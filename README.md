@@ -443,11 +443,11 @@ Ir a https://github.com/new
 Conectar y subir el repositorio local
 
 ```bash
-Copiar git remote add origin https://github.com/tu-usuario/tu-vuelta-al-sol.git
+Copiar git remote add origin git remote add origin https://github.com/tu-usuario/tu-vuelta-al-sol.git
 git branch -M main
 git push -u origin main
 ```
 ## Licencia
 Todos los derechos reservados. Este proyecto y su contenido es propiedad exclusiva de Wunjo Creations.
 ## Contacto
-Para más información, contactar a wunjocreations@gmail.com
+Para más información, contactar a wunjocreations@gmail.com# tu-vuelta-al-sol
