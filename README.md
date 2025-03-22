@@ -205,6 +205,11 @@ La aplicación se conectará a servicios astrológicos que utilizan Swiss Epheme
 - Conformidad con GDPR para datos personales
 - Conexiones seguras HTTPS
 - Protección de rutas API con rate limiting
+  ### Sistema de registro completo que utiliza:
+- Firebase Authentication para el registro de usuarios
+- MongoDB para almacenar datos adicionales del usuario
+- React Hook Form y Zod para validación de formularios
+- Next.js App Router para la navegación.
 
 ## Monetización
 
