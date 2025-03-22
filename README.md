@@ -316,34 +316,6 @@ export const trackEvent = (eventName, params = {}) => {
 - ⬜ Implementación de analítica
 - ⬜ Despliegue a producción
 
-## Instrucciones de instalación
-
-1. Clonar el repositorio
-```bash
-git clone https://github.com/tu-usuario/tu-vuelta-al-sol.git
-cd tu-vuelta-al-sol## Estado de desarrollo
-```
-### Completado
-- ✅ Configuración inicial de Next.js con TypeScript y Tailwind CSS
-- ✅ Estructuración del proyecto
-- ✅ Configuración de estilos con Tailwind CSS
-
-### En progreso
-- 🔄 Implementación de autenticación con Firebase
-- 🔄 Creación de componentes de UI básicos
-- 🔄 Creación de formularios de autenticación
-
-### Pendiente
-- ⬜ Configuración de MongoDB y modelos de datos
-- ⬜ Implementación de página de datos de nacimiento
-- ⬜ Integración con APIs astrológicas
-- ⬜ Implementación de página de dashboard
-- ⬜ Visualización de carta natal
-- ⬜ Generación de contenido personalizado
-- ⬜ Integración de pasarela de pagos
-- ⬜ Generación y descarga de PDF
-- ⬜ Implementación de analítica
-- ⬜ Despliegue a producción
 
 ## Instrucciones de instalación
 
