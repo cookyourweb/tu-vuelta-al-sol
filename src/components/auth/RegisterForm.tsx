@@ -39,8 +39,8 @@ export default function RegisterForm() {
     try {
       await registerUser(data.email, data.password, data.fullName);
       router.push('/dashboard');
-    } catch (err: any) {
-      const errorCode = err?.code;
+    } catch (err: unknown) {
+      const errorCode = (err as { code?: string })?.code;
       
       if (errorCode === 'auth/email-already-in-use') {
         setError('Este correo electrónico ya está en uso');
