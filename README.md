@@ -303,9 +303,10 @@ export const trackEvent = (eventName, params = {}) => {
 - ✅ Configuración inicial de Next.js con TypeScript y Tailwind CSS
 - ✅ Estructuración del proyecto
 - ✅ Configuración de estilos con Tailwind CSS
+- ✅  Implementación de autenticación con Firebase
 
 ### En progreso
-- 🔄 Implementación de autenticación con Firebase
+
 - 🔄 Creación de componentes de UI básicos
 - 🔄 Creación de formularios de autenticación
 
