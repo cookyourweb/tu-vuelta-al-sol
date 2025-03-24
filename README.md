@@ -304,16 +304,16 @@ export const trackEvent = (eventName, params = {}) => {
 - ✅ Estructuración del proyecto
 - ✅ Configuración de estilos con Tailwind CSS
 - ✅  Implementación de autenticación con Firebase
+- ✅Creación de componentes de UI básicos
+- ✅ Creación de formularios de autenticación
+- ✅ Configuración de MongoDB y modelos de datos
 
 ### En progreso
 
-- 🔄 Creación de componentes de UI básicos
-- 🔄 Creación de formularios de autenticación
+- 🔄 Implementación de página de datos de nacimiento
+- 🔄  Integración con APIs astrológicas
 
 ### Pendiente
-- ⬜ Configuración de MongoDB y modelos de datos
-- ⬜ Implementación de página de datos de nacimiento
-- ⬜ Integración con APIs astrológicas
 - ⬜ Implementación de página de dashboard
 - ⬜ Visualización de carta natal
 - ⬜ Generación de contenido personalizado

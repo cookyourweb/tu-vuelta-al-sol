@@ -1,4 +1,3 @@
-// services/astrologyService.ts
 import axios from 'axios';
 import prokeralaService from './prokeralaService';
 
@@ -115,11 +114,7 @@ const translateSignName = (englishName: string): string => {
 };
 
 // API gratuita para fases lunares
-interface MoonPhaseData {
-  phase: Record<string, { phase_name: string }>;
-}
-
-export async function getMoonPhases(startDate: string, endDate: string): Promise<MoonPhaseData | null> {
+export async function getMoonPhases(startDate: string, endDate: string): Promise<any | null> {
   try {
     const response = await axios.get(`https://www.icalendar37.net/lunar/api/?start_date=${startDate}&end_date=${endDate}&format=json`);
     return response.data;
@@ -177,12 +172,12 @@ export async function getAstronomicalEvents(startDate: string, endDate: string):
       console.log('Usando eventos de Prokerala API');
       
       // Convertir el formato de Prokerala al formato de nuestra aplicación
-      const events = prokeralaEvents.events.map((event: AstronomicalEvent) => {
+      const events = prokeralaEvents.events.map((event: any) => {
         return {
           type: event.type,
           date: event.date,
-          startDate: event.startDate,
-          endDate: event.endDate,
+          startDate: event.start_date,
+          endDate: event.end_date,
           phase: event.phase,
           planet: event.planet ? translatePlanetName(event.planet) : undefined,
           sign: event.sign ? translateSignName(event.sign) : undefined,
@@ -200,7 +195,7 @@ export async function getAstronomicalEvents(startDate: string, endDate: string):
       console.log('Usando datos de fases lunares');
       const moonEvents: AstronomicalEvent[] = [];
       
-      Object.entries(moonPhasesResponse.phase).forEach(([date, phaseData]: [string, { phase_name: string }]) => {
+      Object.entries(moonPhasesResponse.phase).forEach(([date, phaseData]: [string, any]) => {
         if (phaseData.phase_name) {
           moonEvents.push({
             type: 'LunarPhase',
@@ -315,7 +310,7 @@ export async function getProgressedChart(
   latitude: number,
   longitude: number,
   timezone: string
-): Promise<ProgressedChart> {
+): Promise<ProgressedChart | null> {
   try {
     // Formatear la fecha y hora para la API
     const formattedBirthTime = birthTime || '00:00';
@@ -406,9 +401,10 @@ export async function getProgressedChart(
           break;
       }
       
+      // Actualizar la posición del planeta
       return {
         ...planet,
-        degree: (planet.degree + degreeProgression) % 360
+        degree: (planet.degree + degreeProgression) % 30, // Asegurarse de que el grado esté en el rango de 0-30
       };
     });
     
@@ -418,107 +414,7 @@ export async function getProgressedChart(
       progressionDate: progressedDate
     };
   } catch (error) {
-    console.error('Error al obtener la carta progresada:', error);
-    throw error;
+    console.error('Error obteniendo carta progresada:', error);
+    return null; // Return null in case of error
   }
 }
-function generateSimulatedEvents(startDate: string, endDate: string): AstronomicalEvents {
-  // Simulate some basic astronomical events between the given dates
-  const simulatedEvents: AstronomicalEvent[] = [
-    {
-      type: 'SimulatedEvent',
-      date: startDate,
-      description: 'Simulated event at the start date.'
-    },
-    {
-      type: 'SimulatedEvent',
-      date: endDate,
-      description: 'Simulated event at the end date.'
-    }
-  ];
-
-  // Add more simulated events if needed
-  return { events: simulatedEvents };
-}
-function generateEnhancedNatalChart(
-  birthDate: string,
-  formattedBirthTime: string,
-  latitude: number,
-  longitude: number,
-  timezone: string
-): NatalChart {
-  // Simulate the generation of a natal chart with random data
-  const generateRandomDegree = () => Math.floor(Math.random() * 30);
-  const generateRandomMinutes = () => Math.floor(Math.random() * 60);
-  const generateRandomHouse = () => Math.floor(Math.random() * 12) + 1;
-
-  const planets: PlanetPosition[] = PLANETS.map((planet) => ({
-    name: planet,
-    sign: SIGNS[Math.floor(Math.random() * SIGNS.length)],
-    degree: generateRandomDegree(),
-    minutes: generateRandomMinutes(),
-    retrograde: Math.random() < 0.3,
-    housePosition: generateRandomHouse(),
-  }));
-
-  const houses: House[] = Array.from({ length: 12 }, (_, i) => ({
-    number: i + 1,
-    sign: SIGNS[Math.floor(Math.random() * SIGNS.length)],
-    degree: generateRandomDegree(),
-    minutes: generateRandomMinutes(),
-  }));
-
-  const aspects: Aspect[] = [
-    {
-      planet1: PLANETS[Math.floor(Math.random() * PLANETS.length)],
-      planet2: PLANETS[Math.floor(Math.random() * PLANETS.length)],
-      type: Object.keys(ASPECT_TYPES)[Math.floor(Math.random() * Object.keys(ASPECT_TYPES).length)],
-      orb: Math.random() * 10,
-      applying: Math.random() < 0.5,
-    },
-  ];
-
-  return {
-    planets,
-    houses,
-    aspects,
-    ascendant: {
-      sign: SIGNS[Math.floor(Math.random() * SIGNS.length)],
-      degree: generateRandomDegree(),
-      minutes: generateRandomMinutes(),
-    },
-    midheaven: {
-      sign: SIGNS[Math.floor(Math.random() * SIGNS.length)],
-      degree: generateRandomDegree(),
-      minutes: generateRandomMinutes(),
-    },
-    latitude,
-    longitude,
-    timezone,
-  };
-}
-function getSignForDate(date: string): string | undefined {
-  const dateObj = new Date(date);
-  const dayOfYear = Math.floor((dateObj.getTime() - new Date(dateObj.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
-
-  const zodiacSigns = [
-    { sign: 'Aries', startDay: 80, endDay: 109 },
-    { sign: 'Tauro', startDay: 110, endDay: 140 },
-    { sign: 'Géminis', startDay: 141, endDay: 171 },
-    { sign: 'Cáncer', startDay: 172, endDay: 203 },
-    { sign: 'Leo', startDay: 204, endDay: 234 },
-    { sign: 'Virgo', startDay: 235, endDay: 265 },
-    { sign: 'Libra', startDay: 266, endDay: 295 },
-    { sign: 'Escorpio', startDay: 296, endDay: 325 },
-    { sign: 'Sagitario', startDay: 326, endDay: 355 },
-    { sign: 'Capricornio', startDay: 356, endDay: 19 },
-    { sign: 'Acuario', startDay: 20, endDay: 49 },
-    { sign: 'Piscis', startDay: 50, endDay: 79 }
-  ];
-
-  return zodiacSigns.find(sign => 
-    (sign.startDay <= sign.endDay && dayOfYear >= sign.startDay && dayOfYear <= sign.endDay) ||
-    (sign.startDay > sign.endDay && (dayOfYear >= sign.startDay || dayOfYear <= sign.endDay))
-  )?.sign;
-}
-
