@@ -15,9 +15,10 @@ export interface IChart extends Document {
   lastUpdated: Date;
 }
 
+// src/models/Chart.ts (ajuste)
 const ChartSchema: Schema = new Schema({
   userId: { type: String, required: true, unique: true },
-  birthDataId: { type: String, required: true },
+  birthDataId: { type: Schema.Types.ObjectId, ref: 'BirthData', required: true },
   natalChart: { type: Object, required: true },
   progressedCharts: [{
     date: { type: Date, required: true },

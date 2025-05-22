@@ -1,113 +1,298 @@
-'use client';
+// components/astrology/ChartDisplay.tsx (Enhanced Version)
 
-import { NatalChart } from '@/services/astrologyService';
-import { useState } from 'react';
-interface ChartDisplayProps {
-  chart: NatalChart;
+import React from 'react';
+import NatalChartWheel from './NatalChartWheel';
+
+// Define interfaces for props
+interface House {
+  number: number;
+  sign: string;
+  degree: string;
+  longitude?: number;
 }
 
-export default function ChartDisplay({ chart }: ChartDisplayProps) {
-  const [selectedPlanet, setSelectedPlanet] = useState<string | null>(null);
+interface Planet {
+  name: string;
+  sign: string;
+  degree: string;
+  longitude?: number;
+  houseNumber?: number;
+  isRetrograde?: boolean;
+}
 
-  // Obtener interpretación para el planeta seleccionado
-  const getInterpretationForPlanet = () => {
-    if (!selectedPlanet) return null;
-    
-    const planet = chart.planets.find((p: { name: string }) => p.name === selectedPlanet);
-    if (!planet) return null;
-    
-    return (
-      <div className="mt-4 p-4 bg-purple-50 rounded-lg">
-        <h3 className="text-lg font-medium text-purple-900">{planet.name} en {planet.sign} (Casa {planet.housePosition})</h3>
-        <p className="mt-2 text-sm text-purple-800">
-          {planet.name} en {planet.sign} en la casa {planet.housePosition} indica...
-          {planet.retrograde && ' Este planeta está retrógrado, lo que sugiere una energía más internalizada.'}
-        </p>
-      </div>
-    );
+interface Aspect {
+  planet_one: {
+    id: number;
+    name: string;
+  };
+  planet_two: {
+    id: number;
+    name: string;
+  };
+  aspect: {
+    id: number;
+    name: string;
+  };
+  orb: number;
+}
+
+export interface ChartDisplayProps {
+  houses: House[];
+  planets: Planet[];
+  elementDistribution: Record<string, number>;
+  modalityDistribution: Record<string, number>;
+  keyAspects: Aspect[];
+  aspects?: any[];
+  angles?: any[];
+  ascendant?: { longitude: number };
+  midheaven?: { longitude: number };
+}
+
+const ChartDisplay: React.FC<ChartDisplayProps> = ({
+  houses = [],
+  planets = [],
+  elementDistribution = { fire: 0, earth: 0, air: 0, water: 0 },
+  modalityDistribution = { cardinal: 0, fixed: 0, mutable: 0 },
+  keyAspects = [],
+  ascendant,
+  midheaven
+}) => {
+  // Mapeo de símbolos planetarios
+  const planetSymbols: Record<string, string> = {
+    'Sol': '☉',
+    'Luna': '☽',
+    'Mercurio': '☿',
+    'Venus': '♀',
+    'Marte': '♂',
+    'Júpiter': '♃',
+    'Saturno': '♄',
+    'Urano': '♅',
+    'Neptuno': '♆',
+    'Plutón': '♇',
+    'Quirón': '⚷',
+    'Lilith': '⚸',
+    'Nodo Norte': '☊',
+    'Nodo Sur': '☋',
+  };
+  
+  // Mapeo de símbolos zodiacales
+  const zodiacSymbols: Record<string, string> = {
+    'Aries': '♈',
+    'Tauro': '♉',
+    'Géminis': '♊',
+    'Cáncer': '♋',
+    'Leo': '♌',
+    'Virgo': '♍',
+    'Libra': '♎',
+    'Escorpio': '♏',
+    'Sagitario': '♐',
+    'Capricornio': '♑',
+    'Acuario': '♒',
+    'Piscis': '♓',
+  };
+  
+  // Mapeo de símbolos de aspectos
+  const aspectSymbols: Record<string, string> = {
+    'Conjunción': '☌',
+    'Oposición': '☍',
+    'Cuadratura': '□',
+    'Trígono': '△',
+    'Sextil': '⚹',
+    'Quincuncio': '⚻',
+    'Semisextil': '⚺',
+    'Sesquicuadratura': '⚼',
+    'Semicuadratura': '∠',
+    'Quintil': '⚤',
+    'Biquintil': 'bQ',
   };
 
+  // Generar longitudes ficticias si no existen (para la rueda)
+  const planetsWithLongitude = planets.map((planet, index) => ({
+    ...planet,
+    longitude: planet.longitude || (index * 30) + Math.random() * 30
+  }));
+
+  const housesWithLongitude = houses.map((house, index) => ({
+    ...house,
+    longitude: house.longitude || (index * 30)
+  }));
+  
   return (
-    <div className="bg-white shadow-md rounded-lg p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">Tu Carta Natal</h2>
+    <div className="bg-white rounded-lg shadow-lg p-6 max-w-6xl mx-auto">
+      <h2 className="text-2xl font-bold text-indigo-800 mb-6 text-center">Carta Natal</h2>
       
-      {/* Información básica */}
-      <div className="mb-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Información Básica</h3>
-        <div className="grid grid-cols-2 gap-4">
-          {chart.ascendant && (
-            <div>
-              <span className="text-gray-500">Ascendente:</span>{' '}
-              <span className="font-medium">{chart.ascendant.sign} {chart.ascendant.degree}°{chart.ascendant.minutes}&apos;</span>
-            </div>
-          )}
-          {chart.midheaven && (
-            <div>
-              <span className="text-gray-500">Medio Cielo:</span>{' '}
-              <span className="font-medium">{chart.midheaven.sign} {chart.midheaven.degree}°{chart.midheaven.minutes}&apos;</span>
-            </div>
-          )}
+      {/* Rueda Astrológica */}
+      <div className="mb-8 flex justify-center">
+        <NatalChartWheel
+          planets={planetsWithLongitude}
+          houses={housesWithLongitude}
+          ascendant={ascendant}
+          midheaven={midheaven}
+          width={400}
+          height={400}
+        />
+      </div>
+      
+      {/* Distribución de Elementos */}
+      <div className="mb-8">
+        <h3 className="text-xl font-semibold text-indigo-700 mb-3">Distribución Elemental</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-red-100 p-4 rounded-lg text-center">
+            <div className="text-2xl mb-2">🔥</div>
+            <span className="font-bold text-red-600 text-lg">Fuego</span>
+            <div className="text-2xl font-bold">{elementDistribution.fire || 0}%</div>
+          </div>
+          <div className="bg-green-100 p-4 rounded-lg text-center">
+            <div className="text-2xl mb-2">🌍</div>
+            <span className="font-bold text-green-600 text-lg">Tierra</span>
+            <div className="text-2xl font-bold">{elementDistribution.earth || 0}%</div>
+          </div>
+          <div className="bg-blue-100 p-4 rounded-lg text-center">
+            <div className="text-2xl mb-2">💨</div>
+            <span className="font-bold text-blue-600 text-lg">Aire</span>
+            <div className="text-2xl font-bold">{elementDistribution.air || 0}%</div>
+          </div>
+          <div className="bg-purple-100 p-4 rounded-lg text-center">
+            <div className="text-2xl mb-2">💧</div>
+            <span className="font-bold text-purple-600 text-lg">Agua</span>
+            <div className="text-2xl font-bold">{elementDistribution.water || 0}%</div>
+          </div>
         </div>
       </div>
       
-      {/* Posiciones planetarias */}
-      <div className="mb-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Posiciones Planetarias</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {chart.planets.map((planet: { name: string; sign: string; degree: number; minutes: number; retrograde: boolean; housePosition: number }) => (
-            <div 
-              key={planet.name}
-              className={`p-3 rounded-md border cursor-pointer transition-colors ${
-                selectedPlanet === planet.name 
-                  ? 'bg-purple-100 border-purple-300' 
-                  : 'bg-white hover:bg-gray-50 border-gray-200'
-              }`}
-              onClick={() => setSelectedPlanet(planet.name === selectedPlanet ? null : planet.name)}
-            >
-              <div className="font-medium">{planet.name}</div>
-              <div>
-                {planet.sign} {planet.degree}°{planet.minutes}&apos;
-                {planet.retrograde && <span className="text-red-500 ml-1">℞</span>}
+      {/* Distribución de Modalidades */}
+      <div className="mb-8">
+        <h3 className="text-xl font-semibold text-indigo-700 mb-3">Modalidades</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-orange-100 p-4 rounded-lg text-center">
+            <div className="text-2xl mb-2">⚡</div>
+            <span className="font-bold text-orange-600 text-lg">Cardinal</span>
+            <div className="text-2xl font-bold">{modalityDistribution.cardinal || 0}%</div>
+          </div>
+          <div className="bg-indigo-100 p-4 rounded-lg text-center">
+            <div className="text-2xl mb-2">🏔️</div>
+            <span className="font-bold text-indigo-600 text-lg">Fijo</span>
+            <div className="text-2xl font-bold">{modalityDistribution.fixed || 0}%</div>
+          </div>
+          <div className="bg-teal-100 p-4 rounded-lg text-center">
+            <div className="text-2xl mb-2">🌊</div>
+            <span className="font-bold text-teal-600 text-lg">Mutable</span>
+            <div className="text-2xl font-bold">{modalityDistribution.mutable || 0}%</div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Información de Ángulos */}
+      {(ascendant || midheaven) && (
+        <div className="mb-8">
+          <h3 className="text-xl font-semibold text-indigo-700 mb-3">Ángulos Principales</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {ascendant && (
+              <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                <h4 className="font-semibold text-orange-800">Ascendente (AC)</h4>
+                <p className="text-gray-600">Representa tu personalidad y cómo te presentas al mundo.</p>
               </div>
-              <div className="text-gray-500 text-sm">Casa {planet.housePosition}</div>
+            )}
+            {midheaven && (
+              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                <h4 className="font-semibold text-green-800">Medio Cielo (MC)</h4>
+                <p className="text-gray-600">Representa tu vocación y reputación pública.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      
+      {/* Planetas - Versión compacta */}
+      <div className="mb-8">
+        <h3 className="text-xl font-semibold text-indigo-700 mb-3">Planetas</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {planets.map((planet, index) => (
+            <div key={index} className="bg-gray-50 p-3 rounded-lg border">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <span className="text-xl mr-2">{planetSymbols[planet.name] || ''}</span>
+                  <span className="font-medium">{planet.name}</span>
+                  {planet.isRetrograde && <span className="ml-1 text-red-500 text-sm">R</span>}
+                </div>
+                <div className="text-right">
+                  <div className="flex items-center">
+                    <span className="text-lg mr-1">{zodiacSymbols[planet.sign] || ''}</span>
+                    <span className="text-sm">{planet.sign}</span>
+                  </div>
+                  <div className="text-xs text-gray-500">{planet.degree}</div>
+                </div>
+              </div>
             </div>
           ))}
         </div>
       </div>
       
-      {/* Interpretación del planeta seleccionado */}
-      {selectedPlanet && getInterpretationForPlanet()}
+      {/* Casas - Versión compacta */}
+      <div className="mb-8">
+        <h3 className="text-xl font-semibold text-indigo-700 mb-3">Casas</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          {houses.map((house, index) => (
+            <div key={index} className="bg-gray-100 p-3 rounded-lg text-center">
+              <div className="font-semibold text-sm">Casa {house.number}</div>
+              <div className="flex items-center justify-center mt-1">
+                <span className="text-lg mr-1">{zodiacSymbols[house.sign] || ''}</span>
+                <span className="text-xs">{house.sign}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
       
-      {/* Aspectos */}
-      <div className="mt-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Aspectos Principales</h3>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Planetas</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aspecto</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Orbe</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {chart.aspects.slice(0, 10).map((aspect: { planet1: string; planet2: string; type: string; orb: number | string }, index: number) => (
-                <tr key={index}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {aspect.planet1} - {aspect.planet2}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {aspect.type}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {typeof aspect.orb === 'number' ? aspect.orb.toFixed(1) : aspect.orb}°
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Aspectos Clave */}
+      {keyAspects && keyAspects.length > 0 && (
+        <div className="mb-8">
+          <h3 className="text-xl font-semibold text-indigo-700 mb-3">Aspectos Principales</h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {keyAspects.slice(0, 8).map((aspect, index) => (
+              <div key={index} className="bg-gray-50 p-3 rounded-lg border">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm font-medium">{aspect.planet_one.name}</span>
+                    <span className="text-lg">{aspectSymbols[aspect.aspect.name] || '◯'}</span>
+                    <span className="text-sm font-medium">{aspect.planet_two.name}</span>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs text-gray-500">{aspect.aspect.name}</div>
+                    <div className="text-xs text-gray-400">{typeof aspect.orb === 'number' ? aspect.orb.toFixed(1) : aspect.orb}°</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {/* Interpretación básica */}
+      <div className="bg-indigo-50 p-6 rounded-lg">
+        <h3 className="text-xl font-semibold text-indigo-700 mb-3">Interpretación Básica</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div>
+            <h4 className="font-semibold mb-2">Elemento Dominante:</h4>
+            <p className="text-gray-600">
+              {Object.entries(elementDistribution).reduce((a, b) => elementDistribution[a[0]] > elementDistribution[b[0]] ? a : b)[0] === 'fire' && 'Tu carta tiene predominancia de fuego, lo que indica una naturaleza apasionada, energética y orientada a la acción.'}
+              {Object.entries(elementDistribution).reduce((a, b) => elementDistribution[a[0]] > elementDistribution[b[0]] ? a : b)[0] === 'earth' && 'Tu carta tiene predominancia de tierra, indicando una naturaleza práctica, estable y orientada a lo material.'}
+              {Object.entries(elementDistribution).reduce((a, b) => elementDistribution[a[0]] > elementDistribution[b[0]] ? a : b)[0] === 'air' && 'Tu carta tiene predominancia de aire, indicando una naturaleza intelectual, comunicativa y social.'}
+              {Object.entries(elementDistribution).reduce((a, b) => elementDistribution[a[0]] > elementDistribution[b[0]] ? a : b)[0] === 'water' && 'Tu carta tiene predominancia de agua, indicando una naturaleza emocional, intuitiva y empática.'}
+            </p>
+          </div>
+          <div>
+            <h4 className="font-semibold mb-2">Modalidad Dominante:</h4>
+            <p className="text-gray-600">
+              {Object.entries(modalityDistribution).reduce((a, b) => modalityDistribution[a[0]] > modalityDistribution[b[0]] ? a : b)[0] === 'cardinal' && 'Predominancia cardinal indica liderazgo natural, iniciativa y capacidad para comenzar proyectos.'}
+              {Object.entries(modalityDistribution).reduce((a, b) => modalityDistribution[a[0]] > modalityDistribution[b[0]] ? a : b)[0] === 'fixed' && 'Predominancia fija indica estabilidad, determinación y resistencia al cambio.'}
+              {Object.entries(modalityDistribution).reduce((a, b) => modalityDistribution[a[0]] > modalityDistribution[b[0]] ? a : b)[0] === 'mutable' && 'Predominancia mutable indica adaptabilidad, flexibilidad y capacidad de cambio.'}
+            </p>
+          </div>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default ChartDisplay;

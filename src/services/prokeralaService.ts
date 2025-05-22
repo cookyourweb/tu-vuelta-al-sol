@@ -1,38 +1,133 @@
-// services/prokeralaService.ts
+// src/services/prokeralaService.ts
 import axios from 'axios';
 
-// Constantes para la API de Prokerala
-const PROKERALA_API_BASE_URL = 'https://api.prokerala.com/v2';
+// Define and export types
+export interface PlanetPosition {
+  name: string;
+  sign: string;
+  degree: number;
+  minutes: number;
+  retrograde: boolean;
+  housePosition: number;
+}
+
+export interface House {
+  number: number;
+  sign: string;
+  degree: number;
+  minutes: number;
+}
+
+export interface Aspect {
+  planet1: string;
+  planet2: string;
+  type: string;
+  orb: number;
+  applying?: boolean;
+}
+
+export interface NatalChart {
+  birthData: {
+    latitude: number;
+    longitude: number;
+    timezone: string;
+    datetime: string;
+  };
+  planets: PlanetPosition[];
+  houses: House[];
+  aspects: Aspect[];
+  ascendant?: {
+    sign: string;
+    degree: number;
+    minutes: number;
+  };
+  midheaven?: {
+    sign: string;
+    degree: number;
+    minutes: number;
+  };
+  latitude: number;
+  longitude: number;
+  timezone: string;
+}
+
+// Interfaces para la respuesta de la API
+interface ProkeralaApiPlanet {
+  name: string;
+  sign?: string;
+  longitude: number;
+  is_retrograde?: boolean;
+  house?: number;
+}
+
+interface ProkeralaApiHouse {
+  number: number;
+  sign?: string;  
+  longitude: number;
+}
+
+interface ProkeralaApiAspect {
+  planet1?: { name: string };
+  planet2?: { name: string };
+  aspect?: { name: string };
+  type?: string;
+  orb?: number;
+  is_applying?: boolean;
+}
+
+interface ProkeralaApiResponse {
+  planets?: ProkeralaApiPlanet[];
+  houses?: ProkeralaApiHouse[];
+  aspects?: ProkeralaApiAspect[];
+  ascendant?: {
+    sign?: string;
+    longitude: number;
+  };
+  mc?: {
+    sign?: string;
+    longitude: number;
+  };
+  datetime?: string;
+}
+
+// API access configuration
+const API_BASE_URL = 'https://api.prokerala.com/v2';
+const TOKEN_ENDPOINT = 'https://api.prokerala.com/token';
 const CLIENT_ID = process.env.NEXT_PUBLIC_PROKERALA_CLIENT_ID;
 const CLIENT_SECRET = process.env.NEXT_PUBLIC_PROKERALA_CLIENT_SECRET;
 
-// Interfaz para el token de acceso
-interface AccessToken {
+// Token cache
+interface TokenCache {
   token: string;
-  expires: number; // timestamp
+  expires: number;
 }
 
-// Almacén de token en memoria (en un entorno de producción real, considerar usar Redis o similar)
-let accessToken: AccessToken | null = null;
+let tokenCache: TokenCache | null = null;
 
 /**
- * Obtiene un token de acceso válido para la API de Prokerala
+ * Get a token for the Prokerala API
  */
-async function getAccessToken(): Promise<string> {
-  // Si ya tenemos un token y no ha expirado, lo devolvemos
+async function getToken(): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
-  if (accessToken && accessToken.expires > now + 60) { // 60 segundos de margen
-    return accessToken.token;
+  
+  // Use cached token if still valid
+  if (tokenCache && tokenCache.expires > now + 60) {
+    return tokenCache.token;
   }
-
+  
+  // Verify credentials
+  if (!CLIENT_ID || !CLIENT_SECRET) {
+    throw new Error('Prokerala API credentials missing. Check your environment variables.');
+  }
+  
   try {
-    // Solicitar un nuevo token
+    // Request new token
     const response = await axios.post(
-      `${PROKERALA_API_BASE_URL}/token`,
+      TOKEN_ENDPOINT,
       new URLSearchParams({
         'grant_type': 'client_credentials',
-        'client_id': CLIENT_ID || '',
-        'client_secret': CLIENT_SECRET || '',
+        'client_id': CLIENT_ID,
+        'client_secret': CLIENT_SECRET,
       }),
       {
         headers: {
@@ -40,235 +135,283 @@ async function getAccessToken(): Promise<string> {
         }
       }
     );
-
-    // Guardar el token y su tiempo de expiración
-    accessToken = {
+    
+    if (!response.data || !response.data.access_token) {
+      throw new Error('Invalid token response from Prokerala');
+    }
+    
+    // Store token in cache
+    tokenCache = {
       token: response.data.access_token,
       expires: now + response.data.expires_in
     };
-
-    return accessToken.token;
+    
+    return tokenCache.token;
   } catch (error) {
-    console.error('Error obteniendo token de acceso de Prokerala:', error);
-    throw new Error('No se pudo autenticar con la API de Prokerala');
+    console.error('Error getting Prokerala token:', error);
+    throw new Error('Authentication failed with Prokerala API');
   }
 }
 
 /**
- * Realiza una solicitud a la API de Prokerala con autenticación
+ * Format timezone offset for API requests
  */
-async function makeRequest(endpoint: string, params: Record<string, string | number> = {}): Promise<unknown> {
+function getTimezoneOffset(timezone: string): string {
   try {
-    const token = await getAccessToken();
-    
-    // Construir la URL con parámetros
-    const url = new URL(`${PROKERALA_API_BASE_URL}${endpoint}`);
-    Object.keys(params).forEach(key => {
-      url.searchParams.append(key, String(params[key]));
+    const date = new Date();
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      timeZoneName: 'short'
     });
+    
+    const formatted = formatter.format(date);
+    const matches = formatted.match(/GMT([+-]\d+)/);
+    
+    if (matches && matches[1]) {
+      const offset = matches[1];
+      // Format to ensure +/-HH:MM format
+      if (offset.length === 3) {
+        return `${offset}:00`;
+      }
+      return offset.replace(/(\d{2})(\d{2})/, '$1:$2');
+    }
+    
+    // Default to UTC if we can't determine
+    return '+00:00';
+  } catch (error) {
+    console.warn('Error calculating timezone offset, using UTC:', error);
+    return '+00:00';
+  }
+}
 
-    // Realizar la solicitud
+/**
+ * Get natal horoscope from Prokerala API
+ */
+export async function getNatalHoroscope(
+  birthDate: string,
+  birthTime: string,
+  latitude: number,
+  longitude: number,
+  timezone: string,
+  options: {
+    houseSystem?: string;
+    aspectFilter?: string;
+    language?: string;
+  } = {}
+): Promise<ProkeralaApiResponse> {
+  try {
+    const token = await getToken();
+    
+    // Format datetime with timezone
+    const offset = getTimezoneOffset(timezone);
+    const datetime = `${birthDate}T${birthTime}${offset}`;
+    
+    // Build URL with correct parameters format
+    const url = new URL(`${API_BASE_URL}/astrology/natal-chart`);
+    url.searchParams.append('profile[datetime]', datetime);
+    url.searchParams.append('profile[coordinates]', `${latitude},${longitude}`);
+    url.searchParams.append('birth_time_unknown', 'false');
+    url.searchParams.append('house_system', options.houseSystem || 'placidus');
+    url.searchParams.append('orb', 'default');
+    url.searchParams.append('birth_time_rectification', 'flat-chart');
+    url.searchParams.append('aspect_filter', options.aspectFilter || 'all');
+    url.searchParams.append('la', options.language || 'es');
+    url.searchParams.append('ayanamsa', '0');
+    
+    console.log('Prokerala natal chart request URL:', url.toString());
+    
+    // Make the request
     const response = await axios.get(url.toString(), {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/json'
       }
     });
-
+    
     return response.data;
   } catch (error) {
-    console.error(`Error en solicitud a Prokerala (${endpoint}):`, error);
-    throw error;
+    console.error('Error in Prokerala natal chart request:', error);
+    throw new Error('Failed to get natal chart from Prokerala');
   }
 }
 
 /**
- * Busca ubicaciones por nombre
- */
-export async function searchLocation(query: string) {
-  try {
-    return await makeRequest('/location-search', { q: query });
-  } catch (error) {
-    console.error('Error buscando ubicación:', error);
-    throw error;
-  }
-}
-
-/**
- * Obtiene la carta natal desde Prokerala
- */
-export async function getNatalHoroscope(
-  datetime: string,
-  latitude: number,
-  longitude: number,
-  timezone: string,
-  language: string = 'es'
-) {
-  try {
-    const params = {
-      datetime: datetime,
-      coordinates: `${latitude},${longitude}`,
-      ayanamsa: 'lahiri', // Sistema de Ayanamsa (puedes cambiar según prefieras)
-      system: 'placidus', // Sistema de casas (puedes cambiar según prefieras)
-      la: language
-    };
-
-    return await makeRequest('/astrology/natal-horoscope', params);
-  } catch (error) {
-    console.error('Error obteniendo carta natal:', error);
-    throw error;
-  }
-}
-
-/**
- * Obtiene tránsitos planetarios
+ * Get planetary transits for a specific date
  */
 export async function getPlanetaryTransits(
-  datetime: string,
+  date: string,
   latitude: number,
   longitude: number,
   timezone: string,
-  language: string = 'es'
-) {
+  options: {
+    language?: string;
+  } = {}
+): Promise<ProkeralaApiResponse> {
   try {
-    const params = {
-      datetime: datetime,
-      coordinates: `${latitude},${longitude}`,
-      ayanamsa: 'lahiri',
-      la: language
-    };
-
-    return await makeRequest('/astrology/planet-position', params);
+    const token = await getToken();
+    
+    // Format datetime
+    const datetime = date.includes('T') ? date : `${date}T00:00:00`;
+    const offset = getTimezoneOffset(timezone);
+    const formattedDatetime = `${datetime}${offset}`;
+    
+    // Build URL
+    const url = new URL(`${API_BASE_URL}/astrology/planet-position`);
+    url.searchParams.append('datetime', formattedDatetime);
+    url.searchParams.append('coordinates', `${latitude},${longitude}`);
+    url.searchParams.append('la', options.language || 'es');
+    
+    // Make the request
+    const response = await axios.get(url.toString(), {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      }
+    });
+    
+    return response.data;
   } catch (error) {
-    console.error('Error obteniendo tránsitos planetarios:', error);
-    throw error;
+    console.error('Error in Prokerala planetary transits request:', error);
+    throw new Error('Failed to get planetary transits from Prokerala');
   }
 }
 
 /**
- * Obtiene eventos astrológicos para un período
+ * Get astrological events for a date range
  */
 export async function getAstronomicalEvents(
   startDate: string,
   endDate: string,
-  language: string = 'es'
-) {
+  options: {
+    language?: string;
+  } = {}
+): Promise<ProkeralaApiResponse> {
   try {
-    const params = {
-      start_date: startDate,
-      end_date: endDate,
-      la: language
-    };
-
-    return await makeRequest('/astrology/astronomical-events', params);
+    const token = await getToken();
+    
+    // Build URL
+    const url = new URL(`${API_BASE_URL}/astrology/astronomical-events`);
+    url.searchParams.append('start_date', startDate);
+    url.searchParams.append('end_date', endDate);
+    url.searchParams.append('la', options.language || 'es');
+    
+    // Make the request
+    const response = await axios.get(url.toString(), {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      }
+    });
+    
+    return response.data;
   } catch (error) {
-    console.error('Error obteniendo eventos astrológicos:', error);
-    throw error;
+    console.error('Error in Prokerala astronomical events request:', error);
+    throw new Error('Failed to get astronomical events from Prokerala');
   }
 }
 
 /**
- * Obtiene aspectos entre planetas
+ * Convert Prokerala API response to NatalChart format
  */
-export async function getPlanetaryAspects(
-  datetime: string,
+export function convertProkeralaToNatalChart(
+  apiResponse: ProkeralaApiResponse,
   latitude: number,
   longitude: number,
-  timezone: string,
-  language: string = 'es'
-) {
-  try {
-    const params = {
-      datetime: datetime,
-      coordinates: `${latitude},${longitude}`,
-      ayanamsa: 'lahiri',
-      la: language
-    };
+  timezone: string
+): NatalChart {
+  if (!apiResponse) {
+    throw new Error('Invalid API response');
+  }
 
-    return await makeRequest('/astrology/planet-aspects', params);
+  try {
+    // Process planets
+    const planets: PlanetPosition[] = (apiResponse.planets || []).map((planet: ProkeralaApiPlanet) => ({
+      name: planet.name,
+      sign: planet.sign || getSignFromLongitude(planet.longitude),
+      degree: Math.floor(planet.longitude % 30),
+      minutes: Math.floor((planet.longitude % 1) * 60),
+      retrograde: planet.is_retrograde || false,
+      housePosition: planet.house || 1
+    }));
+
+    // Process houses
+    const houses: House[] = (apiResponse.houses || []).map((house: ProkeralaApiHouse) => ({
+      number: house.number,
+      sign: house.sign || getSignFromLongitude(house.longitude),
+      degree: Math.floor(house.longitude % 30),
+      minutes: Math.floor((house.longitude % 1) * 60)
+    }));
+
+    // Process aspects
+    const aspects: Aspect[] = (apiResponse.aspects || []).map((aspect: ProkeralaApiAspect) => ({
+      planet1: aspect.planet1?.name || '',
+      planet2: aspect.planet2?.name || '',
+      type: aspect.aspect?.name || aspect.type || 'conjunction',
+      orb: aspect.orb || 0,
+      applying: aspect.is_applying || false
+    }));
+
+    // Extract ascendant and midheaven
+    let ascendant;
+    if (apiResponse.ascendant) {
+      ascendant = {
+        sign: apiResponse.ascendant.sign || getSignFromLongitude(apiResponse.ascendant.longitude),
+        degree: Math.floor(apiResponse.ascendant.longitude % 30),
+        minutes: Math.floor((apiResponse.ascendant.longitude % 1) * 60)
+      };
+    }
+
+    let midheaven;
+    if (apiResponse.mc) {
+      midheaven = {
+        sign: apiResponse.mc.sign || getSignFromLongitude(apiResponse.mc.longitude),
+        degree: Math.floor(apiResponse.mc.longitude % 30),
+        minutes: Math.floor((apiResponse.mc.longitude % 1) * 60)
+      };
+    }
+
+    // Create and return the chart object
+    return {
+      birthData: {
+        latitude,
+        longitude,
+        datetime: apiResponse.datetime || '',
+        timezone,
+      },
+      planets,
+      houses,
+      aspects,
+      ascendant,
+      midheaven,
+      latitude,
+      longitude,
+      timezone
+    };
   } catch (error) {
-    console.error('Error obteniendo aspectos planetarios:', error);
-    throw error;
+    console.error('Error converting Prokerala data:', error);
+    throw new Error('Error processing astrological data');
   }
 }
 
 /**
- * Convierte la respuesta de Prokerala al formato de tu aplicación
+ * Helper function to get zodiac sign from longitude
  */
-interface ProkeralaData {
-  planets?: { name: string; sign: string; longitude: number; is_retrograde?: boolean; house?: number }[];
-  houses?: { number: number; sign: string; longitude: number }[];
-  aspects?: { planet1: string; planet2: string; type: string; orb: number; is_applying?: boolean }[];
-  ascendant?: { sign: string; longitude: number };
-  mc?: { sign: string; longitude: number };
+function getSignFromLongitude(longitude: number): string {
+  const signs = [
+    'Aries', 'Tauro', 'Géminis', 'Cáncer',
+    'Leo', 'Virgo', 'Libra', 'Escorpio',
+    'Sagitario', 'Capricornio', 'Acuario', 'Piscis'
+  ];
+  
+  const signIndex = Math.floor(longitude / 30) % 12;
+  return signs[signIndex];
 }
 
-export function convertProkeralaToNatalChart(prokeralaData: ProkeralaData, latitude: number, longitude: number, timezone: string) {
-  // Esta función dependerá de la estructura exacta de la respuesta de Prokerala
-  // Ajústala según la documentación y tus pruebas
-
-  // Ejemplo básico (necesitarás ajustar esto)
-  const planets = (prokeralaData.planets || []).map((planet: { name: string; sign: string; longitude: number; is_retrograde?: boolean; house?: number }) => ({
-    name: planet.name,
-    sign: planet.sign,
-    degree: Math.floor(planet.longitude % 30),
-    minutes: Math.floor((planet.longitude % 1) * 60),
-    retrograde: planet.is_retrograde || false,
-    housePosition: planet.house || 1
-  }));
-
-  const houses = (prokeralaData.houses || []).map((house: { number: number; sign: string; longitude: number }) => ({
-    number: house.number,
-    sign: house.sign,
-    degree: Math.floor(house.longitude % 30),
-    minutes: Math.floor((house.longitude % 1) * 60)
-  }));
-
-  const aspects = (prokeralaData.aspects || []).map((aspect: { planet1: string; planet2: string; type: string; orb: number; is_applying?: boolean }) => ({
-    planet1: aspect.planet1,
-    planet2: aspect.planet2,
-    type: aspect.type,
-    orb: aspect.orb,
-    applying: aspect.is_applying || false
-  }));
-
-  // Extraer datos del ascendente
-  let ascendant;
-  if (prokeralaData.ascendant) {
-    ascendant = {
-      sign: prokeralaData.ascendant.sign,
-      degree: Math.floor(prokeralaData.ascendant.longitude % 30),
-      minutes: Math.floor((prokeralaData.ascendant.longitude % 1) * 60)
-    };
-  }
-
-  // Extraer datos del medio cielo
-  let midheaven;
-  if (prokeralaData.mc) {
-    midheaven = {
-      sign: prokeralaData.mc.sign,
-      degree: Math.floor(prokeralaData.mc.longitude % 30),
-      minutes: Math.floor((prokeralaData.mc.longitude % 1) * 60)
-    };
-  }
-
-  return {
-    planets,
-    houses,
-    aspects,
-    ascendant,
-    midheaven,
-    latitude,
-    longitude,
-    timezone
-  };
-}
-
-export default {
-  searchLocation,
+// Exportación nombrada del servicio (no anónima)
+export const prokeralaService = {
   getNatalHoroscope,
   getPlanetaryTransits,
   getAstronomicalEvents,
-  getPlanetaryAspects,
-  convertProkeralaToNatalChart
+  convertProkeralaToNatalChart,
+  getToken
 };

@@ -1,31 +1,15 @@
-'use client';
+// app/(dashboard)/birth-data/page.tsx
 
-import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 import BirthDataForm from '@/components/dashboard/BirthDataForm';
 
 export default function BirthDataPage() {
-  const { isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
-
-  // Redirigir si no está autenticado
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push('/login');
-    }
-  }, [isAuthenticated, isLoading, router]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold text-center mb-8 text-indigo-900">Datos de Nacimiento</h1>
+      <p className="max-w-3xl mx-auto text-center mb-8 text-gray-600">
+        Para generar tu carta natal y crear tu agenda astrológica personalizada, necesitamos tus datos de nacimiento exactos. Cuanto más precisos sean los datos, más precisa será tu carta.
+      </p>
+      
       <BirthDataForm />
     </div>
   );

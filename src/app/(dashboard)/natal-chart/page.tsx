@@ -1,142 +1,181 @@
-// src/app/(dashboard)/natal-chart/page.tsx
+// app/(dashboard)/natal-chart/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
 import ChartDisplay from '@/components/astrology/ChartDisplay';
-import { NatalChart } from '@/services/astrologyService';
+import Button from '@/components/ui/Button';
 
 export default function NatalChartPage() {
-  const [isLoading, setIsLoading] = useState(true);
+  const [chartData, setChartData] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [chart, setChart] = useState<NatalChart | null>(null);
-  const { user, isAuthenticated } = useAuth();
+  const [birthData, setBirthData] = useState<any | null>(null);
+  const { user } = useAuth();
   const router = useRouter();
-
-  // Verificar autenticación
+  
   useEffect(() => {
-    if (!isAuthenticated && !isLoading) {
+    if (!user) {
       router.push('/login');
-    }
-  }, [isAuthenticated, isLoading, router]);
-
-  // Cargar la carta natal
-  useEffect(() => {
-    async function loadChart() {
-      if (!user) return;
-      
-      try {
-        setIsLoading(true);
-        const response = await fetch(`/api/charts?userId=${user.uid}`);
-        
-        if (response.ok) {
-          const data = await response.json();
-          setChart(data.chart.natalChart);
-        } else if (response.status === 404) {
-          // Si no hay carta, intentar generarla
-          const generateResponse = await fetch('/api/charts', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ userId: user.uid }),
-          });
-          
-          if (generateResponse.ok) {
-            const data = await generateResponse.json();
-            setChart(data.natalChart);
-          } else {
-            const errorData = await generateResponse.json();
-            setError(errorData.error || 'No se pudo generar la carta natal');
-          }
-        } else {
-          const errorData = await response.json();
-          setError(errorData.error || 'Error al cargar la carta natal');
-        }
-      } catch (error) {
-        console.error('Error cargando carta natal:', error);
-        setError('Error al cargar la carta natal. Inténtalo de nuevo más tarde.');
-      } finally {
-        setIsLoading(false);
-      }
+      return;
     }
     
-    loadChart();
-  }, [user]);
-
-  if (isLoading) {
+    const fetchChartData = async () => {
+      try {
+        setLoading(true);
+        
+        // Primero, obtener los datos de nacimiento
+        const birthDataResponse = await fetch(`/api/birth-data?userId=${user.uid}`);
+        
+        if (!birthDataResponse.ok) {
+          // Si no hay datos de nacimiento, redirigir al formulario
+          router.push('/birth-data');
+          return;
+        }
+        
+        const birthDataResult = await birthDataResponse.json();
+        
+        if (!birthDataResult.data) {
+          router.push('/birth-data');
+          return;
+        }
+        
+        setBirthData(birthDataResult.data);
+        
+        // Con los datos de nacimiento, generar la carta natal
+        const { birthDate, birthTime, latitude, longitude, timezone, birthPlace } = birthDataResult.data;
+        
+        // Formatear la fecha para la API
+        const formattedDate = new Date(birthDate).toISOString().split('T')[0];
+        
+        // Llamar a nuestro API para obtener la carta natal
+        const chartResponse = await fetch('/api/prokerala/natal-chart', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            birthDate: formattedDate,
+            birthTime,
+            latitude,
+            longitude,
+            timezone,
+            birthPlace
+          }),
+        });
+        
+        const chartResult = await chartResponse.json();
+        
+        if (chartResponse.ok && chartResult.success) {
+          setChartData(chartResult.data);
+        } else {
+          throw new Error(chartResult.error || 'Error al obtener la carta natal');
+        }
+      } catch (err: unknown) {
+        console.error('Error fetching chart data:', err);
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('Ocurrió un error desconocido');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchChartData();
+  }, [user, router]);
+  
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-500"></div>
       </div>
     );
   }
-
+  
   if (error) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="bg-red-50 border-l-4 border-red-500 p-4">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm text-red-700">{error}</p>
-              {error.includes('datos de nacimiento') && (
-                <div className="mt-2">
-                  <Link 
-                    href="/birth-data" 
-                    className="text-sm font-medium text-red-700 hover:text-red-600"
-                  >
-                    Completar datos de nacimiento
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+      <div className="p-8 bg-red-50 rounded-lg shadow-lg max-w-2xl mx-auto mt-8">
+        <h2 className="text-2xl font-bold text-red-800 mb-4">Error</h2>
+        <p className="text-red-600">{error}</p>
+        <Button 
+          onClick={() => router.push('/birth-data')} 
+          className="mt-4"
+        >
+          Ingresar datos de nacimiento
+        </Button>
       </div>
     );
   }
-
-  if (!chart) {
+  
+  if (!chartData) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm text-yellow-700">
-                No se pudo cargar la carta natal. Por favor, intenta nuevamente.
-              </p>
-            </div>
-          </div>
-        </div>
+      <div className="p-8 bg-yellow-50 rounded-lg shadow-lg max-w-2xl mx-auto mt-8">
+        <h2 className="text-2xl font-bold text-yellow-800 mb-4">Datos no encontrados</h2>
+        <p className="text-yellow-600">No se ha encontrado tu carta natal. Por favor, ingresa tus datos de nacimiento para generar tu carta.</p>
+        <Button 
+          onClick={() => router.push('/birth-data')} 
+          className="mt-4"
+        >
+          Ingresar datos de nacimiento
+        </Button>
       </div>
     );
   }
-
+  
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Tu Carta Natal</h1>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold text-center mb-8 text-indigo-900">Tu Carta Natal</h1>
       
-      <ChartDisplay chart={chart} />
+      {birthData && (
+        <div className="max-w-4xl mx-auto mb-8 bg-indigo-50 p-4 rounded-lg">
+          <h2 className="text-xl font-semibold text-indigo-800 mb-2">Datos de Nacimiento</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-gray-600">Fecha de nacimiento:</p>
+              <p className="font-medium">{new Date(birthData.birthDate).toLocaleDateString('es-ES')}</p>
+            </div>
+            {birthData.birthTime && (
+              <div>
+                <p className="text-sm text-gray-600">Hora de nacimiento:</p>
+                <p className="font-medium">{birthData.birthTime}</p>
+              </div>
+            )}
+            <div>
+              <p className="text-sm text-gray-600">Lugar de nacimiento:</p>
+              <p className="font-medium">{birthData.birthPlace}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Coordenadas:</p>
+              <p className="font-medium">{birthData.latitude.toFixed(4)}, {birthData.longitude.toFixed(4)}</p>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      <ChartDisplay 
+        houses={chartData.houses || []}
+        planets={chartData.planets || []}
+        elementDistribution={chartData.elementDistribution || { fire: 0, earth: 0, air: 0, water: 0 }}
+        modalityDistribution={chartData.modalityDistribution || { cardinal: 0, fixed: 0, mutable: 0 }}
+        keyAspects={chartData.keyAspects || []}
+      />
       
       <div className="mt-8 text-center">
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-purple-700 bg-purple-100 hover:bg-purple-200"
+        <Button 
+          onClick={() => router.push('/dashboard')} 
+          variant="secondary"
+          className="mr-4"
         >
           Volver al Dashboard
-        </Link>
+        </Button>
+        <Button 
+          onClick={() => router.push('/birth-data')} 
+        >
+          Actualizar Datos de Nacimiento
+        </Button>
       </div>
     </div>
   );
