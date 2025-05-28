@@ -1,6 +1,7 @@
 // src/app/api/prokerala/natal-chart/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
+import { formatProkeralaDateTime } from '@/utils/dateTimeUtils';
 
 // API configuration
 const API_BASE_URL = 'https://api.prokerala.com/v2';
@@ -154,21 +155,23 @@ export async function POST(request: NextRequest) {
       const token = await getToken();
       
       // Format datetime with timezone
-      const formattedBirthTime = birthTime || '00:00:00';
-      const offset = getTimezoneOffset(timezone || 'UTC');
-      const datetime = `${birthDate}T${formattedBirthTime}${offset}`;
-      
-      // Create URL with parameters in the exact format needed
-      const url = new URL(`${API_BASE_URL}/astrology/natal-chart`);
-      url.searchParams.append('profile[datetime]', datetime);
-      url.searchParams.append('profile[coordinates]', `${latitude},${longitude}`);
-      url.searchParams.append('birth_time_unknown', 'false');
-      url.searchParams.append('house_system', 'placidus');
-      url.searchParams.append('orb', 'default');
-      url.searchParams.append('birth_time_rectification', 'flat-chart');
-      url.searchParams.append('aspect_filter', 'all');
-      url.searchParams.append('la', 'es');
-      url.searchParams.append('ayanamsa', '0');
+const formattedBirthTime = birthTime || '00:00:00';
+const datetime = formatProkeralaDateTime(birthDate, formattedBirthTime, timezone || 'UTC');
+
+// Create URL with parameters in the exact format needed using URLSearchParams
+const url = new URL(`${API_BASE_URL}/astrology/natal-chart`);
+const params = new URLSearchParams({
+  'profile[datetime]': datetime,
+  'profile[coordinates]': `${latitude},${longitude}`,
+  'birth_time_unknown': 'false',
+  'house_system': 'placidus',
+  'orb': 'default',
+  'birth_time_rectification': 'flat-chart',
+  'aspect_filter': 'all',
+  'la': 'es',
+  'ayanamsa': '0'
+});
+url.search = params.toString();
       
       console.log('Prokerala natal chart request URL:', url.toString());
       

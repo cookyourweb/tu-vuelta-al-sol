@@ -7,12 +7,12 @@ import ChartDisplay from '@/components/astrology/ChartDisplay';
 
 // Define or import the ChartData type
 interface ChartData {
-  houses: { number: number; sign: string; degree: number }[]; // Corrected to match House type
-  planets: { id: number; name: string; degree: number }[]; // Structure for planets
+  houses: { id: number; name: string; degree: number }[]; // Replace with the actual structure of a house
+  planets: { id: number; name: string; degree: number }[]; // Replace with the actual structure of a planet
   aspects: { id: number; type: string; planet1: string; planet2: string; degree: number }[];
-  angles: { id: number; name: string; degree: number }[];
-  elementDistribution: { fire: number; earth: number; air: number; water: number };
-  modalityDistribution: { cardinal: number; fixed: number; mutable: number };
+  angles: { id: number; name: string; degree: number }[]; // Replace with the actual structure of an angle
+  elementDistribution: { fire: number; earth: number; air: number; water: number }; // Explicitly define the structure
+  modalityDistribution: { [key: string]: number }; // Replace with the actual structure if known
   keyAspects: { id: number; description: string; importance: number }[];
 }
 
@@ -239,47 +239,36 @@ const ChartLoader: React.FC<ChartLoaderProps> = ({
       </div>
       )}
       
-{chartData ? (
-  <div className="mb-8">
-    <ChartDisplay 
-      houses={chartData.houses.map(house => ({
-        ...house,
-        degree: house.degree.toString(),
-      }))}
-      planets={chartData.planets.map(planet => ({
-        name: planet.name,
-        longitude: planet.degree,
-        sign: calculateSign(planet.degree),
-        degree: planet.degree.toString(),
-      }))}
-      aspects={chartData.aspects.map(aspect => ({
-        planet1: { name: aspect.planet1 },
-        planet2: { name: aspect.planet2 },
-        type: aspect.type,
-      }))}
-      elementDistribution={{
-        fire: chartData.elementDistribution.fire || 0,
-        earth: chartData.elementDistribution.earth || 0,
-        air: chartData.elementDistribution.air || 0,
-        water: chartData.elementDistribution.water || 0,
-      }}
-      modalityDistribution={{
-        cardinal: chartData.modalityDistribution.cardinal || 0,
-        fixed: chartData.modalityDistribution.fixed || 0,
-        mutable: chartData.modalityDistribution.mutable || 0,
-      }}
-      keyAspects={chartData.keyAspects.map(ka => ({
-        id: ka.id,
-        planet_one: { id: 0, name: '' }, // Replace with actual planet data if available
-        planet_two: { id: 0, name: '' }, // Replace with actual planet data if available
-        aspect: ka.description, // Or map to a real aspect type if possible
-        orb: ka.importance, // Or provide a default or mapped value
-        description: ka.description,
-        importance: ka.importance,
-      }))}
-    />
-  </div>
-) : null}
+      {chartData && (
+        <div className="mb-8">
+          <ChartDisplay 
+            houses={chartData.houses} 
+            planets={chartData.planets.map(planet => ({
+              name: planet.name,
+              longitude: planet.degree,
+              sign: calculateSign(planet.degree),
+            }))}
+            aspects={chartData.aspects.map(aspect => ({
+              planet1: { name: aspect.planet1 },
+              planet2: { name: aspect.planet2 },
+              type: aspect.type,
+            }))}
+        
+            elementDistribution={{
+              fire: chartData.elementDistribution.fire || 0,
+              earth: chartData.elementDistribution.earth || 0,
+              air: chartData.elementDistribution.air || 0,
+              water: chartData.elementDistribution.water || 0,
+            }}
+            modalityDistribution={{
+              cardinal: chartData.modalityDistribution.cardinal || 0,
+              fixed: chartData.modalityDistribution.fixed || 0,
+              mutable: chartData.modalityDistribution.mutable || 0,
+            }}
+            keyAspects={chartData.keyAspects}
+          />
+        </div>
+      )}
     </div>
   );
 };

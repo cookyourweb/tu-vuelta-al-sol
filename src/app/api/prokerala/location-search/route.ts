@@ -1,8 +1,5 @@
-// src/app/api/prokerala/location-search/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { searchLocation } from '../../charts/progressed/route';
-
-
+import { searchLocation } from '@/services/progressedChartService';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);

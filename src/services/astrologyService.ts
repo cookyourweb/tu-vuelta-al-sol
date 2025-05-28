@@ -143,6 +143,8 @@ function getTimezoneOffset(timezone: string): string {
 /**
  * Get natal horoscope from Prokerala API
  */
+import { formatProkeralaDateTime, ProkeralaUtils } from '../utils/dateTimeUtils';
+
 export async function getNatalHoroscope(
   birthDate: string,
   birthTime: string,
@@ -157,25 +159,27 @@ export async function getNatalHoroscope(
 ): Promise<any> {
   try {
     const token = await getToken();
-    
-    // Format datetime with timezone
-    const offset = getTimezoneOffset(timezone);
-    const datetime = `${birthDate}T${birthTime}${offset}`;
-    
-    // Build URL with correct parameters format
+
+    // Format datetime with timezone using utility
+    const datetime = formatProkeralaDateTime(birthDate, birthTime, timezone);
+
+    // Build URL with correct parameters format using utility
+    const urlParams = ProkeralaUtils.natalChart({
+      birthDate,
+      birthTime,
+      latitude,
+      longitude,
+      timezone,
+      houseSystem: options.houseSystem,
+      aspectFilter: options.aspectFilter,
+      language: options.language
+    });
+
     const url = new URL(`${API_BASE_URL}/astrology/natal-chart`);
-    url.searchParams.append('profile[datetime]', datetime);
-    url.searchParams.append('profile[coordinates]', `${latitude},${longitude}`);
-    url.searchParams.append('birth_time_unknown', 'false');
-    url.searchParams.append('house_system', options.houseSystem || 'placidus');
-    url.searchParams.append('orb', 'default');
-    url.searchParams.append('birth_time_rectification', 'flat-chart');
-    url.searchParams.append('aspect_filter', options.aspectFilter || 'all');
-    url.searchParams.append('la', options.language || 'es');
-    url.searchParams.append('ayanamsa', '0');
-    
+    url.search = urlParams.toString();
+
     console.log('Prokerala natal chart request URL:', url.toString());
-    
+
     // Make the request
     const response = await axios.get(url.toString(), {
       headers: {
@@ -183,7 +187,7 @@ export async function getNatalHoroscope(
         'Accept': 'application/json'
       }
     });
-    
+
     return response.data;
   } catch (error) {
     console.error('Error in Prokerala natal chart request:', error);
