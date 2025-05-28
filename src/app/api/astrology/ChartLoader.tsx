@@ -273,7 +273,7 @@ const ChartLoader: React.FC<ChartLoaderProps> = ({
     planet_one: { id: 0, name: '' }, // Replace with actual planet data if available
     planet_two: { id: 0, name: '' }, // Replace with actual planet data if available
     aspect: { id: 0, name: ka.description }, // Fix type to match expected Aspect type
-    orb: ka.importance, // Or provide a default or mapped value
+    orb: 0, // Or provide a default or mapped value
     description: ka.description,
     importance: ka.importance,
   }))}
