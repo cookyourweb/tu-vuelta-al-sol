@@ -46,12 +46,10 @@ export async function GET() {
       testData: testData,
       natalChart: natalChart,
       timestamp: new Date().toISOString(),
-      credits: natalChart?.credits_remaining || 'Unknown'
+      credits: (natalChart as any)?.credits_remaining || 'Unknown'
     });
-    
   } catch (error: unknown) {
     console.error('❌ Error en prueba de carta natal:', error);
-    
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Error desconocido',

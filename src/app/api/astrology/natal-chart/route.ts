@@ -211,49 +211,60 @@ export async function POST(request: NextRequest) {
 /**
  * Process chart data from API response
  */
-function processChartData(apiResponse: any, latitude: number, longitude: number, timezone: string) {
+function processChartData(apiResponse: unknown, latitude: number, longitude: number, timezone: string) {
+  const data = apiResponse as any;
+
   // Process planets
-  const planets = (apiResponse.planets || []).map((planet: any) => ({
-    name: translatePlanetNameToSpanish(planet.name),
-    sign: planet.sign || getSignNameFromLongitude(planet.longitude),
-    degree: Math.floor(planet.longitude % 30),
-    minutes: Math.floor((planet.longitude % 1) * 60),
-    retrograde: planet.is_retrograde || false,
-    housePosition: planet.house || 1
-  }));
+  const planets = (data.planets || []).map((planet: unknown) => {
+    const p = planet as any;
+    return {
+      name: translatePlanetNameToSpanish(p.name),
+      sign: p.sign || getSignNameFromLongitude(p.longitude),
+      degree: Math.floor(p.longitude % 30),
+      minutes: Math.floor((p.longitude % 1) * 60),
+      retrograde: p.is_retrograde || false,
+      housePosition: p.house || 1
+    };
+  });
 
   // Process houses
-  const houses = (apiResponse.houses || []).map((house: any) => ({
-    number: house.number,
-    sign: house.sign || getSignNameFromLongitude(house.longitude),
-    degree: Math.floor(house.longitude % 30),
-    minutes: Math.floor((house.longitude % 1) * 60)
-  }));
+  const houses = (data.houses || []).map((house: unknown) => {
+    const h = house as any;
+    return {
+      number: h.number,
+      sign: h.sign || getSignNameFromLongitude(h.longitude),
+      degree: Math.floor(h.longitude % 30),
+      minutes: Math.floor((h.longitude % 1) * 60)
+    };
+  });
 
   // Process aspects
-  const aspects = (apiResponse.aspects || []).map((aspect: any) => ({
-    planet1: aspect.planet1?.name ? translatePlanetNameToSpanish(aspect.planet1.name) : '',
-    planet2: aspect.planet2?.name ? translatePlanetNameToSpanish(aspect.planet2.name) : '',
-    type: aspect.aspect?.name || aspect.type || 'conjunction',
-    orb: aspect.orb || 0
-  }));
+  const aspects = (data.aspects || []).map((aspect: unknown) => {
+    const a = aspect as any;
+    return {
+      planet1: a.planet1?.name ? translatePlanetNameToSpanish(a.planet1.name) : '',
+      planet2: a.planet2?.name ? translatePlanetNameToSpanish(a.planet2.name) : '',
+      type: a.aspect?.name || a.type || 'conjunction',
+      orb: a.orb || 0
+    };
+  });
 
   // Extract ascendant and midheaven
   let ascendant;
-  if (apiResponse.ascendant) {
+  if (data.ascendant) {
     ascendant = {
-      sign: apiResponse.ascendant.sign || getSignNameFromLongitude(apiResponse.ascendant.longitude),
-      degree: Math.floor(apiResponse.ascendant.longitude % 30),
-      minutes: Math.floor((apiResponse.ascendant.longitude % 1) * 60)
+      sign: data.ascendant.sign || getSignNameFromLongitude(data.ascendant.longitude),
+      degree: Math.floor(data.ascendant.longitude % 30),
+      minutes: Math.floor((data.ascendant.longitude % 1) * 60)
     };
   }
 
   let midheaven;
-  if (apiResponse.mc) {
+  if (data.mc) {
     midheaven = {
-      sign: apiResponse.mc.sign || getSignNameFromLongitude(apiResponse.mc.longitude),
-      degree: Math.floor(apiResponse.mc.longitude % 30),
-      minutes: Math.floor((apiResponse.mc.longitude % 1) * 60)
+      sign: data.mc.sign || getSignNameFromLongitude(data.mc.longitude),
+      degree: Math.floor(data.mc.longitude % 30),
+      minutes: Math.floor((data.mc.longitude % 1) * 60)
     };
   }
 
@@ -267,7 +278,7 @@ function processChartData(apiResponse: any, latitude: number, longitude: number,
       latitude,
       longitude,
       timezone,
-      datetime: apiResponse.datetime || ''
+      datetime: data.datetime || ''
     },
     planets,
     houses,
@@ -397,7 +408,7 @@ function generateFallbackChart(
 /**
  * Calculate element distribution (fire, earth, air, water)
  */
-function calculateElementDistribution(planets: any[]): { fire: number; earth: number; air: number; water: number } {
+function calculateElementDistribution(planets: unknown[]): { fire: number; earth: number; air: number; water: number } {
   const elementMap: Record<string, string> = {
     'Aries': 'fire', 'Leo': 'fire', 'Sagitario': 'fire',
     'Tauro': 'earth', 'Virgo': 'earth', 'Capricornio': 'earth',
@@ -408,7 +419,7 @@ function calculateElementDistribution(planets: any[]): { fire: number; earth: nu
   const counts = { fire: 0, earth: 0, air: 0, water: 0 };
   let total = 0;
   
-  planets.forEach(planet => {
+  planets.forEach((planet: any) => {
     const element = elementMap[planet.sign];
     if (element) {
       counts[element as keyof typeof counts]++;
@@ -431,7 +442,7 @@ function calculateElementDistribution(planets: any[]): { fire: number; earth: nu
 /**
  * Calculate modality distribution (cardinal, fixed, mutable)
  */
-function calculateModalityDistribution(planets: any[]): { cardinal: number; fixed: number; mutable: number } {
+function calculateModalityDistribution(planets: unknown[]): { cardinal: number; fixed: number; mutable: number } {
   const modalityMap: Record<string, string> = {
     'Aries': 'cardinal', 'Cáncer': 'cardinal', 'Libra': 'cardinal', 'Capricornio': 'cardinal',
     'Tauro': 'fixed', 'Leo': 'fixed', 'Escorpio': 'fixed', 'Acuario': 'fixed',
@@ -441,7 +452,7 @@ function calculateModalityDistribution(planets: any[]): { cardinal: number; fixe
   const counts = { cardinal: 0, fixed: 0, mutable: 0 };
   let total = 0;
   
-  planets.forEach(planet => {
+  planets.forEach((planet: any) => {
     const modality = modalityMap[planet.sign];
     if (modality) {
       counts[modality as keyof typeof counts]++;
