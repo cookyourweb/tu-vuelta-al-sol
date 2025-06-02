@@ -451,3 +451,47 @@ function convertLongitudeToSign(longitude: number): string {
   const signIndex = Math.floor(longitude / 30) % 12;
   return signs[signIndex];
 }
+/**
+ * Obtiene la carta progresada desde Prokerala
+ */
+export async function getProgressedChart(
+  birthDate: string,
+  birthTime: string,
+  latitude: number,
+  longitude: number,
+  timezone: string,
+  progressionYear: number = 2025,
+  options: {
+    houseSystem?: string;
+    aspectFilter?: string;
+    language?: string;
+    ayanamsa?: string;
+    birthTimeRectification?: string;
+  } = {}
+): Promise<ProkeralaNatalChartResponse> {
+  try {
+    console.log('Obteniendo carta progresada con parámetros corregidos...');
+    
+    // Formatear fecha con timezone (formato ISO)
+    const datetime = `${birthDate}T${birthTime || '12:00:00'}`;
+    
+    // ✅ PARÁMETROS CORREGIDOS (iguales a los que funcionan en natal)
+    const params = {
+      'profile[datetime]': datetime,
+      'profile[coordinates]': `${latitude.toFixed(4)},${longitude.toFixed(4)}`,
+      'progression_year': progressionYear.toString(),
+      'ayanamsa': options.ayanamsa || '0', // 🚨 CRÍTICO: 0=Tropical
+      'house_system': options.houseSystem || 'placidus',
+      'birth_time_rectification': options.birthTimeRectification || 'flat-chart',
+      'aspect_filter': options.aspectFilter || 'all',
+      'la': options.language || 'es'
+    };
+
+    console.log('Parámetros carta progresada:', params);
+
+    return await makeApiRequest<ProkeralaNatalChartResponse>('/astrology/progression-chart', params);
+  } catch (error) {
+    console.error('Error obteniendo carta progresada:', error);
+    throw error;
+  }
+}
