@@ -6,7 +6,7 @@
 
 ### Funcionalidades Principales:
 1. **Carta natal con precisión máxima** usando Swiss Ephemeris
-2. **Carta progresada** para el año actual
+2. **Carta progresada** para el año actuala
 3. **Eventos astrológicos anuales** completos (retrogradaciones, lunas, eclipses)
 4. **Agenda personalizada con IA** usando prompts específicos
 5. **Integración Google Calendar** (funcionalidad estrella única)
@@ -262,7 +262,7 @@ POST /api/astrology/validate-birth-data
 
 ## 🚀 PRÓXIMOS PASOS INMEDIATOS
 
-### **Esta Semana (27 Mayo - 2 Junio 2025)**
+### **Esta Semana (3-9 Junio 2025)**
 #### **Prioridad 1: Completar Foundation**
 - [ ] **Deploy actual** con correcciones de carta natal
 - [ ] **Corregir carta progresada** con ayanamsa=0
@@ -280,7 +280,6 @@ POST /api/astrology/validate-birth-data
 - [ ] **Crear endpoint** `/api/astrology/generate-agenda`
 - [ ] **Testing con datos reales** (caso Verónica 1974→2025)
 
-### **Próxima Semana (3-9 Junio 2025)**
 - [ ] **Eventos astrológicos completos** (retrogradaciones, eclipses)
 - [ ] **Interfaz de usuario** para generación de agendas
 - [ ] **Sistema de pagos básico** (Stripe integration)
