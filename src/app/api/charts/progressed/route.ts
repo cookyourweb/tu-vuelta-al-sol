@@ -1,99 +1,227 @@
 // src/app/api/charts/progressed/route.ts
 import { NextRequest, NextResponse } from 'next/server';
+import connectDB from '@/lib/db';
+import BirthData from '@/models/BirthData';
+import Chart from '@/models/Chart';
+import { getProgressedChart } from '@/services/progressedChartService';
 
-// Función de prueba para POST
 export async function POST(request: NextRequest) {
   try {
-    console.log('🔮 POST /api/charts/progressed - Recibiendo solicitud...');
+    await connectDB();
     
-    const body = await request.json();
-    console.log('📋 Body recibido:', body);
+    const { userId, regenerate = false } = await request.json();
     
-    const { birthDate, birthTime, latitude, longitude, timezone } = body;
-    
-    // Validación básica
-    if (!birthDate || !latitude || !longitude) {
-      console.log('❌ Faltan parámetros requeridos');
-      return NextResponse.json({
-        success: false,
-        error: 'Faltan datos requeridos: birthDate, latitude, longitude'
-      }, { status: 400 });
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'userId es requerido' },
+        { status: 400 }
+      );
     }
 
-    console.log('✅ Parámetros válidos, procesando...');
+    console.log(`🔮 Generando carta progresada personalizada para usuario: ${userId}`);
+
+    // 1. Obtener datos de nacimiento del usuario
+    const birthData = await BirthData.findOne({ userId });
+    if (!birthData) {
+      return NextResponse.json(
+        { error: 'Datos de nacimiento no encontrados. Completa tu perfil primero.' },
+        { status: 404 }
+      );
+    }
+
+    // 2. Calcular período personalizado (cumpleaños a cumpleaños)
+    const progressionPeriod = calculateProgressionPeriod(birthData.birthDate);
     
-    // RESPUESTA DE PRUEBA (sin llamar a Prokerala aún)
-    const testResponse = {
-      success: true,
-      message: 'Endpoint funcionando - datos recibidos correctamente',
-      data: {
-        received: {
-          birthDate,
-          birthTime: birthTime || '12:00:00',
-          latitude,
-          longitude,
-          timezone: timezone || 'UTC'
-        },
-        progression: {
-          current: {
-            year: 2025,
-            period: `${birthDate.slice(5)}-2025 a ${birthDate.slice(5)}-2026`,
-            chart: { planets: [], houses: [], status: 'test_mode' }
-          },
-          next: {
-            year: 2026,
-            period: `${birthDate.slice(5)}-2026 a ${birthDate.slice(5)}-2027`,
-            chart: { planets: [], houses: [], status: 'test_mode' }
-          }
-        },
-        metadata: {
-          calculatedAt: new Date().toISOString(),
-          isAfterBirthday: true,
-          mode: 'test_response'
+    console.log(`📅 Período progresado personalizado:`, progressionPeriod);
+
+    // 3. Verificar si ya existe carta progresada para este período
+    if (!regenerate) {
+      const existingChart = await Chart.findOne({ 
+        userId,
+        'progressedCharts.period': progressionPeriod.description
+      });
+      
+      if (existingChart) {
+        const currentProgressedChart = existingChart.progressedCharts.find(
+          (pc: any) => pc.period === progressionPeriod.description
+        );
+        
+        if (currentProgressedChart) {
+          console.log(`✅ Carta progresada existente encontrada para período: ${progressionPeriod.description}`);
+          return NextResponse.json({
+            success: true,
+            data: {
+              period: progressionPeriod,
+              chart: currentProgressedChart.chart,
+              cached: true,
+              message: 'Carta progresada encontrada en cache'
+            }
+          });
         }
       }
+    }
+
+    // 4. Generar nueva carta progresada
+    console.log(`🔄 Generando nueva carta progresada para período: ${progressionPeriod.description}`);
+    
+    const progressedChartData = await getProgressedChart(
+      birthData.birthDate.toISOString().split('T')[0], // YYYY-MM-DD
+      birthData.birthTime || '12:00:00',
+      birthData.latitude,
+      birthData.longitude,
+      birthData.timezone,
+      progressionPeriod.startYear, // ⭐ AÑO DINÁMICO BASADO EN CUMPLEAÑOS
+      {
+        houseSystem: 'placidus',
+        aspectFilter: 'all',
+        language: 'es',
+        ayanamsa: '0', // 🚨 CRÍTICO: Tropical occidental
+        birthTimeRectification: 'flat-chart'
+      }
+    );
+
+    // 5. Guardar en base de datos
+    const progressedEntry = {
+      period: progressionPeriod.description,
+      year: progressionPeriod.startYear,
+      startDate: progressionPeriod.startDate,
+      endDate: progressionPeriod.endDate,
+      chart: progressedChartData,
+      createdAt: new Date()
     };
 
-    console.log('✅ Enviando respuesta de prueba');
-    return NextResponse.json(testResponse);
+    await Chart.findOneAndUpdate(
+      { userId },
+      {
+        $push: { progressedCharts: progressedEntry },
+        $set: { lastUpdated: new Date() }
+      },
+      { upsert: true, new: true }
+    );
+
+    console.log(`✅ Carta progresada guardada exitosamente para período: ${progressionPeriod.description}`);
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        period: progressionPeriod,
+        chart: progressedChartData,
+        cached: false,
+        message: 'Carta progresada generada exitosamente'
+      }
+    });
 
   } catch (error) {
-    console.error('❌ Error en POST /api/charts/progressed:', error);
-    
-    return NextResponse.json({
-      success: false,
-      error: {
-        message: error instanceof Error ? error.message : 'Error desconocido',
-        type: 'server_error'
-      }
-    }, { status: 500 });
+    console.error('❌ Error generando carta progresada:', error);
+    return NextResponse.json(
+      { 
+        error: 'Error interno generando carta progresada',
+        details: error instanceof Error ? error.message : 'Error desconocido'
+      },
+      { status: 500 }
+    );
   }
 }
 
-// Función GET para debug
-export async function GET(request: NextRequest) {
-  console.log('ℹ️ GET /api/charts/progressed - Información del endpoint');
+// ⭐ FUNCIÓN CLAVE: Calcular período personalizado por cumpleaños
+function calculateProgressionPeriod(birthDate: Date) {
+  const today = new Date();
+  const birthMonth = birthDate.getMonth(); // 0-11
+  const birthDay = birthDate.getDate(); // 1-31
   
-  return NextResponse.json({
-    endpoint: '/api/charts/progressed',
-    method: 'POST',
-    description: 'Endpoint para generar cartas progresadas',
-    required_params: {
-      birthDate: 'string (YYYY-MM-DD)',
-      latitude: 'number',
-      longitude: 'number'
-    },
-    optional_params: {
-      birthTime: 'string (HH:mm:ss)',
-      timezone: 'string'
-    },
-    example_request: {
-      birthDate: "1990-01-15",
-      birthTime: "12:30:00",
-      latitude: 40.4168,
-      longitude: -3.7038,
-      timezone: "Europe/Madrid"
-    },
-    status: 'ready_for_testing'
-  });
+  // Calcular próximo cumpleaños
+  let nextBirthday = new Date(today.getFullYear(), birthMonth, birthDay);
+  
+  // Si el cumpleaños ya pasó este año, usar el próximo año
+  if (nextBirthday < today) {
+    nextBirthday = new Date(today.getFullYear() + 1, birthMonth, birthDay);
+  }
+  
+  // Calcular cumpleaños siguiente (fin del período)
+  const followingBirthday = new Date(nextBirthday.getFullYear() + 1, birthMonth, birthDay);
+  
+  // Formatear fechas para mostrar al usuario
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  };
+  
+  return {
+    startDate: nextBirthday,
+    endDate: followingBirthday,
+    startYear: nextBirthday.getFullYear(),
+    description: `${formatDate(nextBirthday)} - ${formatDate(followingBirthday)}`,
+    shortDescription: `Año ${nextBirthday.getFullYear()}-${followingBirthday.getFullYear()}`,
+    daysUntilStart: Math.ceil((nextBirthday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)),
+    isCurrentPeriod: nextBirthday.getFullYear() === today.getFullYear()
+  };
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const url = new URL(request.url);
+    const userId = url.searchParams.get('userId');
+    
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'userId es requerido' },
+        { status: 400 }
+      );
+    }
+
+    await connectDB();
+    
+    // Obtener datos de nacimiento para calcular período actual
+    const birthData = await BirthData.findOne({ userId });
+    if (!birthData) {
+      return NextResponse.json(
+        { error: 'Datos de nacimiento no encontrados' },
+        { status: 404 }
+      );
+    }
+
+    // Calcular período actual
+    const currentPeriod = calculateProgressionPeriod(birthData.birthDate);
+    
+    // Buscar carta progresada existente
+    const chart = await Chart.findOne({ 
+      userId,
+      'progressedCharts.period': currentPeriod.description
+    });
+
+    if (!chart || !chart.progressedCharts.length) {
+      return NextResponse.json({
+        success: true,
+        data: {
+          period: currentPeriod,
+          hasChart: false,
+          message: 'No hay carta progresada generada para este período'
+        }
+      });
+    }
+
+    const currentProgressedChart = chart.progressedCharts.find(
+      (pc: { period: string; chart: any; createdAt?: Date }) => pc.period === currentPeriod.description
+    );
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        period: currentPeriod,
+        chart: currentProgressedChart?.chart || null,
+        hasChart: !!currentProgressedChart,
+        createdAt: currentProgressedChart?.createdAt || null
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error obteniendo carta progresada:', error);
+    return NextResponse.json(
+      { error: 'Error interno obteniendo carta progresada' },
+      { status: 500 }
+    );
+  }
 }

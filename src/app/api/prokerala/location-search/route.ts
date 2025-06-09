@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { searchLocation } from '@/services/progressedChartService';
+import { prokeralaClient } from '@/lib/prokerala/client';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Missing query parameter "q"' }, { status: 400 });
     }
 
-    const results = await searchLocation(query);
+    const results = await prokeralaClient.searchLocation(query);
     return NextResponse.json(results);
   } catch (error) {
     console.error('Error searching location:', error);
