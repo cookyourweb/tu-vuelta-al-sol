@@ -7,7 +7,8 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import { AspectFilter, AspectType, ExtendedPlanet, Planet, PlanetaryAspect } from '../../../types/astrology';
-import { calculateAllAspects, convertToPlanetaryAspect } from '@/utils/astrology/aspectCalculations';
+import { calculateAllAspects } from '@/utils/astrology/aspectCalculations';
+import convertToPlanetaryAspect from '@/utils/astrology/aspectCalculations';
 
 // =============================================================================
 // TIPOS DEL HOOK

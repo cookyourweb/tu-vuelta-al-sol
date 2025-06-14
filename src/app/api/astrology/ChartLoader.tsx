@@ -244,17 +244,17 @@ const ChartLoader: React.FC<ChartLoaderProps> = ({
     <ChartDisplay 
       houses={chartData.houses.map(house => ({
         ...house,
-        degree: house.degree.toString(),
+        longitude: house.degree,
       }))}
       planets={chartData.planets.map(planet => ({
         name: planet.name,
         longitude: planet.degree,
         sign: calculateSign(planet.degree),
-        degree: planet.degree.toString(),
+        degree: planet.degree,
       }))}
       aspects={chartData.aspects.map(aspect => ({
-        planet1: { name: aspect.planet1 },
-        planet2: { name: aspect.planet2 },
+        planet1: aspect.planet1,
+        planet2: aspect.planet2,
         type: aspect.type,
       }))}
       elementDistribution={{
@@ -268,15 +268,15 @@ const ChartLoader: React.FC<ChartLoaderProps> = ({
         fixed: chartData.modalityDistribution.fixed || 0,
         mutable: chartData.modalityDistribution.mutable || 0,
       }}
-  keyAspects={chartData.keyAspects.map(ka => ({
-    id: ka.id,
-    planet_one: { id: 0, name: '' }, // Replace with actual planet data if available
-    planet_two: { id: 0, name: '' }, // Replace with actual planet data if available
-    aspect: { id: 0, name: ka.description }, // Fix type to match expected Aspect type
-    orb: 0, // Or provide a default or mapped value
-    description: ka.description,
-    importance: ka.importance,
-  }))}
+      keyAspects={chartData.keyAspects.map(ka => ({
+        id: ka.id,
+        planet_one: { id: 0, name: '' }, // Replace with actual planet data if available
+        planet_two: { id: 0, name: '' }, // Replace with actual planet data if available
+        aspect: { id: 0, name: ka.description }, // Fix type to match expected Aspect type
+        orb: 0, // Or provide a default or mapped value
+        description: ka.description,
+        importance: ka.importance,
+      }))}
     />
   </div>
 ) : null}

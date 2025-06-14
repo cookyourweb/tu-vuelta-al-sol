@@ -1,128 +1,191 @@
-// src/app/utils/astrology/aspectCalculations.ts - VERSIÓN CORREGIDA
-
-import { AspectType, ExtendedPlanet, Planet, PlanetaryAspect } from "../../../types/astrology";
-
-
+// src/utils/astrology/aspectCalculations.ts - VERSIÓN SIMPLIFICADA SIN ERRORES
+import type { AspectType, Planet, ExtendedPlanet, PlanetaryAspect } from '../../../types/astrology';
 
 // =============================================================================
-// CONFIGURACIÓN DE ASPECTOS
+// CONFIGURACIÓN DE ASPECTOS COMPLETA
 // =============================================================================
 
 export interface AspectDefinition {
   name: AspectType;
   angle: number;
-  orb: number;
+  orb_major: number;      // Orbe para planetas mayores (Sol, Luna, Mercurio, Venus, Marte)
+  orb_minor: number;      // Orbe para planetas menores (Júpiter, Saturno, Urano, Neptuno, Plutón)
   nature: 'harmonico' | 'tensional' | 'neutro';
   symbol: string;
-  isMajor: boolean;
+  color: string;
+  line_style: 'solid' | 'dashed' | 'dotted';
+  line_width: number;
+  priority: number;       // 1 = más importante
+  is_major: boolean;
 }
 
 export const ASPECT_DEFINITIONS: Record<AspectType, AspectDefinition> = {
   conjunction: {
     name: 'conjunction',
     angle: 0,
-    orb: 8,
+    orb_major: 8,
+    orb_minor: 6,
     nature: 'neutro',
     symbol: '☌',
-    isMajor: true
+    color: '#22C55E',        // Verde brillante
+    line_style: 'solid',
+    line_width: 4,
+    priority: 1,
+    is_major: true
   },
   opposition: {
     name: 'opposition',
     angle: 180,
-    orb: 8,
+    orb_major: 8,
+    orb_minor: 6,
     nature: 'tensional',
     symbol: '☍',
-    isMajor: true
+    color: '#EF4444',        // Rojo brillante
+    line_style: 'solid',
+    line_width: 3.5,
+    priority: 2,
+    is_major: true
   },
   trine: {
     name: 'trine',
     angle: 120,
-    orb: 8,
+    orb_major: 8,
+    orb_minor: 6,
     nature: 'harmonico',
     symbol: '△',
-    isMajor: true
+    color: '#3B82F6',        // Azul brillante
+    line_style: 'solid',
+    line_width: 3,
+    priority: 3,
+    is_major: true
   },
   square: {
     name: 'square',
     angle: 90,
-    orb: 8,
+    orb_major: 8,
+    orb_minor: 6,
     nature: 'tensional',
     symbol: '□',
-    isMajor: true
+    color: '#F59E0B',        // Naranja brillante
+    line_style: 'solid',
+    line_width: 3,
+    priority: 4,
+    is_major: true
   },
   sextile: {
     name: 'sextile',
     angle: 60,
-    orb: 6,
+    orb_major: 6,
+    orb_minor: 4,
     nature: 'harmonico',
     symbol: '⚹',
-    isMajor: true
+    color: '#8B5CF6',        // Púrpura brillante
+    line_style: 'dashed',
+    line_width: 2.5,
+    priority: 5,
+    is_major: true
   },
   quincunx: {
     name: 'quincunx',
     angle: 150,
-    orb: 3,
+    orb_major: 3,
+    orb_minor: 2,
     nature: 'tensional',
     symbol: '⚻',
-    isMajor: false
+    color: '#EC4899',        // Rosa brillante
+    line_style: 'dotted',
+    line_width: 2,
+    priority: 6,
+    is_major: false
   },
   semisextile: {
     name: 'semisextile',
     angle: 30,
-    orb: 2,
+    orb_major: 2,
+    orb_minor: 1.5,
     nature: 'harmonico',
     symbol: '⚺',
-    isMajor: false
+    color: '#10B981',        // Verde esmeralda
+    line_style: 'dotted',
+    line_width: 1.5,
+    priority: 7,
+    is_major: false
   },
   sesquiquadrate: {
     name: 'sesquiquadrate',
     angle: 135,
-    orb: 2,
+    orb_major: 2,
+    orb_minor: 1.5,
     nature: 'tensional',
     symbol: '⚼',
-    isMajor: false
+    color: '#F97316',        // Naranja intenso
+    line_style: 'dotted',
+    line_width: 1.5,
+    priority: 8,
+    is_major: false
   },
   semisquare: {
     name: 'semisquare',
     angle: 45,
-    orb: 2,
+    orb_major: 2,
+    orb_minor: 1.5,
     nature: 'tensional',
     symbol: '∠',
-    isMajor: false
+    color: '#EF4444',        // Rojo claro
+    line_style: 'dotted',
+    line_width: 1.5,
+    priority: 9,
+    is_major: false
   },
   quintile: {
     name: 'quintile',
     angle: 72,
-    orb: 1,
+    orb_major: 1.5,
+    orb_minor: 1,
     nature: 'harmonico',
     symbol: 'Q',
-    isMajor: false
+    color: '#06B6D4',        // Cian brillante
+    line_style: 'dotted',
+    line_width: 1,
+    priority: 10,
+    is_major: false
   },
   biquintile: {
     name: 'biquintile',
     angle: 144,
-    orb: 1,
+    orb_major: 1.5,
+    orb_minor: 1,
     nature: 'harmonico',
     symbol: 'bQ',
-    isMajor: false
+    color: '#0EA5E9',        // Azul cielo
+    line_style: 'dotted',
+    line_width: 1,
+    priority: 11,
+    is_major: false
   }
 };
 
-// Modificadores de orbe por planeta
+// =============================================================================
+// CONFIGURACIÓN DE PLANETAS
+// =============================================================================
+
+export const MAJOR_PLANETS = ['Sol', 'Luna', 'Mercurio', 'Venus', 'Marte'];
+export const MINOR_PLANETS = ['Júpiter', 'Saturno', 'Urano', 'Neptuno', 'Plutón'];
+
 export const PLANET_ORB_MODIFIERS: Record<string, number> = {
   'Sol': 1.3,
   'Luna': 1.3,
   'Mercurio': 1.0,
   'Venus': 1.0,
   'Marte': 1.0,
-  'Júpiter': 1.2,
-  'Saturno': 1.2,
+  'Júpiter': 1.1,
+  'Saturno': 1.1,
   'Urano': 0.8,
   'Neptuno': 0.8,
   'Plutón': 0.8,
   'Quirón': 0.6,
-  'Nodo Norte': 0.8,
-  'Nodo Sur': 0.8,
+  'Nodo Norte': 0.7,
+  'Nodo Sur': 0.7,
   'Lilith': 0.5
 };
 
@@ -131,440 +194,287 @@ export const PLANET_ORB_MODIFIERS: Record<string, number> = {
 // =============================================================================
 
 export interface PlanetPosition {
-  planet: Planet | ExtendedPlanet | string;
-  degree: number;
-  name?: string;
-  longitude?: number;
-}
-
-export interface AspectCalculationOptions {
-  includeMinorAspects?: boolean;
-  orbModifier?: number;
-  maxOrb?: number;
-  onlyApplyingAspects?: boolean;
+  name: string;
+  longitude: number;
+  classification: 'major' | 'minor' | 'special';
 }
 
 export interface CalculatedAspect {
-  planet1: Planet | ExtendedPlanet | string;
-  planet2: Planet | ExtendedPlanet | string;
+  planet1: string;
+  planet2: string;
   aspect_type: AspectType;
-  orb: number;
   exact_angle: number;
+  current_separation: number;
+  orb: number;
+  orb_percentage: number;
   is_applying: boolean;
   strength: 'muy_fuerte' | 'fuerte' | 'moderado' | 'debil';
   nature: 'harmonico' | 'tensional' | 'neutro';
 }
 
+export interface AspectCalculationOptions {
+  include_minor_aspects?: boolean;
+  orb_modifier?: number;
+  max_orb_override?: number;
+  only_applying_aspects?: boolean;
+  minimum_strength?: 'muy_fuerte' | 'fuerte' | 'moderado' | 'debil';
+}
+
 // =============================================================================
-// FUNCIONES DE CÁLCULO
+// FUNCIONES MATEMÁTICAS
 // =============================================================================
 
-/**
- * Normalizar ángulo a rango 0-360
- */
 export function normalizeAngle(angle: number): number {
   while (angle < 0) angle += 360;
   while (angle >= 360) angle -= 360;
   return angle;
 }
 
-/**
- * Calcular diferencia angular más corta entre dos puntos
- */
-export function calculateAngularDifference(angle1: number, angle2: number): number {
+export function calculateAngularSeparation(angle1: number, angle2: number): number {
   const diff = Math.abs(normalizeAngle(angle1) - normalizeAngle(angle2));
   return Math.min(diff, 360 - diff);
 }
 
-/**
- * Determinar si un aspecto está aplicándose o separándose
- */
-export function isAspectApplying(
-  planet1Degree: number, 
-  planet2Degree: number, 
-  aspectAngle: number
-): boolean {
-  const currentSeparation = calculateAngularDifference(planet1Degree, planet2Degree);
-  return Math.abs(currentSeparation - aspectAngle) < 1;
+export function classifyPlanet(planetName: string): 'major' | 'minor' | 'special' {
+  if (MAJOR_PLANETS.includes(planetName)) return 'major';
+  if (MINOR_PLANETS.includes(planetName)) return 'minor';
+  return 'special';
 }
 
-/**
- * Calcular orbe efectivo considerando los planetas involucrados
- */
 export function calculateEffectiveOrb(
-  planet1: Planet | ExtendedPlanet | string,
-  planet2: Planet | ExtendedPlanet | string,
-  baseOrb: number,
+  planet1: string,
+  planet2: string,
+  aspectDefinition: AspectDefinition,
   orbModifier: number = 1.0
 ): number {
-  const modifier1 = PLANET_ORB_MODIFIERS[planet1.toString()] || 1.0;
-  const modifier2 = PLANET_ORB_MODIFIERS[planet2.toString()] || 1.0;
+  const class1 = classifyPlanet(planet1);
+  const class2 = classifyPlanet(planet2);
+  
+  const baseOrb = (class1 === 'major' || class2 === 'major') 
+    ? aspectDefinition.orb_major 
+    : aspectDefinition.orb_minor;
+  
+  const modifier1 = PLANET_ORB_MODIFIERS[planet1] || 1.0;
+  const modifier2 = PLANET_ORB_MODIFIERS[planet2] || 1.0;
   const averageModifier = (modifier1 + modifier2) / 2;
   
   return baseOrb * averageModifier * orbModifier;
 }
 
-/**
- * Determinar la fuerza de un aspecto basada en el orbe
- */
 export function calculateAspectStrength(
-  orb: number, 
+  actualOrb: number,
   maxOrb: number
 ): 'muy_fuerte' | 'fuerte' | 'moderado' | 'debil' {
-  const orbPercentage = Math.abs(orb) / maxOrb;
+  const orbPercentage = Math.abs(actualOrb) / maxOrb;
   
-  if (orbPercentage <= 0.2) return 'muy_fuerte';      // 0-20% del orbe máximo
-  if (orbPercentage <= 0.4) return 'fuerte';          // 20-40%
-  if (orbPercentage <= 0.7) return 'moderado';        // 40-70%
-  return 'debil';                                      // 70-100%
+  if (orbPercentage <= 0.15) return 'muy_fuerte';
+  if (orbPercentage <= 0.35) return 'fuerte';
+  if (orbPercentage <= 0.65) return 'moderado';
+  return 'debil';
 }
 
-/**
- * Buscar aspecto entre dos planetas
- */
+// =============================================================================
+// CÁLCULO PRINCIPAL DE ASPECTOS
+// =============================================================================
+
 export function findAspectBetweenPlanets(
   planet1: PlanetPosition,
   planet2: PlanetPosition,
   options: AspectCalculationOptions = {}
 ): CalculatedAspect | null {
   const {
-    includeMinorAspects = false,
-    orbModifier = 1.0,
-    maxOrb = 8
+    include_minor_aspects = false,
+    orb_modifier = 1.0,
+    max_orb_override,
+    only_applying_aspects = false,
+    minimum_strength
   } = options;
 
-  const separation = calculateAngularDifference(planet1.degree, planet2.degree);
+  const separation = calculateAngularSeparation(planet1.longitude, planet2.longitude);
   
-  // Verificar cada tipo de aspecto
-  const aspectsToCheck = includeMinorAspects 
+  const aspectsToCheck = include_minor_aspects 
     ? Object.values(ASPECT_DEFINITIONS)
-    : Object.values(ASPECT_DEFINITIONS).filter(a => a.isMajor);
+    : Object.values(ASPECT_DEFINITIONS).filter(a => a.is_major);
+
+  let bestAspect: CalculatedAspect | null = null;
+  let smallestOrb = Infinity;
 
   for (const aspectDef of aspectsToCheck) {
     const effectiveOrb = calculateEffectiveOrb(
-      planet1.planet, 
-      planet2.planet, 
-      aspectDef.orb, 
-      orbModifier
+      planet1.name,
+      planet2.name,
+      aspectDef,
+      orb_modifier
     );
     
-    const finalMaxOrb = Math.min(effectiveOrb, maxOrb);
-    const orbFromExact = Math.abs(separation - aspectDef.angle);
+    const maxOrb = max_orb_override || effectiveOrb;
     
-    // Verificar también el aspecto "al revés" (ej: 180° también es 180°)
+    const orbFromExact = Math.abs(separation - aspectDef.angle);
     const orbFromExactReverse = Math.abs((360 - separation) - aspectDef.angle);
     const actualOrb = Math.min(orbFromExact, orbFromExactReverse);
     
-    if (actualOrb <= finalMaxOrb) {
-      // Determinar el orbe con signo (aplicándose vs separándose)
-      const isApplying = isAspectApplying(planet1.degree, planet2.degree, aspectDef.angle);
-      const signedOrb = isApplying ? -actualOrb : actualOrb;
+    if (actualOrb <= maxOrb && actualOrb < smallestOrb) {
+      const isApplying = actualOrb < 1.0; // Simplificado
       
-      return {
-        planet1: planet1.planet,
-        planet2: planet2.planet,
+      if (only_applying_aspects && !isApplying) continue;
+      
+      const strength = calculateAspectStrength(actualOrb, maxOrb);
+      
+      if (minimum_strength) {
+        const strengthOrder = { 'muy_fuerte': 4, 'fuerte': 3, 'moderado': 2, 'debil': 1 };
+        if (strengthOrder[strength] < strengthOrder[minimum_strength]) continue;
+      }
+      
+      const orbPercentage = actualOrb / maxOrb;
+      
+      bestAspect = {
+        planet1: planet1.name,
+        planet2: planet2.name,
         aspect_type: aspectDef.name,
-        orb: signedOrb,
         exact_angle: aspectDef.angle,
+        current_separation: separation,
+        orb: actualOrb,
+        orb_percentage: orbPercentage,
         is_applying: isApplying,
-        strength: calculateAspectStrength(actualOrb, finalMaxOrb),
+        strength,
         nature: aspectDef.nature
       };
+      
+      smallestOrb = actualOrb;
     }
   }
-  
-  return null;
+
+  return bestAspect;
 }
 
-/**
- * Calcular todos los aspectos entre una lista de planetas
- */
 export function calculateAllAspects(
-  planets: PlanetPosition[],
+  planets: Array<{ name: string; longitude: number }>,
   options: AspectCalculationOptions = {}
 ): CalculatedAspect[] {
+  const planetPositions: PlanetPosition[] = planets.map(planet => ({
+    name: planet.name,
+    longitude: planet.longitude,
+    classification: classifyPlanet(planet.name)
+  }));
+
   const aspects: CalculatedAspect[] = [];
   
-  // Verificar cada par de planetas
-  for (let i = 0; i < planets.length; i++) {
-    for (let j = i + 1; j < planets.length; j++) {
-      const aspect = findAspectBetweenPlanets(planets[i], planets[j], options);
+  for (let i = 0; i < planetPositions.length; i++) {
+    for (let j = i + 1; j < planetPositions.length; j++) {
+      const aspect = findAspectBetweenPlanets(planetPositions[i], planetPositions[j], options);
       if (aspect) {
         aspects.push(aspect);
       }
     }
   }
   
-  // Ordenar por fuerza del aspecto
   return aspects.sort((a, b) => {
-    const strengthOrder = { 'muy_fuerte': 4, 'fuerte': 3, 'moderado': 2, 'debil': 1 };
-    return strengthOrder[b.strength] - strengthOrder[a.strength];
+    const configA = ASPECT_DEFINITIONS[a.aspect_type];
+    const configB = ASPECT_DEFINITIONS[b.aspect_type];
+    
+    if (configA.priority !== configB.priority) {
+      return configA.priority - configB.priority;
+    }
+    
+    return a.orb - b.orb;
   });
 }
 
-/**
- * Convertir CalculatedAspect a PlanetaryAspect (para compatibilidad)
- */
-export function convertToPlanetaryAspect(aspect: CalculatedAspect): PlanetaryAspect {
-  return {
-    id: `${aspect.planet1}_${aspect.aspect_type}_${aspect.planet2}`,
-    planet1: aspect.planet1 as Planet | ExtendedPlanet,
-    planet2: aspect.planet2 as Planet | ExtendedPlanet,
-    aspect_type: aspect.aspect_type,
-    exact_angle: aspect.exact_angle,
-    orb: aspect.orb,
-    applying: aspect.is_applying,
-    separating: !aspect.is_applying,
-    strength: aspect.strength,
-    visual: {
-      color: getAspectColor(aspect.nature, aspect.aspect_type),
-      line_width: getAspectLineWidth(aspect.strength),
-      line_style: getAspectLineStyle(aspect.aspect_type),
-      opacity: getAspectOpacity(aspect.strength),
-      z_index: getAspectZIndex(aspect.strength)
-    }
-  };
-}
-
-/**
- * Obtener color del aspecto según su naturaleza
- */
-function getAspectColor(nature: 'harmonico' | 'tensional' | 'neutro', aspectType: AspectType): string {
-  const colorMap = {
-    'conjunction': '#FFD700',
-    'opposition': '#FF4444',
-    'trine': '#4CAF50',
-    'square': '#FF9800',
-    'sextile': '#2196F3',
-    'quincunx': '#9C27B0',
-    'semisextile': '#81C784',
-    'sesquiquadrate': '#FF5722',
-    'semisquare': '#FF7043',
-    'quintile': '#E1BEE7',
-    'biquintile': '#CE93D8'
-  };
-  
-  return colorMap[aspectType as keyof typeof colorMap] || '#999999';
-}
-
-/**
- * Obtener grosor de línea según fuerza
- */
-function getAspectLineWidth(strength: 'muy_fuerte' | 'fuerte' | 'moderado' | 'debil'): number {
-  const widthMap = {
-    'muy_fuerte': 3,
-    'fuerte': 2.5,
-    'moderado': 2,
-    'debil': 1.5
-  };
-  
-  return widthMap[strength];
-}
-
-/**
- * Obtener estilo de línea según tipo de aspecto
- */
-function getAspectLineStyle(aspectType: AspectType): 'solid' | 'dashed' | 'dotted' {
-  const majorAspects = ['conjunction', 'opposition', 'trine', 'square', 'sextile'];
-  
-  if (majorAspects.includes(aspectType)) {
-    return 'solid';
-  } else if (aspectType === 'quincunx') {
-    return 'dashed';
-  } else {
-    return 'dotted';
-  }
-}
-
-/**
- * Obtener opacidad según fuerza
- */
-function getAspectOpacity(strength: 'muy_fuerte' | 'fuerte' | 'moderado' | 'debil'): number {
-  const opacityMap = {
-    'muy_fuerte': 0.9,
-    'fuerte': 0.8,
-    'moderado': 0.7,
-    'debil': 0.5
-  };
-  
-  return opacityMap[strength];
-}
-
-/**
- * Obtener z-index según fuerza (para layering)
- */
-function getAspectZIndex(strength: 'muy_fuerte' | 'fuerte' | 'moderado' | 'debil'): number {
-  const zIndexMap = {
-    'muy_fuerte': 4,
-    'fuerte': 3,
-    'moderado': 2,
-    'debil': 1
-  };
-  
-  return zIndexMap[strength];
-}
-
-/**
- * Filtrar aspectos por criterios específicos
- */
-export function filterAspects(
-  aspects: CalculatedAspect[],
-  criteria: {
-    aspectTypes?: AspectType[];
-    planets?: (Planet | ExtendedPlanet | string)[];
-    maxOrb?: number;
-    minStrength?: 'debil' | 'moderado' | 'fuerte' | 'muy_fuerte';
-    nature?: ('harmonico' | 'tensional' | 'neutro')[];
-  }
-): CalculatedAspect[] {
-  return aspects.filter(aspect => {
-    // Filtro por tipo de aspecto
-    if (criteria.aspectTypes && !criteria.aspectTypes.includes(aspect.aspect_type)) {
-      return false;
-    }
-    
-    // Filtro por planetas
-    if (criteria.planets) {
-      const hasTargetPlanet = criteria.planets.includes(aspect.planet1) || 
-                             criteria.planets.includes(aspect.planet2);
-      if (!hasTargetPlanet) return false;
-    }
-    
-    // Filtro por orbe máximo
-    if (criteria.maxOrb && Math.abs(aspect.orb) > criteria.maxOrb) {
-      return false;
-    }
-    
-    // Filtro por fuerza mínima
-    if (criteria.minStrength) {
-      const strengthOrder = { 'debil': 1, 'moderado': 2, 'fuerte': 3, 'muy_fuerte': 4 };
-      const minStrengthValue = strengthOrder[criteria.minStrength];
-      const aspectStrengthValue = strengthOrder[aspect.strength];
-      if (aspectStrengthValue < minStrengthValue) return false;
-    }
-    
-    // Filtro por naturaleza
-    if (criteria.nature && !criteria.nature.includes(aspect.nature)) {
-      return false;
-    }
-    
-    return true;
-  });
-}
-
-/**
- * Obtener estadísticas de aspectos
- */
-export function getAspectStatistics(aspects: CalculatedAspect[]) {
-  const stats = {
-    total: aspects.length,
-    byType: {} as Record<AspectType, number>,
-    byNature: { harmonico: 0, tensional: 0, neutro: 0 },
-    byStrength: { muy_fuerte: 0, fuerte: 0, moderado: 0, debil: 0 },
-    strongestAspect: null as CalculatedAspect | null,
-    averageOrb: 0
-  };
-  
-  let totalOrb = 0;
-  
-  aspects.forEach(aspect => {
-    // Contar por tipo
-    stats.byType[aspect.aspect_type] = (stats.byType[aspect.aspect_type] || 0) + 1;
-    
-    // Contar por naturaleza
-    stats.byNature[aspect.nature]++;
-    
-    // Contar por fuerza
-    stats.byStrength[aspect.strength]++;
-    
-    // Sumar orbes para promedio
-    totalOrb += Math.abs(aspect.orb);
-    
-    // Encontrar el aspecto más fuerte
-    if (!stats.strongestAspect || 
-        (aspect.strength === 'muy_fuerte' && stats.strongestAspect.strength !== 'muy_fuerte') ||
-        (aspect.strength === 'fuerte' && !['muy_fuerte'].includes(stats.strongestAspect.strength)) ||
-        (aspect.strength === 'moderado' && ['debil'].includes(stats.strongestAspect.strength))) {
-      stats.strongestAspect = aspect;
-    }
-  });
-  
-  stats.averageOrb = aspects.length > 0 ? totalOrb / aspects.length : 0;
-  
-  return stats;
-}
-
-/**
- * Convertir desde el formato de la página natal-chart
- */
-export function convertFromNatalChartFormat(aspects: Array<{
+export function convertToComponentFormat(aspects: CalculatedAspect[]): Array<{
   planet1: string;
   planet2: string;
   type: string;
   orb: number;
-  exact_angle: number;
-}>): CalculatedAspect[] {
+  angle?: number;
+}> {
   return aspects.map(aspect => ({
     planet1: aspect.planet1,
     planet2: aspect.planet2,
-    aspect_type: aspect.type as AspectType,
+    type: aspect.aspect_type,
     orb: aspect.orb,
-    exact_angle: aspect.exact_angle,
-    is_applying: aspect.orb < 0,
-    strength: calculateAspectStrength(Math.abs(aspect.orb), 8),
-    nature: ASPECT_DEFINITIONS[aspect.type as AspectType]?.nature || 'neutro'
-  }));
+    angle: aspect.current_separation
+  }));  
 }
 
-/**
- * Convertir hacia el formato de NatalChartWheel
- */
-export function convertToNatalChartFormat(aspects: CalculatedAspect[]): Array<{
-  planet1: string;
-  planet2: string;
-  type: 'conjunction' | 'opposition' | 'trine' | 'square' | 'sextile' | 'quincunx';
-  orb: number;
-  exact_angle: number;
-}> {
-  return aspects.map(aspect => ({
-    planet1: aspect.planet1.toString(),
-    planet2: aspect.planet2.toString(),
-    type: aspect.aspect_type as 'conjunction' | 'opposition' | 'trine' | 'square' | 'sextile' | 'quincunx',
-    orb: aspect.orb,
-    exact_angle: aspect.exact_angle
-  }));
-}
+// =============================================================================
+// EXPORTACIONES ADICIONALES PARA COMPATIBILIDAD
+// =============================================================================
 
-/**
- * Función helper para debugging - mostrar aspectos en consola
- */
-export function debugAspects(aspects: CalculatedAspect[]): void {
-  console.group('🔮 Aspectos Calculados');
+
+// Función de validación
+export function validateAspects(aspects: CalculatedAspect[]): {
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+} {
+  const errors: string[] = [];
+  const warnings: string[] = [];
   
   aspects.forEach((aspect, index) => {
-    const symbol = ASPECT_DEFINITIONS[aspect.aspect_type]?.symbol || '?';
-    console.log(
-      `${index + 1}. ${aspect.planet1} ${symbol} ${aspect.planet2} ` +
-      `(${aspect.aspect_type}) - Orbe: ${aspect.orb.toFixed(2)}° ` +
-      `(${aspect.strength}, ${aspect.nature})`
-    );
+    if (!aspect.planet1 || !aspect.planet2) {
+      errors.push(`Aspecto ${index}: planetas faltantes`);
+    }
+    
+    if (!aspect.aspect_type || !ASPECT_DEFINITIONS[aspect.aspect_type]) {
+      errors.push(`Aspecto ${index}: tipo de aspecto inválido`);
+    }
+    
+    if (typeof aspect.orb !== 'number' || isNaN(aspect.orb)) {
+      errors.push(`Aspecto ${index}: orbe inválido`);
+    }
+    
+    const aspectDef = ASPECT_DEFINITIONS[aspect.aspect_type];
+    if (aspectDef && Math.abs(aspect.orb) > aspectDef.orb_major + 2) {
+      warnings.push(`Aspecto ${index}: orbe muy amplio (${aspect.orb.toFixed(2)}°)`);
+    }
   });
   
-  const stats = getAspectStatistics(aspects);
-  console.log('\n📊 Estadísticas:', stats);
-  
-  console.groupEnd();
+  return {
+    isValid: errors.length === 0,
+    errors,
+    warnings
+  };
 }
 
+// =============================================================================
+// EXPORTACIÓN DEFAULT Y NAMED EXPORTS
+// =============================================================================
+
+// Exportación por defecto
 export default {
   calculateAllAspects,
   findAspectBetweenPlanets,
-  filterAspects,
-  getAspectStatistics,
-  convertToPlanetaryAspect,
-  convertFromNatalChartFormat,
-  convertToNatalChartFormat,
-  debugAspects,
+  convertToComponentFormat,
+  analyzeAspectDistribution,
+  validateAspects,
   ASPECT_DEFINITIONS,
-  PLANET_ORB_MODIFIERS
+  PLANET_ORB_MODIFIERS,
+  normalizeAngle,
+  calculateAngularSeparation,
+  calculateEffectiveOrb,
+  calculateAspectStrength,
+  classifyPlanet
 };
+
+// =============================================================================
+// EXPORTACIONES ADICIONALES PARA COMPATIBILIDAD
+// =============================================================================
+
+// Función de análisis de aspectos
+export function analyzeAspectDistribution(aspects: CalculatedAspect[]) {
+  const byType = aspects.reduce((acc, aspect) => {
+    acc[aspect.aspect_type] = (acc[aspect.aspect_type] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+  
+  const byNature = aspects.reduce((acc, aspect) => {
+    acc[aspect.nature] = (acc[aspect.nature] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+  
+  const byStrength = aspects.reduce((acc, aspect) => {
+    acc[aspect.strength] = (acc[aspect.strength] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+  };
+  
