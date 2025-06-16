@@ -1,4 +1,6 @@
-// src/utils/dateTimeUtils.ts
+// src/utils/dateTimeUtils.ts - VERSIÓN MEJORADA
+// Solo se actualizan las funciones isDST() y getTimezoneOffset()
+// El resto del código permanece igual
 
 /**
  * Utilidades para formateo consistente de fechas y timezones
@@ -28,42 +30,137 @@ export const TIMEZONE_MAP: Record<string, TimezoneInfo> = {
 };
 
 /**
- * Determina si una fecha está en horario de verano (aproximación)
+ * 🆕 FUNCIÓN MEJORADA: Calcula el último domingo de un mes
+ */
+function getLastSunday(year: number, month: number): Date {
+  const lastDay = new Date(year, month, 0);
+  const dayOfWeek = lastDay.getDay();
+  const lastSundayDate = lastDay.getDate() - dayOfWeek;
+  return new Date(year, month - 1, lastSundayDate);
+}
+
+/**
+ * 🆕 FUNCIÓN MEJORADA: Calcula el primer domingo de un mes
+ */
+function getFirstSunday(year: number, month: number): Date {
+  const firstDay = new Date(year, month - 1, 1);
+  const dayOfWeek = firstDay.getDay();
+  const firstSundayDate = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
+  return new Date(year, month - 1, firstSundayDate);
+}
+
+/**
+ * 🆕 FUNCIÓN MEJORADA: Calcula el segundo domingo de un mes
+ */
+function getSecondSunday(year: number, month: number): Date {
+  const firstSunday = getFirstSunday(year, month);
+  return new Date(firstSunday.getTime() + 7 * 24 * 60 * 60 * 1000);
+}
+
+/**
+ * 🔄 FUNCIÓN ACTUALIZADA: Determina si una fecha está en horario de verano con PRECISIÓN
  * @param date - Fecha a evaluar
  * @param timezone - Zona horaria
  */
 export function isDST(date: Date, timezone: string): boolean {
-  const month = date.getMonth() + 1; // 1-12
-  const day = date.getDate();
+  const year = date.getFullYear();
 
   switch (timezone) {
     case 'Europe/Madrid':
-      // DST: último domingo de marzo al último domingo de octubre
-      return month > 3 && month < 10;
+    case 'Europe/Paris':
+    case 'Europe/Berlin':
+      // DST: último domingo de marzo (2AM) al último domingo de octubre (3AM)
+      const cestStart = getLastSunday(year, 3);
+      cestStart.setHours(2, 0, 0, 0);
+      
+      const cestEnd = getLastSunday(year, 10);
+      cestEnd.setHours(3, 0, 0, 0);
+      
+      return date >= cestStart && date < cestEnd;
+    
+    case 'Europe/London':
+      // Reino Unido: último domingo de marzo (1AM) al último domingo de octubre (2AM)
+      const bstStart = getLastSunday(year, 3);
+      bstStart.setHours(1, 0, 0, 0);
+      
+      const bstEnd = getLastSunday(year, 10);
+      bstEnd.setHours(2, 0, 0, 0);
+      
+      return date >= bstStart && date < bstEnd;
     
     case 'America/New_York':
-      // DST: segundo domingo de marzo al primer domingo de noviembre
-      return month > 3 && month < 11;
+      // USA Este: segundo domingo de marzo (2AM) al primer domingo de noviembre (2AM)
+      const edtStart = getSecondSunday(year, 3);
+      edtStart.setHours(2, 0, 0, 0);
+      
+      const edtEnd = getFirstSunday(year, 11);
+      edtEnd.setHours(2, 0, 0, 0);
+      
+      return date >= edtStart && date < edtEnd;
+    
+    case 'America/Los_Angeles':
+      // USA Oeste: mismo que NY pero con horas diferentes
+      const pdtStart = getSecondSunday(year, 3);
+      pdtStart.setHours(2, 0, 0, 0);
+      
+      const pdtEnd = getFirstSunday(year, 11);
+      pdtEnd.setHours(2, 0, 0, 0);
+      
+      return date >= pdtStart && date < pdtEnd;
+    
+    case 'America/Mexico_City':
+      // México: primer domingo de abril al último domingo de octubre
+      const cdtStart = getFirstSunday(year, 4);
+      cdtStart.setHours(2, 0, 0, 0);
+      
+      const cdtEnd = getLastSunday(year, 10);
+      cdtEnd.setHours(2, 0, 0, 0);
+      
+      return date >= cdtStart && date < cdtEnd;
+    
+    case 'America/Santiago':
+      // Chile (hemisferio sur): primer domingo de septiembre al primer domingo de abril
+      const clstStart = getFirstSunday(year, 9);
+      clstStart.setHours(0, 0, 0, 0);
+      
+      // Si estamos antes de abril, el DST empezó el año anterior
+      if (date.getMonth() < 3) {
+        const clstEndCurrent = getFirstSunday(year, 4);
+        clstEndCurrent.setHours(0, 0, 0, 0);
+        return date < clstEndCurrent;
+      }
+      
+      return date >= clstStart;
       
     default:
+      // Zonas sin cambio de horario
       return false;
   }
 }
 
 /**
- * Obtiene el offset correcto para una fecha y timezone específicos
+ * 🔄 FUNCIÓN ACTUALIZADA: Obtiene el offset correcto para una fecha y timezone específicos
  * @param date - Fecha
  * @param timezone - Zona horaria
  */
 export function getTimezoneOffset(date: Date, timezone: string): string {
   const baseOffset = TIMEZONE_MAP[timezone]?.offset || '+00:00';
   
-  if (timezone === 'Europe/Madrid' && isDST(date, timezone)) {
-    return '+02:00'; // CEST (verano)
-  }
+  // Mapeo extendido para DST
+  const dstOffsets: Record<string, string> = {
+    'Europe/Madrid': '+02:00',
+    'Europe/Paris': '+02:00',
+    'Europe/Berlin': '+02:00',
+    'Europe/London': '+01:00',
+    'America/New_York': '-04:00',
+    'America/Los_Angeles': '-07:00',
+    'America/Mexico_City': '-05:00',
+    'America/Santiago': '-03:00'
+  };
   
-  if (timezone === 'America/New_York' && isDST(date, timezone)) {
-    return '-04:00'; // EDT (verano)
+  // Si la zona tiene DST y está activo, usar el offset de verano
+  if (isDST(date, timezone) && dstOffsets[timezone]) {
+    return dstOffsets[timezone];
   }
   
   return baseOffset;

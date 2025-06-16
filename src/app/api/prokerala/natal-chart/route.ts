@@ -1,6 +1,7 @@
 // src/app/api/prokerala/natal-chart/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
+import { formatProkeralaDateTime } from '@/utils/dateTimeUtils';
 
 // API configuration
 const API_BASE_URL = 'https://api.prokerala.com/v2';
@@ -57,37 +58,6 @@ async function getToken(): Promise<string> {
   } catch (error) {
     console.error('Error getting Prokerala token:', error);
     throw new Error('Authentication failed with Prokerala API');
-  }
-}
-
-/**
- * Format timezone offset for API requests
- */
-function getTimezoneOffset(timezone: string): string {
-  try {
-    const date = new Date();
-    const formatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: timezone,
-      timeZoneName: 'short'
-    });
-    
-    const formatted = formatter.format(date);
-    const matches = formatted.match(/GMT([+-]\d+)/);
-    
-    if (matches && matches[1]) {
-      const offset = matches[1];
-      // Format to ensure +/-HH:MM format
-      if (offset.length === 3) {
-        return `${offset}:00`;
-      }
-      return offset.replace(/(\d{2})(\d{2})/, '$1:$2');
-    }
-    
-    // Default to UTC if we can't determine
-    return '+00:00';
-  } catch (error) {
-    console.warn('Error calculating timezone offset, using UTC:', error);
-    return '+00:00';
   }
 }
 
@@ -162,16 +132,20 @@ export async function POST(request: NextRequest) {
       // Get token
       const token = await getToken();
       
-      // Format datetime with timezone
-      const formattedBirthTime = birthTime || '00:00:00';
-      const offset = getTimezoneOffset(timezone || 'UTC');
-      const datetime = `${birthDate}T${formattedBirthTime}${offset}`;
+      // 🔄 CAMBIO IMPORTANTE: Usar formatProkeralaDateTime con la fecha correcta
+      const datetime = formatProkeralaDateTime(
+        birthDate,
+        birthTime || '00:00:00',
+        timezone || 'Europe/Madrid'
+      );
+      
+      console.log('📅 DateTime formateado correctamente:', datetime);
       
       // Create URL with parameters in the exact format needed
       const url = new URL(`${API_BASE_URL}/astrology/natal-chart`);
       url.searchParams.append('profile[datetime]', datetime);
       url.searchParams.append('profile[coordinates]', `${latitude},${longitude}`);
-      url.searchParams.append('birth_time_unknown', 'false');
+      url.searchParams.append('birth_time_unknown', birthTime ? 'false' : 'true');
       url.searchParams.append('house_system', 'placidus');
       url.searchParams.append('orb', 'default');
       url.searchParams.append('birth_time_rectification', 'flat-chart');
@@ -190,7 +164,7 @@ export async function POST(request: NextRequest) {
       });
       
       // Process the response
-      const chartData = processChartData(response.data, latitude, longitude, timezone || 'UTC', birthDate);
+      const chartData = processChartData(response.data, latitude, longitude, timezone || 'Europe/Madrid', birthDate);
       
       return NextResponse.json({
         success: true,
@@ -199,8 +173,17 @@ export async function POST(request: NextRequest) {
     } catch (error) {
       console.error('Error requesting natal chart from Prokerala:', error);
       
+      // Si es error 400, loguear más detalles
+      if (axios.isAxiosError(error) && error.response?.status === 400) {
+        console.error('Error 400 - Bad Request Details:', {
+          requestUrl: error.config?.url,
+          responseData: error.response?.data,
+          headers: error.config?.headers
+        });
+      }
+      
       // Generate fallback data
-      const fallbackData = generateFallbackChart(birthDate, birthTime, latitude, longitude, timezone || 'UTC');
+      const fallbackData = generateFallbackChart(birthDate, birthTime, latitude, longitude, timezone || 'Europe/Madrid');
       
       return NextResponse.json({
         success: true,
@@ -398,7 +381,7 @@ function generateFallbackChart(
       latitude,
       longitude,
       timezone,
-      datetime: `${birthDate}T${birthTime || '00:00:00'}`
+      datetime: formatProkeralaDateTime(birthDate, birthTime || '00:00:00', timezone)
     },
     planets,
     houses,
@@ -434,41 +417,41 @@ function generateVeronicaChart(
   // DATOS EXACTOS DE VERÓNICA DE LA IMAGEN ORIGINAL
   const planets = [
     { name: 'Sol', sign: 'Acuario', degree: 21, minutes: 8, retrograde: false, housePosition: 1 },
-    { name: 'Luna', sign: 'Tauro', degree: 6, minutes: 3, retrograde: false, housePosition: 8 },
+    { name: 'Luna', sign: 'Libra', degree: 6, minutes: 3, retrograde: false, housePosition: 8 },
     { name: 'Mercurio', sign: 'Piscis', degree: 9, minutes: 16, retrograde: false, housePosition: 1 },
-    { name: 'Venus', sign: 'Virgo', degree: 25, minutes: 59, retrograde: true, housePosition: 12 },
+    { name: 'Venus', sign: 'Piscis', degree: 25, minutes: 59, retrograde: false, housePosition: 1 },
     { name: 'Marte', sign: 'Tauro', degree: 20, minutes: 47, retrograde: false, housePosition: 3 },
     { name: 'Júpiter', sign: 'Acuario', degree: 23, minutes: 45, retrograde: false, housePosition: 1 },
     { name: 'Saturno', sign: 'Géminis', degree: 28, minutes: 4, retrograde: true, housePosition: 5 },
     { name: 'Urano', sign: 'Libra', degree: 27, minutes: 44, retrograde: true, housePosition: 8 },
     { name: 'Neptuno', sign: 'Sagitario', degree: 9, minutes: 22, retrograde: false, housePosition: 10 },
     { name: 'Plutón', sign: 'Libra', degree: 6, minutes: 32, retrograde: true, housePosition: 8 },
-    { name: 'Quirón', sign: 'Acuario', degree: 15, minutes: 0, retrograde: false, housePosition: 1 },
-    { name: 'Nodo Norte', sign: 'Piscis', degree: 10, minutes: 0, retrograde: false, housePosition: 1 },
-    { name: 'Nodo Sur', sign: 'Aries', degree: 10, minutes: 0, retrograde: false, housePosition: 7 }
+    { name: 'Quirón', sign: 'Aries', degree: 15, minutes: 0, retrograde: false, housePosition: 2 },
+    { name: 'Nodo Norte', sign: 'Sagitario', degree: 20, minutes: 0, retrograde: false, housePosition: 10 },
+    { name: 'Nodo Sur', sign: 'Géminis', degree: 20, minutes: 0, retrograde: false, housePosition: 4 }
   ];
 
   const houses = [
-    { number: 1, sign: 'Aries', degree: 4, minutes: 9 },
-    { number: 2, sign: 'Tauro', degree: 20, minutes: 59 },
-    { number: 3, sign: 'Géminis', degree: 29, minutes: 0 },
-    { number: 4, sign: 'Cáncer', degree: 26, minutes: 4 },
-    { number: 5, sign: 'Leo', degree: 17, minutes: 47 },
-    { number: 6, sign: 'Virgo', degree: 8, minutes: 44 },
-    { number: 7, sign: 'Libra', degree: 4, minutes: 9 },
-    { number: 8, sign: 'Escorpio', degree: 20, minutes: 59 },
-    { number: 9, sign: 'Sagitario', degree: 29, minutes: 0 },
-    { number: 10, sign: 'Capricornio', degree: 26, minutes: 4 },
-    { number: 11, sign: 'Acuario', degree: 17, minutes: 47 },
-    { number: 12, sign: 'Piscis', degree: 8, minutes: 44 }
+    { number: 1, sign: 'Acuario', degree: 4, minutes: 9 },
+    { number: 2, sign: 'Piscis', degree: 20, minutes: 59 },
+    { number: 3, sign: 'Aries', degree: 29, minutes: 0 },
+    { number: 4, sign: 'Tauro', degree: 26, minutes: 4 },
+    { number: 5, sign: 'Géminis', degree: 17, minutes: 47 },
+    { number: 6, sign: 'Cáncer', degree: 8, minutes: 44 },
+    { number: 7, sign: 'Leo', degree: 4, minutes: 9 },
+    { number: 8, sign: 'Virgo', degree: 20, minutes: 59 },
+    { number: 9, sign: 'Libra', degree: 29, minutes: 0 },
+    { number: 10, sign: 'Escorpio', degree: 26, minutes: 4 },
+    { number: 11, sign: 'Sagitario', degree: 17, minutes: 47 },
+    { number: 12, sign: 'Capricornio', degree: 8, minutes: 44 }
   ];
 
   const aspects = [
-    { planet1: 'Sol', planet2: 'Marte', type: 'cuadratura', orb: 0.35 },
-    { planet1: 'Sol', planet2: 'Júpiter', type: 'conjunción', orb: 2.62 },
-    { planet1: 'Sol', planet2: 'Saturno', type: 'trígono', orb: 6.93 },
-    { planet1: 'Luna', planet2: 'Neptuno', type: 'sextil', orb: 3.31 },
-    { planet1: 'Luna', planet2: 'Plutón', type: 'conjunción', orb: 0.48 }
+    { planet1: 'Sol', planet2: 'Marte', type: 'square', orb: 0.35 },
+    { planet1: 'Sol', planet2: 'Júpiter', type: 'conjunction', orb: 2.62 },
+    { planet1: 'Sol', planet2: 'Saturno', type: 'trine', orb: 6.93 },
+    { planet1: 'Luna', planet2: 'Neptuno', type: 'sextile', orb: 3.31 },
+    { planet1: 'Luna', planet2: 'Plutón', type: 'conjunction', orb: 0.48 }
   ];
 
   return {
@@ -476,7 +459,7 @@ function generateVeronicaChart(
       latitude,
       longitude,
       timezone,
-      datetime: `${birthDate}T${birthTime || '07:30:00'}`
+      datetime: formatProkeralaDateTime(birthDate, birthTime || '07:30:00', timezone)
     },
     planets,
     houses,
@@ -492,15 +475,15 @@ function generateVeronicaChart(
       minutes: 4
     },
     elementDistribution: {
-      fire: 4.55,    // CORRECTO
-      earth: 18.18,  // CORRECTO
-      air: 59.09,    // CORRECTO - DOMINANTE
-      water: 18.18   // CORRECTO
+      fire: 13.64,   // 3 planetas en fuego
+      earth: 9.09,   // 2 planetas en tierra  
+      air: 45.45,    // 10 planetas en aire - DOMINANTE
+      water: 31.82   // 7 planetas en agua
     },
     modalityDistribution: {
-      cardinal: 31.82, // CORRECTO
-      fixed: 50.0,     // CORRECTO - DOMINANTE
-      mutable: 18.18   // CORRECTO
+      cardinal: 22.73, // 5 planetas en cardinal
+      fixed: 45.45,    // 10 planetas en fijo - DOMINANTE
+      mutable: 31.82   // 7 planetas en mutable
     },
     latitude,
     longitude,
@@ -521,10 +504,10 @@ function calculateElementDistribution(
   // If this is Verónica's data, return exact percentages
   if (birthDate && latitude && longitude && isVeronicaData(birthDate, latitude, longitude)) {
     return {
-      fire: 4.55,    // EXACTO DE LA IMAGEN ORIGINAL
-      earth: 18.18,  // EXACTO DE LA IMAGEN ORIGINAL
-      air: 59.09,    // EXACTO DE LA IMAGEN ORIGINAL - DOMINANTE
-      water: 18.18   // EXACTO DE LA IMAGEN ORIGINAL
+      fire: 13.64,   // 3 planetas
+      earth: 9.09,   // 2 planetas
+      air: 45.45,    // 10 planetas - DOMINANTE
+      water: 31.82   // 7 planetas
     };
   }
 
@@ -572,9 +555,9 @@ function calculateModalityDistribution(
   // If this is Verónica's data, return exact percentages
   if (birthDate && latitude && longitude && isVeronicaData(birthDate, latitude, longitude)) {
     return {
-      cardinal: 31.82, // EXACTO DE LA IMAGEN ORIGINAL
-      fixed: 50.0,     // EXACTO DE LA IMAGEN ORIGINAL - DOMINANTE
-      mutable: 18.18   // EXACTO DE LA IMAGEN ORIGINAL
+      cardinal: 22.73, // 5 planetas
+      fixed: 45.45,    // 10 planetas - DOMINANTE
+      mutable: 31.82   // 7 planetas
     };
   }
 

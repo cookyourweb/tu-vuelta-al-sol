@@ -2,7 +2,7 @@
 
 ## 🌞 Sobre el Producto
 
-**"Tu Vuelta al Sol"** es una aplicación web que genera agendas astrológicas personalizadas basadas en la carta natal y progresada del usuario. La aplicación combina precisión astrológica máxima con inteligencia artificial para crear consejos personalizados y herramientas prácticas de planificación.
+**"Tu Vuelta al Sol"** es una aplicación web que genera agendas astrológicas personalizadas basadas en la carta natal y progresada del usuario. La aplicación combina precisión astrológica máxima con inteligencia artificial para crear una agenda anual desde el dia de su cumpleaños hasta el dia de su cumpleaños del siguiente año, con la finaldad de sacar la mayor informacióon  para en funcción de los eventos astrologiccos del año, darle los mejoores  consejos  y herramientas para conseeguir los objetivos que marcan  las  dos cartas y como tratar bloqueos. 
 
 ### Funcionalidades Principales:
 1. **Carta natal con precisión máxima** usando Swiss Ephemeris
@@ -62,7 +62,7 @@ GET https://api.prokerala.com/v2/astrology/progression-chart?profile[datetime]=Y
 - **Despliegue Vercel** sin errores
 - **Parámetros astrológicos** corregidos (ayanamsa=0, coordenadas precisas)
 
-#### 🔄 En Progreso INMEDIATO (Esta semana)
+#### 🔄 En Progreso INMEDIATO (Desde el  2 al 15 junio)
 - [ ] **Corregir carta progresada** con parámetros exactos (ayanamsa=0)
 - [ ] **Implementar prompt de IA** para generación de agenda personalizada
 - [ ] **Eventos astrológicos anuales** completos
@@ -75,7 +75,7 @@ GET https://api.prokerala.com/v2/astrology/progression-chart?profile[datetime]=Y
 
 ---
 
-### **FASE 2: GENERACIÓN INTELIGENTE CON IA** *(Junio 2025)*
+### **FASE 2: GENERACIÓN INTELIGENTE CON IA** *(semana 16 al 22 de Junio)*
 **Objetivo**: Agenda astrológica completa y personalizada
 
 #### **2.1 Core de IA Astrológica** 🤖
@@ -97,32 +97,12 @@ GET https://api.prokerala.com/v2/astrology/progression-chart?profile[datetime]=Y
 
 ---
 
-### **FASE 3: MONETIZACIÓN Y SISTEMA DE PAGOS** *(Julio 2025)*
-**Objetivo**: Convertir en producto rentable
 
-#### **3.1 Sistema de Pagos Stripe** 💳
-- [ ] **Integración Stripe** completa con webhooks
-- [ ] **Planes de suscripción**:
-  - **Básico** (€19/año): Agenda anual completa
-  - **Premium** (€39/año): + Google Calendar + actualizaciones mensuales
-  - **VIP** (€79/año): + consultas personales + informes especiales
-- [ ] **Pagos únicos** para productos específicos
-- [ ] **Sistema de cupones** y descuentos
-- [ ] **Dashboard de suscripciones** para usuarios
 
-#### **3.2 Productos Adicionales** 🎁
-- [ ] **Compatibilidad de pareja** (€29): Carta sinastría
-- [ ] **Carta para bebés** (€24): Regalo para padres
-- [ ] **Informes temáticos** (€15 c/u): Amor, carrera, salud
-- [ ] **Calendario lunar físico** (€35): Producto físico personalizado
-- [ ] **Consultas 1:1** (€75/hora): Con astrólogos certificados
-
----
-
-### **FASE 4: INTEGRACIÓN GOOGLE CALENDAR** *(Agosto 2025)* 🚀
+### **FASE 3: INTEGRACIÓN GOOGLE CALENDAR** *(Del 23 al 29 junio)* 🚀
 **¡FUNCIONALIDAD ESTRELLA ÚNICA EN EL MERCADO!**
 
-#### **4.1 Integración Básica** 📅
+#### **3.1 Integración Básica** 📅
 - [ ] **OAuth Google** para autorización segura
 - [ ] **Sincronización automática** de eventos astrológicos
 - [ ] **Recordatorios personalizados**:
@@ -130,18 +110,39 @@ GET https://api.prokerala.com/v2/astrology/progression-chart?profile[datetime]=Y
   - "Luna nueva en tu signo - tiempo de intenciones"
 - [ ] **Eventos recurrentes**: Fases lunares, aspectos importantes
 
-#### **4.2 Funcionalidades Avanzadas** ⭐
+#### **3.2 Funcionalidades Avanzadas** ⭐
 - [ ] **Smart scheduling**: Sugerir mejores días para reuniones importantes
 - [ ] **Alertas proactivas**: "Evita decisiones grandes mañana (Mercurio Rx)"
 - [ ] **Rituales automáticos**: Recordatorios de ceremonias lunares
 - [ ] **Sincronización bidireccional**: Análisis de eventos del usuario
 - [ ] **Análisis de productividad** basado en tránsitos personales
 
-#### **4.3 Valor Agregado Premium** 💎
+#### **3.3 Valor Agregado Premium** 💎
 - [ ] **Planificación estratégica**: Mejores fechas para proyectos importantes
 - [ ] **Optimización de horarios** según energía astrológica personal
 - [ ] **Integración múltiple**: Outlook, Apple Calendar
 - [ ] **Widget personalizado** para escritorio/móvil
+
+---
+### **FASE 4: MONETIZACIÓN Y SISTEMA DE PAGOS** *(Primera semana julio)*
+**Objetivo**: Convertir en producto rentable
+
+#### **4.1 Sistema de Pagos Stripe** 💳
+- [ ] **Integración Stripe** completa con webhooks ( no tengo claro aun la monetización)
+- [ ] **Planes de suscripción**:
+  - **Básico** (€0/año): Generación carta natal , progreesada y un mes de  agenda
+  - **Premium** (€20/año): + Google Calendar + actualizaciones mensuales
+  - **VIP** (€79/año): + consultas personales (ya con astrologos) + prooductos  adicionales
+- [ ] **Pagos únicos** para productos adicionales y -  Agenda Tu Vuelta Al sol
+- [ ] **Sistema de cupones** y descuentos
+- [ ] **Dashboard de suscripciones** para usuarios
+
+#### **4.2 Productos Adicionales** 🎁
+- [ ] **Compatibilidad de pareja** (€29): Carta sinastría
+- [ ] **Carta para bebés** (€24): Regalo para padres
+- [ ] **Informes temáticos** (€15 c/u): Amor, carrera, salud
+- [ ] **Calendario lunar físico** (€35): Producto físico personalizado
+- [ ] **Consultas 1:1** (€75/hora): Con astrólogos certificados
 
 ---
 
@@ -330,7 +331,287 @@ STRIPE_PUBLISHABLE_KEY=tu_stripe_public
 GOOGLE_CLIENT_ID=tu_google_client_id
 GOOGLE_CLIENT_SECRET=tu_google_client_secret
 ```
+### Acutalmente  estamos conEstructura Completa del Repositorio: Tu Vuelta al Sol
+📋 Resumen del Proyecto
+Proyecto: "Tu Vuelta al Sol" - Aplicación web de agendas astrológicas personalizadas
 
+Estado: 🔄 85% completo
+Stack: Next.js 15.2.3 + TypeScript + Tailwind CSS + MongoDB + Firebase
+API Astrológica: Prokerala (Swiss Ephemeris)
+Despliegue: Vercel
+Última actualización: 27 Mayo 2025
+
+Funcionalidades principales:
+
+✅ Carta natal con precisión máxima
+✅ Integración Prokerala API
+✅ Autenticación Firebase
+✅ Base de datos MongoDB
+🔄 Carta progresada (pendiente corrección)
+📅 Eventos astrológicos anuales
+🤖 Generación de agenda con IA
+📆 Integración Google Calendar (funcionalidad estrella)
+💳 Sistema de pagos y suscripciones
+
+🗂️ Estructura Completa de Archivos
+tu-vuelta-al-sol/
+.
+├── .gitignore
+├── .vercelignore
+├── eslint.config.mjs
+├── next.config.js
+├── next.config.ts
+├── package-lock.json
+├── package.json
+├── postcss.config.mjs
+├── Prokerala_Carta_Natal.postman_collection.json
+├── prokerala-token-test.js
+├── README.md
+├── tsconfig.json
+├── vercel.json
+├── public
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── next.svg
+│   ├── site.webmanifest
+│   ├── vercel.svg
+│   ├── window.svg
+│   └── icons
+│       ├── icon-192x192.png
+│       └── icon-512x512.png
+├── scripts
+│   ├── fix-quotes.sh
+│   └── professional-quote-fix.sh
+├── src
+│   ├── app
+│   │   ├── favicon.ico
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   ├── layout.tsx.backup
+│   │   ├── page.tsx
+│   │   ├── page.tsx.backup
+│   │   ├── (auth)
+│   │   ├── (dashboard)
+│   │   ├── api
+│   │   │   ├── astrology
+│   │   │   │   ├── ChartLoader.tsx
+│   │   │   │   ├── ChartLoader.tsx.backup
+│   │   │   │   ├── natal-chart
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── test-postman
+│   │   │   │   │   └── route.ts
+│   │   │   ├── birth-data
+│   │   │   │   └── route.ts
+│   │   │   ├── charts
+│   │   │   │   ├── natal
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── progressed
+│   │   │   │   │   └── route.ts
+│   │   │   ├── events
+│   │   │   │   ├── astrological
+│   │   │   │   │   └── route.ts
+│   │   │   ├── prokerala
+│   │   │   │   ├── client-v2.ts
+│   │   │   │   ├── utils.ts
+│   │   │   │   ├── chart
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── direct-test
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── location-search
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── natal-chart
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── natal-horoscope
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── test
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── test-page
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── token
+│   │   │   │   │   └── route.ts
+│   │   │   ├── test-mongodb
+│   │   │   │   └── route.ts
+│   │   │   ├── users
+│   │   │   │   └── route.ts
+│   │   ├── postman-test
+│   │   │   ├── page.tsx
+│   │   │   ├── page.tsx.backup
+│   │   ├── test-aspects
+│   │   │   └── page.tsx
+│   │   ├── test-birth-data
+│   │   │   └── page.tsx
+│   │   ├── test-google-coords
+│   │   │   └── page.tsx
+│   │   ├── test-natal-chart
+│   │   │   ├── page.tsx
+│   │   │   ├── page.tsx.backup
+│   │   ├── types
+│   │   │   └── astrology.ts
+│   ├── components
+│   │   ├── astrology
+│   │   │   ├── AspectLines.tsx
+│   │   │   ├── AstrologicalAgenda.tsx
+│   │   │   ├── AstrologicalAgenda.tsx.backup
+│   │   │   ├── AstrologicalAgendaGenerator.tsx
+│   │   │   ├── AstrologicalAgendaGenerator.tsx.backup
+│   │   │   ├── ChartDisplay.tsx
+│   │   │   ├── ChartDisplay.tsx.backup
+│   │   │   ├── HouseGrid.tsx
+│   │   │   ├── NatalChartWheel.tsx
+│   │   │   ├── NatalChartWheel.tsx.backup
+│   │   │   ├── PlanetSymbol.tsx
+│   │   ├── auth
+│   │   │   ├── LoginForm.tsx
+│   │   │   ├── LoginForm.tsx.backup
+│   │   │   ├── RegisterForm.tsx
+│   │   │   ├── RegisterForm.tsx.backup
+│   │   ├── dashboard
+│   │   │   ├── BirthDataForm.tsx
+│   │   │   ├── BirthDataForm.tsx.backup
+│   │   │   ├── NatalChartCard.tsx
+│   │   │   ├── NatalChartCard.tsx.backup
+│   │   ├── forms
+│   │   │   └── EnhancedBirthDataForm.tsx
+│   │   ├── hooks
+│   │   │   ├── useAspects.ts
+│   │   │   ├── useChart.ts
+│   │   │   ├── usePlanets.ts
+│   │   │   ├── useProkeralaApi.ts
+│   │   ├── layout
+│   │   │   ├── Footer.tsx
+│   │   │   ├── Footer.tsx.backup
+│   │   │   ├── PrimaryHeader.tsx
+│   │   │   ├── PrimaryHeader.tsx.backup
+│   │   ├── test
+│   │   │   ├── NatalChartTest.tsx
+│   │   │   ├── NatalChartTest.tsx.backup
+│   │   │   ├── PostmanTest.tsx
+│   │   │   ├── PostmanTest.tsx.backup
+│   │   │   ├── ProkeralaNatalTest.tsx
+│   │   │   ├── ProkeralaNatalTest.tsx.backup
+│   │   ├── ui
+│   │   │   ├── Alert.tsx
+│   │   │   ├── Alert.tsx.backup
+│   │   │   ├── Button.tsx
+│   │   │   ├── Button.tsx.backup
+│   │   │   ├── Input.tsx
+│   │   │   ├── Input.tsx.backup
+│   ├── context
+│   │   ├── AuthContext.tsx
+│   │   ├── NotificationContext.tsx
+│   │   ├── NotificationContext.tsx.backup
+│   ├── lib
+│   │   ├── db.ts
+│   │   ├── firebase.ts
+│   │   ├── utils.ts
+│   │   ├── prokerala
+│   │   │   ├── client.ts
+│   │   │   ├── endpoints.ts
+│   │   │   ├── types.ts
+│   │   │   └── utils.ts
+│   ├── models
+│   │   ├── BirthData.ts
+│   │   ├── Chart.ts
+│   │   ├── User.ts
+│   ├── services
+│   │   ├── astrologyService.ts
+│   │   ├── progressedChartService.ts
+│   │   ├── prokeralaService.ts
+│   ├── utils
+│   │   ├── dateTimeUtils.ts
+│   │   ├── astrology
+│   │   │   ├── aspectCalculations.ts
+│   │   │   ├── coordinateUtils.ts
+│   │   │   ├── degreeConverter.ts
+│   │   │   ├── planetPositions.ts
+├── types
+│   ├── astrology
+│   │   ├── aspects.ts
+│   │   ├── basic.ts
+│   │   ├── chart.ts
+│   │   ├── index.ts
+│   │   ├── utils.ts
+
+🔧 Scripts disponibles (package.json)
+json{
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf .next out dist node_modules/.cache .eslintcache",
+    "clean:all": "rm -rf .next out dist node_modules .eslintcache package-lock.json && npm install",
+    "build:clean": "npm run clean && npm run build",
+    "pre-deploy": "npm run lint:fix && npm run build"
+  }
+}
+🔐 Variables de entorno (.env.local)
+bash# Prokerala API (FUNCIONANDO)
+NEXT_PUBLIC_PROKERALA_CLIENT_ID=
+NEXT_PUBLIC_PROKERALA_CLIENT_SECRET=
+NEXT_PUBLIC_PROKERALA_API_BASE_URL=
+NEXT_PUBLIC_PROKERALA_TOKEN_ENDPOINT=
+
+# MongoDB
+MONGODB_URI=
+
+# Firebase
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+
+# Stripe (Próximamente)
+STRIPE_SECRET_KEY=
+STRIPE_PUBLISHABLE_KEY=
+
+# Google Calendar (Fase 4)
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+📊 Estado actual del proyecto
+✅ Completado:
+
+Configuración base Next.js + TypeScript
+Integración Prokerala API con precisión máxima
+Sistema de autenticación Firebase
+Base de datos MongoDB con Mongoose
+Carta natal funcionando correctamente (100% precisa)
+Múltiples endpoints de testing funcionando
+Componentes UI reutilizables
+Sistema de rutas API estructurado
+Despliegue en Vercel sin errores
+
+🔄 En progreso:
+
+Corrección carta progresada (ayanamsa=0)
+Implementación prompt IA para agenda
+Eventos astrológicos anuales completos
+
+📅 Pendiente:
+
+Sistema de pagos Stripe
+Integración Google Calendar (funcionalidad estrella)
+Generación PDF alta calidad
+App móvil React Native
+Sistema de notificaciones push
+
+🧪 Archivos de Testing
+El proyecto incluye múltiples archivos y rutas de testing:
+
+/api/prokerala/test - Test general API
+/api/prokerala/direct-test - Test directo
+/api/test-mongodb - Test conexión MongoDB
+/test-natal-chart - Página test carta natal
+/postman-test - Página test Postman
+/test-ui-demo - Demo componentes UI
+
+📝 Notas importantes
+
+Precisión astrológica: El proyecto usa parámetros críticos corregidos (ayanamsa=0 para sistema tropical occidental)
+Testing extensivo: Múltiples rutas y componentes de testing para validar la precisión
+Arquitectura modular: Separación clara entre API, componentes, servicios y utilidades
+Preparado para escalar: Estructura lista para agregar nuevas funcionalidades como pagos y calendar
 ### **Stack Tecnológico Actual**:
 - **Frontend**: Next.js 15.2.3 + TypeScript + Tailwind CSS
 - **Backend**: Next.js API Routes + MongoDB + Mongoose
@@ -380,12 +661,12 @@ GOOGLE_CLIENT_SECRET=tu_google_client_secret
 
 **Email**: wunjocreations@gmail.com  
 **Proyecto**: Tu Vuelta al Sol - Agenda Astrológica Personalizada  
-**Repositorio**: Privado  
+**Repositorio**: Publico hasta  terminar el desarrollo  
 **Despliegue**: Vercel  
 
 ---
 
-**Última actualización**: 27 Mayo 2025  
+**Última actualización**: 14 Junio 2025  
 **Estado del proyecto**: Foundation astrológica completa ✅  
 **Próximo hito**: IA + Eventos anuales (Junio 2025) 🎯  
 **Funcionalidad estrella**: Google Calendar Integration (Agosto 2025) 🚀  
