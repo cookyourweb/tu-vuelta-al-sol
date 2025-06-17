@@ -1,7 +1,6 @@
-// src/components/astrology/NatalChartWheel.tsx - VERSIÓN CORREGIDA Y MEJORADA
 'use client';
 
-import React, { useState,useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // =============================================================================
 // INTERFACES Y TIPOS
@@ -33,8 +32,8 @@ interface NatalChartWheelProps {
   planets: Planet[];
   houses: House[];
   aspects: Aspect[];
-  ascendant?: any;
-  midheaven?: any;
+  ascendant?: { longitude: number };
+  midheaven?: { longitude: number };
   showAspects?: boolean;
   showPlanetNames?: boolean;
   showDegrees?: boolean;
@@ -55,92 +54,33 @@ const ASPECT_DEFINITIONS = {
   quincunx: { angle: 150, orb: 3, color: '#9C27B0', width: 2, style: 'dotted', priority: 6 }
 };
 
-// =============================================================================
-// FUNCIONES DE CÁLCULO DE ASPECTOS
-// =============================================================================
-
-function calculateAngularDifference(angle1: number, angle2: number): number {
-  const diff = Math.abs(angle1 - angle2);
-  return Math.min(diff, 360 - diff);
-}
-
-function findAspectType(separation: number): string | null {
-  for (const [type, config] of Object.entries(ASPECT_DEFINITIONS)) {
-    const exactAngle = config.angle;
-    const orb = config.orb;
-    
-    // Verificar aspecto directo
-    if (Math.abs(separation - exactAngle) <= orb) {
-      return type;
-    }
-    
-    // Verificar aspecto complementario (ej: 180° también es 180° desde el otro lado)
-    if (Math.abs((360 - separation) - exactAngle) <= orb) {
-      return type;
-    }
-  }
-  return null;
-}
-
-function calculateAllAspects(planets: Planet[]): Aspect[] {
-  const calculatedAspects: Aspect[] = [];
-  
-  // Verificar cada par de planetas
-  for (let i = 0; i < planets.length; i++) {
-    for (let j = i + 1; j < planets.length; j++) {
-      const planet1 = planets[i];
-      const planet2 = planets[j];
-      
-      // Calcular separación angular
-      const separation = calculateAngularDifference(planet1.longitude, planet2.longitude);
-      
-      // Buscar tipo de aspecto
-      const aspectType = findAspectType(separation);
-      
-      if (aspectType) {
-        const aspectConfig = ASPECT_DEFINITIONS[aspectType as keyof typeof ASPECT_DEFINITIONS];
-        const orb = Math.abs(separation - aspectConfig.angle);
-        
-        calculatedAspects.push({
-          planet1: planet1.name,
-          planet2: planet2.name,
-          type: aspectType,
-          orb: orb,
-          angle: separation
-        });
-      }
-    }
-  }
-  
-  // Ordenar por prioridad y orbe
-  return calculatedAspects.sort((a, b) => {
-    const configA = ASPECT_DEFINITIONS[a.type as keyof typeof ASPECT_DEFINITIONS];
-    const configB = ASPECT_DEFINITIONS[b.type as keyof typeof ASPECT_DEFINITIONS];
-    
-    if (configA.priority !== configB.priority) {
-      return configA.priority - configB.priority;
-    }
-    
-    return a.orb - b.orb;
-  });
-}
+import { calculateAllAspects } from '@/utils/astrology/aspectCalculations';
 
 // =============================================================================
 // COMPONENTE PRINCIPAL
 // =============================================================================
-const NatalChartWheel: React.FC<NatalChartWheelProps> = (props) => {
-  // 🆕 SOLUCIÓN 1: Renderizar solo en cliente para evitar hidratación
+const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
+  planets = [],
+  houses = [],
+  aspects = [],
+  ascendant,
+  midheaven,
+  showAspects = true,
+  showPlanetNames = true,
+  showDegrees = true,
+  width = 650,
+  height = 650
+}) => {
   const [isClient, setIsClient] = useState(false);
-  
+
   useEffect(() => {
     setIsClient(true);
   }, []);
-  
-  // Mientras no esté en el cliente, mostrar placeholder
+
   if (!isClient) {
     return (
-      <div 
-        style={{ width: props.width || 650, height: props.height || 650 }}
+      <div
+        style={{ width: width, height: height }}
         className="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 rounded-2xl shadow-2xl border border-purple-200/50 animate-pulse flex items-center justify-center"
       >
         <div className="text-purple-400">
@@ -152,64 +92,372 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = (props) => {
       </div>
     );
   }
-  
-  // 🆕 SOLUCIÓN 2: Convertir números a string con precisión fija
-  // Esto asegura que servidor y cliente generen exactamente el mismo string
+
   const toFixedString = (value: number, decimals: number = 6): string => {
     return value.toFixed(decimals);
   };
-  
-  // Definir centerX y centerY basados en el tamaño del SVG
-  const svgWidth = props.width || 650;
-  const svgHeight = props.height || 650;
+
+  const svgWidth = width;
+  const svgHeight = height;
   const centerX = svgWidth / 2;
   const centerY = svgHeight / 2;
+  const outerRadius = Math.min(centerX, centerY) * 0.9;
+  const innerRadius = outerRadius * 0.5;
+  const middleRadius = (outerRadius + innerRadius) / 2;
 
-  // Modificar getPositionFromLongitude para devolver strings
   const getPositionFromLongitude = (longitude: number, radius: number) => {
-    if (longitude === null || longitude === undefined || 
-        typeof longitude !== 'number' || isNaN(longitude) || !isFinite(longitude)) {
+    if (
+      longitude === null ||
+      longitude === undefined ||
+      typeof longitude !== 'number' ||
+      isNaN(longitude) ||
+      !isFinite(longitude)
+    ) {
       return { x: toFixedString(centerX), y: toFixedString(centerY) };
     }
 
     const adjustedAngle = (longitude + 270) % 360;
     const angleInRadians = (adjustedAngle * Math.PI) / 180;
-    
+
     const x = centerX + radius * Math.cos(angleInRadians);
     const y = centerY + radius * Math.sin(angleInRadians);
-    
+
     if (isNaN(x) || isNaN(y) || !isFinite(x) || !isFinite(y)) {
       return { x: toFixedString(centerX), y: toFixedString(centerY) };
     }
-    
-    // Devolver como strings con precisión fija
-    return { 
-      x: toFixedString(x), 
-      y: toFixedString(y) 
+
+    return {
+      x: toFixedString(x),
+      y: toFixedString(y)
     };
   };
-  
-  // ... resto del componente igual, pero usando los valores string en el SVG
-};
 
-// 🆕 SOLUCIÓN 3 (ALTERNATIVA): Wrapper que solo renderiza en cliente
-export const ClientOnlyNatalChartWheel: React.FC<NatalChartWheelProps> = (props) => {
-  const [mounted, setMounted] = useState(false);
-  
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-  
-  if (!mounted) {
+  const renderAspectLines = () => {
+    if (!showAspects || !aspects || aspects.length === 0) return null;
+
+    return aspects.map((aspect: Aspect, index: number) => {
+      const planet1 = planets.find((p: Planet) => p.name === aspect.planet1);
+      const planet2 = planets.find((p: Planet) => p.name === aspect.planet2);
+
+      if (!planet1 || !planet2) return null;
+
+      const pos1 = getPositionFromLongitude(planet1.longitude, innerRadius * 0.85);
+      const pos2 = getPositionFromLongitude(planet2.longitude, innerRadius * 0.85);
+
+      const aspectConfig = ASPECT_DEFINITIONS[aspect.type as keyof typeof ASPECT_DEFINITIONS];
+
+      if (!aspectConfig) return null;
+
+      return (
+        <line
+          key={`aspect-line-${index}`}
+          x1={pos1.x}
+          y1={pos1.y}
+          x2={pos2.x}
+          y2={pos2.y}
+          stroke={aspectConfig.color}
+          strokeWidth={aspectConfig.width}
+          strokeDasharray={aspectConfig.style === 'dashed' ? '6 4' : aspectConfig.style === 'dotted' ? '2 4' : '0'}
+          opacity={0.7}
+        />
+      );
+    });
+  };
+
+  const renderHouseLines = () => {
+    if (!houses || houses.length === 0) return null;
+
+    return houses.map((house: House, index: number) => {
+      const position = getPositionFromLongitude(house.longitude, outerRadius);
+
+      return React.createElement(
+        'line',
+        {
+          key: `house-line-${index}`,
+          x1: toFixedString(centerX),
+          y1: toFixedString(centerY),
+          x2: position.x,
+          y2: position.y,
+          stroke: '#999',
+          strokeWidth: '1',
+          strokeDasharray: '4 2'
+        }
+      );
+    });
+  };
+
+  const renderHouseNumbers = () => {
+    if (!houses || houses.length === 0) return null;
+
+    return houses.map((house: House, index: number) => {
+      const nextHouse = houses[(index + 1) % houses.length];
+      const nextLongitude = nextHouse ? nextHouse.longitude : house.longitude + 30;
+      const midAngle = (house.longitude + nextLongitude) / 2;
+      const position = getPositionFromLongitude(midAngle, middleRadius * 0.82);
+
+      return (
+        <text
+          key={`house-number-${index}`}
+          x={position.x}
+          y={position.y}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontSize={12}
+          fill="#666"
+          fontWeight="bold"
+        >
+          {house.number}
+        </text>
+      );
+    });
+  };
+
+  const zodiacSymbols = [
+    { symbol: '♈', name: 'Aries', longitude: 0 },
+    { symbol: '♉', name: 'Tauro', longitude: 30 },
+    { symbol: '♊', name: 'Géminis', longitude: 60 },
+    { symbol: '♋', name: 'Cáncer', longitude: 90 },
+    { symbol: '♌', name: 'Leo', longitude: 120 },
+    { symbol: '♍', name: 'Virgo', longitude: 150 },
+    { symbol: '♎', name: 'Libra', longitude: 180 },
+    { symbol: '♏', name: 'Escorpio', longitude: 210 },
+    { symbol: '♐', name: 'Sagitario', longitude: 240 },
+    { symbol: '♑', name: 'Capricornio', longitude: 270 },
+    { symbol: '♒', name: 'Acuario', longitude: 300 },
+    { symbol: '♓', name: 'Piscis', longitude: 330 }
+  ];
+
+  const elementColors: Record<string, string> = {
+    'Aries': '#FF5733', 'Leo': '#FF5733', 'Sagitario': '#FF5733',
+    'Tauro': '#33A02C', 'Virgo': '#33A02C', 'Capricornio': '#33A02C',
+    'Géminis': '#6BA9FF', 'Libra': '#6BA9FF', 'Acuario': '#6BA9FF',
+    'Cáncer': '#B19CD9', 'Escorpio': '#B19CD9', 'Piscis': '#B19CD9'
+  };
+
+  const renderZodiacSigns = () => {
+    return zodiacSymbols.map((zodiacSign: { symbol: string; name: string; longitude: number }, index: number) => {
+      const position = getPositionFromLongitude(zodiacSign.longitude + 15, outerRadius * 0.95);
+      const color = elementColors[zodiacSign.name] || '#666';
+
+      return (
+        <text
+          key={`zodiac-${index}`}
+          x={position.x}
+          y={position.y}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontSize={16}
+          fill={color}
+          fontWeight="bold"
+        >
+          {zodiacSign.symbol}
+        </text>
+      );
+    });
+  };
+
+  const planetSymbols: Record<string, string> = {
+    'Sol': '☉',
+    'Luna': '☽',
+    'Mercurio': '☿',
+    'Venus': '♀',
+    'Marte': '♂',
+    'Júpiter': '♃',
+    'Saturno': '♄',
+    'Urano': '♅',
+    'Neptuno': '♆',
+    'Plutón': '♇',
+    'Quirón': '⚷',
+    'Nodo Norte': '☊',
+    'Nodo Sur': '☋',
+    'Lilith': '⚸'
+  };
+
+  const renderPlanets = () => {
+    return planets.map((planet: Planet, index: number) => {
+      const position = getPositionFromLongitude(planet.longitude, innerRadius * 0.85);
+      const symbol = planetSymbols[planet.name] || planet.name.charAt(0);
+
+      return (
+        <g key={`planet-${index}`}>
+          <circle
+            cx={position.x}
+            cy={position.y}
+            r="12"
+            fill="white"
+            stroke="#333"
+            strokeWidth="1"
+          />
+          <text
+            x={position.x}
+            y={position.y}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontSize="14"
+            fill="#333"
+            fontWeight="bold"
+          >
+            {symbol}
+          </text>
+        </g>
+      );
+    });
+  };
+
+  const renderAscendant = () => {
+    if (!ascendant) return null;
+
+    const position = getPositionFromLongitude(ascendant.longitude, outerRadius * 1.05);
+
     return (
-      <div 
-        className="animate-pulse bg-gray-200 rounded-2xl"
-        style={{ width: props.width || 650, height: props.height || 650 }}
-      />
+      <g>
+        <text
+          x={position.x}
+          y={position.y}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontSize={14}
+          fill="#FF6B35"
+          fontWeight="bold"
+        >
+          AC
+        </text>
+      </g>
     );
-  }
-  
-  return <NatalChartWheel {...props} />;
+  };
+
+  const renderMidheaven = () => {
+    if (!midheaven) return null;
+
+    const position = getPositionFromLongitude(midheaven.longitude, outerRadius * 1.05);
+
+    return (
+      <g>
+        <text
+          x={position.x}
+          y={position.y}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontSize={14}
+          fill="#2E8B57"
+          fontWeight="bold"
+        >
+          MC
+        </text>
+      </g>
+    );
+  };
+
+  return (
+    <div className="flex flex-col items-center">
+      <svg width={svgWidth} height={svgHeight} className="border border-gray-200 rounded-lg shadow-lg">
+        {/* Círculo exterior (zodíaco) */}
+        <circle
+          cx={toFixedString(centerX)}
+          cy={toFixedString(centerY)}
+          r={toFixedString(outerRadius)}
+          fill="none"
+          stroke="#333"
+          strokeWidth="2"
+        />
+
+        {/* Círculo interior (planetas) */}
+        <circle
+          cx={toFixedString(centerX)}
+          cy={toFixedString(centerY)}
+          r={toFixedString(innerRadius)}
+          fill="none"
+          stroke="#666"
+          strokeWidth="1"
+        />
+
+        {/* Círculo medio (casas) */}
+        <circle
+          cx={toFixedString(centerX)}
+          cy={toFixedString(centerY)}
+          r={toFixedString(middleRadius)}
+          fill="none"
+          stroke="#999"
+          strokeWidth="1"
+          strokeDasharray="2 2"
+        />
+
+        {/* Líneas de las casas */}
+        {renderHouseLines()}
+
+        {/* Líneas de división del zodíaco (cada 30 grados) */}
+        {zodiacSymbols.map((_, index) => {
+          const startPos = getPositionFromLongitude(index * 30, innerRadius);
+          const endPos = getPositionFromLongitude(index * 30, outerRadius);
+
+          return (
+            <line
+              key={`zodiac-line-${index}`}
+              x1={startPos.x}
+              y1={startPos.y}
+              x2={endPos.x}
+              y2={endPos.y}
+              stroke="#ddd"
+              strokeWidth="1"
+            />
+          );
+        })}
+
+        {/* Líneas de aspectos */}
+        {renderAspectLines()}
+
+        {/* Símbolos del zodíaco */}
+        {renderZodiacSigns()}
+
+        {/* Números de las casas */}
+        {renderHouseNumbers()}
+
+        {/* Planetas */}
+        {renderPlanets()}
+
+        {/* Ascendente */}
+        {renderAscendant()}
+
+        {/* Medio Cielo */}
+        {renderMidheaven()}
+
+        {/* Punto central */}
+        <circle
+          cx={toFixedString(centerX)}
+          cy={toFixedString(centerY)}
+          r="3"
+          fill="#333"
+        />
+      </svg>
+
+      {/* Leyenda */}
+      <div className="mt-4 p-4 bg-gray-50 rounded-lg max-w-md">
+        <h3 className="font-semibold mb-2">Leyenda</h3>
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <div className="flex items-center">
+            <span className="w-4 h-4 bg-red-500 rounded mr-2"></span>
+            <span>Fuego</span>
+          </div>
+          <div className="flex items-center">
+            <span className="w-4 h-4 bg-green-500 rounded mr-2"></span>
+            <span>Tierra</span>
+          </div>
+          <div className="flex items-center">
+            <span className="w-4 h-4 bg-blue-400 rounded mr-2"></span>
+            <span>Aire</span>
+          </div>
+          <div className="flex items-center">
+            <span className="w-4 h-4 bg-purple-400 rounded mr-2"></span>
+            <span>Agua</span>
+          </div>
+        </div>
+        <div className="mt-2 text-xs text-gray-600">
+          <p><strong>AC:</strong> Ascendente</p>
+          <p><strong>MC:</strong> Medio Cielo</p>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default NatalChartWheel;

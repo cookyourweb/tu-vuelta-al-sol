@@ -169,15 +169,22 @@ export default function ProgressedChartPage() {
 
   const checkExistingChart = async () => {
     try {
-      const response = await fetch(`/api/charts/progressed?userId=${user?.uid}`);
+      // Use POST to check existing chart with userId in body
+      const response = await fetch('/api/charts/progressed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user?.uid, checkOnly: true }),
+      });
       const data = await response.json();
-      
-      if (data.success && data.data.hasChart) {
+
+      console.log('checkExistingChart response:', data);
+
+      if (data && data.success && data.data && data.data.hasChart) {
         setProgressedData(data.data);
         setHasExistingChart(true);
       } else {
         setHasExistingChart(false);
-        if (data.data.period) {
+        if (data && data.data && data.data.period) {
           setProgressedData({ 
             period: data.data.period, 
             chart: null, 
@@ -233,6 +240,30 @@ export default function ProgressedChartPage() {
     
     setIsLoading(true);
     setError(null);
+
+    // Fetch birth data before generating progressed chart
+    let birthData = null;
+    try {
+      const birthDataResponse = await fetch(`/api/birth-data?userId=${user.uid}`);
+      if (birthDataResponse.ok) {
+        const birthDataJson = await birthDataResponse.json();
+        birthData = birthDataJson.data;
+      } else {
+        setError('No se pudieron obtener los datos de nacimiento');
+        setIsLoading(false);
+        return;
+      }
+    } catch (err) {
+      setError('Error al obtener datos de nacimiento');
+      setIsLoading(false);
+      return;
+    }
+    
+    if (!birthData || !birthData.birthDate || !birthData.latitude || !birthData.longitude || !birthData.timezone) {
+      setError('Datos de nacimiento incompletos para generar carta progresada');
+      setIsLoading(false);
+      return;
+    }
     
     try {
       const response = await fetch('/api/charts/progressed', {
@@ -242,7 +273,12 @@ export default function ProgressedChartPage() {
         },
         body: JSON.stringify({
           userId: user.uid,
-          regenerate
+          regenerate,
+          birthDate: birthData.birthDate,
+          birthTime: birthData.birthTime || '12:00:00',
+          latitude: parseFloat(birthData.latitude),
+          longitude: parseFloat(birthData.longitude),
+          timezone: birthData.timezone
         }),
       });
       

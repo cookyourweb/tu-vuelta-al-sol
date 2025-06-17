@@ -25,6 +25,8 @@ import {
   Zap
 } from 'lucide-react';
 
+import { calculateAllAspects } from '@/utils/astrology/aspectCalculations';
+
 export default function NatalChartPage() {
   const [chartData, setChartData] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
@@ -100,6 +102,7 @@ export default function NatalChartPage() {
         const data = await response.json();
         setDebugInfo('✅ ¡Carta natal generada exitosamente!');
         
+        console.log('Carta natal API data:', data.natalChart);
         setChartData(data.natalChart);
         
       } catch (err) {
@@ -113,6 +116,15 @@ export default function NatalChartPage() {
     
     fetchChartData();
   }, [user, router]);
+
+  // Calculate aspects client-side if API aspects missing
+  const processedKeyAspects = chartData && chartData.keyAspects && chartData.keyAspects.length > 0
+    ? chartData.keyAspects
+    : chartData && chartData.planets
+      ? calculateAllAspects(chartData.planets)
+      : [];
+
+  // Pass processedKeyAspects to ChartDisplay instead of chartData.keyAspects
 
   // 🎨 COMPONENTE DE CARGA MEJORADO
   if (loading) {
