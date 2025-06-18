@@ -18,7 +18,7 @@ export default function AgendaDebugTest() {
     { name: 'Test Exacto Postman', endpoint: '/api/astrology/test-postman', status: 'pending' },
     { name: 'Carta Natal Corregida', endpoint: '/api/prokerala/chart', status: 'pending' },
     { name: 'Carta Progresada', endpoint: '/api/charts/progressed', status: 'pending' },
-    { name: 'Agenda Completa', endpoint: '/api/astrology/agenda-corrected', status: 'pending' }
+    { name: 'Agenda Completa', endpoint: '/api/astrology/agenda-final', status: 'pending' }
   ]);
 
   const [isRunning, setIsRunning] = useState(false);
