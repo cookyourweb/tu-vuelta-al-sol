@@ -49,15 +49,16 @@ const TestNatalChartPage: React.FC = () => {
 
   let aspects = calculateAllAspects(REFERENCE_CHART_DATA.planets);
 
-  // Normalize aspect types to lowercase to match NatalChartWheel expectations
-  aspects = aspects.map(a => ({
-    planet1: a.planet1,
-    planet2: a.planet2,
-    type: a.type.toLowerCase() as 'conjunction' | 'opposition' | 'trine' | 'square' | 'sextile',
-    orb: a.orb,
-    exact: a.exact,
-    angle: a.angle
-  }));
+  // Remove normalization to lowercase to fix type error
+  // aspects = aspects.map(a => ({
+  //   planet1: a.planet1,
+  //   planet2: a.planet2,
+  //   type: a.type.toLowerCase() as 'conjunction' | 'opposition' | 'trine' | 'square' | 'sextile',
+  //   orb: a.orb,
+  //   exact: a.exact,
+  //   angle: a.angle
+  // }));
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-8">
