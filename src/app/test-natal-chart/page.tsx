@@ -3,6 +3,7 @@
 
 import React, { useState } from 'react';
 import NatalChartWheel from '../../components/astrology/NatalChartWheel';
+import NatalChartTest from '../../components/test/NatalChartTest';
 
 // Static test data
 const REFERENCE_CHART_DATA = {
@@ -64,18 +65,24 @@ const TestNatalChartPage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-8">
       <h1 className="text-4xl font-bold mb-6 text-center">Test Carta Natal - Wheel Chart con Líneas y Aspectos</h1>
 
-      <NatalChartWheel
-        planets={REFERENCE_CHART_DATA.planets}
-        houses={REFERENCE_CHART_DATA.houses}
-        aspects={aspects}
-        ascendant={REFERENCE_CHART_DATA.ascendant}
-        midheaven={REFERENCE_CHART_DATA.midheaven}
-        showAspects={true}
-        showPlanetNames={true}
-        showDegrees={true}
-        width={700}
-        height={700}
-      />
+      {/* Test interactivo con validación automática */}
+      <NatalChartTest />
+
+      {/* Rueda de la carta natal con datos estáticos */}
+      <div className="mt-12">
+        <NatalChartWheel
+          planets={REFERENCE_CHART_DATA.planets}
+          houses={REFERENCE_CHART_DATA.houses}
+          aspects={aspects}
+          ascendant={REFERENCE_CHART_DATA.ascendant}
+          midheaven={REFERENCE_CHART_DATA.midheaven}
+          showAspects={true}
+          showPlanetNames={true}
+          showDegrees={true}
+          width={700}
+          height={700}
+        />
+      </div>
 
       {showDebugInfo && (
         <div className="mt-6 p-4 bg-yellow-50 border border-yellow-300 rounded">
