@@ -200,6 +200,10 @@ export interface PlanetPosition {
 }
 
 export interface CalculatedAspect {
+  id: string;
+  visual: {};
+  separating: boolean;
+  applying: boolean;
   planet1: string;
   planet2: string;
   aspect_type: AspectType;
@@ -328,6 +332,10 @@ export function findAspectBetweenPlanets(
       const orbPercentage = actualOrb / maxOrb;
       
       bestAspect = {
+        id: `${planet1.name}-${planet2.name}-${aspectDef.name}`,
+        visual: {},
+        separating: !isApplying,
+        applying: isApplying,
         planet1: planet1.name,
         planet2: planet2.name,
         aspect_type: aspectDef.name,

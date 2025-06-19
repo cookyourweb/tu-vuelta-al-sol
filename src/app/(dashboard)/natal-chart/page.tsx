@@ -242,14 +242,19 @@ export default function NatalChartPage() {
       {/* Carta natal */}
       {chartData && (
         <div className="flex justify-center">
-          <ChartDisplay
+        <ChartDisplay 
             houses={chartData.houses || []}
             planets={chartData.planets || []}
-            elementDistribution={chartData.elementDistribution || {}}
-            modalityDistribution={chartData.modalityDistribution || {}}
+            elementDistribution={chartData.elementDistribution || { fire: 0, earth: 0, air: 0, water: 0 }}
+            modalityDistribution={chartData.modalityDistribution || { cardinal: 0, fixed: 0, mutable: 0 }}
             keyAspects={chartData.keyAspects || []}
-            ascendant={chartData.ascendant}
-            midheaven={chartData.midheaven}
+            ascendant={chartData.ascendant}      // ✅ AÑADIDO
+            midheaven={chartData.midheaven}      // ✅ AÑADIDO  
+            showVisualAspects={true}             // ✅ CLAVE: Habilitar aspectos
+            wheelConfig={{                       // ✅ OPCIONAL: Tamaño
+              width: 500,
+              height: 500
+            }}
           />
         </div>
       )}

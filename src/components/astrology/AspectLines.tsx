@@ -1,426 +1,677 @@
-// src/components/astrology/AspectLines.tsx
+
+/**
+ * Componente mejorado para renderizar líneas de aspectos astrológicos con animaciones
+ * Archivo: components/astrology/AspectLines.tsx
+ */
+
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+
+import { AspectVisualizationConfig, ExtendedPlanet, Planet, PlanetaryAspect } from '../../../types/astrology';
 
 // =============================================================================
-// INTERFACES Y TIPOS (Compatible con NatalChartWheel)
+// TIPOS MEJORADOS
 // =============================================================================
-
-export interface AspectLineProps {
-  planet1: string;
-  planet2: string;
-  type: 'conjunction' | 'opposition' | 'trine' | 'square' | 'sextile' | 'quincunx';
-  orb: number;
-  exact_angle: number;
-  strength?: 'muy_fuerte' | 'fuerte' | 'moderado' | 'debil';
-}
-
-export interface PlanetPosition {
-  name: string;
-  x: number;
-  y: number;
-  longitude: number;
-}
 
 export interface AspectLinesProps {
-  aspects: AspectLineProps[];
-  planetPositions: PlanetPosition[];
+  aspects: PlanetaryAspect[];
+  planetPositions: Array<{
+    planet: Planet | ExtendedPlanet;
+    degree: number;
+    x: number;
+    y: number;
+  }>;
   svgConfig: {
     centerX: number;
     centerY: number;
     radius: number;
     size: number;
   };
+  config?: Partial<AspectVisualizationConfig>;
   filters?: {
     showMajorAspects?: boolean;
     showMinorAspects?: boolean;
     maxOrb?: number;
-    selectedPlanets?: string[];
+    selectedPlanets?: (Planet | ExtendedPlanet)[];
   };
-  onAspectHover?: (aspect: AspectLineProps | null) => void;
-  hoveredAspect?: string | null;
+  onAspectClick?: (aspect: PlanetaryAspect) => void;
+  onAspectHover?: (aspect: PlanetaryAspect | null) => void;
+  className?: string;
+  // ✨ NUEVAS PROPS
+  showAnimations?: boolean;
+  highlightStrongest?: boolean;
+  showTooltips?: boolean;
 }
 
 // =============================================================================
-// CONFIGURACIÓN DE ASPECTOS
+// CONFIGURACIÓN MEJORADA
 // =============================================================================
 
-const ASPECT_STYLES: Record<string, {
-  color: string;
-  width: number;
-  opacity: number;
-  dashArray?: string;
-  nature: 'harmonico' | 'tensional' | 'neutro';
-}> = {
-  conjunction: {
-    color: '#FFD700',
-    width: 3,
-    opacity: 0.9,
-    nature: 'neutro'
-  },
-  opposition: {
-    color: '#FF4444',
-    width: 2.5,
-    opacity: 0.8,
-    nature: 'tensional'
-  },
-  trine: {
-    color: '#4CAF50',
-    width: 2,
-    opacity: 0.7,
-    nature: 'harmonico'
-  },
-  square: {
-    color: '#FF9800',
-    width: 2,
-    opacity: 0.7,
-    nature: 'tensional'
-  },
-  sextile: {
-    color: '#2196F3',
-    width: 1.5,
-    opacity: 0.6,
-    dashArray: '5,5',
-    nature: 'harmonico'
-  },
-  quincunx: {
-    color: '#9C27B0',
-    width: 1,
-    opacity: 0.5,
-    dashArray: '2,2',
-    nature: 'tensional'
-  }
+const DEFAULT_CONFIG: AspectVisualizationConfig = {
+  show_major_aspects: true,
+  show_minor_aspects: true,
+  show_aspect_symbols: false,
+  max_orb_display: 8,
+  opacity_based_on_strength: true,
+  color_coding: 'by_nature',
+  line_style_coding: true
 };
 
-const MAJOR_ASPECTS = ['conjunction', 'opposition', 'trine', 'square', 'sextile'];
-const MINOR_ASPECTS = ['quincunx', 'semisextile', 'sesquiquadrate', 'semisquare'];
+const DEFAULT_FILTERS = {
+  showMajorAspects: true,
+  showMinorAspects: false,
+  maxOrb: 8,
+  selectedPlanets: []
+};
+
+// Colores mejorados para los aspectos
+const ASPECT_COLORS = {
+  // Aspectos armónicos (verdes/azules)
+  conjunction: '#FFD700', // Oro - neutral pero poderoso
+  trine: '#00FF7F',       // Verde brillante - muy armónico
+  sextile: '#87CEEB',     // Azul cielo - armónico suave
+  semisextile: '#98FB98', // Verde pálido - armónico menor
+  quintile: '#20B2AA',    // Turquesa - creativo
+  biquintile: '#48D1CC',  // Turquesa medio - creativo
+  
+  // Aspectos tensionales (rojos/naranjas)
+  opposition: '#FF4500',     // Rojo-naranja - tensión fuerte
+  square: '#DC143C',         // Rojo carmesí - tensión dinámica
+  quincunx: '#FF6347',       // Tomate - tensión adaptable
+  sesquiquadrate: '#B22222', // Rojo ladrillo - tensión menor
+  semisquare: '#CD5C5C'      // Rojo indio - tensión menor
+};
 
 // =============================================================================
-// COMPONENTE PRINCIPAL
+// COMPONENTE PRINCIPAL MEJORADO
 // =============================================================================
 
 export const AspectLines: React.FC<AspectLinesProps> = ({
   aspects,
   planetPositions,
   svgConfig,
+  config = {},
   filters = {},
+  onAspectClick,
   onAspectHover,
-  hoveredAspect
+  className = '',
+  showAnimations = true,
+  highlightStrongest = true,
+  showTooltips = true
 }) => {
-  const {
-    showMajorAspects = true,
-    showMinorAspects = false,
-    maxOrb = 8,
-    selectedPlanets = []
-  } = filters;
+  // Estados para animaciones y interactividad
+  const [animatedAspects, setAnimatedAspects] = useState<Set<string>>(new Set());
+  const [hoveredAspect, setHoveredAspect] = useState<string | null>(null);
+  const [tooltipData, setTooltipData] = useState<{
+    aspect: PlanetaryAspect;
+    x: number;
+    y: number;
+  } | null>(null);
 
-  // Filtrar aspectos según configuración
+  // Combinar configuración
+  const finalConfig = { ...DEFAULT_CONFIG, ...config };
+  const finalFilters = { ...DEFAULT_FILTERS, ...filters };
+
+  // Filtrar aspectos
   const filteredAspects = React.useMemo(() => {
-    return aspects.filter(aspect => {
-      // Filtro por orbe máximo
-      if (Math.abs(aspect.orb) > maxOrb) return false;
+    let filtered = aspects;
+    
+    if (!finalFilters.showMajorAspects || !finalFilters.showMinorAspects) {
+      const majorAspects = ['conjunction', 'opposition', 'trine', 'square', 'sextile'];
+      filtered = filtered.filter(aspect => {
+        const isMajor = majorAspects.includes(aspect.aspect_type);
+        return (isMajor && finalFilters.showMajorAspects) || 
+               (!isMajor && finalFilters.showMinorAspects);
+      });
+    }
+    
+    if (finalFilters.maxOrb) {
+      filtered = filtered.filter(aspect => aspect.orb <= finalFilters.maxOrb);
+    }
+    
+    if (finalFilters.selectedPlanets && finalFilters.selectedPlanets.length > 0) {
+      filtered = filtered.filter(aspect => 
+        finalFilters.selectedPlanets!.includes(aspect.planet1) ||
+        finalFilters.selectedPlanets!.includes(aspect.planet2)
+      );
+    }
+    
+    return filtered;
+  }, [aspects, finalFilters]);
+
+  // Calcular posiciones de líneas
+  const linePositions = React.useMemo(() => {
+    try {
+      return calculateAspectLinePositions(filteredAspects, planetPositions, {
+        centerX: svgConfig.centerX,
+        centerY: svgConfig.centerY,
+        radius: svgConfig.radius
+      });
+    } catch (error) {
+      console.error('Error calculando posiciones de aspectos:', error);
+      return [];
+    }
+  }, [filteredAspects, planetPositions, svgConfig]);
+
+  // Encontrar el aspecto más fuerte
+  const strongestAspect = React.useMemo(() => {
+    if (!highlightStrongest || filteredAspects.length === 0) return null;
+    
+    return filteredAspects.reduce((strongest, current) => {
+      const strengthValues = { muy_fuerte: 4, fuerte: 3, moderado: 2, debil: 1 };
+      const currentStrength = strengthValues[current.strength] || 1;
+      const strongestStrength = strengthValues[strongest.strength] || 1;
       
-      // Filtro por tipo de aspecto
-      const isMajor = MAJOR_ASPECTS.includes(aspect.type);
-      const isMinor = MINOR_ASPECTS.includes(aspect.type);
-      
-      if (!showMajorAspects && isMajor) return false;
-      if (!showMinorAspects && isMinor) return false;
-      
-      // Filtro por planetas seleccionados
-      if (selectedPlanets.length > 0) {
-        const hasSelectedPlanet = selectedPlanets.includes(aspect.planet1) || 
-                                 selectedPlanets.includes(aspect.planet2);
-        if (!hasSelectedPlanet) return false;
-      }
-      
-      return true;
+      return currentStrength > strongestStrength ? current : strongest;
     });
-  }, [aspects, showMajorAspects, showMinorAspects, maxOrb, selectedPlanets]);
+  }, [filteredAspects, highlightStrongest]);
 
-  // Encontrar posiciones de planetas
-  const getPlanetPosition = (planetName: string): PlanetPosition | null => {
-    return planetPositions.find(p => p.name === planetName) || null;
+  // Animación de entrada escalonada
+  useEffect(() => {
+    if (!showAnimations) return;
+    
+    const timer = setTimeout(() => {
+      filteredAspects.forEach((aspect, index) => {
+        setTimeout(() => {
+          setAnimatedAspects(prev => new Set([...prev, aspect.id]));
+        }, index * 100);
+      });
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [filteredAspects, showAnimations]);
+
+  // Obtener color del aspecto
+  const getAspectColor = (aspect: PlanetaryAspect, isStrongest: boolean = false): string => {
+    if (isStrongest) return '#FFD700'; // Oro para el más fuerte
+    return ASPECT_COLORS[aspect.aspect_type as keyof typeof ASPECT_COLORS] || '#888888';
   };
 
-  // Calcular intensidad basada en orbe
-  const calculateIntensity = (orb: number, maxOrb: number): number => {
-    return Math.max(0.3, 1 - (Math.abs(orb) / maxOrb));
+  // Obtener patrón de línea
+  const getStrokeDashArray = (style: string, width: number): string => {
+    switch (style) {
+      case 'dashed': return `${width * 4} ${width * 2}`;
+      case 'dotted': return `${width} ${width}`;
+      default: return 'none';
+    }
   };
 
-  // ID único para cada aspecto
-  const getAspectId = (aspect: AspectLineProps): string => {
-    return `${aspect.planet1}-${aspect.planet2}-${aspect.type}`;
+  // Manejar eventos del mouse
+  const handleLineClick = (aspect: PlanetaryAspect, event: React.MouseEvent) => {
+    event.stopPropagation();
+    onAspectClick?.(aspect);
   };
+
+  const handleLineHover = (aspect: PlanetaryAspect | null, event?: React.MouseEvent) => {
+    setHoveredAspect(aspect?.id || null);
+    onAspectHover?.(aspect);
+    
+    if (showTooltips && aspect && event) {
+      const rect = (event.target as SVGElement).closest('svg')?.getBoundingClientRect();
+      if (rect) {
+        setTooltipData({
+          aspect,
+          x: event.clientX - rect.left,
+          y: event.clientY - rect.top - 10
+        });
+      }
+    } else {
+      setTooltipData(null);
+    }
+  };
+
+  if (linePositions.length === 0) return null;
 
   return (
-    <g className="aspect-lines">
-      {/* Definir filtros para efectos de brillo */}
+    <g className={`aspect-lines ${className}`}>
+      {/* Definir filtros y gradientes mejorados */}
       <defs>
-        <filter id="aspectGlow" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-          <feMerge> 
-            <feMergeNode in="coloredBlur"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
-        </filter>
-        
-        <filter id="aspectGlowStrong" x="-50%" y="-50%" width="200%" height="200%">
+        {/* Filtro de brillo para aspectos fuertes */}
+        <filter id="aspect-glow" x="-50%" y="-50%" width="200%" height="200%">
           <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
           <feMerge> 
             <feMergeNode in="coloredBlur"/>
             <feMergeNode in="SourceGraphic"/>
           </feMerge>
         </filter>
+        
+        {/* Filtro de pulso para el aspecto más fuerte */}
+        <filter id="aspect-pulse" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+          <feOffset dx="0" dy="0" result="offset"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="offset"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        
+        {/* Gradientes para líneas especiales */}
+        <linearGradient id="strongest-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#FFD700" stopOpacity="0.8">
+            <animate attributeName="stop-opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/>
+          </stop>
+          <stop offset="50%" stopColor="#FFA500" stopOpacity="1"/>
+          <stop offset="100%" stopColor="#FFD700" stopOpacity="0.8">
+            <animate attributeName="stop-opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/>
+          </stop>
+        </linearGradient>
       </defs>
 
-      {filteredAspects.map((aspect) => {
-        const pos1 = getPlanetPosition(aspect.planet1);
-        const pos2 = getPlanetPosition(aspect.planet2);
-        
-        if (!pos1 || !pos2) return null;
-
-        const style = ASPECT_STYLES[aspect.type];
-        if (!style) return null;
-
-        const aspectId = getAspectId(aspect);
-        const isHovered = hoveredAspect === aspectId;
-        const intensity = calculateIntensity(aspect.orb, maxOrb);
-        
-        // Calcular propiedades visuales
-        const strokeWidth = style.width * (isHovered ? 1.5 : 1);
-        const opacity = style.opacity * intensity * (isHovered ? 1.2 : 1);
-        const filter = isHovered ? 'url(#aspectGlowStrong)' : 
-                      intensity > 0.7 ? 'url(#aspectGlow)' : '';
-
-        return (
-          <g key={aspectId} className="aspect-line-group">
-            {/* Línea principal del aspecto */}
-            <line
-              x1={pos1.x}
-              y1={pos1.y}
-              x2={pos2.x}
-              y2={pos2.y}
-              stroke={style.color}
-              strokeWidth={strokeWidth}
-              strokeOpacity={opacity}
-              strokeDasharray={style.dashArray}
-              filter={filter}
-              style={{
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                pointerEvents: 'stroke'
-              }}
-              onMouseEnter={() => onAspectHover?.(aspect)}
-              onMouseLeave={() => onAspectHover?.(null)}
-            />
-            
-            {/* Línea de fondo para mejor interacción */}
-            <line
-              x1={pos1.x}
-              y1={pos1.y}
-              x2={pos2.x}
-              y2={pos2.y}
-              stroke="transparent"
-              strokeWidth={Math.max(8, strokeWidth * 2)}
-              style={{ cursor: 'pointer' }}
-              onMouseEnter={() => onAspectHover?.(aspect)}
-              onMouseLeave={() => onAspectHover?.(null)}
-            />
-            
-            {/* Punto medio para información adicional */}
-            {isHovered && (
-              <circle
-                cx={(pos1.x + pos2.x) / 2}
-                cy={(pos1.y + pos2.y) / 2}
-                r="3"
-                fill={style.color}
-                opacity="0.8"
+      {/* Renderizar líneas de aspectos */}
+      {linePositions
+        .filter((line): line is NonNullable<typeof line> => line !== null)
+        .sort((a, b) => a.zIndex - b.zIndex)
+        .map((line, index) => {
+          const aspect = filteredAspects.find(a => a.id === line.id);
+          if (!aspect) return null;
+          
+          const isStrongest = strongestAspect?.id === aspect.id;
+          const isHovered = hoveredAspect === aspect.id;
+          const isAnimated = animatedAspects.has(aspect.id);
+          const color = getAspectColor(aspect, isStrongest);
+          
+          return (
+            <g key={line.id}>
+              {/* Sombra/resplandor de fondo */}
+              {(isStrongest || isHovered) && (
+                <line
+                  x1={line.x1}
+                  y1={line.y1}
+                  x2={line.x2}
+                  y2={line.y2}
+                  stroke={color}
+                  strokeWidth={Math.max(2, line.width + 2)}
+                  strokeDasharray={getStrokeDashArray(line.style, line.width)}
+                  opacity={0.3}
+                  fill="none"
+                  filter={isStrongest ? "url(#aspect-pulse)" : "url(#aspect-glow)"}
+                />
+              )}
+              
+              {/* Línea principal */}
+              <line
+                x1={line.x1}
+                y1={line.y1}
+                x2={line.x2}
+                y2={line.y2}
+                stroke={isStrongest ? "url(#strongest-gradient)" : color}
+                strokeWidth={Math.max(1, line.width + (isHovered ? 1 : 0))}
+                strokeDasharray={getStrokeDashArray(line.style, line.width)}
+                opacity={finalConfig.opacity_based_on_strength ? 
+                  Math.max(0.4, line.opacity + (isHovered ? 0.2 : 0)) : 0.7}
+                fill="none"
+                className={`aspect-line aspect-${aspect.aspect_type} ${
+                  isAnimated ? 'animate-aspect-draw' : ''
+                }`}
                 style={{
-                  animation: 'pulse 2s infinite'
+                  cursor: onAspectClick ? 'pointer' : 'default',
+                  filter: aspect.strength === 'muy_fuerte' ? 'url(#aspect-glow)' : 'none',
+                  pointerEvents: onAspectClick ? 'stroke' : 'none',
+                  strokeDashoffset: isAnimated ? 0 : 1000,
+                  animation: showAnimations && isAnimated ? 
+                    `drawLine 1s ease-out forwards, ${isStrongest ? 'pulseLine 2s ease-in-out infinite' : ''}` : 'none',
+                  transformOrigin: 'center'
                 }}
-              />
-            )}
-          </g>
-        );
-      })}
+                onClick={(e) => handleLineClick(aspect, e)}
+                onMouseEnter={(e) => handleLineHover(aspect, e)}
+                onMouseLeave={() => handleLineHover(null)}
+              >
+                <title>
+                  {`${aspect.planet1} ${aspect.aspect_type} ${aspect.planet2} (${aspect.orb.toFixed(1)}°)`}
+                </title>
+              </line>
+              
+              {/* Puntos en los extremos para aspectos muy fuertes */}
+              {aspect.strength === 'muy_fuerte' && (
+                <>
+                  <circle
+                    cx={line.x1}
+                    cy={line.y1}
+                    r="2"
+                    fill={color}
+                    opacity="0.8"
+                    className={showAnimations ? 'animate-pulse' : ''}
+                  />
+                  <circle
+                    cx={line.x2}
+                    cy={line.y2}
+                    r="2"
+                    fill={color}
+                    opacity="0.8"
+                    className={showAnimations ? 'animate-pulse' : ''}
+                  />
+                </>
+              )}
+            </g>
+          );
+        })}
+
+      {/* Tooltip */}
+      {showTooltips && tooltipData && (
+        <foreignObject
+          x={tooltipData.x - 60}
+          y={tooltipData.y - 30}
+          width="120"
+          height="60"
+          className="pointer-events-none"
+        >
+          <div className="bg-black/90 text-white text-xs rounded-lg p-2 shadow-lg backdrop-blur-sm border border-white/20">
+            <div className="font-semibold text-center mb-1">
+              {tooltipData.aspect.aspect_type.toUpperCase()}
+            </div>
+            <div className="text-center text-gray-300">
+              {tooltipData.aspect.planet1} ↔ {tooltipData.aspect.planet2}
+            </div>
+            <div className="text-center text-gray-400 text-xs">
+              Orbe: {tooltipData.aspect.orb.toFixed(1)}°
+            </div>
+          </div>
+        </foreignObject>
+      )}
+      
+      {/* Estilos CSS para animaciones */}
+      <style jsx>{`
+        @keyframes drawLine {
+          from {
+            stroke-dashoffset: 1000;
+            opacity: 0;
+          }
+          to {
+            stroke-dashoffset: 0;
+            opacity: var(--final-opacity, 0.7);
+          }
+        }
+        
+        @keyframes pulseLine {
+          0%, 100% {
+            filter: drop-shadow(0 0 3px currentColor);
+          }
+          50% {
+            filter: drop-shadow(0 0 8px currentColor);
+          }
+        }
+        
+        .animate-aspect-draw {
+          animation: drawLine 1s ease-out forwards;
+        }
+      `}</style>
     </g>
   );
 };
 
 // =============================================================================
-// COMPONENTE DE LEYENDA
+// LEYENDA MEJORADA CON ESTADÍSTICAS
 // =============================================================================
 
 export interface AspectLegendProps {
-  aspects: AspectLineProps[];
+  aspects: PlanetaryAspect[];
+  config?: Partial<AspectVisualizationConfig>;
   onToggleAspectType?: (aspectType: string) => void;
-  visibleTypes?: Set<string>;
+  activeAspectTypes?: string[];
   className?: string;
+  showStatistics?: boolean;
 }
 
 export const AspectLegend: React.FC<AspectLegendProps> = ({
   aspects,
+  config = {},
   onToggleAspectType,
-  visibleTypes = new Set(),
-  className = ""
+  activeAspectTypes = [],
+  className = '',
+  showStatistics = true
 }) => {
-  // Contar aspectos por tipo
-  const aspectCounts = React.useMemo(() => {
-    const counts: Record<string, number> = {};
+  const finalConfig = { ...DEFAULT_CONFIG, ...config };
+
+  // Agrupar aspectos por tipo
+  const aspectGroups = React.useMemo(() => {
+    const groups: Record<string, PlanetaryAspect[]> = {};
     aspects.forEach(aspect => {
-      counts[aspect.type] = (counts[aspect.type] || 0) + 1;
+      if (!groups[aspect.aspect_type]) {
+        groups[aspect.aspect_type] = [];
+      }
+      groups[aspect.aspect_type].push(aspect);
     });
-    return counts;
+    return groups;
   }, [aspects]);
 
-  // Tipos de aspectos encontrados
-  const aspectTypes = Object.keys(aspectCounts).sort((a, b) => {
-    const aIsMajor = MAJOR_ASPECTS.includes(a);
-    const bIsMajor = MAJOR_ASPECTS.includes(b);
-    if (aIsMajor && !bIsMajor) return -1;
-    if (!aIsMajor && bIsMajor) return 1;
-    return aspectCounts[b] - aspectCounts[a];
-  });
+  // Calcular estadísticas
+  const statistics = React.useMemo(() => {
+    const byNature = { harmonico: 0, tensional: 0, neutro: 0 };
+    const byStrength = { muy_fuerte: 0, fuerte: 0, moderado: 0, debil: 0 };
+    
+    aspects.forEach(aspect => {
+      // Por naturaleza
+      const harmoniousTypes = ['trine', 'sextile', 'semisextile', 'quintile', 'biquintile'];
+      const tensionalTypes = ['opposition', 'square', 'quincunx', 'sesquiquadrate', 'semisquare'];
+      
+      if (harmoniousTypes.includes(aspect.aspect_type)) {
+        byNature.harmonico++;
+      } else if (tensionalTypes.includes(aspect.aspect_type)) {
+        byNature.tensional++;
+      } else {
+        byNature.neutro++;
+      }
+      
+      // Por fuerza
+      byStrength[aspect.strength]++;
+    });
+    
+    return { byNature, byStrength };
+  }, [aspects]);
+
+  const aspectTypes = Object.keys(aspectGroups);
 
   if (aspectTypes.length === 0) {
-    return (
-      <div className={`text-sm text-gray-500 text-center p-4 ${className}`}>
-        No hay aspectos para mostrar
-      </div>
-    );
+    return null;
   }
 
   return (
-    <div className={`space-y-3 ${className}`}>
-      <h4 className="font-semibold text-gray-700 text-sm">
-        Aspectos Activos ({aspects.length})
-      </h4>
+    <div className={`aspect-legend ${className}`}>
+      <h3 className="text-lg font-bold mb-4 text-white flex items-center">
+        🔮 Aspectos Astrológicos
+        <span className="ml-2 text-sm bg-white/10 rounded-full px-2 py-1">
+          {aspects.length}
+        </span>
+      </h3>
       
-      <div className="grid grid-cols-2 gap-2">
-        {aspectTypes.map((aspectType) => {
-          const style = ASPECT_STYLES[aspectType];
-          const count = aspectCounts[aspectType];
-          const isVisible = visibleTypes.has(aspectType);
-          const isMajor = MAJOR_ASPECTS.includes(aspectType);
-          
-          if (!style) return null;
+      {/* Lista de aspectos */}
+      <div className="space-y-2 mb-6">
+        {aspectTypes.map(aspectType => {
+          const firstAspect = aspectGroups[aspectType][0];
+          const count = aspectGroups[aspectType].length;
+          const isActive = activeAspectTypes.includes(aspectType);
+          const color = ASPECT_COLORS[aspectType as keyof typeof ASPECT_COLORS] || '#888888';
           
           return (
-            <button
+            <div
               key={aspectType}
+              className={`flex items-center space-x-3 p-3 rounded-xl cursor-pointer transition-all duration-200 ${
+                isActive 
+                  ? 'bg-white/20 border border-white/30' 
+                  : 'bg-white/5 hover:bg-white/10 border border-transparent'
+              }`}
               onClick={() => onToggleAspectType?.(aspectType)}
-              className={`
-                flex items-center justify-between p-2 rounded-lg border transition-all text-xs
-                ${isVisible 
-                  ? 'bg-white border-gray-300 shadow-sm' 
-                  : 'bg-gray-50 border-gray-200 opacity-60'
-                }
-                hover:shadow-md hover:scale-105
-              `}
             >
-              <div className="flex items-center space-x-2">
-                <div
-                  className="w-4 h-1 rounded"
-                  style={{
-                    backgroundColor: style.color,
-                    opacity: isVisible ? style.opacity : 0.3
-                  }}
+              {/* Línea de muestra */}
+              <svg width="30" height="16" className="flex-shrink-0">
+                <line
+                  x1="2"
+                  y1="8"
+                  x2="28"
+                  y2="8"
+                  stroke={color}
+                  strokeWidth={Math.max(2, firstAspect.visual.line_width)}
+                  strokeDasharray={
+                    firstAspect.visual.line_style === 'dashed' ? '4 3' :
+                    firstAspect.visual.line_style === 'dotted' ? '2 2' : 'none'
+                  }
+                  opacity={0.9}
                 />
-                <span className={`capitalize font-medium ${isVisible ? 'text-gray-800' : 'text-gray-500'}`}>
-                  {aspectType}
-                </span>
-                {isMajor && (
-                  <span className="text-xs bg-blue-100 text-blue-600 px-1 py-0.5 rounded">
-                    M
-                  </span>
-                )}
+              </svg>
+              
+              {/* Información del aspecto */}
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-white capitalize truncate">
+                  {aspectType.replace('_', ' ')}
+                </div>
+                <div className="text-xs text-gray-400">
+                  {count} aspecto{count !== 1 ? 's' : ''} • 
+                  {firstAspect.strength === 'muy_fuerte' ? ' 🔥 Muy fuerte' :
+                   firstAspect.strength === 'fuerte' ? ' ⚡ Fuerte' :
+                   firstAspect.strength === 'moderado' ? ' ✨ Moderado' : ' 💫 Suave'}
+                </div>
               </div>
               
-              <span className={`font-bold ${isVisible ? 'text-gray-600' : 'text-gray-400'}`}>
-                {count}
-              </span>
-            </button>
+              {/* Indicador de actividad */}
+              <div className={`w-3 h-3 rounded-full transition-all ${
+                isActive ? 'bg-white' : 'bg-white/30'
+              }`} />
+            </div>
           );
         })}
       </div>
       
-      {/* Resumen por naturaleza */}
-      <div className="pt-2 border-t border-gray-200">
-        <div className="grid grid-cols-3 gap-2 text-xs">
-          {['harmonico', 'tensional', 'neutro'].map(nature => {
-            const count = aspectTypes.reduce((acc, type) => {
-              const style = ASPECT_STYLES[type];
-              return acc + (style?.nature === nature ? aspectCounts[type] : 0);
-            }, 0);
-            
-            const colors = {
-              harmonico: 'text-green-600 bg-green-50',
-              tensional: 'text-red-600 bg-red-50',
-              neutro: 'text-yellow-600 bg-yellow-50'
-            };
-            
-            return (
-              <div key={nature} className={`text-center p-1 rounded ${colors[nature as keyof typeof colors]}`}>
-                <div className="font-semibold">{count}</div>
-                <div className="capitalize">{nature}</div>
+      {/* Estadísticas */}
+      {showStatistics && (
+        <div className="border-t border-white/20 pt-4">
+          <h4 className="font-semibold text-sm mb-3 text-white">📊 Resumen</h4>
+          
+          {/* Por naturaleza */}
+          <div className="mb-4">
+            <div className="text-xs text-gray-400 mb-2">Por naturaleza:</div>
+            <div className="grid grid-cols-3 gap-2 text-xs">
+              <div className="bg-green-500/20 border border-green-400/30 rounded-lg p-2 text-center">
+                <div className="font-bold text-green-300">{statistics.byNature.harmonico}</div>
+                <div className="text-green-400">Armónicos</div>
               </div>
-            );
-          })}
+              <div className="bg-red-500/20 border border-red-400/30 rounded-lg p-2 text-center">
+                <div className="font-bold text-red-300">{statistics.byNature.tensional}</div>
+                <div className="text-red-400">Tensionales</div>
+              </div>
+              <div className="bg-yellow-500/20 border border-yellow-400/30 rounded-lg p-2 text-center">
+                <div className="font-bold text-yellow-300">{statistics.byNature.neutro}</div>
+                <div className="text-yellow-400">Neutros</div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Por fuerza */}
+          <div>
+            <div className="text-xs text-gray-400 mb-2">Por intensidad:</div>
+            <div className="space-y-1">
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-300">🔥 Muy fuertes:</span>
+                <span className="text-white font-bold">{statistics.byStrength.muy_fuerte}</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-300">⚡ Fuertes:</span>
+                <span className="text-white font-bold">{statistics.byStrength.fuerte}</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-300">✨ Moderados:</span>
+                <span className="text-white font-bold">{statistics.byStrength.moderado}</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-300">💫 Suaves:</span>
+                <span className="text-white font-bold">{statistics.byStrength.debil}</span>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  );
-};
-
-// =============================================================================
-// COMPONENTE DE TOOLTIP
-// =============================================================================
-
-export interface AspectTooltipProps {
-  aspect: AspectLineProps;
-  position: { x: number; y: number };
-  className?: string;
-}
-
-export const AspectTooltip: React.FC<AspectTooltipProps> = ({
-  aspect,
-  position,
-  className = ""
-}) => {
-  const style = ASPECT_STYLES[aspect.type];
-  if (!style) return null;
-
-  return (
-    <div 
-      className={`absolute z-50 pointer-events-none ${className}`}
-      style={{
-        left: position.x + 10,
-        top: position.y - 10,
-        transform: 'translateY(-100%)'
-      }}
-    >
-      <div className="bg-black/80 text-white text-xs rounded-lg p-3 shadow-lg max-w-xs">
-        <div className="font-semibold capitalize mb-1">
-          {aspect.type}
-        </div>
-        
-        <div className="space-y-1 text-gray-300">
-          <div>{aspect.planet1} → {aspect.planet2}</div>
-          <div>Orbe: {Math.abs(aspect.orb).toFixed(1)}°</div>
-          <div>Ángulo: {aspect.exact_angle.toFixed(1)}°</div>
-          {aspect.strength && (
-            <div className="capitalize">Fuerza: {aspect.strength.replace('_', ' ')}</div>
-          )}
-        </div>
-        
-        <div className={`text-xs mt-2 capitalize font-medium`}>
-          Naturaleza: <span style={{ color: style.color }}>{style.nature}</span>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
 
 export default AspectLines;
+
+function calculateAspectLinePositions(
+  filteredAspects: PlanetaryAspect[],
+  planetPositions: { planet: Planet | ExtendedPlanet; degree: number; x: number; y: number; }[],
+  { centerX, centerY, radius }: { centerX: number; centerY: number; radius: number; }
+) {
+  // Helper to find planet position by planet name
+  const getPlanetPos = (planet: Planet | ExtendedPlanet) =>
+    planetPositions.find(p => p.planet === planet);
+
+  // Map aspect strength to opacity and width
+  const strengthMap = {
+    muy_fuerte: { opacity: 1, width: 3 },
+    fuerte: { opacity: 0.85, width: 2.5 },
+    moderado: { opacity: 0.7, width: 2 },
+    debil: { opacity: 0.5, width: 1.5 }
+  };
+
+  // Map aspect type to line style
+  const styleMap: Record<string, string> = {
+    conjunction: 'solid',
+    opposition: 'dashed',
+    trine: 'solid',
+    sextile: 'dashed',
+    square: 'dotted',
+    quincunx: 'dotted',
+    semisextile: 'dashed',
+    quintile: 'dashed',
+    biquintile: 'dashed',
+    sesquiquadrate: 'dotted',
+    semisquare: 'dotted'
+  };
+
+  // Z-index: major aspects above minor
+  const zIndexMap: Record<string, number> = {
+    conjunction: 10,
+    opposition: 9,
+    trine: 8,
+    square: 7,
+    sextile: 6,
+    // minor aspects
+    quincunx: 5,
+    sesquiquadrate: 4,
+    semisquare: 3,
+    semisextile: 2,
+    quintile: 2,
+    biquintile: 2
+  };
+
+  return filteredAspects.map(aspect => {
+    const pos1 = getPlanetPos(aspect.planet1);
+    const pos2 = getPlanetPos(aspect.planet2);
+
+    if (!pos1 || !pos2) {
+      // Fallback: skip if planet position not found
+      return null;
+    }
+
+    // Optionally, you could shorten the lines a bit so they don't overlap planet glyphs
+    const shorten = 10; // px to shorten from each end
+    const dx = pos2.x - pos1.x;
+    const dy = pos2.y - pos1.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const ratio = dist === 0 ? 0 : shorten / dist;
+
+    const x1 = pos1.x + dx * ratio;
+    const y1 = pos1.y + dy * ratio;
+    const x2 = pos2.x - dx * ratio;
+    const y2 = pos2.y - dy * ratio;
+
+    const strength = strengthMap[aspect.strength] || strengthMap['debil'];
+    const style = aspect.visual?.line_style || styleMap[aspect.aspect_type] || 'solid';
+    const width = aspect.visual?.line_width || strength.width;
+    const opacity = aspect.visual?.opacity ?? strength.opacity;
+    const zIndex = zIndexMap[aspect.aspect_type] || 1;
+
+    return {
+      id: aspect.id,
+      x1,
+      y1,
+      x2,
+      y2,
+      width,
+      opacity,
+      style,
+      zIndex
+    };
+  }).filter(Boolean);
+}
