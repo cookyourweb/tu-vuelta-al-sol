@@ -1,5 +1,4 @@
-
-// app/(dashboard)/natal-chart/page.tsx - CARGA ARREGLADA
+// app/(dashboard)/natal-chart/page.tsx - CORRECCIÓN DE ASPECTOS
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -24,8 +23,6 @@ import {
   CheckCircle,
   Zap
 } from 'lucide-react';
-
-import { calculateAllAspects } from '@/utils/astrology/aspectCalculations';
 
 export default function NatalChartPage() {
   const [chartData, setChartData] = useState<any | null>(null);
@@ -102,7 +99,9 @@ export default function NatalChartPage() {
         const data = await response.json();
         setDebugInfo('✅ ¡Carta natal generada exitosamente!');
         
-        console.log('Carta natal API data:', data.natalChart);
+        console.log('🔍 Carta natal API data completa:', data.natalChart);
+        console.log('🔍 Aspectos en la respuesta:', data.natalChart?.keyAspects);
+        
         setChartData(data.natalChart);
         
       } catch (err) {
@@ -116,15 +115,6 @@ export default function NatalChartPage() {
     
     fetchChartData();
   }, [user, router]);
-
-  // Calculate aspects client-side if API aspects missing
-  const processedKeyAspects = chartData && chartData.keyAspects && chartData.keyAspects.length > 0
-    ? chartData.keyAspects
-    : chartData && chartData.planets
-      ? calculateAllAspects(chartData.planets)
-      : [];
-
-  // Pass processedKeyAspects to ChartDisplay instead of chartData.keyAspects
 
   // 🎨 COMPONENTE DE CARGA MEJORADO
   if (loading) {
@@ -239,23 +229,56 @@ export default function NatalChartPage() {
         </p>
       </div>
 
-      {/* Carta natal */}
+      {/* 🚨 CORRECCIÓN CRÍTICA - Carta natal */}
       {chartData && (
         <div className="flex justify-center">
-        <ChartDisplay 
+          <ChartDisplay 
             houses={chartData.houses || []}
             planets={chartData.planets || []}
             elementDistribution={chartData.elementDistribution || { fire: 0, earth: 0, air: 0, water: 0 }}
             modalityDistribution={chartData.modalityDistribution || { cardinal: 0, fixed: 0, mutable: 0 }}
-            keyAspects={chartData.keyAspects || []}
-            ascendant={chartData.ascendant}      // ✅ AÑADIDO
-            midheaven={chartData.midheaven}      // ✅ AÑADIDO  
-            showVisualAspects={true}             // ✅ CLAVE: Habilitar aspectos
-            wheelConfig={{                       // ✅ OPCIONAL: Tamaño
-              width: 500,
-              height: 500
+            keyAspects={chartData.keyAspects || []}  // ✅ ASPECTOS DESDE LA API
+            ascendant={chartData.ascendant}
+            midheaven={chartData.midheaven}
+            showVisualAspects={true}
+            wheelConfig={{
+              width: 600,
+              height: 600
             }}
           />
+        </div>
+      )}
+
+      {/* Debug info adicional - SOLO EN DESARROLLO */}
+      {process.env.NODE_ENV === 'development' && chartData && (
+        <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-4 text-sm">
+          <h4 className="font-bold mb-2">🔧 Debug Info:</h4>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p><strong>Planetas:</strong> {chartData.planets?.length || 0}</p>
+              <p><strong>Casas:</strong> {chartData.houses?.length || 0}</p>
+              <p><strong>KeyAspects:</strong> {chartData.keyAspects?.length || 0}</p>
+            </div>
+            <div>
+              <p><strong>Ascendant:</strong> {chartData.ascendant ? '✅' : '❌'}</p>
+              <p><strong>Midheaven:</strong> {chartData.midheaven ? '✅' : '❌'}</p>
+              <p><strong>Show Aspects:</strong> true</p>
+            </div>
+          </div>
+          
+          {/* Lista de aspectos para debug */}
+          {chartData.keyAspects && chartData.keyAspects.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-yellow-300">
+              <p><strong>📋 Aspectos detectados:</strong></p>
+              <div className="mt-2 text-xs">
+                {chartData.keyAspects.map((aspect: any, i: number) => (
+                  <span key={i} className="inline-block bg-white px-2 py-1 rounded mr-2 mb-1 border">
+                    {aspect.planet_one?.name || aspect.planet1} - {aspect.planet_two?.name || aspect.planet2}: {aspect.aspect?.name || aspect.type}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
