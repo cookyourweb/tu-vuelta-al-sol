@@ -9,7 +9,7 @@ import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import Toggle from '@/components/ui/Toggle';
 import { Sparkles, CheckCircle, XCircle, Clock, Globe, MapPin } from 'lucide-react';
-import { validateBirthData, convertToUTC } from '@/utils/astrology/timezoneUtils';
+import { validateBirthData, convertToUTC } from '@/utils/timezoneUtils';
 
 export default function TestNatalChartPage() {
   const [loading, setLoading] = useState(false);
@@ -198,7 +198,6 @@ export default function TestNatalChartPage() {
                 step="1"
                 value={testData.birthTime}
                 onChange={(e) => setTestData({...testData, birthTime: e.target.value})}
-                icon={<Clock className="w-5 h-5" />}
               />
               
               <Select
@@ -273,21 +272,23 @@ export default function TestNatalChartPage() {
       {/* Error */}
       {error && (
         <Alert
-          type="error"
+          variant="destructive"
           title="Error en la prueba"
-          message={error}
           className="mb-8"
-        />
+        >
+          {error}
+        </Alert>
       )}
 
       {/* Resultados */}
       {result && (
         <div className="space-y-8">
           <Alert
-            type="success"
+            variant="success"
             title="¡Carta natal generada exitosamente!"
-            message="Los cálculos se han completado correctamente"
-          />
+          >
+            Los cálculos se han completado correctamente
+          </Alert>
 
           {/* Información de validación */}
           <Card gradient="blue">

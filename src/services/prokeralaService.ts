@@ -178,12 +178,11 @@ function getTimezoneOffset(timezone: string): string {
 /**
  * Get natal chart from Prokerala API using the correct endpoint
  */
+import { createProkeralaParams } from '@/utils/dateTimeUtils';
+
 export async function getNatalHoroscope(
-  birthDate: string,
-  birthTime: string,
-  latitude: number,
-  longitude: number,
-  timezone: string,
+  formattedDateTime: string,
+  formattedCoordinates: string,
   options: {
     houseSystem?: string;
     aspectFilter?: string;
@@ -196,42 +195,27 @@ export async function getNatalHoroscope(
 ): Promise<ProkeralaApiResponse> {
   try {
     const token = await getToken();
-    
-    // Formatear datetime exactamente como en Postman
-    const offset = getTimezoneOffset(timezone);
-    const datetime = `${birthDate}T${birthTime}${offset}`;
-    
-    // Formatear coordenadas como en Postman: "lat,lon"
-    const coordinates = `${latitude},${longitude}`;
-    
-    console.log('🔍 Llamando a natal-chart con parámetros:', {
-      datetime,
-      coordinates,
-      timezone
+
+    // Build URLSearchParams using createProkeralaParams
+    const params = createProkeralaParams({
+      birthDate: formattedDateTime.substring(0, 10),
+      birthTime: formattedDateTime.substring(11),
+      latitude: parseFloat(formattedCoordinates.split(',')[0]),
+      longitude: parseFloat(formattedCoordinates.split(',')[1]),
+      houseSystem: options.houseSystem,
+      aspectFilter: options.aspectFilter,
+      language: options.language,
+      ayanamsa: options.ayanamsa,
+      birthTimeUnknown: options.birthTimeUnknown,
+      birthTimeRectification: options.birthTimeRectification || 'none',
+      orb: options.orb
     });
-    
-    // Parámetros exactos según Postman
-    const params = {
-      datetime: datetime,
-      coordinates: coordinates,
-      birth_time_unknown: options.birthTimeUnknown ? 'true' : 'false',
-      house_system: options.houseSystem || 'placidus',
-      orb: options.orb || 'default',
-      birth_time_rectification: options.birthTimeRectification || 'none',
-      aspect_filter: options.aspectFilter || 'all',
-      la: options.language || 'es',
-      ayanamsa: options.ayanamsa || '1'
-    };
-    
-    // Construir URL con parámetros
+
     const url = new URL(`${API_BASE_URL}/astrology/natal-chart`);
-    Object.entries(params).forEach(([key, value]) => {
-      url.searchParams.append(key, value);
-    });
-    
+    url.search = params.toString();
+
     console.log('📡 URL completa:', url.toString());
-    
-    // Hacer la petición
+
     const response = await axios.get(url.toString(), {
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -239,9 +223,9 @@ export async function getNatalHoroscope(
         'Accept': 'application/json'
       }
     });
-    
+
     console.log('✅ Respuesta recibida:', response.status);
-    
+
     return response.data;
   } catch (error) {
     console.error('❌ Error en getNatalHoroscope:', error);
