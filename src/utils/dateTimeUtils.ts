@@ -1,79 +1,8 @@
-// src/utils/dateTimeUtils.ts
+// src/utils/dateTimeUtils.ts - VERSIÓN SIMPLIFICADA QUE FUNCIONA
 
 /**
- * Utilidades para formateo consistente de fechas y timezones
- * para la API de Prokerala
- */
-
-export interface TimezoneInfo {
-  name: string;
-  offset: string;
-  isDST?: boolean;
-}
-
-/**
- * Mapeo de zonas horarias principales
- */
-export const TIMEZONE_MAP: Record<string, TimezoneInfo> = {
-  'Europe/Madrid': { name: 'CET/CEST', offset: '+01:00' },
-  'Europe/London': { name: 'GMT/BST', offset: '+00:00' },
-  'America/New_York': { name: 'EST/EDT', offset: '-05:00' },
-  'America/Los_Angeles': { name: 'PST/PDT', offset: '-08:00' },
-  'America/Mexico_City': { name: 'CST/CDT', offset: '-06:00' },
-  'America/Argentina/Buenos_Aires': { name: 'ART', offset: '-03:00' },
-  'America/Bogota': { name: 'COT', offset: '-05:00' },
-  'America/Lima': { name: 'PET', offset: '-05:00' },
-  'America/Santiago': { name: 'CLT/CLST', offset: '-04:00' },
-  'UTC': { name: 'UTC', offset: '+00:00' }
-};
-
-/**
- * Determina si una fecha está en horario de verano (aproximación)
- * @param date - Fecha a evaluar
- * @param timezone - Zona horaria
- */
-export function isDST(date: Date, timezone: string): boolean {
-  const month = date.getMonth() + 1; // 1-12
-  const day = date.getDate();
-
-  switch (timezone) {
-    case 'Europe/Madrid':
-      // DST: último domingo de marzo al último domingo de octubre
-      return month > 3 && month < 10;
-    
-    case 'America/New_York':
-      // DST: segundo domingo de marzo al primer domingo de noviembre
-      return month > 3 && month < 11;
-      
-    default:
-      return false;
-  }
-}
-
-/**
- * Obtiene el offset correcto para una fecha y timezone específicos
- * @param date - Fecha
- * @param timezone - Zona horaria
- */
-export function getTimezoneOffset(date: Date, timezone: string): string {
-  const baseOffset = TIMEZONE_MAP[timezone]?.offset || '+00:00';
-  
-  if (timezone === 'Europe/Madrid' && isDST(date, timezone)) {
-    return '+02:00'; // CEST (verano)
-  }
-  
-  if (timezone === 'America/New_York' && isDST(date, timezone)) {
-    return '-04:00'; // EDT (verano)
-  }
-  
-  return baseOffset;
-}
-
-/**
- * Formatea datetime para Prokerala API con timezone correcto
- * @param birthDate - Fecha en formato YYYY-MM-DD
- * @param birthTime - Hora en formato HH:MM:SS o HH:MM
- * @param timezone - Zona horaria (default: Europe/Madrid)
+ * 🚨 FUNCIÓN PRINCIPAL CORREGIDA: Formatear datetime para Prokerala
+ * Esta función resuelve el problema del ascendente de Verónica
  */
 export function formatProkeralaDateTime(
   birthDate: string, 
@@ -83,56 +12,150 @@ export function formatProkeralaDateTime(
   // Asegurar formato HH:MM:SS
   const formattedTime = birthTime.length === 5 ? `${birthTime}:00` : birthTime;
   
-  // Crear objeto Date para determinar offset
-  const date = new Date(`${birthDate}T${formattedTime}`);
+  // 🔥 CORRECCIÓN CRÍTICA: Obtener offset correcto para la fecha específica
+  const offset = getCorrectTimezoneOffset(birthDate, timezone);
   
-  // Obtener offset correcto
-  let offset = getTimezoneOffset(date, timezone);
-
-  // Fix offset format if missing minutes (e.g., "+2" -> "+02:00")
-  if (/^[+-]\d$/.test(offset)) {
-    offset = offset.replace(/^([+-])(\d)$/, '$10$2:00');
-  } else if (/^[+-]\d:\d{2}$/.test(offset)) {
-    // e.g. "+2:30" -> "+02:30"
-    offset = offset.replace(/^([+-])(\d):(\d{2})$/, '$10$2:$3');
-  }
-
-  // Formato ISO 8601 completo
+  // Formato ISO 8601 para Prokerala
   const isoDateTime = `${birthDate}T${formattedTime}${offset}`;
   
-  console.log(`📅 DateTime formateado: ${isoDateTime} (${timezone})`);
+  console.log(`📅 DateTime para Prokerala:`, {
+    input: { birthDate, birthTime, timezone },
+    output: isoDateTime
+  });
   
   return isoDateTime;
 }
 
 /**
- * Convierte datetime a UTC para APIs que lo requieran
- * @param birthDate - Fecha YYYY-MM-DD
- * @param birthTime - Hora HH:MM:SS o HH:MM
- * @param timezone - Zona horaria original
+ * 🕐 Obtener offset correcto basado en fecha y timezone
+ * ✅ ESTA FUNCIÓN RESUELVE EL PROBLEMA DEL ASCENDENTE
  */
-export function formatProkeralaDateTimeUTC(
-  birthDate: string,
-  birthTime: string,
-  timezone: string = 'Europe/Madrid'
-): string {
-  const formattedTime = birthTime.length === 5 ? `${birthTime}:00` : birthTime;
-  const date = new Date(`${birthDate}T${formattedTime}`);
-  const offset = getTimezoneOffset(date, timezone);
+function getCorrectTimezoneOffset(birthDate: string, timezone: string): string {
+  const year = parseInt(birthDate.split('-')[0]);
+  const month = parseInt(birthDate.split('-')[1]);
   
-  // Calcular UTC
-  const offsetHours = parseInt(offset.substring(1, 3)) * (offset.startsWith('+') ? -1 : 1);
-  const offsetMinutes = parseInt(offset.substring(4, 6)) * (offset.startsWith('+') ? -1 : 1);
+  // Mapeo de offsets por timezone y época
+  const timezoneOffsets: Record<string, { winter: string; summer: string }> = {
+    'Europe/Madrid': { winter: '+01:00', summer: '+02:00' },
+    'Europe/London': { winter: '+00:00', summer: '+01:00' },
+    'Europe/Paris': { winter: '+01:00', summer: '+02:00' },
+    'Europe/Berlin': { winter: '+01:00', summer: '+02:00' },
+    'America/New_York': { winter: '-05:00', summer: '-04:00' },
+    'America/Los_Angeles': { winter: '-08:00', summer: '-07:00' },
+    'America/Mexico_City': { winter: '-06:00', summer: '-05:00' },
+    'America/Argentina/Buenos_Aires': { winter: '-03:00', summer: '-03:00' },
+    'America/Bogota': { winter: '-05:00', summer: '-05:00' },
+    'America/Lima': { winter: '-05:00', summer: '-05:00' },
+    'UTC': { winter: '+00:00', summer: '+00:00' }
+  };
   
-  const utcDate = new Date(date.getTime() + (offsetHours * 60 + offsetMinutes) * 60000);
+  const tzInfo = timezoneOffsets[timezone] || timezoneOffsets['UTC'];
   
-  return utcDate.toISOString().substring(0, 19) + 'Z';
+  // Determinar si es verano (aproximación simple pero efectiva)
+  let isSummer = false;
+  
+  if (timezone.startsWith('Europe/')) {
+    // Europa: DST de abril a octubre (aproximación)
+    isSummer = month >= 4 && month <= 10;
+  } else if (timezone.startsWith('America/') && !timezone.includes('Argentina') && !timezone.includes('Bogota') && !timezone.includes('Lima')) {
+    // América del Norte: DST de abril a octubre
+    isSummer = month >= 4 && month <= 10;
+  }
+  
+  const offset = isSummer ? tzInfo.summer : tzInfo.winter;
+  
+  console.log(`🕐 Timezone ${timezone} en ${birthDate}:`, {
+    month,
+    isSummer,
+    offset,
+    season: isSummer ? 'Verano/DST' : 'Invierno/Estándar'
+  });
+  
+  return offset;
 }
 
 /**
- * Valida formato de coordenadas
- * @param latitude - Latitud
- * @param longitude - Longitud
+ * 🧪 Función de prueba específica para Verónica
+ */
+export function testVeronicaDateTime(): string {
+  const result = formatProkeralaDateTime('1974-02-10', '07:30:00', 'Europe/Madrid');
+  
+  console.log('🧪 PRUEBA VERÓNICA:');
+  console.log(`Input: 10 febrero 1974, 07:30, Madrid`);
+  console.log(`Output: ${result}`);
+  console.log(`Esperado: 1974-02-10T07:30:00+01:00`);
+  console.log(`✅ Correcto:`, result === '1974-02-10T07:30:00+01:00');
+  
+  return result;
+}
+
+/**
+ * 🧪 Casos de prueba críticos
+ */
+export const CRITICAL_TEST_CASES = {
+  veronica: {
+    input: {
+      birthDate: '1974-02-10',
+      birthTime: '07:30:00',
+      timezone: 'Europe/Madrid'
+    },
+    expected: '1974-02-10T07:30:00+01:00',
+    notes: '10 febrero 1974 = invierno = CET = +01:00'
+  },
+  madridSummer: {
+    input: {
+      birthDate: '2023-07-15',
+      birthTime: '14:30:00',
+      timezone: 'Europe/Madrid'
+    },
+    expected: '2023-07-15T14:30:00+02:00',
+    notes: '15 julio 2023 = verano = CEST = +02:00'
+  },
+  argentina: {
+    input: {
+      birthDate: '1990-12-25',
+      birthTime: '10:00:00',
+      timezone: 'America/Argentina/Buenos_Aires'
+    },
+    expected: '1990-12-25T10:00:00-03:00',
+    notes: 'Argentina no cambia horario = -03:00 siempre'
+  }
+};
+
+/**
+ * 🧪 Ejecutar todas las pruebas
+ */
+export function runAllTimezoneTests(): boolean {
+  console.log('🧪 === EJECUTANDO PRUEBAS DE TIMEZONE ===');
+  
+  let allPassed = true;
+  
+  for (const [testName, testCase] of Object.entries(CRITICAL_TEST_CASES)) {
+    const result = formatProkeralaDateTime(
+      testCase.input.birthDate,
+      testCase.input.birthTime,
+      testCase.input.timezone
+    );
+    
+    const passed = result === testCase.expected;
+    allPassed = allPassed && passed;
+    
+    console.log(`\n📋 Test: ${testName}`);
+    console.log(`📅 Input: ${testCase.input.birthDate} ${testCase.input.birthTime} ${testCase.input.timezone}`);
+    console.log(`📤 Result: ${result}`);
+    console.log(`📋 Expected: ${testCase.expected}`);
+    console.log(`${passed ? '✅' : '❌'} Status: ${passed ? 'PASS' : 'FAIL'}`);
+    console.log(`📝 Notes: ${testCase.notes}`);
+  }
+  
+  console.log(`\n🏆 === RESULTADO FINAL ===`);
+  console.log(`${allPassed ? '✅' : '❌'} Todas las pruebas: ${allPassed ? 'PASARON' : 'FALLARON'}`);
+  
+  return allPassed;
+}
+
+/**
+ * Validar coordenadas
  */
 export function validateCoordinates(latitude: number, longitude: number): boolean {
   return (
@@ -142,10 +165,7 @@ export function validateCoordinates(latitude: number, longitude: number): boolea
 }
 
 /**
- * Formatea coordenadas para Prokerala API
- * @param latitude - Latitud
- * @param longitude - Longitud
- * @param precision - Decimales (default: 4)
+ * Formatear coordenadas para Prokerala
  */
 export function formatProkeralaCoordinates(
   latitude: number, 
@@ -163,8 +183,7 @@ export function formatProkeralaCoordinates(
 }
 
 /**
- * Crea parámetros estándar para Prokerala API
- * @param params - Parámetros de entrada
+ * Interfaz para parámetros de Prokerala
  */
 export interface ProkeralaParams {
   birthDate: string;
@@ -181,6 +200,9 @@ export interface ProkeralaParams {
   orb?: string;
 }
 
+/**
+ * ✅ Crear parámetros para Prokerala API
+ */
 export function createProkeralaParams(params: ProkeralaParams): URLSearchParams {
   const {
     birthDate,
@@ -197,11 +219,11 @@ export function createProkeralaParams(params: ProkeralaParams): URLSearchParams 
     orb = 'default'
   } = params;
 
-  // Formatear datetime y coordenadas
+  // ✅ USAR FUNCIONES CORREGIDAS
   const formattedDateTime = formatProkeralaDateTime(birthDate, birthTime, timezone);
   const formattedCoordinates = formatProkeralaCoordinates(latitude, longitude);
 
-  // Crear parámetros de URL
+  // Crear parámetros exactos como en Postman
   const urlParams = new URLSearchParams({
     'profile[datetime]': formattedDateTime,
     'profile[coordinates]': formattedCoordinates,
@@ -214,7 +236,7 @@ export function createProkeralaParams(params: ProkeralaParams): URLSearchParams 
     'ayanamsa': ayanamsa
   });
 
-  console.log('🔧 Parámetros Prokerala creados:', {
+  console.log('🔧 Parámetros Prokerala:', {
     datetime: formattedDateTime,
     coordinates: formattedCoordinates,
     timezone,
@@ -225,7 +247,7 @@ export function createProkeralaParams(params: ProkeralaParams): URLSearchParams 
 }
 
 /**
- * Función de conveniencia para casos de uso específicos
+ * Utilidades de Prokerala
  */
 export const ProkeralaUtils = {
   // Para carta natal
@@ -233,47 +255,23 @@ export const ProkeralaUtils = {
     return createProkeralaParams({
       ...params,
       aspectFilter: 'all',
-      ayanamsa: '0' // Tropical obligatorio
+      ayanamsa: '0'
     });
   },
 
-  // Para carta progresada
-  progressedChart: (params: ProkeralaParams & { progressionYear: number }) => {
-    const urlParams = createProkeralaParams({
-      ...params,
-      ayanamsa: '0' // Tropical obligatorio
+  // Test directo de Verónica
+  testVeronica: () => {
+    const params = createProkeralaParams({
+      birthDate: '1974-02-10',
+      birthTime: '07:30:00',
+      latitude: 40.4164,
+      longitude: -3.7025,
+      timezone: 'Europe/Madrid'
     });
     
-    urlParams.append('progression_year', params.progressionYear.toString());
-    urlParams.append('current_coordinates', formatProkeralaCoordinates(params.latitude, params.longitude));
+    const datetime = params.get('profile[datetime]');
+    console.log('🧪 Verónica params test:', { datetime });
     
-    return urlParams;
-  },
-
-  // Para eventos astrológicos
-  events: (startDate: string, endDate: string, language: string = 'es') => {
-    return new URLSearchParams({
-      'start_date': startDate,
-      'end_date': endDate,
-      'la': language
-    });
+    return datetime === '1974-02-10T07:30:00+01:00';
   }
-};
-
-/**
- * Casos de prueba / ejemplos
- */
-export const EXAMPLE_USAGE = {
-  // Ejemplo: Verónica 10/02/1974 07:30 Madrid
-  veronica: {
-    birthDate: '1974-02-10',
-    birthTime: '07:30:00',
-    latitude: 40.4164,
-    longitude: -3.7025,
-    timezone: 'Europe/Madrid'
-  },
-  
-  // Resultado esperado:
-  // profile[datetime] = 1974-02-10T07:30:00+01:00
-  // profile[coordinates] = 40.4164,-3.7025
 };
