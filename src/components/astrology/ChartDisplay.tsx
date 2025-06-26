@@ -119,20 +119,194 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
   const [hoveredHouse, setHoveredHouse] = useState<number | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
-  // ✅ SIGNIFICADOS DE CASAS ASTROLÓGICAS
+  // ✅ SIGNIFICADOS COMPLETOS DE ASPECTOS
+  const aspectMeanings = {
+    conjunction: {
+      name: 'Conjunción',
+      meaning: 'Fusión de energías. Los planetas trabajan como uno solo.',
+      effect: 'Intensifica y unifica las cualidades planetarias',
+      type: 'Neutral - puede ser armónico o tenso según los planetas'
+    },
+    sextile: {
+      name: 'Sextil', 
+      meaning: 'Oportunidad y facilidad. Energías que fluyen naturalmente.',
+      effect: 'Facilita el desarrollo de talentos y oportunidades',
+      type: 'Armónico - aspectos de crecimiento y facilidad'
+    },
+    square: {
+      name: 'Cuadratura',
+      meaning: 'Tensión creativa. Conflicto que genera crecimiento.',
+      effect: 'Crea desafíos que impulsan el desarrollo personal',
+      type: 'Tenso - genera fricción pero también evolución'
+    },
+    trine: {
+      name: 'Trígono',
+      meaning: 'Armonía natural. Las energías fluyen sin esfuerzo.',
+      effect: 'Aporta facilidad, talento natural y fluidez',
+      type: 'Armónico - el aspecto más favorable y fluido'
+    },
+    opposition: {
+      name: 'Oposición',
+      meaning: 'Polarización. Necesidad de encontrar equilibrio.',
+      effect: 'Requiere integrar energías opuestas',
+      type: 'Tenso - busca balance entre fuerzas contrarias'
+    },
+    semisextile: {
+      name: 'Semisextil',
+      meaning: 'Ajuste sutil. Pequeñas correcciones necesarias.',
+      effect: 'Aporta refinamiento y ajustes menores',
+      type: 'Menor - aspectos de matiz y sutileza'
+    },
+    semisquare: {
+      name: 'Semicuadratura',
+      meaning: 'Irritación menor. Pequeñas fricciones que molestan.',
+      effect: 'Genera pequeñas tensiones que piden atención',
+      type: 'Menor tenso - roces cotidianos que educan'
+    },
+    sesquiquadrate: {
+      name: 'Sesquicuadratura',
+      meaning: 'Presión persistente. Tensión que busca liberación.',
+      effect: 'Crea presión constante hasta encontrar solución',
+      type: 'Menor tenso - insistencia que pide cambio'
+    },
+    quincunx: {
+      name: 'Quincuncio',
+      meaning: 'Desajuste crónico. Energías que no encajan fácilmente.',
+      effect: 'Requiere adaptación constante y flexibilidad',
+      type: 'Menor complejo - aspectos de adaptación'
+    }
+  };
+
+  // ✅ SIGNIFICADOS DE PLANETAS
+  const planetMeanings = {
+    'Sol': {
+      meaning: 'Tu esencia, ego, vitalidad y propósito de vida',
+      keywords: 'Identidad, creatividad, liderazgo, autoridad'
+    },
+    'Luna': {
+      meaning: 'Emociones, intuición, necesidades emocionales y la madre',
+      keywords: 'Sentimientos, memoria, hogar, nutrición'
+    },
+    'Mercurio': {
+      meaning: 'Comunicación, pensamiento, aprendizaje y hermanos',
+      keywords: 'Intelecto, palabras, viajes cortos, curiosidad'
+    },
+    'Venus': {
+      meaning: 'Amor, belleza, valores, dinero y relaciones',
+      keywords: 'Romance, arte, placer, armonía, atracción'
+    },
+    'Marte': {
+      meaning: 'Acción, energía, agresión, sexualidad y guerra',
+      keywords: 'Fuerza, deseo, conflicto, iniciativa'
+    },
+    'Júpiter': {
+      meaning: 'Expansión, sabiduría, filosofía, suerte y crecimiento',
+      keywords: 'Abundancia, enseñanza, viajes, optimismo'
+    },
+    'Saturno': {
+      meaning: 'Disciplina, responsabilidad, límites y lecciones',
+      keywords: 'Estructura, tiempo, autoridad, madurez'
+    },
+    'Urano': {
+      meaning: 'Revolución, innovación, libertad y cambios súbitos',
+      keywords: 'Originalidad, tecnología, rebeldía, genialidad'
+    },
+    'Neptuno': {
+      meaning: 'Espiritualidad, ilusión, compasión y transcendencia',
+      keywords: 'Intuición, arte, sacrificio, confusión'
+    },
+    'Plutón': {
+      meaning: 'Transformación, poder, muerte-renacimiento y lo oculto',
+      keywords: 'Regeneración, intensidad, control, psicología'
+    },
+    'Nodo Norte': {
+      meaning: 'Tu propósito evolutivo y dirección de crecimiento',
+      keywords: 'Destino, desarrollo, nuevas habilidades'
+    },
+    'Quirón': {
+      meaning: 'La herida sanadora, donde duele pero también sanas',
+      keywords: 'Sanación, enseñanza, vulnerabilidad'
+    }
+  };
+
+  // ✅ SIGNIFICADOS DE SIGNOS
+  const signMeanings = {
+    'Aries': 'Iniciativa, liderazgo, impulso pionero',
+    'Tauro': 'Estabilidad, sensualidad, perseverancia',
+    'Géminis': 'Comunicación, versatilidad, curiosidad',
+    'Cáncer': 'Protección, nutrición, emocionalidad',
+    'Leo': 'Creatividad, drama, generosidad',
+    'Virgo': 'Perfección, servicio, análisis',
+    'Libra': 'Equilibrio, belleza, diplomacia',
+    'Escorpio': 'Intensidad, transformación, misterio',
+    'Sagitario': 'Aventura, filosofía, expansión',
+    'Capricornio': 'Ambición, estructura, tradición',
+    'Acuario': 'Innovación, humanitarismo, libertad',
+    'Piscis': 'Compasión, intuición, espiritualidad'
+  };
+
+  // ✅ SIGNIFICADOS DE CASAS EXTENDIDOS
   const housemeanings = {
-    1: "Personalidad, apariencia, forma de ser",
-    2: "Dinero, posesiones, valores personales", 
-    3: "Comunicación, hermanos, estudios",
-    4: "Hogar, familia, raíces",
-    5: "Creatividad, hijos, romance",
-    6: "Trabajo, salud, rutinas",
-    7: "Pareja, matrimonio, enemigos",
-    8: "Transformación, muerte, recursos compartidos",
-    9: "Filosofía, viajes, estudios superiores",
-    10: "Carrera, reputación, autoridad",
-    11: "Amigos, grupos, esperanzas",
-    12: "Espiritualidad, inconsciente, sacrificio"
+    1: {
+      name: "Casa 1 - Personalidad",
+      meaning: "Tu identidad, apariencia física y forma de presentarte al mundo",
+      keywords: "Ego, imagen, primeras impresiones, vitalidad"
+    },
+    2: {
+      name: "Casa 2 - Recursos",
+      meaning: "Dinero, posesiones materiales, valores personales y autoestima",
+      keywords: "Ingresos, talentos, seguridad material, valores"
+    },
+    3: {
+      name: "Casa 3 - Comunicación", 
+      meaning: "Hermanos, estudios básicos, comunicación y entorno cercano",
+      keywords: "Aprendizaje, viajes cortos, vecinos, escritura"
+    },
+    4: {
+      name: "Casa 4 - Hogar",
+      meaning: "Familia, hogar, raíces, tradiciones y el final de la vida",
+      keywords: "Madre, infancia, propiedades, intimidad"
+    },
+    5: {
+      name: "Casa 5 - Creatividad",
+      meaning: "Hijos, romance, creatividad, diversión y autoexpresión",
+      keywords: "Arte, juegos, noviazgo, especulación"
+    },
+    6: {
+      name: "Casa 6 - Trabajo",
+      meaning: "Trabajo diario, salud, rutinas, servicio y empleados",
+      keywords: "Empleo, dieta, mascotas, obligaciones"
+    },
+    7: {
+      name: "Casa 7 - Pareja",
+      meaning: "Matrimonio, socios, enemigos abiertos y contratos",
+      keywords: "Cónyuge, colaboraciones, justicia, otros"
+    },
+    8: {
+      name: "Casa 8 - Transformación",
+      meaning: "Muerte, renacimiento, sexualidad, dinero ajeno y ocultismo",
+      keywords: "Herencias, crisis, psicología, recursos compartidos"
+    },
+    9: {
+      name: "Casa 9 - Sabiduría",
+      meaning: "Filosofía, religión, estudios superiores, viajes largos",
+      keywords: "Universidad, extranjero, ley, espiritualidad"
+    },
+    10: {
+      name: "Casa 10 - Carrera",
+      meaning: "Profesión, reputación, autoridad, imagen pública y el padre",
+      keywords: "Estatus, ambición, reconocimiento, gobierno"
+    },
+    11: {
+      name: "Casa 11 - Amistades",
+      meaning: "Amigos, grupos, esperanzas, sueños y organizaciones",
+      keywords: "Ideales, clubes, benefactores, redes sociales"
+    },
+    12: {
+      name: "Casa 12 - Espiritualidad",
+      meaning: "Subconsciente, karma, sacrificio, hospitales y retiro",
+      keywords: "Meditación, enemigos ocultos, autosabotaje, compasión"
+    }
   };
 
   // ✅ FUNCIÓN PARA CAPTURAR POSICIÓN DEL MOUSE RELATIVA AL VIEWPORT
@@ -488,7 +662,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
     });
   };
 
-  // ✅ RENDERIZAR ASCENDENTE Y MEDIO CIELO
+  // ✅ RENDERIZAR ASCENDENTE CON TOOLTIP MEJORADO
   const renderAngles = () => {
     const angles = [];
     
@@ -514,7 +688,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
             className="animate-pulse"
           />
           
-          {/* Marcador del Ascendente */}
+          {/* Marcador del Ascendente CON TOOLTIP */}
           <circle
             cx={position.x}
             cy={position.y}
@@ -522,6 +696,13 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
             fill="#22c55e"
             stroke="white"
             strokeWidth="2"
+            className="cursor-pointer hover:r-10 transition-all duration-200"
+            onMouseEnter={(e) => {
+              setHoveredPlanet('Ascendente');
+              handleMouseMove(e);
+            }}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={() => setHoveredPlanet(null)}
           />
           
           {/* Símbolo ASC */}
@@ -533,6 +714,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
             fill="white"
             fontSize="10"
             fontWeight="bold"
+            className="pointer-events-none"
           >
             ASC
           </text>
@@ -546,6 +728,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
             fontSize="12"
             fontWeight="bold"
             style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}
+            className="pointer-events-none"
           >
             Ascendente
           </text>
@@ -557,6 +740,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
             fill="rgba(34,197,94,0.8)"
             fontSize="10"
             style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}
+            className="pointer-events-none"
           >
             {ascendant.degree}° {ascendant.sign}
           </text>
@@ -581,6 +765,13 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
             fill="#8b5cf6"
             stroke="white"
             strokeWidth="1"
+            className="cursor-pointer hover:r-8 transition-all duration-200"
+            onMouseEnter={(e) => {
+              setHoveredPlanet('Medio Cielo');
+              handleMouseMove(e);
+            }}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={() => setHoveredPlanet(null)}
           />
           
           <text
@@ -591,6 +782,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
             fill="white"
             fontSize="8"
             fontWeight="bold"
+            className="pointer-events-none"
           >
             MC
           </text>
@@ -602,52 +794,152 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
   };
 
   return (
-    <div className="space-y-8 relative">
-      {/* ✅ TOOLTIPS DINÁMICOS SIGUIENDO EL MOUSE */}
-      {hoveredPlanet && (
+    <>
+      <div className="space-y-8 relative">
+        {/* ✅ TOOLTIPS DINÁMICOS MEJORADOS CON INFORMACIÓN COMPLETA */}
+      {(() => {
+        if (!hoveredPlanet) return null;
+        const hovered = normalizedPlanets.find(p => p && p.name === hoveredPlanet);
+        if (!hovered) return null;
+        return (
+          <div 
+            className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 z-50 pointer-events-none shadow-2xl max-w-sm"
+            style={{ 
+              left: tooltipPosition.x + 15, 
+              top: tooltipPosition.y - 120,
+              transform: tooltipPosition.x > window.innerWidth - 300 ? 'translateX(-100%)' : 'none'
+            }}
+          >
+            <div className="flex items-center mb-3">
+              <span className="text-3xl mr-3">
+                {PLANET_SYMBOLS[hoveredPlanet] || '●'}
+              </span>
+              <div>
+                <div className="text-white font-bold text-lg">{hoveredPlanet}</div>
+                <div className="text-gray-200 text-sm">
+                  {hovered ? `${hovered.degree}° ${hovered.sign}` : ''}
+                  <div className="text-gray-300 text-xs">
+                    {hovered ? (
+                      <>
+                        Casa {hovered.house} • {signMeanings[hovered.sign as keyof typeof signMeanings]}
+                      </>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Significado del planeta */}
+            {planetMeanings[hoveredPlanet as keyof typeof planetMeanings] && (
+              <div className="mb-2">
+                <div className="text-white text-sm font-semibold mb-1">Significado:</div>
+                <div className="text-gray-200 text-xs mb-2">
+                  {planetMeanings[hoveredPlanet as keyof typeof planetMeanings].meaning}
+                </div>
+                <div className="text-gray-300 text-xs">
+                  <strong>Palabras clave:</strong> {planetMeanings[hoveredPlanet as keyof typeof planetMeanings].keywords}
+                </div>
+              </div>
+            )}
+            
+            {/* Estado retrógrado */}
+            {hovered && hovered.retrograde && (
+              <div className="bg-red-400/20 rounded-lg p-2 mt-2">
+                <div className="text-red-300 text-xs font-semibold">⚠️ Retrógrado</div>
+                <div className="text-red-200 text-xs">Energía internalizada, revisión de temas pasados</div>
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
+      {/* ✅ TOOLTIPS ESPECIALES PARA ASCENDENTE Y MEDIO CIELO */}
+      {hoveredPlanet === 'Ascendente' && ascendant && (
         <div 
-          className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 z-50 pointer-events-none shadow-2xl"
+          className="fixed bg-gradient-to-r from-green-500/95 to-emerald-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 z-50 pointer-events-none shadow-2xl max-w-sm"
           style={{ 
             left: tooltipPosition.x + 15, 
-            top: tooltipPosition.y - 80,
-            transform: tooltipPosition.x > window.innerWidth - 200 ? 'translateX(-100%)' : 'none'
+            top: tooltipPosition.y - 130,
+            transform: tooltipPosition.x > window.innerWidth - 300 ? 'translateX(-100%)' : 'none'
           }}
         >
-          <div className="flex items-center mb-2">
-            <span className="text-2xl mr-3">
-              {PLANET_SYMBOLS[hoveredPlanet] || '●'}
-            </span>
+          <div className="flex items-center mb-3">
+            <span className="text-3xl mr-3">⬆️</span>
             <div>
-              <div className="text-white font-semibold">{hoveredPlanet}</div>
+              <div className="text-white font-bold text-lg">Ascendente</div>
               <div className="text-gray-200 text-sm">
-                {normalizedPlanets.find(p => p.name === hoveredPlanet)?.degree}° {normalizedPlanets.find(p => p.name === hoveredPlanet)?.sign}
+                {ascendant.degree}° {ascendant.sign}
               </div>
             </div>
           </div>
-          <div className="text-gray-300 text-xs">
-            Casa {normalizedPlanets.find(p => p.name === hoveredPlanet)?.house}
-            {normalizedPlanets.find(p => p.name === hoveredPlanet)?.retrograde && (
-              <span className="text-red-300 ml-2">Retrógrado</span>
-            )}
+          
+          <div className="mb-2">
+            <div className="text-white text-sm font-semibold mb-1">Significado:</div>
+            <div className="text-gray-200 text-xs mb-2">
+              Tu máscara social, cómo te presentas al mundo y tu apariencia física. 
+              La energía que proyectas en primeras impresiones.
+            </div>
+            <div className="text-gray-300 text-xs mb-2">
+              <strong>En {ascendant.sign}:</strong> {signMeanings[ascendant.sign as keyof typeof signMeanings]}
+            </div>
+          </div>
+        </div>
+      )}
+      {hoveredPlanet === 'Medio Cielo' && midheaven && (
+        <div 
+          className="fixed bg-gradient-to-r from-purple-500/95 to-violet-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 z-50 pointer-events-none shadow-2xl max-w-sm"
+          style={{ 
+            left: tooltipPosition.x + 15, 
+            top: tooltipPosition.y - 120,
+            transform: tooltipPosition.x > window.innerWidth - 300 ? 'translateX(-100%)' : 'none'
+          }}
+        >
+          <div className="flex items-center mb-3">
+            <span className="text-3xl mr-3">🏔️</span>
+            <div>
+              <div className="text-white font-bold text-lg">Medio Cielo</div>
+              <div className="text-gray-200 text-sm">
+                {midheaven.degree}° {midheaven.sign}
+              </div>
+            </div>
+          </div>
+          
+          <div className="mb-2">
+            <div className="text-white text-sm font-semibold mb-1">Significado:</div>
+            <div className="text-gray-200 text-xs mb-2">
+              Tu vocación, carrera ideal, reputación pública y lo que quieres lograr 
+              en el mundo. Tu propósito profesional.
+            </div>
+            <div className="text-gray-300 text-xs mb-2">
+              <strong>En {midheaven.sign}:</strong> {signMeanings[midheaven.sign as keyof typeof signMeanings]}
+            </div>
+            <div className="text-gray-300 text-xs">
+              <strong>Palabras clave:</strong> Carrera, estatus, reconocimiento, autoridad
+            </div>
           </div>
         </div>
       )}
 
       {hoveredHouse && (
         <div 
-          className="fixed bg-gradient-to-r from-blue-500/95 to-cyan-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 z-50 pointer-events-none shadow-2xl max-w-xs"
+          className="fixed bg-gradient-to-r from-blue-500/95 to-cyan-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 z-50 pointer-events-none shadow-2xl max-w-sm"
           style={{ 
             left: tooltipPosition.x + 15, 
-            top: tooltipPosition.y - 60,
-            transform: tooltipPosition.x > window.innerWidth - 250 ? 'translateX(-100%)' : 'none'
+            top: tooltipPosition.y - 100,
+            transform: tooltipPosition.x > window.innerWidth - 300 ? 'translateX(-100%)' : 'none'
           }}
         >
-          <div className="flex items-start mb-2">
-            <span className="text-2xl mr-3">🏠</span>
+          <div className="flex items-start mb-3">
+            <span className="text-3xl mr-3">🏠</span>
             <div>
-              <div className="text-white font-semibold">Casa {hoveredHouse}</div>
-              <div className="text-gray-200 text-sm">
-                {housemeanings[hoveredHouse as keyof typeof housemeanings]}
+              <div className="text-white font-bold text-lg">
+                {housemeanings[hoveredHouse as keyof typeof housemeanings]?.name}
+              </div>
+              <div className="text-gray-200 text-sm mb-2">
+                {housemeanings[hoveredHouse as keyof typeof housemeanings]?.meaning}
+              </div>
+              <div className="text-gray-300 text-xs">
+                <strong>Temas:</strong> {housemeanings[hoveredHouse as keyof typeof housemeanings]?.keywords}
               </div>
             </div>
           </div>
@@ -658,14 +950,18 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
       <div className="bg-black/30 rounded-xl p-4 text-xs text-gray-400">
         <div>🔍 Planetas: {planets.length} | Casas: {houses.length} | Aspectos: {calculatedAspects.length}</div>
         <div>🔺 Ascendente: {ascendant?.sign || 'N/A'} | 🌟 Primera carta: {planets[0]?.name} {planets[0]?.degree}° {planets[0]?.sign}</div>
+        <div className="mt-2 text-yellow-300">💡 <strong>Tip:</strong> Pasa el cursor sobre planetas, casas, ascendente y aspectos para aprender más</div>
       </div>
 
-      {/* Controles de aspectos */}
+      {/* Controles de aspectos CON TOOLTIPS EDUCATIVOS */}
       <div className="bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center">
             <Palette className="w-5 h-5 text-purple-400 mr-3" />
             <h3 className="text-lg font-bold text-white">Configuración de Aspectos</h3>
+            <div className="ml-2 text-gray-400 text-sm">
+              (Líneas que conectan planetas)
+            </div>
           </div>
           
           <button
@@ -685,46 +981,62 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <button
               onClick={() => setSelectedAspectTypes({...selectedAspectTypes, major: !selectedAspectTypes.major})}
-              className={`p-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
+              className={`p-3 rounded-xl text-sm font-semibold transition-all duration-300 relative group ${
                 selectedAspectTypes.major 
                   ? 'bg-gradient-to-r from-blue-400/30 to-purple-500/30 border border-blue-400/50 text-blue-300' 
                   : 'bg-gray-600/20 border border-gray-500/30 text-gray-400'
               }`}
+              title="Conjunción, Sextil, Cuadratura, Trígono, Oposición - Los aspectos más importantes y poderosos"
             >
               🌟 Aspectos Mayores
+              <div className="opacity-0 group-hover:opacity-100 absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-black/90 text-white text-xs rounded p-2 whitespace-nowrap z-10 transition-opacity">
+                Los 5 aspectos principales: más fuertes y definitorios
+              </div>
             </button>
             
             <button
               onClick={() => setSelectedAspectTypes({...selectedAspectTypes, minor: !selectedAspectTypes.minor})}
-              className={`p-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
+              className={`p-3 rounded-xl text-sm font-semibold transition-all duration-300 relative group ${
                 selectedAspectTypes.minor 
                   ? 'bg-gradient-to-r from-purple-400/30 to-pink-500/30 border border-purple-400/50 text-purple-300' 
                   : 'bg-gray-600/20 border border-gray-500/30 text-gray-400'
               }`}
+              title="Semisextil, Semicuadratura, Sesquicuadratura, Quincuncio - Aspectos sutiles pero significativos"
             >
               ✨ Aspectos Menores
+              <div className="opacity-0 group-hover:opacity-100 absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-black/90 text-white text-xs rounded p-2 whitespace-nowrap z-10 transition-opacity">
+                Influencias más sutiles pero importantes
+              </div>
             </button>
             
             <button
               onClick={() => setSelectedAspectTypes({...selectedAspectTypes, easy: !selectedAspectTypes.easy})}
-              className={`p-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
+              className={`p-3 rounded-xl text-sm font-semibold transition-all duration-300 relative group ${
                 selectedAspectTypes.easy 
                   ? 'bg-gradient-to-r from-cyan-400/30 to-blue-500/30 border border-cyan-400/50 text-cyan-300' 
                   : 'bg-gray-600/20 border border-gray-500/30 text-gray-400'
               }`}
+              title="Trígonos y Sextiles - Talentos naturales y facilidades"
             >
               💙 Aspectos Armónicos
+              <div className="opacity-0 group-hover:opacity-100 absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-black/90 text-white text-xs rounded p-2 whitespace-nowrap z-10 transition-opacity">
+                Facilidades, talentos y energías que fluyen
+              </div>
             </button>
             
             <button
               onClick={() => setSelectedAspectTypes({...selectedAspectTypes, hard: !selectedAspectTypes.hard})}
-              className={`p-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
+              className={`p-3 rounded-xl text-sm font-semibold transition-all duration-300 relative group ${
                 selectedAspectTypes.hard 
                   ? 'bg-gradient-to-r from-red-400/30 to-pink-500/30 border border-red-400/50 text-red-300' 
                   : 'bg-gray-600/20 border border-gray-500/30 text-gray-400'
               }`}
+              title="Cuadraturas y Oposiciones - Desafíos que generan crecimiento"
             >
               ❤️ Aspectos Tensos
+              <div className="opacity-0 group-hover:opacity-100 absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-black/90 text-white text-xs rounded p-2 whitespace-nowrap z-10 transition-opacity">
+                Tensiones creativas que impulsan el desarrollo
+              </div>
             </button>
           </div>
         )}
@@ -786,10 +1098,10 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
         </div>
       )}
 
-      {/* Leyenda de aspectos */}
+      {/* Leyenda de aspectos CON SIGNIFICADOS COMPLETOS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {Object.entries(ASPECTS).map(([type, config]) => (
-          <div key={type} className="bg-black/30 rounded-2xl p-4 backdrop-blur-sm border border-white/10">
+          <div key={type} className="bg-black/30 rounded-2xl p-4 backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all duration-200 cursor-pointer group">
             <div className="flex items-center mb-2">
               <div 
                 className="w-4 h-1 mr-3 rounded" 
@@ -797,9 +1109,22 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
               ></div>
               <span className="text-white font-semibold">{config.name}</span>
             </div>
-            <p className="text-gray-400 text-sm">
+            <p className="text-gray-400 text-sm mb-2">
               {config.angle}° | Orbe: ±{config.orb}°
             </p>
+            
+            {/* Información expandida al hacer hover */}
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <div className="text-gray-300 text-xs mb-1">
+                <strong>Significado:</strong> {aspectMeanings[type as keyof typeof aspectMeanings]?.meaning}
+              </div>
+              <div className="text-gray-400 text-xs mb-1">
+                <strong>Efecto:</strong> {aspectMeanings[type as keyof typeof aspectMeanings]?.effect}
+              </div>
+              <div className="text-gray-500 text-xs">
+                <strong>Tipo:</strong> {aspectMeanings[type as keyof typeof aspectMeanings]?.type}
+              </div>
+            </div>
           </div>
         ))}
       </div>
@@ -898,7 +1223,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
       </div>
 
       {/* Lista de aspectos calculados */}
-      {calculatedAspects.length > 0 && (
+      {calculatedAspects && calculatedAspects.length > 0 && (
         <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
           <div className="flex items-center mb-6">
             <Star className="w-6 h-6 text-yellow-400 mr-3" />
@@ -950,23 +1275,25 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {normalizedPlanets.map((planet, index) => (
-            <div key={index} className="bg-black/30 rounded-xl p-4 backdrop-blur-sm border border-white/10">
-              <div className="flex items-center mb-2">
-                <span className="text-2xl mr-3">
-                  {PLANET_SYMBOLS[planet.name] || '●'}
-                </span>
-                <div>
-                  <div className="text-white font-semibold">{planet.name}</div>
-                  <div className="text-gray-400 text-sm">
-                    {planet.degree || 0}° {planet.sign}
-                    {planet.retrograde && <span className="text-red-400 ml-1">R</span>}
+            planet ? (
+              <div key={index} className="bg-black/30 rounded-xl p-4 backdrop-blur-sm border border-white/10">
+                <div className="flex items-center mb-2">
+                  <span className="text-2xl mr-3">
+                    {PLANET_SYMBOLS[planet.name] || '●'}
+                  </span>
+                  <div>
+                    <div className="text-white font-semibold">{planet.name}</div>
+                    <div className="text-gray-400 text-sm">
+                      {`${planet.degree || 0}° ${planet.sign}`}
+                      {planet.retrograde && <span className="text-red-400 ml-1">R</span>}
+                    </div>
                   </div>
                 </div>
+                <div className="text-gray-500 text-xs">
+                  Casa {planet.house} | {SIGN_SYMBOLS[planet.sign] || ''}
+                </div>
               </div>
-              <div className="text-gray-500 text-xs">
-                Casa {planet.house} | {SIGN_SYMBOLS[planet.sign] || ''}
-              </div>
-            </div>
+            ) : null
           ))}
         </div>
       </div>
@@ -997,7 +1324,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
               </div>
             )}
             
-            {midheaven && (
+            {typeof midheaven !== 'undefined' && midheaven && (
               <div className="bg-black/30 rounded-xl p-4 backdrop-blur-sm border border-white/10">
                 <div className="flex items-center mb-2">
                   <span className="text-2xl mr-3">⬆️</span>
@@ -1017,7 +1344,9 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
         </div>
       )}
     </div>
+    </>
   );
-};
+};  
+
 
 export default ChartDisplay;
