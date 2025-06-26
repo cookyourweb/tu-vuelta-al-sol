@@ -1,6 +1,8 @@
 // src/services/progressedChartService.ts - VERSIÓN COMPLETA CORREGIDA
+// ✅ URL de ejemplo que funciona correctamente:
+// https://api.prokerala.com/v2/astrology/natal-planet-position?profile[datetime]=1974-02-10T07:30:00%2B01:00&profile[coordinates]=40.4168,-3.7038&birth_time_unknown=false&house_system=placidus&orb=default&birth_time_rectification=flat-chart&la=es&ayanamsa=0
+
 import axios from 'axios';
-import { formatProkeralaDateTime } from '../utils/dateTimeUtils';
 
 // Constantes para la API de Prokerala
 const PROKERALA_API_BASE_URL = process.env.NEXT_PUBLIC_PROKERALA_API_BASE_URL || 'https://api.prokerala.com/v2';
@@ -61,6 +63,54 @@ export async function getAccessToken(): Promise<string> {
 }
 
 /**
+ * ✅ FUNCIÓN CORREGIDA: Calcular timezone offset correcto según fecha
+ */
+function calculateTimezoneOffset(date: string, timezone: string): string {
+  const birthDate = new Date(date);
+  const year = birthDate.getFullYear();
+  
+  // Función auxiliar para obtener el último domingo de un mes
+  const getLastSunday = (year: number, month: number): number => {
+    const lastDay = new Date(year, month, 0);
+    const dayOfWeek = lastDay.getDay();
+    return lastDay.getDate() - dayOfWeek;
+  };
+  
+  if (timezone === 'Europe/Madrid' || timezone === 'Europe/Berlin' || timezone === 'Europe/Paris') {
+    // Europa Central: Horario de verano desde último domingo de marzo hasta último domingo de octubre
+    const dstStart = new Date(year, 2, getLastSunday(year, 3)); // Marzo
+    const dstEnd = new Date(year, 9, getLastSunday(year, 10)); // Octubre
+    
+    if (birthDate >= dstStart && birthDate < dstEnd) {
+      return '+02:00'; // CEST (Verano)
+    } else {
+      return '+01:00'; // CET (Invierno)
+    }
+  }
+  
+  // Zonas sin cambio de horario
+  const staticTimezones: Record<string, string> = {
+    'America/Argentina/Buenos_Aires': '-03:00',
+    'America/Bogota': '-05:00',
+    'America/Lima': '-05:00',
+    'Asia/Tokyo': '+09:00',
+    'UTC': '+00:00'
+  };
+  
+  return staticTimezones[timezone] || '+00:00';
+}
+
+/**
+ * ✅ FUNCIÓN CORREGIDA: Formatear coordenadas con precisión correcta
+ */
+function formatCoordinates(lat: number, lng: number): string {
+  // Redondear a 4 decimales para Prokerala
+  const latFixed = Math.round(lat * 10000) / 10000;
+  const lngFixed = Math.round(lng * 10000) / 10000;
+  return `${latFixed},${lngFixed}`;
+}
+
+/**
  * 🌟 FUNCIÓN CORREGIDA: Obtiene la carta progresada con parámetros exactos
  */
 export async function getProgressedChart(
@@ -83,32 +133,30 @@ export async function getProgressedChart(
   
   const token = await getAccessToken();
   
-  // ✅ CORRECCIÓN: Usar formato datetime simple sin timezone complejo
-  const datetime = `${birthDate}T${birthTime || '12:00:00'}`;
+  // ✅ CORREGIDO: Usar función mejorada de timezone
+  const offset = calculateTimezoneOffset(birthDate, timezone);
+  const datetime = `${birthDate}T${birthTime || '12:00:00'}${offset}`;
   
-  // ✅ CORRECCIÓN: Coordenadas con 4 decimales y corregir separador decimal
-  const coordinates = `${latitude.toFixed(4)},${longitude.toFixed(4)}`;
+  // ✅ CORREGIDO: Formatear coordenadas con precisión correcta
+  const coordinates = formatCoordinates(latitude, longitude);
   
-  // ✅ CORRECCIÓN: Formatear datetime con segundos y zona horaria Z
-  const datetimeWithSeconds = datetime.length === 16 ? datetime + ':00Z' : datetime;
-  
-  console.log(`🕒 DateTime formateado: ${datetimeWithSeconds}`);
+  console.log(`🕒 DateTime formateado: ${datetime}`);
   console.log(`📍 Coordenadas formateadas: ${coordinates}`);
   
-  // ✅ PARÁMETROS CORREGIDOS - Formato directo como natal chart exitosa
+  // ✅ PARÁMETROS CORREGIDOS - Usar formato profile[] exactamente como natal chart exitosa
   const params = {
-    'profile[datetime]': datetimeWithSeconds,
-    'profile[coordinates]': coordinates,
-    'current_coordinates': coordinates, // Añadido parámetro obligatorio según error API
+    'profile[datetime]': datetime,              // ✅ CORREGIDO: formato profile[]
+    'profile[coordinates]': coordinates,        // ✅ CORREGIDO: formato profile[]
+    'current_coordinates': coordinates,         // Parámetro obligatorio para progresiones
     'progression_year': progressionYear.toString(),
-    'ayanamsa': '0',                        // 🚨 CRÍTICO: Tropical occidental
-    'house_system': 'placidus',
-    'birth_time_rectification': 'flat-chart',
-    'aspect_filter': 'all',
-    'la': 'es'
+    'ayanamsa': options.ayanamsa || '0',       // 🚨 CRÍTICO: Tropical occidental
+    'house_system': options.houseSystem || 'placidus',
+    'birth_time_rectification': options.birthTimeRectification || 'flat-chart', // ✅ CORREGIDO
+    'aspect_filter': options.aspectFilter || 'all',
+    'la': options.language || 'es'
   };
 
-  console.log('📡 Parámetros carta progresada:', params);
+  console.log('📡 Parámetros carta progresada CORREGIDOS:', params);
 
   try {
     // ✅ Construir URL
@@ -117,7 +165,7 @@ export async function getProgressedChart(
       url.searchParams.append(key, value);
     });
 
-    console.log('🌐 URL completa carta progresada:', url.toString());
+    console.log('🌐 URL completa carta progresada CORREGIDA:', url.toString());
 
     // ✅ Hacer la petición
     const response = await axios.get(url.toString(), {
@@ -129,6 +177,12 @@ export async function getProgressedChart(
 
     console.log(`✅ Carta progresada obtenida exitosamente para año ${progressionYear}`);
     console.log(`📊 Respuesta status: ${response.status}`);
+    console.log('📊 Datos de respuesta preview:', {
+      planetsCount: response.data?.planets?.length || 0,
+      housesCount: response.data?.houses?.length || 0,
+      aspectsCount: response.data?.aspects?.length || 0,
+      hasAscendant: !!response.data?.ascendant
+    });
     
     return {
       ...response.data,
@@ -136,7 +190,7 @@ export async function getProgressedChart(
         progressionYear,
         generatedAt: new Date().toISOString(),
         parameters: params,
-        correctionApplied: 'simplified datetime format + ayanamsa=0'
+        correctionApplied: 'profile[datetime] format + ayanamsa=0 + timezone corrected'
       }
     };
 
@@ -315,23 +369,28 @@ export async function testProgressedChartConnection(): Promise<{
       progressionYear: 2025
     };
     
-    // 3. Testear parámetros sin hacer la llamada real
+    // 3. Testear parámetros corregidos
     const datetime = `${testData.birthDate}T${testData.birthTime}`;
-    const coordinates = `${testData.latitude.toFixed(4)},${testData.longitude.toFixed(4)}`;
+    const offset = calculateTimezoneOffset(testData.birthDate, testData.timezone);
+    const formattedDateTime = `${datetime}${offset}`;
+    const coordinates = formatCoordinates(testData.latitude, testData.longitude);
     
-    console.log('🔍 Parámetros de test preparados:');
-    console.log(`  DateTime: ${datetime}`);
+    console.log('🔍 Parámetros de test CORREGIDOS:');
+    console.log(`  DateTime: ${formattedDateTime}`);
     console.log(`  Coordinates: ${coordinates}`);
     console.log(`  Progression Year: ${testData.progressionYear}`);
+    console.log(`  Ayanamsa: 0 (Tropical)`);
     
     return {
       success: true,
-      message: 'Configuración correcta para carta progresada',
+      message: 'Configuración CORREGIDA para carta progresada',
       details: {
         token: token.substring(0, 20) + '...',
-        datetime,
+        datetime: formattedDateTime,
         coordinates,
-        progressionYear: testData.progressionYear
+        progressionYear: testData.progressionYear,
+        ayanamsa: '0',
+        correctionApplied: 'profile[datetime] format + timezone calculation + ayanamsa=0'
       }
     };
     
@@ -356,10 +415,11 @@ export async function debugProgressedVsNatal(
   longitude: number,
   timezone: string
 ) {
-  console.log('🔍 === DEBUGGING: PROGRESADA VS NATAL ===');
+  console.log('🔍 === DEBUGGING: PROGRESADA VS NATAL CORREGIDO ===');
   
-  const datetime = `${birthDate}T${birthTime}`;
-  const coordinates = `${latitude.toFixed(4)},${longitude.toFixed(4)}`;
+  const offset = calculateTimezoneOffset(birthDate, timezone);
+  const datetime = `${birthDate}T${birthTime}${offset}`;
+  const coordinates = formatCoordinates(latitude, longitude);
   
   console.log('📅 Datos base:', {
     birthDate,
@@ -369,17 +429,19 @@ export async function debugProgressedVsNatal(
     timezone
   });
   
-  console.log('🔄 Formato para progresada:', {
-    datetime,
-    coordinates,
-    progression_year: '2025',
-    ayanamsa: '0'
+  console.log('🔄 Formato CORREGIDO para progresada:', {
+    'profile[datetime]': datetime,
+    'profile[coordinates]': coordinates,
+    'progression_year': '2025',
+    'ayanamsa': '0',
+    'birth_time_rectification': 'flat-chart'
   });
   
-  console.log('🌐 URL que se generaría:');
+  console.log('🌐 URL CORREGIDA que se generaría:');
   const testUrl = new URL(`${PROKERALA_API_BASE_URL}/astrology/progression-chart`);
   testUrl.searchParams.append('profile[datetime]', datetime);
   testUrl.searchParams.append('profile[coordinates]', coordinates);
+  testUrl.searchParams.append('current_coordinates', coordinates);
   testUrl.searchParams.append('progression_year', '2025');
   testUrl.searchParams.append('ayanamsa', '0');
   testUrl.searchParams.append('house_system', 'placidus');
@@ -388,6 +450,7 @@ export async function debugProgressedVsNatal(
   testUrl.searchParams.append('la', 'es');
   
   console.log(testUrl.toString());
+  console.log('✅ Esta URL debería funcionar igual que la natal chart');
   console.log('🔍 === FIN DEBUGGING ===');
 }
 

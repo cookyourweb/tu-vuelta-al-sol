@@ -4,6 +4,165 @@
 
 **"Tu Vuelta al Sol"** es una aplicación web que genera agendas astrológicas personalizadas basadas en la carta natal y progresada del usuario. La aplicación combina precisión astrológica máxima con inteligencia artificial para crear consejos personalizados y herramientas prácticas de planificación.
 
+### Estructura de Archivos del Proyecto
+
+El proyecto está organizado de la siguiente manera:
+
+```
+/ (raíz del proyecto)
+├── .gitignore
+├── .vercelignore
+├── eslint.config.mjs
+├── next.config.js
+├── next.config.ts
+├── package-lock.json
+├── package.json
+├── postcss.config.mjs
+├── README.md
+├── tsconfig.json
+├── vercel.json
+├── public/
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
+├── scripts/
+│   ├── fix-quotes.sh
+│   └── professional-quote-fix.sh
+├── src/
+│   ├── app/
+│   │   ├── favicon.ico
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   ├── (auth)/
+│   │   ├── (dashboard)/
+│   │   ├── api/
+│   │   │   ├── astrology/
+│   │   │   │   ├── ChartLoader.tsx
+│   │   │   │   ├── natal-chart/
+│   │   │   │   │   └── route.ts
+│   │   │   │   └── test-postman/
+│   │   │   │       └── route.ts
+│   │   │   ├── birth-data/
+│   │   │   │   └── route.ts
+│   │   │   ├── charts/
+│   │   │   │   ├── natal/
+│   │   │   │   │   └── route.ts
+│   │   │   │   └── progressed/
+│   │   │   │       └── route.ts
+│   │   │   ├── events/
+│   │   │   │   └── astrological/
+│   │   │   │       └── route.ts
+│   │   │   ├── prokerala/
+│   │   │   │   ├── client-v2.ts
+│   │   │   │   ├── utils.ts
+│   │   │   │   ├── chart/
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── direct-test/
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── location-search/
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── natal-chart/
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── natal-horoscope/
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── test/
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── test-page/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── token/
+│   │   │   │   │   └── route.ts
+│   │   │   ├── test-mongodb/
+│   │   │   │   └── route.ts
+│   │   │   ├── users/
+│   │   │   │   └── route.ts
+│   │   ├── clear-chart-cache/
+│   │   │   └── route.ts
+│   │   ├── debug/
+│   │   │   └── page.tsx
+│   │   ├── postman-test/
+│   │   │   └── page.tsx
+│   │   ├── test-api/
+│   │   │   └── page.tsx
+│   │   ├── test-natal-chart/
+│   │   │   └── page.tsx
+│   │   ├── test-timezone/
+│   │   │   └── page.tsx
+│   │   └── types/
+│   │       └── astrology.ts
+│   ├── components/
+│   │   ├── astrology/
+│   │   │   ├── AspectLines.tsx
+│   │   │   ├── AstrologicalAgenda.tsx
+│   │   │   ├── AstrologicalAgendaGenerator.tsx
+│   │   │   ├── ChartDisplay.tsx
+│   │   │   ├── HouseGrid.tsx
+│   │   │   ├── NatalChartWheel.tsx
+│   │   │   └── PlanetSymbol.tsx
+│   │   ├── auth/
+│   │   │   ├── LoginForm.tsx
+│   │   │   └── RegisterForm.tsx
+│   │   ├── dashboard/
+│   │   │   ├── BirthDataForm.tsx
+│   │   │   └── NatalChartCard.tsx
+│   │   ├── debug/
+│   │   │   └── ForceRegenerateChart.tsx
+│   │   ├── forms/
+│   │   │   └── EnhancedBirthDataForm.tsx
+│   │   ├── hooks/
+│   │   │   ├── useAspects.ts
+│   │   │   ├── useChart.ts
+│   │   │   ├── usePlanets.ts
+│   │   │   └── useProkeralaApi.ts
+│   │   ├── layout/
+│   │   │   ├── Footer.tsx
+│   │   │   └── PrimaryHeader.tsx
+│   │   ├── test/
+│   │   │   ├── NatalChartTest.tsx
+│   │   │   ├── PostmanTest.tsx
+│   │   │   ├── ProkeralaNatalTest.tsx
+│   │   │   ├── SimpleTimezonetest.tsx
+│   │   │   └── TimezoneTestComponent.tsx
+│   │   └── ui/
+│   │       ├── Alert.tsx
+│   │       ├── Button.tsx
+│   │       └── Input.tsx
+│   ├── context/
+│   │   ├── AuthContext.tsx
+│   │   └── NotificationContext.tsx
+│   ├── lib/
+│   │   ├── db.ts
+│   │   ├── firebase.ts
+│   │   ├── utils.ts
+│   │   └── prokerala/
+│   │       ├── client.ts
+│   │       ├── endpoints.ts
+│   │       └── types.ts
+│   ├── models/
+│   │   ├── BirthData.ts
+│   │   ├── Chart.ts
+│   │   └── User.ts
+│   ├── services/
+│   │   ├── astrologyService.ts
+│   │   ├── progressedChartService.ts
+│   │   └── prokeralaService.ts
+│   ├── utils/
+│   │   ├── dateTimeUtils.ts
+│   │   └── astrology/
+│   │       ├── aspectCalculations.ts
+│   │       ├── coordinateUtils.ts
+│   │       ├── degreeConverter.ts
+│   │       └── planetPositions.ts
+├── types/
+│   └── astrology/
+│       ├── aspects.ts
+│       ├── basic.ts
+│       ├── chart.ts
+│       └── utils.ts
+```
+
 ### Funcionalidades Principales:
 1. **Carta natal con precisión máxima** usando Swiss Ephemeris
 2. **Carta progresada** para el año actuala

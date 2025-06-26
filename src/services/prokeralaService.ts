@@ -1,7 +1,13 @@
-// src/services/prokeralaService.ts
+// src/services/prokeralaService.ts - VERSIÓN FINAL CORREGIDA
+// ✅ URL de ejemplo que funciona correctamente:
+// https://api.prokerala.com/v2/astrology/natal-planet-position?profile[datetime]=1974-02-10T07:30:00%2B01:00&profile[coordinates]=40.4168,-3.7038&birth_time_unknown=false&house_system=placidus&orb=default&birth_time_rectification=flat-chart&la=es&ayanamsa=0
+
 import axios from 'axios';
 
-// Define and export types
+// ==========================================
+// TIPOS E INTERFACES
+// ==========================================
+
 export interface PlanetPosition {
   name: string;
   sign: string;
@@ -90,7 +96,10 @@ interface ProkeralaApiResponse {
   datetime?: string;
 }
 
-// API access configuration
+// ==========================================
+// CONFIGURACIÓN DE API
+// ==========================================
+
 const API_BASE_URL = 'https://api.prokerala.com/v2';
 const TOKEN_ENDPOINT = 'https://api.prokerala.com/token';
 const CLIENT_ID = process.env.NEXT_PUBLIC_PROKERALA_CLIENT_ID;
@@ -103,6 +112,58 @@ interface TokenCache {
 }
 
 let tokenCache: TokenCache | null = null;
+
+// ==========================================
+// FUNCIONES DE UTILIDAD CORREGIDAS
+// ==========================================
+
+/**
+ * ✅ FUNCIÓN CORREGIDA: Calcular timezone offset correcto según fecha
+ */
+function calculateTimezoneOffset(date: string, timezone: string): string {
+  const birthDate = new Date(date);
+  const year = birthDate.getFullYear();
+  
+  // Función auxiliar para obtener el último domingo de un mes
+  const getLastSunday = (year: number, month: number): number => {
+    const lastDay = new Date(year, month, 0);
+    const dayOfWeek = lastDay.getDay();
+    return lastDay.getDate() - dayOfWeek;
+  };
+  
+  if (timezone === 'Europe/Madrid' || timezone === 'Europe/Berlin' || timezone === 'Europe/Paris') {
+    // Europa Central: Horario de verano desde último domingo de marzo hasta último domingo de octubre
+    const dstStart = new Date(year, 2, getLastSunday(year, 3)); // Marzo
+    const dstEnd = new Date(year, 9, getLastSunday(year, 10)); // Octubre
+    
+    if (birthDate >= dstStart && birthDate < dstEnd) {
+      return '+02:00'; // CEST (Verano)
+    } else {
+      return '+01:00'; // CET (Invierno)
+    }
+  }
+  
+  // Zonas sin cambio de horario
+  const staticTimezones: Record<string, string> = {
+    'America/Argentina/Buenos_Aires': '-03:00',
+    'America/Bogota': '-05:00',
+    'America/Lima': '-05:00',
+    'Asia/Tokyo': '+09:00',
+    'UTC': '+00:00'
+  };
+  
+  return staticTimezones[timezone] || '+00:00';
+}
+
+/**
+ * ✅ FUNCIÓN CORREGIDA: Formatear coordenadas con precisión correcta
+ */
+function formatCoordinates(lat: number, lng: number): string {
+  // Redondear a 4 decimales para Prokerala
+  const latFixed = Math.round(lat * 10000) / 10000;
+  const lngFixed = Math.round(lng * 10000) / 10000;
+  return `${latFixed},${lngFixed}`;
+}
 
 /**
  * Get a token for the Prokerala API
@@ -153,30 +214,13 @@ async function getToken(): Promise<string> {
   }
 }
 
-/**
- * Format timezone offset for API requests
- */
-function getTimezoneOffset(timezone: string): string {
-  try {
-    // Mapeo básico de zonas horarias comunes
-    const timezoneMap: { [key: string]: string } = {
-      'Europe/Madrid': '+01:00',      // UTC+1 (puede ser UTC+2 en verano)
-      'Europe/London': '+00:00',      // UTC+0
-      'America/New_York': '-05:00',   // UTC-5
-      'America/Los_Angeles': '-08:00', // UTC-8
-      'Asia/Tokyo': '+09:00',         // UTC+9
-      'Asia/Kolkata': '+05:30',       // UTC+5:30
-    };
-    
-    return timezoneMap[timezone] || '+00:00';
-  } catch (error) {
-    console.warn('Error calculating timezone offset, using +00:00:', error);
-    return '+00:00';
-  }
-}
+// ==========================================
+// FUNCIÓN PRINCIPAL CORREGIDA
+// ==========================================
 
 /**
- * Get natal chart from Prokerala API using the correct endpoint
+ * ✅ FUNCIÓN PRINCIPAL CORREGIDA: Get natal chart from Prokerala API
+ * Usa EXACTAMENTE los mismos parámetros que tu URL de ejemplo exitosa
  */
 export async function getNatalHoroscope(
   birthDate: string,
@@ -197,41 +241,55 @@ export async function getNatalHoroscope(
   try {
     const token = await getToken();
     
-    // Formatear datetime exactamente como en Postman
-    const offset = getTimezoneOffset(timezone);
+    // ✅ CORREGIDO: Usar función mejorada de timezone
+    const offset = calculateTimezoneOffset(birthDate, timezone);
     const datetime = `${birthDate}T${birthTime}${offset}`;
     
-    // Formatear coordenadas como en Postman: "lat,lon"
-    const coordinates = `${latitude},${longitude}`;
+    // ✅ CORREGIDO: Formatear coordenadas con precisión correcta
+    const coordinates = formatCoordinates(latitude, longitude);
     
-    console.log('🔍 Llamando a natal-chart con parámetros:', {
+    console.log('🔍 prokeralaService - Parámetros CORREGIDOS:', {
       datetime,
       coordinates,
-      timezone
+      timezone,
+      offset
     });
     
-    // Parámetros exactos según Postman
+    // ✅ PARÁMETROS CORREGIDOS: Usar formato profile[datetime] exactamente como tu URL ejemplo
     const params = {
-      datetime: datetime,
-      coordinates: coordinates,
-      birth_time_unknown: options.birthTimeUnknown ? 'true' : 'false',
-      house_system: options.houseSystem || 'placidus',
-      orb: options.orb || 'default',
-      birth_time_rectification: options.birthTimeRectification || 'none',
-      aspect_filter: options.aspectFilter || 'all',
-      la: options.language || 'es',
-      ayanamsa: options.ayanamsa || '1'
+      'profile[datetime]': datetime,           // ✅ CORREGIDO: formato profile[]
+      'profile[coordinates]': coordinates,     // ✅ CORREGIDO: formato profile[]
+      'birth_time_unknown': options.birthTimeUnknown ? 'true' : 'false',
+      'house_system': options.houseSystem || 'placidus',
+      'orb': options.orb || 'default',
+      'birth_time_rectification': options.birthTimeRectification || 'flat-chart', // ✅ CORREGIDO: flat-chart
+      'aspect_filter': options.aspectFilter || 'all',
+      'la': options.language || 'es',
+      'ayanamsa': options.ayanamsa || '0'      // 🚨 CRÍTICO CORREGIDO: 0=Tropical
     };
     
-    // Construir URL con parámetros
+    // Construir URL con parámetros corregidos
     const url = new URL(`${API_BASE_URL}/astrology/natal-chart`);
     Object.entries(params).forEach(([key, value]) => {
       url.searchParams.append(key, value);
     });
     
-    console.log('📡 URL completa:', url.toString());
+    console.log('📡 prokeralaService - URL completa CORREGIDA:', url.toString());
     
-    // Hacer la petición
+    // ✅ Verificar que la URL coincide con tu ejemplo
+    const isVeronica = birthDate === '1974-02-10' && Math.abs(latitude - 40.4168) < 0.01;
+    if (isVeronica) {
+      console.log('🎯 === URL PARA VERÓNICA ===');
+      console.log('✅ Esperado ASC: Acuario');
+      console.log('🔗 URL generada:', url.toString());
+      console.log('📋 Parámetros clave:');
+      console.log('  - ayanamsa:', params.ayanamsa);
+      console.log('  - profile[datetime]:', params['profile[datetime]']);
+      console.log('  - profile[coordinates]:', params['profile[coordinates]']);
+      console.log('  - birth_time_rectification:', params.birth_time_rectification);
+    }
+    
+    // ✅ Hacer la petición
     const response = await axios.get(url.toString(), {
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -240,17 +298,40 @@ export async function getNatalHoroscope(
       }
     });
     
-    console.log('✅ Respuesta recibida:', response.status);
+    console.log('✅ prokeralaService - Respuesta recibida:', response.status);
+    console.log('📊 prokeralaService - Datos preview:', {
+      planetsCount: response.data?.planets?.length || 0,
+      housesCount: response.data?.houses?.length || 0,
+      aspectsCount: response.data?.aspects?.length || 0,
+      hasAscendant: !!response.data?.ascendant
+    });
+    
+    // Verificación especial para Verónica
+    if (isVeronica && response.data?.ascendant) {
+      const ascSign = response.data.ascendant.sign || getSignFromLongitude(response.data.ascendant.longitude);
+      console.log('🎯 === VERIFICACIÓN VERÓNICA EN SERVICIO ===');
+      console.log('🔺 ASC de Prokerala:', ascSign);
+      console.log('✅ Esperado: Acuario');
+      console.log('🎉 Correcto:', ascSign === 'Acuario' ? 'SÍ' : 'NO');
+    }
     
     return response.data;
   } catch (error) {
-    console.error('❌ Error en getNatalHoroscope:', error);
+    console.error('❌ Error en prokeralaService.getNatalHoroscope:', error);
+    if (axios.isAxiosError(error)) {
+      console.error('Status:', error.response?.status);
+      console.error('Data:', error.response?.data);
+    }
     throw new Error('Failed to get natal chart from Prokerala');
   }
 }
 
+// ==========================================
+// OTRAS FUNCIONES CORREGIDAS
+// ==========================================
+
 /**
- * Get planetary transits for a specific date
+ * ✅ FUNCIÓN CORREGIDA: Get planetary transits for a specific date
  */
 export async function getPlanetaryTransits(
   date: string,
@@ -264,14 +345,17 @@ export async function getPlanetaryTransits(
   try {
     const token = await getToken();
     
+    // ✅ CORREGIDO: Usar función mejorada de timezone
     const datetime = date.includes('T') ? date : `${date}T00:00:00`;
-    const offset = getTimezoneOffset(timezone);
+    const offset = calculateTimezoneOffset(date, timezone);
     const formattedDatetime = `${datetime}${offset}`;
     
+    // ✅ CORREGIDO: Usar formato profile[] para consistency
     const url = new URL(`${API_BASE_URL}/astrology/planet-position`);
-    url.searchParams.append('datetime', formattedDatetime);
-    url.searchParams.append('coordinates', `${latitude},${longitude}`);
+    url.searchParams.append('profile[datetime]', formattedDatetime);
+    url.searchParams.append('profile[coordinates]', formatCoordinates(latitude, longitude));
     url.searchParams.append('la', options.language || 'es');
+    url.searchParams.append('ayanamsa', '0'); // ✅ CORREGIDO: Tropical
     
     const response = await axios.get(url.toString(), {
       headers: {
@@ -288,7 +372,7 @@ export async function getPlanetaryTransits(
 }
 
 /**
- * Get astrological events for a date range
+ * ✅ FUNCIÓN CORREGIDA: Get astrological events for a date range
  */
 export async function getAstronomicalEvents(
   startDate: string,
@@ -304,6 +388,7 @@ export async function getAstronomicalEvents(
     url.searchParams.append('start_date', startDate);
     url.searchParams.append('end_date', endDate);
     url.searchParams.append('la', options.language || 'es');
+    url.searchParams.append('ayanamsa', '0'); // ✅ CORREGIDO: Tropical
     
     const response = await axios.get(url.toString(), {
       headers: {
@@ -318,6 +403,10 @@ export async function getAstronomicalEvents(
     throw new Error('Failed to get astronomical events from Prokerala');
   }
 }
+
+// ==========================================
+// CONVERSIÓN DE DATOS
+// ==========================================
 
 /**
  * Convert Prokerala API response to NatalChart format
@@ -411,13 +500,20 @@ function getSignFromLongitude(longitude: number): string {
   return signs[signIndex];
 }
 
-// EXPORTACIÓN CORREGIDA: Crear objeto con nombre antes de exportar
-const prokeralaServiceObj = {
+// ==========================================
+// EXPORTACIONES
+// ==========================================
+
+// ✅ EXPORTACIONES INDIVIDUALES (para importación directa)
+export { getToken, calculateTimezoneOffset, formatCoordinates };
+
+// ✅ EXPORTACIÓN DE OBJETO (para importación completa)
+export const prokeralaService = {
   getNatalHoroscope,
   getPlanetaryTransits,
   getAstronomicalEvents,
   convertProkeralaToNatalChart,
-  getToken
+  getToken,
+  calculateTimezoneOffset,
+  formatCoordinates
 };
-
-export const prokeralaService = prokeralaServiceObj;
