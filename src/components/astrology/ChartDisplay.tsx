@@ -1,4 +1,3 @@
-//src/components/astrology/ChartDisplay.tsx
 
 'use client';
 
@@ -59,560 +58,571 @@ interface ChartDisplayProps {
 }
 
 // 🎨 CONFIGURACIÓN DE ASPECTOS ASTROLÓGICOS
+
+// 🎨 CONFIGURACIÓN DE ASPECTOS ASTROLÓGICOS
 const ASPECTS = {
-  conjunction: { angle: 0, orb: 8, color: '#22c55e', name: 'Conjunción', difficulty: 'neutral' },
-  sextile: { angle: 60, orb: 6, color: '#3b82f6', name: 'Sextil', difficulty: 'easy' },
-  square: { angle: 90, orb: 8, color: '#ef4444', name: 'Cuadratura', difficulty: 'hard' },
-  trine: { angle: 120, orb: 8, color: '#06b6d4', name: 'Trígono', difficulty: 'easy' },
-  opposition: { angle: 180, orb: 8, color: '#dc2626', name: 'Oposición', difficulty: 'hard' },
-  semisextile: { angle: 30, orb: 3, color: '#8b5cf6', name: 'Semisextil', difficulty: 'minor' },
-  semisquare: { angle: 45, orb: 3, color: '#f59e0b', name: 'Semicuadratura', difficulty: 'minor' },
-  sesquiquadrate: { angle: 135, orb: 3, color: '#f59e0b', name: 'Sesquicuadratura', difficulty: 'minor' },
-  quincunx: { angle: 150, orb: 3, color: '#ec4899', name: 'Quincuncio', difficulty: 'minor' }
+ conjunction: { angle: 0, orb: 8, color: '#22c55e', name: 'Conjunción', difficulty: 'neutral' },
+ sextile: { angle: 60, orb: 6, color: '#3b82f6', name: 'Sextil', difficulty: 'easy' },
+ square: { angle: 90, orb: 8, color: '#ef4444', name: 'Cuadratura', difficulty: 'hard' },
+ trine: { angle: 120, orb: 8, color: '#06b6d4', name: 'Trígono', difficulty: 'easy' },
+ opposition: { angle: 180, orb: 8, color: '#dc2626', name: 'Oposición', difficulty: 'hard' },
+ semisextile: { angle: 30, orb: 3, color: '#8b5cf6', name: 'Semisextil', difficulty: 'minor' },
+ semisquare: { angle: 45, orb: 3, color: '#f59e0b', name: 'Semicuadratura', difficulty: 'minor' },
+ sesquiquadrate: { angle: 135, orb: 3, color: '#f59e0b', name: 'Sesquicuadratura', difficulty: 'minor' },
+ quincunx: { angle: 150, orb: 3, color: '#ec4899', name: 'Quincuncio', difficulty: 'minor' }
 };
 
 // 🌟 SÍMBOLOS Y COLORES
 const PLANET_SYMBOLS: { [key: string]: string } = {
-  'Sol': '☉', 'Luna': '☽', 'Mercurio': '☿', 'Venus': '♀', 'Marte': '♂',
-  'Júpiter': '♃', 'Saturno': '♄', 'Urano': '♅', 'Neptuno': '♆', 'Plutón': '♇',
-  'Nodo Norte': '☊', 'Nodo Sur': '☋', 'Quirón': '⚷'
+ 'Sol': '☉', 'Luna': '☽', 'Mercurio': '☿', 'Venus': '♀', 'Marte': '♂',
+ 'Júpiter': '♃', 'Saturno': '♄', 'Urano': '♅', 'Neptuno': '♆', 'Plutón': '♇',
+ 'Nodo Norte': '☊', 'Nodo Sur': '☋', 'Quirón': '⚷'
 };
 
 const PLANET_COLORS: { [key: string]: string } = {
-  'Sol': '#fbbf24', 'Luna': '#e5e7eb', 'Mercurio': '#06b6d4', 'Venus': '#22c55e',
-  'Marte': '#ef4444', 'Júpiter': '#8b5cf6', 'Saturno': '#64748b', 'Urano': '#0ea5e9',
-  'Neptuno': '#3b82f6', 'Plutón': '#7c2d12', 'Nodo Norte': '#f59e0b', 'Nodo Sur': '#f59e0b'
+ 'Sol': '#fbbf24', 'Luna': '#e5e7eb', 'Mercurio': '#06b6d4', 'Venus': '#22c55e',
+ 'Marte': '#ef4444', 'Júpiter': '#8b5cf6', 'Saturno': '#64748b', 'Urano': '#0ea5e9',
+ 'Neptuno': '#3b82f6', 'Plutón': '#7c2d12', 'Nodo Norte': '#f59e0b', 'Nodo Sur': '#f59e0b'
 };
 
 const SIGN_SYMBOLS: { [key: string]: string } = {
-  'Aries': '♈', 'Tauro': '♉', 'Géminis': '♊', 'Cáncer': '♋',
-  'Leo': '♌', 'Virgo': '♍', 'Libra': '♎', 'Escorpio': '♏',
-  'Sagitario': '♐', 'Capricornio': '♑', 'Acuario': '♒', 'Piscis': '♓'
+ 'Aries': '♈', 'Tauro': '♉', 'Géminis': '♊', 'Cáncer': '♋',
+ 'Leo': '♌', 'Virgo': '♍', 'Libra': '♎', 'Escorpio': '♏',
+ 'Sagitario': '♐', 'Capricornio': '♑', 'Acuario': '♒', 'Piscis': '♓'
 };
 
-// 🧠 SIGNIFICADOS EDUCATIVOS COMPLETOS
+// 🧠 SIGNIFICADOS EDUCATIVOS COMPLETOS CON EXPLICACIONES CLARAS
 const aspectMeanings = {
-  conjunction: {
-    name: 'Conjunción',
-    meaning: 'Fusión de energías. Los planetas trabajan como uno solo.',
-    effect: 'Intensifica y unifica las cualidades planetarias',
-    type: 'Neutral - puede ser armónico o tenso según los planetas'
-  },
-  sextile: {
-    name: 'Sextil', 
-    meaning: 'Oportunidad y facilidad. Energías que fluyen naturalmente.',
-    effect: 'Facilita el desarrollo de talentos y oportunidades',
-    type: 'Armónico - aspectos de crecimiento y facilidad'
-  },
-  square: {
-    name: 'Cuadratura',
-    meaning: 'Tensión creativa. Conflicto que genera crecimiento.',
-    effect: 'Crea desafíos que impulsan el desarrollo personal',
-    type: 'Tenso - genera fricción pero también evolución'
-  },
-  trine: {
-    name: 'Trígono',
-    meaning: 'Armonía natural. Las energías fluyen sin esfuerzo.',
-    effect: 'Aporta facilidad, talento natural y fluidez',
-    type: 'Armónico - el aspecto más favorable y fluido'
-  },
-  opposition: {
-    name: 'Oposición',
-    meaning: 'Polarización. Necesidad de encontrar equilibrio.',
-    effect: 'Requiere integrar energías opuestas',
-    type: 'Tenso - busca balance entre fuerzas contrarias'
-  },
-  semisextile: {
-    name: 'Semisextil',
-    meaning: 'Ajuste sutil. Pequeñas correcciones necesarias.',
-    effect: 'Aporta refinamiento y ajustes menores',
-    type: 'Menor - aspectos de matiz y sutileza'
-  },
-  semisquare: {
-    name: 'Semicuadratura',
-    meaning: 'Irritación menor. Pequeñas fricciones que molestan.',
-    effect: 'Genera pequeñas tensiones que piden atención',
-    type: 'Menor tenso - roces cotidianos que educan'
-  },
-  sesquiquadrate: {
-    name: 'Sesquicuadratura',
-    meaning: 'Presión persistente. Tensión que busca liberación.',
-    effect: 'Crea presión constante hasta encontrar solución',
-    type: 'Menor tenso - insistencia que pide cambio'
-  },
-  quincunx: {
-    name: 'Quincuncio',
-    meaning: 'Desajuste crónico. Energías que no encajan fácilmente.',
-    effect: 'Requiere adaptación constante y flexibilidad',
-    type: 'Menor complejo - aspectos de adaptación'
-  }
+ conjunction: {
+   name: 'Conjunción',
+   meaning: 'Fusión de energías. Los planetas trabajan como uno solo.',
+   effect: 'Intensifica y unifica las cualidades planetarias',
+   type: 'Neutral - puede ser armónico o tenso según los planetas',
+   explanation: 'Es como si dos personas trabajaran en perfecta sincronía hacia el mismo objetivo. Las energías se mezclan completamente.'
+ },
+ sextile: {
+   name: 'Sextil', 
+   meaning: 'Oportunidad y facilidad. Energías que fluyen naturalmente.',
+   effect: 'Facilita el desarrollo de talentos y oportunidades',
+   type: 'Armónico - aspectos de crecimiento y facilidad',
+   explanation: 'Como tener una conversación fluida. Las energías se apoyan mutuamente y crean oportunidades cuando decides actuar.'
+ },
+ square: {
+   name: 'Cuadratura',
+   meaning: 'Tensión creativa. Conflicto que genera crecimiento.',
+   effect: 'Crea desafíos que impulsan el desarrollo personal',
+   type: 'Tenso - genera fricción pero también evolución',
+   explanation: 'Como hacer ejercicio: duele en el momento pero te hace más fuerte. Esta tensión te obliga a crecer y encontrar soluciones.'
+ },
+ trine: {
+   name: 'Trígono',
+   meaning: 'Armonía natural. Las energías fluyen sin esfuerzo.',
+   effect: 'Aporta facilidad, talento natural y fluidez',
+   type: 'Armónico - el aspecto más favorable y fluido',
+   explanation: 'Como respirar: sucede de forma natural. Tienes talento innato cuando estas energías trabajan juntas.'
+ },
+ opposition: {
+   name: 'Oposición',
+   meaning: 'Polarización. Necesidad de encontrar equilibrio.',
+   effect: 'Requiere integrar energías opuestas',
+   type: 'Tenso - busca balance entre fuerzas contrarias',
+   explanation: 'Como estar en una balanza. Necesitas encontrar el punto medio entre dos fuerzas que tiran en direcciones opuestas.'
+ },
+ semisextile: {
+   name: 'Semisextil',
+   meaning: 'Ajuste sutil. Pequeñas correcciones necesarias.',
+   effect: 'Aporta refinamiento y ajustes menores',
+   type: 'Menor - aspectos de matiz y sutileza',
+   explanation: 'Como afinar un instrumento musical. Pequeños ajustes que perfeccionan el resultado final.'
+ },
+ semisquare: {
+   name: 'Semicuadratura',
+   meaning: 'Irritación menor. Pequeñas fricciones que molestan.',
+   effect: 'Genera pequeñas tensiones que piden atención',
+   type: 'Menor tenso - roces cotidianos que educan',
+   explanation: 'Como una piedra en el zapato. Molesta lo suficiente para que prestes atención y hagas algo al respecto.'
+ },
+ sesquiquadrate: {
+   name: 'Sesquicuadratura',
+   meaning: 'Presión persistente. Tensión que busca liberación.',
+   effect: 'Crea presión constante hasta encontrar solución',
+   type: 'Menor tenso - insistencia que pide cambio',
+   explanation: 'Como agua hirviendo en una olla tapada. La presión se acumula hasta que encuentras una válvula de escape.'
+ },
+ quincunx: {
+   name: 'Quincuncio',
+   meaning: 'Desajuste crónico. Energías que no encajan fácilmente.',
+   effect: 'Requiere adaptación constante y flexibilidad',
+   type: 'Menor complejo - aspectos de adaptación',
+   explanation: 'Como intentar encajar piezas de rompecabezas diferentes. Requiere creatividad y adaptabilidad constante.'
+ }
 };
 
 const planetMeanings = {
-  'Sol': {
-    meaning: 'Tu esencia, ego, vitalidad y propósito de vida',
-    keywords: 'Identidad, creatividad, liderazgo, autoridad'
-  },
-  'Luna': {
-    meaning: 'Emociones, intuición, necesidades emocionales y la madre',
-    keywords: 'Sentimientos, memoria, hogar, nutrición'
-  },
-  'Mercurio': {
-    meaning: 'Comunicación, pensamiento, aprendizaje y hermanos',
-    keywords: 'Intelecto, palabras, viajes cortos, curiosidad'
-  },
-  'Venus': {
-    meaning: 'Amor, belleza, valores, dinero y relaciones',
-    keywords: 'Romance, arte, placer, armonía, atracción'
-  },
-  'Marte': {
-    meaning: 'Acción, energía, agresión, sexualidad y guerra',
-    keywords: 'Fuerza, deseo, conflicto, iniciativa'
-  },
-  'Júpiter': {
-    meaning: 'Expansión, sabiduría, filosofía, suerte y crecimiento',
-    keywords: 'Abundancia, enseñanza, viajes, optimismo'
-  },
-  'Saturno': {
-    meaning: 'Disciplina, responsabilidad, límites y lecciones',
-    keywords: 'Estructura, tiempo, autoridad, madurez'
-  },
-  'Urano': {
-    meaning: 'Revolución, innovación, libertad y cambios súbitos',
-    keywords: 'Originalidad, tecnología, rebeldía, genialidad'
-  },
-  'Neptuno': {
-    meaning: 'Espiritualidad, ilusión, compasión y transcendencia',
-    keywords: 'Intuición, arte, sacrificio, confusión'
-  },
-  'Plutón': {
-    meaning: 'Transformación, poder, muerte-renacimiento y lo oculto',
-    keywords: 'Regeneración, intensidad, control, psicología'
-  },
-  'Nodo Norte': {
-    meaning: 'Tu propósito evolutivo y dirección de crecimiento',
-    keywords: 'Destino, desarrollo, nuevas habilidades'
-  },
-  'Quirón': {
-    meaning: 'La herida sanadora, donde duele pero también sanas',
-    keywords: 'Sanación, enseñanza, vulnerabilidad'
-  }
+ 'Sol': {
+   meaning: 'Tu esencia, ego, vitalidad y propósito de vida',
+   keywords: 'Identidad, creatividad, liderazgo, autoridad'
+ },
+ 'Luna': {
+   meaning: 'Emociones, intuición, necesidades emocionales y la madre',
+   keywords: 'Sentimientos, memoria, hogar, nutrición'
+ },
+ 'Mercurio': {
+   meaning: 'Comunicación, pensamiento, aprendizaje y hermanos',
+   keywords: 'Intelecto, palabras, viajes cortos, curiosidad'
+ },
+ 'Venus': {
+   meaning: 'Amor, belleza, valores, dinero y relaciones',
+   keywords: 'Romance, arte, placer, armonía, atracción'
+ },
+ 'Marte': {
+   meaning: 'Acción, energía, agresión, sexualidad y guerra',
+   keywords: 'Fuerza, deseo, conflicto, iniciativa'
+ },
+ 'Júpiter': {
+   meaning: 'Expansión, sabiduría, filosofía, suerte y crecimiento',
+   keywords: 'Abundancia, enseñanza, viajes, optimismo'
+ },
+ 'Saturno': {
+   meaning: 'Disciplina, responsabilidad, límites y lecciones',
+   keywords: 'Estructura, tiempo, autoridad, madurez'
+ },
+ 'Urano': {
+   meaning: 'Revolución, innovación, libertad y cambios súbitos',
+   keywords: 'Originalidad, tecnología, rebeldía, genialidad'
+ },
+ 'Neptuno': {
+   meaning: 'Espiritualidad, ilusión, compasión y transcendencia',
+   keywords: 'Intuición, arte, sacrificio, confusión'
+ },
+ 'Plutón': {
+   meaning: 'Transformación, poder, muerte-renacimiento y lo oculto',
+   keywords: 'Regeneración, intensidad, control, psicología'
+ },
+ 'Nodo Norte': {
+   meaning: 'Tu propósito evolutivo y dirección de crecimiento',
+   keywords: 'Destino, desarrollo, nuevas habilidades'
+ },
+ 'Quirón': {
+   meaning: 'La herida sanadora, donde duele pero también sanas',
+   keywords: 'Sanación, enseñanza, vulnerabilidad'
+ }
 };
 
 const signMeanings = {
-  'Aries': 'Iniciativa, liderazgo, impulso pionero',
-  'Tauro': 'Estabilidad, sensualidad, perseverancia',
-  'Géminis': 'Comunicación, versatilidad, curiosidad',
-  'Cáncer': 'Protección, nutrición, emocionalidad',
-  'Leo': 'Creatividad, drama, generosidad',
-  'Virgo': 'Perfección, servicio, análisis',
-  'Libra': 'Equilibrio, belleza, diplomacia',
-  'Escorpio': 'Intensidad, transformación, misterio',
-  'Sagitario': 'Aventura, filosofía, expansión',
-  'Capricornio': 'Ambición, estructura, tradición',
-  'Acuario': 'Innovación, humanitarismo, libertad',
-  'Piscis': 'Compasión, intuición, espiritualidad'
+ 'Aries': 'Iniciativa, liderazgo, impulso pionero',
+ 'Tauro': 'Estabilidad, sensualidad, perseverancia',
+ 'Géminis': 'Comunicación, versatilidad, curiosidad',
+ 'Cáncer': 'Protección, nutrición, emocionalidad',
+ 'Leo': 'Creatividad, drama, generosidad',
+ 'Virgo': 'Perfección, servicio, análisis',
+ 'Libra': 'Equilibrio, belleza, diplomacia',
+ 'Escorpio': 'Intensidad, transformación, misterio',
+ 'Sagitario': 'Aventura, filosofía, expansión',
+ 'Capricornio': 'Ambición, estructura, tradición',
+ 'Acuario': 'Innovación, humanitarismo, libertad',
+ 'Piscis': 'Compasión, intuición, espiritualidad'
 };
 
 const houseMeanings = {
-  1: {
-    name: "Casa 1 - Personalidad",
-    meaning: "Tu identidad, apariencia física y forma de presentarte al mundo",
-    keywords: "Ego, imagen, primeras impresiones, vitalidad"
-  },
-  2: {
-    name: "Casa 2 - Recursos",
-    meaning: "Dinero, posesiones materiales, valores personales y autoestima",
-    keywords: "Ingresos, talentos, seguridad material, valores"
-  },
-  3: {
-    name: "Casa 3 - Comunicación", 
-    meaning: "Hermanos, estudios básicos, comunicación y entorno cercano",
-    keywords: "Aprendizaje, viajes cortos, vecinos, escritura"
-  },
-  4: {
-    name: "Casa 4 - Hogar",
-    meaning: "Familia, hogar, raíces, tradiciones y el final de la vida",
-    keywords: "Madre, infancia, propiedades, intimidad"
-  },
-  5: {
-    name: "Casa 5 - Creatividad",
-    meaning: "Hijos, romance, creatividad, diversión y autoexpresión",
-    keywords: "Arte, juegos, noviazgo, especulación"
-  },
-  6: {
-    name: "Casa 6 - Trabajo",
-    meaning: "Trabajo diario, salud, rutinas, servicio y empleados",
-    keywords: "Empleo, dieta, mascotas, obligaciones"
-  },
-  7: {
-    name: "Casa 7 - Pareja",
-    meaning: "Matrimonio, socios, enemigos abiertos y contratos",
-    keywords: "Cónyuge, colaboraciones, justicia, otros"
-  },
-  8: {
-    name: "Casa 8 - Transformación",
-    meaning: "Muerte, renacimiento, sexualidad, dinero ajeno y ocultismo",
-    keywords: "Herencias, crisis, psicología, recursos compartidos"
-  },
-  9: {
-    name: "Casa 9 - Sabiduría",
-    meaning: "Filosofía, religión, estudios superiores, viajes largos",
-    keywords: "Universidad, extranjero, ley, espiritualidad"
-  },
-  10: {
-    name: "Casa 10 - Carrera",
-    meaning: "Profesión, reputación, autoridad, imagen pública y el padre",
-    keywords: "Estatus, ambición, reconocimiento, gobierno"
-  },
-  11: {
-    name: "Casa 11 - Amistades",
-    meaning: "Amigos, grupos, esperanzas, sueños y organizaciones",
-    keywords: "Ideales, clubes, benefactores, redes sociales"
-  },
-  12: {
-    name: "Casa 12 - Espiritualidad",
-    meaning: "Subconsciente, karma, sacrificio, hospitales y retiro",
-    keywords: "Meditación, enemigos ocultos, autosabotaje, compasión"
-  }
+ 1: {
+   name: "Casa 1 - Personalidad",
+   meaning: "Tu identidad, apariencia física y forma de presentarte al mundo",
+   keywords: "Ego, imagen, primeras impresiones, vitalidad"
+ },
+ 2: {
+   name: "Casa 2 - Recursos",
+   meaning: "Dinero, posesiones materiales, valores personales y autoestima",
+   keywords: "Ingresos, talentos, seguridad material, valores"
+ },
+ 3: {
+   name: "Casa 3 - Comunicación", 
+   meaning: "Hermanos, estudios básicos, comunicación y entorno cercano",
+   keywords: "Aprendizaje, viajes cortos, vecinos, escritura"
+ },
+ 4: {
+   name: "Casa 4 - Hogar",
+   meaning: "Familia, hogar, raíces, tradiciones y el final de la vida",
+   keywords: "Madre, infancia, propiedades, intimidad"
+ },
+ 5: {
+   name: "Casa 5 - Creatividad",
+   meaning: "Hijos, romance, creatividad, diversión y autoexpresión",
+   keywords: "Arte, juegos, noviazgo, especulación"
+ },
+ 6: {
+   name: "Casa 6 - Trabajo",
+   meaning: "Trabajo diario, salud, rutinas, servicio y empleados",
+   keywords: "Empleo, dieta, mascotas, obligaciones"
+ },
+ 7: {
+   name: "Casa 7 - Pareja",
+   meaning: "Matrimonio, socios, enemigos abiertos y contratos",
+   keywords: "Cónyuge, colaboraciones, justicia, otros"
+ },
+ 8: {
+   name: "Casa 8 - Transformación",
+   meaning: "Muerte, renacimiento, sexualidad, dinero ajeno y ocultismo",
+   keywords: "Herencias, crisis, psicología, recursos compartidos"
+ },
+ 9: {
+   name: "Casa 9 - Sabiduría",
+   meaning: "Filosofía, religión, estudios superiores, viajes largos",
+   keywords: "Universidad, extranjero, ley, espiritualidad"
+ },
+ 10: {
+   name: "Casa 10 - Carrera",
+   meaning: "Profesión, reputación, autoridad, imagen pública y el padre",
+   keywords: "Estatus, ambición, reconocimiento, gobierno"
+ },
+ 11: {
+   name: "Casa 11 - Amistades",
+   meaning: "Amigos, grupos, esperanzas, sueños y organizaciones",
+   keywords: "Ideales, clubes, benefactores, redes sociales"
+ },
+ 12: {
+   name: "Casa 12 - Espiritualidad",
+   meaning: "Subconsciente, karma, sacrificio, hospitales y retiro",
+   keywords: "Meditación, enemigos ocultos, autosabotaje, compasión"
+ }
 };
 
 // ✅ COMPONENTE DE MENÚ CORREGIDO CON ICONOS SVG
 const SectionMenu: React.FC<{
-  activeSection: string;
-  scrollToSection: (sectionId: string) => void;
+ activeSection: string;
+ scrollToSection: (sectionId: string) => void;
 }> = ({ activeSection, scrollToSection }) => {
-  const menuItems = [
-    { 
-      id: 'datos-nacimiento', 
-      label: 'Datos', 
-      icon: () => (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-          <line x1="16" y1="2" x2="16" y2="6"/>
-          <line x1="8" y1="2" x2="8" y2="6"/>
-          <line x1="3" y1="10" x2="21" y2="10"/>
-        </svg>
-      )
-    },
-    { 
-      id: 'carta-visual', 
-      label: 'Carta', 
-      icon: () => (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="12" cy="12" r="10"/>
-          <polygon points="10,8 16,12 10,16"/>
-        </svg>
-      )
-    },
-    { 
-      id: 'aspectos-detectados', 
-      label: 'Aspectos', 
-      icon: () => (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/>
-        </svg>
-      )
-    },
-    { 
-      id: 'posiciones-planetarias', 
-      label: 'Planetas', 
-      icon: () => (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="12" cy="12" r="5"/>
-          <line x1="12" y1="1" x2="12" y2="3"/>
-          <line x1="12" y1="21" x2="12" y2="23"/>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-          <line x1="1" y1="12" x2="3" y2="12"/>
-          <line x1="21" y1="12" x2="23" y2="12"/>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-        </svg>
-      )
-    }
-  ];
+ const menuItems = [
+   { 
+     id: 'datos-nacimiento', 
+     label: 'Datos', 
+     icon: () => (
+       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+         <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+         <line x1="16" y1="2" x2="16" y2="6"/>
+         <line x1="8" y1="2" x2="8" y2="6"/>
+         <line x1="3" y1="10" x2="21" y2="10"/>
+       </svg>
+     )
+   },
+   { 
+     id: 'carta-visual', 
+     label: 'Carta', 
+     icon: () => (
+       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+         <circle cx="12" cy="12" r="10"/>
+         <polygon points="10,8 16,12 10,16"/>
+       </svg>
+     )
+   },
+   { 
+     id: 'aspectos-detectados', 
+     label: 'Aspectos', 
+     icon: () => (
+       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+         <polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/>
+       </svg>
+     )
+   },
+   { 
+     id: 'posiciones-planetarias', 
+     label: 'Planetas', 
+     icon: () => (
+       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+         <circle cx="12" cy="12" r="5"/>
+         <line x1="12" y1="1" x2="12" y2="3"/>
+         <line x1="12" y1="21" x2="12" y2="23"/>
+         <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+         <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+         <line x1="1" y1="12" x2="3" y2="12"/>
+         <line x1="21" y1="12" x2="23" y2="12"/>
+         <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+       </svg>
+     )
+   }
+ ];
 
-  return (
-    <div className="flex items-center justify-center space-x-4 mb-6">
-      {menuItems.map((item) => {
-        const IconComponent = item.icon;
-        const isActive = activeSection === item.id;
-        
-        return (
-          <button
-            key={item.id}
-            onClick={() => scrollToSection(item.id)}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ${
-              isActive 
-                ? 'bg-gradient-to-r from-blue-500/30 to-purple-500/30 border border-blue-400/50 text-blue-300' 
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            <IconComponent />
-            <span>{item.label}</span>
-            {isActive && (
-              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-            )}
-          </button>
-        );
-      })}
-    </div>
-  );
+ return (
+   <div className="flex items-center justify-center space-x-4 mb-6">
+     {menuItems.map((item) => {
+       const IconComponent = item.icon;
+       const isActive = activeSection === item.id;
+       
+       return (
+         <button
+           key={item.id}
+           onClick={() => scrollToSection(item.id)}
+           className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ${
+             isActive 
+               ? 'bg-gradient-to-r from-blue-500/30 to-purple-500/30 border border-blue-400/50 text-blue-300' 
+               : 'text-gray-400 hover:text-white hover:bg-white/5'
+           }`}
+         >
+           <IconComponent />
+           <span>{item.label}</span>
+           {isActive && (
+             <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+           )}
+         </button>
+       );
+     })}
+   </div>
+ );
 };
 
 const ChartDisplay: React.FC<ChartDisplayProps> = ({
-  houses = [],
-  planets = [],
-  elementDistribution = { fire: 0, earth: 0, air: 0, water: 0 },
-  modalityDistribution = { cardinal: 0, fixed: 0, mutable: 0 },
-  keyAspects = [],
-  ascendant,
-  midheaven,
-  birthData
+ houses = [],
+ planets = [],
+ elementDistribution = { fire: 0, earth: 0, air: 0, water: 0 },
+ modalityDistribution = { cardinal: 0, fixed: 0, mutable: 0 },
+ keyAspects = [],
+ ascendant,
+ midheaven,
+ birthData
 }) => {
-  // Estados
-  const [showAspects, setShowAspects] = useState(true);
-  const [selectedAspectTypes, setSelectedAspectTypes] = useState({
-    major: true,
-    minor: false,
-    hard: true,
-    easy: true
-  });
-  const [hoveredAspect, setHoveredAspect] = useState<string | null>(null);
-  const [calculatedAspects, setCalculatedAspects] = useState<any[]>([]);
-  const [hoveredPlanet, setHoveredPlanet] = useState<string | null>(null);
-  const [hoveredHouse, setHoveredHouse] = useState<number | null>(null);
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-  const [hoveredElement, setHoveredElement] = useState<string | null>(null);
-  const [hoveredModality, setHoveredModality] = useState<string | null>(null);
-  const [hoveredNavGuide, setHoveredNavGuide] = useState(false);
-  const [activeSection, setActiveSection] = useState('datos-nacimiento');
+ // Estados - 🔄 CORREGIDO: SECCIÓN ACTIVA EN "CARTA"
+ const [showAspects, setShowAspects] = useState(true);
+ const [selectedAspectTypes, setSelectedAspectTypes] = useState({
+   major: true,
+   minor: false,
+   hard: true,
+   easy: true
+ });
+ const [hoveredAspect, setHoveredAspect] = useState<string | null>(null);
+ const [calculatedAspects, setCalculatedAspects] = useState<any[]>([]);
+ const [hoveredPlanet, setHoveredPlanet] = useState<string | null>(null);
+ const [hoveredHouse, setHoveredHouse] = useState<number | null>(null);
+ const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+ const [hoveredElement, setHoveredElement] = useState<string | null>(null);
+ const [hoveredModality, setHoveredModality] = useState<string | null>(null);
+ const [hoveredNavGuide, setHoveredNavGuide] = useState(false);
+ const [activeSection, setActiveSection] = useState('carta-visual'); // 🔄 CORREGIDO
 
-  // 🔄 FUNCIÓN PARA CAPTURAR POSICIÓN DEL MOUSE
-  const handleMouseMove = (event: React.MouseEvent) => {
-    setTooltipPosition({ 
-      x: event.clientX,
-      y: event.clientY
-    });
-  };
+ // 🔄 FUNCIÓN PARA CAPTURAR POSICIÓN DEL MOUSE
+ const handleMouseMove = (event: React.MouseEvent) => {
+   setTooltipPosition({ 
+     x: event.clientX,
+     y: event.clientY
+   });
+ };
 
-  // 🧭 FUNCIÓN PARA SCROLL SUAVE A SECCIONES
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      setActiveSection(sectionId);
-    }
-  };
+ // 🧭 FUNCIÓN PARA SCROLL SUAVE A SECCIONES
+ const scrollToSection = (sectionId: string) => {
+   const element = document.getElementById(sectionId);
+   if (element) {
+     element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+     setActiveSection(sectionId);
+   }
+ };
 
-  // 👀 DETECTAR SECCIÓN VISIBLE CON INTERSECTION OBSERVER
-  useEffect(() => {
-    const sections = ['datos-nacimiento', 'carta-visual', 'aspectos-detectados', 'posiciones-planetarias'];
-    const observers: IntersectionObserver[] = [];
+ // 👀 DETECTAR SECCIÓN VISIBLE CON INTERSECTION OBSERVER
+ useEffect(() => {
+   const sections = ['datos-nacimiento', 'carta-visual', 'aspectos-detectados', 'posiciones-planetarias'];
+   const observers: IntersectionObserver[] = [];
 
-    sections.forEach(sectionId => {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
-              setActiveSection(sectionId);
-            }
-          });
-        },
-        { threshold: 0.5 }
-      );
+   sections.forEach(sectionId => {
+     const observer = new IntersectionObserver(
+       (entries) => {
+         entries.forEach(entry => {
+           if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+             setActiveSection(sectionId);
+           }
+         });
+       },
+       { threshold: 0.5 }
+     );
 
-      const element = document.getElementById(sectionId);
-      if (element) {
-        observer.observe(element);
-        observers.push(observer);
-      }
-    });
+     const element = document.getElementById(sectionId);
+     if (element) {
+       observer.observe(element);
+       observers.push(observer);
+     }
+   });
 
-    return () => {
-      observers.forEach(observer => observer.disconnect());
-    };
-  }, []);
+   return () => {
+     observers.forEach(observer => observer.disconnect());
+   };
+ }, []);
 
-  // 🎯 FUNCIÓN: Convertir grados astrológicos
-  const convertAstrologicalDegreeToPosition = (degree: number, sign: string) => {
-    const signPositions: { [key: string]: number } = {
-      'Aries': 0, 'Tauro': 30, 'Géminis': 60, 'Cáncer': 90,
-      'Leo': 120, 'Virgo': 150, 'Libra': 180, 'Escorpio': 210,
-      'Sagitario': 240, 'Capricornio': 270, 'Acuario': 300, 'Piscis': 330
-    };
+ // 🎯 FUNCIÓN: Convertir grados astrológicos
+ const convertAstrologicalDegreeToPosition = (degree: number, sign: string) => {
+   const signPositions: { [key: string]: number } = {
+     'Aries': 0, 'Tauro': 30, 'Géminis': 60, 'Cáncer': 90,
+     'Leo': 120, 'Virgo': 150, 'Libra': 180, 'Escorpio': 210,
+     'Sagitario': 240, 'Capricornio': 270, 'Acuario': 300, 'Piscis': 330
+   };
 
-    const signBase = signPositions[sign] || 0;
-    return signBase + degree;
-  };
+   const signBase = signPositions[sign] || 0;
+   return signBase + degree;
+ };
 
-  // 🎯 FUNCIÓN: Normalizar datos de planetas
-  const normalizedPlanets = planets.map((planet, index) => {
-    if (!planet) return null;
+ // 🎯 FUNCIÓN: Normalizar datos de planetas
+ const normalizedPlanets = planets.map((planet, index) => {
+   if (!planet) return null;
 
-    const realPosition = convertAstrologicalDegreeToPosition(
-      planet.degree || 0, 
-      planet.sign || 'Aries'
-    );
+   const realPosition = convertAstrologicalDegreeToPosition(
+     planet.degree || 0, 
+     planet.sign || 'Aries'
+   );
 
-    return {
-      ...planet,
-      position: realPosition,
-      house: planet.house || planet.houseNumber || planet.housePosition || 1,
-      retrograde: planet.retrograde || planet.isRetrograde || false
-    };
-  }).filter(Boolean);
+   return {
+     ...planet,
+     position: realPosition,
+     house: planet.house || planet.houseNumber || planet.housePosition || 1,
+     retrograde: planet.retrograde || planet.isRetrograde || false
+   };
+ }).filter(Boolean);
 
-  // 🎯 FUNCIÓN: Normalizar datos de casas
-  const normalizedHouses = houses.map((house, index) => {
-    if (!house) return null;
+ // 🎯 FUNCIÓN: Normalizar datos de casas
+ const normalizedHouses = houses.map((house, index) => {
+   if (!house) return null;
 
-    const realPosition = house.sign ? 
-      convertAstrologicalDegreeToPosition(house.degree || 0, house.sign) :
-      (index * 30);
+   const realPosition = house.sign ? 
+     convertAstrologicalDegreeToPosition(house.degree || 0, house.sign) :
+     (index * 30);
 
-    return {
-      ...house,
-      position: realPosition
-    };
-  }).filter(Boolean);
+   return {
+     ...house,
+     position: realPosition
+   };
+ }).filter(Boolean);
 
-  // Calcular aspectos automáticamente
-  useEffect(() => {
-    if (normalizedPlanets.length > 0) {
-      const aspects = calculateAspects(normalizedPlanets);
-      setCalculatedAspects(aspects);
-    }
-  }, [planets]);
+ // Calcular aspectos automáticamente
+ useEffect(() => {
+   if (normalizedPlanets.length > 0) {
+     const aspects = calculateAspects(normalizedPlanets);
+     setCalculatedAspects(aspects);
+   }
+ }, [planets]);
 
-  // 🎯 FUNCIÓN: Calcular aspectos entre planetas
-  const calculateAspects = (planets: any[]) => {
-    const aspects: any[] = [];
-    
-    for (let i = 0; i < planets.length; i++) {
-      for (let j = i + 1; j < planets.length; j++) {
-        const planet1 = planets[i];
-        const planet2 = planets[j];
-        
-        if (!planet1 || !planet2 || !planet1.name || !planet2.name) {
-          continue;
-        }
+ // 🎯 FUNCIÓN: Calcular aspectos entre planetas
+ const calculateAspects = (planets: any[]) => {
+   const aspects: any[] = [];
+   
+   for (let i = 0; i < planets.length; i++) {
+     for (let j = i + 1; j < planets.length; j++) {
+       const planet1 = planets[i];
+       const planet2 = planets[j];
+       
+       if (!planet1 || !planet2 || !planet1.name || !planet2.name) {
+         continue;
+       }
 
-        let angle = Math.abs(planet1.position - planet2.position);
-        if (angle > 180) angle = 360 - angle;
-        
-        Object.entries(ASPECTS).forEach(([aspectType, config]) => {
-          const orb = Math.abs(angle - config.angle);
-          if (orb <= config.orb) {
-            aspects.push({
-              planet1: planet1.name,
-              planet2: planet2.name,
-              angle: angle,
-              type: aspectType,
-              orb: orb,
-              config: config,
-              exact: orb < 1
-            });
-          }
-        });
-      }
-    }
-    
-    return aspects.sort((a, b) => a.orb - b.orb);
-  };
+       let angle = Math.abs(planet1.position - planet2.position);
+       if (angle > 180) angle = 360 - angle;
+       
+       Object.entries(ASPECTS).forEach(([aspectType, config]) => {
+         const orb = Math.abs(angle - config.angle);
+         if (orb <= config.orb) {
+           aspects.push({
+             planet1: planet1.name,
+             planet2: planet2.name,
+             angle: angle,
+             type: aspectType,
+             orb: orb,
+             config: config,
+             exact: orb < 1
+           });
+         }
+       });
+     }
+   }
+   
+   return aspects.sort((a, b) => a.orb - b.orb);
+ };
 
-  // 🎯 FUNCIÓN: Obtener posición en el círculo
-  const getCirclePosition = (angle: number, radius: number) => {
-    const radian = (angle - 90) * (Math.PI / 180);
-    return {
-      x: 250 + Math.cos(radian) * radius,
-      y: 250 + Math.sin(radian) * radius
-    };
-  };
+ // 🎯 FUNCIÓN: Obtener posición en el círculo
+ const getCirclePosition = (angle: number, radius: number) => {
+   const radian = (angle - 90) * (Math.PI / 180);
+   return {
+     x: 250 + Math.cos(radian) * radius,
+     y: 250 + Math.sin(radian) * radius
+   };
+ };
 
-  // 🔄 FUNCIÓN: Obtener interpretación contextualizada del planeta
-  const getPersonalizedPlanetInterpretation = (planet: any) => {
-    const planetName = planet.name;
-    const sign = planet.sign;
-    const house = planet.house;
+ // 🔄 FUNCIÓN: Obtener interpretación contextualizada del planeta
+ const getPersonalizedPlanetInterpretation = (planet: any) => {
+   const planetName = planet.name;
+   const sign = planet.sign;
+   const house = planet.house;
 
-    // Ejemplos de interpretaciones contextualizadas
-    const interpretations: { [key: string]: { [key: string]: { [key: number]: string } } } = {
-      'Sol': {
-        'Aries': {
-          1: 'Tu identidad es pionera y líder natural. Te presentas al mundo con confianza y fuerza',
-          5: 'Tu creatividad y expresión personal son tu motor vital. Brillas siendo auténtico',
-          10: 'Tu carrera requiere liderazgo y autoridad. Naciste para dirigir proyectos importantes'
-        },
-        'Libra': {
-          7: 'Tu identidad se define a través de las relaciones. Encuentras tu propósito en la armonía con otros'
-        }
-      },
-      'Luna': {
-        'Cáncer': {
-          4: 'Tus emociones están profundamente conectadas con el hogar y la familia. Tu intuición maternal es extraordinaria'
-        }
-      },
-      'Plutón': {
-        'Libra': {
-          8: 'Tu poder de transformación se enfoca en las relaciones y los recursos compartidos. Tienes una capacidad natural para transformar las dinámicas de pareja y manejar crisis financieras con elegancia.'
-        }
-      }
-    };
+   // Ejemplos de interpretaciones contextualizadas
+   const interpretations: { [key: string]: { [key: string]: { [key: number]: string } } } = {
+     'Sol': {
+       'Aries': {
+         1: 'Tu identidad es pionera y líder natural. Te presentas al mundo con confianza y fuerza',
+         5: 'Tu creatividad y expresión personal son tu motor vital. Brillas siendo auténtico',
+         10: 'Tu carrera requiere liderazgo y autoridad. Naciste para dirigir proyectos importantes'
+       },
+       'Libra': {
+         7: 'Tu identidad se define a través de las relaciones. Encuentras tu propósito en la armonía con otros'
+       }
+     },
+     'Luna': {
+       'Cáncer': {
+         4: 'Tus emociones están profundamente conectadas con el hogar y la familia. Tu intuición maternal es extraordinaria'
+       }
+     },
+     'Plutón': {
+       'Libra': {
+         8: 'Tu poder de transformación se enfoca en las relaciones y los recursos compartidos. Tienes una capacidad natural para transformar las dinámicas de pareja y manejar crisis financieras con elegancia.'
+       }
+     }
+   };
 
-    const specific = interpretations[planetName]?.[sign]?.[house];
-    if (specific) return specific;
+   const specific = interpretations[planetName]?.[sign]?.[house];
+   if (specific) return specific;
 
-    // Interpretación general basada en planeta + casa
-    const houseInterpretations: { [key: string]: { [key: number]: string } } = {
-      'Sol': {
-        1: `Tu ${planetName} en ${sign} en Casa 1 define tu personalidad externa con las cualidades de ${signMeanings[sign as keyof typeof signMeanings]}`,
-        2: `Tu identidad solar se manifiesta a través de tus valores y recursos materiales`,
-        3: `Tu esencia se expresa a través de la comunicación y el aprendizaje`,
-        4: `Tu identidad está profundamente enraizada en el hogar y la familia`,
-        5: `Tu creatividad y autoexpresión son fundamentales para tu identidad`,
-        7: `Tu identidad se complementa y define a través de las relaciones de pareja`,
-        10: `Tu propósito vital se realiza a través de tu carrera y reconocimiento público`
-      }
-    };
+   // Interpretación general basada en planeta + casa
+   const houseInterpretations: { [key: string]: { [key: number]: string } } = {
+     'Sol': {
+       1: `Tu ${planetName} en ${sign} en Casa 1 define tu personalidad externa con las cualidades de ${signMeanings[sign as keyof typeof signMeanings]}`,
+       2: `Tu identidad solar se manifiesta a través de tus valores y recursos materiales`,
+       3: `Tu esencia se expresa a través de la comunicación y el aprendizaje`,
+       4: `Tu identidad está profundamente enraizada en el hogar y la familia`,
+       5: `Tu creatividad y autoexpresión son fundamentales para tu identidad`,
+       7: `Tu identidad se complementa y define a través de las relaciones de pareja`,
+       10: `Tu propósito vital se realiza a través de tu carrera y reconocimiento público`
+     }
+   };
 
-    const generalInterpretation = houseInterpretations[planetName]?.[house];
-    if (generalInterpretation) return generalInterpretation;
+   const generalInterpretation = houseInterpretations[planetName]?.[house];
+   if (generalInterpretation) return generalInterpretation;
 
-    // Interpretación por defecto
-    return `Con ${planetName} en ${sign} en Casa ${house}, ${planetMeanings[planetName as keyof typeof planetMeanings]?.meaning.toLowerCase()} se manifiesta con las cualidades de ${signMeanings[sign as keyof typeof signMeanings]?.toLowerCase()} en el área de ${houseMeanings[house as keyof typeof houseMeanings]?.meaning.toLowerCase()}`;
-  };
+   // Interpretación por defecto
+   return `Con ${planetName} en ${sign} en Casa ${house}, ${planetMeanings[planetName as keyof typeof planetMeanings]?.meaning.toLowerCase()} se manifiesta con las cualidades de ${signMeanings[sign as keyof typeof signMeanings]?.toLowerCase()} en el área de ${houseMeanings[house as keyof typeof houseMeanings]?.meaning.toLowerCase()}`;
+ };
 
-  // 🔄 FUNCIÓN: Obtener interpretación contextualizada del aspecto
-  const getPersonalizedAspectInterpretation = (aspect: any) => {
-    const planet1Name = aspect.planet1;
-    const planet2Name = aspect.planet2;
-    const aspectType = aspect.type;
+ // 🔄 FUNCIÓN: Obtener interpretación contextualizada del aspecto
+ const getPersonalizedAspectInterpretation = (aspect: any) => {
+   const planet1Name = aspect.planet1;
+   const planet2Name = aspect.planet2;
+   const aspectType = aspect.type;
 
-    const planet1Desc = planetMeanings[planet1Name as keyof typeof planetMeanings]?.keywords.split(',')[0]?.trim() || planet1Name;
-    const planet2Desc = planetMeanings[planet2Name as keyof typeof planetMeanings]?.keywords.split(',')[0]?.trim() || planet2Name;
+   const planet1Desc = planetMeanings[planet1Name as keyof typeof planetMeanings]?.keywords.split(',')[0]?.trim() || planet1Name;
+   const planet2Desc = planetMeanings[planet2Name as keyof typeof planetMeanings]?.keywords.split(',')[0]?.trim() || planet2Name;
 
-    // Interpretaciones específicas para combinaciones comunes
-    const specificInterpretations: { [key: string]: string } = {
-      'Sol-Luna-conjunction': `Tu esencia masculina (Sol) y femenina (Luna) trabajan en perfecta armonía. Hay coherencia entre lo que eres y lo que sientes.`,
-      'Mercurio-Venus-conjunction': `Tu forma de comunicarte se fusiona con tu capacidad de amar. Hablas con encanto, seduces con las palabras y tu intelecto se vuelve más artístico.`,
-      'Marte-Venus-square': `Existe tensión entre tu forma de actuar (Marte) y tus valores amorosos (Venus). Esta fricción te impulsa a equilibrar pasión con armonía.`,
-      'Sol-Saturno-square': `Tu ego y autoridad personal chocan con las estructuras y límites. Esta tensión te enseña disciplina y perseverancia.`
-    };
+   // Interpretaciones específicas para combinaciones comunes
+   const specificInterpretations: { [key: string]: string } = {
+     'Sol-Luna-conjunction': `Tu esencia masculina (Sol) y femenina (Luna) trabajan en perfecta armonía. Hay coherencia entre lo que eres y lo que sientes.`,
+     'Mercurio-Venus-conjunction': `Tu forma de comunicarte se fusiona con tu capacidad de amar. Hablas con encanto, seduces con las palabras y tu intelecto se vuelve más artístico.`,
+     'Marte-Venus-square': `Existe tensión entre tu forma de actuar (Marte) y tus valores amorosos (Venus). Esta fricción te impulsa a equilibrar pasión con armonía.`,
+     'Sol-Saturno-square': `Tu ego y autoridad personal chocan con las estructuras y límites. Esta tensión te enseña disciplina y perseverancia.`
+   };
 
-    const key = `${planet1Name}-${planet2Name}-${aspectType}`;
-    if (specificInterpretations[key]) return specificInterpretations[key];
+   const key = `${planet1Name}-${planet2Name}-${aspectType}`;
+   if (specificInterpretations[key]) return specificInterpretations[key];
 
-    // Interpretación general
-    let baseInterpretation = aspectMeanings[aspectType as keyof typeof aspectMeanings]?.meaning || '';
-    
-    if (aspectType === 'conjunction') {
-      return `Fusión de ${planet1Name} (${planet1Desc}) y ${planet2Name} (${planet2Desc}). Los planetas trabajan como uno solo. Esto significa que tu ${planet1Desc.toLowerCase()} se fusiona con tu ${planet2Desc.toLowerCase()}, creando una energía unificada y potente.`;
-    } else if (aspectType === 'opposition') {
-      return `Polarización entre ${planet1Name} (${planet1Desc}) y ${planet2Name} (${planet2Desc}). Necesitas encontrar equilibrio entre estas dos energías opuestas en tu vida.`;
-    } else if (aspectType === 'trine') {
-      return `Armonía natural entre ${planet1Name} (${planet1Desc}) y ${planet2Name} (${planet2Desc}). Las energías fluyen sin esfuerzo, creando talento natural en la combinación de estas cualidades.`;
+   // Interpretación general
+   let baseInterpretation = aspectMeanings[aspectType as keyof typeof aspectMeanings]?.meaning || '';
+   
+   if (aspectType === 'conjunction') {
+     return `Fusión de ${planet1Name} (${planet1Desc}) y ${planet2Name} (${planet2Desc}). Los planetas trabajan como uno solo. Esto significa que tu ${planet1Desc.toLowerCase()} se fusiona con tu ${planet2Desc.toLowerCase()}, creando una energía unificada y potente.`;
+   } else if (aspectType === 'opposition') {
+     return `Polarización entre ${planet1Name} (${planet1Desc}) y ${planet2Name} (${planet2Desc}). Necesitas encontrar equilibrio entre estas dos energías opuestas en tu vida.`;
+   } else if (aspectType === 'trine') {
+     return `Armonía natural entre ${planet1Name} (${planet1Desc}) y ${planet2Name} (${planet2Desc}). Las energías fluyen sin esfuerzo, creando talento natural en la combinación de estas cualidades.`;
    } else if (aspectType === 'square') {
      return `Tensión creativa entre ${planet1Name} (${planet1Desc}) y ${planet2Name} (${planet2Desc}). Esta fricción genera crecimiento y te impulsa a integrar ambas energías de forma constructiva.`;
    } else if (aspectType === 'sextile') {
@@ -620,6 +630,14 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
    }
 
    return `${baseInterpretation} entre ${planet1Name} y ${planet2Name}.`;
+ };
+
+ // 🔄 FUNCIÓN: Obtener nombre de aspecto específico con planetas
+ const getSpecificAspectName = (aspect: any) => {
+   const planet1Desc = planetMeanings[aspect.planet1 as keyof typeof planetMeanings]?.keywords.split(',')[0]?.trim() || aspect.planet1;
+   const planet2Desc = planetMeanings[aspect.planet2 as keyof typeof planetMeanings]?.keywords.split(',')[0]?.trim() || aspect.planet2;
+   
+   return `${aspect.config.name} entre ${aspect.planet1} (${planet1Desc}) y ${aspect.planet2} (${planet2Desc})`;
  };
 
  // 🎨 FUNCIÓN: Renderizar líneas de aspectos CON TOOLTIPS MEJORADOS
@@ -1206,10 +1224,29 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
              };
              
              const icons = {
-               fire: '🔥',
-               earth: '🌍',
-               air: '💨',
-               water: '🌊'
+               fire: () => (
+                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                   <path d="M12 23a7.5 7.5 0 0 1-5.138-12.963C8.204 8.774 11.5 6.5 11 1.5c6 4 9 8 3 14 1 0 2.5-.5 2.5-2.5 0 1.5 0 2.5-.5 3.5A7.5 7.5 0 0 1 12 23Z"/>
+                 </svg>
+               ),
+               earth: () => (
+                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                   <circle cx="12" cy="12" r="10"/>
+                   <path d="M12 2a14.5 14.5 0 0 0 0 20 10 10 0 0 0 0-20"/>
+                 </svg>
+               ),
+               air: () => (
+                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                   <path d="M12.8 19.6 7 14H2v-4h5l5.8-5.6A1 1 0 0 1 14 5v14a1 1 0 0 1-1.2.6Z"/>
+                   <path d="M18 8a4 4 0 0 0 0 8"/>
+                   <path d="M20 6a8 8 0 0 0 0 12"/>
+                 </svg>
+               ),
+               water: () => (
+                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                   <path d="M12 22a7 7 0 0 1-5-12L12 2l5 8a7 7 0 0 1-5 12Z"/>
+                 </svg>
+               )
              };
              
              const elementNames = {
@@ -1218,6 +1255,8 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
                air: 'Aire',
                water: 'Agua'
              };
+             
+             const IconComponent = icons[element as keyof typeof icons];
              
              return (
                <div key={element} className="space-y-2">
@@ -1231,8 +1270,11 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
                    onMouseLeave={() => setHoveredElement(null)}
                  >
                    <span className="text-white font-medium flex items-center text-sm">
-                     {icons[element as keyof typeof icons]} {elementNames[element as keyof typeof elementNames]}
-                   </span>
+                     <span className="text-orange-400 mr-2">
+                       <IconComponent />
+                     </span>
+                     {elementNames[element as keyof typeof elementNames]}
+                     </span>
                    <span className="text-gray-300 text-sm font-semibold">{percentage.toFixed(1)}%</span>
                  </div>
                  <div className="w-full bg-gray-700 rounded-full h-2">
@@ -1268,9 +1310,23 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
              };
              
              const icons = {
-               cardinal: '⚡',
-               fixed: '🛡️',
-               mutable: '🔄'
+               cardinal: () => (
+                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                   <polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/>
+                 </svg>
+               ),
+               fixed: () => (
+                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                   <rect x="6" y="4" width="6" height="15" rx="2"/>
+                   <rect x="12" y="4" width="6" height="15" rx="2"/>
+                 </svg>
+               ),
+               mutable: () => (
+                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                   <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                   <circle cx="12" cy="12" r="4"/>
+                 </svg>
+               )
              };
              
              const modalityNames = {
@@ -1278,6 +1334,8 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
                fixed: 'Fijo',
                mutable: 'Mutable'
              };
+             
+             const IconComponent = icons[modality as keyof typeof icons];
              
              return (
                <div key={modality} className="space-y-2">
@@ -1291,7 +1349,10 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
                    onMouseLeave={() => setHoveredModality(null)}
                  >
                    <span className="text-white font-medium flex items-center text-sm">
-                     {icons[modality as keyof typeof icons]} {modalityNames[modality as keyof typeof modalityNames]}
+                     <span className="text-purple-400 mr-2">
+                       <IconComponent />
+                     </span>
+                     {modalityNames[modality as keyof typeof modalityNames]}
                    </span>
                    <span className="text-gray-300 text-sm font-semibold">{percentage.toFixed(1)}%</span>
                  </div>
@@ -1356,38 +1417,74 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
          {showAspects && (
            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
              {Object.entries({
-               major: { label: '🌟 Aspectos Mayores', tooltip: 'Los 5 aspectos principales: más fuertes y definitorios' },
-               minor: { label: '✨ Aspectos Menores', tooltip: 'Influencias más sutiles pero importantes' },
-               easy: { label: '💙 Aspectos Armónicos', tooltip: 'Facilidades, talentos y energías que fluyen' },
-               hard: { label: '❤️ Aspectos Tensos', tooltip: 'Tensiones creativas que impulsan el desarrollo' }
-             }).map(([key, config]) => (
-               <div key={key} className="relative group">
-                 <button
-                   onClick={() => setSelectedAspectTypes({...selectedAspectTypes, [key]: !selectedAspectTypes[key as keyof typeof selectedAspectTypes]})}
-                   className={`w-full p-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
-                     selectedAspectTypes[key as keyof typeof selectedAspectTypes]
-                       ? `bg-gradient-to-r ${
-                           key === 'major' ? 'from-blue-400/30 to-purple-500/30 border-blue-400/50 text-blue-300' :
-                           key === 'minor' ? 'from-purple-400/30 to-pink-500/30 border-purple-400/50 text-purple-300' :
-                           key === 'easy' ? 'from-cyan-400/30 to-blue-500/30 border-cyan-400/50 text-cyan-300' :
-                           'from-red-400/30 to-pink-500/30 border-red-400/50 text-red-300'
-                         } border`
-                       : 'bg-gray-600/20 border border-gray-500/30 text-gray-400'
-                   }`}
-                 >
-                   {config.label}
-                 </button>
-                 
-                 {/* TOOLTIP CON Z-INDEX CORREGIDO */}
-                 <div 
-                   className="opacity-0 group-hover:opacity-100 absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 bg-gradient-to-r from-gray-900/95 to-black/95 backdrop-blur-sm border border-white/30 rounded-xl p-3 shadow-2xl transition-opacity duration-200 pointer-events-none max-w-xs"
-                   style={{ zIndex: 99999 }}
-                 >
-                   <div className="text-white text-xs font-semibold mb-1">{config.label}</div>
-                   <div className="text-gray-300 text-xs">{config.tooltip}</div>
+               major: { 
+                 label: 'Aspectos Mayores', 
+                 tooltip: 'Los 5 aspectos principales: más fuertes y definitorios',
+                 icon: () => (
+                   <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                     <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+                   </svg>
+                 )
+               },
+               minor: { 
+                 label: 'Aspectos Menores', 
+                 tooltip: 'Influencias más sutiles pero importantes',
+                 icon: () => (
+                   <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                     <path d="M9.663 17h4.673M12 3v1m6.364 1.636-.707.707M21 12h-1M4 12H3m3.343-5.657-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                   </svg>
+                 )
+               },
+               easy: { 
+                 label: 'Aspectos Armónicos', 
+                 tooltip: 'Facilidades, talentos y energías que fluyen',
+                 icon: () => (
+                   <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                     <path d="M20 6 9 17l-5-5"/>
+                   </svg>
+                 )
+               },
+               hard: { 
+                 label: 'Aspectos Tensos', 
+                 tooltip: 'Tensiones creativas que impulsan el desarrollo',
+                 icon: () => (
+                   <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                     <polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/>
+                   </svg>
+                 )
+               }
+             }).map(([key, config]) => {
+               const IconComponent = config.icon;
+               return (
+                 <div key={key} className="relative group">
+                   <button
+                     onClick={() => setSelectedAspectTypes({...selectedAspectTypes, [key]: !selectedAspectTypes[key as keyof typeof selectedAspectTypes]})}
+                     className={`w-full p-3 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center ${
+                       selectedAspectTypes[key as keyof typeof selectedAspectTypes]
+                         ? `bg-gradient-to-r ${
+                             key === 'major' ? 'from-blue-400/30 to-purple-500/30 border-blue-400/50 text-blue-300' :
+                             key === 'minor' ? 'from-purple-400/30 to-pink-500/30 border-purple-400/50 text-purple-300' :
+                             key === 'easy' ? 'from-cyan-400/30 to-blue-500/30 border-cyan-400/50 text-cyan-300' :
+                             'from-red-400/30 to-pink-500/30 border-red-400/50 text-red-300'
+                           } border`
+                         : 'bg-gray-600/20 border border-gray-500/30 text-gray-400'
+                     }`}
+                   >
+                     <IconComponent />
+                     {config.label}
+                   </button>
+                   
+                   {/* TOOLTIP CON Z-INDEX CORREGIDO */}
+                   <div 
+                     className="opacity-0 group-hover:opacity-100 absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 bg-gradient-to-r from-gray-900/95 to-black/95 backdrop-blur-sm border border-white/30 rounded-xl p-3 shadow-2xl transition-opacity duration-200 pointer-events-none max-w-xs"
+                     style={{ zIndex: 99999 }}
+                   >
+                     <div className="text-white text-xs font-semibold mb-1">{config.label}</div>
+                     <div className="text-gray-300 text-xs">{config.tooltip}</div>
+                   </div>
                  </div>
-               </div>
-             ))}
+               );
+             })}
            </div>
          )}
        </div>
@@ -1435,13 +1532,85 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
          </div>
        </div>
 
-       {/* Leyenda de aspectos CON SIGNIFICADOS COMPLETOS Y ESTILOS UNIFICADOS */}
+       {/* 📊 RESUMEN EDUCATIVO MOVIDO AQUÍ - DEBAJO DEL CHART WHEEL */}
+       <div className="p-6 bg-gradient-to-r from-indigo-900/40 to-purple-900/40 rounded-xl border border-indigo-400/30">
+         <div className="text-center mb-4">
+           <h4 className="text-white font-bold text-lg mb-2">
+             <svg className="w-5 h-5 inline mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+               <polyline points="14,2 14,8 20,8"/>
+               <line x1="16" y1="13" x2="8" y2="13"/>
+               <line x1="16" y1="17" x2="8" y2="17"/>
+               <polyline points="10,9 9,9 8,9"/>
+             </svg>
+             Resumen de Aspectos
+           </h4>
+           <div className="text-indigo-200 text-sm">Comprende cómo interactúan las energías planetarias en tu carta natal</div>
+         </div>
+         
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+           <div className="text-center">
+             <div className="text-green-300 font-bold text-lg mb-2 flex items-center justify-center">
+               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                 <path d="M20 6 9 17l-5-5"/>
+               </svg>
+               Armónicos
+             </div>
+             <div className="text-green-200 text-sm">Trígono, Sextil, Semisextil</div>
+             <div className="text-gray-300 text-xs mt-1">Facilitan, aportan talentos</div>
+           </div>
+           
+           <div className="text-center">
+             <div className="text-red-300 font-bold text-lg mb-2 flex items-center justify-center">
+               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                 <polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/>
+               </svg>
+               Tensos
+             </div>
+             <div className="text-red-200 text-sm">Cuadratura, Oposición, Quincuncio</div>
+             <div className="text-gray-300 text-xs mt-1">Desafían, impulsan crecimiento</div>
+           </div>
+           
+           <div className="text-center">
+             <div className="text-yellow-300 font-bold text-lg mb-2 flex items-center justify-center">
+               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                 <circle cx="12" cy="12" r="10"/>
+                 <circle cx="12" cy="12" r="6"/>
+                 <circle cx="12" cy="12" r="2"/>
+               </svg>
+               Especiales
+             </div>
+             <div className="text-yellow-200 text-sm">Conjunción, Aspectos Menores</div>
+             <div className="text-gray-300 text-xs mt-1">Intensifican, matizan</div>
+           </div>
+         </div>
+         
+         {/* EXPLICACIÓN DE EXACTO */}
+         <div className="mt-6 p-4 bg-yellow-400/10 border border-yellow-400/30 rounded-lg">
+           <div className="text-center">
+             <div className="text-yellow-300 font-bold text-lg mb-2 flex items-center justify-center">
+               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                 <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+               </svg>
+               Aspectos EXACTOS
+             </div>
+             <div className="text-yellow-100 text-sm leading-relaxed max-w-2xl mx-auto">
+               Cuando el orbe es menor a <span className="font-semibold">1 grado</span>, el aspecto se considera 
+               <span className="bg-yellow-400 text-black px-1 rounded mx-1 font-bold">EXACTO</span>. 
+               Estos aspectos tienen <span className="text-yellow-200 font-semibold">máxima potencia energética</span> 
+               y representan las influencias <span className="text-yellow-200 font-semibold">más poderosas</span> en tu personalidad.
+             </div>
+           </div>
+         </div>
+       </div>
+
+       {/* Leyenda de aspectos CON SIGNIFICADOS COMPLETOS Y EDUCATIVOS */}
        <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
          <div className="flex items-center mb-6">
            <svg className="w-6 h-6 text-purple-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
              <path d="M9.663 17h4.673M12 3v1m6.364 1.636-.707.707M21 12h-1M4 12H3m3.343-5.657-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
            </svg>
-           <h3 className="text-xl font-bold text-white">Guía de Aspectos Astrológicos</h3>
+           <h3 className="text-xl font-bold text-white">Guía Educativa de Aspectos Astrológicos</h3>
          </div>
          
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1472,11 +1641,16 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
                  </div>
                </div>
                
-               {/* SIGNIFICADO COMPLETO */}
+               {/* SIGNIFICADO COMPLETO CON EXPLICACIÓN CLARA */}
                <div className="space-y-3">
                  <div>
                    <div className="text-white text-sm font-semibold mb-1 flex items-center">
-                     🎯 Significado
+                     <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                       <circle cx="12" cy="12" r="10"/>
+                       <circle cx="12" cy="12" r="6"/>
+                       <circle cx="12" cy="12" r="2"/>
+                     </svg>
+                     Significado
                    </div>
                    <div className="text-gray-200 text-xs leading-relaxed">
                      {aspectMeanings[type as keyof typeof aspectMeanings]?.meaning}
@@ -1485,16 +1659,39 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
                  
                  <div>
                    <div className="text-white text-sm font-semibold mb-1 flex items-center">
-                     ⚡ Efecto
+                     <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                       <polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/>
+                     </svg>
+                     Efecto
                    </div>
                    <div className="text-gray-300 text-xs leading-relaxed">
                      {aspectMeanings[type as keyof typeof aspectMeanings]?.effect}
                    </div>
                  </div>
+
+                 <div>
+                   <div className="text-white text-sm font-semibold mb-1 flex items-center">
+                     <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                       <polyline points="14,2 14,8 20,8"/>
+                       <line x1="16" y1="13" x2="8" y2="13"/>
+                       <line x1="16" y1="17" x2="8" y2="17"/>
+                       <polyline points="10,9 9,9 8,9"/>
+                     </svg>
+                     Explicación Simple
+                   </div>
+                   <div className="text-cyan-200 text-xs leading-relaxed">
+                     {aspectMeanings[type as keyof typeof aspectMeanings]?.explanation}
+                   </div>
+                 </div>
                  
                  <div>
                    <div className="text-white text-sm font-semibold mb-1 flex items-center">
-                     📊 Naturaleza
+                     <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                       <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                       <rect x="7" y="7" width="10" height="10" rx="1" ry="1"/>
+                     </svg>
+                     Naturaleza
                    </div>
                    <div className={`text-xs leading-relaxed px-2 py-1 rounded-full text-center font-medium ${
                      config.difficulty === 'easy' 
@@ -1509,64 +1706,8 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
                    </div>
                  </div>
                </div>
-               
-               {/* INTERPRETACIÓN ADICIONAL */}
-               <div className="mt-4 p-3 bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-lg border border-purple-400/20">
-                 <div className="text-purple-200 text-xs leading-relaxed">
-                   {type === 'conjunction' && '💫 Energías fusionadas que actúan como una sola fuerza'}
-                   {type === 'opposition' && '⚖️ Tensión que busca equilibrio entre fuerzas opuestas'}
-                   {type === 'trine' && '🌟 Flujo natural de energía, talentos innatos'}
-                   {type === 'square' && '🔥 Fricción creativa que impulsa el crecimiento'}
-                   {type === 'sextile' && '🤝 Oportunidades que requieren acción consciente'}
-                   {type === 'quincunx' && '🔄 Necesidad constante de adaptación y ajuste'}
-                   {type === 'semisextile' && '✨ Matices sutiles que refinan la personalidad'}
-                   {type === 'semisquare' && '⚠️ Pequeñas tensiones que piden atención'}
-                   {type === 'sesquiquadrate' && '🌪️ Presión persistente hasta encontrar liberación'}
-                 </div>
-               </div>
              </div>
            ))}
-         </div>
-         
-         {/* RESUMEN EDUCATIVO */}
-         <div className="mt-8 p-6 bg-gradient-to-r from-indigo-900/40 to-purple-900/40 rounded-xl border border-indigo-400/30">
-           <div className="text-center mb-4">
-             <h4 className="text-white font-bold text-lg mb-2">📚 Resumen de Aspectos</h4>
-             <div className="text-indigo-200 text-sm">Comprende cómo interactúan las energías planetarias en tu carta natal</div>
-           </div>
-           
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-             <div className="text-center">
-               <div className="text-green-300 font-bold text-lg mb-2">🌟 Armónicos</div>
-               <div className="text-green-200 text-sm">Trígono, Sextil, Semisextil</div>
-               <div className="text-gray-300 text-xs mt-1">Facilitan, aportan talentos</div>
-             </div>
-             
-             <div className="text-center">
-               <div className="text-red-300 font-bold text-lg mb-2">🔥 Tensos</div>
-               <div className="text-red-200 text-sm">Cuadratura, Oposición, Quincuncio</div>
-               <div className="text-gray-300 text-xs mt-1">Desafían, impulsan crecimiento</div>
-             </div>
-             
-             <div className="text-center">
-               <div className="text-yellow-300 font-bold text-lg mb-2">⚡ Especiales</div>
-               <div className="text-yellow-200 text-sm">Conjunción, Aspectos Menores</div>
-               <div className="text-gray-300 text-xs mt-1">Intensifican, matizan</div>
-             </div>
-           </div>
-           
-           {/* EXPLICACIÓN DE EXACTO */}
-           <div className="mt-6 p-4 bg-yellow-400/10 border border-yellow-400/30 rounded-lg">
-             <div className="text-center">
-               <div className="text-yellow-300 font-bold text-lg mb-2">⭐ Aspectos EXACTOS</div>
-               <div className="text-yellow-100 text-sm leading-relaxed max-w-2xl mx-auto">
-                 Cuando el orbe es menor a <span className="font-semibold">1 grado</span>, el aspecto se considera 
-                 <span className="bg-yellow-400 text-black px-1 rounded mx-1 font-bold">EXACTO</span>. 
-                 Estos aspectos tienen <span className="text-yellow-200 font-semibold">máxima potencia energética</span> 
-                 y representan las influencias <span className="text-yellow-200 font-semibold">más poderosas</span> en tu personalidad.
-               </div>
-             </div>
-           </div>
          </div>
        </div>
      </div>
@@ -1574,7 +1715,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
      {/* ✨ MENÚ DE NAVEGACIÓN */}
      <SectionMenu activeSection={activeSection} scrollToSection={scrollToSection} />
 
-     {/* 🎯 SECCIÓN 3: ASPECTOS DETECTADOS */}
+     {/* 🎯 SECCIÓN 3: ASPECTOS DETECTADOS CON NOMBRES ESPECÍFICOS */}
      {calculatedAspects.length > 0 && (
        <div id="aspectos-detectados" className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
          <div className="flex items-center mb-6">
@@ -1582,7 +1723,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
              <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
            </svg>
            <h3 className="text-xl font-bold text-white">
-             Aspectos Detectados ({calculatedAspects.length})
+             Aspectos Específicos Detectados ({calculatedAspects.length})
            </h3>
          </div>
          
@@ -1595,7 +1736,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
                  setHoveredAspect(`${aspect.planet1}-${aspect.planet2}-${aspect.type}`);
                  handleMouseMove(e);
                }}
-               onMouseMove={handleMouseMove}
+              onMouseMove={handleMouseMove}
                onMouseLeave={() => setHoveredAspect(null)}
                style={{ position: 'relative', zIndex: 1 }}
              >

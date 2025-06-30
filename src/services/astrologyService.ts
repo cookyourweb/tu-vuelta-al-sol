@@ -393,7 +393,7 @@ export function convertProkeralaToNatalChart(
       timezone
     };
   } catch (error) {
-    console.error('Error converting Prokerala data:', error);
+    console.error('Error convertinaag Prokerala data:', error);
     throw new Error('Error processing astrological data');
   }
 }
