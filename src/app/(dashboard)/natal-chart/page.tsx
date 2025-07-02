@@ -1,172 +1,127 @@
-// app/(dashboard)/natal-chart/page.tsx - VERSIÓN CORREGIDA COMPLETA
+// src/app/(dashboard)/natal-chart/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 import ChartDisplay from '@/components/astrology/ChartDisplay';
+import { Sparkles, Edit, Star } from 'lucide-react';
 import Button from '@/components/ui/Button';
-import { 
-  Star, 
-  Calendar, 
-  MapPin, 
-  Clock, 
-  Sparkles, 
-  Moon, 
-  Sun, 
-  ArrowLeft, 
-  Edit, 
-  Download,
-  Eye,
-  EyeOff,
-  AlertTriangle,
-  CheckCircle,
-  Zap,
-  RefreshCw
-} from 'lucide-react';
 
-// ✅ INTERFACES CORREGIDAS PARA COMPATIBILIDAD TOTAL
-interface Planet {
-  name: string;
-  degree: number;
-  sign: string;
-  minutes?: number;
-  longitude?: number;
-  houseNumber?: number;
-  housePosition?: number;
-  isRetrograde?: boolean;
-  retrograde?: boolean;
-}
-
-interface House {
-  number: number;
-  sign: string;
-  degree: number;
-  minutes?: number;
-  longitude?: number;
-}
-
-interface Aspect {
-  planet1: string;
-  planet2: string;
-  type: string;
-  orb: number;
-  applying?: boolean;
-}
-
+// Interfaces
 interface NatalChartData {
-  planets: Planet[];
-  houses: House[];
-  aspects: Aspect[];
-  ascendant?: {
-    sign: string;
-    degree: number;
-    minutes: number;
-  };
-  midheaven?: {
-    sign: string;
-    degree: number;
-    minutes: number;
-  };
-  elementDistribution?: { fire: number; earth: number; air: number; water: number };
-  modalityDistribution?: { cardinal: number; fixed: number; mutable: number };
+  planets: any[];
+  houses: any[];
+  aspects?: any[];
+  keyAspects?: any[];
+  elementDistribution: { fire: number; earth: number; air: number; water: number };
+  modalityDistribution: { cardinal: number; fixed: number; mutable: number };
+  ascendant?: { longitude?: number; sign?: string; degree?: number };
+  midheaven?: { longitude?: number; sign?: string; degree?: number };
+}
+
+interface BirthData {
+  birthDate: string;
+  birthTime: string;
+  birthPlace: string;
 }
 
 export default function NatalChartPage() {
-  const [chartData, setChartData] = useState<NatalChartData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [birthData, setBirthData] = useState<any | null>(null);
-  const [debugInfo, setDebugInfo] = useState<string>('Iniciando...'); 
-  const [isVeronica, setIsVeronica] = useState(false);
-  const [showDebug, setShowDebug] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
+  
+  // Estados
+  const [chartData, setChartData] = useState<NatalChartData | null>(null);
+  const [birthData, setBirthData] = useState<BirthData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<string>('');
 
-  // ✅ FUNCIÓN PRINCIPAL CORREGIDA
-  const fetchChartData = async (regenerate = false) => {
+  // Verificar si es Verónica (para debugging)
+  const isVeronica = birthData?.birthDate === '1974-02-10' && 
+                    birthData?.birthTime === '07:30:00' && 
+                    birthData?.birthPlace?.includes('Sevilla');
+
+  useEffect(() => {
+    if (!user) {
+      router.push('/auth/login');
+      return;
+    }
+    
+    loadBirthData();
+  }, [user, router]);
+
+  useEffect(() => {
+    if (birthData) {
+      fetchChartData();
+    }
+  }, [birthData]);
+
+  // ✅ FUNCIÓN CORREGIDA:
+  const loadBirthData = async () => {
     try {
-      if (!user?.uid) {
-        setDebugInfo('❌ No hay usuario autenticado');
-        setLoading(false);
-        router.push('/auth/login');
-        return;
-      }
+      console.log('🔍 Cargando datos de nacimiento...');
+      console.log('👤 User UID:', user?.uid);
       
-      setDebugInfo(`✅ Usuario encontrado: ${user.uid}`);
-      setLoading(true);
-      setError(null);
+      // ✅ AÑADIR EL USERID COMO PARÁMETRO
+      const response = await fetch(`/api/birth-data?userId=${user?.uid}`);
+      console.log('📡 Respuesta API status:', response.status);
       
-      // ✅ PASO 1: Obtener datos de nacimiento
-      setDebugInfo('📡 Obteniendo datos de nacimiento...');
-      
-      const birthDataResponse = await fetch(`/api/birth-data?userId=${user.uid}`);
-      
-      if (!birthDataResponse.ok) {
-        setDebugInfo('❌ No se encontraron datos de nacimiento');
-        setError('No se encontraron datos de nacimiento. Primero debes ingresar tus datos de nacimiento.');
-        setLoading(false);
-        return;
-      }
-      
-      const birthDataResult = await birthDataResponse.json();
-      
-      if (!birthDataResult.success) {
-        setDebugInfo('❌ Error obteniendo datos de nacimiento');
-        setError(birthDataResult.error || 'Error al obtener datos de nacimiento');
-        setLoading(false);
-        return;
-      }
-      
-      setBirthData(birthDataResult.data);
-      setDebugInfo(`✅ Datos de nacimiento obtenidos: ${birthDataResult.data.birthPlace}`);
-      
-      // Verificar si es Verónica
-      const birthDate = new Date(birthDataResult.data.birthDate);
-      const isVeronicaBirth = birthDate.getFullYear() === 1974 && 
-                             birthDate.getMonth() === 1 && // Febrero = 1 (0-indexed)
-                             birthDate.getDate() === 10;
-      setIsVeronica(isVeronicaBirth);
-      
-      // ✅ PASO 2: Intentar obtener carta existente (solo si no regeneramos)
-      if (!regenerate) {
-        setDebugInfo('🔍 Buscando carta natal existente...');
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ Datos recibidos:', data);
         
-        const chartResponse = await fetch(`/api/charts/natal?userId=${user.uid}`);
+        // ✅ PROCESAR DATOS CORRECTAMENTE
+        const processedData = {
+          birthDate: data.birthDate,
+          birthTime: data.birthTime,
+          birthPlace: data.birthPlace || `${data.latitude},${data.longitude}`
+        };
         
-        if (chartResponse.ok) {
-          const chartResult = await chartResponse.json();
-          
-          if (chartResult.success && chartResult.natalChart) {
-            setDebugInfo('✅ Carta natal existente encontrada');
-            setChartData(processChartData(chartResult.natalChart));
-            setLoading(false);
-            return;
-          }
-        }
-        
-        setDebugInfo('📝 No se encontró carta existente, generando nueva...');
+        console.log('🔄 Datos procesados:', processedData);
+        setBirthData(processedData);
       } else {
-        setDebugInfo('🔄 Regenerando carta natal...');
+        const errorText = await response.text();
+        console.log('❌ Error API:', response.status, errorText);
+        console.log('🔄 Redirigiendo a birth-data...');
+        router.push('/birth-data');
       }
+    } catch (error) {
+      console.error('💥 Error cargando datos de nacimiento:', error);
+      router.push('/birth-data');
+    }
+  };
+
+  // ✅ FUNCIÓN: Generar carta natal
+  const fetchChartData = async () => {
+    if (!birthData) return;
+    
+    setLoading(true);
+    setError(null);
+    setDebugInfo('🔄 Generando carta natal...');
+    
+    try {
+      // Construir parámetros para la API
+      const params = new URLSearchParams({
+        date: birthData.birthDate,
+        time: birthData.birthTime,
+        location: birthData.birthPlace,
+        userId: user?.uid || '' // ✅ AÑADIR USERID
+      });
       
-      // ✅ PASO 3: Generar nueva carta natal
-      setDebugInfo('🔄 Generando carta natal con API Prokerala...');
+      setDebugInfo('📡 Enviando petición a API Charts...');
       
-      const generateResponse = await fetch('/api/charts/natal', {
-        method: 'POST',
+      // ✅ RUTA CORREGIDA: /api/charts/natal en lugar de /api/charts/generate
+      const generateResponse = await fetch(`/api/charts/natal?${params}`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          userId: user.uid,
-          regenerate: regenerate
-        }),
       });
       
       if (!generateResponse.ok) {
         const errorText = await generateResponse.text();
-        setDebugInfo(`❌ Error HTTP: ${generateResponse.status}`);
+        setDebugInfo(`❌ Error HTTP ${generateResponse.status}`);
         setError(`Error ${generateResponse.status}: ${errorText}`);
         setLoading(false);
         return;
@@ -186,7 +141,7 @@ export default function NatalChartPage() {
       // ✅ LOG DE DEBUGGING
       console.log('📊 Respuesta completa de API Charts:', generateResult);
       
-      if (isVeronicaBirth) {
+      if (isVeronica) {
         const ascSign = generateResult.natalChart?.ascendant?.sign;
         setDebugInfo(`🎯 Verónica detectada - ASC: ${ascSign} (esperado: Acuario)`);
       }
@@ -211,7 +166,7 @@ export default function NatalChartPage() {
     }
 
     // ✅ PROCESAR PLANETAS CON VALIDACIÓN
-    const planets: Planet[] = (rawData.planets || []).map((planet: any, index: number) => ({
+    const planets: any[] = (rawData.planets || []).map((planet: any, index: number) => ({
       name: planet.name || `Planeta ${index + 1}`,
       degree: planet.degree || 0,
       sign: planet.sign || 'Aries',
@@ -224,7 +179,7 @@ export default function NatalChartPage() {
     }));
 
     // ✅ PROCESAR CASAS CON VALIDACIÓN
-    const houses: House[] = (rawData.houses || []).map((house: any, index: number) => ({
+    const houses: any[] = (rawData.houses || []).map((house: any, index: number) => ({
       number: house.number || (index + 1),
       sign: house.sign || 'Aries',
       degree: house.degree || 0,
@@ -233,7 +188,7 @@ export default function NatalChartPage() {
     }));
 
     // ✅ PROCESAR ASPECTOS CON VALIDACIÓN
-    const aspects: Aspect[] = (rawData.aspects || []).map((aspect: any) => ({
+    const aspects: any[] = (rawData.aspects || []).map((aspect: any) => ({
       planet1: aspect.planet1 || 'Sol',
       planet2: aspect.planet2 || 'Luna',
       type: aspect.type || 'conjunction',
@@ -249,6 +204,7 @@ export default function NatalChartPage() {
       planets,
       houses,
       aspects,
+      keyAspects: aspects,
       ascendant: rawData.ascendant,
       midheaven: rawData.midheaven,
       elementDistribution,
@@ -256,8 +212,8 @@ export default function NatalChartPage() {
     };
   };
 
-  // ✅ CALCULAR DISTRIBUCIÓN DE ELEMENTOS
-  const calculateElementDistribution = (planets: Planet[]) => {
+  // ✅ FUNCIONES DE CÁLCULO DE DISTRIBUCIONES
+  const calculateElementDistribution = (planets: any[]) => {
     const elementMap: { [key: string]: string } = {
       'Aries': 'fire', 'Leo': 'fire', 'Sagitario': 'fire',
       'Tauro': 'earth', 'Virgo': 'earth', 'Capricornio': 'earth',
@@ -269,7 +225,7 @@ export default function NatalChartPage() {
     
     planets.forEach(planet => {
       const element = elementMap[planet.sign];
-      if (element && distribution.hasOwnProperty(element)) {
+      if (element) {
         distribution[element as keyof typeof distribution]++;
       }
     });
@@ -277,8 +233,7 @@ export default function NatalChartPage() {
     return distribution;
   };
 
-  // ✅ CALCULAR DISTRIBUCIÓN DE MODALIDADES
-  const calculateModalityDistribution = (planets: Planet[]) => {
+  const calculateModalityDistribution = (planets: any[]) => {
     const modalityMap: { [key: string]: string } = {
       'Aries': 'cardinal', 'Cáncer': 'cardinal', 'Libra': 'cardinal', 'Capricornio': 'cardinal',
       'Tauro': 'fixed', 'Leo': 'fixed', 'Escorpio': 'fixed', 'Acuario': 'fixed',
@@ -289,7 +244,7 @@ export default function NatalChartPage() {
     
     planets.forEach(planet => {
       const modality = modalityMap[planet.sign];
-      if (modality && distribution.hasOwnProperty(modality)) {
+      if (modality) {
         distribution[modality as keyof typeof distribution]++;
       }
     });
@@ -297,209 +252,146 @@ export default function NatalChartPage() {
     return distribution;
   };
 
-  // ✅ CARGAR DATOS AL MONTAR COMPONENTE
-  useEffect(() => {
-    fetchChartData();
-  }, [user]);
-
-  // ✅ FUNCIÓN PARA REGENERAR CARTA
-  const handleRegenerate = async () => {
-    await fetchChartData(true);
-  };
-
-  // ✅ RENDER DE ESTADOS DE CARGA Y ERROR
+  // ✅ PANTALLA DE CARGA
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-black via-purple-900/20 to-black flex items-center justify-center">
-        <div className="text-center space-y-6 p-8">
-          <div className="relative">
-            <div className="w-16 h-16 border-4 border-purple-500/30 border-t-purple-400 rounded-full animate-spin mx-auto"></div>
-            <Star className="w-6 h-6 text-yellow-400 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+      <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-black text-white flex items-center justify-center">
+        <div className="text-center space-y-6 max-w-md mx-auto px-6">
+          <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 border border-yellow-400/30 rounded-full p-8 backdrop-blur-sm relative mx-auto w-fit">
+            <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 to-orange-500/10 rounded-full animate-pulse"></div>
+            <Sparkles className="w-16 h-16 text-yellow-400 animate-spin" />
           </div>
-          <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-white">Calculando tu Carta Natal</h2>
-            <p className="text-gray-400">Conectando con los astros...</p>
-            <div className="text-sm text-purple-300 font-mono">{debugInfo}</div>
+          
+          <div className="space-y-3">
+            <h2 className="text-2xl font-bold text-white">Generando tu Carta Natal</h2>
+            <p className="text-gray-300 leading-relaxed">
+              Calculando las posiciones planetarias exactas para el momento de tu nacimiento...
+            </p>
+            
+            {debugInfo && (
+              <div className="bg-black/30 rounded-lg p-3 text-sm text-blue-300 font-mono">
+                {debugInfo}
+              </div>
+            )}
+          </div>
+          
+          <div className="flex justify-center">
+            <div className="flex space-x-1">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="w-2 h-2 bg-yellow-400 rounded-full animate-bounce"
+                  style={{ animationDelay: `${i * 0.2}s` }}
+                ></div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
+  // ✅ PANTALLA DE ERROR
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-black via-red-900/20 to-black flex items-center justify-center">
-        <div className="text-center space-y-6 p-8 max-w-md">
-          <AlertTriangle className="w-16 h-16 text-red-400 mx-auto" />
-          <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-white">Error al cargar tu carta</h2>
-            <p className="text-gray-400">{error}</p>
-            <div className="text-sm text-red-300 font-mono">{debugInfo}</div>
+      <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-black text-white flex items-center justify-center">
+        <div className="text-center space-y-6 max-w-md mx-auto px-6">
+          <div className="bg-gradient-to-r from-red-500/20 to-pink-500/20 border border-red-400/30 rounded-full p-8 backdrop-blur-sm mx-auto w-fit">
+            <Sparkles className="w-16 h-16 text-red-400" />
           </div>
-          <div className="space-y-3">
-            <Button
-              onClick={() => fetchChartData()}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
-            >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Intentar de nuevo
-            </Button>
-            <Button
-              onClick={() => router.push('/dashboard')}
-              variant="outline"
-              className="border-gray-600 text-gray-300 hover:bg-gray-800"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Volver al Dashboard
-            </Button>
+          
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold text-white">Error al generar carta</h2>
+            <p className="text-gray-300">{error}</p>
+            
+            {debugInfo && (
+              <div className="bg-black/30 rounded-lg p-3 text-sm text-red-300 font-mono text-left">
+                {debugInfo}
+              </div>
+            )}
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                onClick={() => window.location.reload()}
+                className="bg-purple-600 hover:bg-purple-700 flex items-center space-x-2"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>Intentar de nuevo</span>
+              </Button>
+              <Button
+                onClick={() => router.push('/birth-data')}
+                variant="outline"
+                className="border-purple-400 text-purple-300 hover:bg-purple-400/10"
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Editar datos
+              </Button>
+            </div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ✅ PANTALLA PRINCIPAL - CARTA NATAL GENERADA
+  if (!chartData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-300">No hay datos de carta natal disponibles</p>
+          <Button
+            onClick={() => window.location.reload()}
+            className="mt-4 bg-purple-600 hover:bg-purple-700"
+          >
+            Recargar
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-purple-900/20 to-black">
-      {/* Header épico */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-purple-900/30 via-black/50 to-indigo-900/30 backdrop-blur-sm border-b border-white/10">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20"></div>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-black">
+      <div className="container mx-auto px-4 py-8 space-y-8">
         
-        <div className="relative px-6 py-12">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex items-center justify-between mb-8">
-              <button
-                onClick={() => router.push('/dashboard')}
-                className="flex items-center text-gray-400 hover:text-white transition-colors duration-200"
-              >
-                <ArrowLeft className="w-5 h-5 mr-2" />
-                Volver al Dashboard
-              </button>
+        {/* Header mejorado con icono movido */}
+        <div className="text-center space-y-6">
+          <div className="flex justify-center items-center mb-6">
+            <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 border border-yellow-400/30 rounded-full p-6 backdrop-blur-sm relative">
+              <div className="absolute -top-2 -right-2 w-4 h-4 bg-yellow-400 rounded-full animate-pulse"></div>
+              <Star className="w-12 h-12 text-yellow-400" />
               
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => setShowDebug(!showDebug)}
-                  className="flex items-center px-3 py-2 rounded-lg bg-black/30 border border-white/10 text-gray-300 hover:text-white transition-colors duration-200"
-                >
-                  {showDebug ? <EyeOff className="w-4 h-4 mr-2" /> : <Eye className="w-4 h-4 mr-2" />}
-                  {showDebug ? 'Ocultar Debug' : 'Ver Debug'}
-                </button>
-                
-                <Button
-                  onClick={handleRegenerate}
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
-                >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Regenerar Carta
-                </Button>
-              </div>
-            </div>
-            
-            <div className="text-center space-y-6">
-              <div className="flex items-center justify-center space-x-3 mb-4">
-                <Star className="w-8 h-8 text-yellow-400 animate-pulse" />
-                <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
-                  Tu Carta Natal
-                </h1>
-                <Moon className="w-8 h-8 text-blue-400 animate-pulse" />
-              </div>
-              
-              <div className="text-gray-300 text-lg max-w-2xl mx-auto">
-                Descubre los secretos que los astros revelaron en el momento exacto de tu nacimiento
-              </div>
-              
-              {isVeronica && (
-                <div className="bg-gradient-to-r from-green-500/20 to-blue-500/20 border border-green-400/30 rounded-xl p-4 max-w-md mx-auto">
-                  <div className="flex items-center justify-center space-x-2">
-                    <CheckCircle className="w-5 h-5 text-green-400" />
-                    <span className="text-green-300 font-semibold">Carta verificada para Verónica</span>
-                  </div>
-                  <div className="text-green-200 text-sm mt-1">
-                    ASC: {chartData?.ascendant?.sign || 'Calculando...'} | ✅ Datos corregidos
-                  </div>
+              {/* Badge de corrección para Verónica */}
+              {isVeronica && chartData?.ascendant?.sign === 'Acuario' && (
+                <div className="absolute -bottom-2 -left-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                  ✅ Corregido
                 </div>
               )}
             </div>
           </div>
+          
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed flex items-center justify-center gap-3">
+            <Star className="w-6 h-6 text-yellow-400 flex-shrink-0" />
+            Descubre los secretos que los astros revelaron en el momento exacto de tu nacimiento
+          </p>
+          
         </div>
-      </div>
 
-      {/* Debug Info */}
-      {showDebug && (
-        <div className="bg-black/80 border-b border-white/10 p-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-gray-900 rounded-lg p-4 font-mono text-sm text-green-400">
-              <div>🔍 Debug: {debugInfo}</div>
-              <div>👤 Usuario: {user?.uid}</div>
-              <div>🎯 Es Verónica: {isVeronica ? 'Sí' : 'No'}</div>
-              <div>📊 Planetas cargados: {chartData?.planets?.length || 0}</div>
-              <div>🏠 Casas cargadas: {chartData?.houses?.length || 0}</div>
-              <div>🔺 Ascendente: {chartData?.ascendant?.sign || 'N/A'}</div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Información de nacimiento */}
-      {birthData && (
-        <div className="px-6 py-8">
-          <div className="max-w-4xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
-                <div className="flex items-center mb-3">
-                  <Calendar className="w-6 h-6 text-purple-400 mr-3" />
-                  <h3 className="text-lg font-semibold text-white">Fecha de Nacimiento</h3>
-                </div>
-                <p className="text-gray-300">
-                  {new Date(birthData.birthDate).toLocaleDateString('es-ES', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </p>
-              </div>
-              
-              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
-                <div className="flex items-center mb-3">
-                  <Clock className="w-6 h-6 text-blue-400 mr-3" />
-                  <h3 className="text-lg font-semibold text-white">Hora de Nacimiento</h3>
-                </div>
-                <p className="text-gray-300">{birthData.birthTime || '12:00:00'}</p>
-              </div>
-              
-              <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
-                <div className="flex items-center mb-3">
-                  <MapPin className="w-6 h-6 text-green-400 mr-3" />
-                  <h3 className="text-lg font-semibold text-white">Lugar de Nacimiento</h3>
-                </div>
-                <p className="text-gray-300">{birthData.birthPlace}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Carta Natal Display */}
-      <div className="px-6 pb-12">
-        <div className="max-w-6xl mx-auto">
-          {chartData ? (
+        {/* Carta natal - SIN TARJETAS DE INFORMACIÓN */}
+        {chartData && (
+          <div className="flex justify-center">
             <ChartDisplay
-              houses={chartData.houses}
-              planets={chartData.planets}
-              elementDistribution={chartData.elementDistribution || { fire: 0, earth: 0, air: 0, water: 0 }}
-              modalityDistribution={chartData.modalityDistribution || { cardinal: 0, fixed: 0, mutable: 0 }}
-              keyAspects={chartData.aspects}
+              houses={chartData.houses || []}
+              planets={chartData.planets || []}
+              elementDistribution={chartData.elementDistribution || {}}
+              modalityDistribution={chartData.modalityDistribution || {}}
+              keyAspects={chartData.aspects || chartData.keyAspects || []}
               ascendant={chartData.ascendant}
               midheaven={chartData.midheaven}
+              birthData={birthData ?? undefined}
             />
-          ) : (
-            <div className="text-center py-12">
-              <AlertTriangle className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">No se pudo cargar la carta natal</h3>
-              <p className="text-gray-400">Intenta regenerar la carta o contacta con soporte</p>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

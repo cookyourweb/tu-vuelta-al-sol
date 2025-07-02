@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -56,8 +55,6 @@ interface ChartDisplayProps {
     birthPlace?: string;
   };
 }
-
-// 🎨 CONFIGURACIÓN DE ASPECTOS ASTROLÓGICOS
 
 // 🎨 CONFIGURACIÓN DE ASPECTOS ASTROLÓGICOS
 const ASPECTS = {
@@ -294,18 +291,6 @@ const SectionMenu: React.FC<{
 }> = ({ activeSection, scrollToSection }) => {
  const menuItems = [
    { 
-     id: 'datos-nacimiento', 
-     label: 'Datos', 
-     icon: () => (
-       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-         <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-         <line x1="16" y1="2" x2="16" y2="6"/>
-         <line x1="8" y1="2" x2="8" y2="6"/>
-         <line x1="3" y1="10" x2="21" y2="10"/>
-       </svg>
-     )
-   },
-   { 
      id: 'carta-visual', 
      label: 'Carta', 
      icon: () => (
@@ -418,7 +403,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
 
  // 👀 DETECTAR SECCIÓN VISIBLE CON INTERSECTION OBSERVER
  useEffect(() => {
-   const sections = ['datos-nacimiento', 'carta-visual', 'aspectos-detectados', 'posiciones-planetarias'];
+   const sections = ['carta-visual', 'aspectos-detectados', 'posiciones-planetarias'];
    const observers: IntersectionObserver[] = [];
 
    sections.forEach(sectionId => {
@@ -1020,7 +1005,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
            <svg className="w-6 h-6 text-yellow-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
              <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
            </svg>
-           <h1 className="text-2xl font-bold text-white">Tu Carta Natal</h1>
+           <h1 className="text-2xl font-bold text-white">Descubre los secretos que los astros revelaron en el momento exacto de tu nacimiento</h1>
            
            {/* 🎯 ICONO DE AYUDA CON TOOLTIP CORREGIDO */}
            <div className="relative" style={{ zIndex: 100000 }}>
@@ -1072,307 +1057,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
      {/* ✨ MENÚ DE NAVEGACIÓN PRINCIPAL */}
      <SectionMenu activeSection={activeSection} scrollToSection={scrollToSection} />
 
-     {/* 🎯 SECCIÓN 1: DATOS DE NACIMIENTO */}
-     <div id="datos-nacimiento" className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-       {/* Columna 1: Datos de Nacimiento */}
-       <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
-         <div className="flex items-center mb-4">
-           <svg className="w-5 h-5 text-green-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-             <line x1="16" y1="2" x2="16" y2="6"/>
-             <line x1="8" y1="2" x2="8" y2="6"/>
-             <line x1="3" y1="10" x2="21" y2="10"/>
-           </svg>
-           <h3 className="text-lg font-bold text-white">Datos de Nacimiento</h3>
-         </div>
-         
-         <div className="space-y-4">
-           <div className="flex items-center p-3 bg-black/20 rounded-lg">
-             <svg className="w-6 h-6 text-green-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-               <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-               <line x1="16" y1="2" x2="16" y2="6"/>
-               <line x1="8" y1="2" x2="8" y2="6"/>
-               <line x1="3" y1="10" x2="21" y2="10"/>
-             </svg>
-             <div>
-               <div className="text-white font-semibold text-sm">Fecha de Nacimiento</div>
-               <div className="text-gray-300 text-xs">
-                 {birthData?.birthDate ? new Date(birthData.birthDate).toLocaleDateString('es-ES', {
-                   weekday: 'long',
-                   day: 'numeric',
-                   month: 'long',
-                   year: 'numeric'
-                 }) : 'domingo, 10 de febrero de 1974'}
-               </div>
-             </div>
-           </div>
-           
-           <div className="flex items-center p-3 bg-black/20 rounded-lg">
-             <svg className="w-6 h-6 text-blue-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-               <circle cx="12" cy="12" r="10"/>
-               <polyline points="12,6 12,12 16,14"/>
-             </svg>
-             <div>
-               <div className="text-white font-semibold text-sm">Hora de Nacimiento</div>
-               <div className="text-gray-300 text-xs">
-                 {birthData?.birthTime || '07:30'}
-               </div>
-             </div>
-           </div>
-           
-           <div className="flex items-center p-3 bg-black/20 rounded-lg">
-             <svg className="w-6 h-6 text-purple-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-               <circle cx="12" cy="10" r="3"/>
-             </svg>
-             <div>
-               <div className="text-white font-semibold text-sm">Lugar de Nacimiento</div>
-               <div className="text-gray-300 text-xs">
-                 {birthData?.birthPlace || 'Madrid, España'}
-               </div>
-               <div className="text-gray-400 text-xs mt-1">
-                 40.4168°N, 3.7038°W
-               </div>
-             </div>
-           </div>
-         </div>
-       </div>
-
-       {/* Columna 2: Ángulos Principales */}
-       <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
-         <div className="flex items-center mb-4">
-           <svg className="w-5 h-5 text-blue-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-             <circle cx="12" cy="12" r="3"/>
-             <path d="M12 1v6m0 6v6"/>
-             <path d="m4.93 4.93 4.24 4.24m5.66 5.66 4.24 4.24"/>
-             <path d="M1 12h6m6 0h6"/>
-             <path d="m4.93 19.07 4.24-4.24m5.66-5.66 4.24-4.24"/>
-           </svg>
-           <h3 className="text-lg font-bold text-white">Ángulos</h3>
-         </div>
-         
-         <div className="space-y-4">
-           {ascendant && (
-             <div 
-               className="flex items-center p-3 bg-black/20 rounded-lg cursor-pointer hover:bg-black/30 transition-all duration-200"
-               onMouseEnter={(e) => {
-                 setHoveredPlanet('Ascendente');
-                 handleMouseMove(e);
-               }}
-               onMouseMove={handleMouseMove}
-               onMouseLeave={() => setHoveredPlanet(null)}
-               title={`Ascendente en ${ascendant.sign} - Tu personalidad externa`}
-             >
-               <svg className="w-6 h-6 text-green-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                 <line x1="12" y1="19" x2="12" y2="5"/>
-                 <polyline points="5,12 12,5 19,12"/>
-               </svg>
-               <div>
-                 <div className="text-white font-semibold text-sm">Ascendente</div>
-                 <div className="text-gray-300 text-xs">
-                   {ascendant.degree || 0}° {ascendant.sign || 'N/A'}
-                 </div>
-               </div>
-             </div>
-           )}
-           
-           {midheaven && (
-             <div 
-               className="flex items-center p-3 bg-black/20 rounded-lg cursor-pointer hover:bg-black/30 transition-all duration-200"
-               onMouseEnter={(e) => {
-                 setHoveredPlanet('Medio Cielo');
-                 handleMouseMove(e);
-               }}
-               onMouseMove={handleMouseMove}
-               onMouseLeave={() => setHoveredPlanet(null)}
-               title={`Medio Cielo en ${midheaven.sign} - Tu vocación`}
-             >
-               <svg className="w-6 h-6 text-purple-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                 <polyline points="22,7 13.5,15.5 8.5,10.5 2,17"/>
-                 <polyline points="16,7 22,7 22,13"/>
-               </svg>
-               <div>
-                 <div className="text-white font-semibold text-sm">Medio Cielo</div>
-                 <div className="text-gray-300 text-xs">
-                   {midheaven.degree || 0}° {midheaven.sign || 'N/A'}
-                 </div>
-               </div>
-             </div>
-           )}
-         </div>
-       </div>
-
-       {/* Columna 3: Elementos */}
-       <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
-         <div className="flex items-center mb-4">
-           <svg className="w-5 h-5 text-yellow-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-             <path d="M9.663 17h4.673M12 3v1m6.364 1.636-.707.707M21 12h-1M4 12H3m3.343-5.657-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-           </svg>
-           <h3 className="text-lg font-bold text-white">Elementos</h3>
-         </div>
-         
-         <div className="space-y-3">
-           {Object.entries(elementDistribution).map(([element, count]) => {
-             const total = Object.values(elementDistribution).reduce((a, b) => a + b, 0);
-             const percentage = total > 0 ? (count / total) * 100 : 0;
-             
-             const colors = {
-               fire: 'from-red-400 to-orange-500',
-               earth: 'from-green-400 to-emerald-500',
-               air: 'from-blue-400 to-cyan-500',
-               water: 'from-indigo-400 to-purple-500'
-             };
-             
-             const icons = {
-               fire: () => (
-                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                   <path d="M12 23a7.5 7.5 0 0 1-5.138-12.963C8.204 8.774 11.5 6.5 11 1.5c6 4 9 8 3 14 1 0 2.5-.5 2.5-2.5 0 1.5 0 2.5-.5 3.5A7.5 7.5 0 0 1 12 23Z"/>
-                 </svg>
-               ),
-               earth: () => (
-                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                   <circle cx="12" cy="12" r="10"/>
-                   <path d="M12 2a14.5 14.5 0 0 0 0 20 10 10 0 0 0 0-20"/>
-                 </svg>
-               ),
-               air: () => (
-                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                   <path d="M12.8 19.6 7 14H2v-4h5l5.8-5.6A1 1 0 0 1 14 5v14a1 1 0 0 1-1.2.6Z"/>
-                   <path d="M18 8a4 4 0 0 0 0 8"/>
-                   <path d="M20 6a8 8 0 0 0 0 12"/>
-                 </svg>
-               ),
-               water: () => (
-                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                   <path d="M12 22a7 7 0 0 1-5-12L12 2l5 8a7 7 0 0 1-5 12Z"/>
-                 </svg>
-               )
-             };
-             
-             const elementNames = {
-               fire: 'Fuego',
-               earth: 'Tierra', 
-               air: 'Aire',
-               water: 'Agua'
-             };
-             
-             const IconComponent = icons[element as keyof typeof icons];
-             
-             return (
-               <div key={element} className="space-y-2">
-                 <div 
-                   className="flex items-center justify-between cursor-pointer hover:bg-white/5 rounded-lg p-2 transition-all duration-200"
-                   onMouseEnter={(e) => {
-                     setHoveredElement(element);
-                     handleMouseMove(e);
-                   }}
-                   onMouseMove={handleMouseMove}
-                   onMouseLeave={() => setHoveredElement(null)}
-                 >
-                   <span className="text-white font-medium flex items-center text-sm">
-                     <span className="text-orange-400 mr-2">
-                       <IconComponent />
-                     </span>
-                     {elementNames[element as keyof typeof elementNames]}
-                     </span>
-                   <span className="text-gray-300 text-sm font-semibold">{percentage.toFixed(1)}%</span>
-                 </div>
-                 <div className="w-full bg-gray-700 rounded-full h-2">
-                   <div 
-                     className={`bg-gradient-to-r ${colors[element as keyof typeof colors]} h-2 rounded-full transition-all duration-500`}
-                     style={{ width: `${percentage}%` }}
-                   ></div>
-                 </div>
-               </div>
-             );
-           })}
-         </div>
-       </div>
-
-       {/* Columna 4: Modalidades */}
-       <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
-         <div className="flex items-center mb-4">
-           <svg className="w-5 h-5 text-purple-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-             <polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/>
-           </svg>
-           <h3 className="text-lg font-bold text-white">Modalidades</h3>
-         </div>
-         
-         <div className="space-y-3">
-           {Object.entries(modalityDistribution).map(([modality, count]) => {
-             const total = Object.values(modalityDistribution).reduce((a, b) => a + b, 0);
-             const percentage = total > 0 ? (count / total) * 100 : 0;
-             
-             const colors = {
-               cardinal: 'from-red-400 to-pink-500',
-               fixed: 'from-blue-400 to-indigo-500',
-               mutable: 'from-green-400 to-teal-500'
-             };
-             
-             const icons = {
-               cardinal: () => (
-                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                   <polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/>
-                 </svg>
-               ),
-               fixed: () => (
-                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                   <rect x="6" y="4" width="6" height="15" rx="2"/>
-                   <rect x="12" y="4" width="6" height="15" rx="2"/>
-                 </svg>
-               ),
-               mutable: () => (
-                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                   <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-                   <circle cx="12" cy="12" r="4"/>
-                 </svg>
-               )
-             };
-             
-             const modalityNames = {
-               cardinal: 'Cardinal',
-               fixed: 'Fijo',
-               mutable: 'Mutable'
-             };
-             
-             const IconComponent = icons[modality as keyof typeof icons];
-             
-             return (
-               <div key={modality} className="space-y-2">
-                 <div 
-                   className="flex items-center justify-between cursor-pointer hover:bg-white/5 rounded-lg p-2 transition-all duration-200"
-                   onMouseEnter={(e) => {
-                     setHoveredModality(modality);
-                     handleMouseMove(e);
-                   }}
-                   onMouseMove={handleMouseMove}
-                   onMouseLeave={() => setHoveredModality(null)}
-                 >
-                   <span className="text-white font-medium flex items-center text-sm">
-                     <span className="text-purple-400 mr-2">
-                       <IconComponent />
-                     </span>
-                     {modalityNames[modality as keyof typeof modalityNames]}
-                   </span>
-                   <span className="text-gray-300 text-sm font-semibold">{percentage.toFixed(1)}%</span>
-                 </div>
-                 <div className="w-full bg-gray-700 rounded-full h-2">
-                   <div 
-                     className={`bg-gradient-to-r ${colors[modality as keyof typeof colors]} h-2 rounded-full transition-all duration-500`}
-                     style={{ width: `${percentage}%` }}
-                   ></div>
-                 </div>
-               </div>
-             );
-           })}
-         </div>
-       </div>
-     </div>
-
-     {/* ✨ MENÚ DE NAVEGACIÓN */}
-     <SectionMenu activeSection={activeSection} scrollToSection={scrollToSection} />
-
-     {/* 🎯 SECCIÓN 2: CARTA VISUAL */}
+     {/* 🎯 SECCIÓN 1: CARTA VISUAL */}
      <div id="carta-visual" className="space-y-8">
        {/* Controles de aspectos */}
        <div className="bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
@@ -1532,73 +1217,113 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
          </div>
        </div>
 
-       {/* 📊 RESUMEN EDUCATIVO MOVIDO AQUÍ - DEBAJO DEL CHART WHEEL */}
+       {/* 📊 RESUMEN EDUCATIVO MEJORADO - DEBAJO DEL CHART WHEEL */}
        <div className="p-6 bg-gradient-to-r from-indigo-900/40 to-purple-900/40 rounded-xl border border-indigo-400/30">
-         <div className="text-center mb-4">
-           <h4 className="text-white font-bold text-lg mb-2">
-             <svg className="w-5 h-5 inline mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+         <div className="text-center mb-6">
+           <h4 className="text-white font-bold text-xl mb-3">
+             <svg className="w-6 h-6 inline mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                <polyline points="14,2 14,8 20,8"/>
                <line x1="16" y1="13" x2="8" y2="13"/>
                <line x1="16" y1="17" x2="8" y2="17"/>
                <polyline points="10,9 9,9 8,9"/>
              </svg>
-             Resumen de Aspectos
+             Resumen de Aspectos - Cómo interactúan tus energías planetarias
            </h4>
-           <div className="text-indigo-200 text-sm">Comprende cómo interactúan las energías planetarias en tu carta natal</div>
+           <div className="text-indigo-200 text-base mb-4">Comprende las dinámicas internas de tu personalidad a través de los aspectos astrológicos</div>
          </div>
          
-         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-           <div className="text-center">
-             <div className="text-green-300 font-bold text-lg mb-2 flex items-center justify-center">
-               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
+           <div className="text-center p-4 bg-green-400/10 rounded-xl border border-green-400/30">
+             <div className="text-green-300 font-bold text-xl mb-3 flex items-center justify-center">
+               <svg className="w-6 h-6 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                  <path d="M20 6 9 17l-5-5"/>
                </svg>
-               Armónicos
+               Aspectos Armónicos
              </div>
-             <div className="text-green-200 text-sm">Trígono, Sextil, Semisextil</div>
-             <div className="text-gray-300 text-xs mt-1">Facilitan, aportan talentos</div>
+             <div className="text-green-200 text-sm mb-2 font-semibold">Trígono (120°), Sextil (60°), Semisextil (30°)</div>
+             <div className="text-green-100 text-xs leading-relaxed">
+               <strong>🌟 Qué significan:</strong> Son tus facilidades naturales, talentos innatos y energías que fluyen sin esfuerzo. 
+               Representan las áreas donde tienes habilidades naturales y donde las cosas te salen más fácil.
+             </div>
+             <div className="text-green-200 text-xs mt-2 font-medium">✨ En tu vida: Aprovecha estos aspectos para desarrollar tus fortalezas</div>
            </div>
            
-           <div className="text-center">
-             <div className="text-red-300 font-bold text-lg mb-2 flex items-center justify-center">
-               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+           <div className="text-center p-4 bg-red-400/10 rounded-xl border border-red-400/30">
+             <div className="text-red-300 font-bold text-xl mb-3 flex items-center justify-center">
+               <svg className="w-6 h-6 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                  <polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/>
                </svg>
-               Tensos
+               Aspectos Tensos
              </div>
-             <div className="text-red-200 text-sm">Cuadratura, Oposición, Quincuncio</div>
-             <div className="text-gray-300 text-xs mt-1">Desafían, impulsan crecimiento</div>
+             <div className="text-red-200 text-sm mb-2 font-semibold">Cuadratura (90°), Oposición (180°), Quincuncio (150°)</div>
+             <div className="text-red-100 text-xs leading-relaxed">
+               <strong>⚡ Qué significan:</strong> Son tus desafíos internos que generan crecimiento. Crean tensión creativa que te impulsa 
+               a evolucionar y desarrollar nuevas capacidades. Son tu motor de transformación personal.
+             </div>
+             <div className="text-red-200 text-xs mt-2 font-medium">🚀 En tu vida: Abraza estos desafíos como oportunidades de crecimiento</div>
            </div>
            
-           <div className="text-center">
-             <div className="text-yellow-300 font-bold text-lg mb-2 flex items-center justify-center">
-               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+           <div className="text-center p-4 bg-yellow-400/10 rounded-xl border border-yellow-400/30">
+             <div className="text-yellow-300 font-bold text-xl mb-3 flex items-center justify-center">
+               <svg className="w-6 h-6 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                  <circle cx="12" cy="12" r="10"/>
                  <circle cx="12" cy="12" r="6"/>
                  <circle cx="12" cy="12" r="2"/>
                </svg>
-               Especiales
+               Aspectos Especiales
              </div>
-             <div className="text-yellow-200 text-sm">Conjunción, Aspectos Menores</div>
-             <div className="text-gray-300 text-xs mt-1">Intensifican, matizan</div>
+             <div className="text-yellow-200 text-sm mb-2 font-semibold">Conjunción (0°), Aspectos Menores</div>
+             <div className="text-yellow-100 text-xs leading-relaxed">
+               <strong>🔥 Qué significan:</strong> Las conjunciones fusionan energías planetarias creando una fuerza unificada muy potente. 
+               Los aspectos menores añaden matices y sutilezas a tu personalidad.
+             </div>
+             <div className="text-yellow-200 text-xs mt-2 font-medium">💫 En tu vida: Reconoce estas energías intensas y únicas en ti</div>
            </div>
          </div>
          
-         {/* EXPLICACIÓN DE EXACTO */}
-         <div className="mt-6 p-4 bg-yellow-400/10 border border-yellow-400/30 rounded-lg">
-           <div className="text-center">
-             <div className="text-yellow-300 font-bold text-lg mb-2 flex items-center justify-center">
-               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+         {/* EXPLICACIÓN DETALLADA DE ASPECTOS EXACTOS */}
+         <div className="p-6 bg-yellow-400/15 border border-yellow-400/40 rounded-xl">
+           <div className="text-center mb-4">
+             <div className="text-yellow-300 font-bold text-xl mb-2 flex items-center justify-center">
+               <svg className="w-6 h-6 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                  <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
                </svg>
-               Aspectos EXACTOS
+               ¿Qué son los Aspectos EXACTOS?
              </div>
-             <div className="text-yellow-100 text-sm leading-relaxed max-w-2xl mx-auto">
-               Cuando el orbe es menor a <span className="font-semibold">1 grado</span>, el aspecto se considera 
-               <span className="bg-yellow-400 text-black px-1 rounded mx-1 font-bold">EXACTO</span>. 
-               Estos aspectos tienen <span className="text-yellow-200 font-semibold">máxima potencia energética</span> 
-               y representan las influencias <span className="text-yellow-200 font-semibold">más poderosas</span> en tu personalidad.
+           </div>
+           
+           <div className="text-yellow-100 text-sm leading-relaxed max-w-4xl mx-auto">
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+               <div>
+                 <div className="font-semibold mb-2 text-yellow-200">🎯 Definición:</div>
+                 <div className="mb-4">
+                   Un aspecto se considera <span className="bg-yellow-400 text-black px-2 py-1 rounded font-bold">EXACTO</span> cuando 
+                   el orbe (diferencia angular) es menor a <span className="font-semibold text-yellow-200">1 grado</span>. 
+                   Esto significa que los planetas están casi en el ángulo perfecto del aspecto.
+                 </div>
+                 
+                 <div className="font-semibold mb-2 text-yellow-200">⚡ Intensidad:</div>
+                 <div>
+                   Los aspectos exactos tienen <span className="font-semibold text-yellow-200">máxima potencia energética</span> 
+                   y representan las influencias <span className="font-semibold text-yellow-200">más poderosas y definitorias</span> 
+                   en tu personalidad y destino.
+                 </div>
+               </div>
+               
+               <div>
+                 <div className="font-semibold mb-2 text-yellow-200">🌟 En tu carta:</div>
+                 <div className="mb-4">
+                   Si tienes aspectos exactos, estas energías planetarias están <span className="font-semibold text-yellow-200">perfectamente sincronizadas</span> 
+                   en tu ser. Son como "superpoderes astrológicos" que definen rasgos muy marcados de tu personalidad.
+                 </div>
+                 
+                 <div className="font-semibold mb-2 text-yellow-200">💫 Importancia:</div>
+                 <div>
+                   Presta especial atención a tus aspectos exactos: son las <span className="font-semibold text-yellow-200">claves maestras</span> 
+                   para entender tu naturaleza más profunda y tus potenciales más desarrollados.
+                 </div>
+               </div>
              </div>
            </div>
          </div>
@@ -1610,7 +1335,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
            <svg className="w-6 h-6 text-purple-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
              <path d="M9.663 17h4.673M12 3v1m6.364 1.636-.707.707M21 12h-1M4 12H3m3.343-5.657-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
            </svg>
-           <h3 className="text-xl font-bold text-white">Guía Educativa de Aspectos Astrológicos</h3>
+           <h3 className="text-xl font-bold text-white">Guía Educativa Completa de Aspectos Astrológicos</h3>
          </div>
          
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1715,7 +1440,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
      {/* ✨ MENÚ DE NAVEGACIÓN */}
      <SectionMenu activeSection={activeSection} scrollToSection={scrollToSection} />
 
-     {/* 🎯 SECCIÓN 3: ASPECTOS DETECTADOS CON NOMBRES ESPECÍFICOS */}
+     {/* 🎯 SECCIÓN 2: ASPECTOS DETECTADOS CON NOMBRES ESPECÍFICOS */}
      {calculatedAspects.length > 0 && (
        <div id="aspectos-detectados" className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
          <div className="flex items-center mb-6">
@@ -1723,8 +1448,17 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
              <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
            </svg>
            <h3 className="text-xl font-bold text-white">
-             Aspectos Específicos Detectados ({calculatedAspects.length})
+             Aspectos Específicos Detectados en Tu Carta ({calculatedAspects.length})
            </h3>
+         </div>
+         
+         <div className="mb-4 p-4 bg-blue-500/10 border border-blue-400/30 rounded-lg">
+           <div className="text-blue-200 text-sm leading-relaxed">
+             <strong>💡 Interpretación:</strong> Estos son los aspectos específicos encontrados entre tus planetas. 
+             Cada uno representa una dinámica energética única en tu personalidad. Los aspectos 
+             <span className="bg-yellow-400 text-black px-1 rounded mx-1 font-bold">EXACTOS</span> 
+             (orbe &lt; 1°) son especialmente poderosos y definen rasgos muy marcados en ti.
+           </div>
          </div>
          
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1745,7 +1479,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
                    {aspect.planet1} - {aspect.planet2}
                  </span>
                  {aspect.exact && (
-                   <span className="bg-yellow-400 text-black text-xs px-2 py-1 rounded-full font-bold">
+                   <span className="bg-yellow-400 text-black text-xs px-2 py-1 rounded-full font-bold animate-pulse">
                      EXACTO
                    </span>
                  )}
@@ -1762,16 +1496,30 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
                <div className="text-gray-400 text-xs">
                  Orbe: {aspect.orb.toFixed(2)}° | Ángulo: {aspect.angle.toFixed(1)}°
                </div>
+               
+               {/* PREVIEW DE INTERPRETACIÓN */}
+               <div className="mt-2 text-cyan-200 text-xs leading-relaxed">
+                 {getPersonalizedAspectInterpretation(aspect).substring(0, 100)}...
+               </div>
              </div>
            ))}
          </div>
+         
+         {calculatedAspects.length > 20 && (
+           <div className="mt-4 text-center">
+             <div className="text-gray-400 text-sm">
+               Se muestran los primeros 20 aspectos de {calculatedAspects.length} encontrados. 
+               Los aspectos se ordenan por precisión (orbe menor = más importante).
+             </div>
+           </div>
+         )}
        </div>
      )}
 
      {/* ✨ MENÚ DE NAVEGACIÓN */}
      <SectionMenu activeSection={activeSection} scrollToSection={scrollToSection} />
 
-     {/* 🎯 SECCIÓN 4: POSICIONES PLANETARIAS */}
+     {/* 🎯 SECCIÓN 3: POSICIONES PLANETARIAS CON INTERPRETACIONES */}
      <div id="posiciones-planetarias" className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
        <div className="flex items-center mb-6">
          <svg className="w-6 h-6 text-yellow-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -1785,7 +1533,15 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
          </svg>
-         <h3 className="text-xl font-bold text-white">Posiciones Planetarias</h3>
+         <h3 className="text-xl font-bold text-white">Posiciones Planetarias - Tus Energías Básicas</h3>
+       </div>
+       
+       <div className="mb-4 p-4 bg-purple-500/10 border border-purple-400/30 rounded-lg">
+         <div className="text-purple-200 text-sm leading-relaxed">
+           <strong>🌟 Guía:</strong> Cada planeta representa una energía específica en tu personalidad. 
+           El signo muestra <em>cómo</em> expresas esa energía, y la casa indica <em>dónde</em> la manifiestas en tu vida. 
+           Pasa el cursor sobre cada planeta para interpretaciones personalizadas.
+         </div>
        </div>
        
        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1800,27 +1556,42 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
              onMouseMove={handleMouseMove}
              onMouseLeave={() => setHoveredPlanet(null)}
            >
-             <div className="flex items-center mb-2">
-               <span className="text-2xl mr-3">
+             <div className="flex items-center mb-3">
+               <span className="text-2xl mr-3" style={{ color: PLANET_COLORS[planet.name] || '#ffffff' }}>
                  {planet && PLANET_SYMBOLS[planet.name] || '●'}
                </span>
-               <div>
+               <div className="flex-1">
                  <div className="text-white font-semibold">{planet.name}</div>
                  <div className="text-gray-400 text-sm">
                    {planet.degree || 0}° {planet.sign}
-                   {planet.retrograde && <span className="text-red-400 ml-1">R</span>}
+                   {planet.retrograde && <span className="text-red-400 ml-1 animate-pulse">R</span>}
                  </div>
                </div>
              </div>
-             <div className="text-gray-500 text-xs">
-               Casa {planet.house} | {SIGN_SYMBOLS[planet.sign] || ''}
+             
+             <div className="text-gray-500 text-xs mb-2">
+               Casa {planet.house} | {SIGN_SYMBOLS[planet.sign] || ''} {signMeanings[planet.sign as keyof typeof signMeanings]}
+             </div>
+             
+             {/* PREVIEW DE SIGNIFICADO */}
+             <div className="text-cyan-200 text-xs leading-relaxed">
+               <strong>Significado:</strong> {planetMeanings[planet.name as keyof typeof planetMeanings]?.meaning.substring(0, 60)}...
+             </div>
+             
+             {/* PALABRAS CLAVE */}
+             <div className="mt-2 flex flex-wrap gap-1">
+               {planetMeanings[planet.name as keyof typeof planetMeanings]?.keywords.split(',').slice(0, 2).map((keyword, i) => (
+                 <span key={i} className="bg-purple-400/20 text-purple-200 text-xs px-2 py-1 rounded-full">
+                   {keyword.trim()}
+                 </span>
+               ))}
              </div>
            </div>
          ))}
        </div>
      </div>
 
-     {/* Información de ascendente y medio cielo */}
+     {/* Información de ascendente y medio cielo CON INTERPRETACIONES */}
      {(ascendant || midheaven) && (
        <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
          <div className="flex items-center mb-6">
@@ -1831,46 +1602,39 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
              <path d="M1 12h6m6 0h6"/>
              <path d="m4.93 19.07 4.24-4.24m5.66-5.66 4.24-4.24"/>
            </svg>
-           <h3 className="text-xl font-bold text-white">Ángulos Principales</h3>
+           <h3 className="text-xl font-bold text-white">Ángulos Principales - Tu Orientación Vital</h3>
          </div>
          
          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
            {ascendant && (
-             <div className="bg-black/30 rounded-xl p-4 backdrop-blur-sm border border-white/10">
-               <div className="flex items-center mb-2">
-                 <svg className="w-6 h-6 text-green-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+             <div className="bg-black/30 rounded-xl p-6 backdrop-blur-sm border border-white/10">
+               <div className="flex items-center mb-4">
+                 <svg className="w-8 h-8 text-green-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                    <line x1="12" y1="19" x2="12" y2="5"/>
                    <polyline points="5,12 12,5 19,12"/>
                  </svg>
                  <div>
-                   <div className="text-white font-semibold">Ascendente</div>
+                   <div className="text-white font-bold text-lg">Ascendente</div>
                    <div className="text-gray-400 text-sm">
                      {ascendant.degree || 0}° {ascendant.sign || 'N/A'}
                    </div>
                  </div>
                </div>
-               <div className="text-gray-500 text-xs">
-                 Personalidad y apariencia exterior
-               </div>
-             </div>
-           )}
-           
-           {midheaven && (
-             <div className="bg-black/30 rounded-xl p-4 backdrop-blur-sm border border-white/10">
-               <div className="flex items-center mb-2">
-                 <svg className="w-6 h-6 text-purple-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                   <polyline points="22,7 13.5,15.5 8.5,10.5 2,17"/>
-                   <polyline points="16,7 22,7 22,13"/>
-                 </svg>
-                 <div>
-                   <div className="text-white font-semibold">Medio Cielo</div>
-                   <div className="text-gray-400 text-sm">
-                     {midheaven.degree || 0}° {midheaven.sign || 'N/A'}
-                   </div>
+               
+               <div className="space-y-3">
+                 <div className="text-green-200 text-sm">
+                   <strong>🎭 Tu máscara social:</strong> Cómo te presentas al mundo y primeras impresiones que causas
                  </div>
-               </div>
-               <div className="text-gray-500 text-xs">
-                 Vocación y propósito profesional
+                 
+                 <div className="text-gray-300 text-xs leading-relaxed">
+                   <strong>En {midheaven.sign}:</strong> Tu carrera y estatus se expresan a través de {signMeanings[midheaven.sign as keyof typeof signMeanings]?.toLowerCase()}. 
+                   Esta es la energía que quieres proyectar profesionalmente al mundo.
+                 </div>
+                 
+                 <div className="flex flex-wrap gap-1 mt-2">
+                   <span className="bg-purple-400/20 text-purple-200 text-xs px-2 py-1 rounded-full">Carrera</span>
+                   <span className="bg-purple-400/20 text-purple-200 text-xs px-2 py-1 rounded-full">Reconocimiento</span>
+                 </div>
                </div>
              </div>
            )}
@@ -2123,83 +1887,6 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
        </div>
      )}
 
-     {/* 🎯 TOOLTIP ELEMENTOS CON INTERPRETACIÓN CONTEXTUAL */}
-     {hoveredElement && (
-       <div 
-         className="fixed backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm pointer-events-none"
-         style={{ 
-           left: tooltipPosition.x + 25,
-           top: tooltipPosition.y - 50,
-           zIndex: 99999,
-           transform: tooltipPosition.x > window.innerWidth - 350 ? 'translateX(-100%)' : 'none',
-           backgroundColor: getIntensityColor(hoveredElement, (Object.values(elementDistribution).reduce((a, b) => a + b, 0) > 0 ? (elementDistribution[hoveredElement as keyof typeof elementDistribution] / Object.values(elementDistribution).reduce((a, b) => a + b, 0)) * 100 : 0))
-         }}
-       >
-         <div className="flex items-center mb-3">
-           <span className="text-3xl mr-3">
-             {hoveredElement === 'fire' && '🔥'}
-             {hoveredElement === 'earth' && '🌍'}
-             {hoveredElement === 'air' && '💨'}
-             {hoveredElement === 'water' && '🌊'}
-           </span>
-           <div>
-             <div className="text-white font-bold text-lg">
-               Elemento {elementMeanings[hoveredElement as keyof typeof elementMeanings]?.name}
-             </div>
-           </div>
-         </div>
-         
-         <div className="mb-2">
-           <div className="text-white text-xs leading-relaxed">
-             {getElementInterpretation(
-               hoveredElement, 
-               Object.values(elementDistribution).reduce((a, b) => a + b, 0) > 0 
-                 ? (elementDistribution[hoveredElement as keyof typeof elementDistribution] / Object.values(elementDistribution).reduce((a, b) => a + b, 0)) * 100 
-                 : 0
-             )}
-           </div>
-         </div>
-       </div>
-     )}
-
-     {/* 🎯 TOOLTIP MODALIDADES CON INTERPRETACIÓN CONTEXTUAL */}
-     {hoveredModality && (
-       <div 
-         className="fixed backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm pointer-events-none"
-         style={{ 
-           left: tooltipPosition.x + 25,
-           top: tooltipPosition.y - 50,
-           zIndex: 99999,
-           transform: tooltipPosition.x > window.innerWidth - 350 ? 'translateX(-100%)' : 'none',
-           backgroundColor: getIntensityColor(hoveredModality, (Object.values(modalityDistribution).reduce((a, b) => a + b, 0) > 0 ? (modalityDistribution[hoveredModality as keyof typeof modalityDistribution] / Object.values(modalityDistribution).reduce((a, b) => a + b, 0)) * 100 : 0))
-         }}
-       >
-         <div className="flex items-center mb-3">
-           <span className="text-3xl mr-3">
-             {hoveredModality === 'cardinal' && '⚡'}
-             {hoveredModality === 'fixed' && '🛡️'}
-             {hoveredModality === 'mutable' && '🔄'}
-           </span>
-           <div>
-             <div className="text-white font-bold text-lg">
-               Modalidad {modalityMeanings[hoveredModality as keyof typeof modalityMeanings]?.name}
-             </div>
-           </div>
-         </div>
-         
-         <div className="mb-2">
-           <div className="text-white text-xs leading-relaxed">
-             {getModalityInterpretation(
-               hoveredModality, 
-               Object.values(modalityDistribution).reduce((a, b) => a + b, 0) > 0 
-                 ? (modalityDistribution[hoveredModality as keyof typeof modalityDistribution] / Object.values(modalityDistribution).reduce((a, b) => a + b, 0)) * 100 
-                 : 0
-             )}
-           </div>
-         </div>
-       </div>
-     )}
-
      {/* Debug info LIMPIO */}
      <div className="bg-black/30 rounded-xl p-4 text-xs text-gray-400">
        <div>🔍 Planetas: {planets.length} | Casas: {houses.length} | Aspectos: {calculatedAspects.length}</div>
@@ -2310,4 +1997,5 @@ const getIntensityColor = (element: string, percentage: number) => {
  return `rgba(${color.r}, ${color.g}, ${color.b}, ${0.3 + intensity * 0.7})`;
 };
 
-export default ChartDisplay;
+export default ChartDisplay; 
+                
