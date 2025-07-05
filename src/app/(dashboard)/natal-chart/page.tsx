@@ -369,7 +369,9 @@ export default function NatalChartPage() {
               )}
             </div>
           </div>
-          
+           <h1 className="text-4xl md:text-5xl text-white font-bold">
+Carta Natal <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">Tu Mapa Cósmico</span>
+    </h1>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed flex items-center justify-center gap-3">
             <Star className="w-6 h-6 text-yellow-400 flex-shrink-0" />
             Descubre los secretos que los astros revelaron en el momento exacto de tu nacimiento

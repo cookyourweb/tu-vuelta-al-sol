@@ -387,8 +387,8 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
  // 🔄 FUNCIÓN PARA CAPTURAR POSICIÓN DEL MOUSE
  const handleMouseMove = (event: React.MouseEvent) => {
    setTooltipPosition({ 
-     x: event.clientX,
-     y: event.clientY
+     x: event?.clientX ?? 0,
+     y: event?.clientY ?? 0
    });
  };
 
@@ -996,43 +996,144 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
    return angles;
  };
 
+
+
  return (
    <div className="space-y-8 relative">
-     {/* 🧭 HEADER CON ICONO DE AYUDA */}
-     <div className="bg-gradient-to-r from-black/60 to-purple-900/60 backdrop-blur-md border border-white/10 rounded-2xl p-6">
-       <div className="flex items-center justify-between">
-         <div className="flex items-center space-x-3">
-           <svg className="w-6 h-6 text-yellow-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-             <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
-           </svg>
-           <h1 className="text-2xl font-bold text-white">Descubre los secretos que los astros revelaron en el momento exacto de tu nacimiento</h1>
-           
-           {/* 🎯 ICONO DE AYUDA CON TOOLTIP CORREGIDO */}
-           <div className="relative" style={{ zIndex: 100000 }}>
-             <svg 
-               className="w-5 h-5 text-blue-400 cursor-help hover:text-blue-300 transition-colors duration-200"
-               viewBox="0 0 24 24" 
-               fill="none" 
-               stroke="currentColor" 
-               strokeWidth="2"
-               onMouseEnter={(e) => {
-                 setHoveredNavGuide(true);
-                 const rect = e.currentTarget.getBoundingClientRect();
-                 setTooltipPosition({ 
-                   x: rect.right + 15,
-                   y: rect.top - 20
-                 });
-               }}
-               onMouseLeave={() => setHoveredNavGuide(false)}
-             >
-               <circle cx="12" cy="12" r="10"/>
-               <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-               <line x1="12" y1="17" x2="12.01" y2="17"/>
-             </svg>
-           </div>
-         </div>
-       </div>
-     </div>
+  
+     {/* 🧭 HEADER ESTILO DASHBOARD CON DATOS DE NACIMIENTO */}
+<div className="space-y-8">
+  {/* Header principal estilo dashboard */}
+  <div className="text-center space-y-4">
+ 
+    
+  
+    
+   
+    
+    {/* Indicadores de estado estilo dashboard */}
+    <div className="flex items-center justify-center space-x-6 mt-6">
+      <div className="flex items-center space-x-2">
+        <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+        <span className="text-sm text-gray-400">Carta Activa</span>
+      </div>
+      <div className="flex items-center space-x-2">
+        <div className="w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
+        <span className="text-sm text-gray-400">Interpretando</span>
+      </div>
+      <div className="flex items-center space-x-2">
+        <div className="w-3 h-3 bg-purple-400 rounded-full"></div>
+        <span className="text-sm text-gray-400">Personalizada</span>
+      </div>
+      
+      {/* Icono de ayuda movido aquí */}
+      <div className="relative" style={{ zIndex: 100000 }}>
+        <svg 
+          className="w-5 h-5 text-blue-400 cursor-help hover:text-blue-300 transition-colors duration-200"
+          viewBox="0 0 24 24" 
+          fill="none" 
+          stroke="currentColor" 
+          strokeWidth="2"
+          onMouseEnter={(e) => {
+            setHoveredNavGuide(true);
+            const rect = e.currentTarget.getBoundingClientRect();
+            setTooltipPosition({ 
+              x: rect.left - 300,
+              y: rect.top - 20
+            });
+          }}
+          onMouseLeave={() => setHoveredNavGuide(false)}
+        >
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  {/* 📊 SECCIÓN DE DATOS DE NACIMIENTO AÑADIDA DE NUEVO */}
+  {birthData && (
+    <div id="datos-nacimiento" className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
+      <div className="flex items-center mb-6">
+        <svg className="w-6 h-6 text-blue-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        <h3 className="text-xl font-bold text-white">Datos de Nacimiento - Tu Momento Cósmico</h3>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-black/30 rounded-xl p-4 backdrop-blur-sm border border-white/10">
+          <div className="flex items-center mb-3">
+            <svg className="w-5 h-5 text-yellow-400 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M8 2v4"/>
+              <path d="M16 2v4"/>
+              <rect width="18" height="18" x="3" y="4" rx="2"/>
+              <path d="M3 10h18"/>
+            </svg>
+            <span className="text-yellow-400 font-semibold text-sm">Fecha</span>
+          </div>
+          <div className="text-white font-bold text-lg">
+            {birthData.birthDate ? new Date(birthData.birthDate).toLocaleDateString('es-ES', {
+              day: 'numeric',
+              month: 'long', 
+              year: 'numeric'
+            }) : 'No especificada'}
+          </div>
+        </div>
+
+        <div className="bg-black/30 rounded-xl p-4 backdrop-blur-sm border border-white/10">
+          <div className="flex items-center mb-3">
+            <svg className="w-5 h-5 text-purple-400 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12,6 12,12 16,14"/>
+            </svg>
+            <span className="text-purple-400 font-semibold text-sm">Hora</span>
+          </div>
+          <div className="text-white font-bold text-lg">
+            {birthData.birthTime || 'No especificada'}
+          </div>
+        </div>
+
+        <div className="bg-black/30 rounded-xl p-4 backdrop-blur-sm border border-white/10">
+          <div className="flex items-center mb-3">
+            <svg className="w-5 h-5 text-green-400 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            <span className="text-green-400 font-semibold text-sm">Lugar</span>
+          </div>
+          <div className="text-white font-bold text-lg">
+            {birthData.birthPlace || 'No especificado'}
+          </div>
+        </div>
+
+        <div className="bg-black/30 rounded-xl p-4 backdrop-blur-sm border border-white/10">
+          <div className="flex items-center mb-3">
+            <svg className="w-5 h-5 text-cyan-400 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <span className="text-cyan-400 font-semibold text-sm">Precisión</span>
+          </div>
+          <div className="text-white font-bold text-lg">
+            {ascendant?.sign ? '✅ Exacta' : '⚠️ Aproximada'}
+          </div>
+        </div>
+      </div>
+      
+      <div className="mt-4 p-3 bg-blue-500/10 border border-blue-400/30 rounded-lg">
+        <div className="text-blue-200 text-sm">
+          <strong>📍 Información:</strong> Estos datos determinan las posiciones exactas de los planetas y casas en tu carta natal. 
+          La hora exacta es especialmente importante para el Ascendente y las casas astrológicas.
+        </div>
+      </div>
+    </div>
+  )}
+</div>
 
      {/* TOOLTIP SEPARADO FUERA DEL CONTENEDOR CON Z-INDEX MÁXIMO */}
      {hoveredNavGuide && (
@@ -1041,8 +1142,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
          style={{ 
            left: tooltipPosition.x, 
            top: tooltipPosition.y,
-           zIndex: 100000,
-           transform: tooltipPosition.x > window.innerWidth - 350 ? 'translateX(-100%)' : 'none'
+           zIndex: 100000
          }}
        >
          <div className="text-white font-bold mb-2">Guía de navegación</div>
@@ -1216,8 +1316,273 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
            </svg>
          </div>
        </div>
+     </div>
 
-       {/* 📊 RESUMEN EDUCATIVO MEJORADO - DEBAJO DEL CHART WHEEL */}
+     {/* ✨ MENÚ DE NAVEGACIÓN */}
+     <SectionMenu activeSection={activeSection} scrollToSection={scrollToSection} />
+
+     {/* 🎯 SECCIÓN 2: ASPECTOS DETECTADOS CON BULLETS AÑADIDOS */}
+     {calculatedAspects.length > 0 && (
+       <div id="aspectos-detectados" className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
+         <div className="flex items-center mb-6">
+           <svg className="w-6 h-6 text-yellow-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+             <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+           </svg>
+           <h3 className="text-xl font-bold text-white">
+             Aspectos Específicos Detectados en Tu Carta ({calculatedAspects.length})
+           </h3>
+         </div>
+         
+         <div className="mb-4 p-4 bg-blue-500/10 border border-blue-400/30 rounded-lg">
+           <div className="text-blue-200 text-sm leading-relaxed">
+             <strong>💡 Interpretación:</strong> Estos son los aspectos específicos encontrados entre tus planetas. 
+             Cada uno representa una dinámica energética única en tu personalidad. Los aspectos 
+             <span className="bg-yellow-400 text-black px-1 rounded mx-1 font-bold">EXACTOS</span> 
+             (orbe &lt; 1°) son especialmente poderosos y definen rasgos muy marcados en ti.
+           </div>
+         </div>
+         
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+           {calculatedAspects.slice(0, 20).map((aspect, index) => {
+             // 🔄 FUNCIÓN PARA OBTENER NATURALEZA DEL ASPECTO
+             const getAspectNature = (aspect: any) => {
+               const difficulty = aspect.config.difficulty;
+               if (difficulty === 'easy') return { label: 'Armónico', color: 'text-green-300 bg-green-400/20', icon: '✨' };
+               if (difficulty === 'hard') return { label: 'Tenso', color: 'text-red-300 bg-red-400/20', icon: '⚡' };
+               if (difficulty === 'neutral') return { label: 'Neutro', color: 'text-yellow-300 bg-yellow-400/20', icon: '🔥' };
+               return { label: 'Menor', color: 'text-purple-300 bg-purple-400/20', icon: '🌟' };
+             };
+
+             const nature = getAspectNature(aspect);
+             
+             return (
+               <div 
+                 key={index}
+                 className="bg-black/30 rounded-xl p-4 backdrop-blur-sm border border-white/10 cursor-pointer hover:border-white/20 transition-all duration-200 group relative"
+                 onMouseEnter={(e) => {
+                   setHoveredAspect(`${aspect.planet1}-${aspect.planet2}-${aspect.type}`);
+                   handleMouseMove(e);
+                 }}
+                onMouseMove={handleMouseMove}
+                 onMouseLeave={() => setHoveredAspect(null)}
+                 style={{ position: 'relative', zIndex: 1 }}
+               >
+                 <div className="flex items-center justify-between mb-2">
+                   <span className="text-white font-semibold text-sm">
+                     {aspect.planet1} - {aspect.planet2}
+                   </span>
+                   <div className="flex items-center space-x-2">
+                     {aspect.exact && (
+                       <span className="bg-yellow-400 text-black text-xs px-2 py-1 rounded-full font-bold animate-pulse">
+                         EXACTO
+                       </span>
+                     )}
+                   </div>
+                 </div>
+                 
+                 <div className="flex items-center mb-2">
+                   <div 
+                     className="w-3 h-3 rounded-full mr-2" 
+                     style={{ backgroundColor: aspect.config.color }}
+                   ></div>
+                   <span className="text-gray-300 text-sm">{aspect.config.name}</span>
+                 </div>
+
+                 {/* 🔄 BULLETS AÑADIDOS - NATURALEZA DEL ASPECTO */}
+                 <div className="flex items-center mb-2">
+                   <span className={`text-xs px-2 py-1 rounded-full font-medium ${nature.color} border border-current/30`}>
+                     {nature.icon} {nature.label}
+                   </span>
+                 </div>
+                 
+                 <div className="text-gray-400 text-xs">
+                   Orbe: {aspect.orb.toFixed(2)}° | Ángulo: {aspect.angle.toFixed(1)}°
+                 </div>
+                 
+                 {/* PREVIEW DE INTERPRETACIÓN */}
+                 <div className="mt-2 text-cyan-200 text-xs leading-relaxed">
+                   {getPersonalizedAspectInterpretation(aspect).substring(0, 100)}...
+                 </div>
+               </div>
+             );
+           })}
+         </div>
+         
+         {calculatedAspects.length > 20 && (
+           <div className="mt-4 text-center">
+             <div className="text-gray-400 text-sm">
+               Se muestran los primeros 20 aspectos de {calculatedAspects.length} encontrados. 
+               Los aspectos se ordenan por precisión (orbe menor = más importante).
+             </div>
+           </div>
+         )}
+       </div>
+     )}
+
+     {/* ✨ MENÚ DE NAVEGACIÓN */}
+     <SectionMenu activeSection={activeSection} scrollToSection={scrollToSection} />
+
+     {/* 🎯 SECCIÓN 3: POSICIONES PLANETARIAS CON INTERPRETACIONES */}
+     <div id="posiciones-planetarias" className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
+       <div className="flex items-center mb-6">
+         <svg className="w-6 h-6 text-yellow-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+           <circle cx="12" cy="12" r="5"/>
+           <line x1="12" y1="1" x2="12" y2="3"/>
+           <line x1="12" y1="21" x2="12" y2="23"/>
+           <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+           <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+           <line x1="1" y1="12" x2="3" y2="12"/>
+           <line x1="21" y1="12" x2="23" y2="12"/>
+           <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+           <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+         </svg>
+         <h3 className="text-xl font-bold text-white">Posiciones Planetarias - Tus Energías Básicas</h3>
+       </div>
+       
+       <div className="mb-4 p-4 bg-purple-500/10 border border-purple-400/30 rounded-lg">
+         <div className="text-purple-200 text-sm leading-relaxed">
+           <strong>🌟 Guía:</strong> Cada planeta representa una energía específica en tu personalidad. 
+           El signo muestra <em>cómo</em> expresas esa energía, y la casa indica <em>dónde</em> la manifiestas en tu vida. 
+           Pasa el cursor sobre cada planeta para interpretaciones personalizadas.
+         </div>
+       </div>
+       
+       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+         {normalizedPlanets.map((planet, index) => (
+           planet ? (
+             <div 
+               key={index} 
+               className="bg-black/30 rounded-xl p-4 backdrop-blur-sm border border-white/10 cursor-pointer hover:border-white/20 transition-all duration-200"
+               onMouseEnter={(e) => {
+                 setHoveredPlanet(planet.name);
+                 handleMouseMove(e);
+               }}
+               onMouseMove={handleMouseMove}
+               onMouseLeave={() => setHoveredPlanet(null)}
+             >
+               <div className="flex items-center mb-3">
+                 <span className="text-2xl mr-3" style={{ color: PLANET_COLORS[planet.name] || '#ffffff' }}>
+                   {PLANET_SYMBOLS[planet.name] || '●'}
+                 </span>
+                 <div className="flex-1">
+                   <div className="text-white font-semibold">{planet.name}</div>
+                   <div className="text-gray-400 text-sm">
+                     {(planet?.degree ?? 0)}° {planet?.sign ?? ''}
+                     {planet.retrograde && <span className="text-red-400 ml-1 animate-pulse">R</span>}
+                   </div>
+                 </div>
+               </div>
+               
+               <div className="text-gray-500 text-xs mb-2">
+                 Casa {planet.house} | {SIGN_SYMBOLS[planet.sign] || ''} {signMeanings[planet.sign as keyof typeof signMeanings]}
+               </div>
+               
+               {/* PREVIEW DE SIGNIFICADO */}
+               <div className="text-cyan-200 text-xs leading-relaxed">
+                 <strong>Significado:</strong> {planetMeanings[planet.name as keyof typeof planetMeanings]?.meaning.substring(0, 60)}...
+               </div>
+               
+               {/* PALABRAS CLAVE */}
+               <div className="mt-2 flex flex-wrap gap-1">
+                 {planetMeanings[planet.name as keyof typeof planetMeanings]?.keywords.split(',').slice(0, 2).map((keyword, i) => (
+                   <span key={i} className="bg-purple-400/20 text-purple-200 text-xs px-2 py-1 rounded-full">
+                     {keyword.trim()}
+                   </span>
+                 ))}
+               </div>
+             </div>
+           ) : null
+         ))}
+       </div>
+     </div>
+
+     {/* Información de ascendente y medio cielo CON INTERPRETACIONES */}
+     {(ascendant || midheaven) && (
+       <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
+         <div className="flex items-center mb-6">
+           <svg className="w-6 h-6 text-blue-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+             <circle cx="12" cy="12" r="3"/>
+             <path d="M12 1v6m0 6v6"/>
+             <path d="m4.93 4.93 4.24 4.24m5.66 5.66 4.24 4.24"/>
+             <path d="M1 12h6m6 0h6"/>
+             <path d="m4.93 19.07 4.24-4.24m5.66-5.66 4.24-4.24"/>
+           </svg>
+           <h3 className="text-xl font-bold text-white">Ángulos Principales - Tu Orientación Vital</h3>
+         </div>
+         
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+           {ascendant && (
+             <div className="bg-black/30 rounded-xl p-6 backdrop-blur-sm border border-white/10">
+               <div className="flex items-center mb-4">
+                 <svg className="w-8 h-8 text-green-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                   <line x1="12" y1="19" x2="12" y2="5"/>
+                   <polyline points="5,12 12,5 19,12"/>
+                 </svg>
+                 <div>
+                   <div className="text-white font-bold text-lg">Ascendente</div>
+                   <div className="text-gray-400 text-sm">
+                     {ascendant.degree || 0}° {ascendant.sign || 'N/A'}
+                   </div>
+                 </div>
+               </div>
+               
+               <div className="space-y-3">
+                 <div className="text-green-200 text-sm">
+                   <strong>🎭 Tu máscara social:</strong> Cómo te presentas al mundo y primeras impresiones que causas
+                 </div>
+                 
+                 <div className="text-gray-300 text-xs leading-relaxed">
+                   <strong>En {ascendant.sign}:</strong> Tu personalidad externa se expresa a través de {signMeanings[ascendant.sign as keyof typeof signMeanings]?.toLowerCase()}. 
+                   Esta es la energía que proyectas naturalmente al mundo.
+                 </div>
+                 
+                 <div className="flex flex-wrap gap-1 mt-2">
+                   <span className="bg-green-400/20 text-green-200 text-xs px-2 py-1 rounded-full">Personalidad</span>
+                   <span className="bg-green-400/20 text-green-200 text-xs px-2 py-1 rounded-full">Imagen</span>
+                 </div>
+               </div>
+             </div>
+           )}
+           
+           {midheaven && (
+             <div className="bg-black/30 rounded-xl p-6 backdrop-blur-sm border border-white/10">
+               <div className="flex items-center mb-4">
+                 <svg className="w-8 h-8 text-purple-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                   <polyline points="22,7 13.5,15.5 8.5,10.5 2,17"/>
+                   <polyline points="16,7 22,7 22,13"/>
+                 </svg>
+                 <div>
+                   <div className="text-white font-bold text-lg">Medio Cielo</div>
+                   <div className="text-gray-400 text-sm">
+                     {midheaven.degree || 0}° {midheaven.sign || 'N/A'}
+                   </div>
+                 </div>
+               </div>
+               
+               <div className="space-y-3">
+                 <div className="text-purple-200 text-sm">
+                   <strong>🎯 Tu vocación:</strong> Carrera ideal, reputación pública y propósito profesional
+                 </div>
+                 
+                 <div className="text-gray-300 text-xs leading-relaxed">
+                   <strong>En {midheaven.sign}:</strong> Tu carrera y estatus se expresan a través de {signMeanings[midheaven.sign as keyof typeof signMeanings]?.toLowerCase()}. 
+                   Esta es la energía que quieres proyectar profesionalmente al mundo.
+                 </div>
+                 
+                 <div className="flex flex-wrap gap-1 mt-2">
+                   <span className="bg-purple-400/20 text-purple-200 text-xs px-2 py-1 rounded-full">Carrera</span>
+                   <span className="bg-purple-400/20 text-purple-200 text-xs px-2 py-1 rounded-full">Reconocimiento</span>
+                 </div>
+               </div>
+             </div>
+           )}
+         </div>
+       </div>
+     )}
+
+     {/* 📊 SECCIONES EDUCATIVAS MOVIDAS AL FINAL */}
+     <div className="space-y-8">
+       {/* Resumen de Aspectos - Cómo interactúan tus energías planetarias */}
        <div className="p-6 bg-gradient-to-r from-indigo-900/40 to-purple-900/40 rounded-xl border border-indigo-400/30">
          <div className="text-center mb-6">
            <h4 className="text-white font-bold text-xl mb-3">
@@ -1281,366 +1646,54 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
              <div className="text-yellow-200 text-xs mt-2 font-medium">💫 En tu vida: Reconoce estas energías intensas y únicas en ti</div>
            </div>
          </div>
-         
-         {/* EXPLICACIÓN DETALLADA DE ASPECTOS EXACTOS */}
-         <div className="p-6 bg-yellow-400/15 border border-yellow-400/40 rounded-xl">
-           <div className="text-center mb-4">
-             <div className="text-yellow-300 font-bold text-xl mb-2 flex items-center justify-center">
-               <svg className="w-6 h-6 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                 <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
-               </svg>
-               ¿Qué son los Aspectos EXACTOS?
-             </div>
-           </div>
-           
-           <div className="text-yellow-100 text-sm leading-relaxed max-w-4xl mx-auto">
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-               <div>
-                 <div className="font-semibold mb-2 text-yellow-200">🎯 Definición:</div>
-                 <div className="mb-4">
-                   Un aspecto se considera <span className="bg-yellow-400 text-black px-2 py-1 rounded font-bold">EXACTO</span> cuando 
-                   el orbe (diferencia angular) es menor a <span className="font-semibold text-yellow-200">1 grado</span>. 
-                   Esto significa que los planetas están casi en el ángulo perfecto del aspecto.
-                 </div>
-                 
-                 <div className="font-semibold mb-2 text-yellow-200">⚡ Intensidad:</div>
-                 <div>
-                   Los aspectos exactos tienen <span className="font-semibold text-yellow-200">máxima potencia energética</span> 
-                   y representan las influencias <span className="font-semibold text-yellow-200">más poderosas y definitorias</span> 
-                   en tu personalidad y destino.
-                 </div>
-               </div>
-               
-               <div>
-                 <div className="font-semibold mb-2 text-yellow-200">🌟 En tu carta:</div>
-                 <div className="mb-4">
-                   Si tienes aspectos exactos, estas energías planetarias están <span className="font-semibold text-yellow-200">perfectamente sincronizadas</span> 
-                   en tu ser. Son como "superpoderes astrológicos" que definen rasgos muy marcados de tu personalidad.
-                 </div>
-                 
-                 <div className="font-semibold mb-2 text-yellow-200">💫 Importancia:</div>
-                 <div>
-                   Presta especial atención a tus aspectos exactos: son las <span className="font-semibold text-yellow-200">claves maestras</span> 
-                   para entender tu naturaleza más profunda y tus potenciales más desarrollados.
-                 </div>
-               </div>
-             </div>
-           </div>
-         </div>
        </div>
 
-       {/* Leyenda de aspectos CON SIGNIFICADOS COMPLETOS Y EDUCATIVOS */}
-       <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
-         <div className="flex items-center mb-6">
-           <svg className="w-6 h-6 text-purple-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-             <path d="M9.663 17h4.673M12 3v1m6.364 1.636-.707.707M21 12h-1M4 12H3m3.343-5.657-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-           </svg>
-           <h3 className="text-xl font-bold text-white">Guía Educativa Completa de Aspectos Astrológicos</h3>
+       {/* ¿Qué son los Aspectos EXACTOS? */}
+       <div className="p-6 bg-yellow-400/15 border border-yellow-400/40 rounded-xl">
+         <div className="text-center mb-4">
+           <div className="text-yellow-300 font-bold text-xl mb-2 flex items-center justify-center">
+             <svg className="w-6 h-6 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+               <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+             </svg>
+             ¿Qué son los Aspectos EXACTOS?
+           </div>
          </div>
          
-         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-           {Object.entries(ASPECTS).map(([type, config]) => (
-             <div 
-               key={type} 
-               className="bg-black/30 rounded-xl p-5 backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all duration-300 hover:bg-black/40"
-             >
-               {/* HEADER CON COLOR Y NOMBRE */}
-               <div className="flex items-center mb-3">
-                 <div 
-                   className="w-6 h-3 mr-3 rounded-full shadow-lg" 
-                   style={{ backgroundColor: config.color, boxShadow: `0 0 10px ${config.color}40` }}
-                 ></div>
-                 <span className="text-white font-bold text-lg">{config.name}</span>
+         <div className="text-yellow-100 text-sm leading-relaxed max-w-4xl mx-auto">
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+             <div>
+               <div className="font-semibold mb-2 text-yellow-200">🎯 Definición:</div>
+               <div className="mb-4">
+                 Un aspecto se considera <span className="bg-yellow-400 text-black px-2 py-1 rounded font-bold">EXACTO</span> cuando 
+                 el orbe (diferencia angular) es menor a <span className="font-semibold text-yellow-200">1 grado</span>. 
+                 Esto significa que los planetas están casi en el ángulo perfecto del aspecto.
                </div>
                
-               {/* INFORMACIÓN TÉCNICA */}
-               <div className="mb-4 p-3 bg-white/5 rounded-lg border border-white/10">
-                 <div className="text-gray-300 text-sm mb-1">
-                   <span className="text-blue-300 font-semibold">Ángulo:</span> {config.angle}°
-                 </div>
-                 <div className="text-gray-300 text-sm mb-2">
-                   <span className="text-blue-300 font-semibold">Orbe máximo:</span> ±{config.orb}°
-                 </div>
-                 <div className="text-xs text-gray-400">
-                   <span className="text-yellow-300 font-semibold">EXACTO</span> cuando orbe &lt; 1°
-                 </div>
-               </div>
-               
-               {/* SIGNIFICADO COMPLETO CON EXPLICACIÓN CLARA */}
-               <div className="space-y-3">
-                 <div>
-                   <div className="text-white text-sm font-semibold mb-1 flex items-center">
-                     <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                       <circle cx="12" cy="12" r="10"/>
-                       <circle cx="12" cy="12" r="6"/>
-                       <circle cx="12" cy="12" r="2"/>
-                     </svg>
-                     Significado
-                   </div>
-                   <div className="text-gray-200 text-xs leading-relaxed">
-                     {aspectMeanings[type as keyof typeof aspectMeanings]?.meaning}
-                   </div>
-                 </div>
-                 
-                 <div>
-                   <div className="text-white text-sm font-semibold mb-1 flex items-center">
-                     <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                       <polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/>
-                     </svg>
-                     Efecto
-                   </div>
-                   <div className="text-gray-300 text-xs leading-relaxed">
-                     {aspectMeanings[type as keyof typeof aspectMeanings]?.effect}
-                   </div>
-                 </div>
-
-                 <div>
-                   <div className="text-white text-sm font-semibold mb-1 flex items-center">
-                     <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                       <polyline points="14,2 14,8 20,8"/>
-                       <line x1="16" y1="13" x2="8" y2="13"/>
-                       <line x1="16" y1="17" x2="8" y2="17"/>
-                       <polyline points="10,9 9,9 8,9"/>
-                     </svg>
-                     Explicación Simple
-                   </div>
-                   <div className="text-cyan-200 text-xs leading-relaxed">
-                     {aspectMeanings[type as keyof typeof aspectMeanings]?.explanation}
-                   </div>
-                 </div>
-                 
-                 <div>
-                   <div className="text-white text-sm font-semibold mb-1 flex items-center">
-                     <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                       <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                       <rect x="7" y="7" width="10" height="10" rx="1" ry="1"/>
-                     </svg>
-                     Naturaleza
-                   </div>
-                   <div className={`text-xs leading-relaxed px-2 py-1 rounded-full text-center font-medium ${
-                     config.difficulty === 'easy' 
-                       ? 'bg-green-400/20 text-green-300 border border-green-400/30' 
-                       : config.difficulty === 'hard'
-                         ? 'bg-red-400/20 text-red-300 border border-red-400/30'
-                         : config.difficulty === 'neutral'
-                           ? 'bg-yellow-400/20 text-yellow-300 border border-yellow-400/30'
-                           : 'bg-purple-400/20 text-purple-300 border border-purple-400/30'
-                   }`}>
-                     {aspectMeanings[type as keyof typeof aspectMeanings]?.type}
-                   </div>
-                 </div>
+               <div className="font-semibold mb-2 text-yellow-200">⚡ Intensidad:</div>
+               <div>
+                 Los aspectos exactos tienen <span className="font-semibold text-yellow-200">máxima potencia energética</span> 
+                 y representan las influencias <span className="font-semibold text-yellow-200">más poderosas y definitorias</span> 
+                 en tu personalidad y destino.
                </div>
              </div>
-           ))}
+             
+             <div>
+               <div className="font-semibold mb-2 text-yellow-200">🌟 En tu carta:</div>
+               <div className="mb-4">
+                 Si tienes aspectos exactos, estas energías planetarias están <span className="font-semibold text-yellow-200">perfectamente sincronizadas</span> 
+                 en tu ser. Son como "superpoderes astrológicos" que definen rasgos muy marcados de tu personalidad.
+               </div>
+               
+               <div className="font-semibold mb-2 text-yellow-200">💫 Importancia:</div>
+               <div>
+                 Presta especial atención a tus aspectos exactos: son las <span className="font-semibold text-yellow-200">claves maestras</span> 
+                 para entender tu naturaleza más profunda y tus potenciales más desarrollados.
+               </div>
+             </div>
+           </div>
          </div>
        </div>
      </div>
-
-     {/* ✨ MENÚ DE NAVEGACIÓN */}
-     <SectionMenu activeSection={activeSection} scrollToSection={scrollToSection} />
-
-     {/* 🎯 SECCIÓN 2: ASPECTOS DETECTADOS CON NOMBRES ESPECÍFICOS */}
-     {calculatedAspects.length > 0 && (
-       <div id="aspectos-detectados" className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
-         <div className="flex items-center mb-6">
-           <svg className="w-6 h-6 text-yellow-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-             <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
-           </svg>
-           <h3 className="text-xl font-bold text-white">
-             Aspectos Específicos Detectados en Tu Carta ({calculatedAspects.length})
-           </h3>
-         </div>
-         
-         <div className="mb-4 p-4 bg-blue-500/10 border border-blue-400/30 rounded-lg">
-           <div className="text-blue-200 text-sm leading-relaxed">
-             <strong>💡 Interpretación:</strong> Estos son los aspectos específicos encontrados entre tus planetas. 
-             Cada uno representa una dinámica energética única en tu personalidad. Los aspectos 
-             <span className="bg-yellow-400 text-black px-1 rounded mx-1 font-bold">EXACTOS</span> 
-             (orbe &lt; 1°) son especialmente poderosos y definen rasgos muy marcados en ti.
-           </div>
-         </div>
-         
-         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-           {calculatedAspects.slice(0, 20).map((aspect, index) => (
-             <div 
-               key={index}
-               className="bg-black/30 rounded-xl p-4 backdrop-blur-sm border border-white/10 cursor-pointer hover:border-white/20 transition-all duration-200 group relative"
-               onMouseEnter={(e) => {
-                 setHoveredAspect(`${aspect.planet1}-${aspect.planet2}-${aspect.type}`);
-                 handleMouseMove(e);
-               }}
-              onMouseMove={handleMouseMove}
-               onMouseLeave={() => setHoveredAspect(null)}
-               style={{ position: 'relative', zIndex: 1 }}
-             >
-               <div className="flex items-center justify-between mb-2">
-                 <span className="text-white font-semibold text-sm">
-                   {aspect.planet1} - {aspect.planet2}
-                 </span>
-                 {aspect.exact && (
-                   <span className="bg-yellow-400 text-black text-xs px-2 py-1 rounded-full font-bold animate-pulse">
-                     EXACTO
-                   </span>
-                 )}
-               </div>
-               
-               <div className="flex items-center mb-2">
-                 <div 
-                   className="w-3 h-3 rounded-full mr-2" 
-                   style={{ backgroundColor: aspect.config.color }}
-                 ></div>
-                 <span className="text-gray-300 text-sm">{aspect.config.name}</span>
-               </div>
-               
-               <div className="text-gray-400 text-xs">
-                 Orbe: {aspect.orb.toFixed(2)}° | Ángulo: {aspect.angle.toFixed(1)}°
-               </div>
-               
-               {/* PREVIEW DE INTERPRETACIÓN */}
-               <div className="mt-2 text-cyan-200 text-xs leading-relaxed">
-                 {getPersonalizedAspectInterpretation(aspect).substring(0, 100)}...
-               </div>
-             </div>
-           ))}
-         </div>
-         
-         {calculatedAspects.length > 20 && (
-           <div className="mt-4 text-center">
-             <div className="text-gray-400 text-sm">
-               Se muestran los primeros 20 aspectos de {calculatedAspects.length} encontrados. 
-               Los aspectos se ordenan por precisión (orbe menor = más importante).
-             </div>
-           </div>
-         )}
-       </div>
-     )}
-
-     {/* ✨ MENÚ DE NAVEGACIÓN */}
-     <SectionMenu activeSection={activeSection} scrollToSection={scrollToSection} />
-
-     {/* 🎯 SECCIÓN 3: POSICIONES PLANETARIAS CON INTERPRETACIONES */}
-     <div id="posiciones-planetarias" className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
-       <div className="flex items-center mb-6">
-         <svg className="w-6 h-6 text-yellow-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-           <circle cx="12" cy="12" r="5"/>
-           <line x1="12" y1="1" x2="12" y2="3"/>
-           <line x1="12" y1="21" x2="12" y2="23"/>
-           <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-           <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-           <line x1="1" y1="12" x2="3" y2="12"/>
-           <line x1="21" y1="12" x2="23" y2="12"/>
-           <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-           <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-         </svg>
-         <h3 className="text-xl font-bold text-white">Posiciones Planetarias - Tus Energías Básicas</h3>
-       </div>
-       
-       <div className="mb-4 p-4 bg-purple-500/10 border border-purple-400/30 rounded-lg">
-         <div className="text-purple-200 text-sm leading-relaxed">
-           <strong>🌟 Guía:</strong> Cada planeta representa una energía específica en tu personalidad. 
-           El signo muestra <em>cómo</em> expresas esa energía, y la casa indica <em>dónde</em> la manifiestas en tu vida. 
-           Pasa el cursor sobre cada planeta para interpretaciones personalizadas.
-         </div>
-       </div>
-       
-       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-         {normalizedPlanets.map((planet, index) => (
-           <div 
-             key={index} 
-             className="bg-black/30 rounded-xl p-4 backdrop-blur-sm border border-white/10 cursor-pointer hover:border-white/20 transition-all duration-200"
-             onMouseEnter={(e) => {
-               setHoveredPlanet(planet.name);
-               handleMouseMove(e);
-             }}
-             onMouseMove={handleMouseMove}
-             onMouseLeave={() => setHoveredPlanet(null)}
-           >
-             <div className="flex items-center mb-3">
-               <span className="text-2xl mr-3" style={{ color: PLANET_COLORS[planet.name] || '#ffffff' }}>
-                 {planet && PLANET_SYMBOLS[planet.name] || '●'}
-               </span>
-               <div className="flex-1">
-                 <div className="text-white font-semibold">{planet.name}</div>
-                 <div className="text-gray-400 text-sm">
-                   {planet.degree || 0}° {planet.sign}
-                   {planet.retrograde && <span className="text-red-400 ml-1 animate-pulse">R</span>}
-                 </div>
-               </div>
-             </div>
-             
-             <div className="text-gray-500 text-xs mb-2">
-               Casa {planet.house} | {SIGN_SYMBOLS[planet.sign] || ''} {signMeanings[planet.sign as keyof typeof signMeanings]}
-             </div>
-             
-             {/* PREVIEW DE SIGNIFICADO */}
-             <div className="text-cyan-200 text-xs leading-relaxed">
-               <strong>Significado:</strong> {planetMeanings[planet.name as keyof typeof planetMeanings]?.meaning.substring(0, 60)}...
-             </div>
-             
-             {/* PALABRAS CLAVE */}
-             <div className="mt-2 flex flex-wrap gap-1">
-               {planetMeanings[planet.name as keyof typeof planetMeanings]?.keywords.split(',').slice(0, 2).map((keyword, i) => (
-                 <span key={i} className="bg-purple-400/20 text-purple-200 text-xs px-2 py-1 rounded-full">
-                   {keyword.trim()}
-                 </span>
-               ))}
-             </div>
-           </div>
-         ))}
-       </div>
-     </div>
-
-     {/* Información de ascendente y medio cielo CON INTERPRETACIONES */}
-     {(ascendant || midheaven) && (
-       <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
-         <div className="flex items-center mb-6">
-           <svg className="w-6 h-6 text-blue-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-             <circle cx="12" cy="12" r="3"/>
-             <path d="M12 1v6m0 6v6"/>
-             <path d="m4.93 4.93 4.24 4.24m5.66 5.66 4.24 4.24"/>
-             <path d="M1 12h6m6 0h6"/>
-             <path d="m4.93 19.07 4.24-4.24m5.66-5.66 4.24-4.24"/>
-           </svg>
-           <h3 className="text-xl font-bold text-white">Ángulos Principales - Tu Orientación Vital</h3>
-         </div>
-         
-         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-           {ascendant && (
-             <div className="bg-black/30 rounded-xl p-6 backdrop-blur-sm border border-white/10">
-               <div className="flex items-center mb-4">
-                 <svg className="w-8 h-8 text-green-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                   <line x1="12" y1="19" x2="12" y2="5"/>
-                   <polyline points="5,12 12,5 19,12"/>
-                 </svg>
-                 <div>
-                   <div className="text-white font-bold text-lg">Ascendente</div>
-                   <div className="text-gray-400 text-sm">
-                     {ascendant.degree || 0}° {ascendant.sign || 'N/A'}
-                   </div>
-                 </div>
-               </div>
-               
-               <div className="space-y-3">
-                 <div className="text-green-200 text-sm">
-                   <strong>🎭 Tu máscara social:</strong> Cómo te presentas al mundo y primeras impresiones que causas
-                 </div>
-                 
-                 <div className="text-gray-300 text-xs leading-relaxed">
-                   <strong>En {midheaven.sign}:</strong> Tu carrera y estatus se expresan a través de {signMeanings[midheaven.sign as keyof typeof signMeanings]?.toLowerCase()}. 
-                   Esta es la energía que quieres proyectar profesionalmente al mundo.
-                 </div>
-                 
-                 <div className="flex flex-wrap gap-1 mt-2">
-                   <span className="bg-purple-400/20 text-purple-200 text-xs px-2 py-1 rounded-full">Carrera</span>
-                   <span className="bg-purple-400/20 text-purple-200 text-xs px-2 py-1 rounded-full">Reconocimiento</span>
-                 </div>
-               </div>
-             </div>
-           )}
-         </div>
-       </div>
-     )}
 
      {/* 🎯 TOOLTIPS DINÁMICOS COMPLETOS - TODOS CON Z-INDEX CORREGIDO */}
      {/* TOOLTIP PLANETAS PERSONALIZADO */}
@@ -1697,305 +1750,303 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
      )}
 
      {/* 🎯 TOOLTIP ASPECTOS PERSONALIZADO */}
-     {hoveredAspect && calculatedAspects.length > 0 && (
-       <div 
-         className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-lg pointer-events-none"
-         style={{ 
-           left: tooltipPosition.x, 
-           top: tooltipPosition.y,
-           zIndex: 99999,
-           transform: tooltipPosition.x > window.innerWidth - 350 ? 'translateX(-100%)' : 'none'
-         }}
-       >
-         {(() => {
-           const currentAspect = calculatedAspects.find(aspect => 
-             `${aspect.planet1}-${aspect.planet2}-${aspect.type}` === hoveredAspect
-           );
-           
-           if (!currentAspect) return null;
-           
-           const planet1Desc = planetMeanings[currentAspect.planet1 as keyof typeof planetMeanings]?.keywords.split(',')[0]?.trim() || 'planeta';
-           const planet2Desc = planetMeanings[currentAspect.planet2 as keyof typeof planetMeanings]?.keywords.split(',')[0]?.trim() || 'planeta';
-           
-           return (
-             <>
-               <div className="flex items-center mb-3">
-                 <div 
-                   className="w-6 h-6 rounded-full mr-3" 
-                   style={{ backgroundColor: currentAspect.config.color }}
-                 ></div>
-                 <div>
-                   <div className="text-white font-bold text-lg">{currentAspect.config.name}</div>
-                   <div className="text-gray-200 text-sm">
-                     entre {currentAspect.planet1} ({planet1Desc}) y {currentAspect.planet2} ({planet2Desc})
-                   </div>
-                 </div>
-               </div>
-               
-               <div className="mb-3 p-3 bg-white/10 rounded-lg border border-white/10">
-                 <div className="text-blue-300 text-xs mb-1">
-                   <strong>Ángulo:</strong> {currentAspect.config.angle}°
-                 </div>
-                 <div className="text-blue-300 text-xs mb-1">
-                   <strong>Orbe máximo:</strong> ±{currentAspect.config.orb}°
-                 </div>
-                 <div className="text-yellow-300 text-xs font-semibold">
-                   {currentAspect.exact ? 'EXACTO' : `Orbe: ${currentAspect.orb.toFixed(2)}°`} cuando orbe &lt; 1°
-                 </div>
-               </div>
-               
-               <div className="mb-2">
-                 <div className="text-white text-sm font-semibold mb-1">🎯 Significado:</div>
-                 <div className="text-gray-200 text-xs mb-2">
-                   {getPersonalizedAspectInterpretation(currentAspect)}
-                 </div>
-                 <div className="text-gray-300 text-xs mb-2">
-                   <strong>Efecto:</strong> {aspectMeanings[currentAspect.type as keyof typeof aspectMeanings]?.effect}
-                 </div>
-                 <div className="text-gray-300 text-xs">
-                   <strong>Tipo:</strong> {aspectMeanings[currentAspect.type as keyof typeof aspectMeanings]?.type}
-                 </div>
-               </div>
-               
-               {/* 🌟 EXPLICACIÓN CUANDO ES EXACTO */}
-               {currentAspect.exact && (
-                 <div className="mt-2 p-2 bg-yellow-400/20 border border-yellow-400/40 rounded">
-                   <div className="text-yellow-200 text-xs font-bold mb-1">⭐ Aspecto Exacto</div>
-                   <div className="text-yellow-100 text-xs leading-relaxed">
-                     Este aspecto tiene <strong>máxima potencia energética</strong> (orbe &lt; 1°). 
-                     Es una de las influencias <strong>más poderosas</strong> en tu personalidad.
-                   </div>
-                 </div>
-               )}
-             </>
-           );
-         })()}
-       </div>
-     )}
+    {/* 🎯 TOOLTIP ASPECTOS PERSONALIZADO */}
+{hoveredAspect && calculatedAspects.length > 0 && (
+  <div 
+    className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-lg pointer-events-none"
+    style={{ 
+      left: tooltipPosition.x, 
+      top: tooltipPosition.y,
+      zIndex: 99999,
+      transform: tooltipPosition.x > window.innerWidth - 350 ? 'translateX(-100%)' : 'none'
+    }}
+  >
+    {(() => {
+      const currentAspect = calculatedAspects.find(aspect => 
+        `${aspect.planet1}-${aspect.planet2}-${aspect.type}` === hoveredAspect
+      );
+      
+      if (!currentAspect) return null;
+      
+      const planet1Desc = planetMeanings[currentAspect.planet1 as keyof typeof planetMeanings]?.keywords.split(',')[0]?.trim() || 'planeta';
+      const planet2Desc = planetMeanings[currentAspect.planet2 as keyof typeof planetMeanings]?.keywords.split(',')[0]?.trim() || 'planeta';
+      
+      return (
+        <>
+          <div className="flex items-center mb-3">
+            <div 
+              className="w-6 h-6 rounded-full mr-3" 
+              style={{ backgroundColor: currentAspect.config.color }}
+            ></div>
+            <div>
+              <div className="text-white font-bold text-lg">{currentAspect.config.name}</div>
+              <div className="text-gray-200 text-sm">
+                entre {currentAspect.planet1} ({planet1Desc}) y {currentAspect.planet2} ({planet2Desc})
+              </div>
+            </div>
+          </div>
+          
+          <div className="mb-3 p-3 bg-white/10 rounded-lg border border-white/10">
+            <div className="text-blue-300 text-xs mb-1">
+              <strong>Ángulo:</strong> {currentAspect.config.angle}°
+            </div>
+            <div className="text-blue-300 text-xs mb-1">
+              <strong>Orbe máximo:</strong> ±{currentAspect.config.orb}°
+            </div>
+            <div className="text-yellow-300 text-xs font-semibold">
+              {currentAspect.exact ? 'EXACTO' : `Orbe: ${currentAspect.orb.toFixed(2)}°`}
+            </div>
+          </div>
+          
+          <div className="mb-2">
+            <div className="text-white text-sm font-semibold mb-1">🎯 Significado:</div>
+            <div className="text-gray-200 text-xs mb-2">
+              {getPersonalizedAspectInterpretation(currentAspect)}
+            </div>
+            <div className="text-gray-300 text-xs mb-2">
+              <strong>Efecto:</strong> {aspectMeanings[currentAspect.type as keyof typeof aspectMeanings]?.effect}
+            </div>
+            <div className="text-gray-300 text-xs">
+              <strong>Tipo:</strong> {aspectMeanings[currentAspect.type as keyof typeof aspectMeanings]?.type}
+            </div>
+          </div>
+          
+          {/* 🌟 EXPLICACIÓN CUANDO ES EXACTO */}
+          {currentAspect.exact && (
+            <div className="mt-2 p-2 bg-yellow-400/20 border border-yellow-400/40 rounded">
+              <div className="text-yellow-200 text-xs font-bold mb-1">⭐ Aspecto Exacto</div>
+              <div className="text-yellow-100 text-xs leading-relaxed">
+                Este aspecto tiene <strong>máxima potencia energética</strong> (orbe &lt; 1°). 
+                Es una de las influencias <strong>más poderosas</strong> en tu personalidad.
+              </div>
+            </div>
+          )}
+        </>
+      );
+    })()}
+  </div>
+)} {/* 🎯 TOOLTIP ASCENDENTE */}
+    {hoveredPlanet === 'Ascendente' && ascendant && (
+      <div 
+        className="fixed bg-gradient-to-r from-green-500/95 to-emerald-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm pointer-events-none"
+        style={{ 
+          left: tooltipPosition.x + 25,
+          top: tooltipPosition.y - 50,
+          zIndex: 99999,
+          transform: tooltipPosition.x > window.innerWidth - 300 ? 'translateX(-100%)' : 'none'
+        }}
+      >
+        <div className="flex items-center mb-3">
+          <svg className="w-8 h-8 text-white mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <line x1="12" y1="19" x2="12" y2="5"/>
+            <polyline points="5,12 12,5 19,12"/>
+          </svg>
+          <div>
+            <div className="text-white font-bold text-lg">Ascendente</div>
+            <div className="text-gray-200 text-sm">
+              {ascendant.degree}° {ascendant.sign}
+            </div>
+          </div>
+        </div>
+        
+        <div className="mb-2">
+          <div className="text-white text-sm font-semibold mb-1">🎯 Significado:</div>
+          <div className="text-gray-200 text-xs mb-2">
+            Tu máscara social, cómo te presentas al mundo y tu apariencia física. 
+            La energía que proyectas en primeras impresiones.
+          </div>
+          <div className="text-gray-300 text-xs mb-2">
+            <strong>En {ascendant.sign}:</strong> {signMeanings[ascendant.sign as keyof typeof signMeanings]}
+          </div>
+          <div className="text-cyan-200 text-xs leading-relaxed">
+            <strong>⚡ En tu carta:</strong> Con Ascendente en {ascendant.sign}, te presentas al mundo con las cualidades de {signMeanings[ascendant.sign as keyof typeof signMeanings]?.toLowerCase()}. Tu personalidad externa refleja estas características de forma natural.
+          </div>
+          <div className="text-gray-300 text-xs mt-2">
+            <strong>Palabras clave:</strong> Personalidad externa, imagen, vitalidad, enfoque de vida
+          </div>
+        </div>
+      </div>
+    )}
 
-     {/* 🎯 TOOLTIP ASCENDENTE */}
-     {hoveredPlanet === 'Ascendente' && ascendant && (
-       <div 
-         className="fixed bg-gradient-to-r from-green-500/95 to-emerald-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm pointer-events-none"
-         style={{ 
-           left: tooltipPosition.x + 25,
-           top: tooltipPosition.y - 50,
-           zIndex: 99999,
-           transform: tooltipPosition.x > window.innerWidth - 300 ? 'translateX(-100%)' : 'none'
-         }}
-       >
-         <div className="flex items-center mb-3">
-           <svg className="w-8 h-8 text-white mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-             <line x1="12" y1="19" x2="12" y2="5"/>
-             <polyline points="5,12 12,5 19,12"/>
-           </svg>
-           <div>
-             <div className="text-white font-bold text-lg">Ascendente</div>
-             <div className="text-gray-200 text-sm">
-               {ascendant.degree}° {ascendant.sign}
-             </div>
-           </div>
-         </div>
-         
-         <div className="mb-2">
-           <div className="text-white text-sm font-semibold mb-1">🎯 Significado:</div>
-           <div className="text-gray-200 text-xs mb-2">
-             Tu máscara social, cómo te presentas al mundo y tu apariencia física. 
-             La energía que proyectas en primeras impresiones.
-           </div>
-           <div className="text-gray-300 text-xs mb-2">
-             <strong>En {ascendant.sign}:</strong> {signMeanings[ascendant.sign as keyof typeof signMeanings]}
-           </div>
-           <div className="text-cyan-200 text-xs leading-relaxed">
-             <strong>⚡ En tu carta:</strong> Con Ascendente en {ascendant.sign}, te presentas al mundo con las cualidades de {signMeanings[ascendant.sign as keyof typeof signMeanings]?.toLowerCase()}. Tu personalidad externa refleja estas características de forma natural.
-           </div>
-           <div className="text-gray-300 text-xs mt-2">
-             <strong>Palabras clave:</strong> Personalidad externa, imagen, vitalidad, enfoque de vida
-           </div>
-         </div>
-       </div>
-     )}
+    {/* 🎯 TOOLTIP MEDIO CIELO */}
+    {hoveredPlanet === 'Medio Cielo' && midheaven && (
+      <div 
+        className="fixed bg-gradient-to-r from-purple-500/95 to-violet-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm pointer-events-none"
+        style={{ 
+          left: tooltipPosition.x + 25,
+          top: tooltipPosition.y - 50,
+          zIndex: 99999,
+          transform: tooltipPosition.x > window.innerWidth - 300 ? 'translateX(-100%)' : 'none'
+        }}
+      >
+        <div className="flex items-center mb-3">
+          <svg className="w-8 h-8 text-white mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polyline points="22,7 13.5,15.5 8.5,10.5 2,17"/>
+            <polyline points="16,7 22,7 22,13"/>
+          </svg>
+          <div>
+            <div className="text-white font-bold text-lg">Medio Cielo</div>
+            <div className="text-gray-200 text-sm">
+              {midheaven.degree}° {midheaven.sign}
+            </div>
+          </div>
+        </div>
+        
+        <div className="mb-2">
+          <div className="text-white text-sm font-semibold mb-1">🎯 Significado:</div>
+          <div className="text-gray-200 text-xs mb-2">
+            Tu vocación, carrera ideal, reputación pública y lo que quieres lograr 
+            en el mundo. Tu propósito profesional.
+          </div>
+          <div className="text-gray-300 text-xs mb-2">
+            <strong>En {midheaven.sign}:</strong> {signMeanings[midheaven.sign as keyof typeof signMeanings]}
+          </div>
+          <div className="text-cyan-200 text-xs leading-relaxed">
+            <strong>⚡ En tu carta:</strong> Con Medio Cielo en {midheaven.sign}, tu vocación y carrera se expresan a través de {signMeanings[midheaven.sign as keyof typeof signMeanings]?.toLowerCase()}. Esta es la energía que quieres proyectar profesionalmente.
+          </div>
+          <div className="text-gray-300 text-xs mt-2">
+            <strong>Palabras clave:</strong> Carrera, estatus, reconocimiento, autoridad
+          </div>
+        </div>
+      </div>
+    )}
 
-     {/* 🎯 TOOLTIP MEDIO CIELO */}
-     {hoveredPlanet === 'Medio Cielo' && midheaven && (
-       <div 
-         className="fixed bg-gradient-to-r from-purple-500/95 to-violet-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm pointer-events-none"
-         style={{ 
-           left: tooltipPosition.x + 25,
-           top: tooltipPosition.y - 50,
-           zIndex: 99999,
-           transform: tooltipPosition.x > window.innerWidth - 300 ? 'translateX(-100%)' : 'none'
-         }}
-       >
-         <div className="flex items-center mb-3">
-           <svg className="w-8 h-8 text-white mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-             <polyline points="22,7 13.5,15.5 8.5,10.5 2,17"/>
-             <polyline points="16,7 22,7 22,13"/>
-           </svg>
-           <div>
-             <div className="text-white font-bold text-lg">Medio Cielo</div>
-             <div className="text-gray-200 text-sm">
-               {midheaven.degree}° {midheaven.sign}
-             </div>
-           </div>
-         </div>
-         
-         <div className="mb-2">
-           <div className="text-white text-sm font-semibold mb-1">🎯 Significado:</div>
-           <div className="text-gray-200 text-xs mb-2">
-             Tu vocación, carrera ideal, reputación pública y lo que quieres lograr 
-             en el mundo. Tu propósito profesional.
-           </div>
-           <div className="text-gray-300 text-xs mb-2">
-             <strong>En {midheaven.sign}:</strong> {signMeanings[midheaven.sign as keyof typeof signMeanings]}
-           </div>
-           <div className="text-cyan-200 text-xs leading-relaxed">
-             <strong>⚡ En tu carta:</strong> Con Medio Cielo en {midheaven.sign}, tu vocación y carrera se expresan a través de {signMeanings[midheaven.sign as keyof typeof signMeanings]?.toLowerCase()}. Esta es la energía que quieres proyectar profesionalmente.
-           </div>
-           <div className="text-gray-300 text-xs mt-2">
-             <strong>Palabras clave:</strong> Carrera, estatus, reconocimiento, autoridad
-           </div>
-         </div>
-       </div>
-     )}
+    {/* 🎯 TOOLTIP CASAS */}
+    {hoveredHouse && (
+      <div 
+        className="fixed bg-gradient-to-r from-blue-500/95 to-cyan-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm pointer-events-none"
+        style={{ 
+          left: tooltipPosition.x + 25,
+          top: tooltipPosition.y - 50,
+          zIndex: 99999,
+          transform: tooltipPosition.x > window.innerWidth - 300 ? 'translateX(-100%)' : 'none'
+        }}
+      >
+        <div className="flex items-start mb-3">
+          <span className="text-3xl mr-3">🏠</span>
+          <div>
+            <div className="text-white font-bold text-lg">
+              {houseMeanings[hoveredHouse as keyof typeof houseMeanings]?.name}
+            </div>
+            <div className="text-gray-200 text-sm mb-2">
+              {houseMeanings[hoveredHouse as keyof typeof houseMeanings]?.meaning}
+            </div>
+            <div className="text-gray-300 text-xs">
+              <strong>Temas:</strong> {houseMeanings[hoveredHouse as keyof typeof houseMeanings]?.keywords}
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
 
-     {/* 🎯 TOOLTIP CASAS */}
-     {hoveredHouse && (
-       <div 
-         className="fixed bg-gradient-to-r from-blue-500/95 to-cyan-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm pointer-events-none"
-         style={{ 
-           left: tooltipPosition.x + 25,
-           top: tooltipPosition.y - 50,
-           zIndex: 99999,
-           transform: tooltipPosition.x > window.innerWidth - 300 ? 'translateX(-100%)' : 'none'
-         }}
-       >
-         <div className="flex items-start mb-3">
-           <span className="text-3xl mr-3">🏠</span>
-           <div>
-             <div className="text-white font-bold text-lg">
-               {houseMeanings[hoveredHouse as keyof typeof houseMeanings]?.name}
-             </div>
-             <div className="text-gray-200 text-sm mb-2">
-               {houseMeanings[hoveredHouse as keyof typeof houseMeanings]?.meaning}
-             </div>
-             <div className="text-gray-300 text-xs">
-               <strong>Temas:</strong> {houseMeanings[hoveredHouse as keyof typeof houseMeanings]?.keywords}
-             </div>
-           </div>
-         </div>
-       </div>
-     )}
-
-     {/* Debug info LIMPIO */}
-     <div className="bg-black/30 rounded-xl p-4 text-xs text-gray-400">
-       <div>🔍 Planetas: {planets.length} | Casas: {houses.length} | Aspectos: {calculatedAspects.length}</div>
-       <div>🔺 Ascendente: {ascendant?.sign || 'N/A'} | MC: {midheaven?.sign || 'N/A'}</div>
-       <div className="mt-2 text-yellow-300">💡 <strong>Tip:</strong> Pasa el cursor sobre elementos para interpretaciones personalizadas</div>
-     </div>
-   </div>
- );
+    {/* Debug info LIMPIO */}
+    <div className="bg-black/30 rounded-xl p-4 text-xs text-gray-400">
+      <div>🔍 Planetas: {planets.length} | Casas: {houses.length} | Aspectos: {calculatedAspects.length}</div>
+      <div>🔺 Ascendente: {ascendant?.sign || 'N/A'} | MC: {midheaven?.sign || 'N/A'}</div>
+      <div className="mt-2 text-yellow-300">💡 <strong>Tip:</strong> Pasa el cursor sobre elementos para interpretaciones personalizadas</div>
+    </div>
+  </div>
+);
 };
 
 // 📊 FUNCIONES DE CÁLCULO DE DISTRIBUCIONES (necesarias para los tooltips)
 const elementMeanings = {
- fire: {
-   name: "Fuego",
-   meaning: "Energía, acción, iniciativa y entusiasmo",
-   keywords: "Aries, Leo, Sagitario - Inspiración, liderazgo, creatividad",
-   characteristics: "Personas dinámicas, espontáneas y optimistas"
- },
- earth: {
-   name: "Tierra", 
-   meaning: "Estabilidad, practicidad, materialidad y perseverancia",
-   keywords: "Tauro, Virgo, Capricornio - Recursos, trabajo, estructura",
-   characteristics: "Personas realistas, trabajadoras y confiables"
- },
- air: {
-   name: "Aire",
-   meaning: "Comunicación, ideas, relaciones sociales y conocimiento",
-   keywords: "Géminis, Libra, Acuario - Intelecto, sociabilidad, innovación",
-   characteristics: "Personas mentales, sociables y adaptables"
- },
- water: {
-   name: "Agua",
-   meaning: "Emociones, intuición, sensibilidad y espiritualidad",
-   keywords: "Cáncer, Escorpio, Piscis - Sentimientos, psiquismo, compasión",
-   characteristics: "Personas empáticas, intuitivas y emocionales"
- }
+fire: {
+  name: "Fuego",
+  meaning: "Energía, acción, iniciativa y entusiasmo",
+  keywords: "Aries, Leo, Sagitario - Inspiración, liderazgo, creatividad",
+  characteristics: "Personas dinámicas, espontáneas y optimistas"
+},
+earth: {
+  name: "Tierra", 
+  meaning: "Estabilidad, practicidad, materialidad y perseverancia",
+  keywords: "Tauro, Virgo, Capricornio - Recursos, trabajo, estructura",
+  characteristics: "Personas realistas, trabajadoras y confiables"
+},
+air: {
+  name: "Aire",
+  meaning: "Comunicación, ideas, relaciones sociales y conocimiento",
+  keywords: "Géminis, Libra, Acuario - Intelecto, sociabilidad, innovación",
+  characteristics: "Personas mentales, sociables y adaptables"
+},
+water: {
+  name: "Agua",
+  meaning: "Emociones, intuición, sensibilidad y espiritualidad",
+  keywords: "Cáncer, Escorpio, Piscis - Sentimientos, psiquismo, compasión",
+  characteristics: "Personas empáticas, intuitivas y emocionales"
+}
 };
 
 const modalityMeanings = {
- cardinal: {
-   name: "Cardinal",
-   meaning: "Iniciación, liderazgo, comienzos y acción directa",
-   keywords: "Aries, Cáncer, Libra, Capricornio - Emprendimiento, pioneros",
-   characteristics: "Personas que inician proyectos y toman la iniciativa"
- },
- fixed: {
-   name: "Fijo",
-   meaning: "Estabilidad, persistencia, determinación y resistencia al cambio",
-   keywords: "Tauro, Leo, Escorpio, Acuario - Constancia, lealtad",
-   characteristics: "Personas que mantienen y consolidan lo iniciado"
- },
- mutable: {
-   name: "Mutable",
-   meaning: "Adaptabilidad, flexibilidad, cambio y transformación",
-   keywords: "Géminis, Virgo, Sagitario, Piscis - Versatilidad, adaptación",
-   characteristics: "Personas que se adaptan y completan los ciclos"
- }
+cardinal: {
+  name: "Cardinal",
+  meaning: "Iniciación, liderazgo, comienzos y acción directa",
+  keywords: "Aries, Cáncer, Libra, Capricornio - Emprendimiento, pioneros",
+  characteristics: "Personas que inician proyectos y toman la iniciativa"
+},
+fixed: {
+  name: "Fijo",
+  meaning: "Estabilidad, persistencia, determinación y resistencia al cambio",
+  keywords: "Tauro, Leo, Escorpio, Acuario - Constancia, lealtad",
+  characteristics: "Personas que mantienen y consolidan lo iniciado"
+},
+mutable: {
+  name: "Mutable",
+  meaning: "Adaptabilidad, flexibilidad, cambio y transformación",
+  keywords: "Géminis, Virgo, Sagitario, Piscis - Versatilidad, adaptación",
+  characteristics: "Personas que se adaptan y completan los ciclos"
+}
 };
 
 // FUNCIONES DE INTERPRETACIÓN
 const getElementInterpretation = (element: string, percentage: number) => {
- const base = elementMeanings[element as keyof typeof elementMeanings];
- 
- if (percentage >= 50) {
-   return `Con ${percentage.toFixed(1)}% de ${base.name}, tienes una naturaleza PREDOMINANTEMENTE ${element.toUpperCase()}. ${base.meaning} Este alto porcentaje indica que ${base.characteristics.toLowerCase()} definen tu personalidad de manera muy marcada.`;
- } else if (percentage >= 30) {
-   return `Tu ${percentage.toFixed(1)}% de ${base.name} muestra una influencia SIGNIFICATIVA. ${base.meaning} ${base.characteristics} son características importantes en tu forma de ser.`;
- } else if (percentage >= 15) {
-   return `Con ${percentage.toFixed(1)}% de ${base.name}, tienes una influencia MODERADA. ${base.meaning} Estas cualidades aparecen de forma equilibrada en tu personalidad.`;
- } else if (percentage > 0) {
-   return `Tu ${percentage.toFixed(1)}% de ${base.name} representa una influencia MENOR pero presente. ${base.meaning} Estas cualidades pueden emerger en situaciones específicas.`;
- } else {
-   return `La ausencia de ${base.name} (0%) puede indicar la necesidad de desarrollar más: ${base.keywords.toLowerCase()}. Esto representa un área de crecimiento potencial.`;
- }
+const base = elementMeanings[element as keyof typeof elementMeanings];
+
+if (percentage >= 50) {
+  return `Con ${percentage.toFixed(1)}% de ${base.name}, tienes una naturaleza PREDOMINANTEMENTE ${element.toUpperCase()}. ${base.meaning} Este alto porcentaje indica que ${base.characteristics.toLowerCase()} definen tu personalidad de manera muy marcada.`;
+} else if (percentage >= 30) {
+  return `Tu ${percentage.toFixed(1)}% de ${base.name} muestra una influencia SIGNIFICATIVA. ${base.meaning} ${base.characteristics} son características importantes en tu forma de ser.`;
+} else if (percentage >= 15) {
+  return `Con ${percentage.toFixed(1)}% de ${base.name}, tienes una influencia MODERADA. ${base.meaning} Estas cualidades aparecen de forma equilibrada en tu personalidad.`;
+} else if (percentage > 0) {
+  return `Tu ${percentage.toFixed(1)}% de ${base.name} representa una influencia MENOR pero presente. ${base.meaning} Estas cualidades pueden emerger en situaciones específicas.`;
+} else {
+  return `La ausencia de ${base.name} (0%) puede indicar la necesidad de desarrollar más: ${base.keywords.toLowerCase()}. Esto representa un área de crecimiento potencial.`;
+}
 };
 
 const getModalityInterpretation = (modality: string, percentage: number) => {
- const base = modalityMeanings[modality as keyof typeof modalityMeanings];
- 
- if (percentage >= 50) {
-   return `Con ${percentage.toFixed(1)}% ${base.name}, eres PREDOMINANTEMENTE ${modality.toUpperCase()}. ${base.meaning} ${base.characteristics} son tu forma principal de actuar en la vida.`;
- } else if (percentage >= 30) {
-   return `Tu ${percentage.toFixed(1)}% ${base.name} muestra una tendencia FUERTE. ${base.meaning} ${base.characteristics} son aspectos importantes de tu personalidad.`;
- } else if (percentage >= 15) {
-   return `Con ${percentage.toFixed(1)}% ${base.name}, tienes una influencia EQUILIBRADA. ${base.meaning} Manifiestas estas cualidades de forma balanceada.`;
- } else if (percentage > 0) {
-   return `Tu ${percentage.toFixed(1)}% ${base.name} es una influencia SUTIL. ${base.meaning} Estas características emergen ocasionalmente.`;
- } else {
-   return `La falta de modalidad ${base.name} (0%) sugiere desarrollar: ${base.keywords.toLowerCase()}. Área de crecimiento personal.`;
- }
+const base = modalityMeanings[modality as keyof typeof modalityMeanings];
+
+if (percentage >= 50) {
+  return `Con ${percentage.toFixed(1)}% ${base.name}, eres PREDOMINANTEMENTE ${modality.toUpperCase()}. ${base.meaning} ${base.characteristics} son tu forma principal de actuar en la vida.`;
+} else if (percentage >= 30) {
+  return `Tu ${percentage.toFixed(1)}% ${base.name} muestra una tendencia FUERTE. ${base.meaning} ${base.characteristics} son aspectos importantes de tu personalidad.`;
+} else if (percentage >= 15) {
+  return `Con ${percentage.toFixed(1)}% ${base.name}, tienes una influencia EQUILIBRADA. ${base.meaning} Manifiestas estas cualidades de forma balanceada.`;
+} else if (percentage > 0) {
+  return `Tu ${percentage.toFixed(1)}% ${base.name} es una influencia SUTIL. ${base.meaning} Estas características emergen ocasionalmente.`;
+} else {
+  return `La falta de modalidad ${base.name} (0%) sugiere desarrollar: ${base.keywords.toLowerCase()}. Área de crecimiento personal.`;
+}
 };
 
 // 🎨 FUNCIÓN PARA OBTENER COLOR DINÁMICO SEGÚN PORCENTAJE
 const getIntensityColor = (element: string, percentage: number) => {
- const baseColors = {
-   fire: { r: 239, g: 68, b: 68 },     // red-500
-   earth: { r: 34, g: 197, b: 94 },    // green-500  
-   air: { r: 59, g: 130, b: 246 },     // blue-500
-   water: { r: 99, g: 102, b: 241 },   // indigo-500
-   cardinal: { r: 239, g: 68, b: 68 }, // red-500
-   fixed: { r: 59, g: 130, b: 246 },   // blue-500
-   mutable: { r: 34, g: 197, b: 94 }   // green-500
- };
- 
- const color = baseColors[element as keyof typeof baseColors] || { r: 156, g: 163, b: 175 };
- const intensity = Math.min(percentage / 50, 1); // Máxima intensidad al 50%
- 
- return `rgba(${color.r}, ${color.g}, ${color.b}, ${0.3 + intensity * 0.7})`;
+const baseColors = {
+  fire: { r: 239, g: 68, b: 68 },     // red-500
+  earth: { r: 34, g: 197, b: 94 },    // green-500  
+  air: { r: 59, g: 130, b: 246 },     // blue-500
+  water: { r: 99, g: 102, b: 241 },   // indigo-500
+  cardinal: { r: 239, g: 68, b: 68 }, // red-500
+  fixed: { r: 59, g: 130, b: 246 },   // blue-500
+  mutable: { r: 34, g: 197, b: 94 }   // green-500
 };
 
-export default ChartDisplay; 
-                
+const color = baseColors[element as keyof typeof baseColors] || { r: 156, g: 163, b: 175 };
+const intensity = Math.min(percentage / 50, 1); // Máxima intensidad al 50%
+
+return `rgba(${color.r}, ${color.g}, ${color.b}, ${0.3 + intensity * 0.7})`;
+};
+
+export default ChartDisplay;
