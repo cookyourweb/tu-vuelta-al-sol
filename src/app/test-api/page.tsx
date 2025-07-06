@@ -29,7 +29,7 @@ export default function TestAPIPage() {
       
       console.log('📊 Respuesta Prokerala:', data);
       
-      setResults(prev => ({
+      setResults((prev: any) => ({
         ...prev,
         prokerala: {
           success: data.success,
@@ -45,7 +45,7 @@ export default function TestAPIPage() {
       
     } catch (error) {
       console.error('❌ Error Prokerala:', error);
-      setResults(prev => ({
+      setResults((prev: any) => ({
         ...prev,
         prokerala: { error: error instanceof Error ? error.message : 'Error desconocido' }
       }));
@@ -76,7 +76,7 @@ export default function TestAPIPage() {
       
       console.log('📊 Respuesta Charts:', data);
       
-      setResults(prev => ({
+      setResults((prev: typeof results) => ({
         ...prev,
         charts: {
           success: data.success,
@@ -89,7 +89,7 @@ export default function TestAPIPage() {
       
     } catch (error) {
       console.error('❌ Error Charts:', error);
-      setResults(prev => ({
+      setResults((prev: any) => ({
         ...prev,
         charts: { error: error instanceof Error ? error.message : 'Error desconocido' }
       }));
@@ -114,7 +114,11 @@ export default function TestAPIPage() {
       
       console.log('📊 Datos de nacimiento:', data);
       
-      setResults(prev => ({
+      if (!data.success || !data.data) {
+        alert('No hay datos de nacimiento guardados. Por favor, ingresa tus datos.');
+      }
+      
+      setResults((prev: any) => ({
         ...prev,
         birthdata: {
           success: data.success,
@@ -125,7 +129,7 @@ export default function TestAPIPage() {
       
     } catch (error) {
       console.error('❌ Error Birth Data:', error);
-      setResults(prev => ({
+      setResults((prev: any) => ({
         ...prev,
         birthdata: { error: error instanceof Error ? error.message : 'Error desconocido' }
       }));
@@ -163,7 +167,7 @@ export default function TestAPIPage() {
       
       console.log('📊 Datos creados:', data);
       
-      setResults(prev => ({
+      setResults((prev: any) => ({
         ...prev,
         create: {
           success: data.success,
@@ -174,7 +178,7 @@ export default function TestAPIPage() {
       
     } catch (error) {
       console.error('❌ Error Create:', error);
-      setResults(prev => ({
+      setResults((prev: any) => ({
         ...prev,
         create: { error: error instanceof Error ? error.message : 'Error desconocido' }
       }));
