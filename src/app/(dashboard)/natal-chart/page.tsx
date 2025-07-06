@@ -42,6 +42,21 @@ export default function NatalChartPage() {
                     birthData?.birthTime === '07:30:00' && 
                     birthData?.birthPlace?.includes('Sevilla');
 
+  // 🔍 DEBUG: Log birthData changes
+  useEffect(() => {
+    console.log('📡 birthData actualizado:', birthData);
+  }, [birthData]);
+
+  // 🔍 DEBUG: Log data before passing to ChartDisplay
+  useEffect(() => {
+    console.log('🔍 Datos antes de pasar a ChartDisplay:', {
+      chartData,
+      birthData,
+      birthDataType: typeof birthData,
+      birthDataKeys: birthData ? Object.keys(birthData) : 'no existe'
+    });
+  }, [chartData, birthData]);
+
   useEffect(() => {
     if (!user) {
       router.push('/auth/login');
@@ -56,6 +71,7 @@ export default function NatalChartPage() {
       fetchChartData();
     }
   }, [birthData]);
+
 
   // ✅ FUNCIÓN CORREGIDA:
   const loadBirthData = async () => {
@@ -73,9 +89,9 @@ export default function NatalChartPage() {
         
         // ✅ PROCESAR DATOS CORRECTAMENTE
         const processedData = {
-          birthDate: data.birthDate,
-          birthTime: data.birthTime,
-          birthPlace: data.birthPlace || `${data.latitude},${data.longitude}`
+          birthDate: data.data?.birthDate,
+          birthTime: data.data?.birthTime,
+          birthPlace: data.data?.birthPlace || `${data.data?.latitude},${data.data?.longitude}`
         };
         
         console.log('🔄 Datos procesados:', processedData);
