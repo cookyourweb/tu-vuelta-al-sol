@@ -1,8 +1,59 @@
-# Tu Vuelta al Sol - Agenda Astrológica Personalizada
+# Tu Vuelta al Sol
+
+## Documentación de la funcionalidad de administración de usuarios
+
+Se ha implementado una sección de administración para gestionar usuarios en la aplicación. A continuación se describen las funcionalidades y cómo usarlas:
+
+### Endpoints API
+
+#### Eliminar usuario
+
+- **URL:** `/api/admin/delete-user`
+- **Método:** POST
+- **Descripción:** Elimina un usuario y todos sus datos relacionados (charts y birthdatas).
+- **Parámetros JSON:**
+  - `uid` (string, opcional): Identificador único del usuario.
+  - `email` (string, opcional): Email del usuario.
+- **Nota:** Se debe enviar al menos `uid` o `email`. Si se envía solo `email`, el sistema buscará el `uid` correspondiente para eliminar todos los datos relacionados.
+- **Ejemplo de uso con curl:**
+  ```bash
+  curl -X POST http://localhost:3000/api/admin/delete-user \
+    -H "Content-Type: application/json" \
+    -d '{"email": "usuario@example.com"}'
+  ```
+
+#### Listar usuarios
+
+- **URL:** `/api/admin/users`
+- **Método:** GET
+- **Descripción:** Devuelve una lista de usuarios con información básica (uid, email, fullName).
+- **Ejemplo de uso con curl:**
+  ```bash
+  curl http://localhost:3000/api/admin/users
+  ```
+
+### Interfaz de administración
+
+- **URL:** `/admin`
+- **Descripción:** Página web que muestra la lista de usuarios existentes y un formulario para eliminar usuarios por `uid` o `email`.
+- **Uso:**
+  1. Navegar a `http://localhost:3000/admin`.
+  2. Visualizar la lista de usuarios.
+  3. Ingresar el `uid` o `email` del usuario a eliminar en el formulario.
+  4. Presionar el botón "Eliminar Usuario".
+  5. Ver el mensaje de confirmación o error.
+
+### Notas adicionales
+
+- La eliminación de un usuario borra también todos los charts y birthdatas asociados.
+- El formulario y la página admin están implementados con React y Next.js, usando hooks y API routes.
+
+---
 
 ## 🌞 Sobre el Producto
 
 **"Tu Vuelta al Sol"** es una aplicación web que genera agendas astrológicas personalizadas basadas en la carta natal y progresada del usuario. La aplicación combina precisión astrológica máxima con inteligencia artificial para crear consejos personalizados y herramientas prácticas de planificación.
+
 
 ### Estructura de Archivos del Proyecto
 
@@ -10,6 +61,8 @@ El proyecto está organizado de la siguiente manera:
 
 ```
 / (raíz del proyecto)
+````
+tu-vuelta-al-sol/
 ├── .gitignore
 ├── .vercelignore
 ├── eslint.config.mjs
@@ -18,6 +71,8 @@ El proyecto está organizado de la siguiente manera:
 ├── package-lock.json
 ├── package.json
 ├── postcss.config.mjs
+├── Prokerala_Carta_Natal.postman_collection.json
+├── prokerala-token-test.js
 ├── README.md
 ├── tsconfig.json
 ├── vercel.json
@@ -43,18 +98,18 @@ El proyecto está organizado de la siguiente manera:
 │   │   │   │   ├── ChartLoader.tsx
 │   │   │   │   ├── natal-chart/
 │   │   │   │   │   └── route.ts
-│   │   │   │   └── test-postman/
-│   │   │   │       └── route.ts
+│   │   │   │   ├── test-postman/
+│   │   │   │   │   └── route.ts
 │   │   │   ├── birth-data/
 │   │   │   │   └── route.ts
 │   │   │   ├── charts/
 │   │   │   │   ├── natal/
 │   │   │   │   │   └── route.ts
-│   │   │   │   └── progressed/
-│   │   │   │       └── route.ts
+│   │   │   │   ├── progressed/
+│   │   │   │   │   └── route.ts
 │   │   │   ├── events/
-│   │   │   │   └── astrological/
-│   │   │   │       └── route.ts
+│   │   │   │   ├── astrological/
+│   │   │   │   │   └── route.ts
 │   │   │   ├── prokerala/
 │   │   │   │   ├── client-v2.ts
 │   │   │   │   ├── utils.ts
@@ -88,84 +143,105 @@ El proyecto está organizado de la siguiente manera:
 │   │   │   └── page.tsx
 │   │   ├── test-natal-chart/
 │   │   │   └── page.tsx
+│   │   ├── test-progressed/
+│   │   │   └── page.tsx
 │   │   ├── test-timezone/
 │   │   │   └── page.tsx
-│   │   └── types/
-│   │       └── astrology.ts
+│   │   ├── types/
+│   │   │   └── astrology.ts
 │   ├── components/
 │   │   ├── astrology/
 │   │   │   ├── AspectLines.tsx
 │   │   │   ├── AstrologicalAgenda.tsx
 │   │   │   ├── AstrologicalAgendaGenerator.tsx
+│   │   │   ├── BirthDataForm.tsx
 │   │   │   ├── ChartDisplay.tsx
+│   │   │   ├── ChartTooltips.tsx
+│   │   │   ├── ChartWheel.tsx
+│   │   │   ├── CosmicFootprint.tsx
 │   │   │   ├── HouseGrid.tsx
 │   │   │   ├── NatalChartWheel.tsx
-│   │   │   └── PlanetSymbol.tsx
+│   │   │   ├── PlanetSymbol.tsx
+│   │   │   ├── ProgressedChartVisual.tsx
 │   │   ├── auth/
 │   │   │   ├── LoginForm.tsx
-│   │   │   └── RegisterForm.tsx
+│   │   │   ├── RegisterForm.tsx
 │   │   ├── dashboard/
 │   │   │   ├── BirthDataForm.tsx
-│   │   │   └── NatalChartCard.tsx
+│   │   │   ├── NatalChartCard.tsx
 │   │   ├── debug/
-│   │   │   └── ForceRegenerateChart.tsx
+│   │   │   ├── ForceRegenerateChart.tsx
 │   │   ├── forms/
-│   │   │   └── EnhancedBirthDataForm.tsx
+│   │   │   ├── EnhancedBirthDataForm.tsx
 │   │   ├── hooks/
 │   │   │   ├── useAspects.ts
 │   │   │   ├── useChart.ts
 │   │   │   ├── usePlanets.ts
-│   │   │   └── useProkeralaApi.ts
+│   │   │   ├── useProkeralaApi.ts
 │   │   ├── layout/
 │   │   │   ├── Footer.tsx
-│   │   │   └── PrimaryHeader.tsx
+│   │   │   ├── PrimaryHeader.tsx
 │   │   ├── test/
 │   │   │   ├── NatalChartTest.tsx
 │   │   │   ├── PostmanTest.tsx
 │   │   │   ├── ProkeralaNatalTest.tsx
 │   │   │   ├── SimpleTimezonetest.tsx
-│   │   │   └── TimezoneTestComponent.tsx
-│   │   └── ui/
-│   │       ├── Alert.tsx
-│   │       ├── Button.tsx
-│   │       └── Input.tsx
+│   │   │   ├── TimezoneTestComponent.tsx
+│   │   ├── ui/
+│   │   │   ├── Alert.tsx
+│   │   │   ├── Button.tsx
+│   │   │   ├── Input.tsx
+│   ├── constants/
+│   │   └── astrology.ts
 │   ├── context/
 │   │   ├── AuthContext.tsx
-│   │   └── NotificationContext.tsx
+│   │   ├── NotificationContext.tsx
+│   ├── hooks/
+│   │   ├── useChartDisplay.ts
 │   ├── lib/
 │   │   ├── db.ts
 │   │   ├── firebase.ts
 │   │   ├── utils.ts
-│   │   └── prokerala/
-│   │       ├── client.ts
-│   │       ├── endpoints.ts
-│   │       └── types.ts
+│   │   ├── prokerala/
+│   │   │   ├── client.ts
+│   │   │   ├── endpoints.ts
+│   │   │   ├── types.ts
+│   │   │   ├── utils.ts
 │   ├── models/
 │   │   ├── BirthData.ts
 │   │   ├── Chart.ts
-│   │   └── User.ts
+│   │   ├── User.ts
 │   ├── services/
 │   │   ├── astrologyService.ts
+│   │   ├── chartCalculationsService.ts
+│   │   ├── chartInterpretationsService.ts
 │   │   ├── progressedChartService.ts
-│   │   └── prokeralaService.ts
+│   │   ├── prokeralaService.ts
+│   ├── types/
+│   │   ├── astrology/
+│   │   │   ├── chartDisplay.ts
+│   │   ├── astrology.ts
 │   ├── utils/
 │   │   ├── dateTimeUtils.ts
-│   │   └── astrology/
-│   │       ├── aspectCalculations.ts
-│   │       ├── coordinateUtils.ts
-│   │       ├── degreeConverter.ts
-│   │       └── planetPositions.ts
+│   │   ├── astrology/
+│   │   │   ├── aspectCalculations.ts
+│   │   │   ├── coordinateUtils.ts
+│   │   │   ├── degreeConverter.ts
+│   │   │   ├── planetPositions.ts
 ├── types/
-│   └── astrology/
-│       ├── aspects.ts
-│       ├── basic.ts
-│       ├── chart.ts
-│       └── utils.ts
+│   ├── astrology/
+│   │   ├── aspects.ts
+│   │   ├── basic.ts
+│   │   ├── chart.ts
+│   │   ├── index.ts
+│   │   ├── utils.ts
+
+
 ```
 
 ### Funcionalidades Principales:
 1. **Carta natal con precisión máxima** usando Swiss Ephemeris
-2. **Carta progresada** para el año actuala
+2. **Carta progresada** para el año actual   desde la fecha  de nacimiento del  año en curso, hasta la fecha de nacimiento del año siguiente.
 3. **Eventos astrológicos anuales** completos (retrogradaciones, lunas, eclipses)
 4. **Agenda personalizada con IA** usando prompts específicos
 5. **Integración Google Calendar** (funcionalidad estrella única)
@@ -234,7 +310,7 @@ GET https://api.prokerala.com/v2/astrology/progression-chart?profile[datetime]=Y
 
 ---
 
-### **FASE 2: GENERACIÓN INTELIGENTE CON IA** *(Junio 2025)*
+### **FASE 2: GENERACIÓN INTELIGENTE CON IA** *(julio 2025)*
 **Objetivo**: Agenda astrológica completa y personalizada
 
 #### **2.1 Core de IA Astrológica** 🤖
