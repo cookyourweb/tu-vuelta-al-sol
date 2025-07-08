@@ -1,9 +1,9 @@
 // src/components/astrology/MidheavenCard.tsx
 // Card del Medio Cielo extraída del ChartDisplay
 
-import { SIGN_SYMBOLS, signMeanings } from '@/constants/astrology';
 import React from 'react';
-
+// ✅ IMPORT CORREGIDO
+import { SIGN_SYMBOLS, signMeanings } from '../../constants/astrology/chartConstants';
 
 interface MidheavenCardProps {
   midheaven?: { 

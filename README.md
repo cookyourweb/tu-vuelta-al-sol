@@ -54,6 +54,21 @@ Se ha implementado una sección de administración para gestionar usuarios en la
 
 **"Tu Vuelta al Sol"** es una aplicación web que genera agendas astrológicas personalizadas basadas en la carta natal y progresada del usuario. La aplicación combina precisión astrológica máxima con inteligencia artificial para crear consejos personalizados y herramientas prácticas de planificación.
 
+## 🚀 Funcionalidades Futuras Planeadas
+
+- **Carta Progresada Mejorada:** Corrección y optimización de la carta progresada para mayor precisión.
+- **Agenda Anual Personalizada con IA:** Generación automática de agendas astrológicas anuales usando inteligencia artificial para predicciones y consejos personalizados.
+- **Integración Completa con Google Calendar:** Sincronización bidireccional con Google Calendar para eventos astrológicos, recordatorios y alertas personalizadas.
+- **Eventos Astrológicos Anuales Completos:** Inclusión de retrogradaciones, fases lunares, eclipses y tránsitos importantes.
+- **Sistema de Pagos y Suscripciones:** Implementación de planes freemium y premium con funcionalidades exclusivas.
+- **Mejoras en UX/UI:** Formularios avanzados, autocompletado de lugares, validación en tiempo real y manejo de datos incompletos.
+- **Notificaciones y Alertas Personalizadas:** Alertas proactivas basadas en tránsitos y eventos astrológicos.
+- **Expansión a Plataformas Móviles:** Desarrollo de app móvil nativa y widgets personalizados.
+- **Integraciones Adicionales:** Spotify, Notion, Apple Health, Slack Bot y más.
+
+Estas funcionalidades están planificadas para ser implementadas en los próximos meses, con un enfoque en ofrecer la experiencia astrológica más completa y personalizada del mercado.
+
+
 
 ### Estructura de Archivos del Proyecto
 

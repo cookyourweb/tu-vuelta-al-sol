@@ -1,8 +1,7 @@
 // src/constants/astrology/chartConstants.ts
-// Constantes para el componente ChartDisplay
+// Constantes para el componente ChartDisplay - IMPORTS CORREGIDOS
 
-import { AspectConfig, AspectMeaning, HouseMeaning, PlanetMeaning } from "../../../types/astrology/chartDisplay";
-
+import { AspectConfig, AspectMeaning, HouseMeaning, PlanetMeaning } from "../../types/astrology/chartDisplay";
 
 // =============================================================================
 // CONFIGURACIÓN DE ASPECTOS ASTROLÓGICOS
@@ -191,4 +190,56 @@ export const houseMeanings: Record<number, HouseMeaning> = {
   10: { name: "Casa 10 - Carrera", meaning: "Profesión, reputación, autoridad, imagen pública y el padre", keywords: "Estatus, ambición, reconocimiento, gobierno" },
   11: { name: "Casa 11 - Amistades", meaning: "Amigos, grupos, esperanzas, sueños y organizaciones", keywords: "Ideales, clubes, benefactores, redes sociales" },
   12: { name: "Casa 12 - Espiritualidad", meaning: "Subconsciente, karma, sacrificio, hospitales y retiro", keywords: "Meditación, enemigos ocultos, autosabotaje, compasión" }
+};
+
+// =============================================================================
+// EXPORTACIONES ADICIONALES PARA ELEMENTOS Y MODALIDADES
+// =============================================================================
+
+export const elementMeanings: Record<string, { name: string; meaning: string; characteristics: string; keywords: string }> = {
+  fire: { 
+    name: 'Fuego', 
+    meaning: 'Energía vital, inspiración y acción directa',
+    characteristics: 'Entusiasmo, liderazgo, creatividad, impulsividad',
+    keywords: 'iniciativa, pasión, coraje, independencia'
+  },
+  earth: { 
+    name: 'Tierra', 
+    meaning: 'Practicidad, estabilidad y materialización',
+    characteristics: 'Realismo, perseverancia, sensatez, productividad',
+    keywords: 'estabilidad, recursos, construcción, perseverancia'
+  },
+  air: { 
+    name: 'Aire', 
+    meaning: 'Comunicación, ideas y conexiones sociales',
+    characteristics: 'Intelectualidad, sociabilidad, versatilidad, objetividad',
+    keywords: 'comunicación, ideas, relaciones, adaptabilidad'
+  },
+  water: { 
+    name: 'Agua', 
+    meaning: 'Emociones, intuición y mundo interno',
+    characteristics: 'Sensibilidad, empatía, imaginación, profundidad',
+    keywords: 'emociones, intuición, compasión, receptividad'
+  }
+};
+
+export const modalityMeanings: Record<string, { name: string; meaning: string; characteristics: string; keywords: string }> = {
+  cardinal: { 
+    name: 'Cardinal', 
+    meaning: 'Iniciativa, liderazgo y comienzo de procesos',
+    characteristics: 'Actividad, ambición, dinamismo, liderazgo',
+    keywords: 'iniciativa, liderazgo, actividad, emprendimiento'
+  },
+  fixed: { 
+    name: 'Fijo', 
+    meaning: 'Estabilidad, perseverancia y consolidación',
+    characteristics: 'Determinación, constancia, resistencia, concentración',
+    keywords: 'estabilidad, perseverancia, determinación, constancia'
+  },
+  mutable: { 
+    name: 'Mutable', 
+    meaning: 'Adaptabilidad, flexibilidad y versatilidad',
+    characteristics: 'Adaptabilidad, flexibilidad, versatilidad, cambio',
+    keywords: 'adaptabilidad, flexibilidad, versatilidad, cambio'
+  }
 };

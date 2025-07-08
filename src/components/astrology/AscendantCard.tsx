@@ -2,6 +2,7 @@
 // Card del Ascendente extraída del ChartDisplay
 
 import React from 'react';
+// ✅ IMPORT CORREGIDO
 import { SIGN_SYMBOLS, signMeanings } from '../../constants/astrology/chartConstants';
 
 interface AscendantCardProps {

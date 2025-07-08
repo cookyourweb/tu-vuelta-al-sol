@@ -6,7 +6,7 @@
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
-import { AspectFilter, AspectType, ExtendedPlanet, Planet, PlanetaryAspect } from '../../../types/astrology';
+import { AspectFilter, AspectType, ExtendedPlanet, Planet, PlanetaryAspect } from '../types/astrology';
 import { calculateAllAspects, convertToPlanetaryAspect } from '@/utils/astrology/aspectCalculations';
 
 // =============================================================================

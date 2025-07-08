@@ -1,6 +1,6 @@
 // src/app/utils/astrology/aspectCalculations.ts - VERSIÓN CORREGIDA
 
-import { AspectType, ExtendedPlanet, Planet, PlanetaryAspect } from "../../../types/astrology";
+import { AspectType, ExtendedPlanet, Planet, PlanetaryAspect } from "../../types/astrology";
 
 
 
