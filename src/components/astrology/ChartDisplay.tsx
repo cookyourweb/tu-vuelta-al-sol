@@ -20,6 +20,8 @@ import SectionMenu from './SectionMenu';
 import BirthDataCard from './BirthDataCard';
 import AscendantCard from './AscendantCard';
 import MidheavenCard from './MidheavenCard';
+import CombinedAscendantMCCard from './CombinedAscendantMCCard';
+import ElementsModalitiesCard from './ElementsModalitiesCard';
 
 const ChartDisplay: React.FC<ChartDisplayProps> = ({
   houses = [],
@@ -29,8 +31,15 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
   keyAspects = [],
   ascendant,
   midheaven,
-  birthData
+  birthData,
+  // ✅ NUEVAS PROPS PARA CARTA PROGRESADA
+  chartType = 'natal',
+  showOnlyProgressedAspects = false,
+  progressionInfo
 }) => {
+
+
+
   // ✅ ESTADOS
   const [showAspects, setShowAspects] = useState(true);
   const [selectedAspectTypes, setSelectedAspectTypes] = useState({
@@ -233,7 +242,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
       const isMinor = !isMajor;
 
       if (!selectedAspectTypes.hard && isHard) return null;
-      if (!selectedAspectTypes.easy && isEasy) return null;
+      if (!selectedAspectTypes.easy && isEasy) return null
       if (!selectedAspectTypes.major && isMajor) return null;
       if (!selectedAspectTypes.minor && isMinor) return null;
 
@@ -248,13 +257,13 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
 
       return (
         <g key={index}>
-          <line
-            x1={pos1.x}
-            y1={pos1.y}
-            x2={pos2.x}
-            y2={pos2.y}
-            stroke={aspect.config.color}
-            strokeWidth={isHovered ? strokeWidth + 1 : strokeWidth}
+      <line
+          x1={pos1.x}
+          y1={pos1.y}
+          x2={pos2.x}
+          y2={pos2.y}
+          stroke={showOnlyProgressedAspects ? '#ef4444' : aspect.config.color}
+          strokeWidth={isHovered ? strokeWidth + 1 : strokeWidth}
             opacity={isHovered ? 1 : opacity}
             strokeDasharray={isMinor ? "3,3" : "none"}
             className="transition-all duration-200 cursor-pointer"
@@ -649,12 +658,24 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
       {/* ✨ MENÚ DE NAVEGACIÓN PRINCIPAL */}
       <SectionMenu activeSection={activeSection} scrollToSection={scrollToSection} />
 
-      {/* 🎯 SECCIÓN: TRES CARDS PRINCIPALES */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-        <BirthDataCard birthData={birthData} ascendant={ascendant} />
-        <AscendantCard ascendant={ascendant} />
-        <MidheavenCard midheaven={midheaven} />
-      </div>
+     
+      {/* 🎯 SECCIÓN: TRES CARDS PRINCIPALES - SOLO PARA CARTA NATAL */}
+
+{chartType !== 'progressed' && (
+  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+    {/* Card 1: Datos de Nacimiento (Izquierda) */}
+    <BirthDataCard birthData={birthData} ascendant={ascendant} />
+    
+    {/* Card 2: Ascendente + Medio Cielo (Centro) */}
+    <CombinedAscendantMCCard ascendant={ascendant} midheaven={midheaven} />
+    
+    {/* Card 3: Elementos + Modalidades (Derecha) */}
+    <ElementsModalitiesCard 
+      elementDistribution={elementDistribution} 
+      modalityDistribution={modalityDistribution} 
+    />
+  </div>
+)}
 
       {/* 🎯 SECCIÓN 1: CARTA VISUAL */}
       <div id="carta-visual" className="space-y-8">
@@ -966,7 +987,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
                 </div>
                 
                 <div className="mt-2 flex flex-wrap gap-1">
-                  {planetMeanings[planet.name as keyof typeof planetMeanings]?.keywords.split(',').slice(0, 2).map((keyword, i) => (
+                  {planetMeanings[planet.name as keyof typeof planetMeanings]?.keywords.split(',').slice(0, 2).map((keyword: string, i: number) => (
                     <span key={i} className="bg-purple-400/20 text-purple-200 text-xs px-2 py-1 rounded-full">
                       {keyword.trim()}
                     </span>

@@ -1,10 +1,9 @@
-// src/types/astrology/chartDisplay.ts
-// Tipos optimizados y unificados para ChartDisplay
+// src/types/astrology/chartDisplay.ts - TIPOS ACTUALIZADOS PARA CARTA PROGRESADA
 
 import { JSX } from 'react';
 
 // =============================================================================
-// INTERFACES PRINCIPALES PARA CHARTDISPLAY
+// INTERFACES PRINCIPALES PARA CHARTDISPLAY ACTUALIZADAS
 // =============================================================================
 
 export interface Planet {
@@ -43,6 +42,7 @@ export interface Aspect {
   applying?: boolean;
 }
 
+// ✅ INTERFACE ACTUALIZADA CON PROPS PARA CARTA PROGRESADA
 export interface ChartDisplayProps {
   houses: House[];
   planets: Planet[];
@@ -71,19 +71,27 @@ export interface ChartDisplayProps {
     longitude?: number;
     timezone?: string;
   };
-  chartType?: 'natal' | 'progressed'; // Nuevo: para distinguir tipos
-  progressionInfo?: {                  // Nuevo: para cartas progresadas
+  // ✅ NUEVAS PROPS PARA CARTA PROGRESADA
+  chartType?: 'natal' | 'progressed';
+  progressionInfo?: {
     year: number;
     period: string;
     description: string;
     startDate?: string;
     endDate?: string;
+    ageAtStart?: number;
+    isCurrentYear?: boolean;
+    progressionDate?: string;
+    progressionTime?: string;
+  };
+  showOnlyProgressedAspects?: boolean; // ✅ NUEVA PROP CLAVE
+  progressionLocation?: {
+    progressionPlace: string;
+    latitude: number;
+    longitude: number;
+    timezone: string;
   };
 }
-
-// =============================================================================
-// INTERFACES PARA CONFIGURACIÓN DE ASPECTOS
-// =============================================================================
 
 export interface AspectConfig {
   angle: number;
@@ -101,6 +109,7 @@ export interface CalculatedAspect {
   orb: number;
   config: AspectConfig;
   exact: boolean;
+  isProgressed?: boolean; // ✅ NUEVO: Para distinguir aspectos progresados
 }
 
 export interface SelectedAspectTypes {
@@ -109,10 +118,6 @@ export interface SelectedAspectTypes {
   hard: boolean;
   easy: boolean;
 }
-
-// =============================================================================
-// INTERFACES PARA TOOLTIPS Y POSICIONAMIENTO
-// =============================================================================
 
 export interface TooltipPosition {
   x: number;
@@ -123,10 +128,6 @@ export interface CirclePosition {
   x: number;
   y: number;
 }
-
-// =============================================================================
-// INTERFACES PARA COMPONENTES EXTRAÍDOS
-// =============================================================================
 
 export interface MenuItemConfig {
   id: string;
@@ -165,112 +166,3 @@ export interface MidheavenCardProps {
     minutes?: number;
   };
 }
-
-export interface SectionMenuProps {
-  activeSection: string;
-  scrollToSection: (sectionId: string) => void;
-}
-
-// =============================================================================
-// INTERFACES PARA SIGNIFICADOS ASTROLÓGICOS
-// =============================================================================
-
-export interface AspectMeaning {
-  name: string;
-  meaning: string;
-  effect: string;
-  type: string;
-  explanation: string;
-}
-
-export interface PlanetMeaning {
-  meaning: string;
-  keywords: string;
-}
-
-export interface HouseMeaning {
-  name: string;
-  meaning: string;
-  keywords: string;
-}
-
-// =============================================================================
-// INTERFACES PARA HOOKS Y ESTADO
-// =============================================================================
-
-export interface UseChartDisplayReturn {
-  showAspects: boolean;
-  setShowAspects: (show: boolean) => void;
-  selectedAspectTypes: SelectedAspectTypes;
-  setSelectedAspectTypes: (types: SelectedAspectTypes) => void;
-  hoveredAspect: string | null;
-  setHoveredAspect: (aspectKey: string | null) => void;
-  calculatedAspects: CalculatedAspect[];
-  setCalculatedAspects: (aspects: CalculatedAspect[]) => void;
-  hoveredPlanet: string | null;
-  setHoveredPlanet: (planet: string | null) => void;
-  hoveredHouse: number | null;
-  setHoveredHouse: (house: number | null) => void;
-  tooltipPosition: TooltipPosition;
-  setTooltipPosition: (position: TooltipPosition) => void;
-  hoveredNavGuide: boolean;
-  setHoveredNavGuide: (hovered: boolean) => void;
-  activeSection: string;
-  setActiveSection: (section: string) => void;
-  handleMouseMove: (event: React.MouseEvent) => void;
-  scrollToSection: (sectionId: string) => void;
-}
-
-// =============================================================================
-// FUNCIONES UTILITARIAS
-// =============================================================================
-
-export interface ChartCalculationFunctions {
-  convertAstrologicalDegreeToPosition: (degree: number, sign: string) => number;
-  calculateAspects: (planets: Planet[]) => CalculatedAspect[];
-  getCirclePosition: (angle: number, radius: number) => CirclePosition;
-  getPersonalizedPlanetInterpretation: (planet: Planet) => string;
-  getPersonalizedAspectInterpretation: (aspect: CalculatedAspect) => string;
-}
-
-// =============================================================================
-// TIPOS PARA RENDERIZADO SVG
-// =============================================================================
-
-export interface SVGRenderFunctions {
-  renderAspectLines: () => JSX.Element | null;
-  renderPlanets: () => JSX.Element[];
-  renderHouses: () => JSX.Element[];
-  renderSigns: () => JSX.Element[];
-  renderAngles: () => JSX.Element[];
-}
-
-// =============================================================================
-// CONFIGURACIÓN Y CONSTANTES
-// =============================================================================
-
-export interface ChartDisplayConfiguration {
-  chartSize: number;
-  planetRadius: number;
-  houseRadius: number;
-  signRadius: number;
-  defaultAspectTypes: SelectedAspectTypes;
-  tooltipDelay: number;
-  animationDuration: number;
-}
-
-// Exportar configuración por defecto
-export const DEFAULT_CHART_CONFIG: ChartDisplayConfiguration = {
-  chartSize: 600,
-  planetRadius: 190,
-  houseRadius: 115,
-  signRadius: 270,
-  defaultAspectTypes: {
-    major: true,
-    minor: false,
-    hard: true,
-    easy: true
-  },
-  tooltipDelay: 200,
-  animationDuration: 300
-};
