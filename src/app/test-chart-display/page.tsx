@@ -2,6 +2,7 @@
 
 import React from 'react';
 import ChartDisplay from '../../components/astrology/ChartDisplaycompletosinrefactorizar';
+// Removed import of ChartDisplayProps as it is not exported from ChartDisplay component
 
 const sampleHouses = Array(12).fill(null).map((_, i) => ({
   number: i + 1,

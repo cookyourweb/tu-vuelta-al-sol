@@ -287,11 +287,11 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
               </div>
               
               <div className="mt-2 flex flex-wrap gap-1">
-                {planetMeanings[planet.name as keyof typeof planetMeanings]?.keywords.split(',').slice(0, 2).map((keyword, i) => (
-                  <span key={i} className="bg-purple-400/20 text-purple-200 text-xs px-2 py-1 rounded-full">
-                    {keyword.trim()}
-                  </span>
-                ))}
+{planetMeanings[planet.name as keyof typeof planetMeanings]?.keywords.split(',').slice(0, 2).map((keyword: string, i: number) => (
+  <span key={i} className="bg-purple-400/20 text-purple-200 text-xs px-2 py-1 rounded-full">
+    {keyword.trim()}
+  </span>
+))}
               </div>
             </div>
           ) : null

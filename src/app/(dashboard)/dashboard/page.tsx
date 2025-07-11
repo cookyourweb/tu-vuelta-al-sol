@@ -1,7 +1,8 @@
-// src/app/(dashboard)/dashboard/page.tsx
+// src/app/(dashboard)/dashboard/page.tsx - CORREGIDO
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import Button from '@/components/ui/Button';
@@ -22,11 +23,18 @@ import {
   TrendingUp,
   CheckCircle,
   Eye,
-  Download
+  Download,
+  X
 } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user, isLoading } = useAuth();
+  const searchParams = useSearchParams();
+  
+  // ✅ NUEVO: Estados para manejar mensajes de éxito
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  
   const [birthData, setBirthData] = useState({
     birthDate: '',
     birthTime: '',
@@ -37,6 +45,42 @@ export default function DashboardPage() {
   });
   const [loadingBirthData, setLoadingBirthData] = useState(true);
   const [hasNatalChart, setHasNatalChart] = useState(false);
+
+  // ✅ NUEVO: Detectar parámetros de URL para mostrar mensajes de éxito
+  useEffect(() => {
+    const datosGuardados = searchParams.get('datos');
+    const cartaGenerada = searchParams.get('carta');
+    const pasoCompletado = searchParams.get('paso');
+
+    if (datosGuardados === 'guardados') {
+      setSuccessMessage('✨ ¡Datos de nacimiento guardados exitosamente! Ya puedes generar tu carta natal.');
+      setShowSuccessMessage(true);
+      
+      // Auto-ocultar después de 8 segundos
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 8000);
+    }
+
+    if (cartaGenerada === 'generada') {
+      setSuccessMessage('🌟 ¡Carta natal generada exitosamente! Tu mapa cósmico está listo.');
+      setShowSuccessMessage(true);
+      
+      // Auto-ocultar después de 8 segundos
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 8000);
+    }
+
+    // Limpiar parámetros de URL después de procesar
+    if (datosGuardados || cartaGenerada) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('datos');
+      url.searchParams.delete('carta');
+      url.searchParams.delete('paso');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, [searchParams]);
   
   // Cargar datos de nacimiento del usuario
   useEffect(() => {
@@ -116,6 +160,26 @@ export default function DashboardPage() {
   return (
     <div className="text-white relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        
+        {/* ✅ NUEVO: Mensaje de éxito flotante */}
+        {showSuccessMessage && (
+          <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-in slide-in-from-top-4 duration-500">
+            <div className="bg-gradient-to-r from-green-500/90 to-emerald-600/90 backdrop-blur-lg border border-green-400/30 rounded-2xl px-8 py-4 shadow-2xl max-w-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <CheckCircle className="w-6 h-6 text-green-100 mr-3 animate-pulse" />
+                  <p className="text-green-100 font-medium">{successMessage}</p>
+                </div>
+                <button
+                  onClick={() => setShowSuccessMessage(false)}
+                  className="text-green-200 hover:text-white transition-colors ml-4"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         
         {/* Header principal con mensaje personalizado */}
         <div className="text-center mb-16">

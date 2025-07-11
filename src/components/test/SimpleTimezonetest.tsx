@@ -1,4 +1,3 @@
-// src/components/test/SimpleTimezoneTest.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -10,7 +9,7 @@ import {
   ProkeralaUtils
 } from '@/utils/dateTimeUtils';
 
-const SimpleTimezoneTest: React.FC = () => {
+const SimpleTimezoneTest = () => {
   const [testResults, setTestResults] = useState<any>(null);
   const [apiTestResult, setApiTestResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -247,18 +246,10 @@ const SimpleTimezoneTest: React.FC = () => {
               )}
             </div>
           )}
+
         </div>
       )}
 
-      {/* Info */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h3 className="font-semibold mb-2 text-blue-800">ℹ️ Información</h3>
-        <div className="text-blue-700 text-sm space-y-2">
-          <p><strong>Problema:</strong> El timezone incorrecto hacía que el ascendente fuera Aries en lugar de Acuario.</p>
-          <p><strong>Solución:</strong> Calcular correctamente el offset (+01:00) para febrero de 1974 en Madrid.</p>
-          <p><strong>Esperado:</strong> Con la corrección, Verónica debe tener Ascendente: Acuario 4°09'</p>
-        </div>
-      </div>
     </div>
   );
 };

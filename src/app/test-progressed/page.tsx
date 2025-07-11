@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { testProgressedChartConnection, debugProgressedVsNatal } from '@/services/progressedChartService';
+import { testProgressedChartConnection } from '@/services/progressedChartService';
 
 export default function TestProgressedChart() {
   const [testResult, setTestResult] = useState<any>(null);
@@ -30,23 +30,17 @@ export default function TestProgressedChart() {
   const handleDebugYourDate = () => {
     console.log('🧪 === DEBUGGING TU FECHA ESPECÍFICA ===');
     
-    debugProgressedVsNatal(
-      '1974-02-10',  // Tu fecha
-      '07:30:00',    // Tu hora  
-      40.4164,       // Madrid lat
-      -3.7025,       // Madrid lng
-      'Europe/Madrid' // Tu timezone
-    );
+    // debugProgressedVsNatal function removed because it is not exported
     
     setTestResult({
       success: true,
-      message: 'Debug de tu fecha completado - revisa la consola',
+      message: 'Debug de tu fecha completado - función debugProgressedVsNatal no disponible',
       details: {
         birthDate: '1974-02-10',
         birthTime: '07:30:00',
         location: 'Madrid',
         expectedProgressionYear: 2025,
-        note: 'Revisa la consola para ver la URL generada'
+        note: 'Función debugProgressedVsNatal no está implementada o exportada'
       }
     });
   };

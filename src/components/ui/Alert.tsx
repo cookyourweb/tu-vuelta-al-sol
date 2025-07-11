@@ -1,36 +1,25 @@
 //src/components/ui/Alert.tsx
 import React from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
+// Removed import of cva and VariantProps
 import { cn } from '@/lib/utils';
 
-const alertVariants = cva(
-  "relative w-full rounded-lg border p-4",
-  {
-    variants: {
-      variant: {
-        default: "bg-background text-foreground",
-        destructive: "border-red-500/50 text-red-600 bg-red-50 [&>svg]:text-red-600",
-        warning: "border-yellow-500/50 text-yellow-800 bg-yellow-50 [&>svg]:text-yellow-600",
-        success: "border-green-500/50 text-green-800 bg-green-50 [&>svg]:text-green-600",
-        info: "border-blue-500/50 text-blue-800 bg-blue-50 [&>svg]:text-blue-600",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  }
-);
+const alertVariants = {
+  default: "relative w-full rounded-lg border p-4 bg-background text-foreground",
+  destructive: "relative w-full rounded-lg border p-4 border-red-500/50 text-red-600 bg-red-50 [&>svg]:text-red-600",
+  warning: "relative w-full rounded-lg border p-4 border-yellow-500/50 text-yellow-800 bg-yellow-50 [&>svg]:text-yellow-600",
+  success: "relative w-full rounded-lg border p-4 border-green-500/50 text-green-800 bg-green-50 [&>svg]:text-green-600",
+  info: "relative w-full rounded-lg border p-4 border-blue-500/50 text-blue-800 bg-blue-50 [&>svg]:text-blue-600",
+};
 
-interface AlertProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof alertVariants> {
+interface AlertProps extends React.HTMLAttributes<HTMLDivElement> {
+  variant?: keyof typeof alertVariants;
   icon?: React.ReactNode;
   title?: string;
   onClose?: () => void;
 }
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
-  ({ className, variant, icon, title, children, onClose, ...props }, ref) => {
+  ({ className, variant = "default", icon, title, children, onClose, ...props }, ref) => {
     const getDefaultIcon = () => {
       switch (variant) {
         case 'destructive':
@@ -66,7 +55,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
       <div
         ref={ref}
         role="alert"
-        className={cn(alertVariants({ variant }), className)}
+        className={cn(alertVariants[variant], className)}
         {...props}
       >
         <div className="flex">

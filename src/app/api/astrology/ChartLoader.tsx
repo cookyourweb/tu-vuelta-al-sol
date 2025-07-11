@@ -243,14 +243,13 @@ const ChartLoader: React.FC<ChartLoaderProps> = ({
   <div className="mb-8">
     <ChartDisplay 
       houses={chartData.houses.map(house => ({
-        ...house,
-        degree: house.degree.toString(),
+        ...house
       }))}
       planets={chartData.planets.map(planet => ({
         name: planet.name,
         longitude: planet.degree,
         sign: calculateSign(planet.degree),
-        degree: planet.degree.toString(),
+        degree: planet.degree,
       }))}
       aspects={chartData.aspects.map(aspect => ({
         planet1: { name: aspect.planet1 },
@@ -270,9 +269,9 @@ const ChartLoader: React.FC<ChartLoaderProps> = ({
       }}
   keyAspects={chartData.keyAspects.map(ka => ({
     id: ka.id,
-    planet_one: { id: 0, name: '' }, // Replace with actual planet data if available
-    planet_two: { id: 0, name: '' }, // Replace with actual planet data if available
-    aspect: { id: 0, name: ka.description }, // Fix type to match expected Aspect type
+    planet1: '', // No data available, use empty string
+    planet2: '', // No data available, use empty string
+    type: ka.description, // Use description as type string
     orb: 0, // Or provide a default or mapped value
     description: ka.description,
     importance: ka.importance,

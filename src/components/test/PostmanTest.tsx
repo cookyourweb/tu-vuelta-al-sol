@@ -1,8 +1,10 @@
-//src/components/test/PostmanTest.tsx
 'use client';
 
 import React, { useState } from 'react';
-import ChartDisplay, { ChartDisplayProps } from '../astrology/ChartDisplay';
+import ChartDisplay from '../astrology/ChartDisplay';
+// Removed import of ChartDisplayProps as it is not exported from ChartDisplay component
+
+import type { ChartDisplayProps } from '../../types/astrology/chartDisplay';
 
 const PostmanTest: React.FC = () => {
   const [birthDate, setBirthDate] = useState('1974-02-10');

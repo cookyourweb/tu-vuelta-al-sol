@@ -1,0 +1,11 @@
+To fix the import error in src/components/test/PostmanTest.tsx, replace the import line:
+
+import { AspectConfig, AspectMeaning, HouseMeaning, PlanetMeaning } from "../../types/astrology/chartDisplay";
+
+with:
+
+import { AspectConfig, HouseMeaning, PlanetMeaning } from "../../types/astrology/chartDisplay";
+
+Note: AspectMeaning is not exported from the types file and should be removed from the import.
+
+Please apply this change manually in the file src/components/test/PostmanTest.tsx.

@@ -1,60 +1,47 @@
 //src/components/ui/Button.tsx
 import React, { ButtonHTMLAttributes, ReactNode } from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
-// Definir variantes de botón usando class-variance-authority
-const buttonVariants = cva(
-  // Base styles
-  "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-purple-500 disabled:opacity-50 disabled:pointer-events-none",
-  {
-    variants: {
-      variant: {
-        default: "bg-purple-600 text-white hover:bg-purple-700",
-        outline: "border border-purple-200 bg-white text-purple-700 hover:bg-purple-50",
-        secondary: "bg-purple-100 text-purple-900 hover:bg-purple-200",
-        ghost: "hover:bg-purple-100 hover:text-purple-900",
-        link: "text-purple-600 underline-offset-4 hover:underline"
-      },
-      size: {
-        default: "h-10 py-2 px-4",
-        sm: "h-8 px-3 text-xs",
-        lg: "h-12 px-6 text-base",
-        icon: "h-10 w-10"
-      }
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default"
-    }
-  }
-);
+// Definir variantes de botón usando objeto simple
+const buttonVariants = {
+  default: "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-purple-500 disabled:opacity-50 disabled:pointer-events-none bg-purple-600 text-white hover:bg-purple-700 h-10 py-2 px-4",
+  outline: "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-purple-500 disabled:opacity-50 disabled:pointer-events-none border border-purple-200 bg-white text-purple-700 hover:bg-purple-50 h-10 py-2 px-4",
+  secondary: "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-purple-500 disabled:opacity-50 disabled:pointer-events-none bg-purple-100 text-purple-900 hover:bg-purple-200 h-10 py-2 px-4",
+  ghost: "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-purple-500 disabled:opacity-50 disabled:pointer-events-none hover:bg-purple-100 hover:text-purple-900 h-10 py-2 px-4",
+  link: "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-purple-500 disabled:opacity-50 disabled:pointer-events-none text-purple-600 underline-offset-4 hover:underline h-10 py-2 px-4",
+  sm: "h-8 px-3 text-xs",
+  lg: "h-12 px-6 text-base",
+  icon: "h-10 w-10"
+};
 
 // Extender las props del botón HTML con nuestras variantes
-interface ButtonProps 
-  extends ButtonHTMLAttributes<HTMLButtonElement>, 
-  VariantProps<typeof buttonVariants> {
-  children: ReactNode;
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  children: React.ReactNode;
+  variant?: keyof typeof buttonVariants;
+  size?: keyof typeof buttonVariants;
   isLoading?: boolean;
-  leftIcon?: ReactNode;
-  rightIcon?: ReactNode;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
 }
 
 // Componente de botón que soporta múltiples variantes
 const Button = ({
   children,
   className,
-  variant,
-  size,
+  variant = "default",
+  size = "default",
   isLoading = false,
   leftIcon,
   rightIcon,
   disabled,
   ...props
 }: ButtonProps) => {
+  const variantClass = buttonVariants[variant] || buttonVariants.default;
+  const sizeClass = buttonVariants[size] || buttonVariants.default;
+
   return (
     <button
-      className={cn(buttonVariants({ variant, size }), className)}
+      className={cn(variantClass, sizeClass, className)}
       disabled={disabled || isLoading}
       {...props}
     >
