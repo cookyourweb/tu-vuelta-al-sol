@@ -1,9 +1,10 @@
-// src/app/api/charts/progressed/route.ts
+// src/app/api/charts/progressed/route.ts - CORRECCIÓN RÁPIDA
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import BirthData from '@/models/BirthData';
 import Chart from '@/models/Chart';
-import { getProgressedChart } from '@/services/progressedChartService';
+// ✅ CORRECCIÓN 1: Cambiar import
+import { generateProgressedChart } from '@/services/progressedChartService';
 
 export async function POST(request: NextRequest) {
   try {
@@ -64,21 +65,15 @@ export async function POST(request: NextRequest) {
     // 4. Generar nueva carta progresada
     console.log(`🔄 Generando nueva carta progresada para período: ${progressionPeriod.description}`);
     
-    const progressedChartData = await getProgressedChart(
-      birthData.birthDate.toISOString().split('T')[0], // YYYY-MM-DD
-      birthData.birthTime || '12:00:00',
-      birthData.latitude,
-      birthData.longitude,
-      birthData.timezone,
-      progressionPeriod.startYear, // ⭐ AÑO DINÁMICO BASADO EN CUMPLEAÑOS
-      {
-        houseSystem: 'placidus',
-        aspectFilter: 'all',
-        language: 'es',
-        ayanamsa: '0', // 🚨 CRÍTICO: Tropical occidental
-        birthTimeRectification: 'flat-chart'
-      }
-    );
+    // ✅ CORRECCIÓN 2: Cambiar llamada de función y parámetros
+    const progressedChartData = await generateProgressedChart({
+      birthDate: birthData.birthDate.toISOString().split('T')[0], // YYYY-MM-DD
+      birthTime: birthData.birthTime || '12:00:00',
+      latitude: parseFloat(birthData.latitude),
+      longitude: parseFloat(birthData.longitude),
+      timezone: birthData.timezone || 'Europe/Madrid',
+      progressionYear: progressionPeriod.startYear // ⭐ AÑO DINÁMICO BASADO EN CUMPLEAÑOS
+    });
 
     // 5. Guardar en base de datos
     const progressedEntry = {
