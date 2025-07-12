@@ -1,71 +1,72 @@
-// src/services/progressedChartService.ts - CORREGIDO
+// src/services/progressedChartService.ts - VERSIÓN COMPLETA CORREGIDA
+// ✅ URL que funciona para progression charts:
+// https://api.prokerala.com/v2/astrology/progression-chart?profile[datetime]=1974-02-10T07:30:00%2B01:00&profile[coordinates]=40.4164,-3.7025&profile[birth_time_unknown]=false&progression_year=2025&current_coordinates=40.4164,-3.7025&house_system=placidus&orb=default&birth_time_rectification=flat-chart&aspect_filter=all&la=en
+
 import axios from 'axios';
 
-// Configuración de Prokerala
-const PROKERALA_API_BASE_URL = 'https://api.prokerala.com/v2';
-const TOKEN_URL = 'https://api.prokerala.com/token';
+// Constantes para la API de Prokerala
+const PROKERALA_API_BASE_URL = process.env.NEXT_PUBLIC_PROKERALA_API_BASE_URL || 'https://api.prokerala.com/v2';
+const TOKEN_ENDPOINT = process.env.NEXT_PUBLIC_PROKERALA_TOKEN_ENDPOINT || 'https://api.prokerala.com/token';
+
+// Obtener claves de las variables de entorno
 const CLIENT_ID = process.env.NEXT_PUBLIC_PROKERALA_CLIENT_ID;
 const CLIENT_SECRET = process.env.NEXT_PUBLIC_PROKERALA_CLIENT_SECRET;
 
-// Cache de token
-let tokenCache: { token: string; expires: number } | null = null;
+// Almacén de token en memoria
+interface AccessToken {
+  token: string;
+  expires: number; // timestamp
+}
+
+let accessToken: AccessToken | null = null;
 
 /**
- * Obtener token de Prokerala
+ * Obtiene un token de acceso válido para la API de Prokerala
  */
-async function getProkeralaToken(): Promise<string> {
+export async function getAccessToken(): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
-  
-  // Usar token en cache si es válido
-  if (tokenCache && tokenCache.expires > now + 300) {
-    console.log('🔄 Usando token en cache para carta progresada');
-    return tokenCache.token;
+  if (accessToken && accessToken.expires > now + 60) {
+    return accessToken.token;
   }
-  
-  if (!CLIENT_ID || !CLIENT_SECRET) {
-    throw new Error('Credenciales de Prokerala faltantes');
-  }
-  
-  console.log('🔑 Solicitando nuevo token para carta progresada...');
-  
+
   try {
+    console.log('🔑 Obteniendo nuevo token de Prokerala...');
     const response = await axios.post(
-      TOKEN_URL,
+      TOKEN_ENDPOINT,
       new URLSearchParams({
         'grant_type': 'client_credentials',
-        'client_id': CLIENT_ID,
-        'client_secret': CLIENT_SECRET,
+        'client_id': CLIENT_ID || '',
+        'client_secret': CLIENT_SECRET || '',
       }),
       {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        timeout: 10000
+        }
       }
     );
-    
-    if (!response.data?.access_token) {
+
+    if (!response.data || !response.data.access_token) {
       throw new Error('Respuesta de token inválida');
     }
-    
-    tokenCache = {
+
+    accessToken = {
       token: response.data.access_token,
-      expires: now + (response.data.expires_in || 3600)
+      expires: now + response.data.expires_in
     };
-    
-    console.log('✅ Token obtenido para carta progresada');
-    return tokenCache.token;
+
+    console.log('✅ Token de Prokerala obtenido exitosamente');
+    return accessToken.token;
   } catch (error) {
-    console.error('❌ Error obteniendo token para carta progresada:', error);
-    throw new Error(`Error de autenticación: ${error instanceof Error ? error.message : 'Unknown'}`);
+    console.error('❌ Error obteniendo token de acceso de Prokerala:', error);
+    throw new Error('No se pudo autenticar con la API de Prokerala');
   }
 }
 
 /**
- * Calcular timezone offset
+ * ✅ FUNCIÓN CORREGIDA: Calcular timezone offset correcto según fecha
  */
 function calculateTimezoneOffset(date: string, timezone: string): string {
-  console.log(`🌍 Calculando timezone para carta progresada: ${date} en ${timezone}`);
+  console.log(`🌍 Calculando timezone para ${date} en ${timezone}`);
   
   try {
     const targetDate = new Date(date);
@@ -92,7 +93,7 @@ function calculateTimezoneOffset(date: string, timezone: string): string {
       dstEnd.setUTCHours(2, 0, 0, 0);
       
       const offset = (targetDate >= dstStart && targetDate < dstEnd) ? '+02:00' : '+01:00';
-      console.log(`✅ Timezone Europa para progresada: ${offset}`);
+      console.log(`✅ Timezone Europa: ${offset}`);
       return offset;
     }
     
@@ -108,124 +109,184 @@ function calculateTimezoneOffset(date: string, timezone: string): string {
     };
     
     if (staticTimezones[timezone]) {
-      console.log(`✅ Timezone fijo para progresada: ${staticTimezones[timezone]}`);
+      console.log(`✅ Timezone fijo: ${staticTimezones[timezone]}`);
       return staticTimezones[timezone];
     }
     
     console.warn(`⚠️ Timezone '${timezone}' no reconocida, usando UTC`);
     return '+00:00';
   } catch (error) {
-    console.error('❌ Error calculando timezone para progresada:', error);
+    console.error('❌ Error calculando timezone:', error);
     return '+00:00';
   }
 }
 
 /**
- * Interfaces para carta progresada
+ * ✅ FUNCIÓN CORREGIDA: Formatear coordenadas con precisión correcta
  */
-export interface ProgressedChartRequest {
-  birthDate: string;
-  birthTime: string;
-  latitude: number;
-  longitude: number;
-  timezone: string;
-  progressionYear: number;
-}
-
-export interface ProgressedChartData {
-  progressionYear: number;
-  planets: any[];
-  houses: any[];
-  aspects: any[];
-  ascendant?: any;
-  midheaven?: any;
-  elementDistribution: any;
-  modalityDistribution: any;
+function formatCoordinates(lat: number, lng: number): string {
+  // Redondear a 4 decimales para Prokerala
+  const latFixed = Math.round(lat * 10000) / 10000;
+  const lngFixed = Math.round(lng * 10000) / 10000;
+  return `${latFixed},${lngFixed}`;
 }
 
 /**
- * Generar carta progresada usando Prokerala API
+ * 🌟 FUNCIÓN CORREGIDA: Obtiene la carta progresada con parámetros exactos
  */
-export async function generateProgressedChart(params: ProgressedChartRequest): Promise<ProgressedChartData> {
-  console.log('📊 === GENERANDO CARTA PROGRESADA ===');
-  console.log('📅 Parámetros:', params);
-  
+export async function getProgressedChart(
+  birthDate: string,
+  birthTime: string,
+  latitude: number,
+  longitude: number,
+  timezone: string,
+  progressionYear: number,
+  options: {
+    houseSystem?: string;
+    aspectFilter?: string;
+    language?: string;
+    ayanamsa?: string;
+    birthTimeRectification?: string;
+    useCurrentLocation?: boolean; // Nueva opción para ubicación actual vs natal
+    currentLatitude?: number;
+    currentLongitude?: number;
+  } = {}
+) {
+  console.log('🔮 === GENERANDO CARTA PROGRESADA CON FORMATO CORREGIDO ===');
+  console.log('📅 Parámetros:', { 
+    birthDate, 
+    birthTime, 
+    latitude, 
+    longitude, 
+    timezone, 
+    progressionYear,
+    useCurrentLocation: options.useCurrentLocation 
+  });
+
   try {
-    // Obtener token
-    const token = await getProkeralaToken();
+    const token = await getAccessToken();
     
-    // Formatear parámetros
-    const formattedBirthTime = params.birthTime || '12:00:00';
-    const offset = calculateTimezoneOffset(params.birthDate, params.timezone);
-    const datetime = `${params.birthDate}T${formattedBirthTime}${offset}`;
+    // Formatear datos EXACTAMENTE como en la URL que funciona
+    const formattedBirthTime = birthTime || '12:00:00';
+    const offset = calculateTimezoneOffset(birthDate, timezone);
+    const datetime = `${birthDate}T${formattedBirthTime}${offset}`;
     
-    const latFixed = Math.round(params.latitude * 10000) / 10000;
-    const lngFixed = Math.round(params.longitude * 10000) / 10000;
-    const coordinates = `${latFixed},${lngFixed}`;
+    // Coordenadas natales (siempre para profile[coordinates])
+    const natalCoordinates = formatCoordinates(latitude, longitude);
     
-    console.log('🔧 Datos procesados para progresada:', { 
-      datetime, 
-      coordinates, 
-      progressionYear: params.progressionYear 
-    });
+    // Coordenadas actuales para carta progresada
+    let currentCoordinates = natalCoordinates; // Por defecto usar natal
     
-    // Crear URL para carta progresada
-    const url = new URL(`${PROKERALA_API_BASE_URL}/astrology/progression-chart`);
-    url.searchParams.append('profile[datetime]', datetime);
-    url.searchParams.append('profile[coordinates]', coordinates);
-    url.searchParams.append('progression_year', params.progressionYear.toString());
-    url.searchParams.append('birth_time_unknown', 'false');
-    url.searchParams.append('house_system', 'placidus');
-    url.searchParams.append('orb', 'default');
-    url.searchParams.append('birth_time_rectification', 'flat-chart');
-    url.searchParams.append('aspect_filter', 'all');
-    url.searchParams.append('la', 'es');
-    url.searchParams.append('ayanamsa', '0');
-    
-    console.log('🌐 URL para carta progresada:', url.toString());
-    
-    // Hacer llamada a Prokerala
-    const response = await axios.get(url.toString(), {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
-      },
-      timeout: 20000 // 20 segundos
-    });
-    
-    console.log('✅ Respuesta de carta progresada recibida:', {
-      status: response.status,
-      planetsCount: response.data?.planets?.length || 0,
-      hasAscendant: !!response.data?.ascendant
-    });
-    
-    if (!response.data?.planets) {
-      throw new Error('Respuesta inválida de Prokerala - no hay datos de planetas progresados');
+    if (options.useCurrentLocation && options.currentLatitude && options.currentLongitude) {
+      currentCoordinates = formatCoordinates(options.currentLatitude, options.currentLongitude);
+      console.log('📍 Usando ubicación actual para carta progresada:', currentCoordinates);
+    } else {
+      console.log('📍 Usando ubicación natal para carta progresada:', currentCoordinates);
     }
     
-    return processProgressedData(response.data, params.progressionYear);
+    console.log('🔧 Datos procesados:', { 
+      datetime, 
+      natalCoordinates, 
+      currentCoordinates, 
+      progressionYear 
+    });
+    
+    // ✅ ENDPOINT CORRECTO: progression-chart
+    const url = new URL(`${PROKERALA_API_BASE_URL}/astrology/progression-chart`);
+    
+    // ✅ PARÁMETROS CON FORMATO CORRECTO (igual a tu estructura anterior)
+    const params = {
+      'profile[datetime]': datetime,
+      'profile[coordinates]': natalCoordinates,
+      'profile[birth_time_unknown]': 'false', // ← SIN profile[] (corrección crítica)
+      'progression_year': progressionYear.toString(),
+      'current_coordinates': currentCoordinates,
+      'house_system': options.houseSystem || 'placidus',
+      'orb': 'default',
+      'birth_time_rectification': options.birthTimeRectification || 'flat-chart',
+      'aspect_filter': options.aspectFilter || 'all',
+      'la': options.language || 'en', // ← Usar 'en' por defecto para progression charts
+      // ✅ NO incluir ayanamsa para progression charts (no es requerido según la URL)
+    };
+    
+    // Agregar parámetros a la URL (manteniendo tu estructura)
+    Object.entries(params).forEach(([key, value]) => {
+      url.searchParams.append(key, value);
+    });
+    
+    console.log('📡 Parámetros carta progresada CORREGIDOS:', params);
+    console.log('🌐 URL completa carta progresada CORREGIDA:', url.toString());
+    
+    // 🚨 CORRECCIÓN CRÍTICA: Usar token en HEADER, no en URL
+    const response = await axios.get(url.toString(), {
+      headers: {
+        'Authorization': `Bearer ${token}`,  // ✅ Token en header
+        'Accept': 'application/json'
+      },
+      timeout: 15000
+    });
+    
+    console.log('✅ Carta progresada obtenida exitosamente');
+    console.log('✅ Respuesta recibida:', {
+      status: response.status,
+      hasData: !!response.data,
+      dataKeys: Object.keys(response.data || {})
+    });
+    
+    if (!response.data) {
+      throw new Error('Respuesta inválida de Prokerala - no hay datos');
+    }
+    
+    // 5. Procesar y formatear la respuesta (manteniendo tu estructura)
+    return processProgressedChartData(response.data, {
+      progressionYear,
+      natalLatitude: latitude,
+      natalLongitude: longitude,
+      currentLatitude: options.currentLatitude || latitude,
+      currentLongitude: options.currentLongitude || longitude,
+      timezone,
+      birthDate,
+      birthTime
+    });
     
   } catch (error) {
-    console.error('❌ Error generando carta progresada:', error);
+    console.error('❌ Error en llamada a Prokerala para carta progresada:', error);
     
     if (axios.isAxiosError(error)) {
+      console.error('Detalles del error:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        url: error.config?.url
+      });
+      
       if (error.response?.status === 401) {
-        tokenCache = null; // Limpiar cache
-        throw new Error('Error de autenticación con Prokerala para carta progresada');
+        accessToken = null;
+        throw new Error('Error de autenticación con Prokerala');
       } else if (error.response?.status === 429) {
-        throw new Error('Límite de solicitudes excedido para carta progresada');
+        throw new Error('Límite de solicitudes excedido');
+      } else if (error.response?.status >= 500) {
+        throw new Error('Error del servidor de Prokerala');
       }
     }
     
-    // Generar carta progresada de respaldo
-    return generateFallbackProgressedChart(params);
+    throw error;
   }
 }
 
 /**
  * Procesar datos de carta progresada de Prokerala
  */
-function processProgressedData(apiResponse: any, progressionYear: number): ProgressedChartData {
+function processProgressedChartData(apiResponse: any, metadata: {
+  progressionYear: number;
+  natalLatitude: number;
+  natalLongitude: number;
+  currentLatitude: number;
+  currentLongitude: number;
+  timezone: string;
+  birthDate: string;
+  birthTime: string;
+}) {
   console.log('🔄 Procesando datos de carta progresada...');
   
   const getSignFromLongitude = (longitude: number): string => {
@@ -244,7 +305,7 @@ function processProgressedData(apiResponse: any, progressionYear: number): Progr
   };
   
   // Procesar planetas progresados
-  const planets = (apiResponse.planets || []).map((planet: any) => ({
+  const progressedPlanets = (apiResponse.progressed_planets || []).map((planet: any) => ({
     name: translatePlanet(planet.name || 'Unknown'),
     sign: planet.sign || getSignFromLongitude(planet.longitude || 0),
     degree: Math.floor((planet.longitude || 0) % 30),
@@ -255,7 +316,7 @@ function processProgressedData(apiResponse: any, progressionYear: number): Progr
   }));
   
   // Procesar casas progresadas
-  const houses = (apiResponse.houses || []).map((house: any) => ({
+  const progressedHouses = (apiResponse.progressed_houses || []).map((house: any) => ({
     number: house.number || 1,
     sign: house.sign || getSignFromLongitude(house.longitude || 0),
     degree: Math.floor((house.longitude || 0) % 30),
@@ -263,169 +324,235 @@ function processProgressedData(apiResponse: any, progressionYear: number): Progr
     longitude: house.longitude || 0
   }));
   
-  // Procesar aspectos progresados
-  const aspects = (apiResponse.aspects || []).map((aspect: any) => ({
-    planet1: aspect.planet1?.name ? translatePlanet(aspect.planet1.name) : 'Unknown',
-    planet2: aspect.planet2?.name ? translatePlanet(aspect.planet2.name) : 'Unknown',
-    type: aspect.aspect?.name || aspect.type || 'conjunction',
-    orb: aspect.orb || 0
-  }));
-  
   // Ascendente progresado
-  let ascendant;
-  if (apiResponse.ascendant) {
-    ascendant = {
-      sign: apiResponse.ascendant.sign || getSignFromLongitude(apiResponse.ascendant.longitude || 0),
-      degree: Math.floor((apiResponse.ascendant.longitude || 0) % 30),
-      minutes: Math.floor(((apiResponse.ascendant.longitude || 0) % 1) * 60),
-      longitude: apiResponse.ascendant.longitude || 0
+  let progressedAscendant;
+  if (apiResponse.progressed_ascendant) {
+    progressedAscendant = {
+      sign: apiResponse.progressed_ascendant.sign || getSignFromLongitude(apiResponse.progressed_ascendant.longitude || 0),
+      degree: Math.floor((apiResponse.progressed_ascendant.longitude || 0) % 30),
+      minutes: Math.floor(((apiResponse.progressed_ascendant.longitude || 0) % 1) * 60),
+      longitude: apiResponse.progressed_ascendant.longitude || 0
     };
   }
   
   // Medio Cielo progresado
-  let midheaven;
-  if (apiResponse.mc) {
-    midheaven = {
-      sign: apiResponse.mc.sign || getSignFromLongitude(apiResponse.mc.longitude || 0),
-      degree: Math.floor((apiResponse.mc.longitude || 0) % 30),
-      minutes: Math.floor(((apiResponse.mc.longitude || 0) % 1) * 60),
-      longitude: apiResponse.mc.longitude || 0
+  let progressedMidheaven;
+  if (apiResponse.progressed_mc) {
+    progressedMidheaven = {
+      sign: apiResponse.progressed_mc.sign || getSignFromLongitude(apiResponse.progressed_mc.longitude || 0),
+      degree: Math.floor((apiResponse.progressed_mc.longitude || 0) % 30),
+      minutes: Math.floor(((apiResponse.progressed_mc.longitude || 0) % 1) * 60),
+      longitude: apiResponse.progressed_mc.longitude || 0
     };
   }
   
-  // Distribuciones elementales y modales
-  const elementDistribution = calculateElementDistribution(planets);
-  const modalityDistribution = calculateModalityDistribution(planets);
-  
-  console.log('✅ Carta progresada procesada:', {
-    progressionYear,
-    planetsCount: planets.length,
-    ascendantSign: ascendant?.sign
+  console.log('✅ Datos de carta progresada procesados:', {
+    progressedPlanetsCount: progressedPlanets.length,
+    progressedAscendantSign: progressedAscendant?.sign,
+    progressionYear: metadata.progressionYear
   });
   
   return {
-    progressionYear,
-    planets,
-    houses,
-    aspects,
-    ascendant,
-    midheaven,
-    elementDistribution,
-    modalityDistribution
+    progressionYear: metadata.progressionYear,
+    progressedPlanets,
+    progressedHouses,
+    progressedAscendant,
+    progressedMidheaven,
+    natalLocation: {
+      latitude: metadata.natalLatitude,
+      longitude: metadata.natalLongitude
+    },
+    currentLocation: {
+      latitude: metadata.currentLatitude,
+      longitude: metadata.currentLongitude
+    },
+    timezone: metadata.timezone,
+    birthDate: metadata.birthDate,
+    birthTime: metadata.birthTime,
+    calculatedAt: new Date().toISOString(),
+    apiResponse: apiResponse // Guardar respuesta completa para debugging
   };
 }
 
 /**
- * Generar carta progresada de respaldo
+ * 🗓️ FUNCIÓN: Calcular próximo cumpleaños de cualquier usuario
  */
-function generateFallbackProgressedChart(params: ProgressedChartRequest): ProgressedChartData {
-  console.log('⚠️ Generando carta progresada de respaldo...');
+export function calculateUserProgressionPeriod(birthDate: Date | string) {
+  const birth = typeof birthDate === 'string' ? new Date(birthDate) : birthDate;
+  const today = new Date();
   
-  const seed = new Date(params.birthDate).getTime() + params.progressionYear;
-  const seededRandom = (max: number) => Math.floor((seed % 100000) / 100000 * max);
+  const birthMonth = birth.getMonth(); // 0-11
+  const birthDay = birth.getDate(); // 1-31
   
-  const SIGNS = ['Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'];
-  const PLANETS = ['Sol', 'Luna', 'Mercurio', 'Venus', 'Marte', 'Júpiter', 'Saturno', 'Urano', 'Neptuno', 'Plutón'];
+  // Calcular próximo cumpleaños
+  let nextBirthday = new Date(today.getFullYear(), birthMonth, birthDay);
   
-  const planets = PLANETS.map((name, index) => {
-    const signIndex = (seededRandom(12) + index + params.progressionYear) % 12;
+  // Si ya pasó este año, usar el próximo año
+  if (nextBirthday < today) {
+    nextBirthday = new Date(today.getFullYear() + 1, birthMonth, birthDay);
+  }
+  
+  // Calcular cumpleaños siguiente (fin del período)
+  const followingBirthday = new Date(nextBirthday.getFullYear() + 1, birthMonth, birthDay);
+  
+  // Formatear fechas para mostrar
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'long', 
+      year: 'numeric'
+    });
+  };
+  
+  const daysUntilStart = Math.ceil((nextBirthday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  const isActive = today >= nextBirthday && today <= followingBirthday;
+  
+  return {
+    startDate: nextBirthday,
+    endDate: followingBirthday,
+    startYear: nextBirthday.getFullYear(),
+    endYear: followingBirthday.getFullYear(),
+    description: `${formatDate(nextBirthday)} - ${formatDate(followingBirthday)}`,
+    shortDescription: `${nextBirthday.getFullYear()}-${followingBirthday.getFullYear()}`,
+    daysUntilStart,
+    isCurrentPeriod: isActive,
+    status: isActive ? 'current' : (daysUntilStart > 0 ? 'future' : 'past') as 'current' | 'future' | 'past'
+  };
+}
+
+/**
+ * 🔄 FUNCIÓN PRINCIPAL: Generar carta progresada completa para un usuario
+ */
+export async function generateUserProgressedChart(
+  userId: string,
+  birthData: {
+    birthDate: Date | string;
+    birthTime?: string;
+    latitude: number;
+    longitude: number;
+    timezone: string;
+  },
+  options: {
+    forceRegenerate?: boolean;
+    useCurrentLocation?: boolean;
+    currentLatitude?: number;
+    currentLongitude?: number;
+  } = {}
+) {
+  try {
+    console.log(`👤 Generando carta progresada para usuario: ${userId}`);
+    
+    // 1. Calcular período personalizado del usuario
+    const progressionPeriod = calculateUserProgressionPeriod(birthData.birthDate);
+    
+    console.log(`📅 Período calculado: ${progressionPeriod.description}`);
+    console.log(`🎯 Año objetivo: ${progressionPeriod.startYear}`);
+    console.log(`📊 Estado: ${progressionPeriod.status}`);
+    
+    // 2. Preparar datos para la API
+    const birthDateStr = typeof birthData.birthDate === 'string' 
+      ? birthData.birthDate 
+      : birthData.birthDate.toISOString().split('T')[0];
+    
+    const birthTimeStr = birthData.birthTime || '12:00:00';
+    
+    console.log(`🕒 Datos preparados: ${birthDateStr} ${birthTimeStr}`);
+    
+    // 3. Generar carta progresada con parámetros corregidos
+    const progressedChart = await getProgressedChart(
+      birthDateStr,
+      birthTimeStr,
+      birthData.latitude,
+      birthData.longitude,
+      birthData.timezone,
+      progressionPeriod.startYear, // ⭐ AÑO DINÁMICO POR USUARIO
+      {
+        houseSystem: 'placidus',
+        aspectFilter: 'all',
+        language: 'en', // ✅ Inglés para progression charts
+        birthTimeRectification: 'flat-chart',
+        useCurrentLocation: options.useCurrentLocation,
+        currentLatitude: options.currentLatitude,
+        currentLongitude: options.currentLongitude
+      }
+    );
+    
+    console.log(`✅ Carta progresada generada exitosamente para ${userId}`);
+    
     return {
-      name,
-      sign: SIGNS[signIndex],
-      degree: Math.floor(Math.random() * 30),
-      minutes: Math.floor(Math.random() * 60),
-      retrograde: name !== 'Sol' && name !== 'Luna' && Math.random() < 0.3,
-      housePosition: (index % 12) + 1
+      period: progressionPeriod,
+      chart: progressedChart,
+      success: true,
+      message: `Carta progresada generada para período ${progressionPeriod.shortDescription}`
     };
-  });
-  
-  const houses = Array.from({ length: 12 }, (_, i) => ({
-    number: i + 1,
-    sign: SIGNS[(seededRandom(12) + i) % 12],
-    degree: Math.floor(Math.random() * 30),
-    minutes: Math.floor(Math.random() * 60)
-  }));
-  
-  const ascSignIndex = (seededRandom(12) + params.progressionYear) % 12;
-  
-  return {
-    progressionYear: params.progressionYear,
-    planets,
-    houses,
-    aspects: [],
-    ascendant: {
-      sign: SIGNS[ascSignIndex],
-      degree: Math.floor(Math.random() * 30),
-      minutes: Math.floor(Math.random() * 60)
-    },
-    midheaven: {
-      sign: SIGNS[(ascSignIndex + 3) % 12],
-      degree: Math.floor(Math.random() * 30),
-      minutes: Math.floor(Math.random() * 60)
-    },
-    elementDistribution: calculateElementDistribution(planets),
-    modalityDistribution: calculateModalityDistribution(planets)
-  };
+    
+  } catch (error) {
+    console.error(`❌ Error generando carta progresada para usuario ${userId}:`, error);
+    
+    // ✅ Información específica del error para debugging
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+    console.error(`💥 Detalle del error: ${errorMessage}`);
+    
+    throw new Error(`Error al generar carta progresada: ${errorMessage}`);
+  }
 }
 
 /**
- * Calcular distribución elemental
+ * 🧪 FUNCIÓN DE TESTING: Verificar configuración
  */
-function calculateElementDistribution(planets: any[]) {
-  const elementMap: Record<string, string> = {
-    'Aries': 'fire', 'Leo': 'fire', 'Sagitario': 'fire',
-    'Tauro': 'earth', 'Virgo': 'earth', 'Capricornio': 'earth',
-    'Géminis': 'air', 'Libra': 'air', 'Acuario': 'air',
-    'Cáncer': 'water', 'Escorpio': 'water', 'Piscis': 'water'
-  };
-  
-  const counts = { fire: 0, earth: 0, air: 0, water: 0 };
-  let total = 0;
-  
-  planets.forEach(planet => {
-    const element = elementMap[planet.sign];
-    if (element) {
-      counts[element as keyof typeof counts]++;
-      total++;
-    }
-  });
-  
-  if (total === 0) return { fire: 25, earth: 25, air: 25, water: 25 };
-  
-  return {
-    fire: Math.round((counts.fire / total) * 100),
-    earth: Math.round((counts.earth / total) * 100),
-    air: Math.round((counts.air / total) * 100),
-    water: Math.round((counts.water / total) * 100)
-  };
-}
-
-/**
- * Calcular distribución modal
- */
-function calculateModalityDistribution(planets: any[]) {
-  const modalityMap: Record<string, string> = {
-    'Aries': 'cardinal', 'Cáncer': 'cardinal', 'Libra': 'cardinal', 'Capricornio': 'cardinal',
-    'Tauro': 'fixed', 'Leo': 'fixed', 'Escorpio': 'fixed', 'Acuario': 'fixed',
-    'Géminis': 'mutable', 'Virgo': 'mutable', 'Sagitario': 'mutable', 'Piscis': 'mutable'
-  };
-  
-  const counts = { cardinal: 0, fixed: 0, mutable: 0 };
-  let total = 0;
-  
-  planets.forEach(planet => {
-    const modality = modalityMap[planet.sign];
-    if (modality) {
-      counts[modality as keyof typeof counts]++;
-      total++;
-    }
-  });
-  
-  if (total === 0) return { cardinal: 33, fixed: 33, mutable: 34 };
-  
-  return {
-    cardinal: Math.round((counts.cardinal / total) * 100),
-    fixed: Math.round((counts.fixed / total) * 100),
-    mutable: Math.round((counts.mutable / total) * 100)
-  };
+export async function testProgressedChartConnection(): Promise<{
+  success: boolean;
+  message: string;
+  details?: any;
+}> {
+  try {
+    console.log('🧪 Testeando conexión carta progresada...');
+    
+    // 1. Verificar token
+    const token = await getAccessToken();
+    console.log('✅ Token obtenido correctamente');
+    
+    // 2. Datos de prueba (Verónica - datos verificados)
+    const testData = {
+      birthDate: '1974-02-10',
+      birthTime: '07:30:00',
+      latitude: 40.4164,
+      longitude: -3.7025,
+      timezone: 'Europe/Madrid',
+      progressionYear: 2025
+    };
+    
+    // 3. Probar generación de carta progresada
+    const result = await getProgressedChart(
+      testData.birthDate,
+      testData.birthTime,
+      testData.latitude,
+      testData.longitude,
+      testData.timezone,
+      testData.progressionYear
+    );
+    
+    console.log('✅ Test exitoso:', result);
+    
+    return {
+      success: true,
+      message: 'Conexión de carta progresada funcionando correctamente',
+      details: {
+        progressionYear: result.progressionYear,
+        planetsCount: result.progressedPlanets?.length || 0,
+        ascendantSign: result.progressedAscendant?.sign
+      }
+    };
+    
+  } catch (error) {
+    console.error('❌ Error en test de carta progresada:', error);
+    
+    return {
+      success: false,
+      message: 'Error en test de carta progresada',
+      details: {
+        error: error instanceof Error ? error.message : 'Error desconocido'
+      }
+    };
+  }
 }

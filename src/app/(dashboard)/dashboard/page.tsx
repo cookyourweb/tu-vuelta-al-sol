@@ -6,26 +6,27 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import Button from '@/components/ui/Button';
-import { 
-  User, 
-  Calendar, 
-  Star, 
-  MapPin, 
-  Clock, 
-  Sparkles, 
-  AlertTriangle, 
+import {
+  User as UserIcon,
+  Calendar,
+  Star,
+  MapPin,
+  Clock,
+  Sparkles,
+  AlertTriangle,
   ArrowRight,
   Moon,
   Sun,
   Zap,
-  Heart,
   Gift,
   TrendingUp,
   CheckCircle,
   Eye,
   Download,
-  X
+  X, 
+  Heart
 } from 'lucide-react';
+
 
 export default function DashboardPage() {
   const { user, isLoading } = useAuth();
@@ -229,7 +230,7 @@ export default function DashboardPage() {
             
             <div className="flex items-center mb-8">
               <div className="bg-gradient-to-r from-green-400/20 to-blue-500/20 border border-green-400/30 rounded-full p-4 backdrop-blur-sm mr-6">
-                <User className="w-8 h-8 text-green-400" />
+                <UserIcon className="w-8 h-8 text-green-400" />
               </div>
               <div>
                 <h2 className="text-3xl font-bold text-white mb-2 flex items-center">
@@ -243,7 +244,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="bg-black/30 rounded-2xl p-6 backdrop-blur-sm border border-white/10 hover:border-blue-400/30 transition-all duration-300 group">
                 <div className="flex items-center mb-3">
-                  <User className="w-5 h-5 text-blue-400 mr-3 group-hover:scale-110 transition-transform" />
+                  <UserIcon className="w-5 h-5 text-blue-400 mr-3 group-hover:scale-110 transition-transform" />
                   <span className="text-blue-300 font-semibold">Nombre</span>
                 </div>
                 <p className="text-white text-lg">{user?.displayName || 'No configurado'}</p>

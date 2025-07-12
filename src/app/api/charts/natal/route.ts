@@ -1,139 +1,33 @@
-// src/app/api/charts/natal/route.ts - VERSIÓN SIN DEPENDENCIA CIRCULAR
+// src/app/api/charts/natal/route.ts - VERSIÓN LIMPIA CON TOKEN BEARER
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import BirthData from '@/models/BirthData';
 import Chart from '@/models/Chart';
 import axios from 'axios';
+// ✅ IMPORTAR FUNCIONES CORRECTAS
+import { createProkeralaParams, type ProkeralaParams } from '@/utils/dateTimeUtils';
 
-/**
- * ✅ API CHARTS/NATAL - LLAMADA DIRECTA A PROKERALA (SIN DEPENDENCIA CIRCULAR)
- * 
- * GET: Obtiene carta guardada
- * POST: Genera nueva carta llamando DIRECTAMENTE a Prokerala API  
- * DELETE: Elimina carta guardada (para forzar regeneración)
- */
-
-// Configuración de Prokerala
-const API_BASE_URL = 'https://api.prokerala.com/v2';
-const TOKEN_URL = 'https://api.prokerala.com/token';
+// ✅ Configuración de Prokerala usando variables de entorno
+const API_BASE_URL = process.env.NEXT_PUBLIC_PROKERALA_API_BASE_URL;
+const TOKEN_URL = process.env.NEXT_PUBLIC_PROKERALA_TOKEN_ENDPOINT;
 const CLIENT_ID = process.env.NEXT_PUBLIC_PROKERALA_CLIENT_ID;
 const CLIENT_SECRET = process.env.NEXT_PUBLIC_PROKERALA_CLIENT_SECRET;
+const BEARER_TOKEN = process.env.NEXT_PUBLIC_PROKERALA_BEARER_TOKEN;
 
-// Cache de token
+// Cache de token (para futuro uso con generación automática)
 let tokenCache: { token: string; expires: number } | null = null;
 
-/**
- * Obtener token de Prokerala
- */
 async function getProkeralaToken(): Promise<string> {
-  const now = Math.floor(Date.now() / 1000);
-  
-  // Usar token en cache si es válido
-  if (tokenCache && tokenCache.expires > now + 300) {
-    console.log('🔄 Usando token en cache');
-    return tokenCache.token;
+  // Por ahora usar token estático, más tarde implementar generación automática
+  if (BEARER_TOKEN) {
+    return BEARER_TOKEN;
   }
   
-  if (!CLIENT_ID || !CLIENT_SECRET) {
-    throw new Error('Credenciales de Prokerala faltantes');
-  }
-  
-  console.log('🔑 Solicitando nuevo token...');
-  
-  try {
-    const response = await axios.post(
-      TOKEN_URL,
-      new URLSearchParams({
-        'grant_type': 'client_credentials',
-        'client_id': CLIENT_ID,
-        'client_secret': CLIENT_SECRET,
-      }),
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        timeout: 10000
-      }
-    );
-    
-    if (!response.data?.access_token) {
-      throw new Error('Respuesta de token inválida');
-    }
-    
-    tokenCache = {
-      token: response.data.access_token,
-      expires: now + (response.data.expires_in || 3600)
-    };
-    
-    console.log('✅ Token obtenido exitosamente');
-    return tokenCache.token;
-  } catch (error) {
-    console.error('❌ Error obteniendo token:', error);
-    throw new Error(`Error de autenticación: ${error instanceof Error ? error.message : 'Unknown'}`);
-  }
+  throw new Error('No se encontró token Bearer de Prokerala');
 }
 
 /**
- * Calcular timezone offset
- */
-function calculateTimezoneOffset(date: string, timezone: string): string {
-  console.log(`🌍 Calculando timezone para ${date} en ${timezone}`);
-  
-  try {
-    const targetDate = new Date(date);
-    const year = targetDate.getFullYear();
-    
-    const getLastSunday = (year: number, month: number): Date => {
-      const lastDay = new Date(year, month + 1, 0);
-      const dayOfWeek = lastDay.getDay();
-      const lastSunday = new Date(lastDay);
-      lastSunday.setDate(lastDay.getDate() - dayOfWeek);
-      return lastSunday;
-    };
-    
-    // Europa Central
-    if (timezone === 'Europe/Madrid' || 
-        timezone === 'Europe/Berlin' || 
-        timezone === 'Europe/Paris' ||
-        timezone === 'Europe/Rome') {
-      
-      const dstStart = getLastSunday(year, 2); // Marzo
-      const dstEnd = getLastSunday(year, 9);   // Octubre
-      
-      dstStart.setUTCHours(2, 0, 0, 0);
-      dstEnd.setUTCHours(2, 0, 0, 0);
-      
-      const offset = (targetDate >= dstStart && targetDate < dstEnd) ? '+02:00' : '+01:00';
-      console.log(`✅ Timezone Europa: ${offset}`);
-      return offset;
-    }
-    
-    // Zonas fijas
-    const staticTimezones: Record<string, string> = {
-      'America/Argentina/Buenos_Aires': '-03:00',
-      'America/Bogota': '-05:00',
-      'America/Lima': '-05:00',
-      'America/Mexico_City': '-06:00',
-      'Asia/Tokyo': '+09:00',
-      'UTC': '+00:00',
-      'GMT': '+00:00'
-    };
-    
-    if (staticTimezones[timezone]) {
-      console.log(`✅ Timezone fijo: ${staticTimezones[timezone]}`);
-      return staticTimezones[timezone];
-    }
-    
-    console.warn(`⚠️ Timezone '${timezone}' no reconocida, usando UTC`);
-    return '+00:00';
-  } catch (error) {
-    console.error('❌ Error calculando timezone:', error);
-    return '+00:00';
-  }
-}
-
-/**
- * Llamar directamente a Prokerala API
+ * ✅ LLAMAR A PROKERALA USANDO FUNCIONES CORREGIDAS
  */
 async function callProkeralaAPI(
   birthDate: string,
@@ -142,51 +36,38 @@ async function callProkeralaAPI(
   longitude: number,
   timezone: string
 ) {
-  console.log('📡 === LLAMADA DIRECTA A PROKERALA API ===');
-  console.log('📅 Parámetros:', { birthDate, birthTime, latitude, longitude, timezone });
-  
   try {
-    // Obtener token
     const token = await getProkeralaToken();
     
-    // Formatear parámetros
-    const formattedBirthTime = birthTime || '12:00:00';
-    const offset = calculateTimezoneOffset(birthDate, timezone);
-    const datetime = `${birthDate}T${formattedBirthTime}${offset}`;
+    // ✅ USAR FUNCIONES CORREGIDAS DE dateTimeUtils.ts
+    const prokeralaParams: ProkeralaParams = {
+      birthDate,
+      birthTime,
+      latitude,
+      longitude,
+      timezone,
+      houseSystem: 'placidus',
+      aspectFilter: 'all',
+      language: 'es',
+      ayanamsa: '0', // ✅ Tropical occidental
+      birthTimeUnknown: false,
+      birthTimeRectification: 'flat-chart',
+      orb: 'default'
+    };
     
-    const latFixed = Math.round(latitude * 10000) / 10000;
-    const lngFixed = Math.round(longitude * 10000) / 10000;
-    const coordinates = `${latFixed},${lngFixed}`;
+    // ✅ CREAR PARÁMETROS CON LAS FUNCIONES CORRECTAS
+    const urlParams = createProkeralaParams(prokeralaParams);
     
-    console.log('🔧 Datos procesados:', { datetime, coordinates });
+    // ✅ ENDPOINT CORRECTO: natal-aspect-chart
+    const url = new URL(`${API_BASE_URL}/astrology/natal-aspect-chart`);
+    url.search = urlParams.toString();
     
-    // Crear URL
-    const url = new URL(`${API_BASE_URL}/astrology/natal-chart`);
-    url.searchParams.append('profile[datetime]', datetime);
-    url.searchParams.append('profile[coordinates]', coordinates);
-    url.searchParams.append('birth_time_unknown', 'false');
-    url.searchParams.append('house_system', 'placidus');
-    url.searchParams.append('orb', 'default');
-    url.searchParams.append('birth_time_rectification', 'flat-chart');
-    url.searchParams.append('aspect_filter', 'all');
-    url.searchParams.append('la', 'es');
-    url.searchParams.append('ayanamsa', '0');
-    
-    console.log('🌐 URL:', url.toString());
-    
-    // Hacer llamada
     const response = await axios.get(url.toString(), {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/json'
       },
-      timeout: 15000 // 15 segundos
-    });
-    
-    console.log('✅ Respuesta recibida:', {
-      status: response.status,
-      planetsCount: response.data?.planets?.length || 0,
-      hasAscendant: !!response.data?.ascendant
+      timeout: 15000
     });
     
     if (!response.data?.planets) {
@@ -195,14 +76,13 @@ async function callProkeralaAPI(
     
     return processProkeralaData(response.data, latitude, longitude, timezone);
   } catch (error) {
-    console.error('❌ Error en llamada a Prokerala:', error);
-    
     if (axios.isAxiosError(error)) {
       if (error.response?.status === 401) {
-        tokenCache = null; // Limpiar cache
         throw new Error('Error de autenticación con Prokerala');
       } else if (error.response?.status === 429) {
         throw new Error('Límite de solicitudes excedido');
+      } else if (error.response && typeof error.response.status === 'number' && error.response.status >= 500) {
+        throw new Error('Error del servidor de Prokerala');
       }
     }
     
@@ -210,12 +90,7 @@ async function callProkeralaAPI(
   }
 }
 
-/**
- * Procesar datos de Prokerala
- */
 function processProkeralaData(apiResponse: any, latitude: number, longitude: number, timezone: string) {
-  console.log('🔄 Procesando datos de Prokerala...');
-  
   const getSignFromLongitude = (longitude: number): string => {
     const signs = ['Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'];
     return signs[Math.floor(longitude / 30) % 12];
@@ -285,11 +160,6 @@ function processProkeralaData(apiResponse: any, latitude: number, longitude: num
   const elementDistribution = calculateElementDistribution(planets);
   const modalityDistribution = calculateModalityDistribution(planets);
   
-  console.log('✅ Datos procesados:', {
-    planetsCount: planets.length,
-    ascendantSign: ascendant?.sign
-  });
-  
   return {
     birthData: { latitude, longitude, timezone, datetime: apiResponse.datetime || '' },
     planets,
@@ -305,9 +175,6 @@ function processProkeralaData(apiResponse: any, latitude: number, longitude: num
   };
 }
 
-/**
- * Calcular distribución elemental
- */
 function calculateElementDistribution(planets: any[]) {
   const elementMap: Record<string, string> = {
     'Aries': 'fire', 'Leo': 'fire', 'Sagitario': 'fire',
@@ -337,9 +204,6 @@ function calculateElementDistribution(planets: any[]) {
   };
 }
 
-/**
- * Calcular distribución modal
- */
 function calculateModalityDistribution(planets: any[]) {
   const modalityMap: Record<string, string> = {
     'Aries': 'cardinal', 'Cáncer': 'cardinal', 'Libra': 'cardinal', 'Capricornio': 'cardinal',
@@ -367,12 +231,7 @@ function calculateModalityDistribution(planets: any[]) {
   };
 }
 
-/**
- * Generar carta de respaldo
- */
 function generateFallbackChart(birthDate: string, birthTime: string, latitude: number, longitude: number, timezone: string) {
-  console.log('⚠️ Generando carta de respaldo...');
-  
   const seed = new Date(birthDate).getTime();
   const seededRandom = (max: number) => Math.floor((seed % 100000) / 100000 * max);
   
@@ -436,7 +295,6 @@ export async function GET(request: NextRequest) {
     }
     
     await connectDB();
-    
     const chart = await Chart.findOne({ userId });
     
     if (!chart || !chart.natalChart) {
@@ -459,12 +317,10 @@ export async function GET(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error al obtener carta natal:', error);
     return NextResponse.json(
       { 
         success: false,
-        error: 'Error al recuperar la carta natal',
-        message: 'Hubo un problema al recuperar tu carta natal. Por favor, inténtalo nuevamente.'
+        error: 'Error al recuperar la carta natal'
       },
       { status: 500 }
     );
@@ -483,44 +339,23 @@ export async function DELETE(request: NextRequest) {
       );
     }
     
-    console.log('🗑️ === ELIMINANDO CARTA GUARDADA ===');
-    console.log('👤 Usuario:', userId);
-    
     await connectDB();
-    
     const result = await Chart.deleteOne({ userId });
     
-    console.log('📊 Resultado eliminación:', result);
-    
-    if (result.deletedCount > 0) {
-      console.log('✅ Carta eliminada exitosamente');
-      return NextResponse.json(
-        { 
-          success: true,
-          message: 'Carta natal eliminada. La próxima generación será nueva.',
-          deletedCount: result.deletedCount
-        },
-        { status: 200 }
-      );
-    } else {
-      console.log('📭 No había carta para eliminar');
-      return NextResponse.json(
-        { 
-          success: true,
-          message: 'No había carta guardada para este usuario',
-          deletedCount: 0
-        },
-        { status: 200 }
-      );
-    }
+    return NextResponse.json(
+      { 
+        success: true,
+        message: result.deletedCount > 0 ? 'Carta natal eliminada' : 'No había carta para eliminar',
+        deletedCount: result.deletedCount
+      },
+      { status: 200 }
+    );
     
   } catch (error) {
-    console.error('❌ Error eliminando carta:', error);
     return NextResponse.json(
       { 
         success: false,
-        error: 'Error al eliminar la carta natal',
-        details: error instanceof Error ? error.message : 'Error desconocido'
+        error: 'Error al eliminar la carta natal'
       },
       { status: 500 }
     );
@@ -528,13 +363,9 @@ export async function DELETE(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  console.log('🌟 === INICIO GENERACIÓN CARTA NATAL (SIN DEPENDENCIA CIRCULAR) ===');
-  
   try {
     const body = await request.json();
     const { userId, regenerate = false } = body;
-    
-    console.log('📝 Parámetros:', { userId, regenerate });
     
     if (!userId) {
       return NextResponse.json(
@@ -545,7 +376,6 @@ export async function POST(request: NextRequest) {
     
     await connectDB();
     
-    // Buscar datos de nacimiento
     const birthData = await BirthData.findOne({ userId });
     
     if (!birthData) {
@@ -559,23 +389,12 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    console.log('✅ Datos de nacimiento encontrados:', {
-      birthDate: birthData.birthDate,
-      birthPlace: birthData.birthPlace,
-      latitude: birthData.latitude,
-      longitude: birthData.longitude
-    });
-    
-    // Eliminar carta existente si se solicita regenerar
     if (regenerate) {
-      console.log('🔄 Regeneración solicitada, eliminando carta existente...');
       await Chart.deleteOne({ userId });
     } else {
-      // Comprobar si ya existe carta
       const existingChart = await Chart.findOne({ userId });
       
       if (existingChart && existingChart.natalChart) {
-        console.log('📋 Carta existente encontrada');
         return NextResponse.json(
           { 
             success: true,
@@ -587,21 +406,13 @@ export async function POST(request: NextRequest) {
       }
     }
     
-    // Preparar datos
     const birthDate = birthData.birthDate.toISOString().split('T')[0];
     const birthTime = birthData.birthTime || '12:00:00';
     const latitude = parseFloat(birthData.latitude);
     const longitude = parseFloat(birthData.longitude);
     const timezone = birthData.timezone || 'Europe/Madrid';
     
-    console.log('🔧 Datos procesados:', {
-      birthDate, birthTime, latitude, longitude, timezone
-    });
-    
-    // Generar carta natal
     try {
-      console.log('📡 === LLAMADA DIRECTA A PROKERALA ===');
-      
       const natalChart = await callProkeralaAPI(
         birthDate,
         birthTime,
@@ -610,7 +421,6 @@ export async function POST(request: NextRequest) {
         timezone
       );
       
-      // Guardar en base de datos
       const chartData = {
         userId,
         birthDataId: birthData._id,
@@ -625,37 +435,18 @@ export async function POST(request: NextRequest) {
         { upsert: true, new: true, setDefaultsOnInsert: true }
       );
       
-      console.log('✅ === CARTA NATAL COMPLETADA ===');
-      console.log('🔺 Ascendente:', natalChart.ascendant?.sign);
-      
-      // Verificación para casos de prueba
-      if (birthDate === '1974-02-10' && Math.abs(latitude - 40.4168) < 0.01) {
-        console.log('🎯 === CASO VERÓNICA ===');
-        console.log('🔺 ASC obtenido:', natalChart.ascendant?.sign);
-        console.log('✅ Esperado: Acuario');
-        console.log('🎉 Correcto:', natalChart.ascendant?.sign === 'Acuario' ? 'SÍ' : 'NO');
-      }
-      
       return NextResponse.json(
         { 
           success: true,
           message: `Carta natal ${regenerate ? 'regenerada' : 'generada'} correctamente`,
-          natalChart,
-          debug: {
-            method: 'direct_prokerala',
-            timestamp: new Date().toISOString()
-          }
+          natalChart
         },
         { status: 200 }
       );
       
     } catch (apiError) {
-      console.error('❌ Error llamando a Prokerala, usando respaldo:', apiError);
-      
-      // Generar carta de respaldo
       const fallbackChart = generateFallbackChart(birthDate, birthTime, latitude, longitude, timezone);
       
-      // Guardar carta de respaldo
       const chartData = {
         userId,
         birthDataId: birthData._id,
@@ -673,26 +464,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           success: true,
-          message: 'Carta natal generada con datos simulados debido a problemas con la API',
+          message: 'Carta natal generada con datos simulados debido a error de API',
           natalChart: fallbackChart,
-          fallback: true,
-          debug: {
-            method: 'fallback',
-            error: apiError instanceof Error ? apiError.message : 'Unknown',
-            timestamp: new Date().toISOString()
-          }
+          fallback: true
         },
         { status: 200 }
       );
     }
   } catch (error) {
-    console.error('❌ Error general:', error);
     return NextResponse.json(
       { 
         success: false,
-        error: 'Error interno del servidor',
-        message: 'Ocurrió un error inesperado. Por favor, inténtalo más tarde.',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        error: 'Error interno del servidor'
       },
       { status: 500 }
     );
