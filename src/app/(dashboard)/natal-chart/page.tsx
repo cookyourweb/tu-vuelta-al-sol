@@ -1,11 +1,11 @@
-// src/app/(dashboard)/natal-chart/page.tsx
+// src/app/(dashboard)/natal-chart/page.tsx - VERSIÓN COMPLETAMENTE CORREGIDA
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import ChartDisplay from '@/components/astrology/ChartDisplay';
-import { Sparkles, Edit, Star } from 'lucide-react';
+import { Sparkles, Edit, Star, ArrowLeft, RefreshCw } from 'lucide-react';
 import Button from '@/components/ui/Button';
 
 // Interfaces
@@ -37,152 +37,239 @@ export default function NatalChartPage() {
   const [error, setError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<string>('');
 
-  // Verificar si es Verónica (para debugging)
-  const isVeronica = birthData?.birthDate === '1974-02-10' && 
-                    birthData?.birthTime === '07:30:00' && 
-                    birthData?.birthPlace?.includes('Sevilla');
-
-  // 🔍 DEBUG: Log birthData changes
-  useEffect(() => {
-    console.log('📡 birthData actualizado:', birthData);
-  }, [birthData]);
-
-  // 🔍 DEBUG: Log data before passing to ChartDisplay
-  useEffect(() => {
-    console.log('🔍 Datos antes de pasar a ChartDisplay:', {
-      chartData,
-      birthData,
-      birthDataType: typeof birthData,
-      birthDataKeys: birthData ? Object.keys(birthData) : 'no existe'
-    });
-  }, [chartData, birthData]);
-
   useEffect(() => {
     if (!user) {
       router.push('/auth/login');
       return;
     }
     
-    loadBirthData();
+    loadChartData();
   }, [user, router]);
 
-  useEffect(() => {
-    if (birthData) {
-      fetchChartData();
-    }
-  }, [birthData]);
-
-
-  // ✅ FUNCIÓN CORREGIDA:
-  const loadBirthData = async () => {
+  // ✅ FUNCIÓN CORREGIDA: Cargar o generar carta natal
+  const loadChartData = async () => {
     try {
-      console.log('🔍 Cargando datos de nacimiento...');
-      console.log('👤 User UID:', user?.uid);
+      setLoading(true);
+      setError(null);
+      setDebugInfo('🔍 Verificando carta natal existente...');
       
-      // ✅ AÑADIR EL USERID COMO PARÁMETRO
-      const response = await fetch(`/api/birth-data?userId=${user?.uid}`);
-      console.log('📡 Respuesta API status:', response.status);
+      console.log('🔍 Cargando carta natal para usuario:', user?.uid);
       
-      if (response.ok) {
-        const data = await response.json();
-        console.log('✅ Datos recibidos:', data);
+      // ✅ PRIMERO: Verificar si ya existe carta natal
+      const checkResponse = await fetch(`/api/charts/natal?userId=${user?.uid}`);
+      
+      if (checkResponse.ok) {
+        const checkResult = await checkResponse.json();
         
-        // ✅ PROCESAR DATOS CORRECTAMENTE
-        const processedData = {
-          birthDate: data.data?.birthDate,
-          birthTime: data.data?.birthTime,
-          birthPlace: data.data?.birthPlace || `${data.data?.latitude},${data.data?.longitude}`
-        };
-        
-        console.log('🔄 Datos procesados:', processedData);
-        setBirthData(processedData);
-      } else {
-        const errorText = await response.text();
-        console.log('❌ Error API:', response.status, errorText);
-        console.log('🔄 Redirigiendo a birth-data...');
-        router.push('/birth-data');
+        if (checkResult.success && checkResult.natalChart) {
+          // ✅ Ya existe carta natal
+          console.log('✅ Carta natal encontrada');
+          setDebugInfo('✅ Carta natal encontrada y cargada');
+          
+          const processedData = processChartData(checkResult.natalChart);
+          setChartData(processedData);
+          
+          // Cargar datos de nacimiento para mostrar información
+          await loadBirthDataInfo();
+          return;
+        }
       }
+      
+      // ❌ No existe carta natal - generar
+      setDebugInfo('❌ No existe carta natal, generando automáticamente...');
+      console.log('❌ No existe carta natal, generando...');
+      await generateNatalChart();
+      
     } catch (error) {
-      console.error('💥 Error cargando datos de nacimiento:', error);
-      router.push('/birth-data');
+      console.error('❌ Error en loadChartData:', error);
+      setDebugInfo(`❌ Error: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+      setError('Error cargando carta natal');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // ✅ FUNCIÓN: Generar carta natal
-  const fetchChartData = async () => {
-    if (!birthData) return;
-    
-    setLoading(true);
-    setError(null);
-    setDebugInfo('🔄 Generando carta natal...');
-    
+  // ✅ FUNCIÓN CORREGIDA: Generar carta natal
+  const generateNatalChart = async () => {
     try {
-      // Construir parámetros para la API
-      const params = new URLSearchParams({
-        date: birthData.birthDate,
-        time: birthData.birthTime,
-        location: birthData.birthPlace,
-        userId: user?.uid || '' // ✅ AÑADIR USERID
-      });
+      setDebugInfo('🔮 Generando carta natal...');
       
-      setDebugInfo('📡 Enviando petición a API Charts...');
-      
-      // ✅ RUTA CORREGIDA: /api/charts/natal en lugar de /api/charts/generate
-      const generateResponse = await fetch(`/api/charts/natal?${params}`, {
-        method: 'GET',
+      // ✅ CORRECCIÓN: POST request con userId en body
+      const generateResponse = await fetch('/api/charts/natal', {
+        method: 'POST',  // ✅ POST en lugar de GET
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          userId: user?.uid,
+          regenerate: false  // No forzar regeneración la primera vez
+        })
       });
       
+      console.log('📡 Respuesta generación:', generateResponse.status);
+      
       if (!generateResponse.ok) {
-        const errorText = await generateResponse.text();
-        setDebugInfo(`❌ Error HTTP ${generateResponse.status}`);
-        setError(`Error ${generateResponse.status}: ${errorText}`);
-        setLoading(false);
-        return;
+        const errorResult = await generateResponse.json();
+        console.error('❌ Error generando carta:', errorResult);
+        
+        if (errorResult.error?.includes('datos de nacimiento')) {
+          setError('Primero necesitas configurar tus datos de nacimiento.');
+          setDebugInfo('❌ Faltan datos de nacimiento');
+          return;
+        }
+        
+        throw new Error(errorResult.error || `Error HTTP ${generateResponse.status}`);
       }
       
       const generateResult = await generateResponse.json();
       
       if (!generateResult.success) {
-        setDebugInfo('❌ Error generando carta');
-        setError(generateResult.error || 'Error al generar carta natal');
-        setLoading(false);
-        return;
+        throw new Error(generateResult.error || 'Error al generar carta natal');
       }
       
       setDebugInfo('✅ Carta natal generada correctamente');
+      console.log('✅ Carta natal generada:', generateResult);
       
-      // ✅ LOG DE DEBUGGING
-      console.log('📊 Respuesta completa de API Charts:', generateResult);
+      // ✅ PROCESAR DATOS RECIBIDOS - CON DEBUGGING
+      console.log('🔍 Datos completos recibidos:', generateResult);
+      console.log('🔍 generateResult.data:', generateResult.data);
+      console.log('🔍 generateResult.natalChart:', generateResult.natalChart);
       
-      if (isVeronica) {
-        const ascSign = generateResult.natalChart?.ascendant?.sign;
-        setDebugInfo(`🎯 Verónica detectada - ASC: ${ascSign} (esperado: Acuario)`);
-      }
+      // Intentar diferentes estructuras de datos
+      let dataToProcess = generateResult.data || generateResult.natalChart || generateResult;
+      console.log('🔍 Datos a procesar:', dataToProcess);
       
-      // ✅ PROCESAR DATOS RECIBIDOS
-      const processedData = processChartData(generateResult.natalChart);
+      const processedData = processChartData(dataToProcess);
       setChartData(processedData);
-      setLoading(false);
+      
+      // Cargar datos de nacimiento para mostrar información
+      await loadBirthDataInfo();
       
     } catch (error) {
-      console.error('❌ Error en fetchChartData:', error);
-      setDebugInfo(`❌ Error: ${error instanceof Error ? error.message : 'Error desconocido'}`);
-      setError('Error de conexión. Verifica tu conexión a internet.');
+      console.error('❌ Error generando carta:', error);
+      setDebugInfo(`❌ Error generando: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+      setError(error instanceof Error ? error.message : 'Error generando carta natal');
+    }
+  };
+
+  // ✅ FUNCIÓN: Cargar información de datos de nacimiento (solo para mostrar)
+  const loadBirthDataInfo = async () => {
+    try {
+      const response = await fetch(`/api/birth-data?userId=${user?.uid}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+          setBirthData({
+            birthDate: data.data.birthDate,
+            birthTime: data.data.birthTime,
+            birthPlace: data.data.birthPlace
+          });
+        }
+      }
+    } catch (error) {
+      console.log('⚠️ No se pudieron cargar datos de nacimiento para mostrar:', error);
+    }
+  };
+
+  // ✅ FUNCIÓN: Forzar regeneración
+  const regenerateChart = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      setDebugInfo('🔄 Regenerando carta natal...');
+      
+      const regenerateResponse = await fetch('/api/charts/natal', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user?.uid,
+          regenerate: true  // ✅ Forzar regeneración
+        })
+      });
+      
+      if (!regenerateResponse.ok) {
+        const errorResult = await regenerateResponse.json();
+        throw new Error(errorResult.error || 'Error regenerando carta');
+      }
+      
+      const regenerateResult = await regenerateResponse.json();
+      
+      if (!regenerateResult.success) {
+        throw new Error(regenerateResult.error || 'Error al regenerar carta natal');
+      }
+      
+      setDebugInfo('✅ Carta natal regenerada correctamente');
+      
+      const processedData = processChartData(regenerateResult.natalChart || regenerateResult.data);
+      setChartData(processedData);
+      
+    } catch (error) {
+      console.error('❌ Error regenerando carta:', error);
+      setError(error instanceof Error ? error.message : 'Error regenerando carta');
+    } finally {
       setLoading(false);
     }
   };
 
-  // ✅ FUNCIÓN PARA PROCESAR DATOS DE LA API
+  // ✅ FUNCIÓN PARA PROCESAR DATOS DE LA API - COMPLETAMENTE CORREGIDA
   const processChartData = (rawData: any): NatalChartData => {
+    console.log('🔍 processChartData recibió:', rawData);
+    console.log('🔍 Tipo de datos:', typeof rawData);
+    console.log('🔍 Es array?:', Array.isArray(rawData));
+    console.log('🔍 Keys:', rawData ? Object.keys(rawData) : 'no keys');
+  
     if (!rawData) {
+      console.error('❌ rawData es null/undefined');
+      console.error('❌ Estructura esperada: natalChart o data');
       throw new Error('No hay datos de carta natal');
     }
 
+    // Detectar estructura de datos automáticamente
+    let planets = [];
+    let houses = [];
+    let aspects = [];
+    let ascendant = null;
+    let midheaven = null;
+    let elementDistribution = null;
+    let modalityDistribution = null;
+
+    // Intentar diferentes estructuras
+    if (rawData.planets) {
+      planets = rawData.planets;
+    } else if (Array.isArray(rawData)) {
+      planets = rawData;
+    }
+
+    if (rawData.houses) {
+      houses = rawData.houses;
+    }
+
+    if (rawData.aspects) {
+      aspects = rawData.aspects;
+    }
+
+    if (rawData.ascendant) {
+      ascendant = rawData.ascendant;
+    }
+
+    if (rawData.midheaven || rawData.mc) {
+      midheaven = rawData.midheaven || rawData.mc;
+    }
+
+    console.log('🔍 Elementos extraídos:', {
+      planetsCount: planets.length,
+      housesCount: houses.length,
+      aspectsCount: aspects.length,
+      hasAscendant: !!ascendant,
+      hasMidheaven: !!midheaven
+    });
+
     // ✅ PROCESAR PLANETAS CON VALIDACIÓN
-    const planets: any[] = (rawData.planets || []).map((planet: any, index: number) => ({
+    const processedPlanets: any[] = (planets || []).map((planet: any, index: number) => ({
       name: planet.name || `Planeta ${index + 1}`,
       degree: planet.degree || 0,
       sign: planet.sign || 'Aries',
@@ -195,7 +282,7 @@ export default function NatalChartPage() {
     }));
 
     // ✅ PROCESAR CASAS CON VALIDACIÓN
-    const houses: any[] = (rawData.houses || []).map((house: any, index: number) => ({
+    const processedHouses: any[] = (houses || []).map((house: any, index: number) => ({
       number: house.number || (index + 1),
       sign: house.sign || 'Aries',
       degree: house.degree || 0,
@@ -204,7 +291,7 @@ export default function NatalChartPage() {
     }));
 
     // ✅ PROCESAR ASPECTOS CON VALIDACIÓN
-    const aspects: any[] = (rawData.aspects || []).map((aspect: any) => ({
+    const processedAspects: any[] = (aspects || []).map((aspect: any) => ({
       planet1: aspect.planet1 || 'Sol',
       planet2: aspect.planet2 || 'Luna',
       type: aspect.type || 'conjunction',
@@ -213,19 +300,22 @@ export default function NatalChartPage() {
     }));
 
     // ✅ CALCULAR DISTRIBUCIONES SI NO EXISTEN
-    const elementDistribution = rawData.elementDistribution || calculateElementDistribution(planets);
-    const modalityDistribution = rawData.modalityDistribution || calculateModalityDistribution(planets);
+    const finalElementDistribution = elementDistribution || rawData.elementDistribution || calculateElementDistribution(processedPlanets);
+    const finalModalityDistribution = modalityDistribution || rawData.modalityDistribution || calculateModalityDistribution(processedPlanets);
 
-    return {
-      planets,
-      houses,
-      aspects,
-      keyAspects: aspects,
-      ascendant: rawData.ascendant,
-      midheaven: rawData.midheaven,
-      elementDistribution,
-      modalityDistribution
+    const result = {
+      planets: processedPlanets,
+      houses: processedHouses,
+      aspects: processedAspects,
+      keyAspects: processedAspects,
+      ascendant: ascendant,
+      midheaven: midheaven,
+      elementDistribution: finalElementDistribution,
+      modalityDistribution: finalModalityDistribution
     };
+
+    console.log('✅ Datos procesados finales:', result);
+    return result; // ✅ AÑADIDO: Return statement que faltaba
   };
 
   // ✅ FUNCIONES DE CÁLCULO DE DISTRIBUCIONES
@@ -268,6 +358,10 @@ export default function NatalChartPage() {
     return distribution;
   };
 
+  // Navegación
+  const goToDashboard = () => router.push('/dashboard');
+  const goToBirthData = () => router.push('/birth-data');
+
   // ✅ PANTALLA DE CARGA
   if (loading) {
     return (
@@ -279,9 +373,9 @@ export default function NatalChartPage() {
           </div>
           
           <div className="space-y-3">
-            <h2 className="text-2xl font-bold text-white">Generando tu Carta Natal</h2>
+            <h2 className="text-2xl font-bold text-white">Cargando tu Carta Natal</h2>
             <p className="text-gray-300 leading-relaxed">
-              Calculando las posiciones planetarias exactas para el momento de tu nacimiento...
+              Procesando información astrológica...
             </p>
             
             {debugInfo && (
@@ -317,7 +411,7 @@ export default function NatalChartPage() {
           </div>
           
           <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-white">Error al generar carta</h2>
+            <h2 className="text-2xl font-bold text-white">Error al cargar carta</h2>
             <p className="text-gray-300">{error}</p>
             
             {debugInfo && (
@@ -327,20 +421,31 @@ export default function NatalChartPage() {
             )}
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              {error.includes('datos de nacimiento') ? (
+                <Button
+                  onClick={goToBirthData}
+                  className="bg-blue-600 hover:bg-blue-700 flex items-center space-x-2"
+                >
+                  <Edit className="w-4 h-4" />
+                  <span>Configurar datos</span>
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => loadChartData()}
+                  className="bg-purple-600 hover:bg-purple-700 flex items-center space-x-2"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  <span>Intentar de nuevo</span>
+                </Button>
+              )}
+              
               <Button
-                onClick={() => window.location.reload()}
-                className="bg-purple-600 hover:bg-purple-700 flex items-center space-x-2"
-              >
-                <Sparkles className="w-4 h-4" />
-                <span>Intentar de nuevo</span>
-              </Button>
-              <Button
-                onClick={() => router.push('/birth-data')}
+                onClick={goToDashboard}
                 variant="outline"
-                className="border-purple-400 text-purple-300 hover:bg-purple-400/10"
+                className="border-gray-400 text-gray-300 hover:bg-gray-400/10"
               >
-                <Edit className="w-4 h-4 mr-2" />
-                Editar datos
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Dashboard
               </Button>
             </div>
           </div>
@@ -349,17 +454,17 @@ export default function NatalChartPage() {
     );
   }
 
-  // ✅ PANTALLA PRINCIPAL - CARTA NATAL GENERADA
+  // ✅ PANTALLA PRINCIPAL - CARTA NATAL
   if (!chartData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-black text-white flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-300">No hay datos de carta natal disponibles</p>
           <Button
-            onClick={() => window.location.reload()}
+            onClick={() => loadChartData()}
             className="mt-4 bg-purple-600 hover:bg-purple-700"
           >
-            Recargar
+            Cargar carta
           </Button>
         </div>
       </div>
@@ -368,34 +473,57 @@ export default function NatalChartPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-black">
+      {/* Header con navegación */}
+      <div className="bg-gradient-to-r from-purple-900/50 to-indigo-900/50 backdrop-blur-sm border-b border-purple-700/30 px-4 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center">
+            <button
+              onClick={goToDashboard}
+              className="mr-4 p-2 rounded-lg hover:bg-white/10 transition-colors flex items-center text-gray-300 hover:text-white"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Dashboard
+            </button>
+            <h1 className="text-2xl font-bold text-white flex items-center">
+              <Star className="w-6 h-6 mr-3 text-yellow-400" />
+              Tu Carta Natal
+            </h1>
+          </div>
+          
+          <button
+            onClick={regenerateChart}
+            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all flex items-center text-sm"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Regenerar
+          </button>
+        </div>
+      </div>
+
       <div className="container mx-auto px-4 py-8 space-y-8">
-        
-        {/* Header mejorado con icono movido */}
+        {/* Header principal */}
         <div className="text-center space-y-6">
           <div className="flex justify-center items-center mb-6">
             <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 border border-yellow-400/30 rounded-full p-6 backdrop-blur-sm relative">
               <div className="absolute -top-2 -right-2 w-4 h-4 bg-yellow-400 rounded-full animate-pulse"></div>
               <Star className="w-12 h-12 text-yellow-400" />
-              
-              {/* Badge de corrección para Verónica */}
-              {isVeronica && chartData?.ascendant?.sign === 'Acuario' && (
-                <div className="absolute -bottom-2 -left-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                  ✅ Corregido
-                </div>
-              )}
             </div>
           </div>
-           <h1 className="text-4xl md:text-5xl text-white font-bold">
-Carta Natal <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">Tu Mapa Cósmico</span>
-    </h1>
+          
+          <h1 className="text-4xl md:text-5xl text-white font-bold">
+            Carta Natal{' '}
+            <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
+              Tu Mapa Cósmico
+            </span>
+          </h1>
+          
           <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed flex items-center justify-center gap-3">
             <Star className="w-6 h-6 text-yellow-400 flex-shrink-0" />
             Descubre los secretos que los astros revelaron en el momento exacto de tu nacimiento
           </p>
-          
         </div>
 
-        {/* Carta natal - SIN TARJETAS DE INFORMACIÓN */}
+        {/* Carta natal */}
         {chartData && (
           <div className="flex justify-center">
             <ChartDisplay
