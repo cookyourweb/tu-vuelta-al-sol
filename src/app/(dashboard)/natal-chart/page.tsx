@@ -1,4 +1,4 @@
-// src/app/(dashboard)/natal-chart/page.tsx - VERSIÓN COMPLETAMENTE CORREGIDA
+// src/app/(dashboard)/natal-chart/page.tsx - CORREGIDA
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -204,7 +204,7 @@ export default function NatalChartPage() {
       
       setDebugInfo('✅ Carta natal regenerada correctamente');
       
-      const processedData = processChartData(regenerateResult.natalChart || regenerateResult.data);
+      const processedData = processChartData(regenerateResult.data);
       setChartData(processedData);
       
     } catch (error) {
@@ -215,16 +215,15 @@ export default function NatalChartPage() {
     }
   };
 
-  // ✅ FUNCIÓN PARA PROCESAR DATOS DE LA API - COMPLETAMENTE CORREGIDA
+  // ✅ FUNCIÓN PARA PROCESAR DATOS DE LA API - CON DEBUGGING MEJORADO
   const processChartData = (rawData: any): NatalChartData => {
     console.log('🔍 processChartData recibió:', rawData);
     console.log('🔍 Tipo de datos:', typeof rawData);
     console.log('🔍 Es array?:', Array.isArray(rawData));
     console.log('🔍 Keys:', rawData ? Object.keys(rawData) : 'no keys');
-  
+    
     if (!rawData) {
       console.error('❌ rawData es null/undefined');
-      console.error('❌ Estructura esperada: natalChart o data');
       throw new Error('No hay datos de carta natal');
     }
 
@@ -315,7 +314,7 @@ export default function NatalChartPage() {
     };
 
     console.log('✅ Datos procesados finales:', result);
-    return result; // ✅ AÑADIDO: Return statement que faltaba
+    return result;
   };
 
   // ✅ FUNCIONES DE CÁLCULO DE DISTRIBUCIONES
