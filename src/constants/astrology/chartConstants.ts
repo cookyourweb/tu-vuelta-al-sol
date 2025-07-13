@@ -1,7 +1,13 @@
 // src/constants/astrology/chartConstants.ts
 // Constantes para el componente ChartDisplay - IMPORTS CORREGIDOS
 
-import { AspectConfig, AspectMeaning, HouseMeaning, PlanetMeaning } from "../../types/astrology/chartDisplay";
+export interface AspectConfig {
+  angle: number;
+  orb: number;
+  color: string;
+  name: string;
+  difficulty: 'neutral' | 'easy' | 'hard' | 'minor';
+}
 
 // =============================================================================
 // CONFIGURACIÓN DE ASPECTOS ASTROLÓGICOS
@@ -44,6 +50,14 @@ export const SIGN_SYMBOLS: Record<string, string> = {
 // =============================================================================
 // SIGNIFICADOS EDUCATIVOS COMPLETOS
 // =============================================================================
+
+interface AspectMeaning {
+  name: string;
+  meaning: string;
+  effect?: string;
+  type?: string;
+  explanation?: string;
+}
 
 export const aspectMeanings: Record<string, AspectMeaning> = {
   conjunction: {
@@ -111,6 +125,11 @@ export const aspectMeanings: Record<string, AspectMeaning> = {
   }
 };
 
+interface PlanetMeaning {
+  meaning: string;
+  keywords: string;
+}
+
 export const planetMeanings: Record<string, PlanetMeaning> = {
   'Sol': {
     meaning: 'Tu esencia, ego, vitalidad y propósito de vida',
@@ -176,6 +195,12 @@ export const signMeanings: Record<string, string> = {
   'Acuario': 'Innovación, humanitarismo, libertad',
   'Piscis': 'Compasión, intuición, espiritualidad'
 };
+
+interface HouseMeaning {
+  name: string;
+  meaning: string;
+  keywords: string;
+}
 
 export const houseMeanings: Record<number, HouseMeaning> = {
   1: { name: "Casa 1 - Personalidad", meaning: "Tu identidad, apariencia física y forma de presentarte al mundo", keywords: "Ego, imagen, primeras impresiones, vitalidad" },

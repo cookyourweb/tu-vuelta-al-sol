@@ -4,11 +4,11 @@
 import React, { useState } from 'react';
 
 const ProkeralaTest = () => {
-  const [results, setResults] = useState({});
+  const [results, setResults] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(false);
-  const [logs, setLogs] = useState([]);
+  const [logs, setLogs] = useState<string[]>([]);
 
-  const addLog = (message) => {
+  const addLog = (message: string) => {
     setLogs(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
   };
 
@@ -62,12 +62,20 @@ const ProkeralaTest = () => {
           natal: { success: false, error: data.error }
         });
       }
-    } catch (error) {
-      addLog(`❌ Error de conexión: ${error.message}`);
-      setResults({
-        ...results,
-        natal: { success: false, error: error.message }
-      });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        addLog(`❌ Error de conexión: ${error.message}`);
+        setResults({
+          ...results,
+          natal: { success: false, error: error.message }
+        });
+      } else {
+        addLog(`❌ Error de conexión desconocido`);
+        setResults({
+          ...results,
+          natal: { success: false, error: 'Error desconocido' }
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -114,12 +122,20 @@ const ProkeralaTest = () => {
           progressed: { success: false, error: data.error }
         });
       }
-    } catch (error) {
-      addLog(`❌ Error progresada: ${error.message}`);
-      setResults({
-        ...results,
-        progressed: { success: false, error: error.message }
-      });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        addLog(`❌ Error progresada: ${error.message}`);
+        setResults({
+          ...results,
+          progressed: { success: false, error: error.message }
+        });
+      } else {
+        addLog(`❌ Error progresada desconocido`);
+        setResults({
+          ...results,
+          progressed: { success: false, error: 'Error desconocido' }
+        });
+      }
     } finally {
       setLoading(false);
     }

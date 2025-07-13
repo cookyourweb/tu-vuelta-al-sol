@@ -250,6 +250,7 @@ const ChartLoader: React.FC<ChartLoaderProps> = ({
         longitude: planet.degree,
         sign: calculateSign(planet.degree),
         degree: planet.degree,
+        s: '' // Add missing 's' property with default empty string to satisfy Planet type
       }))}
       aspects={chartData.aspects.map(aspect => ({
         planet1: { name: aspect.planet1 },

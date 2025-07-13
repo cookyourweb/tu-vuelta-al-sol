@@ -265,7 +265,7 @@ export async function getProgressedChart(
         throw new Error('Error de autenticación con Prokerala');
       } else if (error.response?.status === 429) {
         throw new Error('Límite de solicitudes excedido');
-      } else if (error.response?.status >= 500) {
+      } else if (error.response && error.response.status !== undefined && error.response.status >= 500) {
         throw new Error('Error del servidor de Prokerala');
       }
     }

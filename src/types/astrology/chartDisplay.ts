@@ -1,6 +1,7 @@
 // src/types/astrology/chartDisplay.ts - TIPOS ACTUALIZADOS PARA CARTA PROGRESADA
 
-import { JSX } from 'react';
+
+// export type { AspectMeaning, PlanetMeaning, HouseMeaning } from "./chartDisplay";
 
 // =============================================================================
 // INTERFACES PRINCIPALES PARA CHARTDISPLAY ACTUALIZADAS
@@ -132,7 +133,7 @@ export interface CirclePosition {
 export interface MenuItemConfig {
   id: string;
   label: string;
-  icon: () => JSX.Element;
+  icon: () => React.ReactElement;
 }
 
 export interface BirthDataCardProps {

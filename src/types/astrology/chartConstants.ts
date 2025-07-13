@@ -1,7 +1,29 @@
-// src/constants/astrology/chartConstants.ts
-// Constantes para el componente ChartDisplay
+interface AspectConfig {
+  angle: number;
+  orb: number;
+  color: string;
+  name: string;
+  difficulty: 'neutral' | 'easy' | 'hard' | 'minor';
+}
 
-import { AspectConfig, AspectMeaning, HouseMeaning, PlanetMeaning } from "./chartDisplaycopy";
+interface AspectMeaning {
+  name: string;
+  meaning: string;
+  effect?: string;
+  type?: string;
+  explanation?: string;
+}
+
+interface PlanetMeaning {
+  meaning: string;
+  keywords: string;
+}
+
+export interface HouseMeaning {
+  name: string;
+  meaning: string;
+  keywords: string;
+}
 
 // =============================================================================
 // CONFIGURACIÓN DE ASPECTOS ASTROLÓGICOS
@@ -18,32 +40,6 @@ export const ASPECTS: Record<string, AspectConfig> = {
   sesquiquadrate: { angle: 135, orb: 3, color: '#f59e0b', name: 'Sesquicuadratura', difficulty: 'minor' },
   quincunx: { angle: 150, orb: 3, color: '#ec4899', name: 'Quincuncio', difficulty: 'minor' }
 };
-
-// =============================================================================
-// SÍMBOLOS Y COLORES PLANETARIOS
-// =============================================================================
-
-export const PLANET_SYMBOLS: Record<string, string> = {
-  'Sol': '☉', 'Luna': '☽', 'Mercurio': '☿', 'Venus': '♀', 'Marte': '♂',
-  'Júpiter': '♃', 'Saturno': '♄', 'Urano': '♅', 'Neptuno': '♆', 'Plutón': '♇',
-  'Nodo Norte': '☊', 'Nodo Sur': '☋', 'Quirón': '⚷'
-};
-
-export const PLANET_COLORS: Record<string, string> = {
-  'Sol': '#fbbf24', 'Luna': '#e5e7eb', 'Mercurio': '#06b6d4', 'Venus': '#22c55e',
-  'Marte': '#ef4444', 'Júpiter': '#8b5cf6', 'Saturno': '#64748b', 'Urano': '#0ea5e9',
-  'Neptuno': '#3b82f6', 'Plutón': '#7c2d12', 'Nodo Norte': '#f59e0b', 'Nodo Sur': '#f59e0b'
-};
-
-export const SIGN_SYMBOLS: Record<string, string> = {
-  'Aries': '♈', 'Tauro': '♉', 'Géminis': '♊', 'Cáncer': '♋',
-  'Leo': '♌', 'Virgo': '♍', 'Libra': '♎', 'Escorpio': '♏',
-  'Sagitario': '♐', 'Capricornio': '♑', 'Acuario': '♒', 'Piscis': '♓'
-};
-
-// =============================================================================
-// SIGNIFICADOS EDUCATIVOS COMPLETOS
-// =============================================================================
 
 export const aspectMeanings: Record<string, AspectMeaning> = {
   conjunction: {
@@ -111,6 +107,11 @@ export const aspectMeanings: Record<string, AspectMeaning> = {
   }
 };
 
+interface PlanetMeaning {
+  meaning: string;
+  keywords: string;
+}
+
 export const planetMeanings: Record<string, PlanetMeaning> = {
   'Sol': {
     meaning: 'Tu esencia, ego, vitalidad y propósito de vida',
@@ -162,20 +163,11 @@ export const planetMeanings: Record<string, PlanetMeaning> = {
   }
 };
 
-export const signMeanings: Record<string, string> = {
-  'Aries': 'Iniciativa, liderazgo, impulso pionero',
-  'Tauro': 'Estabilidad, sensualidad, perseverancia',
-  'Géminis': 'Comunicación, versatilidad, curiosidad',
-  'Cáncer': 'Protección, nutrición, emocionalidad',
-  'Leo': 'Creatividad, drama, generosidad',
-  'Virgo': 'Perfección, servicio, análisis',
-  'Libra': 'Equilibrio, belleza, diplomacia',
-  'Escorpio': 'Intensidad, transformación, misterio',
-  'Sagitario': 'Aventura, filosofía, expansión',
-  'Capricornio': 'Ambición, estructura, tradición',
-  'Acuario': 'Innovación, humanitarismo, libertad',
-  'Piscis': 'Compasión, intuición, espiritualidad'
-};
+export interface HouseMeaning {
+  name: string;
+  meaning: string;
+  keywords: string;
+}
 
 export const houseMeanings: Record<number, HouseMeaning> = {
   1: { name: "Casa 1 - Personalidad", meaning: "Tu identidad, apariencia física y forma de presentarte al mundo", keywords: "Ego, imagen, primeras impresiones, vitalidad" },

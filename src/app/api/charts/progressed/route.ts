@@ -244,7 +244,7 @@ export async function DELETE(request: NextRequest) {
     const result = await Chart.findOneAndUpdate(
       { userId },
       { 
-        $set: { 
+        $set: {
           progressedCharts: [],
           lastUpdated: new Date()
         }

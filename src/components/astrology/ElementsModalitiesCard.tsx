@@ -34,7 +34,8 @@ const ElementsModalitiesCard: React.FC<ElementsModalitiesCardProps> = ({
         
         <div className="space-y-2">
           {Object.entries(elementDistribution).map(([element, count]) => {
-            const percentage = ((count / 10) * 100).toFixed(0);
+            const total = Object.values(elementDistribution).reduce((acc, val) => acc + val, 0);
+            const percentage = total > 0 ? ((count / total) * 100).toFixed(0) : '0';
             const elementInfo = {
               fire: { 
                 emoji: <svg className="w-4 h-4 text-red-500" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8 2 5 5 5 9c0 5 4 9 7 11 3-2 7-6 7-11 0-4-3-7-7-7z"/></svg>, 
@@ -98,7 +99,8 @@ const ElementsModalitiesCard: React.FC<ElementsModalitiesCardProps> = ({
         
         <div className="space-y-2">
           {Object.entries(modalityDistribution).map(([modality, count]) => {
-            const percentage = ((count / 10) * 100).toFixed(0);
+            const total = Object.values(modalityDistribution).reduce((acc, val) => acc + val, 0);
+            const percentage = total > 0 ? ((count / total) * 100).toFixed(0) : '0';
             const modalityInfo = {
               cardinal: { 
                 emoji: <svg className="w-4 h-4 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/></svg>, 

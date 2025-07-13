@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import ChartDisplay from '../../components/astrology/ChartDisplaycompletosinrefactorizar';
+import ChartDisplay from '../../components/astrology/ChartDisplay';
 // Removed import of ChartDisplayProps as it is not exported from ChartDisplay component
 
 const sampleHouses = Array(12).fill(null).map((_, i) => ({
@@ -11,11 +11,11 @@ const sampleHouses = Array(12).fill(null).map((_, i) => ({
 }));
 
 const samplePlanets = [
-  { name: 'Sun', degree: 10, sign: 'Aries', house: 1, retrograde: false },
-  { name: 'Moon', degree: 20, sign: 'Tauro', house: 2, retrograde: false },
-  { name: 'Mercury', degree: 15, sign: 'Géminis', house: 3, retrograde: true },
-  { name: 'Venus', degree: 5, sign: 'Cáncer', house: 4, retrograde: false },
-  { name: 'Mars', degree: 25, sign: 'Leo', house: 5, retrograde: false },
+  { name: 'Sun', degree: 10, sign: 'Aries', house: 1, retrograde: false, s: '' },
+  { name: 'Moon', degree: 20, sign: 'Tauro', house: 2, retrograde: false, s: '' },
+  { name: 'Mercury', degree: 15, sign: 'Géminis', house: 3, retrograde: true, s: '' },
+  { name: 'Venus', degree: 5, sign: 'Cáncer', house: 4, retrograde: false, s: '' },
+  { name: 'Mars', degree: 25, sign: 'Leo', house: 5, retrograde: false, s: '' },
 ];
 
 const sampleAscendant = { degree: 15, sign: 'Aries' };
