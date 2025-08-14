@@ -389,9 +389,10 @@ function processProkeralaData(apiResponse: any, latitude: number, longitude: num
 }
 
 /**
- * Calcular distribución elemental
+ * ✅ FUNCIÓN CORREGIDA: Calcular distribución elemental
+ * 🎯 SOLUCIÓN: Solo contar los 10 planetas tradicionales, NO puntos como Quirón, Nodos, etc.
  */
-function calculateElementDistribution(planets: any[]) {
+function calculateElementDistribution(planets: any[]): { fire: number; earth: number; air: number; water: number } {
   const elementMap: Record<string, string> = {
     'Aries': 'fire', 'Leo': 'fire', 'Sagitario': 'fire',
     'Tauro': 'earth', 'Virgo': 'earth', 'Capricornio': 'earth',
@@ -399,16 +400,31 @@ function calculateElementDistribution(planets: any[]) {
     'Cáncer': 'water', 'Escorpio': 'water', 'Piscis': 'water'
   };
   
+  // 🎯 CORRECCIÓN PRINCIPAL: Solo contar los 10 planetas tradicionales
+  const TRADITIONAL_PLANETS = [
+    'Sol', 'Luna', 'Mercurio', 'Venus', 'Marte', 
+    'Júpiter', 'Saturno', 'Urano', 'Neptuno', 'Plutón'
+  ];
+  
   const counts = { fire: 0, earth: 0, air: 0, water: 0 };
   let total = 0;
   
   planets.forEach(planet => {
+    // ✅ FILTRO CRÍTICO: Solo procesar planetas tradicionales
+    if (!TRADITIONAL_PLANETS.includes(planet.name)) {
+      console.log(`⏭️ Saltando ${planet.name} (no es planeta tradicional)`);
+      return; // Saltar Quirón, Nodos, Lilith, etc.
+    }
+    
     const element = elementMap[planet.sign];
     if (element) {
       counts[element as keyof typeof counts]++;
       total++;
+      console.log(`✅ ${planet.name} (${planet.sign}) → ${element}`);
     }
   });
+  
+  console.log('📊 Conteo elemental final:', { counts, total });
   
   if (total === 0) return { fire: 25, earth: 25, air: 25, water: 25 };
   
@@ -421,19 +437,31 @@ function calculateElementDistribution(planets: any[]) {
 }
 
 /**
- * Calcular distribución modal
+ * ✅ FUNCIÓN CORREGIDA: Calcular distribución modal
+ * 🎯 SOLUCIÓN: Solo contar los 10 planetas tradicionales
  */
-function calculateModalityDistribution(planets: any[]) {
+function calculateModalityDistribution(planets: any[]): { cardinal: number; fixed: number; mutable: number } {
   const modalityMap: Record<string, string> = {
     'Aries': 'cardinal', 'Cáncer': 'cardinal', 'Libra': 'cardinal', 'Capricornio': 'cardinal',
     'Tauro': 'fixed', 'Leo': 'fixed', 'Escorpio': 'fixed', 'Acuario': 'fixed',
     'Géminis': 'mutable', 'Virgo': 'mutable', 'Sagitario': 'mutable', 'Piscis': 'mutable'
   };
   
+  // 🎯 CORRECCIÓN PRINCIPAL: Solo contar los 10 planetas tradicionales
+  const TRADITIONAL_PLANETS = [
+    'Sol', 'Luna', 'Mercurio', 'Venus', 'Marte', 
+    'Júpiter', 'Saturno', 'Urano', 'Neptuno', 'Plutón'
+  ];
+  
   const counts = { cardinal: 0, fixed: 0, mutable: 0 };
   let total = 0;
   
   planets.forEach(planet => {
+    // ✅ FILTRO CRÍTICO: Solo procesar planetas tradicionales
+    if (!TRADITIONAL_PLANETS.includes(planet.name)) {
+      return; // Saltar Quirón, Nodos, Lilith, etc.
+    }
+    
     const modality = modalityMap[planet.sign];
     if (modality) {
       counts[modality as keyof typeof counts]++;

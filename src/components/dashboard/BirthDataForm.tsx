@@ -20,8 +20,8 @@ const schema = z.object({
   fullName: z.string().min(2, 'Nombre requerido'),
   birthDate: z.string().nonempty('Fecha requerida'),
   birthTime: z.string().optional(),
-  birthTimeKnown: z.boolean().default(true),
-  inputMethod: z.enum(['location', 'coordinates']).default('location'),
+  birthTimeKnown: z.boolean(),
+  inputMethod: z.enum(['location', 'coordinates']),
   birthPlace: z.string().optional(),
   timezone: z.string().optional(),
 });
