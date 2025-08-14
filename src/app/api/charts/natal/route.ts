@@ -1,4 +1,4 @@
-// src/app/api/charts/natal/route.ts - VERSIÓN SIN DEPENDENCIA CIRCULAR
+// src/app/api/charts/natal/route.ts - CORREGIDO PARA USAR ENDPOINT QUE FUNCIONA
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import BirthData from '@/models/BirthData';
@@ -6,10 +6,10 @@ import Chart from '@/models/Chart';
 import axios from 'axios';
 
 /**
- * ✅ API CHARTS/NATAL - LLAMADA DIRECTA A PROKERALA (SIN DEPENDENCIA CIRCULAR)
+ * ✅ API CHARTS/NATAL - LLAMADA DIRECTA A PROKERALA (ENDPOINT CORRECTO)
  * 
  * GET: Obtiene carta guardada
- * POST: Genera nueva carta llamando DIRECTAMENTE a Prokerala API  
+ * POST: Genera nueva carta llamando DIRECTAMENTE a Prokerala API con natal-planet-position
  * DELETE: Elimina carta guardada (para forzar regeneración)
  */
 
@@ -133,7 +133,7 @@ function calculateTimezoneOffset(date: string, timezone: string): string {
 }
 
 /**
- * Llamar directamente a Prokerala API
+ * ✅ CORRECCIÓN CRÍTICA: Llamar a endpoint que devuelve datos JSON, no SVG
  */
 async function callProkeralaAPI(
   birthDate: string,
@@ -142,7 +142,7 @@ async function callProkeralaAPI(
   longitude: number,
   timezone: string
 ) {
-  console.log('📡 === LLAMADA DIRECTA A PROKERALA API ===');
+  console.log('📡 === LLAMADA DIRECTA A PROKERALA API (ENDPOINT CORRECTO) ===');
   console.log('📅 Parámetros:', { birthDate, birthTime, latitude, longitude, timezone });
   
   try {
@@ -160,8 +160,8 @@ async function callProkeralaAPI(
     
     console.log('🔧 Datos procesados:', { datetime, coordinates });
     
-    // Crear URL
-    const url = new URL(`${API_BASE_URL}/astrology/natal-chart`);
+    // ✅ CORRECCIÓN: Usar endpoint que devuelve datos JSON, no SVG
+    const url = new URL(`${API_BASE_URL}/astrology/natal-planet-position`); // ✅ CAMBIADO de natal-chart
     url.searchParams.append('profile[datetime]', datetime);
     url.searchParams.append('profile[coordinates]', coordinates);
     url.searchParams.append('birth_time_unknown', 'false');
@@ -172,7 +172,7 @@ async function callProkeralaAPI(
     url.searchParams.append('la', 'es');
     url.searchParams.append('ayanamsa', '0');
     
-    console.log('🌐 URL:', url.toString());
+    console.log('🌐 URL (natal-planet-position):', url.toString());
     
     // Hacer llamada
     const response = await axios.get(url.toString(), {
@@ -185,15 +185,31 @@ async function callProkeralaAPI(
     
     console.log('✅ Respuesta recibida:', {
       status: response.status,
-      planetsCount: response.data?.planets?.length || 0,
-      hasAscendant: !!response.data?.ascendant
+      dataType: typeof response.data,
+      isArray: Array.isArray(response.data),
+      keys: Object.keys(response.data || {})
     });
     
-    if (!response.data?.planets) {
+    // ✅ NUEVA VALIDACIÓN: Verificar estructura nueva de Prokerala
+    const actualData = response.data?.data || response.data;
+    
+    console.log('🔍 Estructura de datos:', {
+      hasData: !!actualData,
+      hasPlanetPositions: !!actualData?.planet_positions,
+      hasAngles: !!actualData?.angles,
+      hasHouses: !!actualData?.houses,
+      planetCount: actualData?.planet_positions?.length || 0,
+      angleCount: actualData?.angles?.length || 0
+    });
+    
+    // ✅ CORRECCIÓN: Verificar nueva estructura en lugar de planets directamente
+    if (!actualData?.planet_positions && !actualData?.planets) {
+      console.error('❌ No hay datos de planetas en la respuesta');
+      console.error('📊 Respuesta completa:', response.data);
       throw new Error('Respuesta inválida de Prokerala - no hay datos de planetas');
     }
     
-    return processProkeralaData(response.data, latitude, longitude, timezone);
+    return processProkeralaData(actualData, latitude, longitude, timezone);
   } catch (error) {
     console.error('❌ Error en llamada a Prokerala:', error);
     
@@ -211,14 +227,15 @@ async function callProkeralaAPI(
 }
 
 /**
- * Procesar datos de Prokerala
+ * ✅ CORRECCIÓN: Procesar datos de nueva estructura de Prokerala
  */
 function processProkeralaData(apiResponse: any, latitude: number, longitude: number, timezone: string) {
-  console.log('🔄 Procesando datos de Prokerala...');
+  console.log('🔄 Procesando datos de Prokerala (nueva estructura)...');
+  console.log('📊 Datos recibidos:', Object.keys(apiResponse || {}));
   
   const getSignFromLongitude = (longitude: number): string => {
     const signs = ['Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'];
-    return signs[Math.floor(longitude / 30) % 12];
+    return signs[Math.floor((longitude || 0) / 30) % 12];
   };
   
   const translatePlanet = (englishName: string): string => {
@@ -231,48 +248,106 @@ function processProkeralaData(apiResponse: any, latitude: number, longitude: num
     return translations[englishName] || englishName;
   };
   
-  // Procesar planetas
-  const planets = (apiResponse.planets || []).map((planet: any) => ({
-    name: translatePlanet(planet.name || 'Unknown'),
-    sign: planet.sign || getSignFromLongitude(planet.longitude || 0),
-    degree: Math.floor((planet.longitude || 0) % 30),
-    minutes: Math.floor(((planet.longitude || 0) % 1) * 60),
-    retrograde: planet.is_retrograde || false,
-    housePosition: planet.house || 1,
-    longitude: planet.longitude || 0
+  // ✅ PROCESAR PLANETAS - Nueva estructura
+  const planetData = apiResponse.planet_positions || apiResponse.planets || [];
+  console.log('🪐 Procesando planetas:', planetData.length);
+  
+  const planets = planetData.map((planet: any) => {
+    const result = {
+      name: translatePlanet(planet.name || 'Unknown'),
+      sign: planet.zodiac?.name || planet.sign || getSignFromLongitude(planet.longitude || 0),
+      degree: planet.degree || Math.floor((planet.longitude || 0) % 30),
+      minutes: planet.minutes || Math.floor(((planet.longitude || 0) % 1) * 60),
+      retrograde: planet.is_retrograde || planet.retrograde || false,
+      housePosition: planet.house_number || planet.house || 1,
+      longitude: planet.longitude || 0
+    };
+    
+    console.log(`🪐 ${result.name}: ${result.sign} ${result.degree}°${result.minutes}' (Casa ${result.housePosition})`);
+    return result;
+  });
+  
+  // ✅ PROCESAR CASAS - Nueva estructura
+  const houseData = apiResponse.houses || [];
+  console.log('🏠 Procesando casas:', houseData.length);
+  
+  const houses = houseData.map((house: any, index: number) => ({
+    number: house.number || (index + 1),
+    sign: house.start_cusp?.zodiac?.name || house.zodiac?.name || house.sign || getSignFromLongitude(house.start_cusp?.longitude || house.longitude || 0),
+    degree: house.start_cusp?.degree || house.degree || Math.floor((house.start_cusp?.longitude || house.longitude || 0) % 30),
+    minutes: house.start_cusp?.minutes || house.minutes || Math.floor(((house.start_cusp?.longitude || house.longitude || 0) % 1) * 60),
+    longitude: house.start_cusp?.longitude || house.longitude || 0
   }));
   
-  // Procesar casas
-  const houses = (apiResponse.houses || []).map((house: any) => ({
-    number: house.number || 1,
-    sign: house.sign || getSignFromLongitude(house.longitude || 0),
-    degree: Math.floor((house.longitude || 0) % 30),
-    minutes: Math.floor(((house.longitude || 0) % 1) * 60),
-    longitude: house.longitude || 0
-  }));
+  // ✅ PROCESAR ASPECTOS - Nueva estructura
+  const aspectData = apiResponse.aspects || [];
+  console.log('🔗 Procesando aspectos:', aspectData.length);
   
-  // Procesar aspectos
-  const aspects = (apiResponse.aspects || []).map((aspect: any) => ({
-    planet1: aspect.planet1?.name ? translatePlanet(aspect.planet1.name) : 'Unknown',
-    planet2: aspect.planet2?.name ? translatePlanet(aspect.planet2.name) : 'Unknown',
+  const aspects = aspectData.map((aspect: any) => ({
+    planet1: aspect.planet_one?.name ? translatePlanet(aspect.planet_one.name) : (aspect.planet1?.name ? translatePlanet(aspect.planet1.name) : 'Unknown'),
+    planet2: aspect.planet_two?.name ? translatePlanet(aspect.planet_two.name) : (aspect.planet2?.name ? translatePlanet(aspect.planet2.name) : 'Unknown'),
     type: aspect.aspect?.name || aspect.type || 'conjunction',
     orb: aspect.orb || 0
   }));
   
-  // Ascendente
+  // ✅ CRÍTICO: PROCESAR ASCENDENTE desde ANGLES array
   let ascendant;
-  if (apiResponse.ascendant) {
+  if (apiResponse.angles && Array.isArray(apiResponse.angles)) {
+    console.log('🔍 Buscando ascendente en angles:', apiResponse.angles.map((a: any) => a.name));
+    
+    const ascendantAngle = apiResponse.angles.find((angle: any) => 
+      angle.name === 'Ascendente' || 
+      angle.name === 'Ascendant' ||
+      angle.name === 'ASC' ||
+      (angle.name && angle.name.toLowerCase().includes('ascend'))
+    );
+    
+    if (ascendantAngle) {
+      console.log('🔺 Ascendente encontrado en angles:', ascendantAngle);
+      ascendant = {
+        sign: ascendantAngle.zodiac?.name || getSignFromLongitude(ascendantAngle.longitude || 0),
+        degree: ascendantAngle.degree || Math.floor((ascendantAngle.longitude || 0) % 30),
+        minutes: ascendantAngle.minutes || Math.floor(((ascendantAngle.longitude || 0) % 1) * 60),
+        longitude: ascendantAngle.longitude || 0
+      };
+      console.log('🔺 Ascendente procesado:', ascendant);
+    } else {
+      console.warn('⚠️ No se encontró ascendente en angles array');
+    }
+  } else if (apiResponse.ascendant) {
+    // ✅ FALLBACK: Estructura antigua
+    console.log('🔺 Usando ascendente de estructura antigua:', apiResponse.ascendant);
     ascendant = {
       sign: apiResponse.ascendant.sign || getSignFromLongitude(apiResponse.ascendant.longitude || 0),
       degree: Math.floor((apiResponse.ascendant.longitude || 0) % 30),
       minutes: Math.floor(((apiResponse.ascendant.longitude || 0) % 1) * 60),
       longitude: apiResponse.ascendant.longitude || 0
     };
+  } else {
+    console.warn('⚠️ No se encontró ascendente en ninguna estructura');
   }
   
-  // Medio Cielo
+  // ✅ PROCESAR MEDIO CIELO desde ANGLES array
   let midheaven;
-  if (apiResponse.mc) {
+  if (apiResponse.angles && Array.isArray(apiResponse.angles)) {
+    const midheavenAngle = apiResponse.angles.find((angle: any) => 
+      angle.name === 'Midheaven' || 
+      angle.name === 'MC' || 
+      angle.name === 'Medio Cielo' ||
+      (angle.name && angle.name.toLowerCase().includes('midheaven'))
+    );
+    
+    if (midheavenAngle) {
+      console.log('🔺 Medio Cielo encontrado en angles:', midheavenAngle);
+      midheaven = {
+        sign: midheavenAngle.zodiac?.name || getSignFromLongitude(midheavenAngle.longitude || 0),
+        degree: midheavenAngle.degree || Math.floor((midheavenAngle.longitude || 0) % 30),
+        minutes: midheavenAngle.minutes || Math.floor(((midheavenAngle.longitude || 0) % 1) * 60),
+        longitude: midheavenAngle.longitude || 0
+      };
+    }
+  } else if (apiResponse.mc) {
+    // ✅ FALLBACK: Estructura antigua
     midheaven = {
       sign: apiResponse.mc.sign || getSignFromLongitude(apiResponse.mc.longitude || 0),
       degree: Math.floor((apiResponse.mc.longitude || 0) % 30),
@@ -285,10 +360,18 @@ function processProkeralaData(apiResponse: any, latitude: number, longitude: num
   const elementDistribution = calculateElementDistribution(planets);
   const modalityDistribution = calculateModalityDistribution(planets);
   
-  console.log('✅ Datos procesados:', {
+  console.log('✅ Datos procesados correctamente:', {
     planetsCount: planets.length,
-    ascendantSign: ascendant?.sign
+    housesCount: houses.length,
+    aspectsCount: aspects.length,
+    ascendantSign: ascendant?.sign,
+    midheavenSign: midheaven?.sign
   });
+  
+  // ✅ VERIFICACIÓN ESPECIAL PARA VERÓNICA
+  if (ascendant?.sign) {
+    console.log('🎯 Ascendente final procesado:', ascendant.sign);
+  }
   
   return {
     birthData: { latitude, longitude, timezone, datetime: apiResponse.datetime || '' },
@@ -368,7 +451,7 @@ function calculateModalityDistribution(planets: any[]) {
 }
 
 /**
- * Generar carta de respaldo
+ * ✅ MANTENER: Generar carta de respaldo (sin cambios para preservar funcionalidad)
  */
 function generateFallbackChart(birthDate: string, birthTime: string, latitude: number, longitude: number, timezone: string) {
   console.log('⚠️ Generando carta de respaldo...');
@@ -423,6 +506,7 @@ function generateFallbackChart(birthDate: string, birthTime: string, latitude: n
   };
 }
 
+// ✅ MANTENER: Todas las funciones GET, DELETE, POST sin cambios en la estructura
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -528,7 +612,7 @@ export async function DELETE(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  console.log('🌟 === INICIO GENERACIÓN CARTA NATAL (SIN DEPENDENCIA CIRCULAR) ===');
+  console.log('🌟 === INICIO GENERACIÓN CARTA NATAL (ENDPOINT CORRECTO) ===');
   
   try {
     const body = await request.json();
@@ -600,7 +684,7 @@ export async function POST(request: NextRequest) {
     
     // Generar carta natal
     try {
-      console.log('📡 === LLAMADA DIRECTA A PROKERALA ===');
+      console.log('📡 === LLAMADA DIRECTA A PROKERALA (ENDPOINT CORRECTO) ===');
       
       const natalChart = await callProkeralaAPI(
         birthDate,
@@ -625,32 +709,34 @@ export async function POST(request: NextRequest) {
         { upsert: true, new: true, setDefaultsOnInsert: true }
       );
       
-      console.log('✅ === CARTA NATAL COMPLETADA ===');
-      console.log('🔺 Ascendente:', natalChart.ascendant?.sign);
+      console.log('✅ === CARTA NATAL COMPLETADA (ENDPOINT CORRECTO) ===');
+      console.log('🔺 Ascendente obtenido:', natalChart.ascendant?.sign);
       
-      // Verificación para casos de prueba
+      // Verificación especial para casos de prueba
       if (birthDate === '1974-02-10' && Math.abs(latitude - 40.4168) < 0.01) {
-        console.log('🎯 === CASO VERÓNICA ===');
+        console.log('🎯 === VERIFICACIÓN VERÓNICA (ENDPOINT CORRECTO) ===');
         console.log('🔺 ASC obtenido:', natalChart.ascendant?.sign);
         console.log('✅ Esperado: Acuario');
-        console.log('🎉 Correcto:', natalChart.ascendant?.sign === 'Acuario' ? 'SÍ' : 'NO');
+        console.log('🎉 Correcto:', natalChart.ascendant?.sign === 'Acuario' ? 'SÍ ✅' : 'NO ❌');
       }
       
       return NextResponse.json(
         { 
           success: true,
-          message: `Carta natal ${regenerate ? 'regenerada' : 'generada'} correctamente`,
+          message: `Carta natal ${regenerate ? 'regenerada' : 'generada'} correctamente usando endpoint correcto`,
           natalChart,
           debug: {
-            method: 'direct_prokerala',
-            timestamp: new Date().toISOString()
+            method: 'direct_prokerala_corrected',
+            endpoint: 'natal-planet-position',
+            timestamp: new Date().toISOString(),
+            ascendant_detected: natalChart.ascendant?.sign
           }
         },
         { status: 200 }
       );
       
     } catch (apiError) {
-      console.error('❌ Error llamando a Prokerala, usando respaldo:', apiError);
+      console.error('❌ Error llamando a Prokerala (endpoint correcto), usando respaldo:', apiError);
       
       // Generar carta de respaldo
       const fallbackChart = generateFallbackChart(birthDate, birthTime, latitude, longitude, timezone);
@@ -678,6 +764,7 @@ export async function POST(request: NextRequest) {
           fallback: true,
           debug: {
             method: 'fallback',
+            originalEndpoint: 'natal-planet-position',
             error: apiError instanceof Error ? apiError.message : 'Unknown',
             timestamp: new Date().toISOString()
           }

@@ -1,4 +1,4 @@
-// src/app/(dashboard)/natal-chart/page.tsx - CORREGIDA
+// src/app/(dashboard)/natal-chart/page.tsx - CORREGIDA PARA NUEVA ESTRUCTURA PROKERALA
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -130,14 +130,34 @@ export default function NatalChartPage() {
       setDebugInfo('✅ Carta natal generada correctamente');
       console.log('✅ Carta natal generada:', generateResult);
       
-      // ✅ PROCESAR DATOS RECIBIDOS - CON DEBUGGING
+      // ✅ PROCESAR DATOS RECIBIDOS - CON DEBUGGING MEJORADO
       console.log('🔍 Datos completos recibidos:', generateResult);
       console.log('🔍 generateResult.data:', generateResult.data);
       console.log('🔍 generateResult.natalChart:', generateResult.natalChart);
       
-      // Intentar diferentes estructuras de datos
-      let dataToProcess = generateResult.data || generateResult.natalChart || generateResult;
-      console.log('🔍 Datos a procesar:', dataToProcess);
+      // ✅ CORRECCIÓN CRÍTICA: Intentar múltiples estructuras posibles
+      let dataToProcess = null;
+      
+      // Probar diferentes ubicaciones de los datos
+      if (generateResult.data) {
+        dataToProcess = generateResult.data;
+        console.log('🎯 Usando generateResult.data');
+      } else if (generateResult.natalChart) {
+        dataToProcess = generateResult.natalChart;
+        console.log('🎯 Usando generateResult.natalChart');
+      } else if (generateResult.chartData) {
+        dataToProcess = generateResult.chartData;
+        console.log('🎯 Usando generateResult.chartData');
+      } else {
+        dataToProcess = generateResult;
+        console.log('🎯 Usando generateResult completo');
+      }
+      
+      console.log('🔍 Datos finales a procesar:', dataToProcess);
+      
+      if (!dataToProcess) {
+        throw new Error('No se encontraron datos de carta natal en la respuesta');
+      }
       
       const processedData = processChartData(dataToProcess);
       setChartData(processedData);
@@ -173,7 +193,7 @@ export default function NatalChartPage() {
     }
   };
 
-  // ✅ FUNCIÓN: Forzar regeneración
+  // ✅ FUNCIÓN CORREGIDA: Forzar regeneración
   const regenerateChart = async () => {
     try {
       setLoading(true);
@@ -204,7 +224,26 @@ export default function NatalChartPage() {
       
       setDebugInfo('✅ Carta natal regenerada correctamente');
       
-      const processedData = processChartData(regenerateResult.data);
+      // ✅ CORRECCIÓN CRÍTICA: Manejo seguro de datos
+      let dataToProcess = null;
+      
+      if (regenerateResult.data) {
+        dataToProcess = regenerateResult.data;
+      } else if (regenerateResult.natalChart) {
+        dataToProcess = regenerateResult.natalChart;
+      } else if (regenerateResult.chartData) {
+        dataToProcess = regenerateResult.chartData;
+      } else {
+        dataToProcess = regenerateResult;
+      }
+      
+      console.log('🔄 Datos para regeneración:', dataToProcess);
+      
+      if (!dataToProcess) {
+        throw new Error('No se encontraron datos en la respuesta de regeneración');
+      }
+      
+      const processedData = processChartData(dataToProcess);
       setChartData(processedData);
       
     } catch (error) {
@@ -215,92 +254,317 @@ export default function NatalChartPage() {
     }
   };
 
-  // ✅ FUNCIÓN PARA PROCESAR DATOS DE LA API - CON DEBUGGING MEJORADO
-  const processChartData = (rawData: any): NatalChartData => {
-    console.log('🔍 processChartData recibió:', rawData);
-    console.log('🔍 Tipo de datos:', typeof rawData);
-    console.log('🔍 Es array?:', Array.isArray(rawData));
-    console.log('🔍 Keys:', rawData ? Object.keys(rawData) : 'no keys');
+  // ✅ FUNCIÓN ADAPTADORA MEJORADA: Convierte estructura Prokerala a estructura frontend
+  const adaptProkeralaData = (rawData: any): any => {
+    console.log('🔍 Adaptando datos Prokerala:', rawData);
     
     if (!rawData) {
-      console.error('❌ rawData es null/undefined');
-      throw new Error('No hay datos de carta natal');
+      console.warn('⚠️ rawData es null/undefined en adaptProkeralaData');
+      return null;
+    }
+    
+    // ✅ DETECCIÓN MEJORADA: Múltiples formas de detectar estructura nueva
+    const hasAngles = rawData.angles && Array.isArray(rawData.angles);
+    const hasPlanetPositions = rawData.planet_positions && Array.isArray(rawData.planet_positions);
+    const hasNewStructure = hasAngles || hasPlanetPositions || rawData.planets?.some((p: any) => p.zodiac);
+    
+    console.log('🔍 Estructura detectada:', {
+      hasAngles,
+      hasPlanetPositions,
+      hasNewStructure,
+      isProkeralaAPI: hasAngles && hasPlanetPositions
+    });
+    
+    if (!hasNewStructure) {
+      // Es estructura antigua o ya procesada, devolver tal cual
+      console.log('📄 Estructura antigua/procesada detectada');
+      return rawData;
+    }
+    
+    // ✅ NUEVA ESTRUCTURA DE PROKERALA: Adaptar completamente
+    console.log('🔄 Adaptando estructura nueva de Prokerala...');
+    
+    const adaptedData: any = {
+      planets: [],
+      houses: [],
+      aspects: [],
+      ascendant: null,
+      midheaven: null
+    };
+    
+    // ✅ ADAPTAR PLANETAS - Nueva estructura de Prokerala
+    if (rawData.planet_positions && Array.isArray(rawData.planet_positions)) {
+      console.log('🪐 Adaptando planetas de planet_positions');
+      adaptedData.planets = rawData.planet_positions.map((planet: any) => ({
+        name: translatePlanetNameToSpanish(planet.name || ''),
+        degree: planet.degree || Math.floor((planet.longitude || 0) % 30),
+        sign: planet.zodiac?.name || getSignNameFromLongitude(planet.longitude || 0),
+        minutes: planet.minutes || Math.floor(((planet.longitude || 0) % 1) * 60),
+        longitude: planet.longitude || 0,
+        houseNumber: planet.house || 1,
+        housePosition: planet.house || 1,
+        isRetrograde: planet.is_retrograde || false,
+        retrograde: planet.is_retrograde || false
+      }));
+    } else if (rawData.planets && Array.isArray(rawData.planets)) {
+      console.log('🪐 Adaptando planetas de planets (fallback)');
+      adaptedData.planets = rawData.planets.map((planet: any) => ({
+        name: planet.name,
+        degree: planet.degree,
+        sign: planet.signName || planet.sign,
+        minutes: planet.minutes || 0,
+        longitude: planet.longitude,
+        houseNumber: planet.house || 1,
+        housePosition: planet.house || 1,
+        isRetrograde: planet.retrograde || false,
+        retrograde: planet.retrograde || false
+      }));
+    }
+    
+    // ✅ ADAPTAR CASAS - Nueva estructura de Prokerala
+    if (rawData.houses && Array.isArray(rawData.houses)) {
+      console.log('🏠 Adaptando casas');
+      adaptedData.houses = rawData.houses.map((house: any, index: number) => ({
+        number: house.number || (index + 1),
+        sign: house.zodiac?.name || house.signName || house.sign || getSignNameFromLongitude(house.longitude || 0),
+        degree: house.degree || Math.floor((house.longitude || 0) % 30),
+        minutes: house.minutes || Math.floor(((house.longitude || 0) % 1) * 60),
+        longitude: house.longitude || 0
+      }));
+    }
+    
+    // ✅ CRÍTICO: ADAPTAR ÁNGULOS - Ascendente y Medio Cielo desde nueva estructura
+    if (rawData.angles && Array.isArray(rawData.angles)) {
+      console.log('🔺 Adaptando ángulos desde structure angles');
+      console.log('🔍 Ángulos disponibles:', rawData.angles.map((a: any) => a.name));
+      
+      // Buscar ascendente
+      const ascendantAngle = rawData.angles.find((angle: any) => 
+        angle.name === 'Ascendente' || 
+        angle.name === 'Ascendant' ||
+        angle.name === 'ASC' ||
+        angle.name?.toLowerCase().includes('ascend')
+      );
+      
+      if (ascendantAngle) {
+        console.log('🔺 Ascendente encontrado en angles:', ascendantAngle);
+        adaptedData.ascendant = {
+          longitude: ascendantAngle.longitude,
+          sign: ascendantAngle.zodiac?.name || getSignNameFromLongitude(ascendantAngle.longitude),
+          degree: ascendantAngle.degree || Math.floor((ascendantAngle.longitude || 0) % 30),
+          minutes: ascendantAngle.minutes || Math.floor(((ascendantAngle.longitude || 0) % 1) * 60)
+        };
+      } else {
+        console.warn('⚠️ No se encontró ascendente en angles');
+      }
+      
+      // Buscar medio cielo
+      const midheavenAngle = rawData.angles.find((angle: any) => 
+        angle.name === 'Midheaven' || 
+        angle.name === 'MC' || 
+        angle.name === 'Medio Cielo' ||
+        angle.name?.toLowerCase().includes('midheaven')
+      );
+      
+      if (midheavenAngle) {
+        console.log('🔺 Medio Cielo encontrado en angles:', midheavenAngle);
+        adaptedData.midheaven = {
+          longitude: midheavenAngle.longitude,
+          sign: midheavenAngle.zodiac?.name || getSignNameFromLongitude(midheavenAngle.longitude),
+          degree: midheavenAngle.degree || Math.floor((midheavenAngle.longitude || 0) % 30),
+          minutes: midheavenAngle.minutes || Math.floor(((midheavenAngle.longitude || 0) % 1) * 60)
+        };
+      }
+    }
+    
+    // ✅ ADAPTAR ASPECTOS
+    if (rawData.aspects && Array.isArray(rawData.aspects)) {
+      console.log('🔗 Adaptando aspectos');
+      adaptedData.aspects = rawData.aspects.map((aspect: any) => ({
+        planet1: translatePlanetNameToSpanish(aspect.planet_one?.name || aspect.planet1 || ''),
+        planet2: translatePlanetNameToSpanish(aspect.planet_two?.name || aspect.planet2 || ''),
+        type: aspect.aspect?.name || aspect.type || 'conjunction',
+        orb: aspect.orb || 0,
+        applying: aspect.is_applying || aspect.applying || false
+      }));
+    }
+    
+    // ✅ PRESERVAR DISTRIBUCIONES SI EXISTEN
+    if (rawData.elementDistribution) {
+      adaptedData.elementDistribution = rawData.elementDistribution;
+    }
+    if (rawData.modalityDistribution) {
+      adaptedData.modalityDistribution = rawData.modalityDistribution;
+    }
+    
+    console.log('✅ Datos adaptados completos:', adaptedData);
+    console.log('🔺 Ascendente adaptado:', adaptedData.ascendant);
+    
+    return adaptedData;
+  };
+
+  // ✅ FUNCIÓN HELPER: Traducciones de planetas
+  const translatePlanetNameToSpanish = (englishName: string): string => {
+    const translations: Record<string, string> = {
+      'Sun': 'Sol',
+      'Moon': 'Luna',
+      'Mercury': 'Mercurio',
+      'Venus': 'Venus',
+      'Mars': 'Marte',
+      'Jupiter': 'Júpiter',
+      'Saturn': 'Saturno',
+      'Uranus': 'Urano',
+      'Neptune': 'Neptuno',
+      'Pluto': 'Plutón',
+      'Chiron': 'Quirón',
+      'North Node': 'Nodo Norte',
+      'South Node': 'Nodo Sur',
+      'Lilith': 'Lilith'
+    };
+    
+    return translations[englishName] || englishName;
+  };
+
+  // ✅ FUNCIÓN HELPER: Obtener signo desde longitud
+  const getSignNameFromLongitude = (longitude: number): string => {
+    const signs = [
+      'Aries', 'Tauro', 'Géminis', 'Cáncer',
+      'Leo', 'Virgo', 'Libra', 'Escorpio',
+      'Sagitario', 'Capricornio', 'Acuario', 'Piscis'
+    ];
+    
+    const signIndex = Math.floor((longitude || 0) / 30) % 12;
+    return signs[signIndex] || 'Aries';
+  };
+
+  // ✅ FUNCIÓN CORREGIDA: Procesa datos usando el adaptador mejorado
+  const processChartData = (rawData: any): NatalChartData => {
+    console.log('🔍 === INICIANDO processChartData ===');
+    console.log('🔍 rawData recibido:', rawData);
+    console.log('🔍 Tipo de rawData:', typeof rawData);
+    console.log('🔍 rawData keys:', Object.keys(rawData || {}));
+    
+    // ✅ VALIDACIÓN CRÍTICA: Verificar que rawData existe
+    if (!rawData || (typeof rawData === 'object' && Object.keys(rawData).length === 0)) {
+      console.error('❌ rawData es null/undefined/vacío en processChartData');
+      console.error('❌ rawData valor:', rawData);
+      throw new Error('No hay datos de carta natal para procesar');
     }
 
-    // Detectar estructura de datos automáticamente
-    let planets = [];
-    let houses = [];
-    let aspects = [];
-    let ascendant = null;
-    let midheaven = null;
-    let elementDistribution = null;
-    let modalityDistribution = null;
-
-    // Intentar diferentes estructuras
-    if (rawData.planets) {
-      planets = rawData.planets;
-    } else if (Array.isArray(rawData)) {
-      planets = rawData;
+    // ✅ PRIMERO: Adaptar la estructura de datos
+    console.log('🔄 Iniciando adaptación de datos...');
+    const adaptedData = adaptProkeralaData(rawData);
+    
+    if (!adaptedData) {
+      console.error('❌ adaptedData es null después de adaptación');
+      throw new Error('Error adaptando estructura de datos de carta natal');
     }
+    
+    console.log('✅ Datos adaptados exitosamente:', adaptedData);
+    
+    // ✅ LUEGO: Procesar con la estructura adaptada
+    const planets = adaptedData.planets || [];
+    const houses = adaptedData.houses || [];
+    const aspects = adaptedData.aspects || [];
+    const ascendant = adaptedData.ascendant;
+    const midheaven = adaptedData.midheaven;
+    const elementDistribution = adaptedData.elementDistribution;
+    const modalityDistribution = adaptedData.modalityDistribution;
 
-    if (rawData.houses) {
-      houses = rawData.houses;
-    }
-
-    if (rawData.aspects) {
-      aspects = rawData.aspects;
-    }
-
-    if (rawData.ascendant) {
-      ascendant = rawData.ascendant;
-    }
-
-    if (rawData.midheaven || rawData.mc) {
-      midheaven = rawData.midheaven || rawData.mc;
-    }
-
-    console.log('🔍 Elementos extraídos:', {
+    console.log('🔍 Elementos extraídos post-adaptación:', {
       planetsCount: planets.length,
       housesCount: houses.length,
       aspectsCount: aspects.length,
       hasAscendant: !!ascendant,
+      ascendantSign: ascendant?.sign,
       hasMidheaven: !!midheaven
     });
 
-    // ✅ PROCESAR PLANETAS CON VALIDACIÓN
-    const processedPlanets: any[] = (planets || []).map((planet: any, index: number) => ({
-      name: planet.name || `Planeta ${index + 1}`,
-      degree: planet.degree || 0,
-      sign: planet.sign || 'Aries',
-      minutes: planet.minutes || 0,
-      longitude: planet.longitude || planet.degree || 0,
-      houseNumber: planet.houseNumber || planet.housePosition || 1,
-      housePosition: planet.housePosition || planet.houseNumber || 1,
-      isRetrograde: planet.isRetrograde || planet.retrograde || false,
-      retrograde: planet.retrograde || planet.isRetrograde || false
-    }));
+    // ✅ PROCESAR PLANETAS con validación
+    const processedPlanets: any[] = planets.map((planet: any, index: number) => {
+      try {
+        return {
+          name: planet.name || `Planeta${index + 1}`,
+          degree: planet.degree || 0,
+          sign: planet.sign || 'Aries',
+          minutes: planet.minutes || 0,
+          longitude: planet.longitude || planet.degree || 0,
+          houseNumber: planet.houseNumber || planet.housePosition || 1,
+          housePosition: planet.housePosition || planet.houseNumber || 1,
+          isRetrograde: planet.isRetrograde || planet.retrograde || false,
+          retrograde: planet.retrograde || planet.isRetrograde || false
+        };
+      } catch (error) {
+        console.warn(`⚠️ Error procesando planeta ${index}:`, error);
+        return {
+          name: `Planeta${index + 1}`,
+          degree: 0,
+          sign: 'Aries',
+          minutes: 0,
+          longitude: 0,
+          houseNumber: 1,
+          housePosition: 1,
+          isRetrograde: false,
+          retrograde: false
+        };
+      }
+    });
 
-    // ✅ PROCESAR CASAS CON VALIDACIÓN
-    const processedHouses: any[] = (houses || []).map((house: any, index: number) => ({
-      number: house.number || (index + 1),
-      sign: house.sign || 'Aries',
-      degree: house.degree || 0,
-      minutes: house.minutes || 0,
-      longitude: house.longitude || house.degree || 0
-    }));
+    // ✅ PROCESAR CASAS con validación
+    const processedHouses: any[] = houses.length > 0 
+      ? houses.map((house: any, index: number) => {
+          try {
+            return {
+              number: house.number || (index + 1),
+              sign: house.sign || 'Aries',
+              degree: house.degree || 0,
+              minutes: house.minutes || 0,
+              longitude: house.longitude || house.degree || 0
+            };
+          } catch (error) {
+            console.warn(`⚠️ Error procesando casa ${index}:`, error);
+            return {
+              number: index + 1,
+              sign: 'Aries',
+              degree: 0,
+              minutes: 0,
+              longitude: 0
+            };
+          }
+        })
+      : Array.from({ length: 12 }, (_, index) => ({
+          number: index + 1,
+          sign: 'Aries',
+          degree: 0,
+          minutes: 0,
+          longitude: 0
+        }));
 
-    // ✅ PROCESAR ASPECTOS CON VALIDACIÓN
-    const processedAspects: any[] = (aspects || []).map((aspect: any) => ({
-      planet1: aspect.planet1 || 'Sol',
-      planet2: aspect.planet2 || 'Luna',
-      type: aspect.type || 'conjunction',
-      orb: aspect.orb || 0,
-      applying: aspect.applying || false
-    }));
+    // ✅ PROCESAR ASPECTOS con validación
+    const processedAspects: any[] = aspects.map((aspect: any, index: number) => {
+      try {
+        return {
+          planet1: aspect.planet1 || 'Sol',
+          planet2: aspect.planet2 || 'Luna',
+          type: aspect.type || 'conjunction',
+          orb: aspect.orb || 0,
+          applying: aspect.applying || false
+        };
+      } catch (error) {
+        console.warn(`⚠️ Error procesando aspecto ${index}:`, error);
+        return {
+          planet1: 'Sol',
+          planet2: 'Luna',
+          type: 'conjunction',
+          orb: 0,
+          applying: false
+        };
+      }
+    });
 
-    // ✅ CALCULAR DISTRIBUCIONES SI NO EXISTEN
-    const finalElementDistribution = elementDistribution || rawData.elementDistribution || calculateElementDistribution(processedPlanets);
-    const finalModalityDistribution = modalityDistribution || rawData.modalityDistribution || calculateModalityDistribution(processedPlanets);
+    // ✅ CALCULAR DISTRIBUCIONES
+    const finalElementDistribution = elementDistribution || calculateElementDistribution(processedPlanets);
+    const finalModalityDistribution = modalityDistribution || calculateModalityDistribution(processedPlanets);
 
     const result = {
       planets: processedPlanets,
@@ -313,7 +577,13 @@ export default function NatalChartPage() {
       modalityDistribution: finalModalityDistribution
     };
 
-    console.log('✅ Datos procesados finales:', result);
+    console.log('✅ === RESULTADO FINAL processChartData ===');
+    console.log('🪐 Planetas procesados:', result.planets.length);
+    console.log('🏠 Casas procesadas:', result.houses.length);
+    console.log('🔗 Aspectos procesados:', result.aspects.length);
+    console.log('🔺 Ascendente final:', result.ascendant);
+    console.log('🔺 Medio Cielo final:', result.midheaven);
+
     return result;
   };
 

@@ -293,8 +293,8 @@ export default function BirthDataForm() {
         userId: user.uid,
         fullName: data.fullName || user.displayName || 'Usuario',
         birthDate: data.birthDate,
-        birthTime: birthTimeKnown ? (data.birthTime || '12:00:00') : '12:00:00',
-        birthTimeKnown: birthTimeKnown,
+        birthTime: data.birthTimeKnown ? (data.birthTime || '12:00:00') : '12:00:00',
+        birthTimeKnown: data.birthTimeKnown,
         birthPlace: finalPlace,
         latitude: lat,
         longitude: lng,
@@ -407,7 +407,7 @@ export default function BirthDataForm() {
           {/* Formulario - Solo mostrar si no hay éxito */}
           {!success && (
             <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-8">
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <form onSubmit={handleSubmit<FormData>(onSubmit)} className="space-y-6">
                 
                 {/* Nombre */}
                 <div>
@@ -495,6 +495,9 @@ export default function BirthDataForm() {
                         inputMethod === 'location'
                           ? 'border-yellow-400 bg-yellow-400/10 text-white'
                           : 'border-white/20 bg-white/5 text-gray-300 hover:border-white/40'
+                      }`}
+                    >
+                      <Search className="w-6 h-6 mx-auto mb-2" />
                       }`}
                     >
                       <Search className="w-6 h-6 mx-auto mb-2" />

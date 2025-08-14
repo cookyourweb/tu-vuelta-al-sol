@@ -1,0 +1,91 @@
+// debug-token.js - Ejecutar con: node debug-token.js
+require('dotenv').config({ path: '.env.local' });
+const axios = require('axios');
+
+async function debugTokenGeneration() {
+  console.log('🔍 === DEBUGGING TOKEN GENERATION ===');
+  
+  const CLIENT_ID = process.env.NEXT_PUBLIC_PROKERALA_CLIENT_ID;
+  const CLIENT_SECRET = process.env.NEXT_PUBLIC_PROKERALA_CLIENT_SECRET;
+  
+  console.log('📋 Variables de entorno:');
+  console.log('CLIENT_ID:', CLIENT_ID ? `${CLIENT_ID.slice(0, 8)}...` : '❌ FALTANTE');
+  console.log('CLIENT_SECRET:', CLIENT_SECRET ? `${CLIENT_SECRET.slice(0, 8)}...` : '❌ FALTANTE');
+  
+  if (!CLIENT_ID || !CLIENT_SECRET) {
+    console.error('❌ ERROR: Faltan credenciales en .env.local');
+    console.log('✅ SOLUCIÓN: Verifica que .env.local tenga:');
+    console.log('NEXT_PUBLIC_PROKERALA_CLIENT_ID=dfc6d566-0f6b-49d2-ac14-ce049e44ff18');
+    console.log('NEXT_PUBLIC_PROKERALA_CLIENT_SECRET=E6iZifyC7e8rSSol8KcVP5MimZFi071kgmNNSgJQ');
+    return;
+  }
+  
+  try {
+    console.log('🔑 Intentando generar token...');
+    
+    const response = await axios.post(
+      'https://api.prokerala.com/token',
+      new URLSearchParams({
+        'grant_type': 'client_credentials',
+        'client_id': CLIENT_ID,
+        'client_secret': CLIENT_SECRET,
+      }),
+      {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        timeout: 10000
+      }
+    );
+    
+    console.log('✅ TOKEN GENERADO EXITOSAMENTE!');
+    console.log('📊 Detalles del token:');
+    console.log('  - Tipo:', response.data.token_type);
+    console.log('  - Expira en:', response.data.expires_in, 'segundos');
+    console.log('  - Token (primeros 20 chars):', response.data.access_token.slice(0, 20) + '...');
+    
+    // Test básico de API con el token
+    console.log('\n🧪 Probando token con API...');
+    
+    const testResponse = await axios.get(
+      'https://api.prokerala.com/v2/astrology/natal-aspect-chart?profile[datetime]=1974-02-10T07:30:00%2B01:00&profile[coordinates]=40.4164,-3.7025&birth_time_unknown=false&house_system=placidus&orb=default&birth_time_rectification=flat-chart&aspect_filter=all&la=es&ayanamsa=0',
+      {
+        headers: {
+          'Authorization': `Bearer ${response.data.access_token}`,
+          'Accept': 'application/json'
+        },
+        timeout: 15000
+      }
+    );
+    
+    console.log('✅ API TEST EXITOSO!');
+    console.log('📊 Respuesta de carta natal:');
+    console.log('  - Status:', testResponse.status);
+    console.log('  - Planetas:', testResponse.data?.planets?.length || 0);
+    console.log('  - Ascendente:', testResponse.data?.ascendant?.sign || 'No encontrado');
+    
+    if (testResponse.data?.ascendant?.sign) {
+      console.log('\n🎯 === VERIFICACIÓN VERÓNICA ===');
+      console.log('🔺 ASC obtenido:', testResponse.data.ascendant.sign);
+      console.log('✅ Esperado: Acuario');
+      console.log('🎉 Correcto:', testResponse.data.ascendant.sign === 'Acuario' ? 'SÍ ✅' : 'NO ❌');
+    }
+    
+  } catch (error) {
+    console.error('❌ ERROR GENERANDO TOKEN:');
+    
+    if (error.response) {
+      console.error('Status:', error.response.status);
+      console.error('Data:', error.response.data);
+      
+      if (error.response.status === 401) {
+        console.log('\n🔧 POSIBLES SOLUCIONES:');
+        console.log('1. Verificar que CLIENT_ID y CLIENT_SECRET sean correctos');
+        console.log('2. Verificar que las credenciales no hayan expirado');
+        console.log('3. Contactar a Prokerala si persiste el error');
+      }
+    } else {
+      console.error('Error:', error.message);
+    }
+  }
+}
+
+debugTokenGeneration();

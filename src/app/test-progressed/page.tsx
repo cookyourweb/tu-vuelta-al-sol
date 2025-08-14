@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { testProgressedChartConnection } from '@/services/progressedChartService';
+// import { testProgressedChartConnection } from '@/services/progressedChartService';
 
 export default function TestProgressedChart() {
   const [testResult, setTestResult] = useState<any>(null);
@@ -12,9 +12,12 @@ export default function TestProgressedChart() {
   const handleTestConnection = async () => {
     setLoading(true);
     try {
-      const result = await testProgressedChartConnection();
-      setTestResult(result);
-      console.log('🧪 Resultado test connection:', result);
+      // testProgressedChartConnection function no está disponible
+      setTestResult({
+        success: false,
+        message: 'La función testProgressedChartConnection no está exportada desde el módulo.',
+      });
+      console.log('🧪 testProgressedChartConnection no disponible');
     } catch (error) {
       setTestResult({
         success: false,

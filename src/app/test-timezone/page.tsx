@@ -1,11 +1,10 @@
-// src/app/test-timezone/page.tsx
 'use client';
 
 import dynamic from 'next/dynamic';
 
 // Importar dinámicamente para evitar errores de SSR
 const SimpleTimezoneTest = dynamic(
-  () => import('../../components/test/SimpleTimezonetest'),
+  () => import('@/components/test/SimpleTimezonetest'),
   { 
     ssr: false,
     loading: () => <div className="flex items-center justify-center min-h-screen">
