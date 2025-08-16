@@ -15,18 +15,33 @@ import {
 // ==========================================
 // TIPOS Y VALIDACIÓN
 // ==========================================
+// 🔧 CORRECCIÓN DEL SCHEMA - LÍNEAS 20-30 APROX
+// Reemplaza esta parte del schema en BirthDataForm.tsx
 
 const schema = z.object({
   fullName: z.string().min(2, 'Nombre requerido'),
   birthDate: z.string().nonempty('Fecha requerida'),
-  birthTime: z.string().optional(),
   birthTimeKnown: z.boolean(),
   inputMethod: z.enum(['location', 'coordinates']),
+  birthTime: z.string().optional(),
   birthPlace: z.string().optional(),
   timezone: z.string().optional(),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
 });
 
-type FormData = z.infer<typeof schema>;
+type FormData = {
+  fullName: string;
+  birthDate: string;
+  birthTimeKnown: boolean;
+  inputMethod: 'location' | 'coordinates';
+  birthTime?: string;
+  birthPlace?: string;
+  timezone?: string;
+  latitude?: number;
+  longitude?: number;
+};
+
 
 interface LocationSuggestion {
   name: string;
@@ -293,8 +308,8 @@ export default function BirthDataForm() {
         userId: user.uid,
         fullName: data.fullName || user.displayName || 'Usuario',
         birthDate: data.birthDate,
-        birthTime: data.birthTimeKnown ? (data.birthTime || '12:00:00') : '12:00:00',
-        birthTimeKnown: data.birthTimeKnown,
+        birthTime: birthTimeKnown ? (data.birthTime || '12:00:00') : '12:00:00',
+        birthTimeKnown: birthTimeKnown,
         birthPlace: finalPlace,
         latitude: lat,
         longitude: lng,

@@ -68,6 +68,7 @@ export async function POST(request: NextRequest) {
     // ✅ CORRECCIÓN 2: Cambiar llamada de función y parámetros
     const progressedChartData = await generateProgressedChart({
       birthDate: birthData.birthDate.toISOString().split('T')[0], // YYYY-MM-DD
+      latitude: parseFloat(birthData.latitude),
       birthTime: birthData.birthTime || '12:00:00',
       latitude: parseFloat(birthData.latitude),
       longitude: parseFloat(birthData.longitude),

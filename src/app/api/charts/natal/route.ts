@@ -1,4 +1,4 @@
-// src/app/api/charts/natal/route.ts - CORREGIDO PARA USAR ENDPOINT QUE FUNCIONA
+// src/app/api/charts/natal/route.ts - VERSIÓN FINAL LIMPIA
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import BirthData from '@/models/BirthData';
@@ -6,7 +6,7 @@ import Chart from '@/models/Chart';
 import axios from 'axios';
 
 /**
- * ✅ API CHARTS/NATAL - LLAMADA DIRECTA A PROKERALA (ENDPOINT CORRECTO)
+ * ✅ API CHARTS/NATAL - LLAMADA DIRECTA A PROKERALA (VERSIÓN LIMPIA)
  * 
  * GET: Obtiene carta guardada
  * POST: Genera nueva carta llamando DIRECTAMENTE a Prokerala API con natal-planet-position
@@ -133,7 +133,7 @@ function calculateTimezoneOffset(date: string, timezone: string): string {
 }
 
 /**
- * ✅ CORRECCIÓN CRÍTICA: Llamar a endpoint que devuelve datos JSON, no SVG
+ * ✅ FUNCIÓN PRINCIPAL: Llamar a endpoint que devuelve datos JSON
  */
 async function callProkeralaAPI(
   birthDate: string,
@@ -142,17 +142,29 @@ async function callProkeralaAPI(
   longitude: number,
   timezone: string
 ) {
-  console.log('📡 === LLAMADA DIRECTA A PROKERALA API (ENDPOINT CORRECTO) ===');
+  console.log('📡 === LLAMADA DIRECTA A PROKERALA API (VERSIÓN LIMPIA) ===');
   console.log('📅 Parámetros:', { birthDate, birthTime, latitude, longitude, timezone });
   
   try {
     // Obtener token
     const token = await getProkeralaToken();
     
-    // Formatear parámetros
-    const formattedBirthTime = birthTime || '12:00:00';
+    // Formatear parámetros con segundos obligatorios
+    let formattedBirthTime = birthTime || '12:00:00';
+    
+    // ✅ CORRECCIÓN: Asegurar que siempre tenga segundos (formato ISO 8601 completo)
+    if (formattedBirthTime.length === 5) {
+      formattedBirthTime = formattedBirthTime + ':00';
+    }
+    
     const offset = calculateTimezoneOffset(birthDate, timezone);
     const datetime = `${birthDate}T${formattedBirthTime}${offset}`;
+    
+    console.log('🕒 Formato de tiempo verificado:', {
+      original: birthTime,
+      formatted: formattedBirthTime,
+      complete: datetime
+    });
     
     const latFixed = Math.round(latitude * 10000) / 10000;
     const lngFixed = Math.round(longitude * 10000) / 10000;
@@ -160,8 +172,8 @@ async function callProkeralaAPI(
     
     console.log('🔧 Datos procesados:', { datetime, coordinates });
     
-    // ✅ CORRECCIÓN: Usar endpoint que devuelve datos JSON, no SVG
-    const url = new URL(`${API_BASE_URL}/astrology/natal-planet-position`); // ✅ CAMBIADO de natal-chart
+    // ✅ LLAMADA GET con parámetros en URL (NO POST)
+    const url = new URL(`${API_BASE_URL}/astrology/natal-planet-position`);
     url.searchParams.append('profile[datetime]', datetime);
     url.searchParams.append('profile[coordinates]', coordinates);
     url.searchParams.append('birth_time_unknown', 'false');
@@ -172,37 +184,26 @@ async function callProkeralaAPI(
     url.searchParams.append('la', 'es');
     url.searchParams.append('ayanamsa', '0');
     
-    console.log('🌐 URL (natal-planet-position):', url.toString());
+    console.log('🌐 URL completa:', url.toString());
     
-    // Hacer llamada
+    // Hacer llamada GET
     const response = await axios.get(url.toString(), {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/json'
       },
-      timeout: 15000 // 15 segundos
+      timeout: 15000
     });
     
     console.log('✅ Respuesta recibida:', {
       status: response.status,
       dataType: typeof response.data,
-      isArray: Array.isArray(response.data),
       keys: Object.keys(response.data || {})
     });
     
-    // ✅ NUEVA VALIDACIÓN: Verificar estructura nueva de Prokerala
+    // Verificar estructura de datos
     const actualData = response.data?.data || response.data;
     
-    console.log('🔍 Estructura de datos:', {
-      hasData: !!actualData,
-      hasPlanetPositions: !!actualData?.planet_positions,
-      hasAngles: !!actualData?.angles,
-      hasHouses: !!actualData?.houses,
-      planetCount: actualData?.planet_positions?.length || 0,
-      angleCount: actualData?.angles?.length || 0
-    });
-    
-    // ✅ CORRECCIÓN: Verificar nueva estructura en lugar de planets directamente
     if (!actualData?.planet_positions && !actualData?.planets) {
       console.error('❌ No hay datos de planetas en la respuesta');
       console.error('📊 Respuesta completa:', response.data);
@@ -219,6 +220,9 @@ async function callProkeralaAPI(
         throw new Error('Error de autenticación con Prokerala');
       } else if (error.response?.status === 429) {
         throw new Error('Límite de solicitudes excedido');
+      } else if (error.response?.status === 400) {
+        console.error('❌ Error 400 - Parámetros incorrectos:', error.response?.data);
+        throw new Error('Parámetros incorrectos en la solicitud a Prokerala');
       }
     }
     
@@ -227,10 +231,10 @@ async function callProkeralaAPI(
 }
 
 /**
- * ✅ CORRECCIÓN: Procesar datos de nueva estructura de Prokerala
+ * ✅ PROCESAR DATOS de Prokerala
  */
 function processProkeralaData(apiResponse: any, latitude: number, longitude: number, timezone: string) {
-  console.log('🔄 Procesando datos de Prokerala (nueva estructura)...');
+  console.log('🔄 Procesando datos de Prokerala...');
   console.log('📊 Datos recibidos:', Object.keys(apiResponse || {}));
   
   const getSignFromLongitude = (longitude: number): string => {
@@ -248,7 +252,7 @@ function processProkeralaData(apiResponse: any, latitude: number, longitude: num
     return translations[englishName] || englishName;
   };
   
-  // ✅ PROCESAR PLANETAS - Nueva estructura
+  // Procesar planetas
   const planetData = apiResponse.planet_positions || apiResponse.planets || [];
   console.log('🪐 Procesando planetas:', planetData.length);
   
@@ -267,10 +271,8 @@ function processProkeralaData(apiResponse: any, latitude: number, longitude: num
     return result;
   });
   
-  // ✅ PROCESAR CASAS - Nueva estructura
+  // Procesar casas
   const houseData = apiResponse.houses || [];
-  console.log('🏠 Procesando casas:', houseData.length);
-  
   const houses = houseData.map((house: any, index: number) => ({
     number: house.number || (index + 1),
     sign: house.start_cusp?.zodiac?.name || house.zodiac?.name || house.sign || getSignFromLongitude(house.start_cusp?.longitude || house.longitude || 0),
@@ -279,10 +281,8 @@ function processProkeralaData(apiResponse: any, latitude: number, longitude: num
     longitude: house.start_cusp?.longitude || house.longitude || 0
   }));
   
-  // ✅ PROCESAR ASPECTOS - Nueva estructura
+  // Procesar aspectos
   const aspectData = apiResponse.aspects || [];
-  console.log('🔗 Procesando aspectos:', aspectData.length);
-  
   const aspects = aspectData.map((aspect: any) => ({
     planet1: aspect.planet_one?.name ? translatePlanet(aspect.planet_one.name) : (aspect.planet1?.name ? translatePlanet(aspect.planet1.name) : 'Unknown'),
     planet2: aspect.planet_two?.name ? translatePlanet(aspect.planet_two.name) : (aspect.planet2?.name ? translatePlanet(aspect.planet2.name) : 'Unknown'),
@@ -290,11 +290,9 @@ function processProkeralaData(apiResponse: any, latitude: number, longitude: num
     orb: aspect.orb || 0
   }));
   
-  // ✅ CRÍTICO: PROCESAR ASCENDENTE desde ANGLES array
+  // Procesar ascendente
   let ascendant;
   if (apiResponse.angles && Array.isArray(apiResponse.angles)) {
-    console.log('🔍 Buscando ascendente en angles:', apiResponse.angles.map((a: any) => a.name));
-    
     const ascendantAngle = apiResponse.angles.find((angle: any) => 
       angle.name === 'Ascendente' || 
       angle.name === 'Ascendant' ||
@@ -303,31 +301,23 @@ function processProkeralaData(apiResponse: any, latitude: number, longitude: num
     );
     
     if (ascendantAngle) {
-      console.log('🔺 Ascendente encontrado en angles:', ascendantAngle);
       ascendant = {
         sign: ascendantAngle.zodiac?.name || getSignFromLongitude(ascendantAngle.longitude || 0),
         degree: ascendantAngle.degree || Math.floor((ascendantAngle.longitude || 0) % 30),
         minutes: ascendantAngle.minutes || Math.floor(((ascendantAngle.longitude || 0) % 1) * 60),
         longitude: ascendantAngle.longitude || 0
       };
-      console.log('🔺 Ascendente procesado:', ascendant);
-    } else {
-      console.warn('⚠️ No se encontró ascendente en angles array');
     }
   } else if (apiResponse.ascendant) {
-    // ✅ FALLBACK: Estructura antigua
-    console.log('🔺 Usando ascendente de estructura antigua:', apiResponse.ascendant);
     ascendant = {
       sign: apiResponse.ascendant.sign || getSignFromLongitude(apiResponse.ascendant.longitude || 0),
       degree: Math.floor((apiResponse.ascendant.longitude || 0) % 30),
       minutes: Math.floor(((apiResponse.ascendant.longitude || 0) % 1) * 60),
       longitude: apiResponse.ascendant.longitude || 0
     };
-  } else {
-    console.warn('⚠️ No se encontró ascendente en ninguna estructura');
   }
   
-  // ✅ PROCESAR MEDIO CIELO desde ANGLES array
+  // Procesar medio cielo
   let midheaven;
   if (apiResponse.angles && Array.isArray(apiResponse.angles)) {
     const midheavenAngle = apiResponse.angles.find((angle: any) => 
@@ -338,7 +328,6 @@ function processProkeralaData(apiResponse: any, latitude: number, longitude: num
     );
     
     if (midheavenAngle) {
-      console.log('🔺 Medio Cielo encontrado en angles:', midheavenAngle);
       midheaven = {
         sign: midheavenAngle.zodiac?.name || getSignFromLongitude(midheavenAngle.longitude || 0),
         degree: midheavenAngle.degree || Math.floor((midheavenAngle.longitude || 0) % 30),
@@ -347,7 +336,6 @@ function processProkeralaData(apiResponse: any, latitude: number, longitude: num
       };
     }
   } else if (apiResponse.mc) {
-    // ✅ FALLBACK: Estructura antigua
     midheaven = {
       sign: apiResponse.mc.sign || getSignFromLongitude(apiResponse.mc.longitude || 0),
       degree: Math.floor((apiResponse.mc.longitude || 0) % 30),
@@ -356,7 +344,7 @@ function processProkeralaData(apiResponse: any, latitude: number, longitude: num
     };
   }
   
-  // Distribuciones
+  // Distribuciones corregidas
   const elementDistribution = calculateElementDistribution(planets);
   const modalityDistribution = calculateModalityDistribution(planets);
   
@@ -367,11 +355,6 @@ function processProkeralaData(apiResponse: any, latitude: number, longitude: num
     ascendantSign: ascendant?.sign,
     midheavenSign: midheaven?.sign
   });
-  
-  // ✅ VERIFICACIÓN ESPECIAL PARA VERÓNICA
-  if (ascendant?.sign) {
-    console.log('🎯 Ascendente final procesado:', ascendant.sign);
-  }
   
   return {
     birthData: { latitude, longitude, timezone, datetime: apiResponse.datetime || '' },
@@ -389,8 +372,7 @@ function processProkeralaData(apiResponse: any, latitude: number, longitude: num
 }
 
 /**
- * ✅ FUNCIÓN CORREGIDA: Calcular distribución elemental
- * 🎯 SOLUCIÓN: Solo contar los 10 planetas tradicionales, NO puntos como Quirón, Nodos, etc.
+ * ✅ FUNCIÓN CORREGIDA: Distribución elemental - SOLO PLANETAS TRADICIONALES
  */
 function calculateElementDistribution(planets: any[]): { fire: number; earth: number; air: number; water: number } {
   const elementMap: Record<string, string> = {
@@ -400,7 +382,7 @@ function calculateElementDistribution(planets: any[]): { fire: number; earth: nu
     'Cáncer': 'water', 'Escorpio': 'water', 'Piscis': 'water'
   };
   
-  // 🎯 CORRECCIÓN PRINCIPAL: Solo contar los 10 planetas tradicionales
+  // 🎯 FILTRO CRÍTICO: Solo los 10 planetas tradicionales
   const TRADITIONAL_PLANETS = [
     'Sol', 'Luna', 'Mercurio', 'Venus', 'Marte', 
     'Júpiter', 'Saturno', 'Urano', 'Neptuno', 'Plutón'
@@ -410,10 +392,10 @@ function calculateElementDistribution(planets: any[]): { fire: number; earth: nu
   let total = 0;
   
   planets.forEach(planet => {
-    // ✅ FILTRO CRÍTICO: Solo procesar planetas tradicionales
+    // ✅ FILTRO: Solo procesar planetas tradicionales
     if (!TRADITIONAL_PLANETS.includes(planet.name)) {
       console.log(`⏭️ Saltando ${planet.name} (no es planeta tradicional)`);
-      return; // Saltar Quirón, Nodos, Lilith, etc.
+      return;
     }
     
     const element = elementMap[planet.sign];
@@ -437,8 +419,7 @@ function calculateElementDistribution(planets: any[]): { fire: number; earth: nu
 }
 
 /**
- * ✅ FUNCIÓN CORREGIDA: Calcular distribución modal
- * 🎯 SOLUCIÓN: Solo contar los 10 planetas tradicionales
+ * ✅ FUNCIÓN CORREGIDA: Distribución modal - SOLO PLANETAS TRADICIONALES
  */
 function calculateModalityDistribution(planets: any[]): { cardinal: number; fixed: number; mutable: number } {
   const modalityMap: Record<string, string> = {
@@ -447,7 +428,6 @@ function calculateModalityDistribution(planets: any[]): { cardinal: number; fixe
     'Géminis': 'mutable', 'Virgo': 'mutable', 'Sagitario': 'mutable', 'Piscis': 'mutable'
   };
   
-  // 🎯 CORRECCIÓN PRINCIPAL: Solo contar los 10 planetas tradicionales
   const TRADITIONAL_PLANETS = [
     'Sol', 'Luna', 'Mercurio', 'Venus', 'Marte', 
     'Júpiter', 'Saturno', 'Urano', 'Neptuno', 'Plutón'
@@ -457,9 +437,8 @@ function calculateModalityDistribution(planets: any[]): { cardinal: number; fixe
   let total = 0;
   
   planets.forEach(planet => {
-    // ✅ FILTRO CRÍTICO: Solo procesar planetas tradicionales
     if (!TRADITIONAL_PLANETS.includes(planet.name)) {
-      return; // Saltar Quirón, Nodos, Lilith, etc.
+      return;
     }
     
     const modality = modalityMap[planet.sign];
@@ -479,7 +458,7 @@ function calculateModalityDistribution(planets: any[]): { cardinal: number; fixe
 }
 
 /**
- * ✅ MANTENER: Generar carta de respaldo (sin cambios para preservar funcionalidad)
+ * ✅ CARTA DE RESPALDO cuando API falla
  */
 function generateFallbackChart(birthDate: string, birthTime: string, latitude: number, longitude: number, timezone: string) {
   console.log('⚠️ Generando carta de respaldo...');
@@ -534,7 +513,7 @@ function generateFallbackChart(birthDate: string, birthTime: string, latitude: n
   };
 }
 
-// ✅ MANTENER: Todas las funciones GET, DELETE, POST sin cambios en la estructura
+// ✅ ENDPOINTS PRINCIPALES
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -640,7 +619,7 @@ export async function DELETE(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  console.log('🌟 === INICIO GENERACIÓN CARTA NATAL (ENDPOINT CORRECTO) ===');
+  console.log('🌟 === INICIO GENERACIÓN CARTA NATAL (VERSIÓN LIMPIA) ===');
   
   try {
     const body = await request.json();
@@ -712,7 +691,7 @@ export async function POST(request: NextRequest) {
     
     // Generar carta natal
     try {
-      console.log('📡 === LLAMADA DIRECTA A PROKERALA (ENDPOINT CORRECTO) ===');
+      console.log('📡 === LLAMADA DIRECTA A PROKERALA (VERSIÓN LIMPIA) ===');
       
       const natalChart = await callProkeralaAPI(
         birthDate,
@@ -737,12 +716,12 @@ export async function POST(request: NextRequest) {
         { upsert: true, new: true, setDefaultsOnInsert: true }
       );
       
-      console.log('✅ === CARTA NATAL COMPLETADA (ENDPOINT CORRECTO) ===');
+      console.log('✅ === CARTA NATAL COMPLETADA (VERSIÓN LIMPIA) ===');
       console.log('🔺 Ascendente obtenido:', natalChart.ascendant?.sign);
       
       // Verificación especial para casos de prueba
       if (birthDate === '1974-02-10' && Math.abs(latitude - 40.4168) < 0.01) {
-        console.log('🎯 === VERIFICACIÓN VERÓNICA (ENDPOINT CORRECTO) ===');
+        console.log('🎯 === VERIFICACIÓN VERÓNICA (VERSIÓN LIMPIA) ===');
         console.log('🔺 ASC obtenido:', natalChart.ascendant?.sign);
         console.log('✅ Esperado: Acuario');
         console.log('🎉 Correcto:', natalChart.ascendant?.sign === 'Acuario' ? 'SÍ ✅' : 'NO ❌');
@@ -751,10 +730,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           success: true,
-          message: `Carta natal ${regenerate ? 'regenerada' : 'generada'} correctamente usando endpoint correcto`,
+          message: `Carta natal ${regenerate ? 'regenerada' : 'generada'} correctamente usando versión limpia`,
           natalChart,
           debug: {
-            method: 'direct_prokerala_corrected',
+            method: 'direct_prokerala_clean',
             endpoint: 'natal-planet-position',
             timestamp: new Date().toISOString(),
             ascendant_detected: natalChart.ascendant?.sign
@@ -764,7 +743,7 @@ export async function POST(request: NextRequest) {
       );
       
     } catch (apiError) {
-      console.error('❌ Error llamando a Prokerala (endpoint correcto), usando respaldo:', apiError);
+      console.error('❌ Error llamando a Prokerala (versión limpia), usando respaldo:', apiError);
       
       // Generar carta de respaldo
       const fallbackChart = generateFallbackChart(birthDate, birthTime, latitude, longitude, timezone);
