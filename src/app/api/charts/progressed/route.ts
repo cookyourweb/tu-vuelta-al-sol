@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
 
     // 4. Generar nueva carta progresada
     console.log(`🔄 Generando nueva carta progresada para período: ${progressionPeriod.description}`);
-    
+  
     // ✅ CORRECCIÓN 2: Cambiar llamada de función y parámetros
     const progressedChartData = await generateProgressedChart({
       birthDate: birthData.birthDate.toISOString().split('T')[0], // YYYY-MM-DD
