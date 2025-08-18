@@ -12,6 +12,7 @@
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
     "@shadcn/ui": "^0.0.4",
+    "@types/puppeteer": "^5.4.7",
     "axios": "^1.4.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -19,6 +20,8 @@
     "lucide-react": "^0.525.0",
     "mongoose": "^8.16.2",
     "next": "latest",
+    "openai": "^5.12.2",
+    "puppeteer": "^24.16.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.60.0",
