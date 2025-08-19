@@ -41,13 +41,50 @@ export default function RegisterForm() {
   const onSubmit = async (data: RegisterFormValues) => {
     setIsSubmitting(true);
     setError(null);
-    
+
     try {
-      await registerUser(data.email, data.password, data.fullName);
+      // 1. Registra el usuario en Firebase (usa tu AuthContext)
+      const firebaseUser = await registerUser(data.email, data.password, data.fullName);
+      let uid;
+      if (firebaseUser?.user?.uid) {
+        uid = firebaseUser.user.uid;
+      } else if (firebaseUser?.uid) {
+        uid = firebaseUser.uid;
+      }
+
+      // 2. Registra en MongoDB (colección usuarios principal)
+      if (uid) {
+        await fetch('/api/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            uid,
+            email: data.email,
+            fullName: data.fullName
+          })
+        });
+
+        // 3. Registra birth data automáticamente (con lo que tengas disponible)
+        await fetch('/api/birth-data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: uid,
+            fullName: data.fullName,
+            birthDate: '',
+            birthTime: '',
+            birthPlace: '',
+            latitude: 0,
+            longitude: 0,
+            timezone: 'UTC'
+          })
+        });
+      }
+
       router.push('/dashboard');
     } catch (err: unknown) {
       const errorCode = (err as { code?: string })?.code;
-      
+
       if (errorCode === 'auth/email-already-in-use') {
         setError('Este correo electrónico ya está en uso');
       } else if (errorCode === 'auth/invalid-email') {

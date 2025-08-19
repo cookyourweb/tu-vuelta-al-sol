@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import DeleteUserForm from '@/components/admin/DeleteUserForm';
+import BirthDataAdminTable from '@/components/admin/BirthDataAdminTable';
 
 interface User {
   uid: string;
@@ -61,6 +62,11 @@ export default function AdminPage() {
         </div>
       )}
       <DeleteUserForm />
+
+      {/* Sección administración de birth data */}
+      <div style={{ marginTop: 40 }}>
+        <BirthDataAdminTable />
+      </div>
     </div>
   );
 }

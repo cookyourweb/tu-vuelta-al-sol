@@ -214,41 +214,42 @@ export default function BirthDataForm() {
         setIsLoading(false);
         return;
       }
-      
+
       try {
+        // Obtener birthData
         const response = await fetch(`/api/birth-data?userId=${user.uid}`);
-        
+        let hasBirthData = false;
         if (response.ok) {
           const { data } = await response.json();
-          
           if (data) {
-            const birthDate = new Date(data.birthDate).toISOString().split('T')[0];
-            
-            setValue('fullName', data.fullName || user.displayName || '');
+            hasBirthData = true;
+            // Llenar datos de la API birthData
+            const birthDate = data.birthDate ? new Date(data.birthDate).toISOString().split('T')[0] : '';
+            setValue('fullName', data.fullName || user.displayName || user.fullName || '');
             setValue('birthDate', birthDate);
             setValue('birthTime', data.birthTime || '');
             setValue('birthPlace', data.birthPlace || '');
             setValue('timezone', data.timezone || 'Europe/Madrid');
-            
+            // Lógica coords
             if (data.latitude && data.longitude) {
               setInputMethod('coordinates');
               setGoogleCoords(`${data.latitude}, ${data.longitude}`);
               setDetectedLocation(data.birthPlace || 'Ubicación guardada');
               setShowDetection(true);
             }
-          } else if (user.displayName) {
-            setValue('fullName', user.displayName);
           }
         }
-      } catch (error) {
-        if (user.displayName) {
-          setValue('fullName', user.displayName);
+        // Si no hay birthData, mostrar info básica readonly
+        if (!hasBirthData) {
+          setValue('fullName', user.displayName || user.fullName || '');
         }
+      } catch (error) {
+        setValue('fullName', user.displayName || user.fullName || '');
       } finally {
         setIsLoading(false);
       }
     }
-    
+
     loadData();
   }, [user, setValue]);
 

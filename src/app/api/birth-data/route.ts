@@ -86,6 +86,24 @@ export async function POST(request: Request) {
   }
 }
 
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
+    if (!userId) {
+      return NextResponse.json({ success: false, error: 'Se requiere userId' }, { status: 400 });
+    }
+    await connectDB();
+    const result = await BirthData.deleteMany({ userId });
+    if (result.deletedCount > 0) {
+      return NextResponse.json({ success: true, deleted: result.deletedCount });
+    }
+    return NextResponse.json({ success: false, error: 'No encontrado' }, { status: 404 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: 'Error eliminando birth data', details: error instanceof Error ? error.message : '' }, { status: 500 });
+  }
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -108,10 +126,19 @@ export async function GET(request: Request) {
         error: 'No se encontraron datos' 
       }, { status: 404 });
     }
+    // Mapeo de respuesta a formato estándar para el frontend y validadores
+    const mappedData = {
+      date: birthData.birthDate instanceof Date ? birthData.birthDate.toISOString().split('T')[0] : (birthData.birthDate || ''),
+      time: birthData.birthTime || '',
+      location: birthData.birthPlace || '',
+      latitude: birthData.latitude || 0,
+      longitude: birthData.longitude || 0,
+      timezone: birthData.timezone || 'UTC'
+    };
     
     return NextResponse.json({ 
       success: true, 
-      data: birthData 
+      data: mappedData 
     }, { status: 200 });
   } catch (error) {
     console.error('Error al obtener datos de nacimiento:', error);

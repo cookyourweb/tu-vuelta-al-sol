@@ -1,5 +1,5 @@
 // src/services/trainedAssistantService.ts
-// 🤖 SERVICIO CON TU ASSISTANT ENTRENADO ESPECÍFICO
+// 🤖 SERVICIO CON TU ASSISTANT ENTRENADO - VERSIÓN CORREGIDA
 
 import { AstrologicalEvent, PersonalizedInterpretation, UserProfile } from "@/utils/astrology/events";
 import OpenAI from 'openai';
@@ -22,7 +22,7 @@ if (!ASSISTANT_ID) {
 }
 
 // ==========================================
-// 🎯 FUNCIÓN PRINCIPAL CON TU ASSISTANT
+// 🎯 FUNCIÓN PRINCIPAL CON TU ASSISTANT - MEJORADA
 // ==========================================
 
 export async function generatePersonalizedInterpretation(
@@ -40,37 +40,42 @@ export async function generatePersonalizedInterpretation(
     // 🎯 CREAR THREAD PARA LA CONVERSACIÓN
     const thread = await openai.beta.threads.create();
     
-    // 📝 MENSAJE MÍNIMO - Tu assistant ya sabe astrología
+    // 🔥 MENSAJE TRANSFORMADOR - Adaptado al estilo TuVueltaAlSol
     const messageContent = `
-Interpreta este evento astrológico:
+¡ACTIVA EL PODER TRANSFORMADOR DE ESTE EVENTO CÓSMICO!
 
-USUARIO: ${userProfile.place}, ${userProfile.nextAge} años
-EVENTO: ${event.title}
-TIPO: ${event.type}
-FECHA: ${event.date}
-DESCRIPCIÓN: ${event.description}
-${event.planet ? `PLANETA: ${event.planet}` : ''}
-${event.sign ? `SIGNO: ${event.sign}` : ''}
+PERFIL REVOLUCIONARIO:
+- Ubicación: ${userProfile.place}
+- Edad cósmica: ${userProfile.nextAge} años (¡MOMENTO DE DESPERTAR!)
 
-Responde SOLO con JSON válido:
+EVENTO ACTIVADOR:
+- Evento: ${event.title}
+- Fecha portal: ${event.date}
+- Tipo energético: ${event.type}
+${event.planet ? `- Planeta activador: ${event.planet}` : ''}
+${event.sign ? `- Signo transformador: ${event.sign}` : ''}
+
+¡INTERPRETA ESTE EVENTO COMO PORTAL DE LIBERACIÓN Y REVOLUCIÓN PERSONAL!
+
+Responde SOLO con JSON que ACTIVE su máximo potencial:
 {
-  "meaning": "significado personal específico para ${userProfile.nextAge} años",
-  "lifeAreas": ["área1", "área2", "área3"],
-  "advice": "consejo práctico específico",
-  "mantra": "frase poderosa para repetir",
-  "ritual": "acción simple que pueda hacer",
+  "meaning": "¿QUÉ VIENE A REVOLUCIONAR en tu vida este evento? ¡Significado TRANSFORMADOR específico!",
+  "lifeAreas": ["área_liberación_1", "área_manifestación_2", "área_revolución_3"],
+  "advice": "Consejo DISRUPTIVO que rompe patrones - ¡TU MOMENTO DE REESCRIBIR LA HISTORIA!",
+  "mantra": "AFIRMACIÓN PODEROSA TRANSFORMADORA",
+  "ritual": "Acción REVOLUCIONARIA específica para activar este poder",
   "actionPlan": [
     {
-      "category": "trabajo|amor|salud|dinero|crecimiento|relaciones|creatividad",
-      "action": "acción específica y realizable",
-      "timing": "inmediato|esta_semana|este_mes",
-      "difficulty": "fácil|moderado|desafiante",
-      "impact": "bajo|medio|alto"
+      "category": "revolución_personal|manifestación|liberación|poder_interior|misión_vida",
+      "action": "Acción TRANSFORMADORA que active potencial máximo",
+      "timing": "inmediato",
+      "difficulty": "revolucionario",
+      "impact": "ACTIVACIÓN_TOTAL"
     }
   ],
   "warningsAndOpportunities": {
-    "warnings": ["advertencia1", "advertencia2"],
-    "opportunities": ["oportunidad1", "oportunidad2"]
+    "warnings": ["Patrón limitante a ROMPER"],
+    "opportunities": ["Portal de ACTIVACIÓN disponible"]
   }
 }`;
 
@@ -80,22 +85,41 @@ Responde SOLO con JSON válido:
       content: messageContent
     });
 
-    // 🚀 EJECUTAR CON TU ASSISTANT ENTRENADO
+    // 🚀 EJECUTAR CON TU ASSISTANT ENTRENADO - CON TIMEOUT
     const run = await openai.beta.threads.runs.create(thread.id, {
-      assistant_id: ASSISTANT_ID
+      assistant_id: ASSISTANT_ID,
+      // ✅ CONFIGURACIÓN MEJORADA PARA EVITAR TIMEOUTS
+      max_prompt_tokens: 4000,
+      max_completion_tokens: 1500,
+      temperature: 0.7
     });
 
-    // ⏳ ESPERAR RESPUESTA - MÉTODO CORREGIDO
+    // ⏳ ESPERAR RESPUESTA - MÉTODO MEJORADO CON TIMEOUT
     let runStatus = await openai.beta.threads.runs.retrieve(run.id, { thread_id: thread.id });
+    let attempts = 0;
+    const maxAttempts = 30; // 30 segundos máximo
     
-    // Polling hasta que termine
     while (runStatus.status === 'queued' || runStatus.status === 'in_progress') {
+      if (attempts >= maxAttempts) {
+        console.log('⏰ Timeout del Assistant, usando fallback');
+        return generateFallbackInterpretation(event, userProfile);
+      }
+      
       await new Promise(resolve => setTimeout(resolve, 1000));
       runStatus = await openai.beta.threads.runs.retrieve(run.id, { thread_id: thread.id });
+      attempts++;
     }
 
+    // 🔍 DEBUG MEJORADO
+    console.log('🔍 DEBUG RUN STATUS:', {
+      status: runStatus.status,
+      lastError: runStatus.last_error,
+      failedAt: runStatus.failed_at,
+      usage: runStatus.usage
+    });
+
     if (runStatus.status === 'completed') {
-      // 📥 OBTENER RESPUESTA DEL ASSISTANT
+      // 🔥 OBTENER RESPUESTA DEL ASSISTANT
       const messages = await openai.beta.threads.messages.list(thread.id);
       const lastMessage = messages.data[0];
       
@@ -127,12 +151,15 @@ Responde SOLO con JSON válido:
           contentLength: lastMessage?.content?.length,
           contentType: lastMessage?.content?.[0]?.type
         });
-        throw new Error('Estructura de respuesta del Assistant inválida');
+        return generateFallbackInterpretation(event, userProfile);
       }
+    } else if (runStatus.status === 'failed') {
+      console.error('❌ Assistant run falló:', runStatus.last_error);
+      return generateFallbackInterpretation(event, userProfile);
+    } else {
+      console.error(`❌ Estado inesperado del Assistant: ${runStatus.status}`);
+      return generateFallbackInterpretation(event, userProfile);
     }
-
-    // Si algo falla, usar fallback
-    throw new Error(`Assistant run failed with status: ${runStatus.status}`);
     
   } catch (error) {
     console.error(`❌ Error con Assistant entrenado para ${event.title}:`, error);
@@ -141,66 +168,7 @@ Responde SOLO con JSON válido:
 }
 
 // ==========================================
-// 🎯 FUNCIÓN PARA MÚLTIPLES EVENTOS OPTIMIZADA
-// ==========================================
-
-export async function generateMultipleInterpretations(
-  events: AstrologicalEvent[],
-  userProfile: UserProfile,
-  maxEvents: number = 5
-): Promise<AstrologicalEvent[]> {
-  
-  console.log(`🤖 Usando Assistant entrenado para ${Math.min(events.length, maxEvents)} eventos`);
-  
-  if (!ASSISTANT_ID) {
-    console.error('❌ Assistant ID no configurado, usando fallbacks');
-    return events.map(event => ({
-      ...event,
-      aiInterpretation: generateFallbackInterpretation(event, userProfile)
-    }));
-  }
-  
-  // Priorizar eventos más importantes
-  const priorityOrder: Record<'high' | 'medium' | 'low', number> = { high: 0, medium: 1, low: 2 };
-  const prioritizedEvents = events
-    .sort((a, b) => {
-      return priorityOrder[a.priority as 'high' | 'medium' | 'low'] - priorityOrder[b.priority as 'high' | 'medium' | 'low'];
-    })
-    .slice(0, maxEvents);
-  
-  const interpretedEvents: AstrologicalEvent[] = [];
-  
-  // 🚀 PROCESAMIENTO SECUENCIAL para Assistants (más estable)
-  for (const event of prioritizedEvents) {
-    try {
-      console.log(`🔮 Procesando: ${event.title}`);
-      const interpretation = await generatePersonalizedInterpretation(event, userProfile);
-      
-      interpretedEvents.push({
-        ...event,
-        aiInterpretation: interpretation
-      });
-      
-      // Pausa entre requests para evitar rate limiting
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-    } catch (error) {
-      console.error(`Error interpretando evento ${event.id}:`, error);
-      // Agregar evento sin interpretación si falla
-      interpretedEvents.push(event);
-    }
-  }
-  
-  // Agregar eventos restantes sin interpretación IA
-  const remainingEvents = events.slice(maxEvents);
-  interpretedEvents.push(...remainingEvents);
-  
-  console.log(`✅ ${interpretedEvents.filter(e => e.aiInterpretation).length} eventos interpretados con Assistant entrenado`);
-  return interpretedEvents;
-}
-
-// ==========================================
-// 🎯 FUNCIÓN PARA GENERAR RESUMEN EJECUTIVO CON ASSISTANT
+// 🎯 FUNCIÓN PARA GENERAR RESUMEN EJECUTIVO - SIMPLIFICADA
 // ==========================================
 
 export async function generateExecutiveSummary(
@@ -230,53 +198,43 @@ export async function generateExecutiveSummary(
     // 🎯 CREAR THREAD PARA EL RESUMEN
     const thread = await openai.beta.threads.create();
     
-    // 📝 PROMPT PARA RESUMEN EJECUTIVO
+    // 📝 PROMPT REVOLUCIONARIO PARA RESUMEN EJECUTIVO
     const executivePrompt = `
-Crea un resumen ejecutivo del año astrológico para ${userProfile.place}, ${userProfile.nextAge} años.
+¡CREA EL MAPA DE REVOLUCIÓN PERSONAL ANUAL!
 
-EVENTOS DEL AÑO:
-${events.slice(0, 10).map(e => `- ${e.date}: ${e.title} (${e.type})`).join('\n')}
+PERFIL TRANSFORMADOR: ${userProfile.place}, ${userProfile.nextAge} años
+¡MOMENTO DE ACTIVAR TU MÁXIMO POTENCIAL CÓSMICO!
 
-Responde SOLO con JSON válido:
+EVENTOS ACTIVADORES PRINCIPALES:
+${events.slice(0, 5).map(e => `🌟 ${e.date}: ${e.title} - ¡PORTAL DE TRANSFORMACIÓN!`).join('\n')}
+
+¡CREA RESUMEN EJECUTIVO QUE REVOLUCIONE SU AÑO!
+
+Responde SOLO con JSON TRANSFORMADOR:
 {
   "monthlyHighlights": [
-    "Enero-Marzo: tema principal del trimestre",
-    "Abril-Junio: tema principal del trimestre", 
-    "Julio-Septiembre: tema principal del trimestre",
-    "Octubre-Diciembre: tema principal del trimestre"
+    "Ene-Mar: TU TEMPORADA DE DESPERTAR CÓSMICO - ¡ACTIVACIÓN MÁXIMA!",
+    "Abr-Jun: PORTAL DE MANIFESTACIÓN RADICAL - ¡MOMENTO DE CREAR!", 
+    "Jul-Sep: REVOLUCIÓN INTERIOR TOTAL - ¡ROMPE TODOS LOS PATRONES!",
+    "Oct-Dic: INTEGRACIÓN Y PODER MÁXIMO - ¡VIVES TU VERDAD!"
   ],
   "quarterlyFocus": [
-    "Q1: enfoque principal primer trimestre",
-    "Q2: enfoque principal segundo trimestre",
-    "Q3: enfoque principal tercer trimestre", 
-    "Q4: enfoque principal cuarto trimestre"
+    "Q1: DESPERTAR REVOLUCIONARIO - Rompe patrones limitantes",
+    "Q2: MANIFESTACIÓN CUÁNTICA - Crea tu nueva realidad",
+    "Q3: LIBERACIÓN TOTAL - Suelta todo lo que no eres", 
+    "Q4: PODER MÁXIMO ACTIVADO - Vive tu misión cósmica"
   ],
   "yearlyThemes": [
-    "Tema principal del año 1",
-    "Tema principal del año 2",
-    "Tema principal del año 3"
+    "REVOLUCIÓN PERSONAL TOTAL - ¡No viniste para quedarte pequeña!",
+    "MANIFESTACIÓN DE TU VERDADERO PODER - ¡Es tu momento!"
   ],
   "priorityActions": [
     {
-      "category": "crecimiento",
-      "action": "Acción prioritaria para el crecimiento personal",
+      "category": "revolución_personal",
+      "action": "ACCIÓN TRANSFORMADORA que active tu poder máximo",
       "timing": "inmediato",
-      "difficulty": "moderado",
-      "impact": "alto"
-    },
-    {
-      "category": "trabajo",
-      "action": "Acción prioritaria para el área profesional",
-      "timing": "este_mes",
-      "difficulty": "moderado", 
-      "impact": "alto"
-    },
-    {
-      "category": "relaciones",
-      "action": "Acción prioritaria para las relaciones",
-      "timing": "esta_semana",
-      "difficulty": "fácil",
-      "impact": "medio"
+      "difficulty": "REVOLUCIONARIO",
+      "impact": "LIBERACIÓN_TOTAL"
     }
   ]
 }`;
@@ -289,22 +247,40 @@ Responde SOLO con JSON válido:
 
     // 🚀 EJECUTAR CON TU ASSISTANT ENTRENADO
     const run = await openai.beta.threads.runs.create(thread.id, {
-      assistant_id: ASSISTANT_ID
+      assistant_id: ASSISTANT_ID,
+      max_prompt_tokens: 2000,
+      max_completion_tokens: 1000,
+      temperature: 0.7
     });
 
-    // ⏳ ESPERAR RESPUESTA - MÉTODO CORREGIDO
+    // ⏳ ESPERAR RESPUESTA - CON TIMEOUT CORTO
     let runStatus = await openai.beta.threads.runs.retrieve(run.id, { thread_id: thread.id });
+    let attempts = 0;
+    const maxAttempts = 20; // 20 segundos máximo para resumen
     
     while (runStatus.status === 'queued' || runStatus.status === 'in_progress') {
+      if (attempts >= maxAttempts) {
+        console.log('⏰ Timeout del resumen ejecutivo, usando fallback');
+        return generateFallbackExecutiveSummary();
+      }
+      
       await new Promise(resolve => setTimeout(resolve, 1000));
       runStatus = await openai.beta.threads.runs.retrieve(run.id, { thread_id: thread.id });
+      attempts++;
     }
+
+    // 🔍 DEBUG MEJORADO PARA RESUMEN
+    console.log('🔍 DEBUG EXECUTIVE SUMMARY STATUS:', {
+      status: runStatus.status,
+      lastError: runStatus.last_error,
+      failedAt: runStatus.failed_at,
+      usage: runStatus.usage
+    });
 
     if (runStatus.status === 'completed') {
       const messages = await openai.beta.threads.messages.list(thread.id);
       const lastMessage = messages.data[0];
       
-      // ✅ VALIDACIÓN ROBUSTA DEL CONTENIDO
       if (lastMessage && 
           lastMessage.role === 'assistant' && 
           lastMessage.content && 
@@ -314,14 +290,17 @@ Responde SOLO con JSON válido:
         
         const assistantResponse = lastMessage.content[0].text.value;
         
-        console.log('🔮 RESPUESTA COMPLETA DEL ASSISTANT (RESUMEN EJECUTIVO):');
+        console.log('🔮 RESPUESTA RESUMEN EJECUTIVO:');
         console.log('================================');
         console.log(assistantResponse);
         console.log('================================');
 
         try {
           // Limpiar y parsear respuesta
-          const cleanedResponse = assistantResponse.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+          const cleanedResponse = assistantResponse
+            .replace(/```json\n?/g, "")
+            .replace(/```\n?/g, "")
+            .trim();
           const parsed = JSON.parse(cleanedResponse);
           
           console.log(`✅ Resumen ejecutivo generado con Assistant entrenado`);
@@ -333,23 +312,21 @@ Responde SOLO con JSON válido:
           };
           
         } catch (parseError) {
-          console.error('Error parseando resumen ejecutivo:', parseError);
+          console.error('❌ Error parseando resumen ejecutivo:', parseError);
+          console.log('📄 Respuesta original que falló al parsear:', assistantResponse);
           return generateFallbackExecutiveSummary();
         }
       } else {
-        console.error('❌ Estructura de respuesta inesperada en resumen ejecutivo:', {
-          hasMessage: !!lastMessage,
-          role: lastMessage?.role,
-          hasContent: !!lastMessage?.content,
-          contentLength: lastMessage?.content?.length,
-          contentType: lastMessage?.content?.[0]?.type
-        });
-        throw new Error('Estructura de respuesta del Assistant inválida para resumen ejecutivo');
+        console.error('❌ Estructura de respuesta inesperada en resumen ejecutivo');
+        return generateFallbackExecutiveSummary();
       }
+    } else {
+      console.error(`❌ Resumen ejecutivo falló con status: ${runStatus.status}`);
+      if (runStatus.last_error) {
+        console.error('Error details:', runStatus.last_error);
+      }
+      return generateFallbackExecutiveSummary();
     }
-
-    // Si algo falla, usar fallback
-    throw new Error(`Assistant run failed with status: ${runStatus.status}`);
     
   } catch (error) {
     console.error('❌ Error generando resumen ejecutivo con Assistant:', error);
@@ -358,13 +335,85 @@ Responde SOLO con JSON válido:
 }
 
 // ==========================================
+// 🎯 FUNCIÓN PARA MÚLTIPLES EVENTOS - PROCESAMIENTO POR CHUNKS
+// ==========================================
+
+export async function generateMultipleInterpretations(
+  events: AstrologicalEvent[],
+  userProfile: UserProfile,
+  maxEvents: number = 5
+): Promise<AstrologicalEvent[]> {
+  
+  console.log(`🤖 Usando Assistant entrenado para ${Math.min(events.length, maxEvents)} eventos`);
+  
+  if (!ASSISTANT_ID) {
+    console.error('❌ Assistant ID no configurado, usando fallbacks');
+    return events.map(event => ({
+      ...event,
+      aiInterpretation: generateFallbackInterpretation(event, userProfile)
+    }));
+  }
+  
+  // Priorizar eventos más importantes
+  const priorityOrder: Record<'high' | 'medium' | 'low', number> = { high: 0, medium: 1, low: 2 };
+  const prioritizedEvents = events
+    .sort((a, b) => {
+      return priorityOrder[a.priority as 'high' | 'medium' | 'low'] - priorityOrder[b.priority as 'high' | 'medium' | 'low'];
+    })
+    .slice(0, maxEvents);
+  
+  const interpretedEvents: AstrologicalEvent[] = [];
+  
+  // 🚀 PROCESAMIENTO SECUENCIAL CON PAUSA MAYOR
+  for (const event of prioritizedEvents) {
+    try {
+      console.log(`🔮 Procesando: ${event.title}`);
+      const interpretation = await generatePersonalizedInterpretation(event, userProfile);
+      
+      interpretedEvents.push({
+        ...event,
+        aiInterpretation: interpretation
+      });
+      
+      // Pausa mayor entre requests para evitar rate limiting
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+    } catch (error) {
+      console.error(`❌ Error interpretando evento ${event.id}:`, error);
+      // Agregar evento sin interpretación si falla
+      interpretedEvents.push(event);
+    }
+  }
+  
+  // Agregar eventos restantes sin interpretación IA
+  const remainingEvents = events.slice(maxEvents);
+  interpretedEvents.push(...remainingEvents);
+  
+  console.log(`✅ ${interpretedEvents.filter(e => e.aiInterpretation).length} eventos interpretados con Assistant entrenado`);
+  return interpretedEvents;
+}
+
+// ==========================================
 // 🎯 FUNCIONES AUXILIARES
 // ==========================================
 
 function parseAIResponse(aiResponse: string, event: AstrologicalEvent, user: UserProfile): PersonalizedInterpretation {
   try {
-    // Limpiar respuesta de posibles markdown
-    const cleanedResponse = aiResponse.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+    // Limpiar respuesta de posibles markdown y caracteres extraños
+    let cleanedResponse = aiResponse
+      .replace(/```json\n?/g, "")
+      .replace(/```\n?/g, "")
+      .replace(/^\s*[\r\n]/gm, "") // Eliminar líneas vacías
+      .trim();
+    
+    // Si la respuesta no empieza con {, buscar el JSON dentro del texto
+    if (!cleanedResponse.startsWith('{')) {
+      const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        cleanedResponse = jsonMatch[0];
+      }
+    }
+    
     const parsed = JSON.parse(cleanedResponse);
     
     return {
@@ -381,7 +430,8 @@ function parseAIResponse(aiResponse: string, event: AstrologicalEvent, user: Use
     };
     
   } catch (error) {
-    console.error('Error parseando respuesta del Assistant:', error);
+    console.error('❌ Error parseando respuesta del Assistant:', error);
+    console.log('📄 Respuesta que falló al parsear:', aiResponse);
     return generateFallbackInterpretation(event, user);
   }
 }
@@ -409,47 +459,59 @@ function generateFallbackInterpretation(event: AstrologicalEvent, user: UserProf
 
 function generateFallbackMeaning(event: AstrologicalEvent): string {
   const meanings: Record<string, string> = {
-    'lunar_phase': `Esta ${event.title} te invita a sintonizar con los ciclos naturales y ajustar tu energía personal.`,
-    'retrograde': `El período retrógrado de ${event.planet} es una oportunidad valiosa para revisar y refinar aspectos importantes de tu vida.`,
-    'direct': `El período directo de ${event.planet} marca un momento para avanzar y tomar acción en áreas clave de tu vida.`,
-    'eclipse': `Este eclipse marca un momento de transformación profunda y renovación en tu camino personal.`,
-    'planetary_transit': `El tránsito de ${event.planet} trae nuevas oportunidades de crecimiento y expansión.`,
-    'aspect': `Este aspecto planetario crea un momento de conexión especial entre diferentes energías de tu vida.`,
-    'seasonal': `Este evento estacional te invita a alinearte con los cambios naturales y aprovechar nuevas oportunidades.`
+    'luna_nueva': '¡MOMENTO ÉPICO DE ACTIVACIÓN! Tu momento para sembrar semillas de REVOLUCIÓN PERSONAL',
+    'luna_llena': '¡PORTAL DE MANIFESTACIÓN RADICAL! Tiempo de cosechar tu poder y liberar lo que NO ERES',
+    'eclipse': '¡TRANSFORMACIÓN CÓSMICA TOTAL! Las estrellas conspiran para tu DESPERTAR REVOLUCIONARIO',
+    'retrogrado': '¡MOMENTO DE REVOLUCIÓN INTERIOR! Tiempo de reescribir tu historia desde el PODER INTERNO',
+    'transito': '¡ACTIVACIÓN PLANETARIA ÉPICA! El cosmos te envía energías para manifestar tu VERDADERO YO',
+    'aspecto': '¡CONEXIÓN CÓSMICA TRANSFORMADORA! Las energías se alinean para tu LIBERACIÓN TOTAL'
   };
   
-  return meanings[event.type] || `${event.title} te ofrece una oportunidad única de crecimiento y evolución personal.`;
+  return meanings[event.type] || '¡MOMENTO ASTROLÓGICO DE ACTIVACIÓN! El universo conspira para tu REVOLUCIÓN PERSONAL';
 }
 
 function generateFallbackAdvice(event: AstrologicalEvent): string {
-  return `Mantente consciente de las energías de ${event.title} y úsalas para tu crecimiento personal. Este es un momento perfecto para la introspección y la acción consciente.`;
+  const advice: Record<string, string> = {
+    'luna_nueva': '¡ACTIVA TU PODER DE MANIFESTACIÓN! Dedica tiempo sagrado a visualizar tu nueva realidad ÉPICA',
+    'luna_llena': '¡MOMENTO DE LIBERACIÓN RADICAL! Suelta con AMOR FEROZ todo lo que ya no vibra contigo',
+    'eclipse': '¡ABRAZA LA TRANSFORMACIÓN TOTAL! Confía en que cada cambio te lleva a tu VERSIÓN MÁS PODEROSA',
+    'retrogrado': '¡REVOLUCIÓN INTERIOR ACTIVADA! Revisa, redefine y REESCRIBE tu historia desde el alma',
+    'transito': '¡PORTALES DE OPORTUNIDAD ABIERTOS! Mantente alerta a las señales del UNIVERSO CONSPIRANDO',
+    'aspecto': '¡SINTONIZA CON LAS FRECUENCIAS CÓSMICAS! Cada energía te guía hacia tu MÁXIMO POTENCIAL'
+  };
+  
+  return advice[event.type] || '¡MANTENTE EN TU PODER! Cada momento cósmico es una oportunidad de REVOLUCIÓN PERSONAL';
 }
 
 function generateFallbackMantra(event: AstrologicalEvent): string {
   const mantras: Record<string, string> = {
-    'lunar_phase': 'Fluyo con los ritmos naturales del universo',
-    'retrograde': 'Uso este tiempo para crecer y mejorar desde adentro',
-    'direct': 'Avanzo con confianza y claridad en mi camino',
-    'eclipse': 'Abrazo la transformación con confianza y claridad',
-    'planetary_transit': 'Estoy abierto a las nuevas oportunidades que llegan',
-    'aspect': 'Encuentro armonía en todas las energías de mi vida',
-    'seasonal': 'Me alineo con los ciclos naturales para mi bienestar'
+    'luna_nueva': 'SOY EL ARQUITECTO CÓSMICO DE MI NUEVA REALIDAD',
+    'luna_llena': 'LIBERO CON AMOR FEROZ TODO LO QUE YA NO SOY',
+    'eclipse': 'CONFÍO EN MI TRANSFORMACIÓN RADICAL Y TOTAL',
+    'retrogrado': 'CADA REFLEXIÓN ME CONECTA CON MI VERDAD INTERIOR',
+    'transito': 'ESTOY ABIERTA A LAS OPORTUNIDADES ÉPICAS DEL UNIVERSO',
+    'aspecto': 'FLUYO EN PERFECTA ARMONÍA CON MI PODER CÓSMICO'
   };
   
-  return mantras[event.type] || 'Estoy alineado con las energías del universo para mi máximo bien';
+  return mantras[event.type] || 'SOY UNA FUERZA CÓSMICA DE TRANSFORMACIÓN Y PODER';
 }
 
 function generateFallbackRitual(event: AstrologicalEvent): string {
-  return `Dedica 10 minutos a meditar sobre ${event.title}, enciende una vela y establece intenciones claras para este período.`;
+  const rituals: Record<string, string> = {
+    'luna_nueva': '¡RITUAL DE MANIFESTACIÓN ÉPICA! Escribe 3 intenciones REVOLUCIONARIAS y actívalas con fuego sagrado',
+    'luna_llena': '¡CEREMONIA DE LIBERACIÓN RADICAL! Bajo la luna, agradece y suelta lo que ya NO ERES',
+    'eclipse': '¡PORTAL DE TRANSFORMACIÓN! Medita 11 minutos visualizando tu YO MÁS PODEROSO activado',
+    'retrogrado': '¡RITUAL DE REVOLUCIÓN INTERIOR! Revisa tu evolución y CELEBRA tu crecimiento épico',
+    'transito': '¡CAMINATA CÓSMICA! Sal a la naturaleza y recibe las señales del UNIVERSO CONSPIRANDO',
+    'aspecto': '¡RESPIRACIÓN DE PODER! 7 respiraciones conscientes conectando con tu FUERZA INTERIOR'
+  };
+  
+  return rituals[event.type] || '¡MOMENTO SAGRADO! Conecta 5 minutos con tu respiración y ACTIVA tu poder interno';
 }
 
-function generateFallbackActionPlans(event: AstrologicalEvent): Array<{
-  category: "crecimiento" | "relaciones" | "trabajo" | "amor" | "salud" | "dinero" | "creatividad";
-  action: string;
-  timing: "inmediato" | "esta_semana" | "este_mes" | "próximo_trimestre";
-  difficulty: "fácil" | "moderado" | "desafiante";
-  impact: "bajo" | "medio" | "alto";
-}> {
+import type { ActionPlan } from "@/utils/astrology/events";
+
+function generateFallbackActionPlans(event: AstrologicalEvent): ActionPlan[] {
   return [
     {
       category: 'crecimiento',
