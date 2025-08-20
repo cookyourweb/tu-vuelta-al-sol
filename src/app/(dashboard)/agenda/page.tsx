@@ -1,4 +1,4 @@
-// src/app/(dashboard)/agenda/page.tsx - ACTUALIZADA CON CALENDARIO VISUAL
+// src/app/(dashboard)/agenda/page.tsx - ARREGLADA COMPLETA
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -26,6 +26,7 @@ interface EventMetadata {
   eclipses: number;
   retrogrades: number;
   highPriorityEvents: number;
+  withAiInterpretation: number;
   period: {
     startDate: string;
     endDate: string;
@@ -72,7 +73,7 @@ export default function AgendaPage() {
             }
           }
 
-          // Obtener metadata de eventos (sin cargar todos los eventos aquí)
+          // Obtener metadata de eventos del endpoint correcto
           await loadEventsMetadata();
           
         } else {
@@ -93,51 +94,62 @@ export default function AgendaPage() {
     try {
       console.log('📊 Cargando metadata de eventos...');
       
-      // Solo obtener metadata, el calendario cargará los eventos
-      const response = await fetch('/api/astrology/events', {
+      // ARREGLADO: Usar complete-events en lugar de events
+      const response = await fetch('/api/astrology/complete-events', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          userId: user?.uid
+          userId: user?.uid,
+          months: 6
         })
       });
       
       const data = await response.json();
+      console.log('📥 Respuesta metadata:', data);
       
-      if (data.success && data.events) {
-        // Calcular metadata local
-        const events = data.events;
+      // ARREGLADO: Acceder a data.data.events en lugar de data.events
+      if (data.success && data.data && data.data.events) {
+        const events = data.data.events;
+        const statistics = data.data.statistics || {};
+        const userProfile = data.data.userProfile || {};
+        
+        // Calcular metadata mejorada
         const metadata: EventMetadata = {
-          totalEvents: events.length,
-          lunarPhases: events.filter((e: any) => e.type === 'lunar_phase').length,
-          planetaryTransits: events.filter((e: any) => e.type === 'planetary_transit').length,
-          eclipses: events.filter((e: any) => e.type === 'eclipse').length,
-          retrogrades: events.filter((e: any) => e.type === 'retrograde').length,
-          highPriorityEvents: events.filter((e: any) => e.priority === 'high').length,
+          totalEvents: statistics.totalEvents || events.length,
+          lunarPhases: statistics.lunarPhases || events.filter((e: any) => e.type && e.type.includes('luna')).length,
+          planetaryTransits: statistics.planetaryTransits || events.filter((e: any) => e.type === 'transito').length,
+          eclipses: statistics.eclipses || events.filter((e: any) => e.type === 'eclipse').length,
+          retrogrades: statistics.retrogrades || events.filter((e: any) => e.type === 'retrogrado').length,
+          highPriorityEvents: statistics.highPriorityEvents || events.filter((e: any) => e.priority === 'high').length,
+          withAiInterpretation: statistics.withAiInterpretation || events.filter((e: any) => e.hasAiInterpretation).length,
           period: {
             startDate: new Date().toLocaleDateString('es-ES'),
             endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString('es-ES')
           },
           userLocation: {
-            place: 'Tu ubicación'
+            place: userProfile.place || 'Tu ubicación'
           }
         };
         
         setEventsMetadata(metadata);
-        console.log(`✅ Metadata cargada: ${metadata.totalEvents} eventos totales`);
+        console.log(`✅ Metadata cargada: ${metadata.totalEvents} eventos totales, ${metadata.withAiInterpretation} con IA`);
       } else {
         console.warn('⚠️ No se pudo cargar metadata:', data.error);
+        setError(`Error cargando eventos: ${data.error || 'Respuesta inválida'}`);
       }
     } catch (error) {
       console.error('❌ Error cargando metadata:', error);
+      setError('Error de conexión al cargar eventos');
     }
   };
 
   const regenerateEvents = async () => {
     setRefreshing(true);
     try {
+      console.log('🔄 Regenerando eventos...');
+      
       // Forzar regeneración en el backend
       const response = await fetch('/api/astrology/complete-events', {
         method: 'POST',
@@ -146,20 +158,22 @@ export default function AgendaPage() {
         },
         body: JSON.stringify({
           userId: user?.uid,
-          regenerate: true
+          forceRegenerate: true,
+          months: 6
         })
       });
       
       const data = await response.json();
       
       if (data.success) {
-        console.log('🔄 Eventos regenerados exitosamente');
+        console.log('✅ Eventos regenerados exitosamente');
         // Recargar metadata
         await loadEventsMetadata();
-        // El calendario se actualizará automáticamente
+        // Recargar la página para actualizar el calendario
         window.location.reload();
       } else {
-        setError('Error al regenerar eventos');
+        console.error('❌ Error regenerando:', data.error);
+        setError(`Error al regenerar eventos: ${data.error}`);
       }
     } catch (error) {
       console.error('❌ Error regenerando eventos:', error);
@@ -198,7 +212,10 @@ export default function AgendaPage() {
               <p className="text-red-200 mb-6">{error}</p>
               <div className="flex gap-4 justify-center">
                 <Button 
-                  onClick={() => window.location.reload()} 
+                  onClick={() => {
+                    setError(null);
+                    window.location.reload();
+                  }} 
                   className="bg-red-600 hover:bg-red-700"
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
@@ -282,14 +299,14 @@ export default function AgendaPage() {
                 🔮 Resumen de tu Año Astrológico
               </h2>
               
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
                 <div className="text-center bg-white/5 rounded-2xl p-4 border border-white/10">
                   <div className="text-2xl font-bold text-white mb-1">
                     {eventsMetadata.totalEvents}
                   </div>
                   <div className="text-gray-300 text-sm flex items-center justify-center">
                     <Star className="w-4 h-4 mr-1" />
-                    Total Eventos
+                    Total
                   </div>
                 </div>
                 
@@ -299,7 +316,7 @@ export default function AgendaPage() {
                   </div>
                   <div className="text-gray-300 text-sm flex items-center justify-center">
                     <Moon className="w-4 h-4 mr-1" />
-                    Fases Lunares
+                    Lunares
                   </div>
                 </div>
                 
@@ -342,20 +359,39 @@ export default function AgendaPage() {
                     Alta Prioridad
                   </div>
                 </div>
+                
+                <div className="text-center bg-white/5 rounded-2xl p-4 border border-white/10">
+                  <div className="text-2xl font-bold text-purple-300 mb-1">
+                    {eventsMetadata.withAiInterpretation}
+                  </div>
+                  <div className="text-gray-300 text-sm flex items-center justify-center">
+                    <Star className="w-4 h-4 mr-1" />
+                    Con IA
+                  </div>
+                </div>
               </div>
               
               <div className="mt-6 text-center">
                 <p className="text-purple-200 text-sm">
                   📅 Período: {eventsMetadata.period.startDate} → {eventsMetadata.period.endDate}
                 </p>
+                <p className="text-purple-300 text-xs mt-1">
+                  📍 {eventsMetadata.userLocation.place}
+                </p>
               </div>
             </div>
           </div>
         )}
         
-        {/* Calendario Principal */}
+        {/* Calendario Principal - ARREGLADO: Pasar userId */}
         <div className="max-w-7xl mx-auto mb-8">
-          <AstrologicalCalendar />
+          {user?.uid ? (
+            <AstrologicalCalendar userId={user.uid} />
+          ) : (
+            <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+              <p className="text-gray-600">Cargando calendario...</p>
+            </div>
+          )}
         </div>
         
         {/* Botones de navegación */}
@@ -410,6 +446,11 @@ export default function AgendaPage() {
               <p className="text-gray-400 text-sm">
                 💡 Haz clic en cualquier evento del calendario para ver su interpretación completa
               </p>
+              {eventsMetadata && eventsMetadata.withAiInterpretation > 0 && (
+                <p className="text-green-400 text-xs mt-1">
+                  🤖 {eventsMetadata.withAiInterpretation} eventos con interpretaciones IA personalizadas
+                </p>
+              )}
             </div>
           </div>
         </div>
