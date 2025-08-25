@@ -1,8 +1,33 @@
-import { AspectMeaning, HouseMeaning, PlanetMeaning } from './../../types/astrology/chartDisplaycopy';
 // src/constants/astrology/chartConstants.ts
-// Constantes para el componente ChartDisplay - IMPORTS CORREGIDOS
+// Constantes para el componente ChartDisplay - TIPOS DEFINIDOS LOCALMENTE
 
-import { AspectConfig } from "../../types/astrology/chartDisplay";
+// Definir tipos localmente
+export interface AspectConfig {
+  angle: number;
+  orb: number;
+  color: string;
+  name: string;
+  difficulty: 'easy' | 'hard' | 'neutral' | 'minor';
+}
+
+export interface AspectMeaning {
+  name: string;
+  meaning: string;
+  effect: string;
+  type: string;
+  explanation: string;
+}
+
+export interface PlanetMeaning {
+  meaning: string;
+  keywords: string;
+}
+
+export interface HouseMeaning {
+  name: string;
+  meaning: string;
+  keywords: string;
+}
 // =============================================================================
 // CONFIGURACIÓN DE ASPECTOS ASTROLÓGICOS
 // =============================================================================

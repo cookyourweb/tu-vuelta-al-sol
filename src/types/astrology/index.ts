@@ -22,7 +22,10 @@ export type {
   EventType,
   ZodiacSign,
   PlanetName,
-  PersonalizedEventContext
+  PersonalizedEventContext,
+  AspectFilter,
+  AspectType,
+  ExtendedPlanet
 } from './unified-types';
 
 export {
@@ -45,6 +48,12 @@ export type {
   Aspect as ProkeralaAspect,
   Angle as ProkeralaAngle
 } from '@/lib/prokerala/types';
+
+// Re-exportar Planet desde Prokerala para compatibilidad
+export type { Planet } from '@/lib/prokerala/types';
+
+// Exportar PlanetaryAspect desde aspects.ts
+export type { PlanetaryAspect } from './aspects';
 
 // =============================================================================
 // ALIAS PARA COMPATIBILIDAD

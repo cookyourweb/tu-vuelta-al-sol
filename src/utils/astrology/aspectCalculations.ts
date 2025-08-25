@@ -1,6 +1,7 @@
 // src/app/utils/astrology/aspectCalculations.ts - VERSIÓN CORREGIDA
 
-import { AspectType, ExtendedPlanet, Planet, PlanetaryAspect } from "../../types/astrology";
+import { AspectType, PlanetaryAspect } from "../../types/astrology";
+import type { Planet, ExtendedPlanet } from "../../types/astrology/basic";
 
 
 
@@ -110,20 +111,20 @@ export const ASPECT_DEFINITIONS: Record<AspectType, AspectDefinition> = {
 
 // Modificadores de orbe por planeta
 export const PLANET_ORB_MODIFIERS: Record<string, number> = {
-  'Sol': 1.3,
-  'Luna': 1.3,
-  'Mercurio': 1.0,
-  'Venus': 1.0,
-  'Marte': 1.0,
-  'Júpiter': 1.2,
-  'Saturno': 1.2,
-  'Urano': 0.8,
-  'Neptuno': 0.8,
-  'Plutón': 0.8,
-  'Quirón': 0.6,
-  'Nodo Norte': 0.8,
-  'Nodo Sur': 0.8,
-  'Lilith': 0.5
+  'sol': 1.3,
+  'luna': 1.3,
+  'mercurio': 1.0,
+  'venus': 1.0,
+  'marte': 1.0,
+  'jupiter': 1.2,
+  'saturno': 1.2,
+  'urano': 0.8,
+  'neptuno': 0.8,
+  'pluton': 0.8,
+  'quiron': 0.6,
+  'nodo_norte': 0.8,
+  'nodo_sur': 0.8,
+  'lilith': 0.5
 };
 
 // =============================================================================
@@ -197,8 +198,8 @@ export function calculateEffectiveOrb(
   baseOrb: number,
   orbModifier: number = 1.0
 ): number {
-  const modifier1 = PLANET_ORB_MODIFIERS[planet1.toString()] || 1.0;
-  const modifier2 = PLANET_ORB_MODIFIERS[planet2.toString()] || 1.0;
+  const modifier1 = PLANET_ORB_MODIFIERS[planet1.toLowerCase()] || 1.0;
+  const modifier2 = PLANET_ORB_MODIFIERS[planet2.toLowerCase()] || 1.0;
   const averageModifier = (modifier1 + modifier2) / 2;
   
   return baseOrb * averageModifier * orbModifier;
@@ -306,10 +307,14 @@ export function calculateAllAspects(
  * Convertir CalculatedAspect a PlanetaryAspect (para compatibilidad)
  */
 export function convertToPlanetaryAspect(aspect: CalculatedAspect): PlanetaryAspect {
+  // Convertir nombres de planetas a minúsculas para compatibilidad con el tipo Planet
+  const planet1 = typeof aspect.planet1 === 'string' ? aspect.planet1.toLowerCase() : aspect.planet1;
+  const planet2 = typeof aspect.planet2 === 'string' ? aspect.planet2.toLowerCase() : aspect.planet2;
+  
   return {
-    id: `${aspect.planet1}_${aspect.aspect_type}_${aspect.planet2}`,
-    planet1: aspect.planet1 as Planet | ExtendedPlanet,
-    planet2: aspect.planet2 as Planet | ExtendedPlanet,
+    id: `${planet1}_${aspect.aspect_type}_${planet2}`,
+    planet1: planet1 as Planet | ExtendedPlanet,
+    planet2: planet2 as Planet | ExtendedPlanet,
     aspect_type: aspect.aspect_type,
     exact_angle: aspect.exact_angle,
     orb: aspect.orb,

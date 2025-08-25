@@ -1,6 +1,14 @@
 // types/astrology/unified-types.ts
 // TIPOS UNIFICADOS PARA TODO EL SISTEMA ASTROLÓGICO
 
+export type AspectFilter = 'all' | 'major' | 'minor'; // Definición de AspectFilter
+export type AspectType = 
+  'conjunction' | 'opposition' | 'trine' | 'square' | 'sextile' |
+  'quincunx' | 'semisextile' | 'sesquiquadrate' | 'semisquare' |
+  'quintile' | 'biquintile'; // Definición de AspectType
+
+export type ExtendedPlanet = PlanetName | 'Nodo Norte' | 'Nodo Sur' | 'Quirón' | 'Lilith'; // Definición de ExtendedPlanet
+
 // ==========================================
 // IMPORTAR Y RE-EXPORTAR TIPOS EXISTENTES
 // ==========================================
