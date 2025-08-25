@@ -140,7 +140,7 @@ IMPORTANTE: Personaliza TODO basándote en la carta natal real. Menciona signos,
 
     // 5. LLAMADA A OPENAI CON DATOS REALES
     const completion = await openai.chat.completions.create({
-      model: "gpt-4-turbo-preview",
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
@@ -200,7 +200,7 @@ Haz que se sienta como el protagonista de su propia película cósmica.`
             generado_en: new Date().toISOString(),
             usuario: userData.nombre,
             edad: userData.edad_actual,
-            modelo_usado: "gpt-4-turbo-preview",
+            modelo_usado: "gpt-4o-mini",
             formato: "texto_libre"
           }
         },
@@ -219,7 +219,7 @@ Haz que se sienta como el protagonista de su propia película cósmica.`
           edad: userData.edad_actual,
           lugar_nacimiento: userData.lugar_nacimiento,
           periodo: `${currentYear + 1}-${currentYear + 2}`,
-          modelo_usado: "gpt-4-turbo-preview",
+          modelo_usado: "gpt-4o-mini",
           tokens_utilizados: completion.usage?.total_tokens || 0,
           costo_estimado: ((completion.usage?.total_tokens || 0) * 0.00003).toFixed(4) + " USD",
           tiene_carta_natal: !!chart.natalChart,
