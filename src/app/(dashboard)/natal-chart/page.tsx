@@ -175,7 +175,8 @@ export default function NatalChartPage() {
   // ✅ FUNCIÓN: Cargar información de datos de nacimiento (solo para mostrar)
   const loadBirthDataInfo = async () => {
     try {
-      const response = await fetch(`/api/birth-data?userId=${user?.uid}`);
+    const response = await fetch(`/api/birth-data?userId=${user?.uid}`); 
+    console.log('🔍 Respuesta de datos de nacimiento:', response);
       
       if (response.ok) {
         const data = await response.json();
@@ -440,6 +441,18 @@ export default function NatalChartPage() {
   // ✅ FUNCIÓN CORREGIDA: Procesa datos usando el adaptador mejorado
   const processChartData = (rawData: any): NatalChartData => {
     console.log('🔍 === INICIANDO processChartData ===');
+    
+    // Obtener datos de nacimiento del estado del componente
+    const birthDate = birthData?.birthDate || 'No disponible';
+    const birthTime = birthData?.birthTime || 'No disponible';
+    const datetime = birthData?.birthDate && birthData?.birthTime 
+      ? `${birthData.birthDate}T${birthData.birthTime}` 
+      : 'No disponible';
+    
+    console.log('🔍 === DEBUG DATOS DE NACIMIENTO ===');
+    console.log('birthDate recibido:', birthDate);
+    console.log('birthTime recibido:', birthTime);
+    console.log('datetime formateado:', datetime);
     console.log('🔍 rawData recibido:', rawData);
     console.log('🔍 Tipo de rawData:', typeof rawData);
     console.log('🔍 rawData keys:', Object.keys(rawData || {}));

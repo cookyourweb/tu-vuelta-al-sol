@@ -1,7 +1,32 @@
 // src/constants/astrology/chartConstants.ts
 // Constantes para el componente ChartDisplay
 
-import { AspectConfig, AspectMeaning, HouseMeaning, PlanetMeaning } from "./chartDisplaycopy";
+export interface AspectConfig {
+  angle: number;
+  orb: number;
+  color: string;
+  name: string;
+  difficulty: 'easy' | 'hard' | 'neutral' | 'minor';
+}
+
+export interface AspectMeaning {
+  name: string;
+  meaning: string;
+  effect: string;
+  type: string;
+  explanation: string;
+}
+
+export interface PlanetMeaning {
+  meaning: string;
+  keywords: string;
+}
+
+export interface HouseMeaning {
+  name: string;
+  meaning: string;
+  keywords: string;
+}
 
 // =============================================================================
 // CONFIGURACIÓN DE ASPECTOS ASTROLÓGICOS

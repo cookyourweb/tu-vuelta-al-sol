@@ -5,9 +5,10 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import connectDB from '@/lib/db';
 import BirthData from '@/models/BirthData';
+
+import trainedAssistantService from '@/services/trainedAssistantService';
 import type { UserProfile } from '@/utils/astrology/events';
-// Cambiar esta línea:
-import { generateMultipleInterpretations, generateExecutiveSummary } from '@/services/trainedAssistantService';
+
 export async function POST(request: NextRequest) {
   try {
     const { userId, events, includeExecutiveSummary = true } = await request.json();
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     console.log(`👤 Perfil del usuario: ${userProfile.nextAge} años, ${userProfile.place}`);
 
-    // Filtrar eventos de alta prioridad para interpretación IA
+    // Filtrar eventos de alta prioridad para interpretación IAcomo
     const highPriorityEvents = events.filter((event: any) => 
       event.priority === 'high' || event.priority === 'medium'
     );
@@ -58,7 +59,7 @@ export async function POST(request: NextRequest) {
     console.log(`🎯 Interpretando ${maxEventsToInterpret} eventos de alta prioridad de ${events.length} totales`);
 
     // Generar interpretaciones personalizadas con IA
-    const interpretedEvents = await generateMultipleInterpretations(
+    const interpretedEvents = await trainedAssistantService.generateMultipleInterpretations(
       highPriorityEvents,
       userProfile,
       maxEventsToInterpret
@@ -70,10 +71,10 @@ export async function POST(request: NextRequest) {
       ...events.filter((event: any) => !highPriorityEvents.some(hp => hp.id === event.id))
     ];
 
-    let executiveSummary = null;
+    let executiveSummaryResult = null;
     if (includeExecutiveSummary) {
       console.log('📊 Generando resumen ejecutivo del año astrológico...');
-      executiveSummary = await generateExecutiveSummary(interpretedEvents, userProfile);
+      executiveSummaryResult = await trainedAssistantService.generateExecutiveSummary(interpretedEvents, userProfile);
     }
 
     // Calcular estadísticas de interpretación
@@ -86,10 +87,6 @@ export async function POST(request: NextRequest) {
       // Estadísticas por tipo de evento
       eventTypes: {
         lunarPhases: interpretedEvents.filter(e => e.type === 'lunar_phase' && e.aiInterpretation).length,
-        retrogrades: interpretedEvents.filter(e => e.type === 'retrograde' && e.aiInterpretation).length,
-        eclipses: interpretedEvents.filter(e => e.type === 'eclipse' && e.aiInterpretation).length,
-        transits: interpretedEvents.filter(e => e.type === 'planetary_transit' && e.aiInterpretation).length,
-        aspects: interpretedEvents.filter(e => e.type === 'aspect' && e.aiInterpretation).length
       },
       
       // Estadísticas de planes de acción
@@ -114,10 +111,10 @@ export async function POST(request: NextRequest) {
         userProfile: {
           age: userProfile.nextAge,
           location: userProfile.place,
-          timezonea: userProfile.timezone
+          timezone: userProfile.timezone
         },
         interpretationStats,
-        ...(executiveSummary && { executiveSummary }),
+        ...(executiveSummaryResult && { executiveSummary: executiveSummaryResult }),
         aiMetadata: {
           generatedAt: new Date().toISOString(),
           model: 'claude-sonnet-4',

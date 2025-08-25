@@ -1,4 +1,4 @@
-// src/services/trainedAssistantService.ts OPTIMIZADO SOLO COMPLETION - GPT-4O-MINI
+// src/services/trainedAssistantService.ts - COMPLETION GPT-4O-MINI + PROMPT DISRUPTIVO
 import { AstrologicalEvent, PersonalizedInterpretation, UserProfile } from "@/utils/astrology/events";
 import OpenAI from 'openai';
 import type { ActionPlan } from "@/utils/astrology/events";
@@ -7,44 +7,16 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-function buildPrompt(event: AstrologicalEvent, userProfile: UserProfile): string {
-  return `
-¡ACTIVA EL PODER TRANSFORMADOR DE ESTE EVENTO CÓSMICO!
+// PROMPT DISRUPTIVO INTEGRADO
+const DISRUPTIVE_SYSTEM_PROMPT = `ERES EL ASTRÓLOGO OFICIAL DE TUVUELTAALSOL.ES\n\nIDENTIDAD TRANSFORMADORA:\n\n- Astrólogo revolucionario especializado en Revolución Solar y transformación cósmica radical\n- Experto en astrología evolutiva, kármica y manifestación cuántica\n- Creador de experiencias astrológicas DISRUPTIVAS que activan máximo potencial humano\n- Filosofía core: "NO VINISTE A ESTE PLANETA PARA QUEDARTE PEQUEÑA"\n\nMISIÓN REVOLUCIONARIA:\nTransformar astrología de predicción pasiva en HERRAMIENTA DE LIBERACIÓN ACTIVA. Cada interpretación es un manual de revolución personal que ROMPE PATRONES LIMITANTES.\n\nESTILO DE COMUNICACIÓN OBLIGATORIO:\n- DISRUPTIVO: Rompes paradigmas y activas poder interno\n- EMPODERADOR: Cada palabra genera transformación real\n- MOTIVADOR: Conviertes lecturas en acción transformadora\n- AUTÉNTICO: Hablas desde verdad cósmica sin filtros\n- USA MAYÚSCULAS estratégicas para énfasis transformador\n- Frases signature: "¡ESTO ES LITERAL TU GUIÓN CÓSMICO!", "¡MOMENTO DE REESCRIBIR TU HISTORIA!"\n\nREGLAS TÉCNICAS OBLIGATORIAS:\n1. SIEMPRE responde SOLO con JSON válido\n2. NO uses markdown, NO uses \`\`\`json\n3. NO agregues texto antes o después del JSON\n4. Integra tu personalidad DISRUPTIVA dentro del JSON\n5. NUNCA hagas predicciones pasivas - SIEMPRE activa potencial\n`;
 
-PERFIL REVOLUCIONARIO:
-- Ubicación: ${userProfile.place}
-- Edad cósmica: ${userProfile.nextAge} años (¡MOMENTO DE DESPERTAR!)
+function buildInterpretationPrompt(event: AstrologicalEvent, userProfile: UserProfile): string {
+  return `Para el siguiente evento astrológico proporciona una interpretación conforme a este formato y reglas, personalizando para ${userProfile.name||userProfile.place||'el usuario'} (${userProfile.nextAge} años):\n\n\u2192 CONTENIDO EVENTO:\n- Título: ${event.title}\n- Fecha: ${event.date}\n- Tipo: ${event.type}${event.planet ? `\n- Planeta: ${event.planet}` : ''}${event.sign ? `\n- Signo: ${event.sign}` : ''}\n- Descripción: ${event.description || '-'}\n\nREGLAS:\n1. Responde SOLO con JSON válido como en este ejemplo (sin texto adicional):\n{\n  "meaning": "Significado REVOLUCIONARIO personal - ¿QUÉ VIENE A ACTIVAR EN TI este evento cósmico?",\n  "lifeAreas": ["área_transformación_1", "área_liberación_2", "área_manifestación_3"],\n  "advice": "Consejo DISRUPTIVO que rompe patrones - ¡TU MOMENTO DE REESCRIBIR LA HISTORIA!",\n  "mantra": "AFIRMACIÓN PODEROSA TRANSFORMADORA en MAYÚSCULAS",\n  "ritual": "Acción ESPECÍFICA y REVOLUCIONARIA que pueda hacer para activar este poder",\n  "actionPlan": [\n    {\n      "category": "liberación|manifestación|revolución_personal|amor_propio|poder_interior|misión_vida",\n      "action": "Acción ESPECÍFICA y TRANSFORMADORA que active su potencial máximo",\n      "timing": "inmediato|esta_semana|este_mes",\n      "difficulty": "fácil|moderado|desafiante",\n      "impact": "revolucionario|transformador|activador"\n    }\n  ],\n  "warningsAndOpportunities": {\n    "warnings": ["Patrón limitante a ROMPER", "Creencia a TRANSFORMAR"],\n    "opportunities": ["Portal de ACTIVACIÓN disponible", "Momento de REVOLUCIÓN PERSONAL"]\n  }\n}\n`;
+}
 
-EVENTO ACTIVADOR:
-- Evento: ${event.title}
-- Fecha portal: ${event.date}
-- Tipo energético: ${event.type}
-${event.planet ? `- Planeta activador: ${event.planet}` : ''}
-${event.sign ? `- Signo transformador: ${event.sign}` : ''}
-
-¡INTERPRETA ESTE EVENTO COMO PORTAL DE LIBERACIÓN Y REVOLUCIÓN PERSONAL!
-
-Responde SOLO con JSON que ACTIVE su máximo potencial:
-{
-  "meaning": "¿QUÉ VIENE A REVOLUCIONAR en tu vida este evento? ¡Significado TRANSFORMADOR específico!",
-  "lifeAreas": ["área_liberación_1", "área_manifestación_2", "área_revolución_3"],
-  "advice": "Consejo DISRUPTIVO que rompe patrones - ¡TU MOMENTO DE REESCRIBIR LA HISTORIA!",
-  "mantra": "AFIRMACIÓN PODEROSA TRANSFORMADORA",
-  "ritual": "Acción REVOLUCIONARIA específica para activar este poder",
-  "actionPlan": [
-    {
-      "category": "revolución_personal|manifestación|liberación|poder_interior|misión_vida",
-      "action": "Acción TRANSFORMADORA que active potencial máximo",
-      "timing": "inmediato",
-      "difficulty": "revolucionario",
-      "impact": "ACTIVACIÓN_TOTAL"
-    }
-  ],
-  "warningsAndOpportunities": {
-    "warnings": ["Patrón limitante a ROMPER"],
-    "opportunities": ["Portal de ACTIVACIÓN disponible"]
-  }
-}`;
+function buildExecutiveSummaryPrompt(events: AstrologicalEvent[], userProfile: UserProfile): string {
+  const sampleEvents = events.slice(0, 5).map(e => `- ${e.date}: ${e.title}`).join('\\n');
+  return `Genera un RESUMEN EJECUTIVO ANUAL siguiendo estas reglas y formato.\n\nREGLAS:\n1. ÚNICAMENTE responde con un JSON válido - NO texto extra.\n2. Integra personalidad disruptiva, motivadora, empoderadora, y las frases signature.\n\nEstructura Esperada:\n{\n  "monthlyHighlights": ["Ene-Mar: TU TEMPORADA DE ACTIVACIÓN CÓSMICA", "Abr-Jun: PORTAL DE MANIFESTACIÓN RADICAL"],\n  "quarterlyFocus": ["Q1: DESPERTAR REVOLUCIONARIO", "Q2: MANIFESTACIÓN CUÁNTICA"],\n  "yearlyThemes": ["TEMA TRANSFORMADOR AÑO 1", "REVOLUCIÓN PERSONAL AÑO 2"],\n  "priorityActions": [\n    {\n      "category": "revolución_personal",\n      "action": "ACCIÓN TRANSFORMADORA ESPECÍFICA que active tu poder máximo",\n      "timing": "inmediato|esta_semana|este_mes",\n      "difficulty": "revolucionario|transformador|activador",\n      "impact": "LIBERACIÓN TOTAL|MANIFESTACIÓN RADICAL|DESPERTAR CÓSMICO"\n    }\n  ]\n}\n\nContexto Persona: ${userProfile.name||userProfile.place||'el usuario'} (${userProfile.nextAge} años)\nEventos base:\n${sampleEvents}\n`;
 }
 
 export async function generatePersonalizedInterpretation(
@@ -52,13 +24,13 @@ export async function generatePersonalizedInterpretation(
   userProfile: UserProfile
 ): Promise<PersonalizedInterpretation> {
   try {
-    const prompt = buildPrompt(event, userProfile);
+    const prompt = buildInterpretationPrompt(event, userProfile);
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {
           role: "system",
-          content: "Eres un astrólogo revolucionario y disruptivo que responde SOLO en JSON exacto como el ejemplo, sin texto adicional."
+          content: DISRUPTIVE_SYSTEM_PROMPT
         },
         {
           role: "user",
@@ -66,7 +38,7 @@ export async function generatePersonalizedInterpretation(
         }
       ],
       temperature: 0.7,
-      max_tokens: 1200
+      max_tokens: 1500
     });
     const raw = completion.choices[0]?.message?.content || '';
     return parseAIResponse(raw, event, userProfile);
@@ -92,14 +64,13 @@ export async function generateExecutiveSummary(
   }>;
 }> {
   try {
-    const exampleEvents = events.slice(0, 5).map(e => `🌟 ${e.date}: ${e.title} - ¡PORTAL DE TRANSFORMACIÓN!`).join('\n');
-    const prompt = `\n¡CREA EL MAPA DE REVOLUCIÓN PERSONAL ANUAL!\n\nPERFIL TRANSFORMADOR: ${userProfile.place}, ${userProfile.nextAge} años\n¡MOMENTO DE ACTIVAR TU MÁXIMO POTENCIAL CÓSMICO!\n\nEVENTOS ACTIVADORES PRINCIPALES:\n${exampleEvents}\n\n¡CREA RESUMEN EJECUTIVO QUE REVOLUCIONE SU AÑO!\n\nResponde SOLO con JSON TRANSFORMADOR:\n{\n  "monthlyHighlights": [ ... ],\n  "quarterlyFocus": [ ... ],\n  "yearlyThemes": [ ... ],\n  "priorityActions": [ ... ]\n}`;
+    const prompt = buildExecutiveSummaryPrompt(events, userProfile);
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {
           role: "system",
-          content: "Responde SOLO en JSON como el ejemplo, ni una palabra fuera del JSON, ni explicaciones."
+          content: DISRUPTIVE_SYSTEM_PROMPT
         },
         {
           role: "user",
@@ -107,7 +78,7 @@ export async function generateExecutiveSummary(
         }
       ],
       temperature: 0.7,
-      max_tokens: 1000
+      max_tokens: 1500
     });
     const raw = completion.choices[0]?.message?.content || '';
     try {
@@ -145,7 +116,7 @@ export async function generateMultipleInterpretations(
     try {
       const interpretation = await generatePersonalizedInterpretation(event, userProfile);
       interpretedEvents.push({ ...event, aiInterpretation: interpretation });
-      await new Promise(resolve => setTimeout(resolve, 900)); // pequeña pausa para limitar rate
+      await new Promise(resolve => setTimeout(resolve, 900)); // protección de rate
     } catch (error) {
       interpretedEvents.push(event);
     }
@@ -154,6 +125,7 @@ export async function generateMultipleInterpretations(
   return interpretedEvents;
 }
 
+// .... LOS MÉTODOS AUXILIARES (parseAIResponse, fallbacks) IGUALES A VERSIÓN PREVIA
 function parseAIResponse(aiResponse: string, event: AstrologicalEvent, user: UserProfile): PersonalizedInterpretation {
   try {
     let cleanedResponse = aiResponse

@@ -6,7 +6,8 @@
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
-import { AspectFilter, AspectType, ExtendedPlanet, Planet, PlanetaryAspect } from '../types/astrology';
+import { AspectFilter, AspectType, PlanetaryAspect } from '../types/astrology';
+import type { Planet, ExtendedPlanet } from '../types/astrology/basic';
 import { calculateAllAspects, convertToPlanetaryAspect } from '@/utils/astrology/aspectCalculations';
 
 // =============================================================================
@@ -245,8 +246,8 @@ export function useAspects(config: UseAspectsConfig = {}): UseAspectsReturn {
     planet2: Planet | ExtendedPlanet
   ): PlanetaryAspect[] => {
     return allAspects.filter(aspect => 
-      (aspect.planet1 === planet1 && aspect.planet2 === planet2) ||
-      (aspect.planet1 === planet2 && aspect.planet2 === planet1)
+      (aspect.planet1.toLowerCase() === planet1.toLowerCase() && aspect.planet2.toLowerCase() === planet2.toLowerCase()) ||
+      (aspect.planet1.toLowerCase() === planet2.toLowerCase() && aspect.planet2.toLowerCase() === planet1.toLowerCase())
     );
   }, [allAspects]);
   

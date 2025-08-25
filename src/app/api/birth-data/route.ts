@@ -16,6 +16,17 @@ export async function POST(request: Request) {
       timezone
     } = await request.json();
     
+    console.log('🔍 Datos recibidos en POST:', {
+      userId,
+      fullName,
+      birthDate,
+      birthTime,
+      birthPlace,
+      latitude,
+      longitude,
+      timezone
+    });
+    
     // Validación básica
     if (!userId || !fullName || !birthDate || !birthPlace || !latitude || !longitude) {
       return NextResponse.json({ 
@@ -128,9 +139,9 @@ export async function GET(request: Request) {
     }
     // Mapeo de respuesta a formato estándar para el frontend y validadores
     const mappedData = {
-      date: birthData.birthDate instanceof Date ? birthData.birthDate.toISOString().split('T')[0] : (birthData.birthDate || ''),
-      time: birthData.birthTime || '',
-      location: birthData.birthPlace || '',
+      birthDate: birthData.birthDate instanceof Date ? birthData.birthDate.toISOString().split('T')[0] : (birthData.birthDate || ''),
+      birthTime: birthData.birthTime || '',
+      birthPlace: birthData.birthPlace || '',
       latitude: birthData.latitude || 0,
       longitude: birthData.longitude || 0,
       timezone: birthData.timezone || 'UTC'

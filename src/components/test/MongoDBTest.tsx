@@ -54,10 +54,10 @@ export default function MongoDBTest() {
       if (rawData.success && rawData.data) {
         // Aplicar el mismo mapeo que usa userDataService
         mappedData = {
-          date: rawData.data.birthDate ? 
+          birthDate: rawData.data.birthDate ? 
             new Date(rawData.data.birthDate).toISOString().split('T')[0] : '',
-          time: rawData.data.birthTime || '',
-          location: rawData.data.birthPlace || '',
+          birthTime: rawData.data.birthTime || '',
+          birthPlace: rawData.data.birthPlace || '',
           latitude: rawData.data.latitude || 0,
           longitude: rawData.data.longitude || 0,
           timezone: rawData.data.timezone || 'UTC'
@@ -66,7 +66,7 @@ export default function MongoDBTest() {
         console.log('🗺️ MAPPED DATA:', JSON.stringify(mappedData, null, 2));
 
         // 3. 🔍 SIMULAR VALIDACIÓN
-        const requiredFields = ['date', 'time', 'location', 'latitude', 'longitude'];
+        const requiredFields = ['birthDate', 'birthTime', 'birthPlace', 'latitude', 'longitude'];
         const missingFields: string[] = [];
         const fieldDetails: any = {};
 

@@ -54,19 +54,17 @@ interface LocationSuggestion {
 // FUNCIONES AUXILIARES
 // ==========================================
 
-const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
-  try {
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=es`
-    );
-    const data = await response.json();
-    const city = data.address?.city || data.address?.town || 'Ubicación';
-    const country = data.address?.country || '';
-    return country ? `${city}, ${country}` : city;
-  } catch (error) {
-    return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-  }
-};
+  const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
+    try {
+      const response = await fetch(`/api/reverse-geocode?lat=${lat}&lng=${lng}`);
+      const data = await response.json();
+      const city = data.address?.city || data.address?.town || 'Ubicación';
+      const country = data.address?.country || '';
+      return country ? `${city}, ${country}` : city;
+    } catch (error) {
+      return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    }
+  };
 
 const calculateTimezone = (date: string, timezone: string): string => {
   const birthDate = new Date(date);
@@ -150,7 +148,10 @@ export default function BirthDataForm() {
 
     setIsSearching(true);
     try {
-      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`);
+      const response = await fetch(`/api/geocode?q=${encodeURIComponent(query)}`);
+      if (!response.ok) {
+        throw new Error('Error al buscar ubicaciones');
+      }
       const data = await response.json();
       
       const locations = data.map((item: any) => ({
@@ -225,7 +226,7 @@ export default function BirthDataForm() {
             hasBirthData = true;
             // Llenar datos de la API birthData
             const birthDate = data.birthDate ? new Date(data.birthDate).toISOString().split('T')[0] : '';
-            setValue('fullName', data.fullName || user.displayName || user.fullName || '');
+            setValue('fullName', data.fullName || user.displayName || '');
             setValue('birthDate', birthDate);
             setValue('birthTime', data.birthTime || '');
             setValue('birthPlace', data.birthPlace || '');
@@ -241,10 +242,10 @@ export default function BirthDataForm() {
         }
         // Si no hay birthData, mostrar info básica readonly
         if (!hasBirthData) {
-          setValue('fullName', user.displayName || user.fullName || '');
+          setValue('fullName', user.displayName || '');
         }
       } catch (error) {
-        setValue('fullName', user.displayName || user.fullName || '');
+        setValue('fullName', user.displayName || '');
       } finally {
         setIsLoading(false);
       }
@@ -275,7 +276,7 @@ export default function BirthDataForm() {
           finalLng = selectedLocation.longitude;
           finalPlace = selectedLocation.name;
         } else {
-          const geoResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(data.birthPlace || '')}`);
+          const geoResponse = await fetch(`/api/geocode?q=${encodeURIComponent(data.birthPlace || '')}`);
           const geoData = await geoResponse.json();
           
           if (!geoData || geoData.length === 0) {
@@ -317,6 +318,7 @@ export default function BirthDataForm() {
         timezone: data.timezone || 'Europe/Madrid'
       };
       
+      console.log('🔍 Enviando datos de nacimiento:', birthData);
       const response = await fetch('/api/birth-data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
