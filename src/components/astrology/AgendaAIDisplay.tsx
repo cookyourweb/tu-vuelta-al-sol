@@ -126,12 +126,12 @@ export default function AgendaAIDisplay({ userId }: AgendaAIDisplayProps) {
     }
   };
 
-  // 🔄 AUTO-GENERAR AL CARGAR
+  // 🔄 AUTO-GENERAR AL CARGAR (PROTEGIDO MEJOR LOOP)
   useEffect(() => {
-    if (userId && !hasGenerated && !loading) {
-      generateAgenda();
-    }
-  }, [userId]);
+    if (!userId || hasGenerated || loading) return;
+    generateAgenda();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, hasGenerated, loading]);
 
   // 🌀 LOADING STATE
   if (loading) {
