@@ -36,7 +36,9 @@ export type EventType =
   'solar_activation' | 'lunar_resonance' | 'life_purpose_activation' | 
   'venus_harmony' | 'mars_action' | 'mercury_communication' | 
   'jupiter_expansion' | 'saturn_discipline' | 'uranus_innovation' | 
-  'neptune_intuition' | 'pluto_transformation';
+  'neptune_intuition' | 'pluto_transformation' |
+  // Tipos de eventos astrológicos tradicionales
+  'lunar_phase' | 'retrograde' | 'eclipse' | 'planetary_transit' | 'aspect' | 'seasonal';
 
 // ==========================================
 // INTERFACES PARA CONTEXTO PERSONAL

@@ -5,9 +5,9 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import connectDB from '@/lib/db';
 import BirthData from '@/models/BirthData';
-import type { UserProfile } from '@/utils/astrology/events';
-// Cambiar esta línea:
+import type { UserProfile } from '@/types/astrology/unified-types';
 import { generateMultipleInterpretations, generateExecutiveSummary } from '@/services/trainedAssistantService';
+
 export async function POST(request: NextRequest) {
   try {
     const { userId, events, includeExecutiveSummary = true } = await request.json();
@@ -38,13 +38,38 @@ export async function POST(request: NextRequest) {
     const currentAge = currentDate.getFullYear() - birthDate.getFullYear();
     
     const userProfile: UserProfile = {
+      userId: userId,
+      name: birthData.name || 'Usuario', // Valor por defecto si no hay nombre
       birthDate: birthData.birthDate,
       currentAge: currentAge,
       nextAge: currentAge + 1,
       latitude: parseFloat(birthData.latitude),
       longitude: parseFloat(birthData.longitude),
       timezone: birthData.timezone || 'Europe/Madrid',
-      place: birthData.birthPlace || 'Madrid, España'
+      place: birthData.birthPlace || 'Madrid, España',
+      astrological: {
+        signs: {
+          sun: birthData.sunSign || 'Aries', // Valor por defecto
+          moon: birthData.moonSign || 'Aries', // Valor por defecto
+          ascendant: birthData.ascendantSign || 'Aries', // Valor por defecto
+          mercury: birthData.mercurySign || 'Aries', // Valor por defecto
+          venus: birthData.venusSign || 'Aries', // Valor por defecto
+          mars: birthData.marsSign || 'Aries' // Valor por defecto
+        },
+        houses: {
+          sun: birthData.sunHouse || 1, // Valor por defecto
+          moon: birthData.moonHouse || 1, // Valor por defecto
+          mercury: birthData.mercuryHouse || 1, // Valor por defecto
+          venus: birthData.venusHouse || 1, // Valor por defecto
+          mars: birthData.marsHouse || 1 // Valor por defecto
+        },
+        dominantElements: ['fire'], // Valor por defecto
+        dominantMode: 'cardinal', // Valor por defecto
+        lifeThemes: ['crecimiento', 'evolución'],
+        strengths: ['adaptabilidad', 'creatividad'],
+        challenges: ['paciencia', 'organización'],
+        progressions: null
+      }
     };
 
     console.log(`👤 Perfil del usuario: ${userProfile.nextAge} años, ${userProfile.place}`);

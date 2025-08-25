@@ -679,7 +679,14 @@ function generatePersonalizedTitle(type: EventType, userProfile: UserProfile): s
     'saturn_discipline': `Disciplina Saturnina`,
     'uranus_innovation': `Innovación Uraniana`,
     'neptune_intuition': `Intuición Neptuniana`,
-    'pluto_transformation': `Transformación Plutoniana`
+    'pluto_transformation': `Transformación Plutoniana`,
+    // Tipos de eventos astrológicos tradicionales
+    'lunar_phase': `Fase Lunar ${userProfile.astrological.signs.moon}`,
+    'retrograde': `Período Retrógrado`,
+    'eclipse': `Eclipse ${userProfile.astrological.signs.sun}`,
+    'planetary_transit': `Tránsito Planetario`,
+    'aspect': `Aspecto Astrológico`,
+    'seasonal': `Cambio Estacional`
   };
   
   return titles[type] ?? 'Evento Cósmico Personal';
