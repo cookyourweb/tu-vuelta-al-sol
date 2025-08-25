@@ -1,7 +1,7 @@
 // src/services/trainedAssistantService.ts - COMPLETION GPT-4O-MINI + PROMPT DISRUPTIVO
-import { AstrologicalEvent, PersonalizedInterpretation, UserProfile } from "@/utils/astrology/events";
+import { AstrologicalEvent, PersonalizedInterpretation, UserProfile } from "@/types/astrology/unified-types";
 import OpenAI from 'openai';
-import type { ActionPlan } from "@/utils/astrology/events";
+import type { ActionPlan } from "@/types/astrology/unified-types";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,

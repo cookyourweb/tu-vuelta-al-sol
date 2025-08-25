@@ -360,7 +360,7 @@ function calculatePersonalPriority(
 }
 
 function buildCostOptimizedResponse(events: AstrologicalEvent[], userProfile: UserProfile) {
-  const localEvents = events.filter(e => e.localInterpretation);
+  const localEvents = events.filter(e => e.aiInterpretation);
   
   return {
     success: true,

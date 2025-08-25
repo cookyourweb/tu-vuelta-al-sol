@@ -175,7 +175,6 @@ ChartSchema.statics.findProgressedChartByYear = function(userId: string, year: n
 };
 
 // ⭐ ÍNDICES para mejor performance
-ChartSchema.index({ userId: 1 });
 ChartSchema.index({ 'progressedCharts.period': 1 });
 ChartSchema.index({ 'progressedCharts.year': 1 });
 ChartSchema.index({ 'progressedCharts.startDate': 1, 'progressedCharts.endDate': 1 });

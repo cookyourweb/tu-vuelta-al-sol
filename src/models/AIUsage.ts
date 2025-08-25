@@ -6,8 +6,7 @@ import mongoose from 'mongoose';
 const AIUsageSchema = new mongoose.Schema({
   userId: {
     type: String,
-    required: true,
-    index: true
+    required: true
   },
   
   // Control de llamadas anuales

@@ -7,7 +7,7 @@ import connectDB from '@/lib/db';
 import BirthData from '@/models/BirthData';
 
 import trainedAssistantService from '@/services/trainedAssistantService';
-import type { UserProfile } from '@/utils/astrology/events';
+import type { UserProfile } from '@/types/astrology/unified-types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,13 +39,37 @@ export async function POST(request: NextRequest) {
     const currentAge = currentDate.getFullYear() - birthDate.getFullYear();
     
     const userProfile: UserProfile = {
+      userId: userId,
+      name: birthData.fullName || 'Usuario',
       birthDate: birthData.birthDate,
       currentAge: currentAge,
       nextAge: currentAge + 1,
       latitude: parseFloat(birthData.latitude),
       longitude: parseFloat(birthData.longitude),
       timezone: birthData.timezone || 'Europe/Madrid',
-      place: birthData.birthPlace || 'Madrid, España'
+      place: birthData.birthPlace || 'Madrid, España',
+      astrological: {
+        signs: {
+          sun: birthData.sunSign || 'Aries',
+          moon: birthData.moonSign || 'Cancer',
+          ascendant: birthData.ascendantSign || 'Leo',
+          mercury: birthData.mercurySign || 'Geminis',
+          venus: birthData.venusSign || 'Taurus',
+          mars: birthData.marsSign || 'Aries'
+        },
+        houses: {
+          sun: birthData.sunHouse || 1,
+          moon: birthData.moonHouse || 4,
+          mercury: birthData.mercuryHouse || 3,
+          venus: birthData.venusHouse || 2,
+          mars: birthData.marsHouse || 1
+        },
+        dominantElements: ['fire'],
+        dominantMode: 'cardinal',
+        lifeThemes: ['Autoconocimiento', 'Expresión creativa', 'Relaciones armoniosas'],
+        strengths: ['Iniciativa natural', 'Intuición emocional', 'Capacidad de liderazgo'],
+        challenges: ['Desarrollar paciencia', 'Equilibrar ego y humildad']
+      }
     };
 
     console.log(`👤 Perfil del usuario: ${userProfile.nextAge} años, ${userProfile.place}`);
