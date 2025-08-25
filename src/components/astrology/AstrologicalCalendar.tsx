@@ -1,11 +1,9 @@
-// src/components/astrology/AstrologicalCalendar.tsx
-// 📅 CALENDARIO ASTROLÓGICO CON SISTEMA DE CACHÉ INTELIGENTE
+// src/components/astrology/AstrologicalCalendar.tsx - VERSIÓN CON ESTILOS DISRUPTIVOS
 
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -21,7 +19,16 @@ import {
   Brain,
   ShieldCheck,
   Database,
-  CheckCircle
+  CheckCircle,
+  Sparkles,
+  Crown,
+  Target,
+  Flame,
+  Gem,
+  Rocket,
+  // Lightning, // Reemplazado por Zap
+  Compass,
+  Wand2
 } from 'lucide-react';
 import { AgendaLoadingStates, LOADING_STEPS, useAgendaLoading } from './AgendaLoadingStates';
 
@@ -61,181 +68,271 @@ interface CacheInfo {
   aiEventsCount: number;
 }
 
-interface EventDetailModalProps {
-  event: AstrologicalEvent | null;
-  isOpen: boolean;
-  onClose: () => void;
-}
+// ICONOS DESCRIPTIVOS POR TIPO DE EVENTO
+const getEventIconAndStyle = (type: string, priority: string) => {
+  const eventStyles = {
+    lunar_phase: {
+      icon: <Moon className="w-4 h-4" />,
+      label: "FASE LUNAR",
+      bgGradient: "from-indigo-500 to-blue-600",
+      borderColor: "border-blue-400",
+      textColor: "text-blue-100",
+      shadowColor: "shadow-blue-500/30"
+    },
+    eclipse: {
+      icon: <Crown className="w-4 h-4" />,
+      label: "ECLIPSE SUPREMO",
+      bgGradient: "from-yellow-500 to-orange-600",
+      borderColor: "border-yellow-400",
+      textColor: "text-yellow-100",
+      shadowColor: "shadow-yellow-500/50"
+    },
+    retrograde: {
+      icon: <Compass className="w-4 h-4" />,
+      label: "RETRO POWER",
+      bgGradient: "from-purple-500 to-pink-600",
+      borderColor: "border-purple-400",
+      textColor: "text-purple-100",
+      shadowColor: "shadow-purple-500/40"
+    },
+    planetary_transit: {
+      icon: <Rocket className="w-4 h-4" />,
+      label: "TRÁNSITO CÓSMICO",
+      bgGradient: "from-green-500 to-emerald-600",
+      borderColor: "border-green-400",
+      textColor: "text-green-100",
+      shadowColor: "shadow-green-500/30"
+    },
+    seasonal: {
+      icon: <Gem className="w-4 h-4" />,
+      label: "CAMBIO ESTACIONAL",
+      bgGradient: "from-teal-500 to-cyan-600",
+      borderColor: "border-teal-400",
+      textColor: "text-teal-100",
+      shadowColor: "shadow-teal-500/30"
+    },
+    default: {
+      icon: <Sparkles className="w-4 h-4" />,
+      label: "EVENTO MÁGICO",
+      bgGradient: "from-gray-500 to-gray-600",
+      borderColor: "border-gray-400",
+      textColor: "text-gray-100",
+      shadowColor: "shadow-gray-500/30"
+    }
+  };
 
-// 🔮 Modal de detalles del evento (igual que antes)
-function EventDetailModal({ event, isOpen, onClose }: EventDetailModalProps) {
+  const priorityEffects = {
+    high: "animate-pulse ring-2 ring-red-400 ring-opacity-75",
+    medium: "ring-1 ring-yellow-400 ring-opacity-50",
+    low: ""
+  };
+
+  const style = eventStyles[type as keyof typeof eventStyles] || eventStyles.default;
+  const effect = priorityEffects[priority as keyof typeof priorityEffects] || "";
+
+  return { ...style, effect };
+};
+
+// FRASES DISRUPTIVAS ALEATORIAS
+const getDisruptivePhrase = () => {
+  const phrases = [
+    "TU DESTINO SE ESCRIBE HOY",
+    "LAS ESTRELLAS CONSPIRAN A TU FAVOR",
+    "MOMENTO DE DESPERTAR CÓSMICO",
+    "TU PODER INTERIOR SE ACTIVA",
+    "REVOLUCIÓN PERSONAL EN MARCHA",
+    "EL UNIVERSO TE LLAMA A BRILLAR",
+    "TRANSFORMACIÓN ÉPICA INICIADA",
+    "TU ERA DE MANIFESTACIÓN COMIENZA",
+    "CÓDIGO CÓSMICO DESBLOQUEADO",
+    "ENERGÍA SUPERIOR ACTIVADA"
+  ];
+  return phrases[Math.floor(Math.random() * phrases.length)];
+};
+
+// Componente Modal mejorado
+function EventModal({ 
+  event, 
+  isOpen, 
+  onClose 
+}: { 
+  event: AstrologicalEvent | null; 
+  isOpen: boolean; 
+  onClose: () => void; 
+}) {
   if (!isOpen || !event) return null;
 
-  const priorityColors = {
-    high: 'border-red-400 bg-red-500/10',
-    medium: 'border-yellow-400 bg-yellow-500/10', 
-    low: 'border-blue-400 bg-blue-500/10'
-  };
-
-  const categoryIcons: Record<string, JSX.Element> = {
-    trabajo: <TrendingUp className="w-4 h-4" />,
-    amor: <Heart className="w-4 h-4" />,
-    salud: <ShieldCheck className="w-4 h-4" />,
-    crecimiento: <Brain className="w-4 h-4" />,
-    default: <Star className="w-4 h-4" />
-  };
+  const eventStyle = getEventIconAndStyle(event.type, event.priority);
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-600 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-gradient-to-br from-gray-900 via-purple-900/20 to-black border border-purple-400/30 rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
         
-        {/* Header */}
-        <div className={`p-6 border-b border-gray-700 ${priorityColors[event.priority]}`}>
-          <div className="flex justify-between items-start">
-            <div>
-              <h2 className="text-2xl font-bold text-white mb-2">{event.title}</h2>
-              <div className="flex items-center space-x-4 text-sm text-gray-300">
-                <span>📅 {new Date(event.date).toLocaleDateString('es-ES')}</span>
-                <span className="capitalize">🌟 {event.priority} prioridad</span>
-                {event.planet && <span>🪐 {event.planet}</span>}
-                {event.sign && <span>♈ {event.sign}</span>}
+        {/* Header Disruptivo */}
+        <div className={`bg-gradient-to-r ${eventStyle.bgGradient} p-8 rounded-t-3xl relative overflow-hidden`}>
+          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="relative z-10">
+            <div className="flex justify-between items-start">
+              <div>
+                <div className="flex items-center mb-3">
+                  {eventStyle.icon}
+                  <span className="ml-2 text-xs font-bold tracking-wider opacity-80">
+                    {eventStyle.label}
+                  </span>
+                </div>
+                <h2 className="text-3xl font-black text-white mb-3">{event.title}</h2>
+                <div className="flex items-center space-x-4 text-sm text-white/80">
+                  <span className="flex items-center">
+                    <Clock className="w-4 h-4 mr-1" />
+                    {new Date(event.date).toLocaleDateString('es-ES', { 
+                      weekday: 'long', 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}
+                  </span>
+                  <span className="flex items-center">
+                    <Target className="w-4 h-4 mr-1" />
+                    {event.priority === 'high' ? 'PRIORIDAD MÁXIMA' : event.priority === 'medium' ? 'PRIORIDAD ALTA' : 'PRIORIDAD MEDIA'}
+                  </span>
+                </div>
+                <div className="mt-4 text-lg font-bold text-white/90">
+                  {getDisruptivePhrase()}
+                </div>
               </div>
+              <button 
+                onClick={onClose}
+                className="text-white/80 hover:text-white transition-colors bg-black/20 rounded-full p-2"
+              >
+                ✕
+              </button>
             </div>
-            <button 
-              onClick={onClose}
-              className="text-gray-400 hover:text-white transition-colors"
-            >
-              ✕
-            </button>
           </div>
         </div>
 
         {/* Contenido */}
-        <div className="p-6 space-y-6">
+        <div className="p-8 space-y-8">
           
-          {/* Descripción base */}
-          <div>
-            <h3 className="text-lg font-semibold text-white mb-2">📜 Descripción</h3>
-            <p className="text-gray-300">{event.description}</p>
+          {/* Descripción */}
+          <div className="bg-gradient-to-r from-purple-900/20 to-blue-900/20 border border-purple-400/20 rounded-2xl p-6">
+            <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+              <Wand2 className="w-5 h-5 text-purple-400 mr-2" />
+              MENSAJE DEL COSMOS
+            </h3>
+            <p className="text-gray-300 text-lg leading-relaxed">{event.description}</p>
           </div>
 
-          {/* Interpretación IA */}
-          {event.aiInterpretation ? (
+          {event.aiInterpretation && (
             <>
-              {/* Significado */}
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-2">🔮 Significado Personal</h3>
-                <p className="text-gray-300 leading-relaxed">{event.aiInterpretation.meaning}</p>
+              {/* Mantra Power */}
+              <div className="bg-gradient-to-r from-pink-900/30 to-rose-900/30 border border-pink-400/30 rounded-2xl p-6 text-center">
+                <h3 className="text-xl font-bold text-pink-300 mb-4 flex items-center justify-center">
+                  <Heart className="w-5 h-5 mr-2" />
+                  TU MANTRA DE PODER
+                </h3>
+                <div className="text-2xl font-bold text-white italic">
+                  "{event.aiInterpretation.mantra}"
+                </div>
               </div>
 
-              {/* Áreas de vida */}
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-2">🎯 Áreas de Vida Afectadas</h3>
-                <div className="flex flex-wrap gap-2">
-                  {event.aiInterpretation.lifeAreas.map((area, index) => (
-                    <span 
-                      key={index}
-                      className="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-sm"
-                    >
-                      {area}
-                    </span>
+              {/* Plan de Acción */}
+              <div className="bg-gradient-to-r from-emerald-900/20 to-teal-900/20 border border-emerald-400/20 rounded-2xl p-6">
+                <h3 className="text-xl font-bold text-emerald-300 mb-4 flex items-center">
+                  <Zap className="w-5 h-5 mr-2" />
+                  PLAN DE ACCIÓN CÓSMICO
+                </h3>
+                <div className="grid gap-4">
+                  {event.aiInterpretation.actionPlan.slice(0, 3).map((action, index) => (
+                    <div key={index} className="bg-emerald-500/10 border border-emerald-400/30 rounded-xl p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-emerald-300 font-semibold text-sm uppercase tracking-wide">
+                          {action.category}
+                        </span>
+                        <span className="text-xs bg-emerald-400/20 text-emerald-300 px-2 py-1 rounded-full">
+                          {action.timing}
+                        </span>
+                      </div>
+                      <p className="text-white font-medium">{action.action}</p>
+                      <div className="flex items-center mt-2 space-x-3 text-xs">
+                        <span className={`px-2 py-1 rounded-full ${
+                          action.difficulty === 'fácil' ? 'bg-green-400/20 text-green-300' :
+                          action.difficulty === 'moderado' ? 'bg-yellow-400/20 text-yellow-300' :
+                          'bg-red-400/20 text-red-300'
+                        }`}>
+                          {action.difficulty}
+                        </span>
+                        <span className={`px-2 py-1 rounded-full ${
+                          action.impact === 'alto' ? 'bg-red-400/20 text-red-300' :
+                          action.impact === 'medio' ? 'bg-yellow-400/20 text-yellow-300' :
+                          'bg-blue-400/20 text-blue-300'
+                        }`}>
+                          Impacto: {action.impact}
+                        </span>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
 
-              {/* Consejo */}
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-2">💡 Consejo Práctico</h3>
-                <p className="text-gray-300 leading-relaxed">{event.aiInterpretation.advice}</p>
-              </div>
-
-              {/* Mantra */}
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-2">🧘 Mantra</h3>
-                <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-400/30 rounded-2xl p-4">
-                  <p className="text-purple-300 font-medium italic text-center">
-                    "{event.aiInterpretation.mantra}"
-                  </p>
-                </div>
-              </div>
-
-              {/* Ritual */}
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-2">🕯️ Ritual Sugerido</h3>
-                <p className="text-gray-300 leading-relaxed">{event.aiInterpretation.ritual}</p>
-              </div>
-
-              {/* Plan de acción */}
-              {event.aiInterpretation.actionPlan && event.aiInterpretation.actionPlan.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-2">📋 Plan de Acción</h3>
-                  <div className="space-y-3">
-                    {event.aiInterpretation.actionPlan.map((action, index) => (
-                      <div 
-                        key={index}
-                        className="bg-gray-800/50 border border-gray-600 rounded-xl p-4"
-                      >
-                        <div className="flex items-start space-x-3">
-                          <div className="text-blue-400 mt-1">
-                            {categoryIcons[action.category] || categoryIcons.default}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2 mb-1">
-                              <span className="text-blue-300 font-medium capitalize">{action.category}</span>
-                              <span className="text-xs text-gray-500">•</span>
-                              <span className="text-xs text-gray-400 capitalize">{action.timing}</span>
-                            </div>
-                            <p className="text-gray-300 text-sm">{action.action}</p>
-                            <div className="flex items-center space-x-4 mt-2 text-xs">
-                              <span className="text-yellow-400">🎯 {action.difficulty}</span>
-                              <span className="text-green-400">📈 Impacto {action.impact}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {/* Advertencias y Oportunidades */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-2">⚠️ Cuidado con</h3>
-                  <div className="space-y-2">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-gradient-to-r from-red-900/20 to-pink-900/20 border border-red-400/30 rounded-2xl p-6">
+                  <h3 className="text-lg font-bold text-red-300 mb-4 flex items-center">
+                    <ShieldCheck className="w-5 h-5 mr-2" />
+                    EVITA ESTO
+                  </h3>
+                  <div className="space-y-3">
                     {event.aiInterpretation.warningsAndOpportunities.warnings.map((warning, index) => (
-                      <div key={index} className="bg-red-500/10 border border-red-400/30 rounded-lg p-3">
-                        <p className="text-red-300 text-sm">{warning}</p>
+                      <div key={index} className="bg-red-500/10 border-l-4 border-red-400 p-3 rounded">
+                        <p className="text-red-200 text-sm">{warning}</p>
                       </div>
                     ))}
                   </div>
                 </div>
                 
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-2">🌟 Oportunidades</h3>
-                  <div className="space-y-2">
+                <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-400/30 rounded-2xl p-6">
+                  <h3 className="text-lg font-bold text-green-300 mb-4 flex items-center">
+                    <Gem className="w-5 h-5 mr-2" />
+                    APROVECHA ESTO
+                  </h3>
+                  <div className="space-y-3">
                     {event.aiInterpretation.warningsAndOpportunities.opportunities.map((opportunity, index) => (
-                      <div key={index} className="bg-green-500/10 border border-green-400/30 rounded-lg p-3">
-                        <p className="text-green-300 text-sm">{opportunity}</p>
+                      <div key={index} className="bg-green-500/10 border-l-4 border-green-400 p-3 rounded">
+                        <p className="text-green-200 text-sm">{opportunity}</p>
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
+
+              {/* Ritual */}
+              {event.aiInterpretation.ritual && (
+                <div className="bg-gradient-to-r from-indigo-900/20 to-purple-900/20 border border-indigo-400/30 rounded-2xl p-6">
+                  <h3 className="text-xl font-bold text-indigo-300 mb-4 flex items-center">
+                    <Flame className="w-5 h-5 mr-2" />
+                    RITUAL DE ACTIVACIÓN
+                  </h3>
+                  <p className="text-indigo-100 text-lg leading-relaxed">{event.aiInterpretation.ritual}</p>
+                </div>
+              )}
             </>
-          ) : (
-            <div className="text-center py-8">
-              <Star className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-              <p className="text-gray-500">Interpretación IA no disponible para este evento</p>
-            </div>
           )}
+        </div>
+
+        {/* Footer */}
+        <div className="bg-gradient-to-r from-gray-900 to-purple-900/30 p-6 rounded-b-3xl border-t border-purple-400/20">
+          <div className="text-center">
+            <p className="text-purple-300 text-lg font-semibold">
+              EL PODER ESTÁ EN TUS MANOS - ÚSALO SABIAMENTE
+            </p>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-// 📅 Componente principal del calendario
+// Componente principal del calendario
 export default function AstrologicalCalendar() {
   const { user } = useAuth();
   const { isLoading, currentStep, progress, startLoading, updateStep, finishLoading } = useAgendaLoading();
@@ -252,85 +349,99 @@ export default function AstrologicalCalendar() {
     aiEventsCount: 0
   });
 
-  // 🧠 FUNCIÓN PARA VERIFICAR CACHÉ
+  // Función para verificar caché
   const checkCache = async (): Promise<boolean> => {
     if (!user) return false;
 
     try {
-      console.log('🔍 Verificando caché de eventos...');
+      console.log('Verificando caché de eventos...');
       
-      // Intentar cargar eventos guardados desde el endpoint que ya maneja caché
+      const requestBody = {
+        userId: user.uid,
+        months: 12,
+        checkCacheOnly: true
+      };
+      
       const response = await fetch('/api/astrology/complete-events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          userId: user.uid,
-          checkCache: true // Parámetro para solo verificar caché
-        })
+        body: JSON.stringify(requestBody)
       });
 
       if (response.ok) {
         const data = await response.json();
         
-        if (data.success && data.events && data.events.length > 0) {
-          console.log(`💾 Caché encontrado: ${data.events.length} eventos`);
-          setEvents(data.events);
+        if (data.success) {
+          let events = [];
+          if (data.events) {
+            events = data.events;
+          } else if (data.data && data.data.events) {
+            events = data.data.events;
+          }
           
-          const aiEventsCount = data.events.filter((e: AstrologicalEvent) => e.aiInterpretation).length;
-          setCacheInfo({
-            hasCache: true,
-            lastGenerated: data.metadata?.generatedAt || new Date().toISOString(),
-            eventsCount: data.events.length,
-            aiEventsCount
-          });
-          
-          return true; // ✅ Caché encontrado
+          if (events && events.length > 0) {
+            console.log(`Caché encontrado: ${events.length} eventos`);
+            setEvents(events);
+            
+            const aiEventsCount = events.filter((e: AstrologicalEvent) => e.aiInterpretation).length;
+            setCacheInfo({
+              hasCache: true,
+              lastGenerated: data.metadata?.generatedAt || new Date().toISOString(),
+              eventsCount: events.length,
+              aiEventsCount
+            });
+            
+            return true;
+          }
         }
       }
       
-      console.log('💭 No se encontró caché válido');
-      return false; // ❌ No hay caché
+      console.log('No se encontró caché válido');
+      return false;
       
     } catch (error) {
-      console.error('❌ Error verificando caché:', error);
+      console.error('Error verificando caché:', error);
       return false;
     }
   };
 
-  // 📡 FUNCIÓN PARA CARGAR EVENTOS (solo si no hay caché)
+  // Función para cargar eventos
   const loadEvents = async (forceRegenerate: boolean = false) => {
     if (!user) return;
 
     try {
-      // 🔍 PASO 1: Verificar caché (solo si no es regeneración forzada)
       if (!forceRegenerate) {
-        updateStep('🔍 Verificando eventos guardados...', 10);
+        updateStep('Verificando eventos guardados...', 10);
         const hasCachedEvents = await checkCache();
         
         if (hasCachedEvents) {
-          updateStep('✅ Eventos cargados desde caché', 100);
+          updateStep('Eventos cargados desde caché', 100);
           finishLoading();
-          return; // ✅ Salir aquí - ya tenemos los eventos
+          return;
         }
       }
 
-      // 🚀 PASO 2: Generar eventos nuevos (solo si no hay caché)
       startLoading();
       setError(null);
       
       updateStep(LOADING_STEPS.FETCHING_EVENTS, 25);
       
-      console.log('🌟 Generando eventos astrológicos nuevos...');
+      console.log('Generando eventos astrológicos nuevos...');
+      
+      const requestBody = {
+        userId: user.uid,
+        months: 12,
+        regenerate: forceRegenerate
+      };
+      
       const response = await fetch('/api/astrology/complete-events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          userId: user.uid,
-          regenerate: forceRegenerate 
-        })
+        body: JSON.stringify(requestBody)
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
         throw new Error(`Error ${response.status}: ${response.statusText}`);
       }
 
@@ -338,21 +449,31 @@ export default function AstrologicalCalendar() {
       
       const data = await response.json();
       
-      if (data.success && data.events) {
-        setEvents(data.events);
+      if (data.success) {
+        let events = [];
         
-        const aiEventsCount = data.events.filter((e: AstrologicalEvent) => e.aiInterpretation).length;
+        if (data.events) {
+          events = data.events;
+        } else if (data.data && data.data.events) {
+          events = data.data.events;
+        } else {
+          throw new Error('No se encontraron eventos en la respuesta');
+        }
+        
+        setEvents(events);
+        
+        const aiEventsCount = events.filter((e: AstrologicalEvent) => e.aiInterpretation).length;
         setCacheInfo({
           hasCache: true,
           lastGenerated: new Date().toISOString(),
-          eventsCount: data.events.length,
+          eventsCount: events.length,
           aiEventsCount
         });
         
         updateStep(LOADING_STEPS.FINALIZING, 100);
-        console.log(`✅ ${data.events.length} eventos generados (${aiEventsCount} con IA)`);
+        console.log(`${events.length} eventos generados (${aiEventsCount} con IA)`);
       } else {
-        throw new Error(data.message || 'Error cargando eventos');
+        throw new Error(data.error || data.message || 'Error cargando eventos');
       }
 
     } catch (error) {
@@ -363,9 +484,8 @@ export default function AstrologicalCalendar() {
     }
   };
 
-  // 🔄 FUNCIÓN PARA REGENERAR FORZADAMENTE
   const forceRegenerate = async () => {
-    console.log('🔄 Forzando regeneración de eventos...');
+    console.log('Forzando regeneración de eventos...');
     setCacheInfo({
       hasCache: false,
       lastGenerated: null,
@@ -375,7 +495,6 @@ export default function AstrologicalCalendar() {
     await loadEvents(true);
   };
 
-  // 🚀 CARGAR AL INICIAR
   useEffect(() => {
     if (user) {
       startLoading();
@@ -426,7 +545,6 @@ export default function AstrologicalCalendar() {
 
   const days = generateCalendarDays();
 
-  // Funciones de navegación
   const navigateMonth = (direction: 'prev' | 'next') => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + (direction === 'next' ? 1 : -1), 1));
   };
@@ -441,46 +559,25 @@ export default function AstrologicalCalendar() {
     setSelectedEvent(null);
   };
 
-  // Iconos por tipo de evento
-  const getEventIcon = (type: string, priority: string) => {
-    const icons: Record<string, JSX.Element> = {
-      lunar_phase: <Moon className="w-3 h-3" />,
-      eclipse: <Sun className="w-3 h-3" />,
-      retrograde: <RefreshCw className="w-3 h-3" />,
-      planetary_transit: <Star className="w-3 h-3" />,
-      default: <Zap className="w-3 h-3" />
-    };
-
-    const colors = {
-      high: 'text-red-400',
-      medium: 'text-yellow-400',
-      low: 'text-blue-400'
-    };
-
-    return (
-      <span className={colors[priority as keyof typeof colors]}>
-        {icons[type] || icons.default}
-      </span>
-    );
-  };
-
   if (error) {
     return (
       <div className="text-center py-12">
-        <div className="bg-red-500/10 border border-red-400/30 rounded-2xl p-8 max-w-md mx-auto">
-          <p className="text-red-400 mb-4">❌ {error}</p>
+        <div className="bg-gradient-to-r from-red-500/20 to-pink-500/20 border border-red-400/30 rounded-3xl p-8 max-w-md mx-auto">
+          <div className="text-6xl mb-4">🚨</div>
+          <h3 className="text-2xl font-bold text-red-300 mb-4">CONEXIÓN CÓSMICA PERDIDA</h3>
+          <p className="text-red-200 mb-6">{error}</p>
           <div className="space-y-2">
             <button 
               onClick={() => loadEvents()}
-              className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors mr-2"
+              className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-6 py-3 rounded-xl hover:from-red-600 hover:to-pink-600 transition-all transform hover:scale-105 mr-2"
             >
-              🔄 Reintentar
+              RECONECTAR
             </button>
             <button 
               onClick={forceRegenerate}
-              className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+              className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-xl hover:from-orange-600 hover:to-red-600 transition-all transform hover:scale-105"
             >
-              🔥 Regenerar Todo
+              REGENERAR TODO
             </button>
           </div>
         </div>
@@ -492,154 +589,157 @@ export default function AstrologicalCalendar() {
     <>
       <AgendaLoadingStates isGenerating={isLoading} currentStep={currentStep} progress={progress} />
       
-      <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl border border-gray-600 overflow-hidden">
+      <div className="bg-gradient-to-br from-gray-900 via-purple-900/10 to-black rounded-3xl border border-purple-400/30 overflow-hidden shadow-2xl">
         
-        {/* Header del calendario */}
-        <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-white">
-              🔮 Tu Agenda Astrológica
-            </h2>
-            <div className="flex items-center space-x-4">
+        {/* Header épico */}
+        <div className="bg-gradient-to-r from-purple-600 via-pink-500 to-blue-600 p-8 relative overflow-hidden">
+          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="relative z-10">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-3xl font-black text-white mb-2">
+                  TU CALENDARIO CÓSMICO
+                </h2>
+                <p className="text-white/80 text-lg">{getDisruptivePhrase()}</p>
+              </div>
+              
+              <div className="flex items-center space-x-4">
+                <button 
+                  onClick={() => navigateMonth('prev')}
+                  className="text-white hover:text-gray-200 transition-colors bg-white/10 rounded-full p-3 hover:bg-white/20"
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+                
+                <h3 className="text-2xl font-bold text-white min-w-[250px] text-center">
+                  {currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }).toUpperCase()}
+                </h3>
+                
+                <button 
+                  onClick={() => navigateMonth('next')}
+                  className="text-white hover:text-gray-200 transition-colors bg-white/10 rounded-full p-3 hover:bg-white/20"
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+              </div>
+              
               <button 
-                onClick={() => navigateMonth('prev')}
-                className="text-white hover:text-gray-200 transition-colors"
-              >
-                <ChevronLeft className="w-6 h-6" />
-              </button>
-              
-              <h3 className="text-xl font-semibold text-white min-w-[200px] text-center">
-                {currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
-              </h3>
-              
-              <button 
-                onClick={() => navigateMonth('next')}
-                className="text-white hover:text-gray-200 transition-colors"
-              >
-                <ChevronRight className="w-6 h-6" />
-              </button>
-            </div>
-          </div>
-          
-          {/* Info del caché */}
-          <div className="mt-4 flex justify-between items-center">
-            <div className="text-blue-100">
-              <p>📅 {events.length} eventos en tu año astrológico • {getMonthEvents().length} este mes</p>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              {cacheInfo.hasCache && (
-                <div className="flex items-center text-green-200 text-sm">
-                  <Database className="w-4 h-4 mr-1" />
-                  <span>{cacheInfo.aiEventsCount} con IA</span>
-                </div>
-              )}
-              
-              <button
                 onClick={forceRegenerate}
-                className="bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-lg text-sm transition-colors flex items-center"
+                className="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-xl transition-all transform hover:scale-105 flex items-center"
                 disabled={isLoading}
               >
-                <RefreshCw className={`w-4 h-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
-                Regenerar
+                <RefreshCw className="w-4 h-4 mr-2" />
+                REGENERAR
               </button>
             </div>
+            
+            {cacheInfo.hasCache && (
+              <div className="mt-6 text-white/80 text-sm flex items-center">
+                <Database className="w-4 h-4 mr-2" />
+                <strong>{cacheInfo.eventsCount} EVENTOS CARGADOS</strong>
+                <span className="mx-2">•</span>
+                <strong>{cacheInfo.aiEventsCount} CON IA</strong>
+                {cacheInfo.lastGenerated && (
+                  <>
+                    <span className="mx-2">•</span>
+                    <span>ÚLTIMA ACTUALIZACIÓN: {new Date(cacheInfo.lastGenerated).toLocaleDateString('es-ES')}</span>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Info de caché */}
-        {cacheInfo.hasCache && cacheInfo.lastGenerated && (
-          <div className="bg-green-800/20 border-b border-green-600/30 px-6 py-2">
-            <div className="flex items-center justify-center text-green-200 text-sm">
-              <CheckCircle className="w-4 h-4 mr-2" />
-              <span>
-                Última actualización: {new Date(cacheInfo.lastGenerated).toLocaleString('es-ES')} 
-                • {cacheInfo.eventsCount} eventos guardados
-              </span>
-            </div>
-          </div>
-        )}
-
         {/* Días de la semana */}
-        <div className="grid grid-cols-7 bg-gray-800 border-b border-gray-600">
-          {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map(day => (
-            <div key={day} className="p-4 text-center text-gray-400 font-medium border-r border-gray-700 last:border-r-0">
+        <div className="grid grid-cols-7 bg-gradient-to-r from-gray-800 to-purple-800/30 border-b border-purple-400/20">
+          {['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'].map(day => (
+            <div key={day} className="p-4 text-center text-purple-300 font-bold text-sm tracking-wider">
               {day}
             </div>
           ))}
         </div>
 
-        {/* Días del calendario */}
+        {/* Calendario */}
         <div className="grid grid-cols-7">
           {days.map((day, index) => (
             <div 
               key={index}
-              className={`min-h-[120px] p-2 border-r border-b border-gray-700 last:border-r-0 ${
-                day.isCurrentMonth ? 'bg-gray-800' : 'bg-gray-900'
-              }`}
+              className={`min-h-[140px] p-3 border-r border-b border-gray-700/50 relative
+                ${day.isCurrentMonth ? 'bg-gray-900/50' : 'bg-gray-900/20'}
+                ${day.events.length > 0 ? 'hover:bg-purple-900/20 cursor-pointer transition-all duration-300' : ''}
+              `}
             >
-              <div className={`text-sm font-medium mb-2 ${
-                day.isCurrentMonth ? 'text-white' : 'text-gray-500'
-              }`}>
+              <div className={`text-sm font-bold mb-3 
+                ${day.isCurrentMonth ? 'text-white' : 'text-gray-500'}
+                ${day.date.toDateString() === new Date().toDateString() ? 'text-yellow-400 font-black text-lg' : ''}
+              `}>
                 {day.date.getDate()}
               </div>
               
-              <div className="space-y-1">
-                {day.events.slice(0, 3).map(event => (
-                  <div 
-                    key={event.id}
-                    onClick={() => openEventModal(event)}
-                    className={`text-xs p-1 rounded cursor-pointer hover:scale-105 transition-transform ${
-                      event.priority === 'high' ? 'bg-red-500/20 text-red-300' :
-                      event.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
-                      'bg-blue-500/20 text-blue-300'
-                    } ${event.aiInterpretation ? 'border border-purple-400/30' : ''}`}
-                  >
-                    <div className="flex items-center space-x-1">
-                      {getEventIcon(event.type, event.priority)}
-                      <span className="truncate">{event.title}</span>
-                      {event.aiInterpretation && (
-                        <span className="text-purple-400 text-xs">✨</span>
-                      )}
+              {day.events.length > 0 && (
+                <div className="space-y-2">
+                  {day.events.slice(0, 2).map((event, eventIndex) => {
+                    const eventStyle = getEventIconAndStyle(event.type, event.priority);
+                    return (
+                      <div 
+                        key={eventIndex}
+                        onClick={() => openEventModal(event)}
+                        className={`bg-gradient-to-r ${eventStyle.bgGradient} ${eventStyle.borderColor} border ${eventStyle.shadowColor} shadow-lg text-white text-xs p-2 rounded-lg cursor-pointer hover:scale-105 transition-all transform ${eventStyle.effect}`}
+                        title={event.title}
+                      >
+                        <div className="flex items-center justify-between">
+                          {eventStyle.icon}
+                          <span className="font-bold text-xs truncate ml-1">{event.title}</span>
+                        </div>
+                        <div className="text-xs opacity-80 mt-1">{eventStyle.label}</div>
+                      </div>
+                    );
+                  })}
+                  
+                  {day.events.length > 2 && (
+                    <div className="text-xs text-purple-300 font-bold bg-purple-500/20 rounded px-2 py-1 text-center">
+                      +{day.events.length - 2} MÁS
                     </div>
-                  </div>
-                ))}
-                
-                {day.events.length > 3 && (
-                  <div className="text-xs text-gray-500 text-center">
-                    +{day.events.length - 3} más
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
+
+              {day.date.toDateString() === new Date().toDateString() && (
+                <div className="absolute top-1 right-1">
+                  <div className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></div>
+                </div>
+              )}
             </div>
           ))}
         </div>
 
-        {/* Stats del mes */}
-        <div className="bg-gray-800 p-4 border-t border-gray-600">
-          <div className="flex justify-center space-x-6 text-sm">
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-red-500 rounded"></div>
-              <span className="text-gray-300">Alta prioridad</span>
+        {/* Footer con estadísticas épicas */}
+        <div className="bg-gradient-to-r from-gray-900 via-purple-900/20 to-gray-900 p-6 border-t border-purple-400/20">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-6 text-sm">
+              <span className="flex items-center text-emerald-400 font-bold">
+                <CheckCircle className="w-5 h-5 mr-2" />
+                {events.length} EVENTOS TOTALES
+              </span>
+              <span className="flex items-center text-blue-400 font-bold">
+                <Brain className="w-5 h-5 mr-2" />
+                {cacheInfo.aiEventsCount} CON IA PERSONALIZADA
+              </span>
+              <span className="flex items-center text-purple-400 font-bold">
+                <Zap className="w-5 h-5 mr-2" />
+                {getMonthEvents().length} ESTE MES
+              </span>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-yellow-500 rounded"></div>
-              <span className="text-gray-300">Media prioridad</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-blue-500 rounded"></div>
-              <span className="text-gray-300">Baja prioridad</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-purple-400">✨</span>
-              <span className="text-gray-300">Con IA</span>
+            
+            <div className="text-purple-300 font-bold text-lg">
+              {getDisruptivePhrase()}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Modal de detalles */}
-      <EventDetailModal 
+      {/* Modal de detalles del evento */}
+      <EventModal 
         event={selectedEvent}
         isOpen={isModalOpen}
         onClose={closeEventModal}
