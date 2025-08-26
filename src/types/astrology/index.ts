@@ -16,24 +16,14 @@ export type {
   ProgressedAnalysis,
   ElementType,
   ModeType,
-  PersonalContext,
-  UserContext,
   ActionPlan,
   EventType,
-  ZodiacSign,
-  PlanetName,
-  PersonalizedEventContext,
-  AspectFilter,
-  AspectType,
-  ExtendedPlanet
+  PersonalizedEventContext as PersonalContext,
 } from './unified-types';
 
 export {
   getSignElement,
-  getSignMode,
-  isElementType,
-  isModeType,
-  astroToAstronomical
+  getSignMode
 } from './unified-types';
 
 // =============================================================================
@@ -52,8 +42,12 @@ export type {
 // Re-exportar Planet desde Prokerala para compatibilidad
 export type { Planet } from '@/lib/prokerala/types';
 
-// Exportar PlanetaryAspect desde aspects.ts
-export type { PlanetaryAspect } from './aspects';
+// Exportar tipos de aspectos desde aspects.ts
+export type { 
+  PlanetaryAspect,
+  AspectType,
+  AspectFilter 
+} from './aspects';
 
 // =============================================================================
 // ALIAS PARA COMPATIBILIDAD

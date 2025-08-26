@@ -11,6 +11,7 @@ import type {
   UserProfile, 
   AstrologicalEvent, 
   PersonalizedEventType,
+  PersonalizedEventTypeWithContext,
   AstrologicalAnalysis,
   ProgressedAnalysis,
   ElementType,
@@ -256,8 +257,8 @@ async function applyLocalInterpretations(
 // FUNCIONES AUXILIARES
 // ==========================================
 
-function getPersonalizedEventTypes(userProfile: UserProfile): PersonalizedEventType[] {
-  const types: PersonalizedEventType[] = [];
+function getPersonalizedEventTypes(userProfile: UserProfile): PersonalizedEventTypeWithContext[] {
+  const types: PersonalizedEventTypeWithContext[] = [];
   const astrological = userProfile.astrological;
   
   if (!astrological) return [];
@@ -396,7 +397,7 @@ function buildCostOptimizedResponse(events: AstrologicalEvent[], userProfile: Us
       personalizationLevel: 'maximum_with_zero_ai_costs',
       userProfile: {
         hasNatalChart: true,
-        hasProgressedChart: !!userProfile.astrological?.progressions,
+        hasProgressedChart: false,
         chartAnalysisIncluded: true,
         personalContextEvents: events.filter(e => e.personalContext).length,
         interpretationMethod: 'intelligent_local_fallbacks'

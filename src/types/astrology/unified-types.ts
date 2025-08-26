@@ -1,77 +1,65 @@
-// types/astrology/unified-types.ts
-// TIPOS UNIFICADOS PARA TODO EL SISTEMA ASTROLÓGICO
-
-export type AspectFilter = 'all' | 'major' | 'minor'; // Definición de AspectFilter
-export type AspectType = 
-  'conjunction' | 'opposition' | 'trine' | 'square' | 'sextile' |
-  'quincunx' | 'semisextile' | 'sesquiquadrate' | 'semisquare' |
-  'quintile' | 'biquintile'; // Definición de AspectType
-
-export type ExtendedPlanet = PlanetName | 'Nodo Norte' | 'Nodo Sur' | 'Quirón' | 'Lilith'; // Definición de ExtendedPlanet
+// src/types/astrology/unified-types.ts
+// TIPOS UNIFICADOS PARA SISTEMA ASTROLÓGICO COMPLETO
 
 // ==========================================
-// IMPORTAR Y RE-EXPORTAR TIPOS EXISTENTES
+// TIPOS BÁSICOS
 // ==========================================
-
-// Tipos base de Prokerala
-export type { 
-  ZodiacSign as ProkeralaZodiacSign, 
-  PlanetName as ProkeralaPlanetName,
-  Planet,
-  House,
-  Aspect,
-  Angle
-} from '@/lib/prokerala/types';
-
-// ==========================================
-// TIPOS UNIFICADOS PRINCIPALES
-// ==========================================
-
-export type ZodiacSign = 
-  'Aries' | 'Tauro' | 'Géminis' | 'Cáncer' | 'Leo' | 'Virgo' | 
-  'Libra' | 'Escorpio' | 'Sagitario' | 'Capricornio' | 'Acuario' | 'Piscis';
-
-export type PlanetName = 
-  'Sol' | 'Luna' | 'Mercurio' | 'Venus' | 'Marte' | 'Júpiter' | 
-  'Saturno' | 'Urano' | 'Neptuno' | 'Plutón' | 'Quirón' | 'Lilith' | 
-  'Nodo N Verdadero' | 'Nodo S Verdadero';
 
 export type ElementType = 'fire' | 'earth' | 'air' | 'water';
 export type ModeType = 'cardinal' | 'fixed' | 'mutable';
-
-// Tipos específicos para eventos personalizados
 export type EventType = 
-  'solar_activation' | 'lunar_resonance' | 'life_purpose_activation' | 
-  'venus_harmony' | 'mars_action' | 'mercury_communication' | 
-  'jupiter_expansion' | 'saturn_discipline' | 'uranus_innovation' | 
-  'neptune_intuition' | 'pluto_transformation' |
-  // Tipos de eventos astrológicos tradicionales
-  'lunar_phase' | 'retrograde' | 'eclipse' | 'planetary_transit' | 'aspect' | 'seasonal';
+  | 'lunar_phase' 
+  | 'lunar_resonance'
+  | 'solar_activation'
+  | 'planetary_transit' 
+  | 'retrograde' 
+  | 'direct' 
+  | 'aspect' 
+  | 'eclipse' 
+  | 'seasonal'
+  | 'venus_harmony'
+  | 'mars_action'
+  | 'mercury_communication'
+  | 'life_purpose_activation';
 
-// ==========================================
-// INTERFACES PARA CONTEXTO PERSONAL
-// ==========================================
+export type PersonalizedEventType = 
+  | 'solar_activation'
+  | 'lunar_resonance' 
+  | 'life_purpose_activation'
+  | 'venus_harmony'
+  | 'mars_action'
+  | 'mercury_communication'
+  | 'lunar_phase'
+  | 'planetary_transit'
+  | 'eclipse';
 
-export interface PersonalContext {
-  natalConnection: string;
-  progressedConnection: string | null;
-  personalTheme: string;
-  lifeArea: string;
+export interface PersonalizedEventTypeWithContext {
+  type: PersonalizedEventType;
+  frequency: number;
+  personalContext: PersonalizedEventContext;
 }
 
-export interface PersonalizedEventContext {
-  relevantPlanet: string;
-  relevantSign: string;
-  natalConnection: string;
-  progressedConnection: string | null;
-  personalTheme: string;
-  lifeArea: string;
-}
+// ==========================================
+// PERFIL DE USUARIO
+// ==========================================
 
-export interface UserContext {
-  name: string;
-  age: number;
+export interface UserProfile {
+  userId: string;
+  name?: string;
+  birthDate: string;
+  birthTime?: string;
+  birthPlace?: string;
+  currentAge: number;
+  nextAge: number;
+  latitude: number;
+  longitude: number;
+  timezone: string;
   place: string;
+  
+  astrological?: AstrologicalAnalysis;
+}
+
+export interface AstrologicalAnalysis {
   signs: {
     sun: string;
     moon: string;
@@ -87,198 +75,220 @@ export interface UserContext {
     venus: number;
     mars: number;
   };
-  lifeThemes: string[];
-  strengths: string[];
-  challenges: string[];
-}
-
-// ==========================================
-// INTERFACES DE ANÁLISIS ASTROLÓGICO
-// ==========================================
-
-export interface AstrologicalAnalysis {
   dominantElements: ElementType[];
   dominantMode: ModeType;
   lifeThemes: string[];
   strengths: string[];
   challenges: string[];
+  progressions?: any; // Análisis de progresiones (opcional)
 }
+
+// ==========================================
+// ANÁLISIS PROGRESADO
+// ==========================================
 
 export interface ProgressedAnalysis {
-  activeProgressions: {
-    planet: string;
-    from: any;
-    to: any;
-    meaning: string;
-  }[];
-  year: number;
-  focus: string;
+  currentYear: number;
+  progessedSun: {
+    sign: string;
+    house: number;
+    degree: number;
+  };
+  progressedMoon: {
+    sign: string;
+    house: number;
+    phase: string;
+  };
+  majorThemes: string[];
+  opportunities: string[];
+  challenges: string[];
+  keyDates: Array<{
+    date: string;
+    event: string;
+    significance: string;
+  }>;
 }
 
 // ==========================================
-// INTERFACES PARA EVENTOS Y INTERPRETACIONES
+// EVENTOS ASTROLÓGICOS
 // ==========================================
 
-export interface ActionPlan {
-  category: 'trabajo' | 'amor' | 'salud' | 'dinero' | 'crecimiento' | 'relaciones' | 'creatividad';
-  action: string;
-  timing: 'inmediato' | 'esta_semana' | 'este_mes' | 'próximo_trimestre';
-  difficulty: 'fácil' | 'moderado' | 'desafiante';
-  impact: 'bajo' | 'medio' | 'alto';
+export interface AstrologicalEvent {
+  id: string;
+  type: EventType | string;
+  date: string;
+  time?: string;
+  title: string;
+  description: string;
+  priority?: 'high' | 'medium' | 'low';
+  planet?: string;
+  sign?: string;
+  house?: number;
+  phase?: string;
+  
+  // Interpretación IA opcional
+  aiInterpretation?: PersonalizedInterpretation;
+  
+  // Contexto personalizado opcional
+  personalContext?: PersonalizedEventContext;
 }
+
+export interface PersonalizedEventContext {
+  relevantPlanet?: string;
+  relevantSign?: string;
+  natalConnection?: string;
+  progressedConnection?: string | null;
+  personalTheme?: string;
+  lifeArea?: string;
+}
+
+// ==========================================
+// INTERPRETACIONES PERSONALIZADAS
+// ==========================================
 
 export interface PersonalizedInterpretation {
   meaning: string;
   lifeAreas: string[];
-  advice: string;
+  advice: string | string[];
   mantra: string;
   ritual: string;
-  actionPlan: ActionPlan[];
-  warningsAndOpportunities: {
+  actionPlan?: ActionPlan[];
+  warningsAndOpportunities?: {
     warnings: string[];
     opportunities: string[];
   };
 }
 
-export interface AstrologicalEvent {
-  id: string;
-  date: string;
-  title: string;
-  description: string;
-  type: EventType; // CORREGIDO: Usar EventType específico
-  priority: 'high' | 'medium' | 'low';
-  planet?: string;
-  sign?: string;
-  personalContext?: PersonalContext;
-  userContext?: UserContext;
-  aiInterpretation?: {
-    meaning: string;
-    lifeAreas: string[];
-    advice: string;
-    mantra: string;
-    ritual: string;
-    actionPlan: ActionPlan[];
-    warningsAndOpportunities: {
-      warnings: string[];
-      opportunities: string[];
-    };
-    personalContext?: {
-      forAge: number;
-      forLocation: string;
-      natalConnections: string;
-      progressedConnections: string | null;
-      hasRealChartData: boolean;
-      interpretationMethod?: string;
-      evolutionaryMeaning?: string;
-      practicalAdvice?: string;
-    };
-  };
-}
-
-// ==========================================
-// INTERFACE DE PERFIL DE USUARIO COMPLETO
-// ==========================================
-
-export interface UserProfile {
-  userId: string;
-  name: string;
-  birthDate: string;
-  currentAge: number;
-  nextAge: number;
-  latitude: number;
-  longitude: number;
-  timezone: string;
-  place: string;
-  natalChart?: any;
-  astrological: {
-    signs: {
-      sun: string;
-      moon: string;
-      ascendant: string;
-      mercury: string;
-      venus: string;
-      mars: string;
-    };
-    houses: {
-      sun: number;
-      moon: number;
-      mercury: number;
-      venus: number;
-      mars: number;
-    };
-    dominantElements: ElementType[];
-    dominantMode: ModeType;
-    lifeThemes: string[];
-    strengths: string[];
-    challenges: string[];
-    progressions?: ProgressedAnalysis | null;
-  };
-}
-
-// ==========================================
-// TIPOS PARA EVENTOS PERSONALIZADOS
-// ==========================================
-
-export interface PersonalizedEventType {
-  type: EventType; // CORREGIDO: Usar EventType específico
-  frequency: number;
-  personalContext: PersonalizedEventContext;
-}
-
-// ==========================================
-// COMPATIBILIDAD CON TIPOS EXISTENTES
-// ==========================================
-
-// Para compatibilidad con AstronomicalEvent existente
-export interface AstronomicalEvent extends AstrologicalEvent {
-  importance: 'high' | 'medium' | 'low'; // Alias para priority
-  mantra?: string;
-  ritual?: string;
+export interface ActionPlan {
+  // Para compatibilidad con ambos formatos
+  category?: string;
   action?: string;
-  avoid?: string;
-}
-
-// Función de conversión para compatibilidad
-export function astroToAstronomical(event: AstrologicalEvent): AstronomicalEvent {
-  return {
-    ...event,
-    importance: event.priority,
-    mantra: event.aiInterpretation?.mantra,
-    ritual: event.aiInterpretation?.ritual,
-    action: event.aiInterpretation?.advice,
-    avoid: event.aiInterpretation?.warningsAndOpportunities?.warnings?.[0]
-  };
+  timing?: string;
+  difficulty?: string;
+  impact?: string;
+  
+  // Formato alternativo
+  steps?: string[];
+  powerHours?: string[];
+  dangerZones?: string[];
+  timeframe?: 'immediate' | 'weekly' | 'monthly' | 'quarterly';
+  objectives?: string[];
+  actions?: string[];
+  milestones?: string[];
+  metrics?: string[];
 }
 
 // ==========================================
-// FUNCIONES DE UTILIDAD PARA TIPOS
+// FUNCIONES AUXILIARES DE SIGNOS
 // ==========================================
 
-export function isElementType(value: string): value is ElementType {
-  return ['fire', 'earth', 'air', 'water'].includes(value);
-}
-
-export function isModeType(value: string): value is ModeType {
-  return ['cardinal', 'fixed', 'mutable'].includes(value);
-}
-
-export function getSignElement(sign: string): ElementType | null {
+export function getSignElement(sign: string): ElementType {
   const elements: Record<string, ElementType> = {
-    'Aries': 'fire', 'Leo': 'fire', 'Sagittarius': 'fire',
-    'Taurus': 'earth', 'Virgo': 'earth', 'Capricorn': 'earth',
-    'Gemini': 'air', 'Libra': 'air', 'Aquarius': 'air',
-    'Cancer': 'water', 'Scorpio': 'water', 'Pisces': 'water'
+    'Aries': 'fire', 'Leo': 'fire', 'Sagitario': 'fire',
+    'Tauro': 'earth', 'Virgo': 'earth', 'Capricornio': 'earth',
+    'Géminis': 'air', 'Libra': 'air', 'Acuario': 'air',
+    'Cáncer': 'water', 'Escorpio': 'water', 'Piscis': 'water'
   };
-  const element = elements[sign];
-  return isElementType(element) ? element : null;
+  return elements[sign] || 'fire';
 }
 
-export function getSignMode(sign: string): ModeType | null {
+export function getSignMode(sign: string): ModeType {
   const modes: Record<string, ModeType> = {
-    'Aries': 'cardinal', 'Cancer': 'cardinal', 'Libra': 'cardinal', 'Capricorn': 'cardinal',
-    'Taurus': 'fixed', 'Leo': 'fixed', 'Scorpio': 'fixed', 'Aquarius': 'fixed',
-    'Gemini': 'mutable', 'Virgo': 'mutable', 'Sagittarius': 'mutable', 'Pisces': 'mutable'
+    'Aries': 'cardinal', 'Cáncer': 'cardinal', 'Libra': 'cardinal', 'Capricornio': 'cardinal',
+    'Tauro': 'fixed', 'Leo': 'fixed', 'Escorpio': 'fixed', 'Acuario': 'fixed',
+    'Géminis': 'mutable', 'Virgo': 'mutable', 'Sagitario': 'mutable', 'Piscis': 'mutable'
   };
-  const mode = modes[sign];
-  return isModeType(mode) ? mode : null;
+  return modes[sign] || 'cardinal';
 }
+
+// ==========================================
+// TIPOS PARA AGENDA
+// ==========================================
+
+export interface AgendaData {
+  userProfile: UserProfile;
+  events: AstrologicalEvent[];
+  executiveSummary?: ExecutiveSummary;
+  statistics?: EventStatistics;
+  metadata?: {
+    generatedAt: string;
+    version: string;
+    dataQuality: {
+      completeness: number;
+      hasNatalChart: boolean;
+      hasProgressedChart: boolean;
+      hasAIInterpretations: boolean;
+    };
+  };
+}
+
+export interface ExecutiveSummary {
+  monthlyHighlights: string[];
+  quarterlyFocus: string[];
+  yearlyThemes: string[];
+  priorityActions: ActionPlan[];
+  keyInsights?: {
+    dominantElements: string[];
+    primaryChallenges: string[];
+    biggestOpportunities: string[];
+    overallTheme: string;
+  };
+}
+
+export interface EventStatistics {
+  totalEvents: number;
+  byType: Record<string, number>;
+  byPriority: {
+    high: number;
+    medium: number;
+    low: number;
+  };
+  byMonth: Record<string, number>;
+}
+
+// ==========================================
+// TIPOS PARA INTERPRETACIÓN DISRUPTIVA
+// ==========================================
+
+export interface DisruptiveInterpretation {
+  shockValue: string;
+  epicRealization: string;
+  whatToExpect: {
+    energeticShift: string;
+    emotionalWave: string;
+    mentalClarity: string;
+    physicalSensations: string;
+  };
+  preparation: {
+    ritual: string;
+    mindsetShift: string;
+    physicalAction: string;
+    energeticProtection: string;
+  };
+  revolutionaryAdvice: {
+    doThis: string[];
+    avoidThis: string[];
+    powerHours: string[];
+    dangerZones: string[];
+  };
+  manifestation: {
+    mantra: string;
+    visualization: string;
+    physicalGesture: string;
+    elementalConnection: string;
+  };
+  expectedTransformation: {
+    immediate: string;
+    weekly: string;
+    longTerm: string;
+  };
+}
+
+// ==========================================
+// EXPORTACIONES DE COMPATIBILIDAD
+// ==========================================
+
+export default {
+  getSignElement,
+  getSignMode
+};

@@ -1,460 +1,422 @@
-// src/app/(dashboard)/agenda/page.tsx - ARREGLADA COMPLETA
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
-import AstrologicalCalendar from '@/components/astrology/AstrologicalCalendar';
-import Button from '@/components/ui/Button';
-import { 
-  Star, 
-  Calendar, 
-  Moon, 
-  Sun, 
-  Zap, 
-  BarChart3,
-  RefreshCw,
-  ArrowLeft,
-  Eye,
-  TrendingUp
-} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Calendar, Sparkles, AlertCircle, Star, Clock, Target, Heart, Zap } from 'lucide-react';
 
-interface EventMetadata {
-  totalEvents: number;
-  lunarPhases: number;
-  planetaryTransits: number;
-  eclipses: number;
-  retrogrades: number;
-  highPriorityEvents: number;
-  withAiInterpretation: number;
-  period: {
-    startDate: string;
-    endDate: string;
-  };
-  userLocation: {
-    place: string;
-  };
+// Tipos simplificados para el componente
+interface AstrologicalEvent {
+  id: string;
+  date: string;
+  time?: string;
+  title: string;
+  description: string;
+  type: string;
+  priority: 'high' | 'medium' | 'low';
+  planet?: string;
+  sign?: string;
+  disruptiveInterpretation?: any;
 }
 
-export default function AgendaPage() {
-  const [loading, setLoading] = useState(true);
-  const [hasNatalChart, setHasNatalChart] = useState(false);
-  const [birthDate, setBirthDate] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [eventsMetadata, setEventsMetadata] = useState<EventMetadata | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
-  
-  const { user } = useAuth();
-  const router = useRouter();
-  
+interface AgendaProps {
+  userId?: string;
+  events?: AstrologicalEvent[];
+}
+
+const AgendaPersonalizada: React.FC<AgendaProps> = ({ 
+  userId = 'demo-user',
+  events: initialEvents = []
+}) => {
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [events, setEvents] = useState<AstrologicalEvent[]>(initialEvents);
+  const [selectedEvent, setSelectedEvent] = useState<AstrologicalEvent | null>(null);
+  const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
+  const [loading, setLoading] = useState(false);
+
+  // Generar eventos de ejemplo si no hay eventos
   useEffect(() => {
-    if (!user) {
-      router.push('/login');
-      return;
+    if (events.length === 0) {
+      generateSampleEvents();
     }
-    
-    const initializeAgenda = async () => {
-      try {
-        setLoading(true);
-        
-        // Verificar carta natal
-        const chartResponse = await fetch(`/api/charts/natal?userId=${user.uid}`);
-        
-        if (chartResponse.ok) {
-          setHasNatalChart(true);
-          
-          // Obtener datos de nacimiento
-          const birthDataResponse = await fetch(`/api/birth-data?userId=${user.uid}`);
-          
-          if (birthDataResponse.ok) {
-            const birthData = await birthDataResponse.json();
-            if (birthData.data && birthData.data.birthDate) {
-              setBirthDate(birthData.data.birthDate);
-            }
-          }
+  }, []);
 
-          // Obtener metadata de eventos del endpoint correcto
-          await loadEventsMetadata();
-          
-        } else {
-          setHasNatalChart(false);
-        }
-      } catch (error) {
-        console.error('Error al inicializar agenda:', error);
-        setError('Ocurrió un error al cargar tus datos. Por favor, intenta de nuevo más tarde.');
-      } finally {
-        setLoading(false);
+  const generateSampleEvents = () => {
+    const sampleEvents: AstrologicalEvent[] = [
+      {
+        id: '1',
+        date: '2025-08-28',
+        title: 'Luna Nueva en Virgo',
+        description: 'PORTAL DE MANIFESTACIÓN: Momento ideal para sembrar intenciones de orden y salud',
+        type: 'lunar_phase',
+        priority: 'high',
+        sign: 'Virgo'
+      },
+      {
+        id: '2', 
+        date: '2025-08-30',
+        title: 'Mercurio Retrógrado',
+        description: '[ALERTA] Período de revisión profunda en comunicación y tecnología',
+        type: 'retrograde',
+        priority: 'high',
+        planet: 'Mercurio',
+        sign: 'Virgo'
+      },
+      {
+        id: '3',
+        date: '2025-09-02',
+        title: 'Activación Solar Personal',
+        description: 'TU SOL NATAL SE ACTIVA: Máximo poder para manifestar tu propósito',
+        type: 'solar_activation',
+        priority: 'high',
+        planet: 'Sol',
+        sign: 'Acuario'
+      },
+      {
+        id: '4',
+        date: '2025-09-07',
+        title: 'Resonancia Lunar Libra',
+        description: 'Tu Luna natal en Libra resuena con energías cósmicas de equilibrio',
+        type: 'lunar_resonance',
+        priority: 'medium',
+        planet: 'Luna',
+        sign: 'Libra'
+      },
+      {
+        id: '5',
+        date: '2025-09-15',
+        title: 'Portal de Transformación',
+        description: 'MOMENTO ÉPICO: Las energías convergen para tu evolución radical',
+        type: 'life_purpose_activation',
+        priority: 'high'
       }
-    };
-    
-    initializeAgenda();
-  }, [user, router]);
-
-  const loadEventsMetadata = async () => {
-    try {
-      console.log('📊 Cargando metadata de eventos...');
-      
-      // ARREGLADO: Usar complete-events en lugar de events
-      const response = await fetch('/api/astrology/complete-events', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          userId: user?.uid,
-          months: 6
-        })
-      });
-      
-      const data = await response.json();
-      console.log('📥 Respuesta metadata:', data);
-      
-      // ARREGLADO: Acceder a data.data.events en lugar de data.events
-      if (data.success && data.data && data.data.events) {
-        const events = data.data.events;
-        const statistics = data.data.statistics || {};
-        const userProfile = data.data.userProfile || {};
-        
-        // Calcular metadata mejorada
-        const metadata: EventMetadata = {
-          totalEvents: statistics.totalEvents || events.length,
-          lunarPhases: statistics.lunarPhases || events.filter((e: any) => e.type && e.type.includes('luna')).length,
-          planetaryTransits: statistics.planetaryTransits || events.filter((e: any) => e.type === 'transito').length,
-          eclipses: statistics.eclipses || events.filter((e: any) => e.type === 'eclipse').length,
-          retrogrades: statistics.retrogrades || events.filter((e: any) => e.type === 'retrogrado').length,
-          highPriorityEvents: statistics.highPriorityEvents || events.filter((e: any) => e.priority === 'high').length,
-          withAiInterpretation: statistics.withAiInterpretation || events.filter((e: any) => e.hasAiInterpretation).length,
-          period: {
-            startDate: new Date().toLocaleDateString('es-ES'),
-            endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString('es-ES')
-          },
-          userLocation: {
-            place: userProfile.place || 'Tu ubicación'
-          }
-        };
-        
-        setEventsMetadata(metadata);
-        console.log(`✅ Metadata cargada: ${metadata.totalEvents} eventos totales, ${metadata.withAiInterpretation} con IA`);
-      } else {
-        console.warn('⚠️ No se pudo cargar metadata:', data.error);
-        setError(`Error cargando eventos: ${data.error || 'Respuesta inválida'}`);
-      }
-    } catch (error) {
-      console.error('❌ Error cargando metadata:', error);
-      setError('Error de conexión al cargar eventos');
-    }
+    ];
+    setEvents(sampleEvents);
   };
 
-  const regenerateEvents = async () => {
-    setRefreshing(true);
-    try {
-      console.log('🔄 Regenerando eventos...');
-      
-      // Forzar regeneración en el backend
-      const response = await fetch('/api/astrology/complete-events', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          userId: user?.uid,
-          forceRegenerate: true,
-          months: 6
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        console.log('✅ Eventos regenerados exitosamente');
-        // Recargar metadata
-        await loadEventsMetadata();
-        // Recargar la página para actualizar el calendario
-        window.location.reload();
-      } else {
-        console.error('❌ Error regenerando:', data.error);
-        setError(`Error al regenerar eventos: ${data.error}`);
-      }
-    } catch (error) {
-      console.error('❌ Error regenerando eventos:', error);
-      setError('Error de conexión al regenerar eventos');
-    } finally {
-      setRefreshing(false);
-    }
+  // Obtener eventos del día seleccionado
+  const getDayEvents = (date: Date): AstrologicalEvent[] => {
+    const dateStr = date.toISOString().split('T')[0];
+    return events.filter(event => event.date === dateStr);
   };
-  
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-black flex items-center justify-center">
-        <div className="text-center text-white">
-          <div className="relative mb-8">
-            <div className="animate-spin rounded-full h-20 w-20 border-4 border-purple-400 border-t-transparent mx-auto"></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Star className="w-8 h-8 text-yellow-400 animate-pulse" />
+
+  // Generar días del calendario
+  const generateCalendarDays = () => {
+    const year = selectedDate.getFullYear();
+    const month = selectedDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - firstDay.getDay());
+    
+    const days = [];
+    const current = new Date(startDate);
+    
+    while (current <= lastDay || current.getDay() !== 0) {
+      days.push(new Date(current));
+      current.setDate(current.getDate() + 1);
+    }
+    
+    return days;
+  };
+
+  // Renderizar interpretación disruptiva
+  const renderDisruptiveInterpretation = (event: AstrologicalEvent) => {
+    if (!event.disruptiveInterpretation) {
+      return (
+        <div className="mt-4 p-4 bg-gradient-to-br from-purple-900 to-indigo-900 rounded-lg">
+          <h4 className="text-lg font-bold text-white mb-2">[ACTIVACIÓN CÓSMICA]</h4>
+          <p className="text-purple-100">{event.description}</p>
+          <div className="mt-4 space-y-2">
+            <div className="flex items-start gap-2">
+              <Sparkles className="w-5 h-5 text-yellow-400 mt-1" />
+              <div>
+                <p className="text-sm font-semibold text-yellow-400">QUÉ ESPERAR:</p>
+                <p className="text-sm text-purple-100">
+                  Tu energía estará elevada. Aprovecha para tomar acción decisiva hacia tus metas.
+                </p>
+              </div>
             </div>
-          </div>
-          <h2 className="text-3xl font-bold mb-4">Consultando las estrellas...</h2>
-          <p className="text-purple-200 text-lg">Preparando tu calendario astrológico</p>
-          <p className="text-purple-300 text-sm mt-2">✨ Cargando eventos e interpretaciones IA</p>
-        </div>
-      </div>
-    );
-  }
-  
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-black py-8">
-        <div className="container mx-auto px-4">
-          <div className="p-8 bg-red-900/40 backdrop-blur-sm border border-red-400/30 rounded-3xl max-w-2xl mx-auto mt-8">
-            <div className="text-center">
-              <div className="text-6xl mb-6">❌</div>
-              <h2 className="text-2xl font-bold text-red-300 mb-4">Error Cósmico</h2>
-              <p className="text-red-200 mb-6">{error}</p>
-              <div className="flex gap-4 justify-center">
-                <Button 
-                  onClick={() => {
-                    setError(null);
-                    window.location.reload();
-                  }} 
-                  className="bg-red-600 hover:bg-red-700"
-                >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Reintentar
-                </Button>
-                <Button 
-                  onClick={() => router.push('/dashboard')} 
-                  variant="secondary"
-                  className="bg-gray-700 hover:bg-gray-600 text-white"
-                >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Volver al Dashboard
-                </Button>
+            <div className="flex items-start gap-2">
+              <Target className="w-5 h-5 text-green-400 mt-1" />
+              <div>
+                <p className="text-sm font-semibold text-green-400">ACCIÓN RECOMENDADA:</p>
+                <p className="text-sm text-purple-100">
+                  Dedica 15 minutos a meditar sobre tu propósito y toma UNA acción concreta hoy.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2">
+              <AlertCircle className="w-5 h-5 text-orange-400 mt-1" />
+              <div>
+                <p className="text-sm font-semibold text-orange-400">EVITA:</p>
+                <p className="text-sm text-purple-100">
+                  No te disperses en múltiples direcciones. Mantén el foco en tu prioridad principal.
+                </p>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    );
-  }
-  
-  if (!hasNatalChart) {
+      );
+    }
+    
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-black py-8">
-        <div className="container mx-auto px-4">
-          <div className="p-8 bg-amber-900/40 backdrop-blur-sm border border-amber-400/30 rounded-3xl max-w-2xl mx-auto mt-8">
-            <div className="text-center">
-              <div className="text-6xl mb-6">🌟</div>
-              <h2 className="text-3xl font-bold text-amber-300 mb-4">Tu Viaje Cósmico Está a Punto de Comenzar</h2>
-              <p className="text-amber-200 text-lg mb-6">
-                Para acceder a tu agenda astrológica con eventos reales interpretados por IA, 
-                necesitas generar tu carta natal primero.
-              </p>
-              <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center">
-                <Button 
-                  onClick={() => router.push('/birth-data')} 
-                  className="w-full sm:w-auto bg-amber-600 hover:bg-amber-700"
-                >
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Configurar Datos de Nacimiento
-                </Button>
-                <Button 
-                  onClick={() => router.push('/natal-chart')} 
-                  className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700"
-                >
-                  <Star className="w-4 h-4 mr-2" />
-                  Generar Carta Natal
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="mt-4 p-4 bg-gradient-to-br from-purple-900 to-indigo-900 rounded-lg">
+        {/* Contenido personalizado basado en la interpretación */}
+        <div dangerouslySetInnerHTML={{ __html: event.disruptiveInterpretation }} />
       </div>
     );
-  }
-  
+  };
+
+  // Obtener color según prioridad
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high':
+        return 'bg-red-500';
+      case 'medium':
+        return 'bg-yellow-500';
+      case 'low':
+        return 'bg-green-500';
+      default:
+        return 'bg-gray-500';
+    }
+  };
+
+  // Obtener icono según tipo de evento
+  const getEventIcon = (type: string) => {
+    switch (type) {
+      case 'lunar_phase':
+      case 'lunar_resonance':
+        return '🌙';
+      case 'solar_activation':
+        return '☀️';
+      case 'retrograde':
+        return '🔄';
+      case 'life_purpose_activation':
+        return '⚡';
+      default:
+        return '✨';
+    }
+  };
+
+  const calendarDays = generateCalendarDays();
+  const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  const weekDays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-black py-8">
-      <div className="container mx-auto px-4">
-        
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 p-4">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-400/30 rounded-full p-4 backdrop-blur-sm">
-              <Calendar className="w-8 h-8 text-purple-400" />
-            </div>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            ✨ Tu Agenda Astrológica ✨
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 mb-6">
+          <h1 className="text-4xl font-bold text-white mb-2">
+            AGENDA CÓSMICA PERSONALIZADA
           </h1>
-          <p className="text-xl text-indigo-200 max-w-2xl mx-auto">
-            Calendario interactivo con eventos reales de Prokerala e interpretaciones personalizadas de IA
+          <p className="text-purple-200">
+            Tu guía revolucionaria para navegar las energías del universo
           </p>
         </div>
 
-        {/* Estadísticas */}
-        {eventsMetadata && (
-          <div className="max-w-6xl mx-auto mb-8">
-            <div className="bg-gradient-to-r from-purple-900/40 to-blue-900/40 backdrop-blur-sm border border-purple-400/30 rounded-3xl p-6">
-              <h2 className="text-xl font-semibold text-purple-200 mb-6 text-center">
-                🔮 Resumen de tu Año Astrológico
-              </h2>
-              
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
-                <div className="text-center bg-white/5 rounded-2xl p-4 border border-white/10">
-                  <div className="text-2xl font-bold text-white mb-1">
-                    {eventsMetadata.totalEvents}
-                  </div>
-                  <div className="text-gray-300 text-sm flex items-center justify-center">
-                    <Star className="w-4 h-4 mr-1" />
-                    Total
-                  </div>
-                </div>
-                
-                <div className="text-center bg-white/5 rounded-2xl p-4 border border-white/10">
-                  <div className="text-2xl font-bold text-blue-300 mb-1">
-                    {eventsMetadata.lunarPhases}
-                  </div>
-                  <div className="text-gray-300 text-sm flex items-center justify-center">
-                    <Moon className="w-4 h-4 mr-1" />
-                    Lunares
-                  </div>
-                </div>
-                
-                <div className="text-center bg-white/5 rounded-2xl p-4 border border-white/10">
-                  <div className="text-2xl font-bold text-green-300 mb-1">
-                    {eventsMetadata.planetaryTransits}
-                  </div>
-                  <div className="text-gray-300 text-sm flex items-center justify-center">
-                    <TrendingUp className="w-4 h-4 mr-1" />
-                    Tránsitos
-                  </div>
-                </div>
-                
-                <div className="text-center bg-white/5 rounded-2xl p-4 border border-white/10">
-                  <div className="text-2xl font-bold text-yellow-300 mb-1">
-                    {eventsMetadata.eclipses}
-                  </div>
-                  <div className="text-gray-300 text-sm flex items-center justify-center">
-                    <Sun className="w-4 h-4 mr-1" />
-                    Eclipses
-                  </div>
-                </div>
-                
-                <div className="text-center bg-white/5 rounded-2xl p-4 border border-white/10">
-                  <div className="text-2xl font-bold text-orange-300 mb-1">
-                    {eventsMetadata.retrogrades}
-                  </div>
-                  <div className="text-gray-300 text-sm flex items-center justify-center">
-                    <RefreshCw className="w-4 h-4 mr-1" />
-                    Retrógrados
-                  </div>
-                </div>
-                
-                <div className="text-center bg-white/5 rounded-2xl p-4 border border-white/10">
-                  <div className="text-2xl font-bold text-red-300 mb-1">
-                    {eventsMetadata.highPriorityEvents}
-                  </div>
-                  <div className="text-gray-300 text-sm flex items-center justify-center">
-                    <Zap className="w-4 h-4 mr-1" />
-                    Alta Prioridad
-                  </div>
-                </div>
-                
-                <div className="text-center bg-white/5 rounded-2xl p-4 border border-white/10">
-                  <div className="text-2xl font-bold text-purple-300 mb-1">
-                    {eventsMetadata.withAiInterpretation}
-                  </div>
-                  <div className="text-gray-300 text-sm flex items-center justify-center">
-                    <Star className="w-4 h-4 mr-1" />
-                    Con IA
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-6 text-center">
-                <p className="text-purple-200 text-sm">
-                  📅 Período: {eventsMetadata.period.startDate} → {eventsMetadata.period.endDate}
-                </p>
-                <p className="text-purple-300 text-xs mt-1">
-                  📍 {eventsMetadata.userLocation.place}
-                </p>
-              </div>
+        {/* Controles */}
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 mb-6">
+          <div className="flex justify-between items-center">
+            <div className="flex gap-2">
+              <button
+                onClick={() => setViewMode('day')}
+                className={`px-4 py-2 rounded-lg transition-all ${
+                  viewMode === 'day' 
+                    ? 'bg-purple-600 text-white' 
+                    : 'bg-white/20 text-purple-200 hover:bg-white/30'
+                }`}
+              >
+                Día
+              </button>
+              <button
+                onClick={() => setViewMode('week')}
+                className={`px-4 py-2 rounded-lg transition-all ${
+                  viewMode === 'week' 
+                    ? 'bg-purple-600 text-white' 
+                    : 'bg-white/20 text-purple-200 hover:bg-white/30'
+                }`}
+              >
+                Semana
+              </button>
+              <button
+                onClick={() => setViewMode('month')}
+                className={`px-4 py-2 rounded-lg transition-all ${
+                  viewMode === 'month' 
+                    ? 'bg-purple-600 text-white' 
+                    : 'bg-white/20 text-purple-200 hover:bg-white/30'
+                }`}
+              >
+                Mes
+              </button>
+            </div>
+            <div className="text-2xl font-bold text-white">
+              {monthNames[selectedDate.getMonth()]} {selectedDate.getFullYear()}
             </div>
           </div>
-        )}
-        
-        {/* Calendario Principal - ARREGLADO: Pasar userId */}
-        <div className="max-w-7xl mx-auto mb-8">
-          {user?.uid ? (
-            <AstrologicalCalendar userId={user.uid} />
-          ) : (
-            <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-              <p className="text-gray-600">Cargando calendario...</p>
-            </div>
-          )}
         </div>
-        
-        {/* Botones de navegación */}
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-gradient-to-r from-gray-900/40 to-gray-800/40 backdrop-blur-sm border border-gray-600/30 rounded-3xl p-6">
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button 
-                onClick={() => router.push('/dashboard')} 
-                variant="secondary"
-                className="bg-gray-700 hover:bg-gray-600 text-white"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Volver al Dashboard
-              </Button>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Calendario */}
+          <div className="lg:col-span-2 bg-white/10 backdrop-blur-md rounded-2xl p-6">
+            <div className="grid grid-cols-7 gap-1">
+              {/* Días de la semana */}
+              {weekDays.map((day) => (
+                <div key={day} className="text-center text-purple-300 font-semibold p-2">
+                  {day}
+                </div>
+              ))}
               
-              <Button
-                onClick={() => router.push('/natal-chart')}
-                className="bg-purple-600 hover:bg-purple-700"
-              >
-                <Eye className="w-4 h-4 mr-2" />
-                Ver Carta Natal
-              </Button>
-              
-              <Button
-                onClick={() => router.push('/progressed-chart')}
-                className="bg-indigo-600 hover:bg-indigo-700"
-              >
-                <BarChart3 className="w-4 h-4 mr-2" />
-                Ver Carta Progresada
-              </Button>
-              
-              <Button
-                onClick={regenerateEvents}
-                className="bg-pink-600 hover:bg-pink-700"
-                disabled={refreshing}
-              >
-                {refreshing ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                    Regenerando...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    Actualizar Eventos
-                  </>
-                )}
-              </Button>
+              {/* Días del calendario */}
+              {calendarDays.map((day, index) => {
+                const dayEvents = getDayEvents(day);
+                const isCurrentMonth = day.getMonth() === selectedDate.getMonth();
+                const isToday = day.toDateString() === new Date().toDateString();
+                const isSelected = day.toDateString() === selectedDate.toDateString();
+                
+                return (
+                  <div
+                    key={index}
+                    onClick={() => setSelectedDate(day)}
+                    className={`
+                      min-h-[80px] p-2 rounded-lg cursor-pointer transition-all
+                      ${isCurrentMonth ? 'bg-white/10' : 'bg-white/5'}
+                      ${isToday ? 'ring-2 ring-yellow-400' : ''}
+                      ${isSelected ? 'bg-purple-600/40' : ''}
+                      hover:bg-white/20
+                    `}
+                  >
+                    <div className={`text-sm font-semibold ${
+                      isCurrentMonth ? 'text-white' : 'text-purple-400'
+                    }`}>
+                      {day.getDate()}
+                    </div>
+                    
+                    {/* Indicadores de eventos */}
+                    {dayEvents.length > 0 && (
+                      <div className="mt-1 space-y-1">
+                        {dayEvents.slice(0, 2).map((event) => (
+                          <div
+                            key={event.id}
+                            className={`text-xs p-1 rounded ${getPriorityColor(event.priority)} text-white`}
+                          >
+                            {getEventIcon(event.type)} {event.title.substring(0, 12)}...
+                          </div>
+                        ))}
+                        {dayEvents.length > 2 && (
+                          <div className="text-xs text-purple-300">
+                            +{dayEvents.length - 2} más
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
+          </div>
+
+          {/* Panel de Eventos del Día */}
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6">
+            <h3 className="text-xl font-bold text-white mb-4">
+              Eventos del {selectedDate.getDate()} de {monthNames[selectedDate.getMonth()]}
+            </h3>
             
-            <div className="mt-4 text-center">
-              <p className="text-gray-400 text-sm">
-                💡 Haz clic en cualquier evento del calendario para ver su interpretación completa
-              </p>
-              {eventsMetadata && eventsMetadata.withAiInterpretation > 0 && (
-                <p className="text-green-400 text-xs mt-1">
-                  🤖 {eventsMetadata.withAiInterpretation} eventos con interpretaciones IA personalizadas
-                </p>
+            <div className="space-y-3 max-h-[600px] overflow-y-auto">
+              {getDayEvents(selectedDate).length === 0 ? (
+                <p className="text-purple-300 italic">No hay eventos cósmicos este día</p>
+              ) : (
+                getDayEvents(selectedDate).map((event) => (
+                  <div
+                    key={event.id}
+                    onClick={() => setSelectedEvent(event)}
+                    className="bg-white/10 rounded-lg p-3 cursor-pointer hover:bg-white/20 transition-all"
+                  >
+                    <div className="flex items-start gap-2">
+                      <span className="text-2xl">{getEventIcon(event.type)}</span>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-white">{event.title}</h4>
+                        <p className="text-sm text-purple-200 mt-1">{event.description}</p>
+                        {event.planet && (
+                          <div className="flex gap-2 mt-2">
+                            <span className="text-xs bg-purple-600 text-white px-2 py-1 rounded">
+                              {event.planet}
+                            </span>
+                            {event.sign && (
+                              <span className="text-xs bg-indigo-600 text-white px-2 py-1 rounded">
+                                {event.sign}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <span className={`w-2 h-2 rounded-full ${getPriorityColor(event.priority)}`} />
+                    </div>
+                  </div>
+                ))
               )}
+            </div>
+          </div>
+        </div>
+
+        {/* Panel de Interpretación Disruptiva */}
+        {selectedEvent && (
+          <div className="mt-6 bg-white/10 backdrop-blur-md rounded-2xl p-6">
+            <div className="flex justify-between items-start mb-4">
+              <h3 className="text-2xl font-bold text-white">
+                {selectedEvent.title.toUpperCase()}
+              </h3>
+              <button
+                onClick={() => setSelectedEvent(null)}
+                className="text-purple-300 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+            {renderDisruptiveInterpretation(selectedEvent)}
+          </div>
+        )}
+
+        {/* Resumen Mensual */}
+        <div className="mt-6 bg-white/10 backdrop-blur-md rounded-2xl p-6">
+          <h3 className="text-2xl font-bold text-white mb-4">
+            RESUMEN ÉPICO DEL MES
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-gradient-to-br from-red-500 to-orange-500 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Zap className="w-6 h-6 text-white" />
+                <h4 className="font-bold text-white">ALTA PRIORIDAD</h4>
+              </div>
+              <p className="text-white/90 text-sm">
+                {events.filter(e => e.priority === 'high').length} eventos críticos este mes
+              </p>
+            </div>
+            <div className="bg-gradient-to-br from-yellow-500 to-amber-500 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Star className="w-6 h-6 text-white" />
+                <h4 className="font-bold text-white">OPORTUNIDADES</h4>
+              </div>
+              <p className="text-white/90 text-sm">
+                Múltiples portales de manifestación activos
+              </p>
+            </div>
+            <div className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Heart className="w-6 h-6 text-white" />
+                <h4 className="font-bold text-white">TEMA PRINCIPAL</h4>
+              </div>
+              <p className="text-white/90 text-sm">
+                Revolución personal y activación de poder
+              </p>
             </div>
           </div>
         </div>
       </div>
     </div>
   );
+};
+
+export default function AgendaPage() {
+  return <AgendaPersonalizada />;
 }
