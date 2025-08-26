@@ -40,3 +40,6 @@ check-package.js
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Large PDF files for astrology books (processed into chunks.json)
+astrology_books/*.pdf
