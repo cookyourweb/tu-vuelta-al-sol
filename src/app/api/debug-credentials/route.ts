@@ -3,8 +3,8 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   // Leer EXACTAMENTE las mismas variables que usa natal-chart
-  const CLIENT_ID = process.env.NEXT_PUBLIC_PROKERALA_CLIENT_ID;
-  const CLIENT_SECRET = process.env.NEXT_PUBLIC_PROKERALA_CLIENT_SECRET;
+  const CLIENT_ID = process.env.PROKERALA_CLIENT_ID;
+  const CLIENT_SECRET = process.env.PROKERALA_CLIENT_SECRET;
 
   return NextResponse.json({
     timestamp: new Date().toISOString(),
@@ -19,8 +19,8 @@ export async function GET() {
       CLIENT_SECRET_preview: CLIENT_SECRET ? CLIENT_SECRET.substring(0, 8) + '...' : 'UNDEFINED',
       CLIENT_SECRET_full: CLIENT_SECRET, // ⚠️ Solo para debug, quitar en producción
     },
-    allEnvVars: Object.keys(process.env).filter(key => 
-      key.startsWith('NEXT_PUBLIC_PROKERALA')
+    allEnvVars: Object.keys(process.env).filter(key =>
+      key.startsWith('PROKERALA')
     ),
     expectedValues: {
       CLIENT_ID_should_be: '1c6bf7c7-2b6b-4721-8b32-d054129ecd87',

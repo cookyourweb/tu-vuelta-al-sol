@@ -45,3 +45,30 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const uid = searchParams.get('uid');
+    
+    if (!uid) {
+      return NextResponse.json({ error: 'UID es requerido' }, { status: 400 });
+    }
+
+    await connectDB();
+
+    const user = await User.findOne({ uid });
+    
+    if (!user) {
+      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
+    }
+
+    return NextResponse.json(user);
+  } catch (error) {
+    console.error('Error al obtener usuario:', error);
+    return NextResponse.json(
+      { error: 'Error al obtener usuario' },
+      { status: 500 }
+    );
+  }
+}

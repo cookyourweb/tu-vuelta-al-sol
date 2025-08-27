@@ -1,5 +1,24 @@
 # Tu Vuelta al Sol
 
+## Sincronización de Datos de Usuario
+
+### Actualización Automática de Nombres
+- **Sincronización Completa**: Al actualizar el nombre completo en el formulario de datos de nacimiento, se sincroniza automáticamente en:
+  - ✅ Firebase Authentication (displayName)
+  - ✅ Colección de usuarios MongoDB (fullName) 
+  - ✅ Colección BirthData MongoDB (fullName)
+  - ✅ Panel de administración (interfaz actualizable)
+
+### Panel de Administración Mejorado
+- **Botón de Actualización**: Se ha añadido un botón "🔄 Actualizar" que permite a los administradores refrescar manualmente la lista de usuarios
+- **Eventos Personalizados**: Los componentes escuchan eventos `birthDataSaved` para actualizaciones automáticas
+- **Visualización en Tiempo Real**: Los cambios se reflejan inmediatamente después de guardar datos
+
+### Endpoints de Sincronización
+- **POST `/api/birth-data`**: Actualiza simultáneamente todos los sistemas
+- **GET `/api/admin/users`**: Devuelve lista actualizada de usuarios
+- **Eventos**: Sistema de eventos personalizados para sincronización cross-component
+
 ## Documentación de la funcionalidad de administración de usuarios
 
 Se ha implementado una sección de administración para gestionar usuarios en la aplicación. A continuación se describen las funcionalidades y cómo usarlas:
@@ -54,6 +73,43 @@ Se ha implementado una sección de administración para gestionar usuarios en la
 
 **"Tu Vuelta al Sol"** es una aplicación web que genera agendas astrológicas personalizadas basadas en la carta natal y progresada del usuario. La aplicación combina precisión astrológica máxima con inteligencia artificial para crear consejos personalizados y herramientas prácticas de planificación.
 
+## 📅 ¿Qué es la Agenda Astrológica?
+
+La **Agenda Astrológica Personalizada** es el corazón de "Tu Vuelta al Sol". Es un calendario único que combina:
+
+### 🔮 **Predicciones Basadas en Tu Carta Natal**
+- **Tránsitos personales**: Cómo los planetas en movimiento afectan tu carta natal específica
+- **Aspectos importantes**: Conjunciones, oposiciones, trígonos y cuadraturas que impactan tu energía
+- **Retrogradaciones**: Efectos personalizados de Mercurio, Venus y Marte retrógrados
+
+### 🌙 **Eventos Astrológicos Anuales**
+- **Fases lunares**: Lunas nuevas y llenas con rituales específicos
+- **Eclipses**: Momentos de transformación y nuevos comienzos
+- **Cambios de estación**: Equinoccios y solsticios con significado personal
+- **Ingresos planetarios**: Cuando los planetas cambian de signo
+
+### 🤖 **Consejos de IA Personalizados**
+- **Acciones recomendadas**: Qué hacer en cada fase astrológica
+- **Evitar decisiones**: Cuándo postergar decisiones importantes
+- **Enfoque energético**: Dónde dirigir tu energía según los tránsitos
+- **Rituales específicos**: Ceremonias y prácticas para cada evento
+
+### 📊 **Características Únicas de la Agenda**
+- **Generación con IA**: Usa inteligencia artificial para interpretaciones personalizadas
+- **Integración Google Calendar**: Sincronización automática con tu calendario
+- **Recordatorios proactivos**: Alertas antes de eventos importantes
+- **Formato PDF descargable**: Agenda imprimible de alta calidad
+- **Actualizaciones mensuales**: Contenido fresco y relevante
+
+### 🎯 **Beneficios para el Usuario**
+- **Planificación estratégica**: Mejores fechas para proyectos importantes
+- **Autoconocimiento**: Entender tus patrones energéticos naturales
+- **Prevención**: Evitar conflictos durante tránsitos difíciles
+- **Aprovechamiento**: Maximizar oportunidades durante tránsitos favorables
+- **Conexión cósmica**: Sentirse en sintonía con los ciclos naturales
+
+La agenda cubre desde tu cumpleaños actual hasta tu próximo cumpleaños, creando un ciclo completo de "tu vuelta al sol" con guidance astrológico personalizado para cada mes.
+
 ## 🚀 Funcionalidades Futuras Planeadas
 
 - **Carta Progresada Mejorada:** Corrección y optimización de la carta progresada para mayor precisión.
@@ -72,11 +128,11 @@ Estas funcionalidades están planificadas para ser implementadas en los próximo
 
 ### Estructura de Archivos del Proyecto
 
+### Estructura de Archivos Actualizada
+
 El proyecto está organizado de la siguiente manera:
 
 ```
-/ (raíz del proyecto)
-````
 tu-vuelta-al-sol/
 ├── .gitignore
 ├── .vercelignore
@@ -95,58 +151,50 @@ tu-vuelta-al-sol/
 │   ├── file.svg
 │   ├── globe.svg
 │   ├── next.svg
+│   ├── site.webmanifest
 │   ├── vercel.svg
 │   └── window.svg
 ├── scripts/
 │   ├── fix-quotes.sh
+│   ├── parse_and_chunk_pdfs.js
 │   └── professional-quote-fix.sh
 ├── src/
 │   ├── app/
 │   │   ├── favicon.ico
 │   │   ├── globals.css
 │   │   ├── layout.tsx
+│   │   ├── layout.tsx.backup
 │   │   ├── page.tsx
 │   │   ├── (auth)/
 │   │   ├── (dashboard)/
+│   │   ├── admin/
+│   │   │   └── page.tsx
 │   │   ├── api/
+│   │   │   ├── admin/
+│   │   │   │   ├── delete-user/
+│   │   │   │   ├── update-role/
+│   │   │   │   └── update-role.ts
 │   │   │   ├── astrology/
-│   │   │   │   ├── ChartLoader.tsx
-│   │   │   │   ├── natal-chart/
-│   │   │   │   │   └── route.ts
-│   │   │   │   ├── test-postman/
-│   │   │   │   │   └── route.ts
+│   │   │   │   ├── generate-agenda-ai/
+│   │   │   │   └── generate-agenda-ai/route.ts
 │   │   │   ├── birth-data/
 │   │   │   │   └── route.ts
+│   │   │   ├── cache/
 │   │   │   ├── charts/
-│   │   │   │   ├── natal/
-│   │   │   │   │   └── route.ts
-│   │   │   │   ├── progressed/
-│   │   │   │   │   └── route.ts
-│   │   │   ├── events/
-│   │   │   │   ├── astrological/
-│   │   │   │   │   └── route.ts
-│   │   │   ├── prokerala/
-│   │   │   │   ├── client-v2.ts
-│   │   │   │   ├── utils.ts
-│   │   │   │   ├── chart/
-│   │   │   │   │   └── route.ts
-│   │   │   │   ├── direct-test/
-│   │   │   │   │   └── route.ts
-│   │   │   │   ├── location-search/
-│   │   │   │   │   └── route.ts
-│   │   │   │   ├── natal-chart/
-│   │   │   │   │   └── route.ts
-│   │   │   │   ├── natal-horoscope/
-│   │   │   │   │   └── route.ts
-│   │   │   │   ├── test/
-│   │   │   │   │   └── route.ts
-│   │   │   │   ├── test-page/
-│   │   │   │   │   └── page.tsx
-│   │   │   │   ├── token/
-│   │   │   │   │   └── route.ts
-│   │   │   ├── test-mongodb/
+│   │   │   ├── debug/
+│   │   │   │   ├── assistants/
+│   │   │   │   ├── auth/
+│   │   │   │   ├── auth-context/
+│   │   │   │   ├── firebase/
 │   │   │   │   └── route.ts
-│   │   │   ├── users/
+│   │   │   ├── events/
+│   │   │   ├── geocode/
+│   │   │   ├── pdf/
+│   │   │   │   └── generate/
+│   │   │   ├── prokerala/
+│   │   │   ├── reverse-geocode/
+│   │   │   ├── test-mongodb/
+│   │   │   └── users/
 │   │   │   │   └── route.ts
 │   │   ├── clear-chart-cache/
 │   │   │   └── route.ts
@@ -154,105 +202,158 @@ tu-vuelta-al-sol/
 │   │   │   └── page.tsx
 │   │   ├── postman-test/
 │   │   │   └── page.tsx
+│   │   ├── test-agenda-ai/
+│   │   │   └── page.tsx
 │   │   ├── test-api/
 │   │   │   └── page.tsx
-│   │   ├── test-natal-chart/
+│   │   ├── test-chart-display/
 │   │   │   └── page.tsx
+│   │   ├── test-mongodb/
+│   │   │   └── page.tsx
+│   │   ├── test-natal-chart/
+│   │   │   ├── page.tsx
+│   │   │   └── page.tsx.backup
 │   │   ├── test-progressed/
+│   │   │   ├── page.test.tsx
 │   │   │   └── page.tsx
 │   │   ├── test-timezone/
 │   │   │   └── page.tsx
-│   │   ├── types/
+│   │   └── types/
 │   │   │   └── astrology.ts
 │   ├── components/
+│   │   ├── admin/
+│   │   │   ├── BirthDataAdminTable.tsx
+│   │   │   └── DeleteUserForm.tsx
 │   │   ├── astrology/
+│   │   │   ├── AgendaAIDisplay.tsx
+│   │   │   ├── AgendaLoadingStates.tsx
+│   │   │   ├── AscendantCard.tsx
+│   │   │   ├── AspectControlPanel.tsx
 │   │   │   ├── AspectLines.tsx
 │   │   │   ├── AstrologicalAgenda.tsx
 │   │   │   ├── AstrologicalAgendaGenerator.tsx
+│   │   │   ├── AstrologicalCalendar.tsx
+│   │   │   ├── BirthDataCard.tsx
 │   │   │   ├── BirthDataForm.tsx
 │   │   │   ├── ChartDisplay.tsx
+│   │   │   ├── ChartDisplaycompletosinrefactorizar.tsx
+│   │   │   ├── ChartDisplayrefactorizadSinLineasniAspeectos.tsx
 │   │   │   ├── ChartTooltips.tsx
 │   │   │   ├── ChartWheel.tsx
+│   │   │   ├── CombinedAscendantMCCard.tsx
 │   │   │   ├── CosmicFootprint.tsx
+│   │   │   ├── ElementsModalitiesCard.tsx
 │   │   │   ├── HouseGrid.tsx
+│   │   │   ├── MidheavenCard.tsx
 │   │   │   ├── NatalChartWheel.tsx
 │   │   │   ├── PlanetSymbol.tsx
 │   │   │   ├── ProgressedChartVisual.tsx
+│   │   │   ├── SectionMenu.tsx
+│   │   │   └── tooltips/
 │   │   ├── auth/
 │   │   │   ├── LoginForm.tsx
-│   │   │   ├── RegisterForm.tsx
+│   │   │   └── RegisterForm.tsx
 │   │   ├── dashboard/
 │   │   │   ├── BirthDataForm.tsx
-│   │   │   ├── NatalChartCard.tsx
+│   │   │   └── NatalChartCard.tsx
 │   │   ├── debug/
-│   │   │   ├── ForceRegenerateChart.tsx
-│   │   ├── forms/
-│   │   │   ├── EnhancedBirthDataForm.tsx
-│   │   ├── hooks/
-│   │   │   ├── useAspects.ts
-│   │   │   ├── useChart.ts
-│   │   │   ├── usePlanets.ts
-│   │   │   ├── useProkeralaApi.ts
+│   │   │   └── ForceRegenerateChart.tsx
 │   │   ├── layout/
 │   │   │   ├── Footer.tsx
-│   │   │   ├── PrimaryHeader.tsx
+│   │   │   ├── Footer.tsx.backup
+│   │   │   └── PrimaryHeader.tsx
 │   │   ├── test/
+│   │   │   ├── AgendaAITest.tsx
+│   │   │   ├── MongoDBTest.tsx
 │   │   │   ├── NatalChartTest.tsx
 │   │   │   ├── PostmanTest.tsx
 │   │   │   ├── ProkeralaNatalTest.tsx
 │   │   │   ├── SimpleTimezonetest.tsx
-│   │   │   ├── TimezoneTestComponent.tsx
-│   │   ├── ui/
+│   │   │   └── TimezoneTestComponent.tsx
+│   │   └── ui/
 │   │   │   ├── Alert.tsx
 │   │   │   ├── Button.tsx
-│   │   │   ├── Input.tsx
+│   │   │   └── Input.tsx
 │   ├── constants/
-│   │   └── astrology.ts
+│   │   ├── astrology.ts
+│   │   └── astrology/
+│   │   │   ├── chartConstants.ts
+│   │   │   └── progressedChartConstants.ts
 │   ├── context/
 │   │   ├── AuthContext.tsx
-│   │   ├── NotificationContext.tsx
+│   │   └── NotificationContext.tsx
 │   ├── hooks/
+│   │   ├── useAspects.ts
+│   │   ├── useChart.ts
 │   │   ├── useChartDisplay.ts
+│   │   ├── usePlanets.ts
+│   │   ├── useProkeralaApi.ts
+│   │   ├── astrology/
+│   │   │   └── useChartDisplay.ts
+│   │   └── lib/
+│   │   │   ├── db.ts
+│   │   │   ├── firebase.ts
+│   │   │   ├── utils.ts
+│   │   │   └── prokerala/
 │   ├── lib/
 │   │   ├── db.ts
+│   │   ├── firebase-client.ts
 │   │   ├── firebase.ts
+│   │   ├── firebaseAdmin.ts
 │   │   ├── utils.ts
-│   │   ├── prokerala/
+│   │   ├── firebase/
+│   │   │   ├── admin.ts
+│   │   │   ├── client.ts
+│   │   │   ├── config.ts
+│   │   │   └── index.ts
+│   │   └── prokerala/
 │   │   │   ├── client.ts
 │   │   │   ├── endpoints.ts
 │   │   │   ├── types.ts
-│   │   │   ├── utils.ts
+│   │   │   └── utils.ts
 │   ├── models/
+│   │   ├── AIUsage.ts
 │   │   ├── BirthData.ts
 │   │   ├── Chart.ts
-│   │   ├── User.ts
+│   │   └── User.ts
 │   ├── services/
+│   │   ├── astrologicalEventsService.ts
 │   │   ├── astrologyService.ts
+│   │   ├── cacheService.ts
 │   │   ├── chartCalculationsService.ts
 │   │   ├── chartInterpretationsService.ts
+│   │   ├── chartRenderingService.tsx
 │   │   ├── progressedChartService.ts
 │   │   ├── prokeralaService.ts
+│   │   ├── trainedAssistantService.ts
+│   │   └── userDataService.ts
 │   ├── types/
-│   │   ├── astrology/
+│   │   └── astrology/
+│   │   │   ├── aspects.ts
+│   │   │   ├── basic.ts
+│   │   │   ├── chart.ts
+│   │   │   ├── chartConstants.ts
 │   │   │   ├── chartDisplay.ts
-│   │   ├── astrology.ts
-│   ├── utils/
+│   │   │   ├── chartDisplaycopy.ts
+│   │   │   ├── index.ts
+│   │   │   ├── unified-types.ts
+│   │   │   └── utils.ts
+│   └── utils/
+│   │   ├── agendaCalculator.ts
 │   │   ├── dateTimeUtils.ts
-│   │   ├── astrology/
+│   │   └── astrology/
 │   │   │   ├── aspectCalculations.ts
 │   │   │   ├── coordinateUtils.ts
 │   │   │   ├── degreeConverter.ts
-│   │   │   ├── planetPositions.ts
-├── types/
-│   ├── astrology/
-│   │   ├── aspects.ts
-│   │   ├── basic.ts
-│   │   ├── chart.ts
-│   │   ├── index.ts
-│   │   ├── utils.ts
-
-
+│   │   │   ├── disruptiveMotivationalSystem.ts
+│   │   │   ├── events.ts
+│   │   │   ├── extractAstroProfile.ts
+│   │   │   ├── intelligentFallbacks.ts
+│   │   │   └── planetPositions.ts
+└── TODO.md
 ```
+
+**Nota**: Esta estructura refleja la organización actual del proyecto con todos los archivos y directorios existentes.
 
 ### Funcionalidades Principales:
 1. **Carta natal con precisión máxima** usando Swiss Ephemeris
@@ -313,7 +414,7 @@ GET https://api.prokerala.com/v2/astrology/progression-chart?profile[datetime]=Y
 - **Parámetros astrológicos** corregidos (ayanamsa=0, coordenadas precisas)
 
 #### 🔄 En Progreso INMEDIATO (Esta semana)
-- [ ] **Corregir carta progresada** con parámetros exactos (ayanamsa=0)
+- [ ] **Corregir carta progresada** verificar que usa loparámetros exactos (ayanamsa=0) arreglar ux
 - [ ] **Implementar prompt de IA** para generación de agenda personalizada
 - [ ] **Eventos astrológicos anuales** completos
 - [ ] **Mejorar UX formulario de nacimiento**:
@@ -360,12 +461,18 @@ GET https://api.prokerala.com/v2/astrology/progression-chart?profile[datetime]=Y
 - [ ] **Sistema de cupones** y descuentos
 - [ ] **Dashboard de suscripciones** para usuarios
 
-#### **3.2 Productos Adicionales** 🎁
+### **3.2 Productos Adicionales** 🎁
 - [ ] **Compatibilidad de pareja** (€29): Carta sinastría
 - [ ] **Carta para bebés** (€24): Regalo para padres
 - [ ] **Informes temáticos** (€15 c/u): Amor, carrera, salud
 - [ ] **Calendario lunar físico** (€35): Producto físico personalizado
 - [ ] **Consultas 1:1** (€75/hora): Con astrólogos certificados
+- [ ] **Regalos Astrológicos** (€25-50): Crear cartas y agendas personalizadas para familiares y amigos como regalo especial
+  - **Funcionalidad**: Los usuarios pueden ingresar datos de nacimiento de sus seres queridos
+  - **Entrega**: Envío por email con diseño premium y mensaje personalizado
+  - **Packaging**: PDF de alta calidad con diseño de regalo
+  - **Personalización**: Mensaje personalizado del remitente
+  - **Seguimiento**: Notificación cuando el regalo es abierto
 
 ---
 
@@ -512,30 +619,27 @@ POST /api/astrology/validate-birth-data
 
 ## 🚀 PRÓXIMOS PASOS INMEDIATOS
 
-### **Esta Semana (3-9 Junio 2025)**
-#### **Prioridad 1: Completar Foundation**
-- [ ] **Deploy actual** con correcciones de carta natal
-- [ ] **Corregir carta progresada** con ayanamsa=0
-- [ ] **Verificar precisión** comparando con datos de referencia
-- [ ] **Implementar eventos anuales básicos** (fases lunares)
-- [ ] **Mejorar formulario de nacimiento**:
-  - [ ] **Component de búsqueda de lugares** con API de geocoding
-  - [ ] **Toggle coordenadas manuales** vs búsqueda automática
-  - [ ] **Checkbox "No sé mi hora exacta"** → usar mediodía + advertencia
-  - [ ] **Validación en tiempo real** de coordenadas y fechas
-  - [ ] **Preview de ubicación** en mapa (opcional)
+### **Próximos Pasos Inmediatos (Esta Semana)**
 
-#### **Prioridad 2: IA Integration**  
-- [ ] **Integrar prompt personalizado** para generación de agenda
-- [ ] **Crear endpoint** `/api/astrology/generate-agenda`
-- [ ] **Testing con datos reales** (caso Verónica 1974→2025)
+#### **🔄 Prioridad 1: UX Carta Progresada y Agenda IA**
+- [ ] **Arreglar UX carta progresada** - Mejorar interfaz y visualización
+- [ ] **Corregir agenda IA** - Comprobar que está siendo alimentada correctamente por la IA
+- [ ] **Generar todos los meses** - Asegurar que la agenda cubra todo el año astrológico
+- [ ] **Arreglar UX general** - Mejorar experiencia de usuario en todo el flujo
 
-- [ ] **Eventos astrológicos completos** (retrogradaciones, eclipses)
-- [ ] **Interfaz de usuario** para generación de agendas
-- [ ] **Sistema de pagos básico** (Stripe integration)
-- [ ] **Beta testing** con usuarios reales
+#### **🌟 Prioridad 2: Generación Inteligente con IA (Septiembre 2025)**
+- [ ] **Agenda astrológica completa** y personalizada con IA
+- [ ] **Prompt engineering optimizado** para astrología personalizada
+- [ ] **Generación de interpretaciones** basadas en carta natal + progresada
+- [ ] **Consejos específicos** según tránsitos personales
+- [ ] **Endpoint**: `/api/astrology/generate-agenda-ai`
 
-### **Junio 2025 - Objetivos del Mes**
+#### **🚀 Prioridad 3: Deploy y Testing**
+- [ ] **Deploy con últimas correcciones** - Implementar todas las mejoras
+- [ ] **Testing exhaustivo** - Verificar funcionalidad completa
+- [ ] **Optimización de performance** - Mejorar tiempos de carga
+
+### **Septiembre 2025 - Objetivos del Mes**
 - [ ] **Producto funcional completo** (cartas + IA + eventos)
 - [ ] **50 usuarios beta** testeando el producto
 - [ ] **Feedback loop** implementado
@@ -637,6 +741,6 @@ GOOGLE_CLIENT_SECRET=tu_google_client_secret
 
 **Última actualización**: 27 Mayo 2025  
 **Estado del proyecto**: Foundation astrológica completa ✅  
-**Próximo hito**: IA + Eventos anuales (Junio 2025) 🎯  
+**Próximo hito**: IA + Eventos anuales (Septiembre 2025) 🎯  
 **Funcionalidad estrella**: Google Calendar Integration (Agosto 2025) 🚀  
 **Visión**: La app de astrología más práctica y útil del mercado hispanohablante 🌟

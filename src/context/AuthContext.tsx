@@ -11,7 +11,7 @@ import {
   sendPasswordResetEmail,
   updateProfile
 } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth } from '@/lib/firebase-client';
 
 interface AuthContextType {
   user: User | null;
@@ -21,6 +21,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   register: (email: string, password: string, fullName: string) => Promise<{ user: User; uid: string } | void>;
   resetPassword: (email: string) => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -90,6 +91,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     await sendPasswordResetEmail(auth, email);
   };
 
+  const refreshUser = async () => {
+    if (auth.currentUser) {
+      // Forzar una recarga del usuario actual para obtener los datos actualizados
+      await auth.currentUser.reload();
+      setUser(auth.currentUser);
+    }
+  };
+
   return (
     <AuthContext.Provider 
       value={{ 
@@ -99,7 +108,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         login, 
         logout, 
         register,
-        resetPassword
+        resetPassword,
+        refreshUser
       }}
     >
       {children}

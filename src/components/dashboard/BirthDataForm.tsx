@@ -118,7 +118,7 @@ export default function BirthDataForm() {
   const [detectedLocation, setDetectedLocation] = useState('');
   const [showDetection, setShowDetection] = useState(false);
   
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const router = useRouter();
 
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<FormData>({
@@ -334,6 +334,15 @@ export default function BirthDataForm() {
       // ✅ FLUJO SIMPLIFICADO: Solo mostrar éxito
       setSuccess(true);
       console.log('✅ Datos guardados exitosamente');
+      
+      // Actualizar el contexto de autenticación
+      await refreshUser();
+      
+      // Disparar evento personalizado para actualizar el header
+      const event = new CustomEvent('birthDataSaved', { 
+        detail: { userId: user.uid } 
+      });
+      window.dispatchEvent(event);
       
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Error inesperado');

@@ -3,8 +3,8 @@ import { NextResponse } from 'next/server';
 import axios from 'axios';
 
 // Usamos las credenciales exactamente como están en el .env.local
-const CLIENT_ID = process.env.NEXT_PUBLIC_PROKERALA_CLIENT_ID;
-const CLIENT_SECRET = process.env.NEXT_PUBLIC_PROKERALA_CLIENT_SECRET;
+const CLIENT_ID = process.env.PROKERALA_CLIENT_ID;
+const CLIENT_SECRET = process.env.PROKERALA_CLIENT_SECRET;
 
 export async function GET() {
   // URLs para probar

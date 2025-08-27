@@ -6,11 +6,17 @@ import OpenAI from 'openai';
 // 🔧 CONFIGURACIÓN OPENAI CON ORGANIZACIÓN
 // ==========================================
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  organization: process.env.OPENAI_ORG_ID,     // wunjo-rcyvpv
-  project: process.env.OPENAI_PROJECT_ID,      // proj_MfpxlisuxKqjN7eIKrGHZqw4
-});
+// Función helper para obtener el cliente OpenAI (lazy loading)
+function getOpenAIClient() {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY no está configurada en las variables de entorno');
+  }
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    organization: process.env.OPENAI_ORG_ID,     // wunjo-rcyvpv
+    project: process.env.OPENAI_PROJECT_ID,      // proj_MfpxlisuxKqjN7eIKrGHZqw4
+  });
+}
 
 // ==========================================
 // 🎯 ENDPOINT GET (EXPORTACIÓN CORRECTA)
@@ -32,6 +38,7 @@ export async function GET() {
     
     // 1. Listar assistants disponibles
     console.log('🔍 Listando assistants disponibles...');
+    const openai = getOpenAIClient();
     const assistants = await openai.beta.assistants.list({
       order: 'desc',
       limit: 10

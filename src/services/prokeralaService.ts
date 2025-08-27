@@ -113,8 +113,8 @@ interface ProkeralaApiResponse {
 
 const API_BASE_URL = 'https://api.prokerala.com/v2';
 const TOKEN_ENDPOINT = 'https://api.prokerala.com/token';
-const CLIENT_ID = process.env.NEXT_PUBLIC_PROKERALA_CLIENT_ID;
-const CLIENT_SECRET = process.env.NEXT_PUBLIC_PROKERALA_CLIENT_SECRET;
+const CLIENT_ID = process.env.PROKERALA_CLIENT_ID;
+const CLIENT_SECRET = process.env.PROKERALA_CLIENT_SECRET;
 
 // Cache de token mejorado
 interface TokenCache {
@@ -238,7 +238,7 @@ export async function getToken(): Promise<string> {
   
   // Verificar credenciales
   if (!CLIENT_ID || !CLIENT_SECRET) {
-    throw new Error('❌ Credenciales de Prokerala no configuradas. Verifica NEXT_PUBLIC_PROKERALA_CLIENT_ID y NEXT_PUBLIC_PROKERALA_CLIENT_SECRET');
+    throw new Error('❌ Credenciales de Prokerala no configuradas. Verifica PROKERALA_CLIENT_ID y PROKERALA_CLIENT_SECRET');
   }
   
   try {

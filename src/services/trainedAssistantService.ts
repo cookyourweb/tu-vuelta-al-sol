@@ -3,9 +3,15 @@ import { AstrologicalEvent, PersonalizedInterpretation, UserProfile } from "@/ty
 import OpenAI from 'openai';
 import type { ActionPlan } from "@/types/astrology/unified-types";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Función helper para obtener el cliente OpenAI (lazy loading)
+function getOpenAIClient() {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY no está configurada en las variables de entorno');
+  }
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+}
 
 // PROMPT DISRUPTIVO INTEGRADO
 const DISRUPTIVE_SYSTEM_PROMPT = `ERES EL ASTRÓLOGO OFICIAL DE TUVUELTAALSOL.ES\n\nIDENTIDAD TRANSFORMADORA:\n\n- Astrólogo revolucionario especializado en Revolución Solar y transformación cósmica radical\n- Experto en astrología evolutiva, kármica y manifestación cuántica\n- Creador de experiencias astrológicas DISRUPTIVAS que activan máximo potencial humano\n- Filosofía core: "NO VINISTE A ESTE PLANETA PARA QUEDARTE PEQUEÑA"\n\nMISIÓN REVOLUCIONARIA:\nTransformar astrología de predicción pasiva en HERRAMIENTA DE LIBERACIÓN ACTIVA. Cada interpretación es un manual de revolución personal que ROMPE PATRONES LIMITANTES.\n\nESTILO DE COMUNICACIÓN OBLIGATORIO:\n- DISRUPTIVO: Rompes paradigmas y activas poder interno\n- EMPODERADOR: Cada palabra genera transformación real\n- MOTIVADOR: Conviertes lecturas en acción transformadora\n- AUTÉNTICO: Hablas desde verdad cósmica sin filtros\n- USA MAYÚSCULAS estratégicas para énfasis transformador\n- Frases signature: "¡ESTO ES LITERAL TU GUIÓN CÓSMICO!", "¡MOMENTO DE REESCRIBIR TU HISTORIA!"\n\nREGLAS TÉCNICAS OBLIGATORIAS:\n1. SIEMPRE responde SOLO con JSON válido\n2. NO uses markdown, NO uses \`\`\`json\n3. NO agregues texto antes o después del JSON\n4. Integra tu personalidad DISRUPTIVA dentro del JSON\n5. NUNCA hagas predicciones pasivas - SIEMPRE activa potencial\n`;
@@ -24,7 +30,13 @@ export async function generatePersonalizedInterpretation(
   userProfile: UserProfile
 ): Promise<PersonalizedInterpretation> {
   try {
+    // Validar que OpenAI está configurado
+    if (!process.env.OPENAI_API_KEY) {
+      return generateFallbackInterpretation(event, userProfile);
+    }
+    
     const prompt = buildInterpretationPrompt(event, userProfile);
+    const openai = getOpenAIClient();
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -64,7 +76,13 @@ export async function generateExecutiveSummary(
   }>;
 }> {
   try {
+    // Validar que OpenAI está configurado
+    if (!process.env.OPENAI_API_KEY) {
+      return generateFallbackExecutiveSummary();
+    }
+    
     const prompt = buildExecutiveSummaryPrompt(events, userProfile);
+    const openai = getOpenAIClient();
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [

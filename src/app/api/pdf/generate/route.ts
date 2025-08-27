@@ -3,9 +3,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Función helper para obtener el cliente OpenAI (lazy loading)
+function getOpenAIClient() {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY no está configurada en las variables de entorno');
+  }
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+}
 
 interface AgendaRequest {
   datos_usuario: {
@@ -89,6 +95,7 @@ RESPONDE EN FORMATO JSON EXACTO:
 `;
 
     // 🚀 LLAMADA A OPENAI
+    const openai = getOpenAIClient();
     const completion = await openai.chat.completions.create({
       model: "gpt-4-turbo-preview",
       messages: [

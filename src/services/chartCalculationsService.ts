@@ -1,3 +1,5 @@
+import { ASPECTS } from '../constants/astrology';
+
 export const convertAstrologicalDegreeToPosition = (degree: number, sign: string): number => {
   const signPositions: { [key: string]: number } = {
     'Aries': 0, 'Tauro': 30, 'Géminis': 60, 'Cáncer': 90,
@@ -8,8 +10,6 @@ export const convertAstrologicalDegreeToPosition = (degree: number, sign: string
   const signBase = signPositions[sign] || 0;
   return signBase + degree;
 };
-
-import { ASPECTS } from '../constants/astrology';
 
 export const calculateAspects = (planets: any[]): any[] => {
   const aspects: any[] = [];

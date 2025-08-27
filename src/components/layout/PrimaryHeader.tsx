@@ -14,7 +14,8 @@ import {
   Sparkles,
   Calendar,
   Menu,
-  X
+  X,
+  Settings
 } from 'lucide-react';
 
 // 🌟 Iconos zodiacales para avatares (mismos del dashboard)
@@ -71,29 +72,92 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
   const pathname = usePathname(); // 🎯 Para detectar página activa
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [userZodiacSign, setUserZodiacSign] = useState<string>('Acuario');
+  const [userZodiacSign, setUserZodiacSign] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
-  // 🔍 Obtener signo zodiacal del usuario (desde carta natal si existe)
   useEffect(() => {
     if (user) {
       fetchUserZodiacSign();
+      fetchUserRole();
     }
   }, [user]);
 
-  const fetchUserZodiacSign = async () => {
+  useEffect(() => {
+    const handleBirthDataSaved = () => {
+      fetchUserZodiacSign();
+      fetchUserRole();
+    };
+
+    window.addEventListener('birthDataSaved', handleBirthDataSaved);
+
+    return () => {
+      window.removeEventListener('birthDataSaved', handleBirthDataSaved);
+    };
+  }, []);
+
+  // 🔍 Obtener rol del usuario desde la API
+  const fetchUserRole = async () => {
+    if (!user) return;
+    
     try {
-      // Intentar obtener desde carta natal existente
-      const response = await fetch(`/api/charts/natal?userId=${user?.uid}`);
+      const res = await fetch(`/api/users?uid=${user.uid}`);
+      if (res.ok) {
+        const userData = await res.json();
+        setUserRole(userData.role);
+      }
+    } catch (error) {
+      console.log('Error obteniendo rol del usuario:', error);
+    }
+  };
+
+  const fetchUserZodiacSign = async () => {
+    if (!user) return;
+    
+    try {
+      // Primero intentar obtener desde datos de nacimiento
+      const response = await fetch(`/api/birth-data?userId=${user.uid}`);
       if (response.ok) {
         const data = await response.json();
-        if (data.chart?.planets?.Sol?.sign) {
-          setUserZodiacSign(data.chart.planets.Sol.sign);
+        if (data.data?.birthDate) {
+          const birthDate = new Date(data.data.birthDate);
+          const sign = getZodiacSign(birthDate);
+          setUserZodiacSign(sign);
+          return;
+        }
+      }
+      
+      // Si no hay datos de nacimiento, intentar desde carta natal
+      const chartResponse = await fetch(`/api/charts/natal?userId=${user.uid}`);
+      if (chartResponse.ok) {
+        const chartData = await chartResponse.json();
+        if (chartData.chart?.planets?.Sol?.sign) {
+          setUserZodiacSign(chartData.chart.planets.Sol.sign);
         }
       }
     } catch (error) {
       console.log('Error obteniendo signo zodiacal:', error);
-      // Mantener default Acuario
     }
+  };
+
+  // Función para calcular el signo zodiacal basado en la fecha
+  const getZodiacSign = (date: Date): string | null => {
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    
+    if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return 'Aries';
+    if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return 'Tauro';
+    if ((month === 5 && day >= 21) || (month === 6 && day <= 20)) return 'Géminis';
+    if ((month === 6 && day >= 21) || (month === 7 && day <= 22)) return 'Cáncer';
+    if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return 'Leo';
+    if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return 'Virgo';
+    if ((month === 9 && day >= 23) || (month === 10 && day <= 22)) return 'Libra';
+    if ((month === 10 && day >= 23) || (month === 11 && day <= 21)) return 'Escorpio';
+    if ((month === 11 && day >= 22) || (month === 12 && day <= 21)) return 'Sagitario';
+    if ((month === 12 && day >= 22) || (month === 1 && day <= 19)) return 'Capricornio';
+    if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) return 'Acuario';
+    if ((month === 2 && day >= 19) || (month === 3 && day <= 20)) return 'Piscis';
+    
+    return null; // No default, retorna null si no se puede determinar
   };
 
   const handleLogout = async () => {
@@ -112,7 +176,7 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
     return 'Usuario';
   };
 
-  const zodiacIcon = ZodiacIcons[userZodiacSign] || '♒';
+  const zodiacIcon = userZodiacSign ? ZodiacIcons[userZodiacSign] : '❓';
 
   // 🎯 Función para determinar si una ruta está activa
   const isActiveRoute = (href: string) => {
@@ -162,6 +226,36 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
           {/* 🧭 Navegación Principal Desktop (solo si está logado) */}
           {user && (
             <nav className="hidden md:flex items-center space-x-1">
+              {/* Enlace de Administración (solo para admins) */}
+              {userRole === 'admin' && (
+                <Link
+                  href="/admin"
+                  className={`relative flex items-center space-x-3 px-4 py-2 rounded-lg transition-all duration-300 group ${
+                    isActiveRoute('/admin')
+                      ? 'bg-purple-700/70 text-white border border-purple-500/50 shadow-lg shadow-purple-500/25' 
+                      : 'text-purple-200 hover:text-white hover:bg-purple-800/50'
+                  }`}
+                  title="Panel de Administración"
+                >
+                  <Settings className={`w-4 h-4 transition-all duration-300 ${
+                    isActiveRoute('/admin')
+                      ? 'text-yellow-400 scale-110' 
+                      : 'group-hover:scale-110'
+                  }`} />
+                  <span className="font-medium">Admin</span>
+                  
+                  {/* Indicador de página activa */}
+                  {isActiveRoute('/admin') && (
+                    <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                  )}
+                  
+                  {/* Efecto hover mágico */}
+                  {!isActiveRoute('/admin') && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600/0 via-purple-600/20 to-purple-600/0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
+                  )}
+                </Link>
+              )}
+              
               {navItems.map((item) => {
                 const IconComponent = item.icon;
                 const isActive = isActiveRoute(item.href);
@@ -234,7 +328,7 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
                         {getUserDisplayName()}
                       </p>
                       <p className="text-purple-300 text-xs group-hover:text-purple-200 transition-colors duration-300">
-                        {userZodiacSign}
+                        {userZodiacSign || 'Sin signo zodiacal'}
                       </p>
                     </div>
                     
@@ -254,6 +348,17 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
                       </div>
                       
                       {/* Enlaces del menú */}
+                      {userRole === 'admin' && (
+                        <Link
+                          href="/admin"
+                          className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-purple-50 transition-colors duration-200"
+                          onClick={() => setIsDropdownOpen(false)}
+                        >
+                          <Settings className="w-4 h-4" />
+                          <span>Administración</span>
+                        </Link>
+                      )}
+                      
                       <Link
                         href="/profile"
                         className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-purple-50 transition-colors duration-200"

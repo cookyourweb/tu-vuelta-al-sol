@@ -5,9 +5,15 @@ import connectDB from '@/lib/db';
 import BirthData from '@/models/BirthData';
 import Chart from '@/models/Chart';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Función helper para obtener el cliente OpenAI (lazy loading)
+function getOpenAIClient() {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY no está configurada en las variables de entorno');
+  }
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -138,7 +144,18 @@ RESPONDE EN FORMATO JSON EXACTO:
 IMPORTANTE: Personaliza TODO basándote en la carta natal real. Menciona signos, casas y planetas específicos.
 `;
 
-    // 5. LLAMADA A OPENAI CON DATOS REALES
+    // 5. Validar que OpenAI está configurado antes de proceder
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json({
+        success: false,
+        error: 'Servicio de IA no disponible. OPENAI_API_KEY no está configurada.',
+        message: 'Por favor, configura la clave de API de OpenAI para usar esta funcionalidad',
+        action: 'configure_openai'
+      }, { status: 503 });
+    }
+
+    // 6. LLAMADA A OPENAI CON DATOS REALES
+    const openai = getOpenAIClient();
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -273,6 +290,9 @@ export async function GET() {
     timestamps: {
       servidor: new Date().toISOString(),
       zona_horaria: Intl.DateTimeFormat().resolvedOptions().timeZone
-    }
+    },
+    nota_importante: !process.env.OPENAI_API_KEY ? 
+      "⚠️ OPENAI_API_KEY no está configurada. La funcionalidad de IA no estará disponible hasta que se configure." : 
+      "✅ OpenAI configurado correctamente"
   });
 }

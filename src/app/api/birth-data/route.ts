@@ -2,6 +2,9 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import BirthData from '@/models/BirthData';
+import User from '@/models/User';
+import { getAuth } from 'firebase-admin/auth';
+import { getFirebaseAdmin } from '@/lib/firebase/admin';
 
 export async function POST(request: Request) {
   try {
@@ -36,8 +39,7 @@ export async function POST(request: Request) {
     }
 
     await connectDB();
-
-    // Verificar si ya existen datos para este usuario
+ // Verificar si ya existen datos para este usuario
     const existingData = await BirthData.findOne({ userId });
     
     if (existingData) {
@@ -51,6 +53,29 @@ export async function POST(request: Request) {
       existingData.timezone = timezone;
       
       await existingData.save();
+      
+      // Actualizar también el displayName en Firebase Authentication y el fullName en la colección de usuarios
+      try {
+        const adminApp = getFirebaseAdmin();
+        const auth = getAuth(adminApp);
+        await auth.updateUser(userId, {
+          displayName: fullName
+        });
+        console.log('✅ DisplayName actualizado en Firebase Authentication');
+        
+        // Actualizar también el fullName en la colección de usuarios de MongoDB
+        const user = await User.findOne({ uid: userId });
+        if (user) {
+          user.fullName = fullName;
+          await user.save();
+          console.log('✅ fullName actualizado en la colección de usuarios');
+        } else {
+          console.log('⚠️ Usuario no encontrado en la colección de usuarios para actualizar fullName');
+        }
+      } catch (firebaseError) {
+        console.error('❌ Error al actualizar displayName en Firebase:', firebaseError);
+        // No fallamos la operación completa si solo falla la actualización del displayName
+      }
       
       return NextResponse.json(
         { 
@@ -75,6 +100,29 @@ export async function POST(request: Request) {
     });
 
     await newBirthData.save();
+
+    // Actualizar también el displayName en Firebase Authentication y el fullName en la colección de usuarios
+    try {
+      const adminApp = getFirebaseAdmin();
+      const auth = getAuth(adminApp);
+      await auth.updateUser(userId, {
+        displayName: fullName
+      });
+      console.log('✅ DisplayName actualizado en Firebase Authentication');
+      
+      // Actualizar también el fullName en la colección de usuarios de MongoDB
+      const user = await User.findOne({ uid: userId });
+      if (user) {
+        user.fullName = fullName;
+        await user.save();
+        console.log('✅ fullName actualizado en la colección de usuarios');
+      } else {
+        console.log('⚠️ Usuario no encontrado en la colección de usuarios para actualizar fullName');
+      }
+    } catch (firebaseError) {
+      console.error('❌ Error al actualizar displayName en Firebase:', firebaseError);
+      // No fallamos la operación completa si solo falla la actualización del displayName
+    }
 
     return NextResponse.json(
       { 

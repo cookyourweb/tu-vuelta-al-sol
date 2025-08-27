@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'; 
+import { useAuth } from '@/context/AuthContext';
 
 export default function BirthDataAdminTable() {
   const [data, setData] = useState([]);
@@ -19,6 +20,20 @@ export default function BirthDataAdminTable() {
   };
 
   useEffect(() => { fetchData(); }, [refresh]);
+
+  // Escuchar evento de datos guardados para actualizar automáticamente
+  useEffect(() => {
+    const handleBirthDataSaved = () => {
+      console.log('📋 Evento birthDataSaved recibido, actualizando tabla...');
+      fetchData();
+    };
+
+    window.addEventListener('birthDataSaved', handleBirthDataSaved);
+    
+    return () => {
+      window.removeEventListener('birthDataSaved', handleBirthDataSaved);
+    };
+  }, []);
   
   const handleDelete = async (userId: string) => {
     if (!window.confirm(`¿Eliminar registro de ${userId}?`)) return;
