@@ -94,12 +94,87 @@ La **Agenda Astrológica Personalizada** es el corazón de "Tu Vuelta al Sol". E
 - **Enfoque energético**: Dónde dirigir tu energía según los tránsitos
 - **Rituales específicos**: Ceremonias y prácticas para cada evento
 
-### 📊 **Características Únicas de la Agenda**
+## 📊 **Características Únicas de la Agenda**
 - **Generación con IA**: Usa inteligencia artificial para interpretaciones personalizadas
 - **Integración Google Calendar**: Sincronización automática con tu calendario
 - **Recordatorios proactivos**: Alertas antes de eventos importantes
 - **Formato PDF descargable**: Agenda imprimible de alta calidad
 - **Actualizaciones mensuales**: Contenido fresco y relevante
+- **Base de conocimiento astrológico**: Sistema de búsqueda en libros de astrología procesados
+
+## 📚 Sistema de Procesamiento de Libros Astrológicos
+
+El proyecto incluye un sistema avanzado para procesar y buscar en libros de astrología:
+
+### 🛠 **Script de Procesamiento**
+- **`scripts/parse_and_chunk_pdfs.js`**: Convierte PDFs de astrología en chunks de texto
+- **Genera `astrology_books/chunks.json`**: Archivo con fragmentos de texto procesados
+- **Búsqueda por chunks**: Sistema optimizado para búsqueda rápida
+
+### 🚀 **Integración con Vercel**
+
+#### Opción 1: Incluir chunks.json en el proyecto (si es < 50MB)
+```typescript
+// src/lib/astrologyBooks.ts
+import booksData from 'astrology_books/chunks.json';
+
+export function searchInBooks(query: string) {
+  const results = booksData.filter(chunk => 
+    chunk.text.toLowerCase().includes(query.toLowerCase())
+  );
+  return results.slice(0, 5);
+}
+```
+
+#### Opción 2: Cargar dinámicamente (para archivos grandes)
+```typescript
+// src/app/api/astrology/search-books/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
+
+let chunksCache: any[] | null = null;
+
+export async function POST(request: NextRequest) {
+  try {
+    const { query } = await request.json();
+    
+    if (!chunksCache) {
+      const chunksPath = path.join(process.cwd(), 'astrology_books', 'chunks.json');
+      const fileContent = fs.readFileSync(chunksPath, 'utf-8');
+      chunksCache = JSON.parse(fileContent);
+    }
+    
+    const results = chunksCache.filter(chunk =>
+      chunk.text.toLowerCase().includes(query.toLowerCase())
+    );
+    
+    return NextResponse.json({ success: true, results: results.slice(0, 10) });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: 'Error buscando en libros' });
+  }
+}
+```
+
+### 🔍 **Verificación Rápida**
+```bash
+# Ejecutar script de procesamiento
+node scripts/parse_and_chunk_pdfs.js
+
+# Verificar tamaño del archivo
+ls -lh astrology_books/chunks.json
+
+# Si es mayor a 50MB, usar Git LFS
+git lfs track "astrology_books/chunks.json"
+git add .gitattributes
+git add astrology_books/chunks.json
+```
+
+### 📦 **Para Desplegar en Vercel**
+1. Generar chunks.json localmente
+2. Verificar tamaño del archivo
+3. Subir con el proyecto (o usar Git LFS si es grande)
+4. El sistema de búsqueda estará disponible automáticamente
 
 ### 🎯 **Beneficios para el Usuario**
 - **Planificación estratégica**: Mejores fechas para proyectos importantes
