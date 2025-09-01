@@ -1,4 +1,4 @@
-// src/components/astrology/AstrologicalAgenda.tsx - VERSIÓN MEJORADA
+// src/components/astrology/AstrologicalAgenda.tsx - CON TOOLTIPS ON HOVER
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -22,6 +22,7 @@ interface AstronomicalEvent {
     ritual?: string;
     avoid?: string;
     opportunity?: string;
+    lifeAreas?: string[];
   };
 }
 
@@ -38,6 +39,10 @@ interface AstronomicalAgendaProps {
   birthDate?: string;
   aiEvents?: AstronomicalEvent[];
   showRealEventsInfo?: boolean;
+  eventsMetadata?: any;
+  loading?: boolean;
+  error?: string | null;
+  events?: AstronomicalEvent[];
 }
 
 export default function AstrologicalAgenda({
@@ -45,105 +50,59 @@ export default function AstrologicalAgenda({
   initialMonth = new Date(),
   birthDate,
   aiEvents = [],
-  showRealEventsInfo = false
+  showRealEventsInfo = false,
+  eventsMetadata,
+  loading = false,
+  error = null,
+  events = []
 }: AstronomicalAgendaProps) {
+  // Estados principales
   const [currentMonth, setCurrentMonth] = useState<Date>(initialMonth);
-  const [events, setEvents] = useState<AstronomicalEvent[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedDayEvents, setSelectedDayEvents] = useState<AstronomicalEvent[]>([]);
-  const [eventsMetadata, setEventsMetadata] = useState<any>(null);
 
-  // Cargar eventos reales desde la API
-  useEffect(() => {
-    const loadRealEvents = async () => {
-      if (!userId) return;
-      
-      setLoading(true);
-      setError(null);
-      
-      try {
-        console.log('📡 Cargando eventos astrológicos reales...');
-        
-        const response = await fetch('/api/astrology/complete-events', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            userId: userId,
-            months: 6 // 6 meses de eventos
-          })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          const realEvents = data.data.events || [];
-          console.log(`✅ ${realEvents.length} eventos reales cargados`);
-          
-          // Combinar eventos reales con eventos IA si los hay
-          const combinedEvents = [...realEvents, ...aiEvents];
-          setEvents(combinedEvents);
-          setEventsMetadata(data.data);
-          
-          console.log('📊 Metadatos de eventos:', data.data.highlights);
-        } else {
-          console.warn('⚠️ Error cargando eventos reales:', data.error);
-          setError(`Error cargando eventos: ${data.error}`);
-          
-          // Fallback a eventos de ejemplo
-          setEvents(generateSampleEvents());
-        }
-      } catch (error) {
-        console.error('❌ Error cargando eventos reales:', error);
-        setError('Error de conexión al cargar eventos astrológicos');
-        
-        // Fallback a eventos de ejemplo
-        setEvents(generateSampleEvents());
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    loadRealEvents();
-  }, [userId, aiEvents]);
+  // Estados para tooltips
+  const [hoveredEvent, setHoveredEvent] = useState<AstronomicalEvent | null>(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
-  // Eventos de ejemplo como fallback
-  const generateSampleEvents = (): AstronomicalEvent[] => {
+  // Función para obtener eventos de muestra
+  const getSampleEvents = (): AstronomicalEvent[] => {
     return [
       {
         id: 'sample-1',
-        date: format(new Date(), 'yyyy-MM-dd'),
-        title: 'Luna Llena Energética',
-        description: 'Energía lunar amplificada para manifestación y liberación.',
-        type: 'lunar_phase',
+        date: '2025-09-04',
+        title: 'Portal de Propósito Personal',
+        description: 'Las energías cósmicas se alinean para revelar tu propósito más profundo.',
+        type: 'ai_generated',
         importance: 'high',
         personalInterpretation: {
-          impact: 'Momento perfecto para conectar con tu intuición y liberar lo que ya no te sirve.',
-          advice: 'Medita bajo la luz lunar y establece intenciones claras para el nuevo ciclo.',
-          mantra: 'Libero con amor todo lo que ya no necesito en mi vida.'
+          impact: '¡REVOLUCIÓN ENERGÉTICA VERO2708! Tu Sol natal en Acuario 21.4° Casa 1 está siendo DIRECTAMENTE ACTIVADO por este evento cósmico. Las frecuencias del universo están sintonizándose específicamente con tu configuración natal única.',
+          advice: 'ACTIVA tu poder de brillar - es tu momento de liderar sin límites. USA tu naturaleza innovadora y humanitaria como arma secreta - nadie más tiene tu combinación única. COMUNICA tu verdad - tus ideas pueden cambiar el mundo.',
+          mantra: 'SOY REVOLUCIÓN PURA. MI BRILLAR ES MI SUPERPODER. ABRAZO MI NATURALEZA INNOVADORA Y HUMANITARIA Y TRANSFORMO TODO EN ORO.',
+          ritual: 'RITUAL SOLAR PERSONALIZADO: 1) Al amanecer, activa tu Casa 1 (identidad). 2) Respira conscientemente (elemento aire). 3) Declara: "Soy innovación constante". 4) Ancla con 7 respiraciones.',
+          lifeAreas: ['Identidad personal (Casa 1)', 'Propósito de vida', 'Creatividad e innovación'],
+          avoid: 'Evita el desapego emocional típico de Acuario.',
+          opportunity: 'Tu Sol Acuario Casa 1 + Luna Libra Casa 7 te convierte en LÍDER MAGNÉTICO.'
         }
       },
       {
         id: 'sample-2',
-        date: format(addMonths(new Date(), 0), 'yyyy-MM-' + String(Math.floor(Math.random() * 25) + 1).padStart(2, '0')),
-        title: 'Tránsito Planetario Importante',
-        description: 'Energías planetarias favorables para nuevos proyectos.',
-        type: 'planetary_transit',
+        date: '2025-09-15',
+        title: 'Resonancia Lunar Libra',
+        description: 'Tu Luna natal recibe activación directa para equilibrio emocional.',
+        type: 'lunar_phase',
         importance: 'medium',
-        planet: 'Júpiter',
-        sign: 'Tauro',
         personalInterpretation: {
-          impact: 'Las energías de abundancia y crecimiento están especialmente activas.',
-          advice: 'Es un momento excelente para iniciar proyectos relacionados con estabilidad y recursos.',
-          mantra: 'Atraigo abundancia y prosperidad a mi vida de manera natural.'
+          impact: '¡ACTIVACIÓN CÓSMICA DETECTADA! Tu Luna natal en Libra 5.9° Casa 7 recibe códigos de actualización del cosmos.',
+          advice: 'EQUILIBRA tus emociones usando tu superpoder natural de Libra. Tu Casa 7 se activa para relaciones armoniosas.',
+          mantra: 'SOY EQUILIBRIO PERFECTO. MI LUNA EN LIBRA ES MI BRÚJULA EMOCIONAL.',
+          lifeAreas: ['Relaciones (Casa 7)', 'Equilibrio emocional', 'Armonía']
         }
       }
     ];
   };
 
+  // Funciones de navegación
   const getDaysWithEvents = () => {
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(monthStart);
@@ -153,9 +112,10 @@ export default function AstrologicalAgenda({
     endDate.setDate(endDate.getDate() + (7 - monthEnd.getDay()));
 
     const days = eachDayOfInterval({ start: startDate, end: endDate });
+    const allEvents = [...events, ...getSampleEvents()];
 
     return days.map(day => {
-      const dayEvents = events.filter(event => {
+      const dayEvents = allEvents.filter(event => {
         const eventDate = new Date(event.date);
         return isSameDay(day, eventDate);
       });
@@ -190,6 +150,30 @@ export default function AstrologicalAgenda({
     setSelectedDayEvents(day.events);
   };
 
+  // Funciones para tooltips
+  const handleEventHover = (event: AstronomicalEvent, mouseEvent: React.MouseEvent) => {
+    setHoveredEvent(event);
+    const rect = mouseEvent.currentTarget.getBoundingClientRect();
+    setTooltipPosition({
+      x: rect.left + rect.width / 2,
+      y: rect.top - 10
+    });
+  };
+
+  const handleEventLeave = () => {
+    setHoveredEvent(null);
+  };
+
+  // Manejo del movimiento del mouse para tooltips
+  const handleMouseMove = (event: React.MouseEvent) => {
+    if (hoveredEvent) {
+      setTooltipPosition({
+        x: event.clientX,
+        y: event.clientY - 20
+      });
+    }
+  };
+
   const getEventIndicatorStyle = (eventType: string, importance: string) => {
     const baseStyle = "h-2 w-2 rounded-full mr-2 flex-shrink-0";
     
@@ -211,84 +195,66 @@ export default function AstrologicalAgenda({
       case 'seasonal':
         return `${baseStyle} bg-gradient-to-r from-yellow-500 to-orange-500 shadow-sm`;
       default:
-        return `${baseStyle} bg-gray-400`;
+        return `${baseStyle} bg-gradient-to-r from-purple-500 to-pink-500 shadow-sm`;
     }
-  };
-
-  const getEventTypeName = (eventType: string): string => {
-    const typeNames: { [key: string]: string } = {
-      'lunar_phase': '🌙 Lunar',
-      'planetary_transit': '🪐 Tránsito',
-      'retrograde': '🔄 Retrógrado',
-      'direct': '➡️ Directo',
-      'eclipse': '🌒 Eclipse',
-      'seasonal': '🍂 Estacional',
-      'ai_generated': '✨ IA',
-      'aspect': '🔗 Aspecto'
-    };
-    
-    return typeNames[eventType] || '⭐ Evento';
   };
 
   const weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   const days = getDaysWithEvents();
 
   return (
-    <div className="max-w-6xl mx-auto">
-      {/* Header con estadísticas de eventos */}
-      <div className="mb-8 bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 p-6">
+    <div className="max-w-6xl mx-auto" onMouseMove={handleMouseMove}>
+      {/* Header con estadísticas - RESTAURADO */}
+      <div className="mb-8 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
           <div className="mb-4 lg:mb-0">
-            <h2 className="text-3xl font-bold text-gray-800 capitalize mb-2">
+            <h2 className="text-3xl font-bold text-white capitalize mb-2 flex items-center">
+              <span className="text-purple-400 mr-3">🗓️</span>
               {getCurrentMonthName()}
             </h2>
             
             {eventsMetadata && (
               <div className="flex flex-wrap items-center gap-4 text-sm">
-                <span className="flex items-center text-blue-600">
-                  <span className="h-2 w-2 rounded-full bg-blue-500 mr-2"></span>
+                <span className="flex items-center text-blue-300">
+                  <span className="h-2 w-2 rounded-full bg-blue-400 mr-2"></span>
                   {eventsMetadata.highlights?.totalEvents || 0} eventos totales
                 </span>
-                <span className="flex items-center text-red-600">
-                  <span className="h-2 w-2 rounded-full bg-red-500 mr-2 animate-pulse"></span>
-                  {eventsMetadata.highlights?.highPriorityEvents || 0} alta prioridad
-                </span>
-                <span className="flex items-center text-purple-600">
-                  <span className="h-2 w-2 rounded-full bg-purple-500 mr-2"></span>
-                  {eventsMetadata.highlights?.lunarPhases || 0} fases lunares
-                </span>
-                <span className="flex items-center text-orange-600">
-                  <span className="h-2 w-2 rounded-full bg-orange-500 mr-2"></span>
-                  {eventsMetadata.highlights?.retrogrades || 0} retrógrados
-                </span>
+                
+                {eventsMetadata.highlights?.highPriority > 0 && (
+                  <span className="flex items-center text-red-300">
+                    <span className="h-2 w-2 rounded-full bg-red-400 mr-2 animate-pulse"></span>
+                    {eventsMetadata.highlights.highPriority} alta prioridad
+                  </span>
+                )}
+                
+                {eventsMetadata.highlights?.withAiInterpretation > 0 && (
+                  <span className="flex items-center text-purple-300">
+                    <span className="h-2 w-2 rounded-full bg-purple-400 mr-2"></span>
+                    {eventsMetadata.highlights.withAiInterpretation} con IA
+                  </span>
+                )}
               </div>
             )}
           </div>
-          
-          <div className="flex items-center space-x-3">
+
+          {/* Navegación de meses - RESTAURADA */}
+          <div className="flex items-center gap-3">
             <button
               onClick={goToPreviousMonth}
-              className="p-3 rounded-xl bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 transition-all duration-200 shadow-sm"
+              className="p-3 rounded-xl bg-gradient-to-r from-purple-600/80 to-indigo-600/80 hover:from-purple-500/90 hover:to-indigo-500/90 transition-all duration-200 shadow-lg hover:shadow-purple-500/25 border border-white/10"
               aria-label="Mes anterior"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             
             <button
-              onClick={() => setCurrentMonth(new Date())}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-sm"
-            >
-              Hoy
-            </button>
-            
-            <button
               onClick={goToNextMonth}
-              className="p-3 rounded-xl bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 transition-all duration-200 shadow-sm"
+              className="p-3 rounded-xl bg-gradient-to-r from-purple-600/80 to-indigo-600/80 hover:from-purple-500/90 hover:to-indigo-500/90 transition-all duration-200 shadow-lg hover:shadow-purple-500/25 border border-white/10"
               aria-label="Mes siguiente"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
@@ -296,83 +262,84 @@ export default function AstrologicalAgenda({
         </div>
       </div>
 
-      {/* Información sobre eventos reales */}
+      {/* Información sobre eventos reales - RESTAURADA */}
       {showRealEventsInfo && eventsMetadata && (
-        <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl shadow-sm">
+        <div className="mb-6 p-4 bg-gradient-to-r from-indigo-900/60 to-purple-900/60 backdrop-blur-sm border border-indigo-400/30 rounded-2xl shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-blue-800 font-semibold">
-                🌟 <strong>Eventos Astrológicos Reales:</strong> {eventsMetadata.highlights?.totalEvents || 0} eventos obtenidos
+              <p className="text-indigo-200 font-semibold flex items-center">
+                <span className="text-indigo-400 mr-2">✨</span>
+                Eventos Astrológicos Reales: {eventsMetadata.highlights?.totalEvents || 0} eventos obtenidos
               </p>
-              <p className="text-blue-600 text-sm mt-1">
+              <p className="text-indigo-300 text-sm mt-1">
                 Estrategia: {eventsMetadata.metadata?.strategy || 'Híbrida Prokerala + Cálculos astronómicos'}
               </p>
               {eventsMetadata.highlights?.withAiInterpretation && (
-                <p className="text-blue-600 text-sm">
-                  🤖 {eventsMetadata.highlights.withAiInterpretation} interpretados con IA
+                <p className="text-indigo-300 text-sm">
+                  {eventsMetadata.highlights.withAiInterpretation} interpretados con IA personalizada
                 </p>
               )}
             </div>
-            <div className="text-blue-400 text-2xl">🔮</div>
+            <div className="text-indigo-400 text-3xl">🌟</div>
           </div>
         </div>
       )}
 
-      {/* Estado de carga */}
+      {/* Estado de carga - RESTAURADO */}
       {loading && (
-        <div className="flex justify-center items-center h-32 bg-white/95 rounded-2xl shadow-sm mb-6">
-          <div className="animate-spin rounded-full h-8 w-8 border-4 border-purple-500 border-t-transparent"></div>
-          <span className="ml-3 text-gray-600">Consultando las estrellas...</span>
+        <div className="flex justify-center items-center h-32 bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm rounded-2xl shadow-lg mb-6 border border-white/20">
+          <div className="animate-spin rounded-full h-8 w-8 border-4 border-purple-400 border-t-transparent"></div>
+          <span className="ml-3 text-purple-200 font-medium">Consultando las estrellas...</span>
         </div>
       )}
 
-      {/* Mensaje de error */}
+      {/* Mensaje de error - RESTAURADO */}
       {error && (
-        <div className="bg-red-50 border border-red-200 p-4 rounded-2xl mb-6 shadow-sm">
+        <div className="bg-gradient-to-r from-red-900/60 to-orange-900/60 border border-red-400/30 p-4 rounded-2xl mb-6 shadow-lg backdrop-blur-sm">
           <div className="flex">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <svg className="h-5 w-5 text-red-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
             </div>
             <div className="ml-3">
-              <p className="text-sm text-red-700">{error}</p>
-              <p className="text-xs text-red-600 mt-1">Mostrando eventos de ejemplo mientras se resuelve el problema.</p>
+              <p className="text-sm text-red-200 font-medium">{error}</p>
+              <p className="text-xs text-red-300 mt-1">Mostrando eventos de ejemplo mientras se resuelve el problema.</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* CALENDARIO PRINCIPAL */}
-      <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 overflow-hidden">
+      {/* CALENDARIO PRINCIPAL - RESTAURADO CON ESTILOS */}
+      <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
         {/* Días de la semana */}
-        <div className="grid grid-cols-7 gap-px bg-gray-100">
+        <div className="grid grid-cols-7 gap-px bg-gradient-to-r from-purple-800/50 to-indigo-800/50">
           {weekDays.map((day, index) => (
-            <div key={index} className="bg-gray-50 py-4 text-center text-sm font-semibold text-gray-700 border-b border-gray-200">
+            <div key={index} className="bg-gradient-to-br from-purple-700/40 to-indigo-700/40 backdrop-blur-sm py-4 text-center text-sm font-semibold text-purple-100 border-b border-white/10">
               {day}
             </div>
           ))}
         </div>
 
         {/* Días del mes con eventos */}
-        <div className="grid grid-cols-7 gap-px bg-gray-100">
+        <div className="grid grid-cols-7 gap-px bg-gradient-to-br from-purple-800/30 to-indigo-800/30">
           {days.map((day, index) => (
             <div
               key={index}
-              className={`min-h-[120px] p-3 cursor-pointer transition-all duration-200 relative group ${
+              className={`min-h-[120px] p-3 cursor-pointer transition-all duration-300 relative group border-white/5 ${
                 day.isCurrentMonth
                   ? isSameDay(day.date, new Date())
-                    ? 'bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-300'
-                    : 'bg-white hover:bg-gray-50'
-                  : 'bg-gray-50 text-gray-400'
-              } ${isSameDay(day.date, selectedDate || new Date(0)) ? 'ring-2 ring-purple-500 ring-inset' : ''}`}
+                    ? 'bg-gradient-to-br from-purple-500/30 to-pink-500/30 border-2 border-purple-400/50 shadow-lg'
+                    : 'bg-gradient-to-br from-white/5 to-white/0 hover:from-white/10 hover:to-white/5'
+                  : 'bg-gradient-to-br from-gray-800/20 to-gray-900/20 text-gray-500'
+              } ${isSameDay(day.date, selectedDate || new Date(0)) ? 'ring-2 ring-purple-400/60 ring-inset shadow-lg' : ''}`}
               onClick={() => handleDayClick(day)}
             >
               {/* Número del día */}
               <div className={`font-semibold text-sm mb-2 ${
                 isSameDay(day.date, new Date()) 
-                  ? 'text-purple-700' 
-                  : day.isCurrentMonth ? 'text-gray-800' : 'text-gray-400'
+                  ? 'text-purple-200 font-bold' 
+                  : day.isCurrentMonth ? 'text-white' : 'text-gray-500'
               }`}>
                 {day.date.getDate()}
               </div>
@@ -383,24 +350,21 @@ export default function AstrologicalAgenda({
                   {day.events.slice(0, 3).map((event, eventIndex) => (
                     <div
                       key={eventIndex}
-                      className="flex items-center cursor-pointer group-hover:scale-105 transition-transform duration-200"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedDate(day.date);
-                        setSelectedDayEvents(day.events);
-                      }}
+                      className="flex items-center cursor-pointer group-hover:scale-105 transition-transform duration-200 hover:bg-white/10 rounded p-1"
+                      onMouseEnter={(e) => handleEventHover(event, e)}
+                      onMouseLeave={handleEventLeave}
                     >
                       <span className={getEventIndicatorStyle(event.type, event.importance)}></span>
-                      <span className="text-xs truncate font-medium text-gray-700 flex-1">
+                      <span className="text-xs truncate font-medium text-gray-100 flex-1">
                         {event.title}
                       </span>
                       {event.importance === 'high' && (
-                        <span className="text-red-500 text-xs ml-1">!</span>
+                        <span className="text-red-400 text-xs ml-1 animate-pulse">!</span>
                       )}
                     </div>
                   ))}
                   {day.events.length > 3 && (
-                    <div className="text-xs text-gray-500 font-medium pl-4">
+                    <div className="text-xs text-purple-300 font-medium pl-4">
                       +{day.events.length - 3} más
                     </div>
                   )}
@@ -408,17 +372,18 @@ export default function AstrologicalAgenda({
               )}
 
               {/* Indicador de hover mejorado */}
-              <div className="absolute inset-0 border-2 border-transparent group-hover:border-purple-200 rounded transition-colors duration-200 pointer-events-none"></div>
+              <div className="absolute inset-0 border-2 border-transparent group-hover:border-purple-400/30 rounded transition-colors duration-200 pointer-events-none"></div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* DETALLES DEL DÍA SELECCIONADO */}
+      {/* DETALLES DEL DÍA SELECCIONADO - PANEL LATERAL */}
       {selectedDate && (
-        <div className="mt-8 bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 overflow-hidden">
-          <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6 text-white">
-            <h3 className="text-2xl font-bold mb-2">
+        <div className="mt-8 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden">
+          <div className="bg-gradient-to-r from-purple-600/80 to-pink-600/80 p-6 text-white border-b border-white/20">
+            <h3 className="text-2xl font-bold mb-2 flex items-center">
+              <span className="text-yellow-300 mr-3">📅</span>
               {selectedDate.toLocaleDateString('es-ES', {
                 weekday: 'long',
                 day: 'numeric',
@@ -428,96 +393,55 @@ export default function AstrologicalAgenda({
             </h3>
             <p className="text-purple-100">
               {selectedDayEvents.length === 0 
-                ? 'No hay eventos programados para este día' 
-                : `${selectedDayEvents.length} evento${selectedDayEvents.length > 1 ? 's' : ''} astrológico${selectedDayEvents.length > 1 ? 's' : ''}`
+                ? 'No hay eventos programados para este día'
+                : `${selectedDayEvents.length} evento${selectedDayEvents.length > 1 ? 's' : ''} programado${selectedDayEvents.length > 1 ? 's' : ''}`
               }
             </p>
           </div>
-          
+
           {selectedDayEvents.length > 0 && (
-            <div className="p-6 space-y-6">
-              {selectedDayEvents.map((event, index) => (
-                <div key={index} className={`p-5 rounded-xl border-l-4 shadow-sm transition-all hover:shadow-md ${
-                  event.importance === 'high' 
-                    ? 'bg-gradient-to-r from-red-50 to-orange-50 border-red-500'
-                    : event.type === 'lunar_phase'
-                      ? 'bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-500'
-                      : event.type === 'retrograde'
-                        ? 'bg-gradient-to-r from-orange-50 to-red-50 border-orange-500'
-                        : 'bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-500'
-                }`}>
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex-1">
-                      <h4 className="font-bold text-lg text-gray-800 mb-1">{event.title}</h4>
-                      {event.time && (
-                        <p className="text-sm text-gray-600 mb-2">🕐 {event.time}</p>
-                      )}
-                      {event.planet && event.sign && (
-                        <p className="text-sm text-gray-600 mb-2">
-                          🪐 {event.planet} en {event.sign}
-                        </p>
-                      )}
+            <div className="p-6 space-y-4 max-h-96 overflow-y-auto">
+              {selectedDayEvents.map((event) => (
+                <div
+                  key={event.id}
+                  className="border border-white/20 rounded-xl p-4 hover:shadow-lg hover:bg-white/5 transition-all duration-200 cursor-pointer backdrop-blur-sm"
+                  onMouseEnter={(e) => handleEventHover(event, e)}
+                  onMouseLeave={handleEventLeave}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center">
+                      <span className={getEventIndicatorStyle(event.type, event.importance)}></span>
+                      <h4 className="font-semibold text-white">{event.title}</h4>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        event.importance === 'high'
-                          ? 'bg-red-100 text-red-800'
-                          : event.importance === 'medium'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-green-100 text-green-800'
-                      }`}>
-                        {event.importance === 'high' ? 'Alta' : event.importance === 'medium' ? 'Media' : 'Baja'}
+                    {event.importance === 'high' && (
+                      <span className="bg-red-500/80 text-white text-xs font-medium px-2 py-1 rounded-full animate-pulse">
+                        Alta prioridad
                       </span>
-                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-200 text-gray-700">
-                        {getEventTypeName(event.type)}
-                      </span>
-                    </div>
+                    )}
                   </div>
                   
-                  <p className="text-gray-700 mb-4 leading-relaxed">{event.description}</p>
+                  <p className="text-gray-300 text-sm mb-3">{event.description}</p>
                   
-                  {/* INTERPRETACIÓN PERSONALIZADA */}
-                  {event.personalInterpretation && (
-                    <div className="space-y-3 border-t border-gray-200 pt-4">
-                      <h5 className="font-semibold text-gray-800 mb-3">🔮 Interpretación Personalizada:</h5>
-                      
-                      <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
-                        <strong className="text-blue-800 block mb-1">💫 Impacto:</strong>
-                        <p className="text-blue-700 text-sm">{event.personalInterpretation.impact}</p>
-                      </div>
-                      
-                      <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
-                        <strong className="text-green-800 block mb-1">✅ Consejo:</strong>
-                        <p className="text-green-700 text-sm">{event.personalInterpretation.advice}</p>
-                      </div>
-                      
-                      <div className="bg-purple-50 border border-purple-200 p-3 rounded-lg">
-                        <strong className="text-purple-800 block mb-1">🧘 Mantra del día:</strong>
-                        <p className="text-purple-700 text-sm italic">"{event.personalInterpretation.mantra}"</p>
-                      </div>
-                      
-                      {event.personalInterpretation.avoid && (
-                        <div className="bg-red-50 border border-red-200 p-3 rounded-lg">
-                          <strong className="text-red-800 block mb-1">⚠️ Evitar:</strong>
-                          <p className="text-red-700 text-sm">{event.personalInterpretation.avoid}</p>
-                        </div>
+                  {(event.planet || event.sign) && (
+                    <div className="flex items-center gap-4 text-sm">
+                      {event.planet && (
+                        <span className="flex items-center text-blue-300">
+                          <span className="font-medium">Planeta:</span>
+                          <span className="ml-1">{event.planet}</span>
+                        </span>
                       )}
-                      
-                      {event.personalInterpretation.opportunity && (
-                        <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-lg">
-                          <strong className="text-yellow-800 block mb-1">🌟 Oportunidad:</strong>
-                          <p className="text-yellow-700 text-sm">{event.personalInterpretation.opportunity}</p>
-                        </div>
-                      )}
-                      
-                      {event.personalInterpretation.ritual && (
-                        <div className="bg-indigo-50 border border-indigo-200 p-3 rounded-lg">
-                          <strong className="text-indigo-800 block mb-1">✨ Ritual sugerido:</strong>
-                          <p className="text-indigo-700 text-sm">{event.personalInterpretation.ritual}</p>
-                        </div>
+                      {event.sign && (
+                        <span className="flex items-center text-purple-300">
+                          <span className="font-medium">Signo:</span>
+                          <span className="ml-1">{event.sign}</span>
+                        </span>
                       )}
                     </div>
                   )}
+                  
+                  <div className="mt-3 text-xs text-purple-300 italic">
+                    Mantén el cursor sobre el evento para ver interpretación completa
+                  </div>
                 </div>
               ))}
             </div>
@@ -525,42 +449,153 @@ export default function AstrologicalAgenda({
         </div>
       )}
 
-      {/* LEYENDA DE TIPOS DE EVENTOS */}
-      <div className="mt-8 bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 p-6">
-        <h4 className="font-bold text-gray-800 mb-4 text-lg">🎨 Tipos de Eventos Astrológicos</h4>
+      {/* TOOLTIP DE EVENTO - ESTILO CARTA NATAL */}
+      {hoveredEvent && hoveredEvent.personalInterpretation && (
+        <div 
+          className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-5 shadow-2xl max-w-lg pointer-events-none"
+          style={{ 
+            left: tooltipPosition.x - 250,
+            top: tooltipPosition.y - 20,
+            zIndex: 100000,
+            transform: tooltipPosition.x > window.innerWidth - 500 ? 'translateX(-50%)' : 'none'
+          }}
+        >
+          {/* Header del tooltip */}
+          <div className="flex items-center mb-4">
+            <div className={`w-4 h-4 rounded-full mr-3 ${
+              hoveredEvent.importance === 'high' ? 'bg-red-400 animate-pulse' :
+              hoveredEvent.importance === 'medium' ? 'bg-yellow-400' : 'bg-blue-400'
+            }`}></div>
+            <div>
+              <div className="text-white font-bold text-lg">{hoveredEvent.title}</div>
+              <div className="text-gray-200 text-sm">
+                {new Date(hoveredEvent.date).toLocaleDateString('es-ES', { 
+                  weekday: 'long', day: 'numeric', month: 'long' 
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Contenido principal */}
+          <div className="space-y-3">
+            {/* Significado Épico */}
+            <div className="bg-white/10 rounded-lg p-3 border border-white/20">
+              <div className="text-yellow-300 font-semibold text-sm mb-1 flex items-center">
+                <span className="mr-2">🔥</span>
+                SIGNIFICADO ÉPICO:
+              </div>
+              <div className="text-white text-sm leading-relaxed">
+                {hoveredEvent.personalInterpretation.impact}
+              </div>
+            </div>
+
+            {/* Áreas Activadas */}
+            {hoveredEvent.personalInterpretation.lifeAreas && (
+              <div className="bg-white/10 rounded-lg p-3 border border-white/20">
+                <div className="text-blue-300 font-semibold text-sm mb-2 flex items-center">
+                  <span className="mr-2">🎯</span>
+                  ÁREAS ACTIVADAS:
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {hoveredEvent.personalInterpretation.lifeAreas.map((area: string, index: number) => (
+                    <span key={index} className="bg-blue-500/20 border border-blue-400/30 text-blue-200 px-2 py-1 rounded-full text-xs">
+                      {area}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Consejo Revolucionario */}
+            <div className="bg-white/10 rounded-lg p-3 border border-white/20">
+              <div className="text-emerald-300 font-semibold text-sm mb-1 flex items-center">
+                <span className="mr-2">⚡</span>
+                CONSEJO:
+              </div>
+              <div className="text-white text-sm leading-relaxed">
+                {hoveredEvent.personalInterpretation.advice}
+              </div>
+            </div>
+
+            {/* Mantra */}
+            {hoveredEvent.personalInterpretation.mantra && (
+              <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-400/30 rounded-lg p-3 text-center">
+                <div className="text-yellow-300 font-semibold text-sm mb-1 flex items-center justify-center">
+                  <span className="mr-2">✨</span>
+                  MANTRA:
+                </div>
+                <div className="text-white text-sm font-medium italic">
+                  "{hoveredEvent.personalInterpretation.mantra}"
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Indicador de más información */}
+          <div className="mt-3 pt-3 border-t border-white/20 text-center">
+            <div className="text-gray-300 text-xs">
+              Haz clic en el evento para ver rituales y detalles completos
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* LEYENDA DE TIPOS DE EVENTOS - RESTAURADA */}
+      <div className="mt-8 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
+        <h4 className="font-bold text-white mb-4 text-lg flex items-center">
+          <span className="text-purple-400 mr-3">🎨</span>
+          Tipos de Eventos Astrológicos
+        </h4>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="flex items-center p-3 bg-indigo-50 rounded-lg">
+          <div className="flex items-center p-3 bg-gradient-to-r from-indigo-900/40 to-purple-900/40 rounded-lg backdrop-blur-sm border border-indigo-400/20">
             <span className="h-4 w-4 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 mr-3 shadow-sm"></span>
-            <span className="text-gray-700 font-medium">🌙 Fases Lunares</span>
+            <span className="text-gray-100 font-medium">🌙 Fases Lunares</span>
           </div>
-          <div className="flex items-center p-3 bg-blue-50 rounded-lg">
+          <div className="flex items-center p-3 bg-gradient-to-r from-blue-900/40 to-cyan-900/40 rounded-lg backdrop-blur-sm border border-blue-400/20">
             <span className="h-4 w-4 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 mr-3 shadow-sm"></span>
-            <span className="text-gray-700 font-medium">🪐 Tránsitos Planetarios</span>
+            <span className="text-gray-100 font-medium">🪐 Tránsitos Planetarios</span>
           </div>
-          <div className="flex items-center p-3 bg-orange-50 rounded-lg">
+          <div className="flex items-center p-3 bg-gradient-to-r from-orange-900/40 to-red-900/40 rounded-lg backdrop-blur-sm border border-orange-400/20">
             <span className="h-4 w-4 rounded-full bg-gradient-to-r from-orange-500 to-red-500 mr-3 shadow-sm"></span>
-            <span className="text-gray-700 font-medium">🔄 Movimientos Retrógrados</span>
+            <span className="text-gray-100 font-medium">↩️ Retrogradaciones</span>
           </div>
-          <div className="flex items-center p-3 bg-green-50 rounded-lg">
+          <div className="flex items-center p-3 bg-gradient-to-r from-green-900/40 to-emerald-900/40 rounded-lg backdrop-blur-sm border border-green-400/20">
             <span className="h-4 w-4 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 mr-3 shadow-sm"></span>
-            <span className="text-gray-700 font-medium">➡️ Movimientos Directos</span>
+            <span className="text-gray-100 font-medium">➡️ Movimientos Directos</span>
           </div>
-          <div className="flex items-center p-3 bg-purple-50 rounded-lg">
+          <div className="flex items-center p-3 bg-gradient-to-r from-purple-900/40 to-pink-900/40 rounded-lg backdrop-blur-sm border border-purple-400/20">
             <span className="h-4 w-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 mr-3 shadow-sm"></span>
-            <span className="text-gray-700 font-medium">🌒 Eclipses</span>
+            <span className="text-gray-100 font-medium">🌑 Eclipses</span>
           </div>
-          <div className="flex items-center p-3 bg-yellow-50 rounded-lg">
+          <div className="flex items-center p-3 bg-gradient-to-r from-yellow-900/40 to-orange-900/40 rounded-lg backdrop-blur-sm border border-yellow-400/20">
             <span className="h-4 w-4 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 mr-3 shadow-sm"></span>
-            <span className="text-gray-700 font-medium">🍂 Eventos Estacionales</span>
+            <span className="text-gray-100 font-medium">🍃 Cambios Estacionales</span>
           </div>
         </div>
         
-        <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-          <p className="text-sm text-gray-600">
-            <strong>💡 Prioridades:</strong>
-            <span className="text-red-600 ml-2">🔴 Alta prioridad</span>
-            <span className="text-yellow-600 ml-2">🟡 Media prioridad</span>
-            <span className="text-green-600 ml-2">🟢 Baja prioridad</span>
+        {/* Indicadores de prioridad */}
+        <div className="mt-6 pt-4 border-t border-white/20">
+          <h5 className="text-purple-200 font-semibold mb-3">Niveles de Importancia:</h5>
+          <div className="flex flex-wrap items-center gap-6">
+            <div className="flex items-center">
+              <span className="h-3 w-3 rounded-full bg-red-500 mr-2 animate-pulse"></span>
+              <span className="text-gray-200 text-sm">Alta Prioridad - Eventos críticos</span>
+            </div>
+            <div className="flex items-center">
+              <span className="h-3 w-3 rounded-full bg-yellow-500 mr-2"></span>
+              <span className="text-gray-200 text-sm">Media Prioridad - Importantes</span>
+            </div>
+            <div className="flex items-center">
+              <span className="h-3 w-3 rounded-full bg-blue-500 mr-2"></span>
+              <span className="text-gray-200 text-sm">Baja Prioridad - Informativos</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Instrucciones de uso */}
+        <div className="mt-4 p-3 bg-gradient-to-r from-purple-600/20 to-indigo-600/20 border border-purple-400/30 rounded-lg">
+          <p className="text-purple-200 text-sm text-center">
+            <span className="font-semibold">💡 Tip:</span> Mantén el cursor sobre cualquier evento para ver su interpretación personalizada completa
           </p>
         </div>
       </div>

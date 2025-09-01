@@ -27,7 +27,6 @@ const AgendaPersonalizada = () => {
   const [modalEvent, setModalEvent] = useState<AstrologicalEvent | null>(null);
   const [hoveredEvent, setHoveredEvent] = useState<AstrologicalEvent | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-  const [showPersonalityModal, setShowPersonalityModal] = useState(false);
 
   // Perfil de usuario REAL (no datos de prueba)
   const [userProfile, setUserProfile] = React.useState<UserProfile | null>(null);
@@ -378,7 +377,7 @@ const AgendaPersonalizada = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 relative overflow-hidden">
-
+      
       {/* Partículas mágicas de fondo */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-10 left-10 w-2 h-2 bg-yellow-400 rounded-full animate-pulse opacity-60"></div>
@@ -388,7 +387,7 @@ const AgendaPersonalizada = () => {
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto p-4 lg:p-8">
-
+        
         {/* HEADER ÉPICO INSPIRADO EN DASHBOARD */}
         <div className="text-center mb-16">
           <div className="flex justify-center items-center mb-8">
@@ -411,10 +410,10 @@ const AgendaPersonalizada = () => {
             </p>
 
             {/* Texto de personalidad con modal */}
-            {userProfile && userProfile.astrological && (
+            {userProfile && userProfile.progressedInterpretation && (
               <>
                 <p className="text-gray-400 mb-4 line-clamp-3">
-                  {userProfile.astrological.lifeThemes?.join(', ') || 'Descubre tu personalidad astrológica única'}
+                  {userProfile.progressedInterpretation.summary}
                 </p>
                 <button
                   onClick={() => setShowPersonalityModal(true)}
@@ -433,7 +432,7 @@ const AgendaPersonalizada = () => {
                       <div className="bg-gradient-to-br from-purple-900/95 to-pink-900/95 backdrop-blur-sm border border-purple-400/40 rounded-3xl shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-y-auto p-6 text-white">
                         <h3 className="text-2xl font-bold mb-4">Perfil de Personalidad</h3>
                         <p className="whitespace-pre-line leading-relaxed">
-                          {userProfile.astrological.strengths?.join(', ') || 'Tus fortalezas astrológicas serán reveladas aquí'}
+                          {userProfile.progressedInterpretation.fullText}
                         </p>
                         <button
                           onClick={() => setShowPersonalityModal(false)}
@@ -468,10 +467,10 @@ const AgendaPersonalizada = () => {
 
         {/* LAYOUT DESKTOP/MOBILE */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
+          
           {/* CALENDARIO PRINCIPAL - 2/3 en desktop */}
           <div className="lg:col-span-2">
-
+            
             {/* Header del calendario */}
             <div className="bg-gradient-to-r from-purple-600/30 to-indigo-600/30 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-purple-400/30">
               <div className="flex items-center justify-between">
@@ -479,7 +478,7 @@ const AgendaPersonalizada = () => {
                   <span className="mr-3">🗓️</span>
                   {getCurrentMonthName()}
                 </h2>
-
+                
                 {/* Navegación */}
                 <div className="flex items-center gap-3">
                   <button
@@ -490,7 +489,7 @@ const AgendaPersonalizada = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
                   </button>
-
+                  
                   <button
                     onClick={goToNextMonth}
                     className="p-3 rounded-xl bg-gradient-to-r from-purple-500/80 to-indigo-500/80 hover:from-purple-400/90 hover:to-indigo-400/90 transition-all duration-200 shadow-lg hover:shadow-purple-500/25 border border-white/10 group"
@@ -505,7 +504,7 @@ const AgendaPersonalizada = () => {
 
             {/* Calendario grid */}
             <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-sm rounded-2xl shadow-2xl border border-purple-400/20 overflow-hidden">
-
+              
               {/* Días de la semana */}
               <div className="grid grid-cols-7 bg-gradient-to-r from-purple-700/50 to-indigo-700/50">
                 {weekDays.map((day, index) => (
@@ -520,7 +519,7 @@ const AgendaPersonalizada = () => {
                 {days.map((day, index) => {
                   const isToday = isSameDay(day.date, new Date());
                   const isSelected = selectedDate && isSameDay(day.date, selectedDate);
-
+                  
                   return (
                     <div
                       key={index}
@@ -570,7 +569,7 @@ const AgendaPersonalizada = () => {
                               )}
                             </div>
                           ))}
-
+                          
                           {day.events.length > 2 && (
                             <div className="text-purple-300 text-xs font-medium text-center bg-purple-600/20 rounded px-2 py-1">
                               +{day.events.length - 2} más
@@ -684,9 +683,9 @@ const AgendaPersonalizada = () => {
                           </span>
                         )}
                       </div>
-
+                      
                       <p className="text-gray-200 text-sm mb-3 line-clamp-2">{event.description}</p>
-
+                      
                       <div className="text-purple-300 text-xs italic">
                         Hover para ver interpretación completa ✨
                       </div>
@@ -702,10 +701,7 @@ const AgendaPersonalizada = () => {
                 <p className="text-purple-200 text-sm mb-4">
                   Descubre interpretaciones aún más profundas de tu carta natal
                 </p>
-                <button className="bg<execute_command>
-<command>tail -20 src/app/\(dashboard\)/agenda/page.tsx</command>
-</execute_command>
--gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-full font-semibold hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg hover:shadow-xl">
+                <button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-full font-semibold hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg hover:shadow-xl">
                   Explorar más ✨
                 </button>
               </div>

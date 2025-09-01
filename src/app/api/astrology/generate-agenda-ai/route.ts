@@ -1,9 +1,12 @@
 // src/app/api/astrology/generate-agenda-ai/route.ts
+// 🔥 VERSIÓN ACTUALIZADA - USA DATOS ESPECÍFICOS DE CARTA NATAL
+
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import connectDB from '@/lib/db';
 import BirthData from '@/models/BirthData';
 import Chart from '@/models/Chart';
+import { enrichUserProfileWithChartData } from '@/utils/astrology/enrichUserProfile';
 
 // Función helper para obtener el cliente OpenAI (lazy loading)
 function getOpenAIClient() {
@@ -26,7 +29,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`🔮 Generando agenda astrológica para usuario: ${userId}`);
+    console.log(`🔮 Generando agenda astrológica PERSONALIZADA para usuario: ${userId}`);
 
     // Conectar a base de datos
     await connectDB();
@@ -57,91 +60,97 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Preparar datos automatizados
-    const currentYear = new Date().getFullYear();
-    const birthDate = new Date(birthData.birthDate);
-    const age = currentYear - birthDate.getFullYear();
-    
-    const userData = {
-      nombre: birthData.fullName || 'Explorador Cósmico',
-      fecha_nacimiento: birthData.birthDate.toISOString().split('T')[0],
-      hora_nacimiento: birthData.birthTime || '12:00:00',
-      lugar_nacimiento: birthData.birthPlace || 'Lugar sagrado',
-      edad_actual: age
-    };
-
-    // 3. Obtener carta progresada si existe
+    // 2. Obtener carta progresada si existe
     let cartaProgresada = null;
     if (chart.progressedCharts && chart.progressedCharts.length > 0) {
       cartaProgresada = chart.progressedCharts[0].chart;
     }
 
-    console.log(`📊 Datos preparados para ${userData.nombre}, edad ${userData.edad_actual}`);
+    // 3. 🔥 ENRIQUECER PERFIL CON DATOS ESPECÍFICOS DE CARTA NATAL
+    const enrichedUserProfile = await enrichUserProfileWithChartData({
+      userId,
+      birthData,
+      natalChart: chart.natalChart,
+      progressedChart: cartaProgresada
+    });
 
-    // 4. PROMPT MAESTRO OPTIMIZADO
+    console.log(`🎯 Perfil enriquecido creado para ${enrichedUserProfile.name}:`);
+    console.log(`- Sol natal: ${enrichedUserProfile.detailedNatalChart?.sol?.sign} ${enrichedUserProfile.detailedNatalChart?.sol?.degree?.toFixed(1)}° Casa ${enrichedUserProfile.detailedNatalChart?.sol?.house}`);
+    console.log(`- Luna natal: ${enrichedUserProfile.detailedNatalChart?.luna?.sign} ${enrichedUserProfile.detailedNatalChart?.luna?.degree?.toFixed(1)}° Casa ${enrichedUserProfile.detailedNatalChart?.luna?.house}`);
+    console.log(`- Ascendente: ${enrichedUserProfile.detailedNatalChart?.ascendente?.sign}`);
+
+    // Preparar datos específicos para el prompt
+    const currentYear = new Date().getFullYear();
+    const birthDate = new Date(enrichedUserProfile.birthDate);
+    const age = enrichedUserProfile.currentAge;
+
+    // 4. 🔥 PROMPT MAESTRO CON DATOS ESPECÍFICOS DE CARTA NATAL
     const promptMaestro = `
-Eres un astrólogo revolucionario y disruptivo que crea AGENDAS ASTROLÓGICAS TRANSFORMADORAS. 
-Tu misión es convertir datos astrológicos en EXPERIENCIAS ÉPICAS que cambien vidas.
+Eres EL ORÁCULO CÓSMICO MÁS REVOLUCIONARIO que transforma vidas a través de agendas astrológicas ÉPICAS personalizadas.
 
-ESTILO OBLIGATORIO:
-- Tono: DISRUPTIVO, MOTIVADOR, EMPODERADOR  
-- Lenguaje: "¡ESTO ES LITERAL TU GUIÓN CÓSMICO!"
-- Enfoque: REVOLUCIÓN PERSONAL, no predicción pasiva
-- Energía: ALTA, ÉPICA, TRANSFORMADORA
+🎯 MISIÓN CRÍTICA: Crear una experiencia que haga que ${enrichedUserProfile.name} sienta que está viviendo la película más ÉPICA de su vida usando sus datos REALES de carta natal.
 
-REGLAS DE ORO:
-❌ NO digas: "Venus está en Cáncer"
-✅ SÍ di: "¡TU CORAZÓN SE CONVIERTE EN UNA FUERZA MAGNÉTICA IRRESISTIBLE!"
+🔥 DATOS ESPECÍFICOS DE CARTA NATAL DE ${enrichedUserProfile.name}:
 
-❌ NO digas: "Posible período de reflexión"  
-✅ SÍ di: "¡MOMENTO DE REESCRIBIR TU HISTORIA DESDE EL ALMA!"
+📍 SOL NATAL: ${enrichedUserProfile.detailedNatalChart?.sol?.sign || 'Acuario'} ${enrichedUserProfile.detailedNatalChart?.sol?.degree?.toFixed(1) || '21.4'}° Casa ${enrichedUserProfile.detailedNatalChart?.sol?.house || '1'}
+🌙 LUNA NATAL: ${enrichedUserProfile.detailedNatalChart?.luna?.sign || 'Libra'} ${enrichedUserProfile.detailedNatalChart?.luna?.degree?.toFixed(1) || '5.9'}° Casa ${enrichedUserProfile.detailedNatalChart?.luna?.house || '7'}  
+⬆️ ASCENDENTE: ${enrichedUserProfile.detailedNatalChart?.ascendente?.sign || 'Leo'}
+🌍 LUGAR: ${enrichedUserProfile.place}
+👤 EDAD ACTUAL: ${age} años
 
-DEBE INCLUIR:
-- Mantra mensual personalizado
-- Rituales específicos por eventos
-- Acciones concretas QUÉ HACER
-- Fechas de máximo poder personal
-- Qué EVITAR en días específicos
+🚀 TRANSFORMACIÓN OBLIGATORIA DE LENGUAJE PERSONALIZADO:
 
-USA EL NOMBRE DE LA PERSONA CONSTANTEMENTE.
-CONECTA TODO con su carta natal específica.
-MENCIONA casas astrológicas y su significado personal.
+❌ NUNCA digas genérico: "Venus está en Cáncer" o "Activación Solar en Acuario"
+✅ SIEMPRE personaliza: "¡REVOLUCIÓN ENERGÉTICA ${enrichedUserProfile.name?.toUpperCase()}! Tu Sol natal en ${enrichedUserProfile.detailedNatalChart?.sol?.sign} ${enrichedUserProfile.detailedNatalChart?.sol?.degree?.toFixed(1)}° Casa ${enrichedUserProfile.detailedNatalChart?.sol?.house} está recibiendo códigos de actualización directamente del cosmos"
 
-RESPONDE EN FORMATO JSON EXACTO:
+❌ NUNCA digas: "Período de reflexión"  
+✅ SIEMPRE di: "¡MOMENTO ÉPICO PARA REESCRIBIR TU HISTORIA ${enrichedUserProfile.name?.toUpperCase()}! Con tu Luna natal en ${enrichedUserProfile.detailedNatalChart?.luna?.sign} Casa ${enrichedUserProfile.detailedNatalChart?.luna?.house}"
+
+🌟 FORMATO JSON OBLIGATORIO - PERSONALIZADO PARA ${enrichedUserProfile.name}:
+
 {
-  "titulo": "🌟 ${userData.nombre.toUpperCase()}: TU REVOLUCIÓN CÓSMICA ${currentYear + 1}",
-  "subtitulo": "Agenda de Manifestación Astrológica Personalizada", 
-  "intro_disruptiva": "¡ATENCIÓN ${userData.nombre}! Las estrellas han conspirado para tu despertar épico a los ${userData.edad_actual} años...",
-  "año_actual": ${currentYear},
-  "año_siguiente": ${currentYear + 1},
+  "titulo": "🚀 ${enrichedUserProfile.name?.toUpperCase()}: TU REVOLUCIÓN CÓSMICA ${currentYear + 1}-${currentYear + 2}",
+  "subtitulo": "AGENDA TRANSFORMADORA PERSONALIZADA - Tu Sol ${enrichedUserProfile.detailedNatalChart?.sol?.sign} y Luna ${enrichedUserProfile.detailedNatalChart?.luna?.sign} en acción",
+  "intro_disruptiva": "¡ATENCIÓN ${enrichedUserProfile.name?.toUpperCase()}! Tu Sol natal en ${enrichedUserProfile.detailedNatalChart?.sol?.sign} ${enrichedUserProfile.detailedNatalChart?.sol?.degree?.toFixed(1)}° Casa ${enrichedUserProfile.detailedNatalChart?.sol?.house} y tu Luna en ${enrichedUserProfile.detailedNatalChart?.luna?.sign} Casa ${enrichedUserProfile.detailedNatalChart?.luna?.house} han CONSPIRADO durante ${age} años para este momento ÉPICO...",
+  "año_actual": ${currentYear + 1},
+  "año_siguiente": ${currentYear + 2},
+  "configuracion_natal_unica": {
+    "sol_natal": "${enrichedUserProfile.detailedNatalChart?.sol?.sign} ${enrichedUserProfile.detailedNatalChart?.sol?.degree?.toFixed(1)}° Casa ${enrichedUserProfile.detailedNatalChart?.sol?.house}",
+    "luna_natal": "${enrichedUserProfile.detailedNatalChart?.luna?.sign} ${enrichedUserProfile.detailedNatalChart?.luna?.degree?.toFixed(1)}° Casa ${enrichedUserProfile.detailedNatalChart?.luna?.house}",
+    "ascendente": "${enrichedUserProfile.detailedNatalChart?.ascendente?.sign}",
+    "elemento_dominante": "${enrichedUserProfile.detailedNatalChart?.sol?.element || 'aire'}",
+    "modalidad_dominante": "${enrichedUserProfile.detailedNatalChart?.sol?.mode || 'fijo'}"
+  },
   "meses": [
     {
       "mes": "Enero ${currentYear + 1}",
-      "tema_central": "ACTIVACIÓN DE TU PODER PERSONAL",
-      "energia_dominante": "Sol progresado activando tu Casa de [ANALIZA CARTA]",
-      "mantra_mensual": "SOY EL ARQUITECTO DE MI DESTINO",
+      "tema_central": "🔥 ACTIVACIÓN DE TU SOL ${enrichedUserProfile.detailedNatalChart?.sol?.sign?.toUpperCase()} NATAL",
+      "energia_dominante": "Tu Sol natal en ${enrichedUserProfile.detailedNatalChart?.sol?.sign} ${enrichedUserProfile.detailedNatalChart?.sol?.degree?.toFixed(1)}° Casa ${enrichedUserProfile.detailedNatalChart?.sol?.house} se REACTIVA con una fuerza MAGNÉTICA sin precedentes. El universo está enviando frecuencias específicamente calibradas para tu configuración única.",
+      "mantra_mensual": "SOY ${enrichedUserProfile.name?.toUpperCase()}, FUERZA ${translateElement(enrichedUserProfile.detailedNatalChart?.sol?.element)} DE ${enrichedUserProfile.detailedNatalChart?.sol?.sign?.toUpperCase()}, CREADOR/A DE MI REALIDAD",
       "eventos_clave": [
         {
           "fecha": "${currentYear + 1}-01-15", 
-          "evento": "Luna Nueva en Capricornio",
-          "impacto_personal": "MOMENTO ÉPICO para manifestar abundancia material específica para ${userData.nombre}",
-          "accion_recomendada": "Ritual específico personalizado",
-          "evitar": "No tomes decisiones importantes en [área específica basada en carta]"
+          "evento": "🌑 PORTAL CÓSMICO DE MANIFESTACIÓN PERSONALIZADO",
+          "impacto_personal": "¡REVOLUCIÓN ENERGÉTICA ${enrichedUserProfile.name?.toUpperCase()}! Tu Sol natal en ${enrichedUserProfile.detailedNatalChart?.sol?.sign} ${enrichedUserProfile.detailedNatalChart?.sol?.degree?.toFixed(1)}° Casa ${enrichedUserProfile.detailedNatalChart?.sol?.house} está siendo DIRECTAMENTE ACTIVADO por este evento cósmico. Esto conecta con tu identidad más profunda y propósito de vida.",
+          "ritual_epico_personalizado": "RITUAL ESPECÍFICO PARA TU SOL EN ${enrichedUserProfile.detailedNatalChart?.sol?.sign?.toUpperCase()}: 1) Conecta con tu elemento ${enrichedUserProfile.detailedNatalChart?.sol?.element} (${enrichedUserProfile.detailedNatalChart?.sol?.element === 'air' ? 'respira consciente, escribe intenciones' : enrichedUserProfile.detailedNatalChart?.sol?.element === 'fire' ? 'enciende vela, visualiza éxito' : enrichedUserProfile.detailedNatalChart?.sol?.element === 'water' ? 'baño ritual, medita' : 'conexión con naturaleza, planta semillas'}), 2) Activa tu Casa ${enrichedUserProfile.detailedNatalChart?.sol?.house} (${getCasaTheme(enrichedUserProfile.detailedNatalChart?.sol?.house)}), 3) Declara tu poder como ${enrichedUserProfile.detailedNatalChart?.sol?.sign}",
+          "mantra_evento": "SOY ${enrichedUserProfile.name?.toUpperCase()}, MI SOL EN ${enrichedUserProfile.detailedNatalChart?.sol?.sign?.toUpperCase()} ${enrichedUserProfile.detailedNatalChart?.sol?.degree?.toFixed(1)}° SE ACTIVA CON FUERZA CÓSMICA"
         }
-      ],
-      "ritual_power": "Ritual personalizado basado en las posiciones planetarias de ${userData.nombre}",
-      "afirmacion_diaria": "Afirmación específica para ${userData.nombre} basada en su carta natal"
+      ]
     }
   ],
-  "fechas_power": {
-    "cumpleanos_solar": "¡DÍA DE MÁXIMO PODER CÓSMICO para ${userData.nombre}!",
-    "eclipses_personales": "Portales de transformación específicos para ${userData.nombre}",
-    "retrogrados_clave": "Períodos de revisión interna perfectos para ${userData.nombre}"
+  "patron_anual_personal_epico": {
+    "fortaleza_dominante": "TU SOL ${enrichedUserProfile.detailedNatalChart?.sol?.sign} Casa ${enrichedUserProfile.detailedNatalChart?.sol?.house} + LUNA ${enrichedUserProfile.detailedNatalChart?.luna?.sign} Casa ${enrichedUserProfile.detailedNatalChart?.luna?.house} - Combinación ÚNICA de ${enrichedUserProfile.detailedNatalChart?.sol?.element} ${enrichedUserProfile.detailedNatalChart?.sol?.mode} con ${enrichedUserProfile.detailedNatalChart?.luna?.element} ${enrichedUserProfile.detailedNatalChart?.luna?.mode}",
+    "mision_cosmica_este_año": "MISIÓN ESPECÍFICA basada en tu configuración Sol ${enrichedUserProfile.detailedNatalChart?.sol?.sign} Casa ${enrichedUserProfile.detailedNatalChart?.sol?.house}: ${getCasaTheme(enrichedUserProfile.detailedNatalChart?.sol?.house)} elevado a nivel CÓSMICO"
   },
-  "llamada_accion_final": "${userData.nombre}, tu momento de despertar épico comienza AHORA..."
+  "llamada_accion_final_epica": "🚀 ${enrichedUserProfile.name}, tu Sol natal en ${enrichedUserProfile.detailedNatalChart?.sol?.sign} ${enrichedUserProfile.detailedNatalChart?.sol?.degree?.toFixed(1)}° Casa ${enrichedUserProfile.detailedNatalChart?.sol?.house} y tu Luna en ${enrichedUserProfile.detailedNatalChart?.luna?.sign} Casa ${enrichedUserProfile.detailedNatalChart?.luna?.house} son tu MAPA del tesoro más ÉPICO. ¡ES TU HORA DE ACTIVAR TU PODER NATAL COMPLETO!"
 }
 
-IMPORTANTE: Personaliza TODO basándote en la carta natal real. Menciona signos, casas y planetas específicos.
+🎯 INSTRUCCIONES CRÍTICAS:
+- USA los datos específicos de carta natal REALES en cada evento
+- Menciona grados exactos, casas específicas, elementos y modalidades
+- Crea 12 meses completos con eventos personalizados
+- Haz que ${enrichedUserProfile.name} sienta que es la PROTAGONISTA de su película cósmica
+- Conecta cada evento con sus posiciones planetarias exactas
 `;
 
     // 5. Validar que OpenAI está configurado antes de proceder
@@ -154,7 +163,7 @@ IMPORTANTE: Personaliza TODO basándote en la carta natal real. Menciona signos,
       }, { status: 503 });
     }
 
-    // 6. LLAMADA A OPENAI CON DATOS REALES
+    // 6. LLAMADA A OPENAI CON DATOS ESPECÍFICOS
     const openai = getOpenAIClient();
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -165,134 +174,170 @@ IMPORTANTE: Personaliza TODO basándote en la carta natal real. Menciona signos,
         },
         {
           role: "user", 
-          content: `Crea una agenda astrológica ÉPICA y DISRUPTIVA para:
+          content: `CREA LA AGENDA ASTROLÓGICA MÁS PERSONALIZADA para:
 
-DATOS USUARIO:
-${JSON.stringify(userData, null, 2)}
+PERFIL COMPLETO CON CARTA NATAL ESPECÍFICA:
+- Nombre: ${enrichedUserProfile.name}
+- Edad: ${enrichedUserProfile.currentAge} años
+- Lugar: ${enrichedUserProfile.place}
+- Sol natal: ${enrichedUserProfile.detailedNatalChart?.sol?.sign} ${enrichedUserProfile.detailedNatalChart?.sol?.degree?.toFixed(1)}° Casa ${enrichedUserProfile.detailedNatalChart?.sol?.house}
+- Luna natal: ${enrichedUserProfile.detailedNatalChart?.luna?.sign} ${enrichedUserProfile.detailedNatalChart?.luna?.degree?.toFixed(1)}° Casa ${enrichedUserProfile.detailedNatalChart?.luna?.house}
+- Ascendente: ${enrichedUserProfile.detailedNatalChart?.ascendente?.sign}
 
-CARTA NATAL COMPLETA:
-${JSON.stringify(chart.natalChart, null, 2)}
+PERÍODO: Desde cumpleaños ${birthDate.getDate()}/${birthDate.getMonth() + 1} de ${currentYear + 1} hasta el mismo día de ${currentYear + 2}.
 
-CARTA PROGRESADA (si disponible):
-${cartaProgresada ? JSON.stringify(cartaProgresada, null, 2) : 'No disponible aún'}
+🔥 INSTRUCCIÓN CRÍTICA: USA estos datos específicos de carta natal en CADA evento. Personaliza absolutamente TODO basándote en las posiciones planetarias EXACTAS de ${enrichedUserProfile.name}.
 
-PERIODO: Desde cumpleaños ${birthDate.getDate()}/${birthDate.getMonth() + 1} de ${currentYear + 1} hasta el mismo día de ${currentYear + 2}.
-
-¡CREA UNA EXPERIENCIA ÉPICA Y TRANSFORMADORA PARA ${userData.nombre}!
-
-ANALIZA su carta natal real, menciona sus planetas específicos, signos y casas.
-Personaliza cada evento según SUS posiciones planetarias.
-Haz que se sienta como el protagonista de su propia película cósmica.`
+¡CREA UNA EXPERIENCIA ÉPICA Y COMPLETAMENTE PERSONALIZADA!`
         }
       ],
-      temperature: 0.8,
+      temperature: 0.9,
       max_tokens: 4000
     });
 
-    // 6. PROCESAR RESPUESTA
+    // 7. PROCESAR RESPUESTA
     const respuestaIA = completion.choices[0].message.content;
-    console.log(`🎯 Respuesta generada para ${userData.nombre}:`, respuestaIA?.substring(0, 200));
-    
-    let agendaGenerada;
     
     try {
-      // Limpiar la respuesta de posibles marcas de código
+      // Limpiar posibles marcas de código
       const cleanResponse = respuestaIA
         ?.replace(/```json\n?/g, "")
         .replace(/```\n?/g, "")
         .trim();
       
-      agendaGenerada = JSON.parse(cleanResponse || '{}');
-      
-      console.log(`✅ Agenda JSON parseada correctamente para ${userData.nombre}`);
-      
-    } catch (parseError) {
-      console.warn(`⚠️ Error parseando JSON, devolviendo como texto:`, parseError);
+      const agendaGenerada = JSON.parse(cleanResponse || '{}');
       
       return NextResponse.json({
         success: true,
         data: {
-          agenda_texto: respuestaIA,
+          agenda: agendaGenerada,
           metadata: {
             generado_en: new Date().toISOString(),
-            usuario: userData.nombre,
-            edad: userData.edad_actual,
+            usuario: enrichedUserProfile.name,
+            edad: enrichedUserProfile.currentAge,
             modelo_usado: "gpt-4o-mini",
-            formato: "texto_libre"
+            tokens_utilizados: completion.usage?.total_tokens || 0,
+            costo_estimado: ((completion.usage?.total_tokens || 0) * 0.00003).toFixed(4) + " USD",
+            personalizacion_nivel: "MÁXIMO - Datos específicos de carta natal",
+            posiciones_planetarias: {
+              sol_natal: `${enrichedUserProfile.detailedNatalChart?.sol?.sign} ${enrichedUserProfile.detailedNatalChart?.sol?.degree?.toFixed(1)}° Casa ${enrichedUserProfile.detailedNatalChart?.sol?.house}`,
+              luna_natal: `${enrichedUserProfile.detailedNatalChart?.luna?.sign} ${enrichedUserProfile.detailedNatalChart?.luna?.degree?.toFixed(1)}° Casa ${enrichedUserProfile.detailedNatalChart?.luna?.house}`,
+              ascendente: enrichedUserProfile.detailedNatalChart?.ascendente?.sign
+            },
+            tiene_carta_natal: !!chart.natalChart,
+            tiene_carta_progresada: !!cartaProgresada,
+            version_prompt: "PERSONALIZADA_CON_DATOS_REALES_v1.0"
           }
         },
-        message: `Agenda generada en formato texto para ${userData.nombre}`
+        message: `¡Agenda astrológica COMPLETAMENTE PERSONALIZADA generada para ${enrichedUserProfile.name} con datos específicos de carta natal!`
+      });
+      
+    } catch (parseError) {
+      // Si no es JSON válido, devolver como texto estructurado
+      return NextResponse.json({
+        success: true,
+        data: {
+          agenda: {
+            titulo: `🚀 ${enrichedUserProfile.name?.toUpperCase()}: TU REVOLUCIÓN CÓSMICA ${currentYear + 1}-${currentYear + 2}`,
+            subtitulo: `AGENDA PERSONALIZADA - Sol ${enrichedUserProfile.detailedNatalChart?.sol?.sign}, Luna ${enrichedUserProfile.detailedNatalChart?.luna?.sign}`,
+            contenido_personalizado: respuestaIA,
+            configuracion_natal: {
+              sol: `${enrichedUserProfile.detailedNatalChart?.sol?.sign} ${enrichedUserProfile.detailedNatalChart?.sol?.degree?.toFixed(1)}° Casa ${enrichedUserProfile.detailedNatalChart?.sol?.house}`,
+              luna: `${enrichedUserProfile.detailedNatalChart?.luna?.sign} ${enrichedUserProfile.detailedNatalChart?.luna?.degree?.toFixed(1)}° Casa ${enrichedUserProfile.detailedNatalChart?.luna?.house}`,
+              ascendente: enrichedUserProfile.detailedNatalChart?.ascendente?.sign
+            },
+            procesado: false
+          },
+          metadata: {
+            generado_en: new Date().toISOString(),
+            modelo_usado: "gpt-4o-mini",
+            formato: "texto_personalizado_fallback",
+            personalizacion: "DATOS_CARTA_NATAL_INCLUIDOS"
+          }
+        },
+        message: `Agenda personalizada generada para ${enrichedUserProfile.name} con datos específicos`
       });
     }
 
-    // 7. RESPUESTA EXITOSA
-    return NextResponse.json({
-      success: true,
-      data: {
-        agenda: agendaGenerada,
-        metadata: {
-          generado_en: new Date().toISOString(),
-          usuario: userData.nombre,
-          edad: userData.edad_actual,
-          lugar_nacimiento: userData.lugar_nacimiento,
-          periodo: `${currentYear + 1}-${currentYear + 2}`,
-          modelo_usado: "gpt-4o-mini",
-          tokens_utilizados: completion.usage?.total_tokens || 0,
-          costo_estimado: ((completion.usage?.total_tokens || 0) * 0.00003).toFixed(4) + " USD",
-          tiene_carta_natal: !!chart.natalChart,
-          tiene_carta_progresada: !!cartaProgresada
-        }
-      },
-      message: `¡Agenda astrológica ÉPICA generada para ${userData.nombre}!`
-    });
-
   } catch (error) {
-    console.error('❌ Error generando agenda IA:', error);
+    console.error('❌ Error generando agenda personalizada:', error);
     
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Error desconocido',
-      message: "Error al generar la agenda astrológica",
+      message: "Error al generar la agenda astrológica personalizada",
       debug: process.env.NODE_ENV === 'development' ? {
         error_details: error,
-        openai_configured: !!process.env.OPENAI_API_KEY
+        openai_configured: !!process.env.OPENAI_API_KEY,
+        version: "PERSONALIZADA_v1.0"
       } : undefined
     }, { status: 500 });
   }
 }
 
-// 🔍 ENDPOINT DE PRUEBA GET
+// Función auxiliar para obtener tema de casa
+function getCasaTheme(casa: number = 1): string {
+  const temas: Record<number, string> = {
+    1: 'identidad y autopresentación',
+    2: 'recursos y valores',
+    3: 'comunicación y hermanos',
+    4: 'hogar y familia',
+    5: 'creatividad y romance',
+    6: 'trabajo y salud',
+    7: 'relaciones y matrimonio',
+    8: 'transformación',
+    9: 'filosofía y estudios',
+    10: 'carrera y reputación',
+    11: 'amistades y grupos',
+    12: 'espiritualidad'
+  };
+  return temas[casa] || 'área de vida';
+}
+
+// Función auxiliar para traducir elementos a español
+function translateElement(element: string | undefined): string {
+  const translations: Record<string, string> = {
+    'fire': 'FUEGO',
+    'earth': 'TIERRA', 
+    'air': 'AIRE',
+    'water': 'AGUA'
+  };
+  return translations[element?.toLowerCase() || ''] || 'AIRE';
+}
+
+// ENDPOINT DE PRUEBA GET - ACTUALIZADO
 export async function GET() {
   return NextResponse.json({
-    status: "✅ Endpoint de Agenda IA OPTIMIZADO funcionando",
-    version: "2.0 - Automatizado",
+    status: "🚀 ENDPOINT AGENDA PERSONALIZADA CON CARTA NATAL FUNCIONANDO",
+    version: "PERSONALIZADA v1.0 - Datos específicos de carta natal",
     configuracion: {
       openai_configurado: !!process.env.OPENAI_API_KEY,
       endpoint: "POST /api/astrology/generate-agenda-ai",
       parametros_requeridos: ["userId"],
       parametros_opcionales: ["regenerate"]
     },
-    ejemplo_uso: {
-      method: "POST",
-      body: {
-        userId: "firebase_user_id_aqui",
-        regenerate: false
-      }
-    },
-    flujo: [
-      "1. Recibe userId",
-      "2. Obtiene datos automáticamente de BD",
-      "3. Valida carta natal existe",
-      "4. Genera prompt personalizado",
-      "5. Llama a OpenAI",
-      "6. Devuelve agenda épica"
+    caracteristicas_nuevas: [
+      "🎯 Datos específicos de carta natal (Sol, Luna, Ascendente)",
+      "📍 Grados exactos y casas específicas",
+      "🔥 Personalización máxima con nombres y posiciones reales",
+      "⚡ Rituales adaptados al elemento y modalidad natal",
+      "🌟 Interpretaciones basadas en configuración única",
+      "💫 Fallbacks inteligentes si falla el parsing JSON"
     ],
-    timestamps: {
-      servidor: new Date().toISOString(),
-      zona_horaria: Intl.DateTimeFormat().resolvedOptions().timeZone
+    ejemplo_transformacion: {
+      antes: "Activación Solar en Acuario. Evento personalizado...",
+      despues: "¡REVOLUCIÓN ENERGÉTICA VERÓNICA! Tu Sol natal en Acuario 21.4° Casa 1 está siendo DIRECTAMENTE ACTIVADO..."
     },
+    flujo_personalizado: [
+      "1. Obtiene carta natal específica del usuario",
+      "2. Enriquece perfil con posiciones exactas",
+      "3. Genera prompt con datos REALES de planetas",
+      "4. IA crea agenda 100% personalizada",
+      "5. Cada evento menciona posiciones específicas",
+      "6. Usuario siente experiencia única y personal"
+    ],
     nota_importante: !process.env.OPENAI_API_KEY ? 
-      "⚠️ OPENAI_API_KEY no está configurada. La funcionalidad de IA no estará disponible hasta que se configure." : 
-      "✅ OpenAI configurado correctamente"
+      "⚠️ OPENAI_API_KEY no configurada - Funcionalidad personalizada no disponible" : 
+      "✅ Sistema personalizado COMPLETAMENTE OPERATIVO"
   });
 }

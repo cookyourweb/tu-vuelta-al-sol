@@ -8,65 +8,6 @@ import type { ActionPlan } from "@/types/astrology/unified-types";
 // Importar el sistema disruptivo existente
 import disruptiveSystem from "@/utils/astrology/disruptiveMotivationalSystem";
 
-// Fallback para interpretación personalizada si no hay OpenAI o sistema disruptivo
-export async function generateChartBasedFallback(
-  event: AstrologicalEvent,
-  userProfile: UserProfile
-): Promise<PersonalizedInterpretation> {
-  // Implementación básica de fallback usando datos de carta natal
-  const userName = userProfile.name || "ALMA PODEROSA";
-  const planet = "Sol";
-  const position = userProfile.detailedNatalChart?.sol;
-  return {
-    meaning: `Interpretación básica para ${userName} usando su ${planet} natal en ${position?.sign || "signo"} Casa ${position?.house || 1}.`,
-    lifeAreas: [
-      `CASA ${position?.house || 1}: Área de vida activada`,
-      `ELEMENTO ${position?.element || "fuego"}: Manifestación elemental`,
-      "Manifestación específica basada en configuración natal"
-    ],
-    advice: `Consejo personalizado para ${userName} usando su ${planet} en ${position?.sign || "signo"} Casa ${position?.house || 1}.`,
-    mantra: `Mantra para ${userName} (${position?.sign || "signo"} - ${position?.element || "elemento"})`,
-    ritual: `Ritual básico para ${planet} en ${position?.sign || "signo"} Casa ${position?.house || 1}.`,
-    actionPlan: [
-      {
-        category: "poder_planetario_personal",
-        action: `Activa tu ${planet} en ${position?.sign || "signo"} Casa ${position?.house || 1}`,
-        timing: "inmediato",
-        difficulty: "fácil",
-        impact: "transformador"
-      }
-    ],
-    warningsAndOpportunities: {
-      warnings: [
-        `Cuidado con desafíos de ${position?.sign || "signo"} en Casa ${position?.house || 1}`
-      ],
-      opportunities: [
-        `Tu combinación ${planet}-${position?.sign || "signo"}-Casa ${position?.house || 1} te da SUPERPODER`
-      ]
-    },
-    natalContext: {
-      conexionPlanetaria: `Tu ${planet} natal en ${position?.sign || "signo"} está siendo activado.`,
-      casaActivada: position?.house || 1,
-      temaVida: `Tema de vida de Casa ${position?.house || 1}`,
-      desafioEvolutivo: `Desafío de ${planet} en ${position?.sign || "signo"}`
-    }
-  };
-}
-
-// Fallback para resumen ejecutivo si no hay OpenAI
-export async function generateChartBasedExecutiveFallback(
-  userProfile: UserProfile
-): Promise<any> {
-  const userName = userProfile.name || "REVOLUCIONARIO CÓSMICO";
-  const natalChart = userProfile.detailedNatalChart;
-  return {
-    resumen: `Resumen ejecutivo básico para ${userName} usando su carta natal.`,
-    sol: natalChart?.sol || {},
-    luna: natalChart?.luna || {},
-    ascendente: natalChart?.ascendente || {}
-  };
-}
-
 // Función helper para obtener el cliente OpenAI (lazy loading)
 function getOpenAIClient() {
   if (!process.env.OPENAI_API_KEY) {
@@ -284,7 +225,8 @@ FORMATO JSON OBLIGATORIO CON DATOS DE CARTA NATAL:
     "[Área de manifestación específica basada en su configuración natal]"
   ],
   "advice": "TU MOMENTO DE ACCIÓN ÉPICA PERSONALIZADA ${userName.toUpperCase()}: Basándote en tu ${planetName} en ${(position?.sign || 'signo')} Casa ${(position?.house || 1)}, [consejo específico que usa sus datos natales]",
-      "mantra": "[MANTRA PODEROSO que incorpore su signo ${(position?.sign || 'signo')} y elemento ${(position?.element || 'elemento')}]",
+  "mantra": "[MANTRA PODEROSO que incorpore su signo ${(position?.sign || 'signo')} y elemento ${(position?.element || 'elemento')}]",
+  "ritual": "RITUAL ÉPICO PARA TU ${planetName} EN ${(position?.sign || 'signo')}: 1) [Paso específico usando su elemento], 2) [Paso usando su casa astrológica], 3) [Paso final personalizado]",
   "actionPlan": [
     {
       "category": "poder_planetario_personal",
@@ -343,8 +285,7 @@ export async function generatePersonalizedInterpretation(
 
     if (!process.env.OPENAI_API_KEY) {
       console.warn('⚠️ OpenAI no configurado, usando fallback con carta natal');
-      const interpretations: PersonalizedInterpretation[] = [];
-      interpretations.push(await generateChartBasedFallback(event, userProfile));
+      return generateChartBasedFallback(event, userProfile);
     }
 
     const openai = getOpenAIClient();
@@ -371,7 +312,7 @@ export async function generatePersonalizedInterpretation(
       const parsedResponse = JSON.parse(cleanResponse);
       
       if (!parsedResponse.meaning || !parsedResponse.advice) {
-      return await generateChartBasedExecutiveFallback(userProfile);
+        throw new Error('Estructura de respuesta incompleta');
       }
       
       return parsedResponse as PersonalizedInterpretation;
@@ -388,7 +329,9 @@ export async function generatePersonalizedInterpretation(
 }
 
 export async function generateMultipleInterpretations(
-events: AstrologicalEvent[], userProfile: UserProfile, maxEventsToInterpret: number): Promise<PersonalizedInterpretation[]> {
+  events: AstrologicalEvent[],
+  userProfile: UserProfile
+): Promise<PersonalizedInterpretation[]> {
   const interpretations: PersonalizedInterpretation[] = [];
   
   console.log(`🔥 Generando interpretaciones para ${events.length} eventos con carta natal de ${userProfile.name}`);
@@ -403,7 +346,7 @@ events: AstrologicalEvent[], userProfile: UserProfile, maxEventsToInterpret: num
       
     } catch (error) {
       console.error(`❌ Error interpretando evento ${event.title}:`, error);
-      interpretations.push(await generateChartBasedFallback(event, userProfile));
+      interpretations.push(generateChartBasedFallback(event, userProfile));
     }
   }
   
@@ -449,31 +392,11 @@ INSTRUCCIONES:
 
 FORMATO JSON con referencias específicas a su carta natal.`;
 
-const completion = await openai.chat.completions.create({
-  model: "gpt-4o-mini",
-  messages: [
-    { role: "system", content: DISRUPTIVE_SYSTEM_PROMPT },
-    { role: "user", content: prompt }
-  ],
-  temperature: 0.9,
-  max_tokens: 2000
-});
-
-    const response = completion.choices[0].message.content;
-
-    if (!response) {
-      throw new Error("Respuesta vacía de OpenAI");
-    }
-
-    try {
-      const cleanResponse = response.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-      return JSON.parse(cleanResponse);
-    } catch (parseError) {
-      return generateChartBasedExecutiveFallback(userProfile);
-    }
-
-  } catch (error) {
-    console.error("❌ Error generando executive summary:", error);
-    return generateChartBasedExecutiveFallback(userProfile);
-  }
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: DISRUPTIVE_SYSTEM_PROMPT },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0
 }

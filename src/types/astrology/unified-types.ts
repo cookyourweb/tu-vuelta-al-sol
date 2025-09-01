@@ -1,5 +1,5 @@
 // src/types/astrology/unified-types.ts
-// TIPOS UNIFICADOS PARA SISTEMA ASTROLÓGICO COMPLETO
+// 🔥 TIPOS UNIFICADOS MEJORADOS CON DATOS DETALLADOS DE CARTA NATAL
 
 // ==========================================
 // TIPOS BÁSICOS
@@ -40,7 +40,77 @@ export interface PersonalizedEventTypeWithContext {
 }
 
 // ==========================================
-// PERFIL DE USUARIO
+// 🔥 DATOS DETALLADOS DE PLANETAS
+// ==========================================
+
+export interface PlanetPosition {
+  sign: string;           // "Acuario", "Libra", etc.
+  house: number;          // 1-12
+  degree: number;         // 0-30 grados dentro del signo
+  longitude: number;      // 0-360 grados absolutos
+  retrograde?: boolean;   // Si está retrógrado
+  element: ElementType;   // fuego, tierra, aire, agua
+  mode: ModeType;         // cardinal, fijo, mutable
+}
+
+export interface DetailedNatalChart {
+  // Planetas principales con datos completos
+  sol: PlanetPosition;
+  luna: PlanetPosition;
+  mercurio: PlanetPosition;
+  venus: PlanetPosition;
+  marte: PlanetPosition;
+  jupiter: PlanetPosition;
+  saturno: PlanetPosition;
+  urano: PlanetPosition;
+  neptuno: PlanetPosition;
+  pluton: PlanetPosition;
+  
+  // Puntos importantes
+  ascendente: PlanetPosition;
+  mediocielo: PlanetPosition;
+  
+  // Nodos lunares
+  nodo_norte?: PlanetPosition;
+  nodo_sur?: PlanetPosition;
+  
+  // Aspectos principales
+  aspectos: Array<{
+    planeta1: string;
+    planeta2: string;
+    tipo: 'conjuncion' | 'oposicion' | 'trigono' | 'cuadratura' | 'sextil';
+    orbe: number;
+    energia: 'armonica' | 'desafiante' | 'neutra';
+  }>;
+}
+
+export interface DetailedProgressedChart {
+  // Planetas progresados más importantes
+  sol_progresado: PlanetPosition;
+  luna_progresada: PlanetPosition;
+  mercurio_progresado: PlanetPosition;
+  venus_progresada: PlanetPosition;
+  marte_progresado: PlanetPosition;
+  
+  // Aspectos natal-progresado más relevantes
+  aspectos_natales_progresados: Array<{
+    planeta_natal: string;
+    planeta_progresado: string;
+    tipo: string;
+    significado: string;
+  }>;
+  
+  // Información del año progresado
+  año_progresado: number;
+  edad_correspondiente: number;
+  periodo_validez: {
+    inicio: string;
+    fin: string;
+  };
+}
+
+// ==========================================
+// 🔥 PERFIL DE USUARIO ENRIQUECIDO
 // ==========================================
 
 export interface UserProfile {
@@ -56,10 +126,14 @@ export interface UserProfile {
   timezone: string;
   place: string;
   
+  // 🔥 NUEVA SECCIÓN: Datos astrológicos detallados
   astrological?: AstrologicalAnalysis;
+  detailedNatalChart?: DetailedNatalChart;
+  detailedProgressedChart?: DetailedProgressedChart;
 }
 
 export interface AstrologicalAnalysis {
+  // Análisis básico (mantener compatibilidad)
   signs: {
     sun: string;
     moon: string;
@@ -80,7 +154,37 @@ export interface AstrologicalAnalysis {
   lifeThemes: string[];
   strengths: string[];
   challenges: string[];
-  progressions?: any; // Análisis de progresiones (opcional)
+  progressions?: any;
+  
+  // 🔥 NUEVA SECCIÓN: Datos de carta detallados
+  natalChart?: any;
+  progressedChart?: any;
+  
+  // 🔥 NUEVA SECCIÓN: Análisis profundo
+  planetaryStrengths?: {
+    elemento_dominante: ElementType;
+    planetas_en_elemento: string[];
+    modo_dominante: ModeType;
+    planetas_en_modo: string[];
+  };
+  
+  aspectPattern?: {
+    gran_trigono?: boolean;
+    gran_cuadratura?: boolean;
+    stellium?: {
+      signo: string;
+      planetas: string[];
+      casa: number;
+    };
+  };
+  
+  casasActivadas?: {
+    [casa: number]: {
+      planetas: string[];
+      tema_principal: string;
+      energia: 'fuerte' | 'moderada' | 'debil';
+    };
+  };
 }
 
 // ==========================================
@@ -140,10 +244,19 @@ export interface PersonalizedEventContext {
   progressedConnection?: string | null;
   personalTheme?: string;
   lifeArea?: string;
+  
+  // 🔥 NUEVO: Conexión específica con carta natal
+  natalPlanetPosition?: PlanetPosition;
+  progressedPlanetPosition?: PlanetPosition;
+  aspectosActivados?: Array<{
+    tipo: string;
+    planetas: string[];
+    significado: string;
+  }>;
 }
 
 // ==========================================
-// INTERPRETACIONES PERSONALIZADAS
+// INTERPRETACIONES PERSONALIZADAS MEJORADAS
 // ==========================================
 
 export interface PersonalizedInterpretation {
@@ -156,6 +269,20 @@ export interface PersonalizedInterpretation {
   warningsAndOpportunities?: {
     warnings: string[];
     opportunities: string[];
+  };
+  
+  // 🔥 NUEVO: Interpretación específica basada en carta
+  natalContext?: {
+    conexionPlanetaria: string;
+    casaActivada: number;
+    temaVida: string;
+    desafioEvolutivo: string;
+  };
+  
+  progressedContext?: {
+    evolucionActual: string;
+    temasEmergentes: string[];
+    oportunidadesCrecimiento: string[];
   };
 }
 
@@ -176,6 +303,52 @@ export interface ActionPlan {
   actions?: string[];
   milestones?: string[];
   metrics?: string[];
+  
+  // 🔥 NUEVO: Acciones basadas en posiciones planetarias
+  planetaryTiming?: {
+    mejoresMomentos: string[];
+    evitarMomentos: string[];
+    lunarPhase?: string;
+    planetaryHours?: string[];
+  };
+}
+
+// ==========================================
+// 🔥 SISTEMA DISRUPTIVO INTEGRADO
+// ==========================================
+
+export interface DisruptiveInterpretation {
+  shockValue: string;              // Apertura impactante
+  epicRealization: string;         // Realización profunda
+  whatToExpected: {                // Qué esperar por horas
+    energeticShift: string;
+    emotionalWave: string;
+    mentalClarity: string;
+    physicalSensations: string;
+  };
+  preparation: {                   // Preparación épica
+    ritual: string;
+    mindsetShift: string;
+    physicalAction: string;
+    energeticProtection: string;
+  };
+  revolutionaryAdvice: {          // Consejos revolucionarios
+    doThis: string[];
+    avoidThis: string[];
+    powerHours: string[];
+    dangerZones: string[];
+  };
+  manifestation: {                // Manifestación activa
+    mantra: string;
+    visualization: string;
+    physicalGesture: string;
+    elementalConnection: string;
+  };
+  expectedTransformation: {       // Transformación esperada
+    immediate: string;
+    weekly: string;
+    longTerm: string;
+  };
 }
 
 // ==========================================
@@ -201,6 +374,43 @@ export function getSignMode(sign: string): ModeType {
   return modes[sign] || 'cardinal';
 }
 
+// 🔥 NUEVAS FUNCIONES AUXILIARES
+export function getPlanetaryRuler(sign: string): string {
+  const rulers: Record<string, string> = {
+    'Aries': 'Marte',
+    'Tauro': 'Venus', 
+    'Géminis': 'Mercurio',
+    'Cáncer': 'Luna',
+    'Leo': 'Sol',
+    'Virgo': 'Mercurio',
+    'Libra': 'Venus',
+    'Escorpio': 'Plutón',
+    'Sagitario': 'Júpiter',
+    'Capricornio': 'Saturno',
+    'Acuario': 'Urano',
+    'Piscis': 'Neptuno'
+  };
+  return rulers[sign] || 'Sol';
+}
+
+export function getHouseTheme(house: number): string {
+  const themes: Record<number, string> = {
+    1: 'Identidad y autopresentación',
+    2: 'Recursos y valores personales',
+    3: 'Comunicación y hermanos',
+    4: 'Hogar y familia',
+    5: 'Creatividad y romance',
+    6: 'Trabajo y salud',
+    7: 'Relaciones y matrimonio',
+    8: 'Transformación y recursos compartidos',
+    9: 'Filosofía y estudios superiores',
+    10: 'Carrera y reputación',
+    11: 'Amistades y grupos',
+    12: 'Espiritualidad y subconsciente'
+  };
+  return themes[house] || 'Área de vida';
+}
+
 // ==========================================
 // TIPOS PARA AGENDA
 // ==========================================
@@ -218,6 +428,7 @@ export interface AgendaData {
       hasNatalChart: boolean;
       hasProgressedChart: boolean;
       hasAIInterpretations: boolean;
+      hasDetailedPositions: boolean;
     };
   };
 }
@@ -227,68 +438,116 @@ export interface ExecutiveSummary {
   quarterlyFocus: string[];
   yearlyThemes: string[];
   priorityActions: ActionPlan[];
-  keyInsights?: {
-    dominantElements: string[];
-    primaryChallenges: string[];
-    biggestOpportunities: string[];
-    overallTheme: string;
-  };
+  keyInsights?: string[];
+  cosmicOverview?: string;
 }
 
 export interface EventStatistics {
   totalEvents: number;
-  byType: Record<string, number>;
-  byPriority: {
-    high: number;
-    medium: number;
-    low: number;
-  };
-  byMonth: Record<string, number>;
+  highPriorityEvents: number;
+  interpretedEvents: number;
+  eventsByType: Record<string, number>;
+  eventsByMonth: Record<string, number>;
+  aiInterpretationCoverage: number;
 }
 
 // ==========================================
-// TIPOS PARA INTERPRETACIÓN DISRUPTIVA
+// 🔥 FUNCIONES DE CONVERSIÓN DE DATOS
 // ==========================================
 
-export interface DisruptiveInterpretation {
-  shockValue: string;
-  epicRealization: string;
-  whatToExpect: {
-    energeticShift: string;
-    emotionalWave: string;
-    mentalClarity: string;
-    physicalSensations: string;
-  };
-  preparation: {
-    ritual: string;
-    mindsetShift: string;
-    physicalAction: string;
-    energeticProtection: string;
-  };
-  revolutionaryAdvice: {
-    doThis: string[];
-    avoidThis: string[];
-    powerHours: string[];
-    dangerZones: string[];
-  };
-  manifestation: {
-    mantra: string;
-    visualization: string;
-    physicalGesture: string;
-    elementalConnection: string;
-  };
-  expectedTransformation: {
-    immediate: string;
-    weekly: string;
-    longTerm: string;
-  };
+export function convertProkeralaToDetailedChart(prokeralaData: any): DetailedNatalChart | null {
+  try {
+    const planets = prokeralaData?.planets;
+    const houses = prokeralaData?.houses;
+    
+    if (!planets || !Array.isArray(planets)) {
+      return null;
+    }
+    
+    const detailedChart: Partial<DetailedNatalChart> = {
+      aspectos: [] // Inicializar aspectos vacío
+    };
+    
+    // Mapear planetas
+    planets.forEach((planet: any) => {
+      const planetName = planet.name?.toLowerCase();
+      const sign = getSignNameFromId(planet.sign);
+      
+      if (sign) {
+        const position: PlanetPosition = {
+          sign,
+          house: planet.house || 1,
+          degree: planet.degree || 0,
+          longitude: planet.full_degree || 0,
+          retrograde: planet.retrograde || false,
+          element: getSignElement(sign),
+          mode: getSignMode(sign)
+        };
+        
+        // Mapear a los nombres correctos
+        switch (planetName) {
+          case 'sun': case 'sol':
+            detailedChart.sol = position;
+            break;
+          case 'moon': case 'luna':
+            detailedChart.luna = position;
+            break;
+          case 'mercury': case 'mercurio':
+            detailedChart.mercurio = position;
+            break;
+          case 'venus':
+            detailedChart.venus = position;
+            break;
+          case 'mars': case 'marte':
+            detailedChart.marte = position;
+            break;
+          case 'jupiter': case 'júpiter':
+            detailedChart.jupiter = position;
+            break;
+          case 'saturn': case 'saturno':
+            detailedChart.saturno = position;
+            break;
+          case 'uranus': case 'urano':
+            detailedChart.urano = position;
+            break;
+          case 'neptune': case 'neptuno':
+            detailedChart.neptuno = position;
+            break;
+          case 'pluto': case 'plutón':
+            detailedChart.pluton = position;
+            break;
+        }
+      }
+    });
+    
+    // Calcular ascendente si hay datos de casas
+    if (houses && Array.isArray(houses) && houses[0]) {
+      const ascSign = getSignNameFromId(houses[0].sign);
+      if (ascSign) {
+        detailedChart.ascendente = {
+          sign: ascSign,
+          house: 1,
+          degree: houses[0].degree || 0,
+          longitude: houses[0].degree || 0,
+          retrograde: false,
+          element: getSignElement(ascSign),
+          mode: getSignMode(ascSign)
+        };
+      }
+    }
+    
+    return detailedChart as DetailedNatalChart;
+  } catch (error) {
+    console.error('Error convirtiendo datos Prokerala:', error);
+    return null;
+  }
 }
 
-// ==========================================
-// EXPORTACIONES DE COMPATIBILIDAD
-// ==========================================
-
-export default {
-  getSignElement,
-  getSignMode
-};
+function getSignNameFromId(signId: number): string | null {
+  const signs: Record<number, string> = {
+    1: 'Aries', 2: 'Tauro', 3: 'Géminis', 4: 'Cáncer',
+    5: 'Leo', 6: 'Virgo', 7: 'Libra', 8: 'Escorpio',
+    9: 'Sagitario', 10: 'Capricornio', 11: 'Acuario', 12: 'Piscis'
+  };
+  return signs[signId] || null;
+}

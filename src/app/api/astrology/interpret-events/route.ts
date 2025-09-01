@@ -1,13 +1,11 @@
 // src/app/api/astrology/interpret-events/route.ts
-// 🤖 ENDPOINT ACTUALIZADO CON IA AVANZADA PARA PLANES DE ACCIÓN
-
 import { NextRequest, NextResponse } from 'next/server';
-
 import connectDB from '@/lib/db';
 import BirthData from '@/models/BirthData';
 
-import trainedAssistantService from '@/services/trainedAssistantService';
-import type { UserProfile } from '@/types/astrology/unified-types';
+// Corregir el import
+import * as trainedAssistantService from '@/services/trainedAssistantService';
+import type { UserProfile, AstrologicalEvent, PersonalizedInterpretation } from '@/types/astrology/unified-types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,7 +20,6 @@ export async function POST(request: NextRequest) {
 
     console.log(`🤖 Interpretando ${events.length} eventos para usuario: ${userId}`);
 
-    // Conectar a base de datos y obtener perfil del usuario
     await connectDB();
     const birthData = await BirthData.findOne({ userId });
     
@@ -74,7 +71,7 @@ export async function POST(request: NextRequest) {
 
     console.log(`👤 Perfil del usuario: ${userProfile.nextAge} años, ${userProfile.place}`);
 
-    // Filtrar eventos de alta prioridad para interpretación IAcomo
+    // Filtrar eventos de alta prioridad
     const highPriorityEvents = events.filter((event: any) => 
       event.priority === 'high' || event.priority === 'medium'
     );
@@ -83,11 +80,15 @@ export async function POST(request: NextRequest) {
     console.log(`🎯 Interpretando ${maxEventsToInterpret} eventos de alta prioridad de ${events.length} totales`);
 
     // Generar interpretaciones personalizadas con IA
-    const interpretedEvents = await trainedAssistantService.generateMultipleInterpretations(
+    const aiInterpretations: PersonalizedInterpretation[] = await trainedAssistantService.generateMultipleInterpretations(
       highPriorityEvents,
       userProfile,
       maxEventsToInterpret
     );
+    const interpretedEvents: AstrologicalEvent[] = highPriorityEvents.map((event: any, idx: number) => ({
+      ...event,
+      aiInterpretation: aiInterpretations[idx] || null
+    }));
 
     // Combinar eventos interpretados con el resto
     const allEvents = [
@@ -101,27 +102,30 @@ export async function POST(request: NextRequest) {
       executiveSummaryResult = await trainedAssistantService.generateExecutiveSummary(interpretedEvents, userProfile);
     }
 
-    // Calcular estadísticas de interpretación
+    // Calcular estadísticas de interpretación - CORRECCIÓN DE TIPOS
     const interpretationStats = {
       totalEvents: events.length,
-      interpretedEvents: interpretedEvents.filter(e => e.aiInterpretation).length,
-      highPriorityInterpreted: interpretedEvents.filter(e => e.priority === 'high' && e.aiInterpretation).length,
-      mediumPriorityInterpreted: interpretedEvents.filter(e => e.priority === 'medium' && e.aiInterpretation).length,
+      interpretedEvents: interpretedEvents.filter((e: AstrologicalEvent) => e.aiInterpretation).length,
+      highPriorityInterpreted: interpretedEvents.filter((e: AstrologicalEvent) => 
+        e.priority === 'high' && e.aiInterpretation).length,
+      mediumPriorityInterpreted: interpretedEvents.filter((e: AstrologicalEvent) => 
+        e.priority === 'medium' && e.aiInterpretation).length,
       
       // Estadísticas por tipo de evento
       eventTypes: {
-        lunarPhases: interpretedEvents.filter(e => e.type === 'lunar_phase' && e.aiInterpretation).length,
+        lunarPhases: interpretedEvents.filter((e: AstrologicalEvent) => 
+          e.type === 'lunar_phase' && e.aiInterpretation).length,
       },
       
       // Estadísticas de planes de acción
       actionPlans: {
-        total: interpretedEvents.reduce((total, event) => 
+        total: interpretedEvents.reduce((total: number, event: AstrologicalEvent) => 
           total + (event.aiInterpretation?.actionPlan?.length || 0), 0),
-        immediate: interpretedEvents.reduce((total, event) => 
+        immediate: interpretedEvents.reduce((total: number, event: AstrologicalEvent) => 
           total + (event.aiInterpretation?.actionPlan?.filter(ap => ap.timing === 'inmediato').length || 0), 0),
-        weekly: interpretedEvents.reduce((total, event) => 
+        weekly: interpretedEvents.reduce((total: number, event: AstrologicalEvent) => 
           total + (event.aiInterpretation?.actionPlan?.filter(ap => ap.timing === 'esta_semana').length || 0), 0),
-        monthly: interpretedEvents.reduce((total, event) => 
+        monthly: interpretedEvents.reduce((total: number, event: AstrologicalEvent) => 
           total + (event.aiInterpretation?.actionPlan?.filter(ap => ap.timing === 'este_mes').length || 0), 0)
       }
     };
@@ -182,7 +186,7 @@ export async function GET(request: NextRequest) {
     capabilities: [
       "Análisis personalizado por edad y ubicación",
       "Planes de acción específicos por categoría",
-      "Timing optimizado para cada acción",
+      "Timing optimizado para cada acción", 
       "Advertencias y oportunidades personalizadas",
       "Mantras y rituales adaptados",
       "Resumen ejecutivo del año astrológico"

@@ -8,65 +8,6 @@ import type { ActionPlan } from "@/types/astrology/unified-types";
 // Importar el sistema disruptivo existente
 import disruptiveSystem from "@/utils/astrology/disruptiveMotivationalSystem";
 
-// Fallback para interpretación personalizada si no hay OpenAI o sistema disruptivo
-export async function generateChartBasedFallback(
-  event: AstrologicalEvent,
-  userProfile: UserProfile
-): Promise<PersonalizedInterpretation> {
-  // Implementación básica de fallback usando datos de carta natal
-  const userName = userProfile.name || "ALMA PODEROSA";
-  const planet = "Sol";
-  const position = userProfile.detailedNatalChart?.sol;
-  return {
-    meaning: `Interpretación básica para ${userName} usando su ${planet} natal en ${position?.sign || "signo"} Casa ${position?.house || 1}.`,
-    lifeAreas: [
-      `CASA ${position?.house || 1}: Área de vida activada`,
-      `ELEMENTO ${position?.element || "fuego"}: Manifestación elemental`,
-      "Manifestación específica basada en configuración natal"
-    ],
-    advice: `Consejo personalizado para ${userName} usando su ${planet} en ${position?.sign || "signo"} Casa ${position?.house || 1}.`,
-    mantra: `Mantra para ${userName} (${position?.sign || "signo"} - ${position?.element || "elemento"})`,
-    ritual: `Ritual básico para ${planet} en ${position?.sign || "signo"} Casa ${position?.house || 1}.`,
-    actionPlan: [
-      {
-        category: "poder_planetario_personal",
-        action: `Activa tu ${planet} en ${position?.sign || "signo"} Casa ${position?.house || 1}`,
-        timing: "inmediato",
-        difficulty: "fácil",
-        impact: "transformador"
-      }
-    ],
-    warningsAndOpportunities: {
-      warnings: [
-        `Cuidado con desafíos de ${position?.sign || "signo"} en Casa ${position?.house || 1}`
-      ],
-      opportunities: [
-        `Tu combinación ${planet}-${position?.sign || "signo"}-Casa ${position?.house || 1} te da SUPERPODER`
-      ]
-    },
-    natalContext: {
-      conexionPlanetaria: `Tu ${planet} natal en ${position?.sign || "signo"} está siendo activado.`,
-      casaActivada: position?.house || 1,
-      temaVida: `Tema de vida de Casa ${position?.house || 1}`,
-      desafioEvolutivo: `Desafío de ${planet} en ${position?.sign || "signo"}`
-    }
-  };
-}
-
-// Fallback para resumen ejecutivo si no hay OpenAI
-export async function generateChartBasedExecutiveFallback(
-  userProfile: UserProfile
-): Promise<any> {
-  const userName = userProfile.name || "REVOLUCIONARIO CÓSMICO";
-  const natalChart = userProfile.detailedNatalChart;
-  return {
-    resumen: `Resumen ejecutivo básico para ${userName} usando su carta natal.`,
-    sol: natalChart?.sol || {},
-    luna: natalChart?.luna || {},
-    ascendente: natalChart?.ascendente || {}
-  };
-}
-
 // Función helper para obtener el cliente OpenAI (lazy loading)
 function getOpenAIClient() {
   if (!process.env.OPENAI_API_KEY) {
@@ -190,14 +131,10 @@ function getRelevantNatalPosition(
   const planetKey = eventPlanetMap[event.type];
   if (!planetKey) {
     // Usar Sol por defecto para eventos generales
-    const solPosition = natalChart.sol;
-    if (solPosition) {
-      return {
-        planetName: 'Sol',
-        position: solPosition
-      };
-    }
-    return null;
+    return {
+      planetName: 'Sol',
+      position: natalChart.sol
+    };
   }
   
   const position = natalChart[planetKey] as PlanetPosition;
@@ -225,15 +162,12 @@ function buildChartEnhancedPrompt(event: AstrologicalEvent, userProfile: UserPro
   
   let chartSpecificInfo = "";
   let planetaryContext = "";
-  let planetName = "";
-  let position: PlanetPosition | null = null;
   
   if (natalChart) {
     const relevantPlanet = getRelevantNatalPosition(event, natalChart);
     
     if (relevantPlanet) {
-      planetName = relevantPlanet.planetName;
-      position = relevantPlanet.position;
+      const { planetName, position } = relevantPlanet;
       chartSpecificInfo = getChartSpecificImpact(userName, planetName, position);
       
       planetaryContext = `
@@ -279,16 +213,17 @@ FORMATO JSON OBLIGATORIO CON DATOS DE CARTA NATAL:
 {
   "meaning": "${epicOpening} ${chartSpecificInfo}. [Continúa con explicación épica específica basada en SUS posiciones planetarias exactas]",
   "lifeAreas": [
-    "CASA ${(position?.house || 1)}: [Área de vida específica activada]",
-    "ELEMENTO ${(position?.element || 'fuego')}: [Cómo se manifiesta su energía elemental]", 
+    "CASA ${position?.house || 1}: [Área de vida específica activada]",
+    "ELEMENTO ${position?.element || 'fuego'}: [Cómo se manifiesta su energía elemental]", 
     "[Área de manifestación específica basada en su configuración natal]"
   ],
-  "advice": "TU MOMENTO DE ACCIÓN ÉPICA PERSONALIZADA ${userName.toUpperCase()}: Basándote en tu ${planetName} en ${(position?.sign || 'signo')} Casa ${(position?.house || 1)}, [consejo específico que usa sus datos natales]",
-      "mantra": "[MANTRA PODEROSO que incorpore su signo ${(position?.sign || 'signo')} y elemento ${(position?.element || 'elemento')}]",
+  "advice": "TU MOMENTO DE ACCIÓN ÉPICA PERSONALIZADA ${userName.toUpperCase()}: Basándote en tu ${planetName} en ${position?.sign} Casa ${position?.house}, [consejo específico que usa sus datos natales]",
+  "mantra": "[MANTRA PODEROSO que incorpore su signo ${position?.sign} y elemento ${position?.element}]",
+  "ritual": "RITUAL ÉPICO PARA TU ${planetName} EN ${position?.sign}: 1) [Paso específico usando su elemento], 2) [Paso usando su casa astrológica], 3) [Paso final personalizado]",
   "actionPlan": [
     {
       "category": "poder_planetario_personal",
-      "action": "Acción específica que active tu ${planetName} en ${(position?.sign || 'signo')} Casa ${(position?.house || 1)}",
+      "action": "Acción específica que active tu ${planetName} en ${position?.sign} Casa ${position?.house}",
       "timing": "inmediato|esta_semana|este_mes", 
       "difficulty": "fácil|moderado|desafiante",
       "impact": "revolucionario|transformador|activador"
@@ -296,19 +231,19 @@ FORMATO JSON OBLIGATORIO CON DATOS DE CARTA NATAL:
   ],
   "warningsAndOpportunities": {
     "warnings": [
-      "Ten cuidado con [desafío específico de ${(position?.sign || 'signo')}] en tu Casa ${(position?.house || 1)}",
-      "Tu ${planetName} ${(position?.retrograde ? 'retrógrado' : 'directo')} puede generar [advertencia personalizada]"
+      "Ten cuidado con [desafío específico de ${position?.sign}] en tu Casa ${position?.house}",
+      "Tu ${planetName} ${position?.retrograde ? 'retrógrado' : 'directo'} puede generar [advertencia personalizada]"
     ],
     "opportunities": [
-      "Tu combinación ${planetName}-${(position?.sign || 'signo')}-Casa ${(position?.house || 1)} te da SUPERPODER en [área específica]",
-      "Momento perfecto para manifestar usando tu energía ${(position?.element || 'elemento')} dominante"
+      "Tu combinación ${planetName}-${position?.sign}-Casa ${position?.house} te da SUPERPODER en [área específica]",
+      "Momento perfecto para manifestar usando tu energía ${position?.element} dominante"
     ]
   },
   "natalContext": {
-    "conexionPlanetaria": "Tu ${planetName} natal en ${(position?.sign || 'signo')} ${(position?.degree || 0)}° está siendo directamente activado por este evento",
-    "casaActivada": ${(position?.house || 1)},
-    "temaVida": "[Tema de vida específico de Casa ${(position?.house || 1)}]",
-    "desafioEvolutivo": "[Desafío específico que tu ${planetName} en ${(position?.sign || 'signo')} viene a resolver]"
+    "conexionPlanetaria": "Tu ${planetName} natal en ${position?.sign} ${position?.degree}° está siendo directamente activado por este evento",
+    "casaActivada": ${position?.house || 1},
+    "temaVida": "[Tema de vida específico de Casa ${position?.house}]",
+    "desafioEvolutivo": "[Desafío específico que tu ${planetName} en ${position?.sign} viene a resolver]"
   }
 }
 
@@ -343,8 +278,7 @@ export async function generatePersonalizedInterpretation(
 
     if (!process.env.OPENAI_API_KEY) {
       console.warn('⚠️ OpenAI no configurado, usando fallback con carta natal');
-      const interpretations: PersonalizedInterpretation[] = [];
-      interpretations.push(await generateChartBasedFallback(event, userProfile));
+      return generateChartBasedFallback(event, userProfile);
     }
 
     const openai = getOpenAIClient();
@@ -371,7 +305,7 @@ export async function generatePersonalizedInterpretation(
       const parsedResponse = JSON.parse(cleanResponse);
       
       if (!parsedResponse.meaning || !parsedResponse.advice) {
-      return await generateChartBasedExecutiveFallback(userProfile);
+        throw new Error('Estructura de respuesta incompleta');
       }
       
       return parsedResponse as PersonalizedInterpretation;
@@ -388,7 +322,9 @@ export async function generatePersonalizedInterpretation(
 }
 
 export async function generateMultipleInterpretations(
-events: AstrologicalEvent[], userProfile: UserProfile, maxEventsToInterpret: number): Promise<PersonalizedInterpretation[]> {
+  events: AstrologicalEvent[],
+  userProfile: UserProfile
+): Promise<PersonalizedInterpretation[]> {
   const interpretations: PersonalizedInterpretation[] = [];
   
   console.log(`🔥 Generando interpretaciones para ${events.length} eventos con carta natal de ${userProfile.name}`);
@@ -403,7 +339,7 @@ events: AstrologicalEvent[], userProfile: UserProfile, maxEventsToInterpret: num
       
     } catch (error) {
       console.error(`❌ Error interpretando evento ${event.title}:`, error);
-      interpretations.push(await generateChartBasedFallback(event, userProfile));
+      interpretations.push(generateChartBasedFallback(event, userProfile));
     }
   }
   
@@ -449,31 +385,251 @@ INSTRUCCIONES:
 
 FORMATO JSON con referencias específicas a su carta natal.`;
 
-const completion = await openai.chat.completions.create({
-  model: "gpt-4o-mini",
-  messages: [
-    { role: "system", content: DISRUPTIVE_SYSTEM_PROMPT },
-    { role: "user", content: prompt }
-  ],
-  temperature: 0.9,
-  max_tokens: 2000
-});
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: DISRUPTIVE_SYSTEM_PROMPT },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.9,
+      max_tokens: 2000
+    });
 
     const response = completion.choices[0].message.content;
-
+    
     if (!response) {
-      throw new Error("Respuesta vacía de OpenAI");
+      throw new Error('Respuesta vacía de OpenAI');
     }
 
     try {
-      const cleanResponse = response.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+      const cleanResponse = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
       return JSON.parse(cleanResponse);
     } catch (parseError) {
       return generateChartBasedExecutiveFallback(userProfile);
     }
 
   } catch (error) {
-    console.error("❌ Error generando executive summary:", error);
+    console.error('❌ Error generando executive summary:', error);
     return generateChartBasedExecutiveFallback(userProfile);
   }
 }
+
+// 🔥 FALLBACKS CON DATOS DE CARTA NATAL
+function generateChartBasedFallback(
+  event: AstrologicalEvent, 
+  userProfile: UserProfile
+): PersonalizedInterpretation {
+  const userName = userProfile.name || userProfile.place || 'ALMA PODEROSA';
+  const natalChart = userProfile.detailedNatalChart;
+  const eventTitle = event.title || 'ACTIVACIÓN CÓSMICA';
+  
+  const epicOpening = getRandomOpening(userName);
+  let natalConnection = "";
+  let specificAdvice = "";
+  let chartContext = null;
+  
+  if (natalChart) {
+    const relevantPlanet = getRelevantNatalPosition(event, natalChart);
+    if (relevantPlanet) {
+      const { planetName, position } = relevantPlanet;
+      natalConnection = `Tu ${planetName} natal en ${position.sign} ${position.degree.toFixed(1)}° Casa ${position.house} está siendo DIRECTAMENTE activado por este evento cósmico.`;
+      specificAdvice = `Basándote en tu ${planetName} en ${position.sign} Casa ${position.house}, este es TU momento de brillar en el área de ${getHouseTheme(position.house)}.`;
+      
+      chartContext = {
+        conexionPlanetaria: natalConnection,
+        casaActivada: position.house,
+        temaVida: getHouseTheme(position.house),
+        desafioEvolutivo: `Desarrollar plenamente tu ${planetName} en ${position.sign} para manifestar tu máximo potencial`
+      };
+    }
+  }
+  
+  return {
+    meaning: `${epicOpening} ${eventTitle} está activando frecuencias épicas específicamente calibradas para tu configuración natal única. ${natalConnection} Este momento fue programado por tu alma antes de nacer para REVOLUCIONAR tu realidad desde el núcleo.`,
+    
+    lifeAreas: natalChart ? [
+      `CASA ${natalChart.sol?.house || 1}: Tu poder personal se ACTIVA de forma magnética`,
+      `ELEMENTO ${natalChart.sol?.element || 'fuego'}: Tu energía natural alcanza niveles épicos`, 
+      `MODALIDAD ${natalChart.sol?.mode || 'cardinal'}: Tu forma única de crear realidad se POTENCIA`
+    ] : [
+      `REVOLUCIÓN ENERGÉTICA: Tu frecuencia está ascendiendo a niveles épicos`,
+      `TRANSFORMACIÓN PERSONAL: Activación de tu máximo potencial interior`, 
+      `MANIFESTACIÓN ACELERADA: Tus deseos se materializan con velocidad cuántica`
+    ],
+    
+    advice: specificAdvice || `TU MOMENTO DE ACCIÓN ÉPICA HA LLEGADO ${userName.toUpperCase()}: El universo te está entregando las llaves de tu poder interior. Actúa desde tu corazón, confía en tu instinto épico, y prepárate para manifestar la versión más PODEROSA de ti misma.`,
+    
+    mantra: natalChart?.sol ? 
+      `SOY ${userName.toUpperCase()}, FUERZA ${natalChart.sol.element.toUpperCase()} DE ${natalChart.sol.sign.toUpperCase()}, CREADORA MAGNÉTICA DE MI REALIDAD` :
+      `SOY ${userName.toUpperCase()}, UNA FUERZA CÓSMICA IMPARABLE DE MANIFESTACIÓN ÉPICA`,
+    
+    ritual: natalChart?.sol ? 
+      `RITUAL PERSONALIZADO PARA TU SOL EN ${natalChart.sol.sign}: 1) Conecta con energía ${natalChart.sol.element} (${getElementalAction(natalChart.sol.element)}), 2) Activa tu Casa ${natalChart.sol.house} (${getHouseActivation(natalChart.sol.house)}), 3) Declara tu poder como ${natalChart.sol.sign}, 4) Ancla tu nueva frecuencia con 7 respiraciones de gratitud.` :
+      `RITUAL ÉPICO UNIVERSAL: 1) Enciende vela dorada, 2) Declara "SOY LIBRE DE LIMITACIONES", 3) Visualiza tu vida ideal, 4) Ancla con gratitud al universo.`,
+    
+    actionPlan: [
+      {
+        category: 'poder_natal_personal',
+        action: natalChart?.sol ? 
+          `Activa conscientemente tu Sol en ${natalChart.sol.sign} Casa ${natalChart.sol.house} durante 20 minutos diarios` :
+          `Conecta con tu poder interior 20 minutos diarios mediante meditación`,
+        timing: 'inmediato',
+        difficulty: 'fácil',
+        impact: 'revolucionario'
+      },
+      {
+        category: 'manifestación_elemental',
+        action: natalChart?.sol ? 
+          `Usa tu energía ${natalChart.sol.element} para manifestar mediante ${getElementalManifestation(natalChart.sol.element)}` :
+          `Visualiza tu realidad ideal cada mañana durante 10 minutos`,
+        timing: 'esta_semana', 
+        difficulty: 'moderado',
+        impact: 'transformador'
+      }
+    ],
+    
+    warningsAndOpportunities: {
+      warnings: natalChart?.sol ? [
+        `Ten cuidado con el desafío natural de ${natalChart.sol.sign}: ${getSignChallenge(natalChart.sol.sign)}`,
+        `Tu Sol en Casa ${natalChart.sol.house} puede generar sobrefoco en ${getHouseTheme(natalChart.sol.house)} - mantén equilibrio`
+      ] : [
+        `No resistas los cambios épicos que se aproximan - tu alma los solicitó`,
+        `Evita tomar decisiones desde el miedo - tu poder viene de la confianza total`
+      ],
+      opportunities: natalChart?.sol ? [
+        `Tu Sol en ${natalChart.sol.sign} Casa ${natalChart.sol.house} te da SUPERPODER natural en ${getHouseTheme(natalChart.sol.house)}`,
+        `Tu energía ${natalChart.sol.element} está en MÁXIMO nivel - momento perfecto para ${getElementalOpportunity(natalChart.sol.element)}`
+      ] : [
+        `Portal de manifestación ÉPICO activado - materializa tus deseos con velocidad cuántica`,
+        `Tu campo magnético está en modo MÁXIMO - atrae milagros y oportunidades`
+      ]
+    },
+    
+    natalContext: chartContext || undefined
+  };
+}
+
+function generateChartBasedExecutiveFallback(userProfile: UserProfile): any {
+  const userName = userProfile.name || 'REVOLUCIONARIO CÓSMICO';
+  const natalChart = userProfile.detailedNatalChart;
+  const epicOpening = getRandomOpening(userName);
+  
+  return {
+    monthlyHighlights: natalChart ? [
+      `${epicOpening} - ENERO activa tu Sol en ${natalChart.sol?.sign} con PODER MAGNÉTICO`,
+      `FEBRERO: ¡LUNA NATAL DESPERTANDO! - Tu Luna en ${natalChart.luna?.sign} recibe UPGRADE cósmico`,
+      `MARZO: ¡REVOLUCIÓN ${natalChart.sol?.element?.toUpperCase()}! - Tu elemento dominante se POTENCIA`,
+      `[continúa personalizado con su carta natal...]`
+    ] : [
+      `${epicOpening} - ENERO marca tu REVOLUCIÓN PERSONAL más épica`,
+      `FEBRERO: TRANSFORMACIÓN MAGNÉTICA en curso - evolución acelerada`,
+      `[continúa con variedad épica...]`
+    ],
+    
+    yearlyThemes: natalChart ? [
+      `ACTIVACIÓN TOTAL de tu Sol en ${natalChart.sol?.sign} - Liderazgo magnético`,
+      `EVOLUCIÓN de tu Luna en ${natalChart.luna?.sign} - Sabiduría emocional épica`,
+      `MAESTRÍA de tu energía ${natalChart.sol?.element} - Manifestación acelerada`,
+      `REVOLUCIÓN en tu Casa ${natalChart.sol?.house} - ${getHouseTheme(natalChart.sol?.house || 1)} transformada`
+    ] : [
+      `REVOLUCIÓN PERSONAL TOTAL - Transformación de limitaciones a creación infinita`,
+      `ACTIVACIÓN de magnetismo cósmico - Atracción consciente de realidad ideal`,
+      `MANIFESTACIÓN cuántica - Materialización de visiones más audaces`
+    ],
+    
+    priorityActions: [
+      {
+        category: 'activacion_natal',
+        action: natalChart?.sol ? 
+          `Desarrolla ritual diario específico para tu Sol en ${natalChart.sol.sign} Casa ${natalChart.sol.house}` :
+          `Desarrolla conexión diaria con tu poder interior único`,
+        timing: 'inmediato',
+        difficulty: 'transformador',
+        impact: 'revolucionario'
+      }
+    ]
+  };
+}
+
+// 🔥 FUNCIONES AUXILIARES PARA CARTA NATAL
+function getHouseTheme(house: number): string {
+  const themes: Record<number, string> = {
+    1: 'Identidad y autopresentación', 2: 'Recursos y valores', 3: 'Comunicación',
+    4: 'Hogar y familia', 5: 'Creatividad y romance', 6: 'Trabajo y salud',
+    7: 'Relaciones', 8: 'Transformación', 9: 'Filosofía y expansión',
+    10: 'Carrera y reputación', 11: 'Grupos y amistad', 12: 'Espiritualidad'
+  };
+  return themes[house] || 'Área de vida';
+}
+
+function getElementalAction(element: string): string {
+  const actions: Record<string, string> = {
+    'fire': 'enciende vela roja, mueve tu cuerpo',
+    'earth': 'toca la tierra, usa cristales',
+    'air': 'respira consciente, escribe intenciones',
+    'water': 'usa agua, conecta con emociones'
+  };
+  return actions[element] || 'conecta con la naturaleza';
+}
+
+function getHouseActivation(house: number): string {
+  const activations: Record<number, string> = {
+    1: 'mírate al espejo y declara tu poder',
+    2: 'organiza tus recursos físicos',
+    3: 'escribe o comunícate conscientemente',
+    4: 'crea espacio sagrado en tu hogar',
+    5: 'haz algo creativo',
+    6: 'mejora tu rutina diaria',
+    7: 'honra tus relaciones importantes',
+    8: 'practica liberación emocional',
+    9: 'estudia algo que te expanda',
+    10: 'visualiza tus logros profesionales',
+    11: 'conecta con tu comunidad',
+    12: 'medita y conecta con lo sagrado'
+  };
+  return activations[house] || 'toma acción consciente';
+}
+
+function getElementalManifestation(element: string): string {
+  const manifestations: Record<string, string> = {
+    'fire': 'visualización ardiente y acción inmediata',
+    'earth': 'pasos concretos y constancia',
+    'air': 'intención clara y comunicación',
+    'water': 'conexión emocional y flujo'
+  };
+  return manifestations[element] || 'intención enfocada';
+}
+
+function getSignChallenge(sign: string): string {
+  const challenges: Record<string, string> = {
+    'Aries': 'impaciencia y impulsividad',
+    'Tauro': 'rigidez y resistencia al cambio',
+    'Géminis': 'dispersión mental',
+    'Cáncer': 'hipersensibilidad emocional',
+    'Leo': 'ego inflado',
+    'Virgo': 'perfeccionismo paralizante',
+    'Libra': 'indecisión',
+    'Escorpio': 'intensidad obsesiva',
+    'Sagitario': 'falta de enfoque',
+    'Capricornio': 'rigidez mental',
+    'Acuario': 'desapego excesivo',
+    'Piscis': 'escapismo'
+  };
+  return challenges[sign] || 'desequilibrio energético';
+}
+
+function getElementalOpportunity(element: string): string {
+  const opportunities: Record<string, string> = {
+    'fire': 'liderar proyectos innovadores',
+    'earth': 'materializar sueños en realidad física',
+    'air': 'comunicar ideas revolucionarias',
+    'water': 'sanar y nutrir desde el alma'
+  };
+  return opportunities[element] || 'crear transformación positiva';
+}
+
+export default {
+  generatePersonalizedInterpretation,
+  generateMultipleInterpretations,
+  generateExecutiveSummary
+};
