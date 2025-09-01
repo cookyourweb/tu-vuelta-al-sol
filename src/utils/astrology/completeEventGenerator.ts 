@@ -1,0 +1,420 @@
+// src/utils/astrology/completeEventGenerator.ts - CORREGIDO PARA PERÍODO COMPLETO
+// ✅ PROBLEMA RESUELTO: Genera eventos desde último cumpleaños hasta próximo cumpleaños
+
+import { AstrologicalEvent, UserProfile, ZODIAC_SIGNS, normalizeEvent } from '@/types/astrology/unified-types';
+import { addDays, addMonths, format, differenceInDays, isBefore, isAfter } from 'date-fns';
+
+export interface EventGenerationOptions {
+  userProfile: UserProfile;
+  includeAllYear?: boolean;
+  eventsPerMonth?: number;
+}
+
+export function generateCompleteEventCalendar(options: EventGenerationOptions): AstrologicalEvent[] {
+  const { userProfile, includeAllYear = true, eventsPerMonth = 8 } = options;
+  const events: AstrologicalEvent[] = [];
+  
+  console.log('🎂 Generando eventos completos para:', userProfile.name, userProfile.currentAge, 'años');
+  
+  // ✅ CALCULAR FECHAS CORRECTAS: ÚLTIMO CUMPLEAÑOS → PRÓXIMO CUMPLEAÑOS
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const birthMonth = parseInt(userProfile.birthDate.split('-')[1]) - 1; // 0-indexed
+  const birthDay = parseInt(userProfile.birthDate.split('-')[2]);
+  
+  // ✅ ÚLTIMO CUMPLEAÑOS (inicio del período)
+  let lastBirthday = new Date(currentYear, birthMonth, birthDay);
+  if (isAfter(lastBirthday, today)) {
+    lastBirthday = new Date(currentYear - 1, birthMonth, birthDay);
+  }
+  
+  // ✅ PRÓXIMO CUMPLEAÑOS (final del período)
+  let nextBirthday = new Date(currentYear, birthMonth, birthDay);
+  if (isBefore(nextBirthday, today)) {
+    nextBirthday = new Date(currentYear + 1, birthMonth, birthDay);
+  }
+  
+  console.log('📅 Período CORRECTO de eventos:', {
+    desde: format(lastBirthday, 'yyyy-MM-dd'),
+    hasta: format(nextBirthday, 'yyyy-MM-dd'),
+    hoy: format(today, 'yyyy-MM-dd'),
+    totalDías: differenceInDays(nextBirthday, lastBirthday)
+  });
+  
+  // 1. ✅ EVENTOS PASADOS: Del último cumpleaños hasta hoy
+  if (isBefore(lastBirthday, today)) {
+    const pastEvents = generateEventsForPeriod(lastBirthday, today, userProfile, 'past');
+    events.push(...pastEvents);
+    console.log(`📚 Eventos pasados generados: ${pastEvents.length}`);
+  }
+  
+  // 2. ✅ EVENTOS FUTUROS: De hoy hasta próximo cumpleaños
+  if (isBefore(today, nextBirthday)) {
+    const futureEvents = generateEventsForPeriod(today, nextBirthday, userProfile, 'future');
+    events.push(...futureEvents);
+    console.log(`🔮 Eventos futuros generados: ${futureEvents.length}`);
+  }
+  
+  // 3. ✅ EVENTOS ESPECIALES ADICIONALES
+  if (includeAllYear) {
+    const specialEvents = generateSpecialEvents(lastBirthday, nextBirthday, userProfile);
+    events.push(...specialEvents);
+    console.log(`⭐ Eventos especiales agregados: ${specialEvents.length}`);
+  }
+  
+  // Ordenar por fecha y normalizar
+  const normalizedEvents = events.map(normalizeEvent).sort((a, b) => 
+    new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+  
+  console.log(`✅ Total eventos generados: ${normalizedEvents.length}`);
+  console.log('📊 Distribución por tipo:', getEventDistribution(normalizedEvents));
+  
+  return normalizedEvents;
+}
+
+// ✅ FUNCIÓN MEJORADA: Generar eventos para un período específico
+function generateEventsForPeriod(
+  startDate: Date, 
+  endDate: Date, 
+  userProfile: UserProfile,
+  period: 'past' | 'future'
+): AstrologicalEvent[] {
+  const events: AstrologicalEvent[] = [];
+  const current = new Date(startDate);
+  let eventId = period === 'past' ? 1000 : 2000;
+  
+  console.log(`🔄 Generando eventos ${period}:`, {
+    desde: format(startDate, 'yyyy-MM-dd'),
+    hasta: format(endDate, 'yyyy-MM-dd'),
+    días: differenceInDays(endDate, startDate)
+  });
+  
+  while (current <= endDate) {
+    const dayOfMonth = current.getDate();
+    const dayOfWeek = current.getDay();
+    const month = current.getMonth();
+    
+    // ✅ FASES LUNARES (cada 15 días aprox)
+    if (dayOfMonth === 1 || dayOfMonth === 15) {
+      const isNewMoon = dayOfMonth === 1;
+      events.push({
+        id: `${period}-lunar-${eventId++}`,
+        type: isNewMoon ? 'lunar_new' : 'lunar_full',
+        date: format(current, 'yyyy-MM-dd'),
+        title: `${isNewMoon ? 'Luna Nueva' : 'Luna Llena'} en ${getSignForDate(current)}`,
+        description: isNewMoon ? 
+          'Momento perfecto para nuevos comienzos y manifestación' : 
+          'Energía de culminación y liberación emocional',
+        importance: 'high',
+        priority: 'high', // ✅ AMBOS CAMPOS
+        planet: 'Luna',
+        sign: getSignForDate(current)
+      });
+    }
+    
+    // ✅ EVENTOS DE DESARROLLO PERSONAL (domingos específicos)
+    if (dayOfWeek === 0 && dayOfMonth % 7 === 0) {
+      const isAdolescent = userProfile.currentAge < 18;
+      events.push({
+        id: `${period}-growth-${eventId++}`,
+        type: 'life_purpose_activation',
+        date: format(current, 'yyyy-MM-dd'),
+        title: isAdolescent ? 
+          'Momento de Autoconocimiento Adolescente' : 
+          'Activación de Propósito Personal',
+        description: isAdolescent ?
+          'Período importante para entender tu identidad y relaciones' :
+          'Momento de conectar con tu propósito de vida más profundo',
+        importance: 'medium',
+        priority: 'medium', // ✅ AMBOS CAMPOS
+        planet: 'Sol',
+        sign: userProfile.astrological?.signs?.sun || 'Géminis'
+      });
+    }
+    
+    // ✅ TRÁNSITOS IMPORTANTES (cada 8 días)
+    if (dayOfMonth % 8 === 0) {
+      const planets = ['Mercurio', 'Venus', 'Marte', 'Júpiter'];
+      const planet = planets[month % planets.length];
+      
+      events.push({
+        id: `${period}-transit-${eventId++}`,
+        type: 'planetary_transit',
+        date: format(current, 'yyyy-MM-dd'),
+        title: `${planet} ${period === 'past' ? 'activó' : 'activará'} tu energía personal`,
+        description: getTransitDescription(planet, userProfile, period),
+        importance: planet === 'Júpiter' ? 'high' : 'medium',
+        priority: planet === 'Júpiter' ? 'high' : 'medium', // ✅ AMBOS CAMPOS
+        planet,
+        sign: getSignForDate(current)
+      });
+    }
+    
+    // ✅ RETROGRADACIONES (menos frecuentes pero importantes)
+    if (dayOfMonth % 25 === 0 && Math.random() > 0.7) {
+      events.push({
+        id: `${period}-retro-${eventId++}`,
+        type: 'retrograde',
+        date: format(current, 'yyyy-MM-dd'),
+        title: 'Período de Revisión Planetaria',
+        description: 'Momento excelente para revisar, reflexionar y reorganizar',
+        importance: 'high',
+        priority: 'high', // ✅ AMBOS CAMPOS
+        planet: 'Mercurio'
+      });
+    }
+    
+    current.setDate(current.getDate() + 1);
+  }
+  
+  return events;
+}
+
+// ✅ FUNCIÓN NUEVA: Eventos especiales para el año astrológico
+function generateSpecialEvents(
+  lastBirthday: Date,
+  nextBirthday: Date,
+  userProfile: UserProfile
+): AstrologicalEvent[] {
+  const events: AstrologicalEvent[] = [];
+  let eventId = 3000;
+  
+  // Evento especial en el cumpleaños
+  events.push({
+    id: `birthday-${eventId++}`,
+    type: 'solar_activation',
+    date: format(lastBirthday, 'yyyy-MM-dd'),
+    title: `¡Feliz Cumpleaños ${userProfile.currentAge}!`,
+    description: 'Tu Revolución Solar: inicio de un nuevo ciclo de crecimiento y oportunidades',
+    importance: 'high',
+    priority: 'high',
+    planet: 'Sol',
+    sign: userProfile.astrological?.signs?.sun || 'Géminis'
+  });
+  
+  // Eventos de mitad de año (6 meses después del cumpleaños)
+  const halfYear = new Date(lastBirthday);
+  halfYear.setMonth(halfYear.getMonth() + 6);
+  
+  if (halfYear <= nextBirthday) {
+    events.push({
+      id: `half-year-${eventId++}`,
+      type: 'solar_activation',
+      date: format(halfYear, 'yyyy-MM-dd'),
+      title: 'Punto Medio del Año Astrológico',
+      description: 'Momento de evaluación y reajuste de metas del año',
+      importance: 'high',
+      priority: 'high',
+      planet: 'Sol',
+      sign: getOppositeSign(userProfile.astrological?.signs?.sun || 'Géminis')
+    });
+  }
+  
+  // Eventos de cuartos del año astrológico
+  const quarterPoints = [3, 9]; // 3 y 9 meses después del cumpleaños
+  
+  quarterPoints.forEach(monthsAfter => {
+    const quarterDate = new Date(lastBirthday);
+    quarterDate.setMonth(quarterDate.getMonth() + monthsAfter);
+    
+    if (quarterDate <= nextBirthday) {
+      events.push({
+        id: `quarter-${monthsAfter}-${eventId++}`,
+        type: 'seasonal',
+        date: format(quarterDate, 'yyyy-MM-dd'),
+        title: `${monthsAfter === 3 ? 'Primer' : 'Tercer'} Cuarto del Año Astrológico`,
+        description: `Momento de ${monthsAfter === 3 ? 'acción decidida' : 'liberación y preparación'}`,
+        importance: 'medium',
+        priority: 'medium',
+        planet: monthsAfter === 3 ? 'Marte' : 'Saturno',
+        sign: getSignForDate(quarterDate)
+      });
+    }
+  });
+  
+  return events;
+}
+
+// ✅ FUNCIONES AUXILIARES MEJORADAS
+
+function getSignForDate(date: Date): string {
+  const month = date.getMonth();
+  const day = date.getDate();
+  
+  // Cálculo simplificado por mes (en producción usar Swiss Ephemeris)
+  const signsByMonth = [
+    'Capricornio', 'Acuario', 'Piscis', 'Aries', 'Tauro', 'Géminis',
+    'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario'
+  ];
+  
+  // Ajuste aproximado por día del mes
+  if (day <= 20) {
+    return signsByMonth[month] || 'Aries';
+  } else {
+    return signsByMonth[(month + 1) % 12] || 'Aries';
+  }
+}
+
+function getOppositeSign(sign: string): string {
+  const opposites: Record<string, string> = {
+    'Aries': 'Libra', 'Libra': 'Aries',
+    'Tauro': 'Escorpio', 'Escorpio': 'Tauro',
+    'Géminis': 'Sagitario', 'Sagitario': 'Géminis',
+    'Cáncer': 'Capricornio', 'Capricornio': 'Cáncer',
+    'Leo': 'Acuario', 'Acuario': 'Leo',
+    'Virgo': 'Piscis', 'Piscis': 'Virgo'
+  };
+  return opposites[sign] || sign;
+}
+
+function getTransitDescription(
+  planet: string, 
+  userProfile: UserProfile, 
+  period: 'past' | 'future'
+): string {
+  const age = userProfile.currentAge;
+  const verb = period === 'past' ? 'activó' : 'activará';
+  
+  if (age < 18) {
+    switch (planet) {
+      case 'Mercurio': 
+        return `${verb} tu mente: excelente momento para estudios y comunicación con amigos`;
+      case 'Venus': 
+        return `${verb} tu creatividad: período favorable para arte y armonía en relaciones`;
+      case 'Marte': 
+        return `${verb} tu energía: impulso extra para deportes y actividades que te apasionan`;
+      case 'Júpiter':
+        return `${verb} tu expansión: oportunidades de crecimiento personal y nuevas experiencias`;
+      default: 
+        return `${verb} tu crecimiento personal de manera importante`;
+    }
+  } else {
+    switch (planet) {
+      case 'Mercurio': 
+        return `${verb} tu comunicación: período excelente para decisiones profesionales importantes`;
+      case 'Venus': 
+        return `${verb} tu magnetismo: momento favorable para relaciones y asuntos financieros`;
+      case 'Marte': 
+        return `${verb} tu poder de acción: energía potente para iniciar proyectos importantes`;
+      case 'Júpiter':
+        return `${verb} tu suerte: momento de expansión y oportunidades únicas`;
+      default: 
+        return `${verb} aspectos importantes de tu vida personal y profesional`;
+    }
+  }
+}
+
+function getEventDistribution(events: AstrologicalEvent[]): Record<string, number> {
+  const distribution: Record<string, number> = {};
+  
+  events.forEach(event => {
+    distribution[event.type] = (distribution[event.type] || 0) + 1;
+  });
+  
+  return distribution;
+}
+
+// ✅ FUNCIONES AUXILIARES PARA EVENTOS ESPECIALES
+
+function getRandomEventType(): EventType {
+  const types: EventType[] = [
+    'venus_harmony', 'mars_action', 'mercury_communication',
+    'solar_activation', 'lunar_resonance', 'life_purpose_activation'
+  ];
+  return types[Math.floor(Math.random() * types.length)];
+}
+
+function generateEventTitle(userProfile: UserProfile): string {
+  const age = userProfile.currentAge;
+  const titles = age < 18 ? [
+    'Momento de Creatividad Adolescente',
+    'Energía para Nuevas Amistades',
+    'Período de Autoconocimiento',
+    'Activación de Talentos Naturales',
+    'Momento de Expresión Personal'
+  ] : [
+    'Activación de Poder Personal',
+    'Momento de Claridad Profesional',
+    'Energía para Nuevos Proyectos',
+    'Período de Manifestación',
+    'Oportunidad de Transformación'
+  ];
+  
+  return titles[Math.floor(Math.random() * titles.length)];
+}
+
+function generateEventDescription(userProfile: UserProfile): string {
+  const age = userProfile.currentAge;
+  const descriptions = age < 18 ? [
+    'Momento perfecto para explorar nuevos intereses y conectar con tu verdadero yo',
+    'Período excelente para fortalecer amistades y desarrollar habilidades sociales',
+    'Energía favorable para estudios y actividades creativas',
+    'Tiempo ideal para expresar tu personalidad única y auténtica'
+  ] : [
+    'Período favorable para decisiones importantes sobre carrera y relaciones',
+    'Momento excelente para manifestar proyectos y objetivos a largo plazo',
+    'Energía potente para transformar aspectos clave de tu vida',
+    'Oportunidad única para conectar con tu propósito más profundo'
+  ];
+  
+  return descriptions[Math.floor(Math.random() * descriptions.length)];
+}
+
+function getRandomPlanet(): string {
+  const planets = ['Sol', 'Luna', 'Mercurio', 'Venus', 'Marte', 'Júpiter'];
+  return planets[Math.floor(Math.random() * planets.length)];
+}
+
+// ✅ FUNCIÓN PARA VERIFICAR QUE LOS EVENTOS CUBRAN TODO EL PERÍODO
+export function validateEventCoverage(
+  events: AstrologicalEvent[],
+  expectedStartDate: string,
+  expectedEndDate: string
+): {
+  isComplete: boolean;
+  missingPeriods: string[];
+  coverage: {
+    totalEvents: number;
+    pastEvents: number;
+    futureEvents: number;
+    coveragePercentage: number;
+  };
+} {
+  const start = new Date(expectedStartDate);
+  const end = new Date(expectedEndDate);
+  const today = new Date();
+  
+  const pastEvents = events.filter(event => new Date(event.date) < today).length;
+  const futureEvents = events.filter(event => new Date(event.date) >= today).length;
+  
+  const totalDays = differenceInDays(end, start);
+  const daysWithEvents = new Set(events.map(event => event.date)).size;
+  const coveragePercentage = Math.round((daysWithEvents / totalDays) * 100);
+  
+  console.log('📊 Validación de cobertura:', {
+    período: `${expectedStartDate} → ${expectedEndDate}`,
+    totalEventos: events.length,
+    eventosDelPasado: pastEvents,
+    eventosDelFuturo: futureEvents,
+    díasConEventos: daysWithEvents,
+    díasTotales: totalDays,
+    cobertura: `${coveragePercentage}%`
+  });
+  
+  return {
+    isComplete: coveragePercentage >= 40, // Mínimo 40% de días con eventos
+    missingPeriods: coveragePercentage < 40 ? ['Cobertura insuficiente'] : [],
+    coverage: {
+      totalEvents: events.length,
+      pastEvents,
+      futureEvents,
+      coveragePercentage
+    }
+  };
+}
+
+export default {
+  generateCompleteEventCalendar,
+  validateEventCoverage
+};

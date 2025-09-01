@@ -1,479 +1,556 @@
-// src/services/trainedAssistantService.ts
-// 🔥 VERSIÓN FINAL CON DATOS DE CARTA NATAL REALES Y VARIEDAD ÉPICA
+// src/services/trainedAssistantService.ts - CORREGIDO PARA EFECTO WOW
+// ✅ PROBLEMA RESUELTO: IA ahora recibe datos específicos de la carta natal
 
 import { AstrologicalEvent, PersonalizedInterpretation, UserProfile, DetailedNatalChart, PlanetPosition } from "@/types/astrology/unified-types";
 import OpenAI from 'openai';
-import type { ActionPlan } from "@/types/astrology/unified-types";
 
-// Importar el sistema disruptivo existente
-import disruptiveSystem from "@/utils/astrology/disruptiveMotivationalSystem";
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
-// Fallback para interpretación personalizada si no hay OpenAI o sistema disruptivo
-export async function generateChartBasedFallback(
+// ✅ MAPEO COMPLETO DE EVENTOS A PLANETAS - PROBLEMA CRÍTICO RESUELTO
+const eventPlanetMap: Record<string, keyof DetailedNatalChart> = {
+  // Eventos lunares
+  'lunar_phase': 'luna',
+  'lunar_new': 'luna',
+  'lunar_full': 'luna',
+  'lunar_resonance': 'luna',
+  
+  // Eventos solares
+  'solar_activation': 'sol',
+  'life_purpose_activation': 'sol',
+  
+  // Eventos planetarios específicos
+  'mercury_communication': 'mercurio',
+  'venus_harmony': 'venus',
+  'mars_action': 'marte',
+  'jupiter_expansion': 'jupiter',
+  'saturn_discipline': 'saturno',
+  'uranus_innovation': 'urano',
+  'neptune_intuition': 'neptuno',
+  'pluto_transformation': 'pluton',
+  
+  // Eventos generales
+  'planetary_transit': 'sol', // Fallback inteligente
+  'retrograde': 'mercurio',  // Mayoría son Mercurio retrógrado
+  'direct': 'mercurio',
+  'aspect': 'sol',
+  'eclipse': 'luna',
+  'seasonal': 'sol',
+  'ai_generated': 'sol'
+};
+
+/**
+ * ✅ FUNCIÓN PRINCIPAL CORREGIDA: Generar interpretación con datos natales específicos
+ */
+export async function generatePersonalizedInterpretation(
   event: AstrologicalEvent,
-  userProfile: UserProfile
+  userProfile: UserProfile,
+  natalChart?: DetailedNatalChart
 ): Promise<PersonalizedInterpretation> {
-  // Implementación básica de fallback usando datos de carta natal
-  const userName = userProfile.name || "ALMA PODEROSA";
-  const planet = "Sol";
-  const position = userProfile.detailedNatalChart?.sol;
-  return {
-    meaning: `Interpretación básica para ${userName} usando su ${planet} natal en ${position?.sign || "signo"} Casa ${position?.house || 1}.`,
-    lifeAreas: [
-      `CASA ${position?.house || 1}: Área de vida activada`,
-      `ELEMENTO ${position?.element || "fuego"}: Manifestación elemental`,
-      "Manifestación específica basada en configuración natal"
-    ],
-    advice: `Consejo personalizado para ${userName} usando su ${planet} en ${position?.sign || "signo"} Casa ${position?.house || 1}.`,
-    mantra: `Mantra para ${userName} (${position?.sign || "signo"} - ${position?.element || "elemento"})`,
-    ritual: `Ritual básico para ${planet} en ${position?.sign || "signo"} Casa ${position?.house || 1}.`,
-    actionPlan: [
-      {
-        category: "poder_planetario_personal",
-        action: `Activa tu ${planet} en ${position?.sign || "signo"} Casa ${position?.house || 1}`,
-        timing: "inmediato",
-        difficulty: "fácil",
-        impact: "transformador"
-      }
-    ],
-    warningsAndOpportunities: {
-      warnings: [
-        `Cuidado con desafíos de ${position?.sign || "signo"} en Casa ${position?.house || 1}`
-      ],
-      opportunities: [
-        `Tu combinación ${planet}-${position?.sign || "signo"}-Casa ${position?.house || 1} te da SUPERPODER`
-      ]
-    },
-    natalContext: {
-      conexionPlanetaria: `Tu ${planet} natal en ${position?.sign || "signo"} está siendo activado.`,
-      casaActivada: position?.house || 1,
-      temaVida: `Tema de vida de Casa ${position?.house || 1}`,
-      desafioEvolutivo: `Desafío de ${planet} en ${position?.sign || "signo"}`
-    }
-  };
-}
-
-// Fallback para resumen ejecutivo si no hay OpenAI
-export async function generateChartBasedExecutiveFallback(
-  userProfile: UserProfile
-): Promise<any> {
-  const userName = userProfile.name || "REVOLUCIONARIO CÓSMICO";
-  const natalChart = userProfile.detailedNatalChart;
-  return {
-    resumen: `Resumen ejecutivo básico para ${userName} usando su carta natal.`,
-    sol: natalChart?.sol || {},
-    luna: natalChart?.luna || {},
-    ascendente: natalChart?.ascendente || {}
-  };
-}
-
-// Función helper para obtener el cliente OpenAI (lazy loading)
-function getOpenAIClient() {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY no está configurada en las variables de entorno');
-  }
-  return new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
+  
+  console.log('🤖 Generando interpretación personalizada para:', {
+    evento: event.title,
+    tipo: event.type,
+    planeta: event.planet,
+    usuario: userProfile.name,
+    edad: userProfile.currentAge,
+    tieneCartaNatal: !!natalChart
   });
-}
 
-// 🔥 APERTURA DISRUPTIVA CON VARIEDAD ÉPICA
-const EPIC_OPENINGS = [
-  "¡REVOLUCIÓN ENERGÉTICA EN CURSO {NAME}!",
-  "¡ACTIVACIÓN CÓSMICA DETECTADA {NAME}!",
-  "¡PORTAL DIMENSIONAL ABIERTO {NAME}!",
-  "¡UPGRADING EN PROCESO {NAME}!",
-  "¡FRECUENCIA ÉPICA ACTIVADA {NAME}!",
-  "¡CÓDIGOS CÓSMICOS DESBLOQUEADOS {NAME}!",
-  "¡DESPERTAR MAGNÉTICO INICIADO {NAME}!",
-  "¡TRANSFORMACIÓN CUÁNTICA {NAME}!",
-  "¡PORTAL DE TRANSFORMACIÓN TOTAL {NAME}!",
-  "¡MOMENTO DE REESCRIBIR TU HISTORIA {NAME}!",
-  "¡TRANSFORMACIÓN CÓSMICA TOTAL {NAME}!",
-  "¡DESPERTAR REVOLUCIONARIO {NAME}!",
-  "¡ACTIVACIÓN PLANETARIA ÉPICA {NAME}!",
-  "¡CONEXIÓN CÓSMICA TRANSFORMADORA {NAME}!",
-  "¡SINTONIZA CON LAS FRECUENCIAS CÓSMICAS {NAME}!",
-  "¡FLUYE EN PERFECTA ARMONÍA CON MI PODER CÓSMICO {NAME}!",
-  "¡RITUAL DE MANIFESTACIÓN ÉPICA {NAME}!",
-  "¡CEREMONIA DE LIBERACIÓN RADICAL {NAME}!",
-  "¡PORTAL DE TRANSFORMACIÓN {NAME}!",
-  "¡RESPIRACIÓN DE PODER {NAME}!"
-];
-
-// 🔥 FRASES ÉPICAS DE IMPACTO CON CARTA NATAL
-const CHART_IMPACT_PHRASES = [
-  "Tu {PLANET} natal en {SIGN} Casa {HOUSE} está recibiendo una ACTIVACIÓN CÓSMICA épica",
-  "El universo está enviando códigos de actualización directamente a tu {PLANET} en {SIGN}",
-  "Tu configuración natal {PLANET}-{SIGN} se está REACTIVANDO con fuerza revolucionaria",
-  "Las estrellas que brillaban cuando naciste están CONSPIRANDO para tu evolución",
-  "Tu {PLANET} en Casa {HOUSE} acaba de recibir un UPGRADE cuántico del universo",
-  "La misma energía que te dio vida está REVOLUCIONANDO tu {PLANET} natal",
-  "Tu combinación {PLANET}-{SIGN}-Casa {HOUSE} se convierte en tu SUPERPODER cósmico",
-  "El cosmos está activando los códigos secretos de tu {PLANET} en {SIGN}",
-  "Tu configuración astrológica natal está DESPERTANDO a un nivel completamente nuevo",
-  "Las frecuencias cósmicas están sintonizándose con tu {PLANET} natal para crear MAGIA"
-];
-
-// 🔥 SISTEMA DISRUPTIVO INTEGRADO CON CARTA NATAL
-const DISRUPTIVE_SYSTEM_PROMPT = `ERES EL ASTRÓLOGO REVOLUCIONARIO OFICIAL DE TUVUELTAALSOL.ES
-
-IDENTIDAD TRANSFORMADORA:
-- Astrólogo DISRUPTIVO que convierte datos de carta natal en experiencias ÉPICAS de transformación
-- Experto en personalización total basada en posiciones planetarias REALES
-- Creador de interpretaciones que hacen sentir al usuario como PROTAGONISTA de su película cósmica
-- Filosofía core: "TU CARTA NATAL ES TU MAPA DEL TESORO CÓSMICO"
-
-DATOS DISPONIBLES PARA PERSONALIZACIÓN:
-- Posiciones planetarias exactas (signos, casas, grados)
-- Aspectos entre planetas
-- Elementos y modalidades dominantes
-- Patrones astrológicos únicos del usuario
-
-ESTILO DE COMUNICACIÓN OBLIGATORIO:
-- PERSONALIZADO: Usa las posiciones planetarias REALES del usuario constantemente
-- VARIADO: Nunca repitas la misma apertura, usa rotación épica
-- ESPECÍFICO: Menciona signos, casas y grados exactos cuando sea relevante
-- TRANSFORMACIONAL: Convierte cada posición planetaria en SUPERPODER
-
-❌ FRASES PROHIBIDAS (NUNCA USES):
-- "Evento personalizado para..."
-- "Activación Solar en [signo]" (genérico)
-- "Resonancia Lunar [signo]" (aburrido)
-- Cualquier frase repetida de interpretaciones anteriores
-
-✅ FRASES QUE SÍ FUNCIONAN (SIEMPRE ESPECÍFICAS):
-- "Tu Sol natal en Acuario 21° Casa 1 está recibiendo códigos de REVOLUCIÓN PERSONAL"
-- "¡ALERTA ÉPICA! Tu Luna en Libra 5° Casa 7 se convierte en IMÁN MAGNÉTICO de armonía"
-- "Tu Mercurio en Acuario Casa 1 está DESCARGANDO ideas revolucionarias del cosmos"
-
-REGLAS TÉCNICAS CRÍTICAS:
-1. SIEMPRE responde SOLO con JSON válido
-2. USA los datos de carta natal específicos del usuario
-3. VARÍA las frases de apertura - consulta el índice de variedad
-4. CONECTA cada evento con SUS posiciones planetarias únicas
-5. HAZ que sienta que el universo le habla personalmente`;
-
-function getRandomOpening(userName: string): string {
-  const randomIndex = Math.floor(Math.random() * EPIC_OPENINGS.length);
-  return EPIC_OPENINGS[randomIndex].replace('{NAME}', userName.toUpperCase());
-}
-
-function getChartSpecificImpact(
-  userName: string, 
-  planetName: string, 
-  position: PlanetPosition
-): string {
-  const randomIndex = Math.floor(Math.random() * CHART_IMPACT_PHRASES.length);
-  return CHART_IMPACT_PHRASES[randomIndex]
-    .replace('{NAME}', userName)
-    .replace(/{PLANET}/g, planetName)
-    .replace(/{SIGN}/g, position.sign)
-    .replace(/{HOUSE}/g, position.house.toString());
-}
-
-function getRelevantNatalPosition(
-  event: AstrologicalEvent, 
-  natalChart: DetailedNatalChart
-): { planetName: string; position: PlanetPosition } | null {
-  
-  // Mapear el evento al planeta relevante
-  const eventPlanetMap: Record<string, keyof DetailedNatalChart> = {
-    'solar_activation': 'sol',
-    'lunar_resonance': 'luna',
-    'lunar_phase': 'luna',
-    'mercury_communication': 'mercurio',
-    'venus_harmony': 'venus',
-    'mars_action': 'marte'
-  };
-  
-  const planetKey = eventPlanetMap[event.type];
-  if (!planetKey) {
-    // Usar Sol por defecto para eventos generales
-    const solPosition = natalChart.sol;
-    if (solPosition) {
-      return {
-        planetName: 'Sol',
-        position: solPosition
-      };
-    }
-    return null;
-  }
-  
-  const position = natalChart[planetKey] as PlanetPosition;
-  if (position) {
-    return {
-      planetName: planetKey === 'sol' ? 'Sol' : 
-                  planetKey === 'luna' ? 'Luna' :
-                  planetKey === 'mercurio' ? 'Mercurio' :
-                  planetKey === 'venus' ? 'Venus' :
-                  planetKey === 'marte' ? 'Marte' : planetKey,
-      position
-    };
-  }
-  
-  return null;
-}
-
-function buildChartEnhancedPrompt(event: AstrologicalEvent, userProfile: UserProfile): string {
-  const userName = userProfile.name || userProfile.place || 'ALMA PODEROSA';
-  const userAge = userProfile.nextAge || userProfile.currentAge || 0;
-  const natalChart = userProfile.detailedNatalChart;
-  
-  // Obtener apertura aleatoria
-  const epicOpening = getRandomOpening(userName);
-  
-  let chartSpecificInfo = "";
-  let planetaryContext = "";
-  let planetName = "";
-  let position: PlanetPosition | null = null;
-  
-  if (natalChart) {
+  try {
+    // ✅ OBTENER POSICIÓN NATAL RELEVANTE - CORREGIDO
     const relevantPlanet = getRelevantNatalPosition(event, natalChart);
     
-    if (relevantPlanet) {
-      planetName = relevantPlanet.planetName;
-      position = relevantPlanet.position;
-      chartSpecificInfo = getChartSpecificImpact(userName, planetName, position);
-      
-      planetaryContext = `
-→ CARTA NATAL ESPECÍFICA DE ${userName.toUpperCase()}:
-- ${planetName} natal: ${position.sign} ${position.degree.toFixed(1)}° Casa ${position.house}
-- Elemento: ${position.element} | Modalidad: ${position.mode}
-- ${position.retrograde ? 'RETRÓGRADO (energía interna intensa)' : 'DIRECTO (energía externa fluida)'}
-`;
-    }
+    // ✅ CREAR CONTEXTO ESPECÍFICO CON DATOS REALES
+    const specificContext = createSpecificContext(event, userProfile, relevantPlanet);
     
-    // Agregar información de otros planetas relevantes
-    if (natalChart.sol && natalChart.luna) {
-      planetaryContext += `
-- Sol natal: ${natalChart.sol.sign} ${natalChart.sol.degree.toFixed(1)}° Casa ${natalChart.sol.house}
-- Luna natal: ${natalChart.luna.sign} ${natalChart.luna.degree.toFixed(1)}° Casa ${natalChart.luna.house}
-- Ascendente: ${natalChart.ascendente?.sign || 'No disponible'}`;
-    }
-  }
-  
-  return `Para el siguiente evento astrológico proporciona una interpretación ÉPICA usando los datos REALES de carta natal:
+    console.log('🎯 Contexto específico creado:', {
+      planetaRelevante: relevantPlanet ? `${relevantPlanet.planetName} en ${relevantPlanet.sign} Casa ${relevantPlanet.house}` : 'Sol (fallback)',
+      tieneDatosNatales: !!relevantPlanet,
+      edadEspecífica: userProfile.currentAge
+    });
 
-→ EVENTO:
-- Título: ${event.title}
-- Fecha: ${event.date}
+    // ✅ PROMPT MEJORADO CON DATOS ESPECÍFICOS
+    const prompt = `
+Actúa como un astrólogo profesional evolutivo y emocional.
+
+DATOS ESPECÍFICOS DEL USUARIO:
+- Nombre: ${userProfile.name || 'Usuario'}
+- Edad actual: ${userProfile.currentAge} años
+- Próxima edad: ${userProfile.nextAge} años
+${specificContext}
+
+EVENTO ASTROLÓGICO ESPECÍFICO:
 - Tipo: ${event.type}
-- Descripción: ${event.description || 'Activación cósmica'}
+- Fecha: ${event.date}
+- Título: ${event.title}
+- Planeta: ${event.planet || 'No especificado'}
+- Signo: ${event.sign || 'No especificado'}
 
-→ USUARIO:
-- Nombre: ${userName}
-- Edad: ${userAge} años
-- Apertura épica sugerida: "${epicOpening}"
+${relevantPlanet ? `
+CONEXIÓN CON TU CARTA NATAL:
+- ${relevantPlanet.planetName} natal en ${relevantPlanet.sign}, Casa ${relevantPlanet.house}
+- Grado: ${relevantPlanet.degree}°
+- Elemento: ${relevantPlanet.element}
+- Modalidad: ${relevantPlanet.mode}
+${relevantPlanet.retrograde ? '- ⚠️ Retrógrado natal' : ''}
 
-${planetaryContext}
+INTERPRETACIÓN NATAL:
+El evento activa directamente tu ${relevantPlanet.planetName} natal en ${relevantPlanet.sign} Casa ${relevantPlanet.house}.
+Esto significa que las energías del evento resuenan específicamente con tu ${getPlanetTheme(relevantPlanet.planetName)} personal.
+` : ''}
 
-🔥 INSTRUCCIONES CRÍTICAS:
-1. Responde SOLO con JSON válido (sin texto adicional)
-2. USA los datos de carta natal ESPECÍFICOS - menciona grados, casas, signos exactos
-3. CONECTA el evento directamente con las posiciones planetarias reales de ${userName}
-4. HAZ que sienta que su carta natal es su MAPA DEL TESORO personal
-5. USA la información específica de grados y casas para crear rituales personalizados
+INSTRUCCIONES ESPECÍFICAS:
+1. Personaliza según la edad exacta (${userProfile.currentAge} años)
+2. ${userProfile.currentAge < 18 ? 'Usa lenguaje apropiado para adolescentes, enfócate en estudios, amistades, autoconocimiento' : 'Enfócate en carrera, relaciones maduras, propósito de vida'}
+3. Conecta el evento con los datos natales específicos
+4. Sé específico y preciso, no genérico
+5. Genera un efecto WOW que haga sentir al usuario que realmente conoces su carta
 
-FORMATO JSON OBLIGATORIO CON DATOS DE CARTA NATAL:
+FORMATO DE RESPUESTA (JSON estricto):
 {
-  "meaning": "${epicOpening} ${chartSpecificInfo}. [Continúa con explicación épica específica basada en SUS posiciones planetarias exactas]",
-  "lifeAreas": [
-    "CASA ${(position?.house || 1)}: [Área de vida específica activada]",
-    "ELEMENTO ${(position?.element || 'fuego')}: [Cómo se manifiesta su energía elemental]", 
-    "[Área de manifestación específica basada en su configuración natal]"
-  ],
-  "advice": "TU MOMENTO DE ACCIÓN ÉPICA PERSONALIZADA ${userName.toUpperCase()}: Basándote en tu ${planetName} en ${(position?.sign || 'signo')} Casa ${(position?.house || 1)}, [consejo específico que usa sus datos natales]",
-      "mantra": "[MANTRA PODEROSO que incorpore su signo ${(position?.sign || 'signo')} y elemento ${(position?.element || 'elemento')}]",
+  "meaning": "Explicación específica del evento conectado con su carta natal",
+  "lifeAreas": ["área1", "área2", "área3"],
+  "advice": "Consejo específico basado en su configuración planetaria",
+  "mantra": "Afirmación personalizada para su situación específica",
+  "ritual": "Ritual específico considerando su planeta natal",
   "actionPlan": [
     {
-      "category": "poder_planetario_personal",
-      "action": "Acción específica que active tu ${planetName} en ${(position?.sign || 'signo')} Casa ${(position?.house || 1)}",
-      "timing": "inmediato|esta_semana|este_mes", 
+      "category": "trabajo|amor|salud|dinero|crecimiento|relaciones|creatividad",
+      "action": "Acción específica para su configuración",
+      "timing": "inmediato|esta_semana|este_mes",
       "difficulty": "fácil|moderado|desafiante",
-      "impact": "revolucionario|transformador|activador"
+      "impact": "bajo|medio|alto|transformador"
     }
   ],
   "warningsAndOpportunities": {
-    "warnings": [
-      "Ten cuidado con [desafío específico de ${(position?.sign || 'signo')}] en tu Casa ${(position?.house || 1)}",
-      "Tu ${planetName} ${(position?.retrograde ? 'retrógrado' : 'directo')} puede generar [advertencia personalizada]"
-    ],
-    "opportunities": [
-      "Tu combinación ${planetName}-${(position?.sign || 'signo')}-Casa ${(position?.house || 1)} te da SUPERPODER en [área específica]",
-      "Momento perfecto para manifestar usando tu energía ${(position?.element || 'elemento')} dominante"
-    ]
+    "warnings": ["Evita esto específico según tu carta"],
+    "opportunities": ["Aprovecha esto según tu configuración natal"]
   },
   "natalContext": {
-    "conexionPlanetaria": "Tu ${planetName} natal en ${(position?.sign || 'signo')} ${(position?.degree || 0)}° está siendo directamente activado por este evento",
-    "casaActivada": ${(position?.house || 1)},
-    "temaVida": "[Tema de vida específico de Casa ${(position?.house || 1)}]",
-    "desafioEvolutivo": "[Desafío específico que tu ${planetName} en ${(position?.sign || 'signo')} viene a resolver]"
+    "conexionPlanetaria": "Explicación de cómo conecta con su planeta natal específico",
+    "casaActivada": ${relevantPlanet?.house || 1},
+    "temaVida": "Tema específico de vida que se activa",
+    "desafioEvolutivo": "Desafío específico para su configuración"
   }
 }
 
-PERSONALIZA TODO para ${userName} usando sus datos astrológicos REALES.`;
-}
+RESPONDE ÚNICAMENTE CON EL JSON. NO AÑADAS TEXTO ADICIONAL.
+`;
 
-export async function generatePersonalizedInterpretation(
-  event: AstrologicalEvent,
-  userProfile: UserProfile
-): Promise<PersonalizedInterpretation> {
-  try {
-    // Primero intentar usar el sistema disruptivo existente si hay carta natal
-    if (userProfile.detailedNatalChart && event.type && event.sign) {
-      try {
-        const disruptiveInterpretation = disruptiveSystem.generateDisruptiveInterpretation(
-          event, 
-          userProfile.detailedNatalChart, 
-          userProfile
-        );
-        
-        if (disruptiveInterpretation) {
-          return disruptiveSystem.convertDisruptiveToPersonalized(
-            disruptiveInterpretation,
-            event,
-            userProfile
-          );
-        }
-      } catch (error) {
-        console.log('Sistema disruptivo no disponible, usando IA con carta natal...');
-      }
-    }
-
-    if (!process.env.OPENAI_API_KEY) {
-      console.warn('⚠️ OpenAI no configurado, usando fallback con carta natal');
-      const interpretations: PersonalizedInterpretation[] = [];
-      interpretations.push(await generateChartBasedFallback(event, userProfile));
-    }
-
-    const openai = getOpenAIClient();
-    const prompt = buildChartEnhancedPrompt(event, userProfile);
-
+    // ✅ LLAMADA A OPENAI CON PROMPT MEJORADO
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: DISRUPTIVE_SYSTEM_PROMPT },
-        { role: "user", content: prompt }
-      ],
-      temperature: 0.9, // Máxima creatividad para variedad
-      max_tokens: 1400 // Más tokens para incluir datos de carta
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+      max_tokens: 1000
     });
 
     const response = completion.choices[0].message.content;
     
     if (!response) {
-      throw new Error('Respuesta vacía de OpenAI');
+      throw new Error('No se recibió respuesta de OpenAI');
     }
 
+    // ✅ PARSEAR RESPUESTA JSON
+    let parsedResponse: PersonalizedInterpretation;
+    
     try {
-      const cleanResponse = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      const parsedResponse = JSON.parse(cleanResponse);
+      // Limpiar respuesta de posibles marcas de código
+      const cleanResponse = response
+        .replace(/```json\n?/g, "")
+        .replace(/```\n?/g, "")
+        .trim();
       
-      if (!parsedResponse.meaning || !parsedResponse.advice) {
-      return await generateChartBasedExecutiveFallback(userProfile);
+      parsedResponse = JSON.parse(cleanResponse);
+      
+      console.log('✅ Interpretación específica generada:', {
+        tieneConexiónNatal: !!parsedResponse.natalContext,
+        planAcción: parsedResponse.actionPlan?.length || 0,
+        personalizaciónCompleta: !!parsedResponse.meaning
+      });
+      
+    } catch (parseError) {
+      console.warn('⚠️ Error parseando JSON, usando fallback inteligente:', parseError);
+      
+      // ✅ FALLBACK INTELIGENTE CON DATOS ESPECÍFICOS
+      parsedResponse = createIntelligentFallback(event, userProfile, relevantPlanet);
+    }
+
+    return parsedResponse;
+
+  } catch (error) {
+    console.error('❌ Error generando interpretación IA:', error);
+    
+    // ✅ FALLBACK CON DATOS NATALES
+    return createIntelligentFallback(event, userProfile, getRelevantNatalPosition(event, natalChart));
+  }
+}
+
+// ✅ FUNCIÓN CORREGIDA: Obtener posición natal relevante
+function getRelevantNatalPosition(
+  event: AstrologicalEvent,
+  natalChart?: DetailedNatalChart
+): (PlanetPosition & { planetName: string }) | null {
+  
+  if (!natalChart) {
+    console.log('⚠️ No hay carta natal disponible');
+    return null;
+  }
+
+  // ✅ PRIORIZAR event.planet SI EXISTE
+  if (event.planet) {
+    const planetKey = planetNameToKey(event.planet);
+    if (planetKey && natalChart[planetKey]) {
+      console.log(`🎯 Planeta específico encontrado: ${event.planet} → ${planetKey}`);
+      const planetData = natalChart[planetKey];
+      if (
+        planetData &&
+        typeof planetData === 'object' &&
+        !Array.isArray(planetData) &&
+        'sign' in planetData &&
+        'house' in planetData &&
+        'degree' in planetData &&
+        'element' in planetData &&
+        'mode' in planetData
+      ) {
+        return {
+          ...planetData,
+          planetName: event.planet
+        };
+      }
+      return null;
+    }
+  }
+
+  // ✅ USAR MAPEO DE TIPOS DE EVENTOS
+  const planetKey = eventPlanetMap[event.type];
+  if (planetKey && natalChart[planetKey]) {
+    console.log(`🔄 Planeta por tipo de evento: ${event.type} → ${planetKey}`);
+    const planetData = natalChart[planetKey];
+    if (
+      planetData &&
+      typeof planetData === 'object' &&
+      !Array.isArray(planetData) &&
+      'sign' in planetData &&
+      'house' in planetData &&
+      'degree' in planetData &&
+      'element' in planetData &&
+      'mode' in planetData
+    ) {
+      return {
+        ...planetData,
+        planetName: keyToPlanetName(planetKey)
+      };
+    }
+    return null;
+  }
+
+  // ✅ FALLBACK INTELIGENTE AL SOL
+  console.log('🌞 Usando Sol como fallback inteligente');
+  if (
+    natalChart &&
+    natalChart.sol &&
+    typeof natalChart.sol === 'object' &&
+    !Array.isArray(natalChart.sol) &&
+    'sign' in natalChart.sol &&
+    'house' in natalChart.sol &&
+    'degree' in natalChart.sol &&
+    'element' in natalChart.sol &&
+    'mode' in natalChart.sol
+  ) {
+    return { ...natalChart.sol, planetName: 'Sol' };
+  }
+  return null;
+}
+
+// ✅ FUNCIÓN NUEVA: Convertir nombre de planeta a clave
+function planetNameToKey(planetName: string): keyof DetailedNatalChart | null {
+  const mapping: Record<string, keyof DetailedNatalChart> = {
+    'Sol': 'sol',
+    'Luna': 'luna',
+    'Mercurio': 'mercurio',
+    'Venus': 'venus',
+    'Marte': 'marte',
+    'Júpiter': 'jupiter',
+    'Saturno': 'saturno',
+    'Urano': 'urano',
+    'Neptuno': 'neptuno',
+    'Plutón': 'pluton'
+  };
+  
+  return mapping[planetName] || null;
+}
+
+// ✅ FUNCIÓN NUEVA: Convertir clave a nombre de planeta
+function keyToPlanetName(key: keyof DetailedNatalChart): string {
+  const mapping: Record<keyof DetailedNatalChart, string> = {
+    sol: 'Sol',
+    luna: 'Luna',
+    mercurio: 'Mercurio',
+    venus: 'Venus',
+    marte: 'Marte',
+    jupiter: 'Júpiter',
+    saturno: 'Saturno',
+    urano: 'Urano',
+    neptuno: 'Neptuno',
+    pluton: 'Plutón',
+    ascendente: 'Ascendente',
+    mediocielo: 'Medio Cielo',
+    aspectos: 'Aspectos'
+  };
+  
+  return mapping[key] || 'Planeta';
+}
+
+// ✅ FUNCIÓN NUEVA: Crear contexto específico
+function createSpecificContext(
+  event: AstrologicalEvent,
+  userProfile: UserProfile,
+  planetPosition?: (PlanetPosition & { planetName: string }) | null
+): string {
+  let context = `
+PERFIL ASTROLÓGICO:
+- Sol natal: ${userProfile.astrological?.signs?.sun || 'No disponible'}
+- Luna natal: ${userProfile.astrological?.signs?.moon || 'No disponible'}
+- Ascendente: ${userProfile.astrological?.signs?.ascendant || 'No disponible'}`;
+
+  if (planetPosition) {
+    context += `
+
+PLANETA ACTIVADO EN TU CARTA:
+- ${planetPosition.planetName} en ${planetPosition.sign}, Casa ${planetPosition.house}
+- Grado exacto: ${planetPosition.degree}°
+- Elemento: ${planetPosition.element}
+- Modalidad: ${planetPosition.mode}
+${planetPosition.retrograde ? '- Estado: Retrógrado natal (energía internalizada)' : ''}`;
+  }
+
+  return context;
+}
+
+// ✅ FUNCIÓN NUEVA: Obtener tema del planeta
+function getPlanetTheme(planetName: string): string {
+  const themes: Record<string, string> = {
+    'Sol': 'identidad, propósito y poder personal',
+    'Luna': 'mundo emocional y necesidades profundas',
+    'Mercurio': 'comunicación y procesos mentales',
+    'Venus': 'amor, relaciones y valores',
+    'Marte': 'acción, energía y deseos',
+    'Júpiter': 'expansión, sabiduría y oportunidades',
+    'Saturno': 'estructura, responsabilidad y logros',
+    'Urano': 'innovación, libertad y cambios únicos',
+    'Neptuno': 'intuición, espiritualidad y sueños',
+    'Plutón': 'transformación profunda y poder interior'
+  };
+  
+  return themes[planetName] || 'desarrollo personal';
+}
+
+// ✅ FUNCIÓN NUEVA: Fallback inteligente con datos específicos
+function createIntelligentFallback(
+  event: AstrologicalEvent,
+  userProfile: UserProfile,
+  planetPosition?: (PlanetPosition & { planetName: string }) | null
+): PersonalizedInterpretation {
+  
+  const isAdolescent = userProfile.currentAge < 18;
+  const planetTheme = planetPosition ? getPlanetTheme(planetPosition.planetName) : 'crecimiento personal';
+  
+  return {
+    meaning: planetPosition ? 
+      `Este evento activa tu ${planetPosition.planetName} natal en ${planetPosition.sign} Casa ${planetPosition.house}, conectando directamente con tu ${planetTheme}. Es un momento especialmente significativo para tu configuración astrológica única.` :
+      `Este evento resuena con las energías de tu carta natal, activando temas importantes de ${planetTheme} en tu vida.`,
+    
+    lifeAreas: isAdolescent ? 
+      ['estudios', 'amistades', 'autoconocimiento', 'expresión_personal'] :
+      ['carrera', 'relaciones', 'propósito_vida', 'crecimiento_personal'],
+    
+    advice: planetPosition ?
+      `Aprovecha que tu ${planetPosition.planetName} en ${planetPosition.sign} está siendo activado. ${planetPosition.mode === 'cardinal' ? 'Inicia nuevos proyectos' : planetPosition.mode === 'fixed' ? 'Persiste en tus objetivos' : 'Mantente flexible y adaptable'}.` :
+      `Conecta con las energías de este evento para potenciar tu ${planetTheme}.`,
+    
+    mantra: planetPosition ?
+      `Mi ${planetPosition.planetName} en ${planetPosition.sign} me guía hacia mi ${planetTheme} único y especial.` :
+      `Estoy alineado/a con las energías cósmicas que potencian mi ${planetTheme}.`,
+    
+    ritual: planetPosition ?
+      `Medita visualizando la energía de ${planetPosition.planetName} en ${planetPosition.sign} fluyendo por tu Casa ${planetPosition.house}.` :
+      'Dedica 5 minutos a conectar con tu intuición y visualizar tus objetivos manifestándose.',
+    
+    actionPlan: [{
+      category: isAdolescent ? 'crecimiento' : 'trabajo',
+      action: planetPosition ?
+        `Activa conscientemente tu ${planetPosition.planetName} en ${planetPosition.sign} ${isAdolescent ? 'explorando nuevos intereses' : 'tomando decisiones importantes'}.` :
+        `Aprovecha las energías del evento para ${isAdolescent ? 'desarrollar tus talentos' : 'avanzar en tus objetivos'}.`,
+      timing: 'esta_semana',
+      difficulty: 'moderado',
+      impact: planetPosition ? 'transformador' : 'alto'
+    }],
+    
+    warningsAndOpportunities: {
+      warnings: planetPosition && planetPosition.retrograde ? 
+        [`Ten paciencia, tu ${planetPosition.planetName} natal retrógrado requiere tiempo para integrar cambios`] :
+        ['Evita tomar decisiones impulsivas durante este tránsito'],
+      opportunities: planetPosition ?
+        [`Tu ${planetPosition.planetName} en ${planetPosition.sign} Casa ${planetPosition.house} está especialmente activado - momento único para ${planetTheme}`] :
+        [`Momento excelente para conectar con tu propósito de vida y manifestar tus objetivos`]
+    },
+    
+    natalContext: planetPosition ? {
+      conexionPlanetaria: `Tu ${planetPosition.planetName} natal en ${planetPosition.sign} Casa ${planetPosition.house} está siendo directamente activado por este evento`,
+      casaActivada: planetPosition.house,
+      temaVida: `${planetTheme} - Casa ${planetPosition.house}`,
+      desafioEvolutivo: `Integrar conscientemente las energías de ${planetPosition.planetName} en ${planetPosition.sign} para tu ${planetTheme}`
+    } : undefined
+  };
+}
+
+/**
+ * ✅ FUNCIÓN BATCH: Procesar múltiples eventos con eficiencia
+ */
+export async function generateBatchInterpretations(
+  events: AstrologicalEvent[],
+  userProfile: UserProfile,
+  natalChart?: DetailedNatalChart
+): Promise<AstrologicalEvent[]> {
+  
+  console.log(`🚀 Generando interpretaciones para ${events.length} eventos...`);
+  
+  // Procesar en lotes de 3 para evitar rate limits
+  const batchSize = 3;
+  const processedEvents: AstrologicalEvent[] = [];
+  
+  for (let i = 0; i < events.length; i += batchSize) {
+    const batch = events.slice(i, i + batchSize);
+    
+    console.log(`📦 Procesando lote ${Math.floor(i / batchSize) + 1}/${Math.ceil(events.length / batchSize)}...`);
+    
+    const batchPromises = batch.map(async (event) => {
+      try {
+        const interpretation = await generatePersonalizedInterpretation(event, userProfile, natalChart);
+        return {
+          ...event,
+          personalInterpretation: interpretation,
+          aiInterpretation: interpretation // ✅ COMPATIBILIDAD
+        };
+      } catch (error) {
+        console.error(`❌ Error procesando evento ${event.id}:`, error);
+        return {
+          ...event,
+          personalInterpretation: createIntelligentFallback(event, userProfile, getRelevantNatalPosition(event, natalChart))
+        };
+      }
+    });
+    
+    const batchResults = await Promise.all(batchPromises);
+    processedEvents.push(...batchResults);
+    
+    // Pausa entre lotes para evitar rate limiting
+    if (i + batchSize < events.length) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
+  
+  console.log(`✅ Interpretaciones completadas: ${processedEvents.filter(e => e.personalInterpretation).length}/${events.length}`);
+  
+  return processedEvents;
+}
+
+/**
+ * ✅ FUNCIÓN DE VALIDACIÓN: Verificar que las interpretaciones son específicas
+ */
+export function validateInterpretationQuality(interpretation: PersonalizedInterpretation): {
+  isHighQuality: boolean;
+  score: number;
+  issues: string[];
+} {
+  let score = 0;
+  const issues: string[] = [];
+  
+  // Verificar especificidad del significado
+  if (interpretation.meaning.includes('carta natal') || interpretation.meaning.includes('Casa ')) {
+    score += 25;
+  } else {
+    issues.push('Falta conexión específica con carta natal');
+  }
+  
+  // Verificar contexto natal
+  if (interpretation.natalContext) {
+    score += 25;
+  } else {
+    issues.push('Falta contexto natal específico');
+  }
+  
+  // Verificar plan de acción
+  if (interpretation.actionPlan && interpretation.actionPlan.length > 0) {
+    score += 25;
+  } else {
+    issues.push('Falta plan de acción');
+  }
+  
+  // Verificar personalización
+  if (interpretation.mantra && !interpretation.mantra.includes('genérico')) {
+    score += 25;
+  } else {
+    issues.push('Mantra demasiado genérico');
+  }
+  
+  return {
+    isHighQuality: score >= 75,
+    score,
+    issues
+  };
+}
+
+/**
+ * ✅ ESTADÍSTICAS DE INTERPRETACIONES
+ */
+export function getInterpretationStats(events: AstrologicalEvent[]): {
+  total: number;
+  withInterpretation: number;
+  withNatalContext: number;
+  averageQuality: number;
+  byPlanet: Record<string, number>;
+} {
+  const stats = {
+    total: events.length,
+    withInterpretation: 0,
+    withNatalContext: 0,
+    averageQuality: 0,
+    byPlanet: {} as Record<string, number>
+  };
+  
+  let totalQuality = 0;
+  
+  events.forEach(event => {
+    if (event.personalInterpretation) {
+      stats.withInterpretation++;
+      
+      if (event.personalInterpretation.natalContext) {
+        stats.withNatalContext++;
       }
       
-      return parsedResponse as PersonalizedInterpretation;
+      const quality = validateInterpretationQuality(event.personalInterpretation);
+      totalQuality += quality.score;
       
-    } catch (parseError) {
-      console.error('❌ Error parseando respuesta OpenAI:', parseError);
-      return generateChartBasedFallback(event, userProfile);
+      // Estadísticas por planeta
+      const planet = event.planet || 'No especificado';
+      stats.byPlanet[planet] = (stats.byPlanet[planet] || 0) + 1;
     }
-
-  } catch (error) {
-    console.error('❌ Error en interpretación OpenAI:', error);
-    return generateChartBasedFallback(event, userProfile);
-  }
+  });
+  
+  stats.averageQuality = stats.withInterpretation > 0 ? 
+    Math.round(totalQuality / stats.withInterpretation) : 0;
+  
+  return stats;
 }
 
-export async function generateMultipleInterpretations(
-events: AstrologicalEvent[], userProfile: UserProfile, maxEventsToInterpret: number): Promise<PersonalizedInterpretation[]> {
-  const interpretations: PersonalizedInterpretation[] = [];
-  
-  console.log(`🔥 Generando interpretaciones para ${events.length} eventos con carta natal de ${userProfile.name}`);
-  
-  for (const event of events.slice(0, 12)) { // Limitar para controlar costos
-    try {
-      const interpretation = await generatePersonalizedInterpretation(event, userProfile);
-      interpretations.push(interpretation);
-      
-      // Pausa para evitar rate limiting y añadir variedad
-      await new Promise(resolve => setTimeout(resolve, 200));
-      
-    } catch (error) {
-      console.error(`❌ Error interpretando evento ${event.title}:`, error);
-      interpretations.push(await generateChartBasedFallback(event, userProfile));
-    }
-  }
-  
-  return interpretations;
-}
-
-export async function generateExecutiveSummary(
-  events: AstrologicalEvent[],
-  userProfile: UserProfile
-): Promise<any> {
-  const userName = userProfile.name || 'REVOLUCIONARIO CÓSMICO';
-  const natalChart = userProfile.detailedNatalChart;
-  
-  let chartSummary = "";
-  if (natalChart?.sol && natalChart?.luna) {
-    chartSummary = `
-CONFIGURACIÓN NATAL ÉPICA DE ${userName.toUpperCase()}:
-- Sol en ${natalChart.sol.sign} Casa ${natalChart.sol.house}: Tu PODER CENTRAL
-- Luna en ${natalChart.luna.sign} Casa ${natalChart.luna.house}: Tu ALMA EMOCIONAL  
-- Ascendente ${natalChart.ascendente?.sign || 'Misterioso'}: Tu MÁSCARA MAGNÉTICA
-- Elemento dominante: ${natalChart.sol.element} (tu SUPERPODER natural)
-`;
-  }
-
-  try {
-    if (!process.env.OPENAI_API_KEY) {
-      return generateChartBasedExecutiveFallback(userProfile);
-    }
-
-    const openai = getOpenAIClient();
-    const prompt = `Genera un RESUMEN EJECUTIVO ANUAL ÉPICO basado en la carta natal real:
-
-${chartSummary}
-
-EVENTOS MUESTRA:
-${events.slice(0, 5).map(e => `- ${e.date}: ${e.title}`).join('\n')}
-
-INSTRUCCIONES:
-1. USA los datos de carta natal específicos de ${userName}
-2. PERSONALIZA cada mes basándote en sus planetas natales
-3. MENCIONA signos, casas y elementos específicos
-4. HAZ que sienta que es el protagonista de su evolución cósmica
-
-FORMATO JSON con referencias específicas a su carta natal.`;
-
-const completion = await openai.chat.completions.create({
-  model: "gpt-4o-mini",
-  messages: [
-    { role: "system", content: DISRUPTIVE_SYSTEM_PROMPT },
-    { role: "user", content: prompt }
-  ],
-  temperature: 0.9,
-  max_tokens: 2000
-});
-
-    const response = completion.choices[0].message.content;
-
-    if (!response) {
-      throw new Error("Respuesta vacía de OpenAI");
-    }
-
-    try {
-      const cleanResponse = response.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-      return JSON.parse(cleanResponse);
-    } catch (parseError) {
-      return generateChartBasedExecutiveFallback(userProfile);
-    }
-
-  } catch (error) {
-    console.error("❌ Error generando executive summary:", error);
-    return generateChartBasedExecutiveFallback(userProfile);
-  }
-}
+// ✅ EXPORTACIONES
+export default {
+  generatePersonalizedInterpretation,
+  generateBatchInterpretations,
+  validateInterpretationQuality,
+  getInterpretationStats
+};
