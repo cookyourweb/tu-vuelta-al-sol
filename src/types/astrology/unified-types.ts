@@ -158,6 +158,8 @@ export interface DetailedProgressedChart {
   sol_progresado: PlanetPosition;
   luna_progresada: PlanetPosition;
   aspectos_natales_progresados: any[];
+  ascendente?: PlanetPosition;
+  mediocielo?: PlanetPosition;
 }
 
 // ==========================================

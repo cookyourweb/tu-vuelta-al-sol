@@ -79,16 +79,11 @@ export async function POST(request: NextRequest) {
     const maxEventsToInterpret = Math.min(highPriorityEvents.length, 15);
     console.log(`🎯 Interpretando ${maxEventsToInterpret} eventos de alta prioridad de ${events.length} totales`);
 
-    // Generar interpretaciones personalizadas con IA
-    const aiInterpretations: PersonalizedInterpretation[] = await trainedAssistantService.generateMultipleInterpretations(
-      highPriorityEvents,
-      userProfile,
-      maxEventsToInterpret
+    // Generar interpretaciones personalizadas con IA usando la función correcta
+    const interpretedEvents: AstrologicalEvent[] = await trainedAssistantService.generateBatchInterpretations(
+      highPriorityEvents.slice(0, maxEventsToInterpret),
+      userProfile
     );
-    const interpretedEvents: AstrologicalEvent[] = highPriorityEvents.map((event: any, idx: number) => ({
-      ...event,
-      aiInterpretation: aiInterpretations[idx] || null
-    }));
 
     // Combinar eventos interpretados con el resto
     const allEvents = [
@@ -99,34 +94,49 @@ export async function POST(request: NextRequest) {
     let executiveSummaryResult = null;
     if (includeExecutiveSummary) {
       console.log('📊 Generando resumen ejecutivo del año astrológico...');
-      executiveSummaryResult = await trainedAssistantService.generateExecutiveSummary(interpretedEvents, userProfile);
+      // Crear resumen ejecutivo simple basado en estadísticas
+      const stats = trainedAssistantService.getInterpretationStats(interpretedEvents);
+      executiveSummaryResult = {
+        title: `Resumen Ejecutivo Astrológico ${userProfile.name}`,
+        keyInsights: [
+          `Se han interpretado ${stats.withInterpretation} eventos de ${stats.total} totales`,
+          `Promedio de calidad de interpretaciones: ${stats.averageQuality}%`,
+          `Eventos con contexto natal específico: ${stats.withNatalContext}`,
+          `Principales planetas activados: ${Object.entries(stats.byPlanet).slice(0, 3).map(([planet, count]) => `${planet} (${count})`).join(', ')}`
+        ],
+        recommendations: [
+          'Enfócate en los eventos de alta prioridad para maximizar el impacto',
+          'Utiliza los mantras y rituales proporcionados para potenciar las energías',
+          'Revisa regularmente los planes de acción para mantener el progreso'
+        ]
+      };
     }
 
     // Calcular estadísticas de interpretación - CORRECCIÓN DE TIPOS
     const interpretationStats = {
       totalEvents: events.length,
-      interpretedEvents: interpretedEvents.filter((e: AstrologicalEvent) => e.aiInterpretation).length,
-      highPriorityInterpreted: interpretedEvents.filter((e: AstrologicalEvent) => 
-        e.priority === 'high' && e.aiInterpretation).length,
-      mediumPriorityInterpreted: interpretedEvents.filter((e: AstrologicalEvent) => 
-        e.priority === 'medium' && e.aiInterpretation).length,
-      
+      interpretedEvents: interpretedEvents.filter((e: AstrologicalEvent) => e.personalInterpretation).length,
+      highPriorityInterpreted: interpretedEvents.filter((e: AstrologicalEvent) =>
+        e.priority === 'high' && e.personalInterpretation).length,
+      mediumPriorityInterpreted: interpretedEvents.filter((e: AstrologicalEvent) =>
+        e.priority === 'medium' && e.personalInterpretation).length,
+
       // Estadísticas por tipo de evento
       eventTypes: {
-        lunarPhases: interpretedEvents.filter((e: AstrologicalEvent) => 
-          e.type === 'lunar_phase' && e.aiInterpretation).length,
+        lunarPhases: interpretedEvents.filter((e: AstrologicalEvent) =>
+          e.type === 'lunar_phase' && e.personalInterpretation).length,
       },
-      
+
       // Estadísticas de planes de acción
       actionPlans: {
-        total: interpretedEvents.reduce((total: number, event: AstrologicalEvent) => 
-          total + (event.aiInterpretation?.actionPlan?.length || 0), 0),
-        immediate: interpretedEvents.reduce((total: number, event: AstrologicalEvent) => 
-          total + (event.aiInterpretation?.actionPlan?.filter(ap => ap.timing === 'inmediato').length || 0), 0),
-        weekly: interpretedEvents.reduce((total: number, event: AstrologicalEvent) => 
-          total + (event.aiInterpretation?.actionPlan?.filter(ap => ap.timing === 'esta_semana').length || 0), 0),
-        monthly: interpretedEvents.reduce((total: number, event: AstrologicalEvent) => 
-          total + (event.aiInterpretation?.actionPlan?.filter(ap => ap.timing === 'este_mes').length || 0), 0)
+        total: interpretedEvents.reduce((total: number, event: AstrologicalEvent) =>
+          total + (event.personalInterpretation?.actionPlan?.length || 0), 0),
+        immediate: interpretedEvents.reduce((total: number, event: AstrologicalEvent) =>
+          total + (event.personalInterpretation?.actionPlan?.filter(ap => ap.timing === 'inmediato').length || 0), 0),
+        weekly: interpretedEvents.reduce((total: number, event: AstrologicalEvent) =>
+          total + (event.personalInterpretation?.actionPlan?.filter(ap => ap.timing === 'esta_semana').length || 0), 0),
+        monthly: interpretedEvents.reduce((total: number, event: AstrologicalEvent) =>
+          total + (event.personalInterpretation?.actionPlan?.filter(ap => ap.timing === 'este_mes').length || 0), 0)
       }
     };
 

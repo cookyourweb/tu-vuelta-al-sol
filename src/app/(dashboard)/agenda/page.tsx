@@ -5,7 +5,8 @@ import React, { useState, useEffect } from 'react';
 import { format, addMonths, subMonths, isSameMonth, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useAuth } from '@/context/AuthContext';
-import type { UserProfile, AstrologicalEvent } from '@/types/astrology/unified-types';
+import { useRouter, useSearchParams } from 'next/navigation';
+import type { UserProfile, AstrologicalEvent, EventType } from '@/types/astrology/unified-types';
 
 interface AstronomicalDay {
   date: Date;
@@ -73,6 +74,48 @@ const AgendaPersonalizada = () => {
     fetchUserProfile();
   }, [user]);
 
+  // 🔧 NUEVO: Cargar datos de carta progresada si vienen desde esa página
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromProgressedChart = urlParams.get('from') === 'progressed-chart';
+
+    if (fromProgressedChart) {
+      const progressedData = localStorage.getItem('progressedChartData');
+      const timestamp = localStorage.getItem('progressedChartTimestamp');
+
+      if (progressedData && timestamp) {
+        // Verificar que los datos no sean demasiado antiguos (menos de 24 horas)
+        const dataAge = Date.now() - parseInt(timestamp);
+        const isDataFresh = dataAge < 24 * 60 * 60 * 1000; // 24 horas
+
+        if (isDataFresh) {
+          try {
+            const parsedData = JSON.parse(progressedData);
+            console.log('📡 Datos de carta progresada cargados desde localStorage:', parsedData);
+
+            // Aquí puedes usar los datos de la carta progresada para enriquecer los eventos
+            // Por ejemplo, agregar eventos basados en aspectos progresados
+            if (parsedData.aspects && parsedData.aspects.length > 0) {
+              console.log('🔮 Aspectos progresados encontrados:', parsedData.aspects);
+              // Podrías generar eventos adicionales basados en estos aspectos
+            }
+
+            // Limpiar localStorage después de usar los datos
+            localStorage.removeItem('progressedChartData');
+            localStorage.removeItem('progressedChartTimestamp');
+
+          } catch (error) {
+            console.error('Error parsing progressed chart data:', error);
+          }
+        } else {
+          console.log('Datos de carta progresada expirados, usando datos normales');
+          localStorage.removeItem('progressedChartData');
+          localStorage.removeItem('progressedChartTimestamp');
+        }
+      }
+    }
+  }, []);
+
   // Eventos de ejemplo ÉPICOS con variedad visual
   const generateExampleEvents = (): AstrologicalEvent[] => {
     if (!userProfile) return [];
@@ -86,6 +129,7 @@ const AgendaPersonalizada = () => {
         description: 'Momento perfecto para nuevos comienzos y organización',
         type: 'lunar_phase',
         priority: 'high',
+        importance: 'high',
         planet: 'Luna',
         sign: 'Virgo',
         aiInterpretation: {
@@ -103,6 +147,7 @@ const AgendaPersonalizada = () => {
         description: 'Culminación emocional e intuición elevada',
         type: 'lunar_phase',
         priority: 'high',
+        importance: 'high',
         planet: 'Luna',
         sign: 'Piscis',
         aiInterpretation: {
@@ -122,6 +167,7 @@ const AgendaPersonalizada = () => {
         description: 'Tu planeta regente mejora tu comunicación y relaciones',
         type: 'planetary_transit',
         priority: 'medium',
+        importance: 'medium',
         planet: 'Mercurio',
         sign: 'Libra',
         aiInterpretation: {
@@ -141,6 +187,7 @@ const AgendaPersonalizada = () => {
         description: 'Revisión profunda de valores y relaciones',
         type: 'retrograde',
         priority: 'medium',
+        importance: 'medium',
         planet: 'Venus',
         sign: 'Escorpio',
         aiInterpretation: {
@@ -160,6 +207,7 @@ const AgendaPersonalizada = () => {
         description: 'Expansión, oportunidades y optimismo',
         type: 'aspect',
         priority: 'high',
+        importance: 'high',
         planet: 'Sol',
         sign: 'Géminis',
         aiInterpretation: {
@@ -179,6 +227,7 @@ const AgendaPersonalizada = () => {
         description: 'Energía enfocada en perfeccionamiento y rutinas',
         type: 'planetary_transit',
         priority: 'low',
+        importance: 'low',
         planet: 'Marte',
         sign: 'Virgo',
         aiInterpretation: {
@@ -197,6 +246,7 @@ const AgendaPersonalizada = () => {
         description: 'Portal de transformación en relaciones',
         type: 'eclipse',
         priority: 'high',
+        importance: 'high',
         planet: 'Sol',
         sign: 'Libra',
         aiInterpretation: {
@@ -219,13 +269,15 @@ const AgendaPersonalizada = () => {
     const additionalEvents = [];
     for (let day = 1; day <= 30; day++) {
       if (Math.random() > 0.7) { // 30% probabilidad de evento
+        const randomImportance = getRandomImportance() as 'high' | 'medium' | 'low';
         additionalEvents.push({
           id: `day-${day}`,
           date: `2025-09-${day.toString().padStart(2, '0')}`,
           title: getRandomEventTitle(),
           description: 'Evento astrológico personalizado para tu evolución',
           type: getRandomEventType(),
-          priority: getRandomImportance() as 'high' | 'medium' | 'low',
+          priority: randomImportance,
+          importance: randomImportance,
           planet: getRandomPlanet(),
           sign: getRandomSign(),
           aiInterpretation: {
@@ -251,8 +303,8 @@ const AgendaPersonalizada = () => {
     return titles[Math.floor(Math.random() * titles.length)];
   };
 
-  const getRandomEventType = () => {
-    const types = ['ai_generated', 'lunar_phase', 'planetary_transit', 'aspect', 'eclipse'];
+  const getRandomEventType = (): EventType => {
+    const types: EventType[] = ['ai_generated', 'lunar_phase', 'planetary_transit', 'aspect', 'eclipse'];
     return types[Math.floor(Math.random() * types.length)];
   };
 

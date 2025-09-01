@@ -81,36 +81,8 @@ export default function ProgressedChartPage() {
     return age;
   };
 
-  // 🔧 FUNCIÓN: Calcular período de progresión personalizado (cumpleaños a cumpleaños)
-  const calculateProgressionPeriod = (birthDate: string) => {
-    const birth = new Date(birthDate);
-    const currentYear = new Date().getFullYear();
-    const age = calculateCurrentAge(birthDate);
-    
-    // 📅 PERÍODO ACTUAL: Del último cumpleaños al próximo
-    const lastBirthday = new Date(birth);
-    lastBirthday.setFullYear(currentYear);
-    
-    // Si el cumpleaños ya pasó este año, usar este año
-    // Si no ha pasado, usar el año anterior
-    const today = new Date();
-    if (today < lastBirthday) {
-      lastBirthday.setFullYear(currentYear - 1);
-    }
-    
-    const nextBirthday = new Date(lastBirthday);
-    nextBirthday.setFullYear(lastBirthday.getFullYear() + 1);
-    
-    return {
-      startDate: lastBirthday.toISOString().split('T')[0],
-      endDate: nextBirthday.toISOString().split('T')[0],
-      year: lastBirthday.getFullYear(),
-      ageAtStart: age,
-      description: `Año Solar ${age} (${lastBirthday.getFullYear()}-${nextBirthday.getFullYear()})`,
-      period: `Cumpleaños ${lastBirthday.getFullYear()} → ${nextBirthday.getFullYear()}`,
-      isCurrentYear: true
-    };
-  };
+  // ✅ IMPORTAR FUNCIÓN DEL SERVICIO PARA CONSISTENCIA
+  const { calculateProgressionPeriod } = require('@/services/progressedChartService');
 
   // 🔍 DEBUG: Log cambios importantes
   useEffect(() => {
@@ -187,20 +159,25 @@ export default function ProgressedChartPage() {
 
   // ✅ FUNCIÓN MEJORADA: Generar carta progresada
   const generateProgressedChart = async () => {
-    if (!birthData || !user) return;
-    
+    if (!birthData || !user) {
+      setError('Datos de usuario o nacimiento faltantes');
+      setDebugInfo('❌ Datos insuficientes para generar carta');
+      return;
+    }
+
     setLoading(true);
     setError(null);
-    setDebugInfo('🔄 Generando carta progresada personalizada...');
-    
+    setDebugInfo('🔄 Iniciando generación de carta progresada...');
+
     try {
       // 📅 Calcular período personalizado
       const progressionPeriod = calculateProgressionPeriod(birthData.birthDate);
-      
+
       console.log('🎭 Período de progresión calculado:', progressionPeriod);
-      setDebugInfo(`📅 Período: ${progressionPeriod.description}`);
-      
+      setDebugInfo(`📅 Período calculado: ${progressionPeriod.description}`);
+
       // 🔧 LLAMADA MEJORADA AL API
+      setDebugInfo('🌐 Llamando API de carta progresada...');
       const response = await fetch('/api/charts/progressed', {
         method: 'POST',
         headers: {
@@ -219,27 +196,56 @@ export default function ProgressedChartPage() {
           }
         }),
       });
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error('❌ Error API carta progresada:', response.status, errorText);
+        setDebugInfo(`❌ Error API (${response.status}): ${errorText.substring(0, 100)}...`);
         throw new Error(`Error ${response.status}: ${errorText}`);
       }
-      
+
+      setDebugInfo('📡 Procesando respuesta de API...');
       const result = await response.json();
       console.log('✅ Resultado carta progresada:', result);
-      
+
       if (result.success && result.data) {
-        // ✅ PROCESAMIENTO MEJORADO DE DATOS
+        // ✅ PROCESAMIENTO MEJORADO DE DATOS - MAPEAR FORMATO DEL SERVICIO AL COMPONENTE
+        const chart = result.data.chart || {};
+
+        // Convertir planetas individuales a array
+        const planets = [];
+        if (chart.sol_progresado) planets.push({ ...chart.sol_progresado, name: 'Sol' });
+        if (chart.luna_progresada) planets.push({ ...chart.luna_progresada, name: 'Luna' });
+        if (chart.mercurio_progresado) planets.push({ ...chart.mercurio_progresado, name: 'Mercurio' });
+        if (chart.venus_progresado) planets.push({ ...chart.venus_progresado, name: 'Venus' });
+        if (chart.marte_progresado) planets.push({ ...chart.marte_progresado, name: 'Marte' });
+        if (chart.jupiter_progresado) planets.push({ ...chart.jupiter_progresado, name: 'Júpiter' });
+        if (chart.saturno_progresado) planets.push({ ...chart.saturno_progresado, name: 'Saturno' });
+        if (chart.urano_progresado) planets.push({ ...chart.urano_progresado, name: 'Urano' });
+        if (chart.neptuno_progresado) planets.push({ ...chart.neptuno_progresado, name: 'Neptuno' });
+        if (chart.pluton_progresado) planets.push({ ...chart.pluton_progresado, name: 'Plutón' });
+
+        // Mapear aspectos
+        const aspects = chart.aspectos_natales_progresados || [];
+
+        // Calcular distribuciones elementales y modales
+        const elementDistribution = { fire: 0, earth: 0, air: 0, water: 0 };
+        const modalityDistribution = { cardinal: 0, fixed: 0, mutable: 0 };
+
+        planets.forEach(planet => {
+          if (planet.element) elementDistribution[planet.element as keyof typeof elementDistribution]++;
+          if (planet.mode) modalityDistribution[planet.mode as keyof typeof modalityDistribution]++;
+        });
+
         const progressedChartData: ProgressedChartData = {
-          planets: result.data.chart?.planets || [],
-          houses: result.data.chart?.houses || [],
-          aspects: result.data.chart?.aspects || [], // 🔧 ASPECTOS PROGRESADOS
-          keyAspects: result.data.chart?.keyAspects || [],
-          elementDistribution: result.data.chart?.elementDistribution || { fire: 0, earth: 0, air: 0, water: 0 },
-          modalityDistribution: result.data.chart?.modalityDistribution || { cardinal: 0, fixed: 0, mutable: 0 },
-          ascendant: result.data.chart?.ascendant,
-          midheaven: result.data.chart?.midheaven,
+          planets: planets,
+          houses: chart.houses || [], // Ahora incluye casas calculadas
+          aspects: aspects,
+          keyAspects: aspects.slice(0, 5), // Primeros 5 aspectos como clave
+          elementDistribution: elementDistribution,
+          modalityDistribution: modalityDistribution,
+          ascendant: chart.ascendente,
+          midheaven: chart.mediocielo,
           progressionInfo: {
             year: progressionPeriod.year,
             period: progressionPeriod.period,
@@ -266,20 +272,22 @@ export default function ProgressedChartPage() {
             dissolvingAspects: []
           }
         };
-        
+
         console.log('🎉 Carta progresada procesada exitosamente:', progressedChartData);
         setChartData(progressedChartData);
-        setDebugInfo('✅ Carta progresada generada exitosamente');
-        
+        setDebugInfo('✅ Carta progresada generada y procesada exitosamente');
+
       } else {
         console.error('❌ Respuesta inválida:', result);
+        setDebugInfo('❌ Respuesta de API inválida');
         throw new Error(result.error || 'Error procesando carta progresada');
       }
-      
+
     } catch (error) {
       console.error('💥 Error generando carta progresada:', error);
-      setError(error instanceof Error ? error.message : 'Error desconocido');
-      setDebugInfo('❌ Error en generación');
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      setError(errorMessage);
+      setDebugInfo(`❌ Error: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -294,9 +302,16 @@ export default function ProgressedChartPage() {
     generateProgressedChart();
   };
 
-  // 🔧 FUNCIÓN: Navegar a agenda personalizada
+  // 🔧 FUNCIÓN: Navegar a agenda personalizada con datos de carta progresada
   const handleViewPersonalAgenda = () => {
-    router.push('/agenda');
+    // Guardar datos de la carta progresada en localStorage para que la agenda los use
+    if (chartData) {
+      localStorage.setItem('progressedChartData', JSON.stringify(chartData));
+      localStorage.setItem('progressedChartTimestamp', Date.now().toString());
+    }
+
+    // Navegar a la agenda con parámetros para indicar que viene de carta progresada
+    router.push('/(dashboard)/agenda?from=progressed-chart');
   };
 
   // Renderizado de estados de carga
