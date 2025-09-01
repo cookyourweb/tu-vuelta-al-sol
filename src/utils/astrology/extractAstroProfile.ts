@@ -162,8 +162,7 @@ export default function extractAstroProfile(input: ExtractorInput): AstroProfile
       dominantMode: astroAnalysis.dominantMode as ModeType,
       lifeThemes: astroAnalysis.lifeThemes,
       strengths: astroAnalysis.strengths,
-      challenges: astroAnalysis.challenges,
-      progressions: input.progressed ? extractProgressedAnalysis(input.progressed) : null
+      challenges: astroAnalysis.challenges
     }
   };
 

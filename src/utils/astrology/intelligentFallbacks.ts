@@ -237,7 +237,7 @@ export function generateCostEffectiveInterpretation(
   return {
     meaning: Array.isArray(personalizedMeaning) ? personalizedMeaning.join('\n') : personalizedMeaning,
     lifeAreas,
-    advice: personalizedAdvice,
+    advice: Array.isArray(personalizedAdvice) ? personalizedAdvice.join('\n') : personalizedAdvice,
     mantra: personalizedMantra,
     ritual: personalizedRitual,
     actionPlan: [actionPlan],
@@ -452,25 +452,18 @@ function convertDisruptiveToPersonalized(
     advice: [
       ...disruptive.revolutionaryAdvice.doThis.slice(0, 3),
       `Evita: ${disruptive.revolutionaryAdvice.avoidThis[0]}`
-    ],
+    ].join('\n'),
     
     mantra: disruptive.manifestation.mantra,
     
     ritual: disruptive.preparation.ritual,
     
     actionPlan: [{
-      timeframe: 'monthly',
-      objectives: [
-        disruptive.preparation.mindsetShift,
-        disruptive.preparation.physicalAction
-      ],
-      actions: disruptive.revolutionaryAdvice.doThis,
-      milestones: [
-        `Inmediato: ${disruptive.expectedTransformation.immediate}`,
-        `Esta semana: ${disruptive.expectedTransformation.weekly}`,
-        `A largo plazo: ${disruptive.expectedTransformation.longTerm}`
-      ],
-      metrics: ['Estado emocional diario', 'Patrones evitados', 'Nuevas acciones tomadas']
+      category: 'crecimiento',
+      action: disruptive.preparation.mindsetShift,
+      timing: 'inmediato',
+      difficulty: 'moderado',
+      impact: 'transformador'
     }],
     
     warningsAndOpportunities: {
@@ -588,33 +581,14 @@ function generateIntelligentActionPlan(
   userProfile: UserProfile
 ): ActionPlan {
   const planet = event.planet || 'Sol';
-  const timeframe = event.type === 'retrograde' ? 'monthly' : 'weekly';
-  
+  const timing = event.type === 'retrograde' ? 'este_mes' : 'esta_semana';
+
   return {
-    timeframe,
-    objectives: [
-      `Integrar la energía de ${planet} en tu vida diaria`,
-      `Transformar desafíos en oportunidades de crecimiento`,
-      `Elevar tu vibración al siguiente nivel de consciencia`
-    ],
-    actions: [
-      `Medita 10 minutos diarios enfocándote en ${planet}`,
-      `Journaling nocturno: "¿Cómo manifesté hoy la energía de ${planet}?"`,
-      `Una acción valiente semanal alineada con ${planet}`,
-      `Crear un símbolo/amuleto que represente esta energía`
-    ],
-    milestones: [
-      `Día 3: Primera señal de cambio energético`,
-      `Semana 1: Patrón viejo identificado y en proceso de liberación`,
-      `Semana 2: Nueva rutina establecida`,
-      `Mes 1: Transformación visible en área de vida relacionada`
-    ],
-    metrics: [
-      `Nivel de energía diario (1-10)`,
-      `Sincronicidades notadas`,
-      `Patrones viejos evitados`,
-      `Nuevas oportunidades manifestadas`
-    ]
+    category: 'crecimiento',
+    action: `Integra la energía de ${planet} en tu vida diaria: Medita 10 minutos diarios enfocándote en ${planet}, practica journaling nocturno sobre cómo manifestar esta energía, y toma una acción valiente semanal alineada con ${planet}`,
+    timing,
+    difficulty: 'moderado',
+    impact: 'alto'
   };
 }
 

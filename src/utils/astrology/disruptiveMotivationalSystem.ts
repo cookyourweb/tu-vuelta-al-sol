@@ -360,25 +360,26 @@ export function convertDisruptiveToPersonalized(
     advice: [
       ...disruptive.revolutionaryAdvice.doThis.slice(0, 3),
       `Evita: ${disruptive.revolutionaryAdvice.avoidThis[0]}`
-    ],
+    ].join('\n'),
     
     mantra: disruptive.manifestation.mantra,
     
     ritual: disruptive.preparation.ritual,
     
-    actionPlan: [  // AQUÍ - debe ser un array
+    actionPlan: [
       {
-        timeframe: 'monthly',
-        objectives: [
-          disruptive.preparation.mindsetShift
-        ],
-        actions: disruptive.revolutionaryAdvice.doThis,
-        milestones: [
-          `Inmediato: ${disruptive.expectedTransformation.immediate}`,
-          `Semanal: ${disruptive.expectedTransformation.weekly}`,
-          `Largo plazo: ${disruptive.expectedTransformation.longTerm}`
-        ],
-        metrics: ['Estado emocional diario', 'Patrones evitados', 'Nuevas acciones tomadas']
+        category: 'crecimiento',
+        action: disruptive.preparation.mindsetShift,
+        timing: 'inmediato',
+        difficulty: 'moderado',
+        impact: 'transformador'
+      },
+      {
+        category: 'creatividad',
+        action: disruptive.revolutionaryAdvice.doThis[0] || 'Toma acción consciente',
+        timing: 'esta_semana',
+        difficulty: 'fácil',
+        impact: 'alto'
       }
     ],
     

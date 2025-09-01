@@ -220,9 +220,12 @@ function generatePersonalizedEvents(userProfile: UserProfile, months: number): A
           description: generatePersonalizedDescription(type, userProfile, personalContext),
           type: type,
           priority: calculatePersonalPriority(type, eventDate, userProfile),
+          importance: calculatePersonalPriority(type, eventDate, userProfile),
           planet: personalContext.relevantPlanet,
           sign: personalContext.relevantSign,
           personalContext: {
+            relevantPlanet: personalContext.relevantPlanet,
+            relevantSign: personalContext.relevantSign,
             natalConnection: personalContext.natalConnection,
             progressedConnection: personalContext.progressedConnection || null,
             personalTheme: personalContext.personalTheme,

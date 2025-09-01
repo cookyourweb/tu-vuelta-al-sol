@@ -49,6 +49,11 @@ export interface AstrologicalEvent {
   ritual?: string;
   mantra?: string;
   action?: string;
+
+  // Contexto personalizado para eventos generados localmente
+  personalContext?: PersonalizedEventContext;
+  localInterpretation?: any;
+  interpretationSource?: string;
 }
 
 // ==========================================
@@ -79,6 +84,40 @@ export interface PersonalizedInterpretation {
     casaActivada: number;
     temaVida: string;
     desafioEvolutivo: string;
+  };
+}
+
+export interface DisruptiveInterpretation {
+  shockValue: string;
+  epicRealization: string;
+  whatToExpect: {
+    energeticShift: string;
+    emotionalWave: string;
+    mentalClarity: string;
+    physicalSensations: string;
+  };
+  preparation: {
+    ritual: string;
+    mindsetShift: string;
+    physicalAction: string;
+    energeticProtection: string;
+  };
+  revolutionaryAdvice: {
+    doThis: string[];
+    avoidThis: string[];
+    powerHours: string[];
+    dangerZones: string[];
+  };
+  manifestation: {
+    mantra: string;
+    visualization: string;
+    physicalGesture: string;
+    elementalConnection: string;
+  };
+  expectedTransformation: {
+    immediate: string;
+    weekly: string;
+    longTerm: string;
   };
 }
 
@@ -160,6 +199,57 @@ export interface DetailedProgressedChart {
   aspectos_natales_progresados: any[];
   ascendente?: PlanetPosition;
   mediocielo?: PlanetPosition;
+}
+
+// ==========================================
+// TIPOS PARA EVENTOS PERSONALIZADOS
+// ==========================================
+
+export interface PersonalizedEventContext {
+  relevantPlanet: string;
+  relevantSign: string;
+  natalConnection: string;
+  progressedConnection?: string | null;
+  personalTheme: string;
+  lifeArea: string;
+}
+
+export interface PersonalizedEventType {
+  type: EventType;
+  frequency: number;
+  personalContext: PersonalizedEventContext;
+}
+
+export interface PersonalizedEventTypeWithContext extends PersonalizedEventType {
+  personalContext: PersonalizedEventContext;
+}
+
+// ==========================================
+// ANÁLISIS ASTROLÓGICO
+// ==========================================
+
+export interface AstrologicalAnalysis {
+  dominantElements: ElementType[];
+  dominantMode: ModeType;
+  lifeThemes: string[];
+  strengths: string[];
+  challenges: string[];
+  planetaryBalance: Record<string, number>;
+  elementalBalance: Record<ElementType, number>;
+  modalBalance: Record<ModeType, number>;
+}
+
+export interface ProgressedAnalysis {
+  currentProgression: {
+    age: number;
+    period: string;
+    description: string;
+  };
+  progressedPlanets: Record<string, PlanetPosition>;
+  progressedAspects: any[];
+  progressedHouses: any[];
+  progressionThemes: string[];
+  lifeLessons: string[];
 }
 
 // ==========================================
