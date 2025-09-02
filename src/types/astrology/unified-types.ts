@@ -1,5 +1,4 @@
-// src/types/astrology/unified-types.ts - VERSIÓN DEFINITIVA CORREGIDA
-// ✅ PROBLEMA RESUELTO: importance vs priority - AMBOS SOPORTADOS
+// src/types/astrology/unified-types.ts - VERSIÓN CORREGIDA CON PLANETPOSITION COMPLETA
 
 // ==========================================
 // TIPOS BÁSICOS
@@ -167,14 +166,20 @@ export interface UserProfile {
   detailedProgressedChart?: DetailedProgressedChart;
 }
 
+// ✅ CORRECCIÓN: PlanetPosition COMPLETA con todas las propiedades necesarias
 export interface PlanetPosition {
   sign: string;
   house: number;
   degree: number;
   longitude: number;
   retrograde: boolean;
-  element: ElementType;
-  mode: ModeType;
+  element?: ElementType;
+  mode?: ModeType;
+  
+  // ✅ PROPIEDADES ADICIONALES para cartas progresadas
+  symbol?: string;      // Símbolo del planeta (☉, ☽, etc.)
+  meaning?: string;     // Interpretación del planeta progresado
+  minutes?: number;     // Minutos del grado
 }
 
 export interface DetailedNatalChart {
@@ -193,12 +198,37 @@ export interface DetailedNatalChart {
   aspectos: any[];
 }
 
+// ✅ CORRECCIÓN: DetailedProgressedChart con estructura flexible
 export interface DetailedProgressedChart {
+  // Planetas progresados principales
   sol_progresado: PlanetPosition;
   luna_progresada: PlanetPosition;
-  aspectos_natales_progresados: any[];
+  mercurio_progresado?: PlanetPosition;
+  venus_progresada?: PlanetPosition;
+  marte_progresado?: PlanetPosition;
+  jupiter_progresado?: PlanetPosition;
+  saturno_progresado?: PlanetPosition;
+  urano_progresado?: PlanetPosition;
+  neptuno_progresado?: PlanetPosition;
+  pluton_progresado?: PlanetPosition;
+  
+  // Puntos progresados
   ascendente?: PlanetPosition;
   mediocielo?: PlanetPosition;
+  
+  // Datos adicionales
+  currentAge?: number;
+  houses?: any[];
+  aspectos_natales_progresados: any[];
+  
+  // Metadata
+  generatedAt?: string;
+  isMockData?: boolean;
+  progressionPeriod?: any;
+  
+  // ✅ COMPATIBILIDAD con diferentes estructuras de datos
+  ascendant?: any;      // Para compatibilidad con APIs externas
+  planets?: any;        // Para compatibilidad con APIs externas
 }
 
 // ==========================================

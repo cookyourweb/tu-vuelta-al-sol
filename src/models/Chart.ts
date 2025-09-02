@@ -1,187 +1,294 @@
-// src/models/Chart.ts - ACTUALIZADO PARA PERÍODOS DINÁMICOS
+// =============================================================================
+// 🔧 CORRECCIÓN CRÍTICA 2: Chart model - Estructura flexible
+// src/models/Chart.ts
 
-import { model, models, Schema, Document } from "mongoose";
+import { model, models, Schema, Document, Types } from "mongoose";
 
-// ⭐ INTERFAZ ACTUALIZADA con períodos personalizados
+// ✅ INTERFAZ flexible que soporta AMBAS estructuras
 export interface IChart extends Document {
+  _id: Types.ObjectId;
   userId: string;
-  birthDataId: string;
-  natalChart: object;  // JSON con la carta natal
-  progressedCharts: {  // ⭐ ARRAY MEJORADO - múltiples períodos por usuario
-    period: string;        // "10 febrero 2025 - 10 febrero 2026"
-    year: number;          // 2025 (año de inicio)
-    startDate: Date;       // Fecha exacta de inicio del período
-    endDate: Date;         // Fecha exacta de fin del período
-    chart: object;         // Datos de la carta progresada
-    isActive: boolean;     // Si es el período actual activo
-    createdAt: Date;       // Cuándo se generó
+  uid?: string;
+  birthDataId: Types.ObjectId;
+  chartType?: string;
+  
+  // ✅ Carta natal
+  natalChart: any;
+  
+  // ✅ AMBAS estructuras de progresadas
+  progressedChart?: any;  // Estructura legacy (objeto directo)
+  progressedCharts?: {    // Estructura nueva (array)
+    period: string;
+    year: number;
+    startDate: Date;
+    endDate: Date;
+    chart: any;
+    isActive: boolean;
+    createdAt: Date;
   }[];
+  
   createdAt: Date;
   lastUpdated: Date;
 }
 
-// ⭐ SCHEMA ACTUALIZADO con validaciones mejoradas
-const ChartSchema: Schema = new Schema({
-  userId: { 
-    type: String, 
-    required: true, 
-    unique: true,
-    index: true // Índice para búsquedas rápidas
+const ChartSchema = new Schema<IChart>({
+  userId: {
+    type: String,
+    required: true,
+    index: true
   },
-  birthDataId: { 
-    type: Schema.Types.ObjectId, 
-    ref: 'BirthData', 
-    required: true 
+  uid: {
+    type: String,
+    index: true,
+    sparse: true
   },
-  natalChart: { 
-    type: Object, 
-    required: true 
+  birthDataId: {
+    type: Schema.Types.ObjectId,
+    ref: 'BirthData',
+    required: true
   },
+  chartType: {
+    type: String,
+    enum: ['natal', 'progressed', 'transit', 'composite'],
+    default: 'natal'
+  },
+  
+  // ✅ Carta natal (siempre presente)
+  natalChart: {
+    type: Schema.Types.Mixed,
+    required: true,
+    default: {}
+  },
+  
+  // ✅ ESTRUCTURA LEGACY: progressedChart como objeto
+  progressedChart: {
+    type: Schema.Types.Mixed,
+    required: false
+  },
+  
+  // ✅ ESTRUCTURA NUEVA: progressedCharts como array
   progressedCharts: [{
-    period: { 
-      type: String, 
-      required: true,
-      // Ejemplo: "10 febrero 2025 - 10 febrero 2026"
+    period: {
+      type: String,
+      required: true
     },
-    year: { 
-      type: Number, 
-      required: true,
-      min: 2020, // Validación básica
-      max: 2050
+    year: {
+      type: Number,
+      required: true
     },
-    startDate: { 
-      type: Date, 
-      required: true 
+    startDate: {
+      type: Date,
+      required: true
     },
-    endDate: { 
-      type: Date, 
-      required: true,
-      validate: {
-        validator: function(this: any, endDate: Date) {
-          return endDate > this.startDate;
-        },
-        message: 'La fecha de fin debe ser posterior a la fecha de inicio'
-      }
+    endDate: {
+      type: Date,
+      required: true
     },
-    chart: { 
-      type: Object, 
-      required: true 
+    chart: {
+      type: Schema.Types.Mixed,
+      required: true
     },
-    isActive: { 
-      type: Boolean, 
-      default: function(this: any) {
-        const now = new Date();
-        return now >= this.startDate && now < this.endDate;
-      }
+    isActive: {
+      type: Boolean,
+      default: false
     },
-    createdAt: { 
-      type: Date, 
-      default: Date.now 
+    createdAt: {
+      type: Date,
+      default: Date.now
     }
   }],
-  createdAt: { 
-    type: Date, 
-    default: Date.now 
-  },
-  lastUpdated: { 
-    type: Date, 
-    default: Date.now 
+  
+  lastUpdated: {
+    type: Date,
+    default: Date.now
+  }
+}, {
+  timestamps: true,
+  collection: 'charts'
+});
+
+// ✅ ÍNDICES para performance
+ChartSchema.index({ userId: 1, chartType: 1 });
+ChartSchema.index({ uid: 1, chartType: 1 }, { sparse: true });
+ChartSchema.index({ birthDataId: 1 });
+ChartSchema.index({ createdAt: 1 });
+ChartSchema.index({ 'progressedCharts.year': 1 });
+ChartSchema.index({ 'progressedCharts.isActive': 1 });
+
+// ✅ HOOK PRE-SAVE: Mantener sincronización
+ChartSchema.pre('save', function() {
+  // Sincronizar uid con userId
+  if (this.userId && !this.uid) {
+    this.uid = this.userId;
+  }
+  
+  // Actualizar lastUpdated
+  this.lastUpdated = new Date();
+  
+  // Gestionar estados activos de progresadas
+  if (this.progressedCharts && this.progressedCharts.length > 0) {
+    this.updateActiveStates();
   }
 });
 
-// ⭐ MIDDLEWARE para actualizar lastUpdated automáticamente
-ChartSchema.pre('save', function(next) {
-  this.lastUpdated = new Date();
-  next();
-});
-
-ChartSchema.pre('findOneAndUpdate', function(next) {
-  this.set({ lastUpdated: new Date() });
-  next();
-});
-
-// ⭐ MÉTODOS DE INSTANCIA útiles
+// ✅ MÉTODOS DE INSTANCIA
 ChartSchema.methods.getCurrentProgressedChart = function() {
-  const now = new Date();
-  return this.progressedCharts.find((chart: any) => 
-    now >= chart.startDate && now < chart.endDate
-  );
+  if (this.progressedCharts && this.progressedCharts.length > 0) {
+    return this.progressedCharts.find((chart: any) => chart.isActive);
+  }
+  return null;
 };
 
 ChartSchema.methods.getProgressedChartByPeriod = function(period: string) {
-  return this.progressedCharts.find((chart: any) => chart.period === period);
+  if (this.progressedCharts && this.progressedCharts.length > 0) {
+    return this.progressedCharts.find((chart: any) => chart.period === period);
+  }
+  return null;
 };
 
-ChartSchema.methods.addOrUpdateProgressedChart = function(progressedData: {
+ChartSchema.methods.addOrUpdateProgressedChart = async function(data: {
   period: string;
   year: number;
   startDate: Date;
   endDate: Date;
-  chart: object;
+  chart: any;
 }) {
-  // Buscar si ya existe una carta para este período
+  if (!this.progressedCharts) {
+    this.progressedCharts = [];
+  }
+  
+  // Buscar si ya existe para este período
   const existingIndex = this.progressedCharts.findIndex(
-    (chart: any) => chart.period === progressedData.period
+    (chart: any) => chart.period === data.period
   );
   
-  if (existingIndex !== -1) {
+  if (existingIndex >= 0) {
     // Actualizar existente
     this.progressedCharts[existingIndex] = {
-      ...this.progressedCharts[existingIndex],
-      ...progressedData,
+      ...data,
+      isActive: true,
       createdAt: new Date()
     };
   } else {
-    // Agregar nuevo
+    // Añadir nuevo
     this.progressedCharts.push({
-      ...progressedData,
-      isActive: false, // Se calculará automáticamente
+      ...data,
+      isActive: true,
       createdAt: new Date()
     });
   }
   
   // Actualizar estados activos
-  this.updateActiveStates();
+  if (typeof this.updateActiveStates === 'function') {
+    this.updateActiveStates();
+  }
   
   return this.save();
 };
 
-ChartSchema.methods.updateActiveStates = function() {
+// Agregar el método correctamente al prototipo del documento
+ChartSchema.method('updateActiveStates', function() {
+  if (!this.progressedCharts) return;
+  
   const now = new Date();
   this.progressedCharts.forEach((chart: any) => {
     chart.isActive = now >= chart.startDate && now < chart.endDate;
   });
-};
+});
 
-// ⭐ MÉTODOS ESTÁTICOS útiles
+// ✅ MÉTODOS ESTÁTICOS
 ChartSchema.statics.findByUserId = function(userId: string) {
-  return this.findOne({ userId });
+  return this.findOne({ 
+    $or: [
+      { userId: userId },
+      { uid: userId }
+    ] 
+  });
 };
 
 ChartSchema.statics.findCurrentProgressedChart = function(userId: string) {
   const now = new Date();
   return this.findOne({
-    userId,
+    $or: [
+      { userId: userId },
+      { uid: userId }
+    ],
     'progressedCharts.startDate': { $lte: now },
-    'progressedCharts.endDate': { $gt: now }
+    'progressedCharts.endDate': { $gt: now },
+    'progressedCharts.isActive': true
   });
 };
 
 ChartSchema.statics.findProgressedChartByYear = function(userId: string, year: number) {
   return this.findOne({
-    userId,
+    $or: [
+      { userId: userId },
+      { uid: userId }
+    ],
     'progressedCharts.year': year
   });
 };
 
-// ⭐ ÍNDICES para mejor performance
-ChartSchema.index({ 'progressedCharts.period': 1 });
-ChartSchema.index({ 'progressedCharts.year': 1 });
-ChartSchema.index({ 'progressedCharts.startDate': 1, 'progressedCharts.endDate': 1 });
+const Chart = models.Chart || model<IChart>('Chart', ChartSchema);
 
-export default models.Chart || model<IChart>('Chart', ChartSchema);
+// ✅ FUNCIÓN DE CASTING robusta
+export function castChart(data: any): IChart | null {
+  if (!data) {
+    return null;
+  }
 
-// ⭐ TIPOS ADICIONALES para TypeScript
+  try {
+    // ✅ NORMALIZAR datos
+    const normalizedData = {
+      ...data,
+      _id: data._id || new Types.ObjectId(),
+      userId: data.userId || data.uid,
+      uid: data.uid || data.userId,
+      birthDataId: data.birthDataId instanceof Types.ObjectId 
+        ? data.birthDataId 
+        : new Types.ObjectId(data.birthDataId),
+      natalChart: data.natalChart || {},
+      chartType: data.chartType || 'natal',
+      createdAt: data.createdAt || new Date(),
+      lastUpdated: data.lastUpdated || new Date()
+    };
+
+    // ✅ MANEJAR progressedCharts
+    if (data.progressedCharts && Array.isArray(data.progressedCharts)) {
+      normalizedData.progressedCharts = data.progressedCharts.map((pc: any) => ({
+        ...pc,
+        startDate: pc.startDate instanceof Date ? pc.startDate : new Date(pc.startDate),
+        endDate: pc.endDate instanceof Date ? pc.endDate : new Date(pc.endDate),
+        createdAt: pc.createdAt instanceof Date ? pc.createdAt : new Date(pc.createdAt)
+      }));
+    }
+
+    // ✅ MANEJAR progressedChart legacy
+    if (data.progressedChart) {
+      normalizedData.progressedChart = data.progressedChart;
+    }
+
+    // ✅ VALIDACIÓN BÁSICA
+    if (!normalizedData.userId || !normalizedData.birthDataId) {
+      console.warn('⚠️ [Chart] Datos inválidos:', {
+        userId: !!normalizedData.userId,
+        birthDataId: !!normalizedData.birthDataId
+      });
+      return null;
+    }
+
+    return normalizedData as IChart;
+    
+  } catch (error) {
+    console.error('❌ [Chart] Error en casting:', error);
+    return null;
+  }
+}
+
+// ✅ EXPORT por defecto
+export default Chart;
+
+// ✅ TIPOS ADICIONALES
 export interface ProgressedChartPeriod {
   period: string;
   year: number;
@@ -192,15 +299,67 @@ export interface ProgressedChartPeriod {
   createdAt: Date;
 }
 
-export interface ChartMethods {
-  getCurrentProgressedChart(): ProgressedChartPeriod | undefined;
-  getProgressedChartByPeriod(period: string): ProgressedChartPeriod | undefined;
-  addOrUpdateProgressedChart(data: Omit<ProgressedChartPeriod, 'isActive' | 'createdAt'>): Promise<IChart>;
-  updateActiveStates(): void;
+export interface ChartInput {
+  userId: string;
+  birthDataId: string | Types.ObjectId;
+  chartType?: string;
+  natalChart: any;
+  progressedChart?: any;
+  progressedCharts?: ProgressedChartPeriod[];
 }
 
-export interface ChartStatics {
-  findByUserId(userId: string): Promise<IChart | null>;
-  findCurrentProgressedChart(userId: string): Promise<IChart | null>;
-  findProgressedChartByYear(userId: string, year: number): Promise<IChart | null>;
-}
+// ✅ HELPER FUNCTIONS
+export const ChartHelpers = {
+  createNatalChart: (input: ChartInput) => {
+    return new Chart({
+      ...input,
+      uid: input.userId,
+      chartType: 'natal'
+    });
+  },
+
+  createProgressedChart: (input: ChartInput & { period: string; year: number }) => {
+    const now = new Date();
+    return new Chart({
+      ...input,
+      uid: input.userId,
+      chartType: 'progressed',
+      progressedCharts: [{
+        period: input.period,
+        year: input.year,
+        startDate: now,
+        endDate: new Date(now.getFullYear() + 1, now.getMonth(), now.getDate()),
+        chart: input.natalChart, // Se usará como progresada
+        isActive: true,
+        createdAt: now
+      }]
+    });
+  },
+
+  validateChartData: (data: any): { valid: boolean; errors: string[] } => {
+    const errors: string[] = [];
+
+    if (!data.userId && !data.uid) errors.push('userId o uid es requerido');
+    if (!data.birthDataId) errors.push('birthDataId es requerido');
+    if (!data.natalChart) errors.push('natalChart es requerido');
+
+    return {
+      valid: errors.length === 0,
+      errors
+    };
+  },
+
+  formatForDisplay: (chart: IChart) => {
+    return {
+      id: chart._id.toString(),
+      userId: chart.userId,
+      chartType: chart.chartType,
+      hasNatal: !!chart.natalChart,
+      hasProgressed: !!(chart.progressedChart || chart.progressedCharts?.length),
+      progressedChartsCount: chart.progressedCharts?.length || 0,
+      activeProgressedChart: chart.progressedCharts?.find(pc => pc.isActive),
+      lastUpdated: chart.lastUpdated,
+      createdAt: chart.createdAt
+    };
+  }
+};
