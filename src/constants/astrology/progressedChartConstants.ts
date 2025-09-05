@@ -1,214 +1,309 @@
+// =============================================================================
+// 🌟 CONSTANTES EDUCATIVAS PARA CARTA PROGRESADA
 // src/constants/astrology/progressedChartConstants.ts
-// Constantes específicas para carta progresada con enfoque evolutivo
-
-// =============================================================================
-// SIGNIFICADOS EVOLUTIVOS DE PLANETAS PROGRESADOS
 // =============================================================================
 
-export interface ProgressedPlanetMeaning {
-  evolutiveRole: string;
-  currentPhase: string;
-  lifeAreas: string[];
-  keywords: string;
-  timeframe: string;
-}
-
-export const progressedPlanetMeanings: Record<string, ProgressedPlanetMeaning> = {
+// ✅ SIGNIFICADOS DE PLANETAS PROGRESADOS
+export const progressedPlanetMeanings = {
   'Sol': {
-    evolutiveRole: 'Evolución de tu identidad y propósito de vida',
-    currentPhase: 'Tu esencia más auténtica está madurando hacia nuevas formas de autoexpresión y liderazgo',
-    lifeAreas: ['Identidad personal', 'Autoestima', 'Creatividad', 'Liderazgo', 'Propósito vital'],
-    keywords: 'Madurez, Autenticidad, Propósito, Creatividad, Liderazgo',
-    timeframe: 'Cambios graduales durante 30 años aproximadamente por signo'
+    meaning: 'Tu identidad y propósito de vida evolucionando',
+    evolution: 'Cómo has desarrollado tu autoestima y liderazgo',
+    keywords: ['Identidad', 'Propósito', 'Autoestima', 'Liderazgo', 'Vitalidad'],
+    developmentPhases: {
+      '0-30': 'Formación de la identidad básica y primeras experiencias de liderazgo',
+      '30-60': 'Consolidación del propósito de vida y maduración del ego',
+      '60+': 'Sabiduría solar y mentoreo de otros en el desarrollo personal'
+    }
   },
   'Luna': {
-    evolutiveRole: 'Transformación de tus necesidades emocionales y hogar interno',
-    currentPhase: 'Tu mundo emocional y forma de sentir seguridad están evolucionando hacia nuevos patrones',
-    lifeAreas: ['Emociones', 'Hogar', 'Familia', 'Intuición', 'Necesidades básicas'],
-    keywords: 'Sensibilidad, Hogar, Intuición, Cuidado, Emociones',
-    timeframe: 'Ciclo completo de 28 años - el más rápido de todos'
+    meaning: 'Tus emociones y necesidades internas cambiando',
+    evolution: 'La evolución de tus patrones emocionales y hogar interior',
+    keywords: ['Emociones', 'Intuición', 'Hogar', 'Familia', 'Seguridad'],
+    developmentPhases: {
+      '0-30': 'Establecimiento de patrones emocionales y necesidades de seguridad',
+      '30-60': 'Maduración emocional y redefinición del concepto de hogar',
+      '60+': 'Sabiduría emocional y capacidad de nutrir a otros'
+    }
   },
   'Mercurio': {
-    evolutiveRole: 'Evolución de tu forma de pensar y comunicarte',
-    currentPhase: 'Tu mente está desarrollando nuevas formas de procesar información y expresar ideas',
-    lifeAreas: ['Comunicación', 'Aprendizaje', 'Escritura', 'Tecnología', 'Hermanos'],
-    keywords: 'Comunicación, Aprendizaje, Agilidad mental, Adaptabilidad',
-    timeframe: 'Cambios cada 25-30 años por signo'
+    meaning: 'Tu forma de pensar y comunicarte transformándose',
+    evolution: 'Cómo ha crecido tu capacidad mental y expresión',
+    keywords: ['Comunicación', 'Pensamiento', 'Aprendizaje', 'Curiosidad', 'Adaptabilidad'],
+    developmentPhases: {
+      '0-30': 'Desarrollo del pensamiento lógico y habilidades de comunicación básicas',
+      '30-60': 'Refinamiento intelectual y especialización en áreas de interés',
+      '60+': 'Sabiduría comunicativa y capacidad de enseñar'
+    }
   },
   'Venus': {
-    evolutiveRole: 'Transformación de tus valores, amor y estética',
-    currentPhase: 'Tu forma de amar, valorar y crear belleza está madurando hacia nuevas expresiones',
-    lifeAreas: ['Amor', 'Relaciones', 'Arte', 'Dinero', 'Valores', 'Belleza'],
-    keywords: 'Amor, Belleza, Valores, Armonía, Creatividad artística',
-    timeframe: 'Evolución cada 25-30 años por signo'
+    meaning: 'Tus valores, amor y creatividad madurando',
+    evolution: 'La evolución de tus relaciones y sentido estético',
+    keywords: ['Amor', 'Belleza', 'Valores', 'Relaciones', 'Creatividad'],
+    developmentPhases: {
+      '0-30': 'Exploración del amor y establecimiento de valores personales',
+      '30-60': 'Refinamiento estético y relaciones más maduras',
+      '60+': 'Amor universal y expresión artística madura'
+    }
   },
   'Marte': {
-    evolutiveRole: 'Evolución de tu energía vital y forma de actuar',
-    currentPhase: 'Tu manera de usar la energía y enfrentar desafíos está desarrollándose hacia nuevos enfoques',
-    lifeAreas: ['Acción', 'Energía', 'Sexualidad', 'Competitividad', 'Coraje'],
-    keywords: 'Acción, Energía, Coraje, Impulso, Determinación',
-    timeframe: 'Cambios cada 22-25 años por signo'
+    meaning: 'Tu energía, ambición y forma de actuar desarrollándose',
+    evolution: 'Cómo has canalizado tu fuerza vital y determinación',
+    keywords: ['Acción', 'Energía', 'Ambición', 'Coraje', 'Competitividad'],
+    developmentPhases: {
+      '0-30': 'Aprendizaje del uso constructivo de la energía y la agresión',
+      '30-60': 'Canalización madura de la ambición hacia metas significativas',
+      '60+': 'Sabiduría en la acción y liderazgo inspirador'
+    }
   },
   'Júpiter': {
-    evolutiveRole: 'Expansión de tu sabiduría y visión del mundo',
-    currentPhase: 'Tu filosofía de vida y búsqueda de significado están expandiéndose hacia nuevos horizontes',
-    lifeAreas: ['Filosofía', 'Viajes', 'Educación superior', 'Religión', 'Justicia'],
-    keywords: 'Sabiduría, Expansión, Optimismo, Filosofía, Abundancia',
-    timeframe: 'Evolución muy lenta - aproximadamente 12 años por signo'
+    meaning: 'Tu sabiduría y búsqueda de significado expandiéndose',
+    evolution: 'El crecimiento de tu filosofía de vida y búsqueda de verdad',
+    keywords: ['Sabiduría', 'Expansión', 'Filosofía', 'Justicia', 'Optimismo'],
+    developmentPhases: {
+      '0-30': 'Formación de creencias y búsqueda inicial de significado',
+      '30-60': 'Expansión de horizontes y desarrollo de sabiduría práctica',
+      '60+': 'Maestría filosófica y capacidad de guiar a otros'
+    }
   },
   'Saturno': {
-    evolutiveRole: 'Maduración de tu estructura personal y responsabilidades',
-    currentPhase: 'Tu sentido de disciplina y autoridad están cristalizando en nuevas formas de maestría',
-    lifeAreas: ['Disciplina', 'Carrera', 'Autoridad', 'Tiempo', 'Límites'],
-    keywords: 'Disciplina, Responsabilidad, Maestría, Autoridad, Perseverancia',
-    timeframe: 'Cambios muy lentos - aproximadamente 30 años por signo'
-  },
-  'Urano': {
-    evolutiveRole: 'Despertar de tu originalidad y libertad',
-    currentPhase: 'Tu necesidad de independencia y innovación está manifestándose en nuevas áreas de vida',
-    lifeAreas: ['Innovación', 'Libertad', 'Tecnología', 'Amistad', 'Revolución personal'],
-    keywords: 'Originalidad, Libertad, Innovación, Rebeldía, Genialidad',
-    timeframe: 'Evolución ultra-lenta - aproximadamente 84 años por signo'
-  },
-  'Neptuno': {
-    evolutiveRole: 'Disolución de ilusiones y despertar espiritual',
-    currentPhase: 'Tu conexión espiritual y capacidad de trascendencia están refinándose hacia mayor claridad',
-    lifeAreas: ['Espiritualidad', 'Arte', 'Compasión', 'Intuición', 'Servicio'],
-    keywords: 'Espiritualidad, Compasión, Intuición, Arte, Trascendencia',
-    timeframe: 'Evolución generacional - aproximadamente 165 años por signo'
-  },
-  'Plutón': {
-    evolutiveRole: 'Transformación profunda del alma',
-    currentPhase: 'Tu poder personal y capacidad de regeneración están emergiendo en nuevas dimensiones de vida',
-    lifeAreas: ['Transformación', 'Poder', 'Psicología', 'Muerte-renacimiento', 'Recursos compartidos'],
-    keywords: 'Transformación, Poder, Regeneración, Profundidad, Renacimiento',
-    timeframe: 'Evolución ultra-lenta - hasta 248 años por signo'
+    meaning: 'Tu disciplina y estructura interna madurando',
+    evolution: 'Cómo has desarrollado responsabilidad y autoridad personal',
+    keywords: ['Disciplina', 'Responsabilidad', 'Estructura', 'Autoridad', 'Paciencia'],
+    developmentPhases: {
+      '0-30': 'Aprendizaje de límites y desarrollo de disciplina básica',
+      '30-60': 'Construcción de autoridad y asunción de responsabilidades mayores',
+      '60+': 'Maestría en la disciplina y sabiduría estructural'
+    }
   }
 };
 
-// =============================================================================
-// EXPLICACIONES SOBRE QUÉ ES UNA CARTA PROGRESADA
-// =============================================================================
-
+// ✅ EDUCACIÓN SOBRE PROGRESIONES
 export const progressedChartEducation = {
-  mainConcept: {
-    title: "¿Qué es tu Carta Progresada?",
-    explanation: "Tu carta progresada muestra cómo has evolucionado internamente desde el día que naciste. Mientras tu carta natal es tu 'semilla original', la progresada es tu 'crecimiento actual'.",
-    analogy: "Si tu carta natal es el ADN de tu personalidad, la carta progresada es cómo ese ADN se está expresando ahora, después de años de experiencias y crecimiento."
+  conceptoBasico: {
+    titulo: '¿Qué es una Carta Progresada?',
+    descripcion: `Tu carta progresada muestra cómo has evolucionado internamente desde tu nacimiento. 
+    Mientras que tu carta natal es tu "semilla cósmica", la progresada es tu "árbol crecido".`,
+    analogias: [
+      'Carta Natal = Semilla con todo el potencial',
+      'Carta Progresada = Árbol que ha crecido con el tiempo',
+      'Natal = Plano arquitectónico de tu alma',
+      'Progresada = Casa construida con experiencia'
+    ]
   },
   
-  howItWorks: {
-    title: "¿Cómo funciona la progresión?",
-    method: "Cada día después de tu nacimiento equivale a un año de tu vida (1 día = 1 año)",
-    example: "Si naciste el 10/02/1974 y ahora tienes 51 años, tu carta progresada se calcula para el 2/04/1974 (51 días después)",
-    timeframe: "Para tu año solar actual (de cumpleaños a cumpleaños)"
+  metodoCalculo: {
+    titulo: 'Método de Cálculo',
+    descripcion: 'Cada día después de tu nacimiento = 1 año de tu vida',
+    ejemplos: [
+      'Si tienes 25 años → carta para el día 25 después de nacer',
+      'Si tienes 50 años → carta para el día 50 después de nacer',
+      'Es como si el cosmos "envejeciera" un año por cada día'
+    ],
+    importante: 'Este método se basa en el movimiento natural de los planetas y refleja tu evolución interna'
   },
   
-  differences: {
-    title: "Diferencias clave con tu Carta Natal",
+  diferenciaClave: {
     natal: {
-      what: "Carta Natal",
-      represents: "Tu personalidad base, talentos innatos, desafíos de nacimiento",
-      changes: "NUNCA cambia - es tu configuración original",
-      use: "Para entender tu esencia, propósito y potencial de vida"
+      descripcion: 'Tu potencial y características innatas',
+      representa: ['Temperamento básico', 'Talentos naturales', 'Desafíos kármicos', 'Misión del alma'],
+      preguntasClave: ['¿Quién soy?', '¿Cuál es mi propósito?', '¿Qué vine a aprender?']
     },
-    progressed: {
-      what: "Carta Progresada", 
-      represents: "Tu evolución actual, madurez emocional, nuevas fases de vida",
-      changes: "Cambia constantemente - refleja tu crecimiento interno",
-      use: "Para entender qué está emergiendo en ti AHORA"
+    progresada: {
+      descripcion: 'Cómo has desarrollado ese potencial',
+      representa: ['Evolución personal', 'Maduración emocional', 'Desarrollo de talentos', 'Integración de experiencias'],
+      preguntasClave: ['¿Cómo he crecido?', '¿Qué he desarrollado?', '¿En qué me he convertido?']
     }
   },
   
-  interpretation: {
-    title: "Cómo interpretar las diferencias",
-    sameSign: "Si un planeta progresado está en el mismo signo que natal = estás profundizando esas cualidades",
-    differentSign: "Si cambió de signo = estás desarrollando nuevas facetas de esa energía planetaria",
-    newAspects: "Nuevos aspectos = nuevas dinámicas internas están emergiendo",
-    dissolvedAspects: "Aspectos que se disuelven = viejos patrones están siendo superados"
-  }
+  utilidades: [
+    'Entender tu evolución personal a lo largo de los años',
+    'Ver patrones de crecimiento y desarrollo',
+    'Identificar timing de cambios internos importantes',
+    'Integrar nuevas facetas de tu personalidad',
+    'Comprender ciclos de maduración emocional',
+    'Reconocer el desarrollo de tus talentos'
+  ]
 };
 
-// =============================================================================
-// FASES DE VIDA SEGÚN PROGRESIONES
-// =============================================================================
-
+// ✅ FASES DE VIDA ASTROLÓGICAS
 export const lifePhases = {
-  youngAdult: {
-    ageRange: "18-30 años",
-    description: "Primeras progresiones significativas - especialmente Luna progresada",
-    focus: "Desarrollo emocional, primeras relaciones importantes, definición de identidad"
+  juventud: {
+    rango: '0-29 años',
+    titulo: 'Formación y Exploración',
+    descripcion: 'Desarrollo de la personalidad básica y exploración del mundo',
+    planetasActivos: ['Sol', 'Luna', 'Mercurio', 'Venus', 'Marte'],
+    temasClave: ['Identidad', 'Educación', 'Primeras relaciones', 'Carrera inicial'],
+    desarrolloProgresado: 'Los planetas personales muestran su primera maduración'
   },
-  earlyMaturity: {
-    ageRange: "30-40 años", 
-    description: "Progresiones del Sol y planetas personales más evidentes",
-    focus: "Consolidación profesional, relaciones estables, madurez emocional"
+  
+  adultoJoven: {
+    rango: '30-59 años',
+    titulo: 'Consolidación y Expansión',
+    descripcion: 'Establecimiento en la vida y desarrollo de sabiduría práctica',
+    planetasActivos: ['Júpiter', 'Saturno'],
+    temasClave: ['Carrera consolidada', 'Relaciones maduras', 'Responsabilidades', 'Expansión'],
+    desarrolloProgresado: 'Los planetas sociales guían el crecimiento y la responsabilidad'
   },
-  midlife: {
-    ageRange: "40-50 años",
-    description: "Posibles cambios significativos especialmente en planetas rápidos", 
-    focus: "Replanteamiento de valores, posibles crisis de crecimiento, nuevas direcciones"
-  },
-  matureWisdom: {
-    ageRange: "50+ años",
-    description: "Progresiones más sutiles pero profundas - sabiduría acumulada",
-    focus: "Integración de experiencias, enseñanza, legado, espiritualidad"
+  
+  madurez: {
+    rango: '60+ años',
+    titulo: 'Sabiduría y Trascendencia',
+    descripcion: 'Integración de experiencias y desarrollo de sabiduría universal',
+    planetasActivos: ['Urano', 'Neptuno', 'Plutón'],
+    temasClave: ['Sabiduría', 'Mentoreo', 'Legado', 'Espiritualidad'],
+    desarrolloProgresado: 'Los planetas transpersonales revelan el propósito más profundo'
   }
 };
 
-// =============================================================================
-// ASPECTOS PROGRESADOS - SIGNIFICADOS EVOLUTIVOS
-// =============================================================================
-
+// ✅ SIGNIFICADOS DE ASPECTOS PROGRESADOS
 export const progressedAspectMeanings = {
-  forming: {
-    title: "Aspectos que se Forman",
-    meaning: "Nuevas dinámicas internas que están emergiendo en tu personalidad",
-    significance: "Representan nuevas habilidades, desafíos o oportunidades que estás desarrollando"
+  conjuncion: {
+    simbolo: '☌',
+    significado: 'Fusión y nueva síntesis',
+    desarrollo: 'Dos partes de tu personalidad se han unido para crear algo nuevo',
+    energia: 'Intensidad, nuevo comienzo, potencial concentrado'
   },
-  exact: {
-    title: "Aspectos Exactos", 
-    meaning: "Dinámicas que están en su punto de máxima influencia",
-    significance: "Período de máxima intensidad para integrar estas energías"
+  
+  sextil: {
+    simbolo: '⚹',
+    significado: 'Oportunidad y cooperación',
+    desarrollo: 'Has desarrollado la habilidad de integrar estas energías de forma armoniosa',
+    energia: 'Facilidad, oportunidad, talento natural desarrollado'
   },
-  separating: {
-    title: "Aspectos que se Separan",
-    meaning: "Dinámicas que están perdiendo intensidad o siendo superadas",
-    significance: "Patrones que estás dejando atrás o integrando definitivamente"
+  
+  cuadratura: {
+    simbolo: '□',
+    significado: 'Tensión creativa y crecimiento',
+    desarrollo: 'La tensión entre estas energías te ha hecho crecer y evolucionar',
+    energia: 'Desafío, crecimiento, fuerza desarrollada a través del conflicto'
+  },
+  
+  trigono: {
+    simbolo: '△',
+    significado: 'Fluidez y talento natural',
+    desarrollo: 'Has desarrollado una capacidad natural para expresar estas energías',
+    energia: 'Armonía, talento, expresión fluida y natural'
+  },
+  
+  oposicion: {
+    simbolo: '☍',
+    significado: 'Equilibrio y integración',
+    desarrollo: 'Has aprendido a equilibrar estas fuerzas opuestas en tu vida',
+    energia: 'Polaridad, equilibrio, integración de opuestos'
   }
 };
 
-// =============================================================================
-// COLORES ESPECÍFICOS PARA PROGRESIONES
-// =============================================================================
-
-export const progressedColors = {
-  natalPlanets: '#3B82F6', // Azul para planetas natales (referencia)
-  progressedPlanets: '#EF4444', // Rojo para planetas progresados (actuales)
-  newAspects: '#10B981', // Verde para aspectos nuevos
-  dissolvedAspects: '#F59E0B', // Ámbar para aspectos que se disuelven
-  stableAspects: '#8B5CF6' // Púrpura para aspectos que permanecen
+// ✅ TOOLTIPS EDUCATIVOS
+export const progressedTooltips = {
+  education: 'Las progresiones muestran tu evolución interna desde el nacimiento usando el método "un día = un año"',
+  
+  comparison: 'Compara tu carta natal (potencial innato) con la progresada (desarrollo alcanzado) para ver tu crecimiento',
+  
+  aspects: 'Los aspectos progresados son nuevas dinámicas internas que has desarrollado. No estaban activas al nacer pero han emergido con tu maduración',
+  
+  houses: 'Las casas muestran las áreas de vida donde se manifiestan estos cambios evolutivos internos',
+  
+  planets: 'Cada planeta progresado representa cómo esa función psicológica ha evolucionado desde tu nacimiento',
+  
+  timing: 'El timing de las progresiones revela cuándo ocurren los cambios internos más significativos',
+  
+  elements: 'La distribución elemental progresada muestra cómo ha cambiado tu temperamento básico',
+  
+  modalities: 'Las modalidades progresadas indican cómo ha evolucionado tu forma de actuar en el mundo'
 };
 
-// =============================================================================
-// TOOLTIPS EDUCATIVOS ESPECÍFICOS
-// =============================================================================
+// ✅ CICLOS EVOLUTIVOS IMPORTANTES
+export const evolutionaryCycles = {
+  lunaProgresada: {
+    ciclo: '27-29 años',
+    nombre: 'Retorno Lunar Progresado',
+    significado: 'La Luna progresada vuelve a su posición natal',
+    descripcion: 'Momento de renovación emocional y nuevo ciclo de crecimiento interior',
+    temas: ['Renovación emocional', 'Nuevo hogar interior', 'Ciclo femenino', 'Intuición madura']
+  },
+  
+  solProgresado: {
+    ciclo: '30 años aprox',
+    nombre: 'Cambio de Signo Solar',
+    significado: 'El Sol progresado cambia de signo zodiacal',
+    descripcion: 'Transformación profunda de la identidad y propósito de vida',
+    temas: ['Nueva identidad', 'Propósito renovado', 'Liderazgo diferente', 'Vitalidad transformada']
+  },
+  
+  retornoSaturno: {
+    ciclo: '29.5 años',
+    nombre: 'Retorno de Saturno',
+    significado: 'Saturno vuelve a su posición natal (tránsito)',
+    descripcion: 'Crisis de maduración y asunción de responsabilidades adultas',
+    temas: ['Maduración', 'Responsabilidad', 'Estructura de vida', 'Autoridad personal']
+  }
+};
 
-export const progressedTooltips = {
-  planetDifference: (natalSign: string, progressedSign: string, planetName: string) => {
-    if (natalSign === progressedSign) {
-      return `Tu ${planetName} sigue en ${natalSign} - estás profundizando y madurando estas cualidades naturales.`;
-    } else {
-      return `Tu ${planetName} ha evolucionado de ${natalSign} a ${progressedSign} - estás desarrollando nuevas facetas de esta energía.`;
-    }
+// ✅ GUÍAS INTERPRETATIVAS POR EDAD
+export const ageInterpretationGuides = {
+  '0-7': {
+    fase: 'Infancia Astrológica',
+    planetaDominante: 'Luna',
+    desarrollo: 'Formación de la base emocional y vínculos primarios',
+    progresiones: 'Los planetas apenas han comenzado su viaje progresado'
   },
   
-  ageRelevance: (ageAtStart: number) => {
-    if (ageAtStart < 30) return "Estás en una fase de desarrollo de identidad y exploración emocional.";
-    if (ageAtStart < 45) return "Estás en una fase de consolidación y madurez de tus valores.";
-    if (ageAtStart < 60) return "Estás en una fase de replanteamiento y posibles nuevas direcciones.";
-    return "Estás en una fase de sabiduría acumulada e integración de experiencias.";
+  '7-14': {
+    fase: 'Despertar Mental',
+    planetaDominante: 'Mercurio',
+    desarrollo: 'Desarrollo del pensamiento lógico y comunicación',
+    progresiones: 'Mercurio progresado puede cambiar de signo, alterando el estilo mental'
   },
   
-  timeRelevance: "Esta carta progresada es específica para tu año solar actual - desde tu último cumpleaños hasta el próximo."
-}
+  '14-21': {
+    fase: 'Despertar Emocional y Social',
+    planetaDominante: 'Venus',
+    desarrollo: 'Primeras relaciones amorosas y desarrollo estético',
+    progresiones: 'Venus progresado influye en los valores y relaciones tempranas'
+  },
+  
+  '21-28': {
+    fase: 'Afirmación Personal',
+    planetaDominante: 'Marte',
+    desarrollo: 'Desarrollo de la voluntad y capacidad de acción',
+    progresiones: 'Marte progresado muestra cómo se ha desarrollado la asertividad'
+  },
+  
+  '29-35': {
+    fase: 'Primera Maduración',
+    planetaDominante: 'Sol',
+    desarrollo: 'Crisis de los 30 y redefinición del propósito',
+    progresiones: 'Retorno de Saturno y posible cambio de signo del Sol progresado'
+  },
+  
+  '35-42': {
+    fase: 'Expansión Jupiteriana',
+    planetaDominante: 'Júpiter',
+    desarrollo: 'Búsqueda de significado y expansión de horizontes',
+    progresiones: 'Las progresiones muestran la evolución de la sabiduría personal'
+  },
+  
+  '42-49': {
+    fase: 'Crisis de Medio Camino',
+    planetaDominante: 'Urano (tránsito)',
+    desarrollo: 'Cuestionamiento profundo y necesidad de cambio',
+    progresiones: 'Los planetas progresados revelan cambios internos profundos'
+  },
+  
+  '49+': {
+    fase: 'Sabiduría y Trascendencia',
+    planetaDominante: 'Neptuno/Plutón',
+    desarrollo: 'Integración de experiencias y desarrollo espiritual',
+    progresiones: 'Las progresiones muestran la síntesis final de la personalidad'
+  }
+};
+
+export default {
+  progressedPlanetMeanings,
+  progressedChartEducation,
+  lifePhases,
+  progressedAspectMeanings,
+  progressedTooltips,
+  evolutionaryCycles,
+  ageInterpretationGuides
+};

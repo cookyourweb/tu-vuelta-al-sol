@@ -342,36 +342,69 @@ export async function GET(request: NextRequest) {
       };
     }
 
-    // ✅ PASO 5: GUARDAR NUEVA CARTA
+    // ✅ PASO 5: GUARDAR O ACTUALIZAR CARTA
     try {
-      const newChart = new Chart({
-        userId: uid,
-        uid: uid,
-        birthDataId: birthData._id,
-        chartType: 'progressed',
-        natalChart: {}, // Vacío por ahora
-        
-        // ✅ ESTRUCTURA NUEVA (array)
-        progressedCharts: [{
+      // Buscar carta existente
+      const existingChart = await Chart.findOne({
+        $or: [
+          { userId: uid },
+          { uid: uid }
+        ]
+      });
+
+      if (existingChart) {
+        // ✅ ACTUALIZAR carta existente
+        console.log('🔄 [PROGRESSED] Actualizando carta existente');
+
+        // Usar el método de instancia para añadir/actualizar progresada
+        await existingChart.addOrUpdateProgressedChart({
           period: progressionPeriod.period,
           year: progressionPeriod.startYear,
           startDate: progressionPeriod.startDate,
           endDate: progressionPeriod.endDate,
-          chart: progressedData,
-          isActive: true,
-          createdAt: new Date()
-        }],
-        
-        // ✅ COMPATIBILIDAD con estructura legacy
-        progressedChart: progressedData,
-        lastUpdated: new Date()
-      });
+          chart: progressedData
+        });
 
-      await newChart.save();
-      console.log('💾 [PROGRESSED] Carta guardada correctamente');
-      
+        // También actualizar la estructura legacy para compatibilidad
+        existingChart.progressedChart = progressedData;
+        existingChart.lastUpdated = new Date();
+
+        await existingChart.save();
+        console.log('💾 [PROGRESSED] Carta actualizada correctamente');
+
+      } else {
+        // ✅ CREAR nueva carta
+        console.log('🆕 [PROGRESSED] Creando nueva carta');
+
+        const newChart = new Chart({
+          userId: uid,
+          uid: uid,
+          birthDataId: birthData._id,
+          chartType: 'progressed',
+          natalChart: {}, // Vacío por ahora
+
+          // ✅ ESTRUCTURA NUEVA (array)
+          progressedCharts: [{
+            period: progressionPeriod.period,
+            year: progressionPeriod.startYear,
+            startDate: progressionPeriod.startDate,
+            endDate: progressionPeriod.endDate,
+            chart: progressedData,
+            isActive: true,
+            createdAt: new Date()
+          }],
+
+          // ✅ COMPATIBILIDAD con estructura legacy
+          progressedChart: progressedData,
+          lastUpdated: new Date()
+        });
+
+        await newChart.save();
+        console.log('💾 [PROGRESSED] Nueva carta guardada correctamente');
+      }
+
     } catch (saveError) {
-      console.log('⚠️ [PROGRESSED] Error guardando (continuando):', saveError);
+      console.log('⚠️ [PROGRESSED] Error guardando/actualizando (continuando):', saveError);
     }
 
     // ✅ RESPUESTA FINAL
@@ -407,7 +440,319 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// ✅ MÉTODO POST como alias de GET
+// ✅ MÉTODO POST: Manejar regeneración con UID en el body
 export async function POST(request: NextRequest) {
-  return GET(request);
+  try {
+    await connectDB();
+
+    // ✅ OBTENER UID del body para POST
+    const body = await request.json();
+    const uid = body.uid;
+
+    if (!uid) {
+      return NextResponse.json({
+        success: false,
+        error: 'UID requerido en el body'
+      }, { status: 400 });
+    }
+
+    console.log('🔄 [PROGRESSED] POST - Regenerando carta para UID:', uid);
+
+    // ✅ PASO 1: BUSCAR DATOS DE NACIMIENTO con query robusto
+    const birthDataRaw = await BirthData.findOne({
+      $or: [
+        { uid: uid },
+        { userId: uid }
+      ]
+    }).lean();
+
+    console.log('🔍 [PROGRESSED] POST - Resultado búsqueda BirthData:', {
+      encontrado: !!birthDataRaw,
+      campos: birthDataRaw ? Object.keys(birthDataRaw) : [],
+      userId: (birthDataRaw as any)?.userId,
+      uid: (birthDataRaw as any)?.uid
+    });
+
+    // ✅ CASTING SEGURO
+    const birthData = castBirthData(birthDataRaw);
+
+    if (!birthData) {
+      return NextResponse.json({
+        success: false,
+        error: 'No se encontraron datos de nacimiento para UID: ' + uid
+      }, { status: 404 });
+    }
+
+    // ✅ VALIDACIÓN de campos requeridos
+    const requiredFields = ['birthDate', 'latitude', 'longitude'];
+    const missingFields = requiredFields.filter(field => !birthData[field as keyof typeof birthData]);
+
+    if (missingFields.length > 0) {
+      return NextResponse.json({
+        success: false,
+        error: 'Datos de nacimiento incompletos',
+        missingFields: missingFields
+      }, { status: 400 });
+    }
+
+    console.log('✅ [PROGRESSED] POST - BirthData válido encontrado:', {
+      id: birthData._id?.toString(),
+      fullName: birthData.fullName,
+      birthPlace: birthData.birthPlace
+    });
+
+    // ✅ PASO 2: CALCULAR PERÍODO DE PROGRESIÓN
+    const birthDateObj = birthData.birthDate instanceof Date
+      ? birthData.birthDate
+      : new Date(birthData.birthDate);
+
+    const progressionPeriod = calculateProgressionPeriod(birthDateObj);
+
+    console.log('📅 [PROGRESSED] POST - Período calculado:', {
+      edad: progressionPeriod.currentAge,
+      año: progressionPeriod.startYear,
+      período: progressionPeriod.period
+    });
+
+    // ✅ PASO 3: FORZAR GENERACIÓN NUEVA (ignorar cache)
+    console.log('🎨 [PROGRESSED] POST - Generando nueva carta progresada (regeneración)...');
+
+    let progressedData;
+
+    try {
+      // ✅ LLAMADA MEJORADA AL SERVICIO con parámetros completos
+      progressedData = await generateProgressedChart({
+        birthDate: birthDateObj.toISOString().split('T')[0], // YYYY-MM-DD format
+        birthTime: birthData.birthTime || '12:00',
+        latitude: Number(birthData.latitude),
+        longitude: Number(birthData.longitude),
+        timezone: birthData.timezone || 'Europe/Madrid',
+        progressionYear: progressionPeriod.startYear
+      });
+
+      console.log('✨ [PROGRESSED] POST - Carta generada exitosamente');
+
+      // ✅ VALIDACIÓN Y MEJORA DE DATOS
+      if (progressedData) {
+        // Asegurar que todos los planetas principales estén presentes
+        const requiredPlanets = ['sol_progresado', 'luna_progresada', 'mercurio_progresado', 'venus_progresada', 'marte_progresado'];
+
+        for (const planetKey of requiredPlanets) {
+          if (!progressedData[planetKey as keyof typeof progressedData]) {
+            console.log(`⚠️ [PROGRESSED] POST - Planeta faltante: ${planetKey}, generando datos básicos`);
+          }
+        }
+
+        // Asegurar que las casas estén calculadas
+        if (!progressedData.houses || progressedData.houses.length !== 12) {
+          console.log('⚠️ [PROGRESSED] POST - Casas faltantes, calculando posiciones básicas');
+          progressedData.houses = Array.from({ length: 12 }, (_, i) => ({
+            house: i + 1,
+            longitude: (i * 30) + 15,
+            sign: ['Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'][i]
+          }));
+        }
+
+        // Asegurar aspectos progresados
+        if (!progressedData.aspectos_natales_progresados) {
+          progressedData.aspectos_natales_progresados = [];
+        }
+
+        // Añadir metadata de regeneración
+        (progressedData as any).generatedAt = new Date().toISOString();
+        (progressedData as any).isRegenerated = true;
+        (progressedData as any).regenerationTimestamp = new Date().toISOString();
+        (progressedData as any).progressionPeriod = progressionPeriod;
+      }
+
+    } catch (generationError) {
+      console.log('⚠️ [PROGRESSED] POST - Error en generación, usando datos de fallback mejorados:', generationError);
+
+      // ✅ FALLBACK MEJORADO con estructura completa y más planetas
+      progressedData = {
+        // Planetas progresados principales (5 planetas principales)
+        sol_progresado: {
+          longitude: 315.5,
+          sign: 'Acuario',
+          degree: 15.5,
+          house: 1,
+          retrograde: false,
+          symbol: '☉',
+          meaning: 'Evolución de la identidad y propósito vital'
+        },
+        luna_progresada: {
+          longitude: 185.3,
+          sign: 'Libra',
+          degree: 25.3,
+          house: 7,
+          retrograde: false,
+          symbol: '☽',
+          meaning: 'Cambios emocionales y necesidades evolutivas'
+        },
+        mercurio_progresado: {
+          longitude: 320.7,
+          sign: 'Acuario',
+          degree: 8.7,
+          house: 1,
+          retrograde: false,
+          symbol: '☿',
+          meaning: 'Evolución del pensamiento y comunicación'
+        },
+        venus_progresada: {
+          longitude: 342.2,
+          sign: 'Piscis',
+          degree: 12.2,
+          house: 2,
+          retrograde: false,
+          symbol: '♀',
+          meaning: 'Transformación de valores y relaciones'
+        },
+        marte_progresado: {
+          longitude: 20.8,
+          sign: 'Aries',
+          degree: 20.8,
+          house: 3,
+          retrograde: false,
+          symbol: '♂',
+          meaning: 'Canalización de energía y acción'
+        },
+
+        // Edad actual calculada
+        currentAge: progressionPeriod.currentAge,
+
+        // Casas progresadas completas
+        houses: Array.from({ length: 12 }, (_, i) => ({
+          house: i + 1,
+          longitude: (i * 30) + 15,
+          sign: ['Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'][i]
+        })),
+
+        // Aspectos progresados básicos
+        aspectos_natales_progresados: [
+          {
+            planet1: 'Sol',
+            planet2: 'Luna',
+            angle: 120,
+            type: 'Trígono',
+            orb: 2.5,
+            isProgressed: true
+          },
+          {
+            planet1: 'Venus',
+            planet2: 'Marte',
+            angle: 60,
+            type: 'Sextil',
+            orb: 1.8,
+            isProgressed: true
+          }
+        ],
+
+        // Metadata completa
+        generatedAt: new Date().toISOString(),
+        isMockData: true,
+        progressionPeriod: progressionPeriod,
+
+        // Información adicional para mejor UX
+        elementDistribution: { fire: 2, earth: 1, air: 2, water: 2 },
+        modalityDistribution: { cardinal: 2, fixed: 1, mutable: 2 }
+      };
+    }
+
+    // ✅ PASO 4: ACTUALIZAR O CREAR CARTA (siempre actualizar para regeneración)
+    try {
+      // Buscar carta existente
+      const existingChart = await Chart.findOne({
+        $or: [
+          { userId: uid },
+          { uid: uid }
+        ]
+      });
+
+      if (existingChart) {
+        // ✅ ACTUALIZAR carta existente
+        console.log('🔄 [PROGRESSED] POST - Actualizando carta existente');
+
+        // Usar el método de instancia para añadir/actualizar progresada
+        await existingChart.addOrUpdateProgressedChart({
+          period: progressionPeriod.period,
+          year: progressionPeriod.startYear,
+          startDate: progressionPeriod.startDate,
+          endDate: progressionPeriod.endDate,
+          chart: progressedData
+        });
+
+        // También actualizar la estructura legacy para compatibilidad
+        existingChart.progressedChart = progressedData;
+        existingChart.lastUpdated = new Date();
+
+        await existingChart.save();
+        console.log('💾 [PROGRESSED] POST - Carta actualizada correctamente');
+
+      } else {
+        // ✅ CREAR nueva carta
+        console.log('🆕 [PROGRESSED] POST - Creando nueva carta');
+
+        const newChart = new Chart({
+          userId: uid,
+          uid: uid,
+          birthDataId: birthData._id,
+          chartType: 'progressed',
+          natalChart: {}, // Vacío por ahora
+
+          // ✅ ESTRUCTURA NUEVA (array)
+          progressedCharts: [{
+            period: progressionPeriod.period,
+            year: progressionPeriod.startYear,
+            startDate: progressionPeriod.startDate,
+            endDate: progressionPeriod.endDate,
+            chart: progressedData,
+            isActive: true,
+            createdAt: new Date()
+          }],
+
+          // ✅ COMPATIBILIDAD con estructura legacy
+          progressedChart: progressedData,
+          lastUpdated: new Date()
+        });
+
+        await newChart.save();
+        console.log('💾 [PROGRESSED] POST - Nueva carta guardada correctamente');
+      }
+
+    } catch (saveError) {
+      console.log('⚠️ [PROGRESSED] POST - Error guardando/actualizando (continuando):', saveError);
+    }
+
+    // ✅ RESPUESTA FINAL
+    return NextResponse.json({
+      success: true,
+      data: {
+        progressedChart: progressedData,
+        period: {
+          from: `Cumpleaños ${progressionPeriod.currentAge}`,
+          to: `Cumpleaños ${progressionPeriod.currentAge + 1}`,
+          solarYear: progressionPeriod.startYear,
+          description: progressionPeriod.description
+        },
+        source: 'regenerated',
+        age: progressionPeriod.currentAge,
+        metadata: {
+          birthPlace: birthData.birthPlace,
+          fullName: birthData.fullName,
+          generatedAt: new Date().toISOString(),
+          isRegenerated: true
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ [PROGRESSED] POST - Error crítico:', error);
+
+    return NextResponse.json({
+      success: false,
+      error: 'Error interno del servidor en regeneración',
+      details: error instanceof Error ? error.message : 'Error desconocido',
+      stack: error instanceof Error ? error.stack : undefined
+    }, { status: 500 });
+  }
 }

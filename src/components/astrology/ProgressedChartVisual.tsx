@@ -1,11 +1,16 @@
-// src/components/astrology/ProgressedChartVisual.tsx - VERSIÓN EDUCATIVA COMPLETA
+// =============================================================================
+// 🌟 COMPONENTE CARTA PROGRESADA VISUAL COMPLETO - VERSIÓN EDUCATIVA
+// src/components/astrology/ProgressedChartVisual.tsx
+// =============================================================================
+
 'use client';
 
 import React, { useState } from 'react';
 import ChartDisplay from '@/components/astrology/ChartDisplay';
-import { 
-  TrendingUp, 
-  Calendar, 
+import { progressedPlanetMeanings, progressedTooltips } from '@/constants/astrology/progressedChartConstants';
+import {
+  TrendingUp,
+  Calendar,
   Target,
   Info,
   Settings,
@@ -21,19 +26,19 @@ import {
   Zap,
   RefreshCw,
   HelpCircle,
-  Brain
+  Brain,
+  Compass,
+  Orbit,
+  Flame,
+  Mountain,
+  Wind,
+  Waves,
+  Moon,
+  Sun,
+  AlertTriangle
 } from 'lucide-react';
 
-// ✅ IMPORTAR CONSTANTES EDUCATIVAS
-import { 
-  progressedPlanetMeanings, 
-  progressedChartEducation, 
-  lifePhases,
-  progressedAspectMeanings,
-  progressedTooltips
-} from '@/constants/astrology/progressedChartConstants';
-
-// ✅ INTERFACE PARA CARTA PROGRESADA ESPECÍFICA
+// ✅ INTERFACES COMPLETAS
 interface ProgressedChartData {
   houses: any[];
   planets: any[];
@@ -54,27 +59,22 @@ interface ProgressedChartData {
     progressionDate?: string;
     progressionTime?: string;
   };
-  birthData: {
-    birthDate: string;
-    birthTime: string;
-    birthPlace: string;
-    latitude: number;
-    longitude: number;
-    timezone: string;
-    fullName: string;
-  };
   progressionLocation?: {
     progressionPlace: string;
     latitude: number;
     longitude: number;
     timezone: string;
   };
-  // ✅ AÑADIDO: Comparación con natal
   natalComparison?: {
     planetaryMovements: any[];
     significantChanges: any[];
     newAspects: any[];
     dissolvingAspects: any[];
+  };
+  birthData?: {
+    birthPlace: string;
+    birthDate: string;
+    birthTime: string;
   };
 }
 
@@ -84,8 +84,8 @@ interface ProgressedChartVisualProps {
   error?: string | null;
 }
 
-// ✅ SÍMBOLOS PLANETARIOS PARA TABLA
-const planetSymbols = {
+// ✅ SÍMBOLOS PLANETARIOS
+const planetSymbols: { [key: string]: string } = {
   'Sol': '☉',
   'Luna': '☽',
   'Mercurio': '☿',
@@ -98,19 +98,32 @@ const planetSymbols = {
   'Plutón': '♇'
 };
 
-// ✅ COMPONENTE PRINCIPAL CON EDUCACIÓN COMPLETA
+
+
 const ProgressedChartVisual: React.FC<ProgressedChartVisualProps> = ({
   data,
   isLoading = false,
   error = null
 }) => {
+  const birthData = data.birthData;
   const [activeTab, setActiveTab] = useState<'education' | 'chart' | 'positions' | 'aspects' | 'evolution'>('education');
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [hoveredPlanet, setHoveredPlanet] = useState<string | null>(null);
   const [hoveredAspect, setHoveredAspect] = useState<string | null>(null);
   const [showComparison, setShowComparison] = useState(false);
 
-  // Estados de carga y error
+  // ✅ FUNCIÓN: Obtener icono de elemento
+  const getElementIcon = (element: string) => {
+    const icons: { [key: string]: JSX.Element } = {
+      'fuego': <Flame className="w-4 h-4 text-red-400" />,
+      'tierra': <Mountain className="w-4 h-4 text-green-400" />,
+      'aire': <Wind className="w-4 h-4 text-blue-400" />,
+      'agua': <Waves className="w-4 h-4 text-blue-600" />
+    };
+    return icons[element.toLowerCase()] || <Star className="w-4 h-4" />;
+  };
+
+  // ✅ ESTADO DE CARGA
   if (isLoading) {
     return (
       <div className="space-y-8">
@@ -132,277 +145,123 @@ const ProgressedChartVisual: React.FC<ProgressedChartVisualProps> = ({
     );
   }
 
+  // ✅ ESTADO DE ERROR
   if (error) {
     return (
-      <div className="bg-gradient-to-br from-red-900/30 to-pink-900/30 backdrop-blur-sm border border-red-400/30 rounded-3xl p-8">
+      <div className="bg-gradient-to-br from-red-900/30 via-pink-900/20 to-rose-900/30 backdrop-blur-sm border border-red-400/30 rounded-3xl p-8">
         <div className="text-center">
-          <div className="text-6xl mb-4">⚠️</div>
-          <h3 className="text-xl font-bold text-white mb-2">Error en Carta Progresada</h3>
-          <p className="text-red-200 mb-4">{error}</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg transition-colors"
-          >
-            <RefreshCw className="w-4 h-4 mr-2 inline" />
-            Reintentar
-          </button>
+          <AlertTriangle className="w-16 h-16 text-red-400 mx-auto mb-4" />
+          <h3 className="text-2xl font-bold text-white mb-4">Error en Carta Progresada</h3>
+          <p className="text-red-200 text-lg mb-6">{error}</p>
+          <div className="flex justify-center gap-4">
+            <button className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg transition-colors flex items-center">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Reintentar
+            </button>
+          </div>
         </div>
       </div>
     );
   }
-
-  if (!data) {
-    return (
-      <div className="bg-gradient-to-br from-gray-900/30 to-slate-900/30 backdrop-blur-sm border border-gray-600/30 rounded-3xl p-8">
-        <div className="text-center">
-          <Clock className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-white mb-2">No hay datos de progresión</h3>
-          <p className="text-gray-300">Genera tu carta progresada para ver tu evolución astrológica</p>
-        </div>
-      </div>
-    );
-  }
-
-  // ✅ FUNCIÓN: Determinar fase de vida
-  const getLifePhase = (age: number) => {
-    if (age < 30) return lifePhases.youngAdult;
-    if (age < 40) return lifePhases.earlyMaturity;
-    if (age < 50) return lifePhases.midlife;
-    return lifePhases.matureWisdom;
-  };
-
-  const currentLifePhase = getLifePhase(data.progressionInfo.ageAtStart);
 
   return (
     <div className="space-y-8">
-      {/* ✅ HEADER EDUCATIVO PRINCIPAL */}
-      <div className="bg-gradient-to-br from-purple-900/40 via-indigo-900/30 to-blue-900/40 backdrop-blur-sm border border-purple-400/30 rounded-3xl p-8">
-        <div className="text-center mb-6">
-          <h2 className="text-3xl font-bold text-white mb-4 flex items-center justify-center">
-            <TrendingUp className="w-8 h-8 text-purple-400 mr-3" />
-            Tu Carta Progresada - Evolución Interna
-          </h2>
-          
-          <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-400/20 rounded-xl p-6 max-w-4xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
-              <div className="text-center">
-                <div className="text-purple-300 font-semibold mb-1">Tu Edad Actual</div>
-                <div className="text-white text-2xl font-bold">{data.progressionInfo.ageAtStart} años</div>
-                <div className="text-purple-200 text-xs">{currentLifePhase.ageRange}</div>
-              </div>
-              <div className="text-center">
-                <div className="text-purple-300 font-semibold mb-1">Período de Análisis</div>
-                <div className="text-white text-lg">{data.progressionInfo.period}</div>
-                <div className="text-purple-200 text-xs">Año solar personal</div>
-              </div>
-              <div className="text-center">
-                <div className="text-purple-300 font-semibold mb-1">Fase de Vida</div>
-                <div className="text-white text-lg font-semibold">{currentLifePhase.description.split(' - ')[0]}</div>
-                <div className="text-purple-200 text-xs">{currentLifePhase.focus.substring(0, 30)}...</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ✅ NAVEGACIÓN EDUCATIVA */}
-        <div className="flex justify-center mt-8">
-          <div className="bg-black/30 rounded-xl p-1 flex flex-wrap justify-center gap-1">
+      {/* ✅ NAVEGACIÓN POR PESTAÑAS */}
+      <div className="flex flex-wrap gap-2 justify-center">
+        {[
+          { id: 'education', label: '📚 Educación', icon: BookOpen },
+          { id: 'chart', label: '🌙 Carta Visual', icon: Star },
+          { id: 'positions', label: '🪐 Posiciones', icon: Compass },
+          { id: 'aspects', label: '⚡ Aspectos', icon: Zap },
+          { id: 'evolution', label: '🔮 Evolución', icon: TrendingUp }
+        ].map((tab) => {
+          const IconComponent = tab.icon;
+          return (
             <button
-              onClick={() => setActiveTab('education')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center ${
-                activeTab === 'education'
-                  ? 'bg-purple-500 text-white'
-                  : 'text-gray-300 hover:text-white'
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
+                activeTab === tab.id
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg'
+                  : 'bg-white/10 text-gray-300 hover:bg-white/20 hover:text-white'
               }`}
             >
-              <BookOpen className="w-4 h-4 mr-2" />
-              ¿Qué es esto?
+              <IconComponent className="w-4 h-4" />
+              {tab.label}
             </button>
-            <button
-              onClick={() => setActiveTab('chart')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center ${
-                activeTab === 'chart'
-                  ? 'bg-purple-500 text-white'
-                  : 'text-gray-300 hover:text-white'
-              }`}
-            >
-              <Target className="w-4 h-4 mr-2" />
-              Carta Visual
-            </button>
-            <button
-              onClick={() => setActiveTab('positions')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center ${
-                activeTab === 'positions'
-                  ? 'bg-purple-500 text-white'
-                  : 'text-gray-300 hover:text-white'
-              }`}
-            >
-              <Star className="w-4 h-4 mr-2" />
-              Planetas Progresados
-            </button>
-            <button
-              onClick={() => setActiveTab('aspects')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center ${
-                activeTab === 'aspects'
-                  ? 'bg-purple-500 text-white'
-                  : 'text-gray-300 hover:text-white'
-              }`}
-            >
-              <Zap className="w-4 h-4 mr-2" />
-              Aspectos Nuevos
-            </button>
-            <button
-              onClick={() => setActiveTab('evolution')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center ${
-                activeTab === 'evolution'
-                  ? 'bg-purple-500 text-white'
-                  : 'text-gray-300 hover:text-white'
-              }`}
-            >
-              <Brain className="w-4 h-4 mr-2" />
-              Tu Evolución
-            </button>
-          </div>
-        </div>
+          );
+        })}
       </div>
 
-      {/* ✅ TAB: EDUCACIÓN PRINCIPAL */}
+      {/* ✅ TAB: EDUCACIÓN ASTROLÓGICA */}
       {activeTab === 'education' && (
-        <div className="space-y-8">
-          {/* Concepto principal */}
-          <div className="bg-gradient-to-br from-blue-900/30 to-indigo-900/30 backdrop-blur-sm border border-blue-400/20 rounded-3xl p-8">
+        <div className="space-y-6">
+          <div className="bg-gradient-to-br from-purple-900/30 to-indigo-900/30 backdrop-blur-sm border border-purple-400/20 rounded-3xl p-8">
             <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
-              <Lightbulb className="w-6 h-6 text-blue-400 mr-3" />
-              {progressedChartEducation.mainConcept.title}
+              <BookOpen className="w-6 h-6 text-purple-400 mr-3" />
+              ¿Qué es una Carta Progresada?
             </h3>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-2 gap-8">
               <div className="space-y-4">
-                <p className="text-blue-100 text-lg leading-relaxed">
-                  {progressedChartEducation.mainConcept.explanation}
-                </p>
-                
-                <div className="bg-blue-500/10 border border-blue-400/20 rounded-xl p-6">
-                  <h4 className="text-blue-300 font-semibold mb-3 flex items-center">
-                    <Sparkles className="w-5 h-5 mr-2" />
-                    Analogía fácil de entender
+                <div className="bg-purple-800/30 rounded-xl p-6">
+                  <h4 className="text-purple-300 font-semibold mb-3 flex items-center">
+                    <Lightbulb className="w-5 h-5 mr-2" />
+                    Concepto Básico
                   </h4>
-                  <p className="text-blue-100 italic">
-                    "{progressedChartEducation.mainConcept.analogy}"
+                  <p className="text-purple-100 text-sm leading-relaxed">
+                    Tu carta progresada muestra cómo has evolucionado internamente desde tu nacimiento. 
+                    Mientras que tu carta natal es tu "semilla cósmica", la progresada es tu "árbol crecido".
+                  </p>
+                </div>
+                
+                <div className="bg-purple-800/30 rounded-xl p-6">
+                  <h4 className="text-purple-300 font-semibold mb-3 flex items-center">
+                    <Clock className="w-5 h-5 mr-2" />
+                    Método de Cálculo
+                  </h4>
+                  <p className="text-purple-100 text-sm leading-relaxed">
+                    Cada día después de tu nacimiento = 1 año de tu vida. Si tienes 30 años, 
+                    tu carta progresada se calcula para el día 30 después de que naciste.
                   </p>
                 </div>
               </div>
               
               <div className="space-y-4">
-                <h4 className="text-blue-300 font-semibold text-xl mb-4">
-                  ¿Cómo funciona para ti?
-                </h4>
-                
-                <div className="bg-green-500/10 border border-green-400/20 rounded-xl p-4">
-                  <div className="text-green-300 font-semibold mb-2">Tu caso específico:</div>
-                  <div className="text-green-100 text-sm space-y-1">
-                    <p>• Naciste: {new Date(data.birthData.birthDate).toLocaleDateString('es-ES', { 
-                      weekday: 'long', 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}</p>
-                    <p>• Edad actual: {data.progressionInfo.ageAtStart} años</p>
-                    <p>• Progresión calculada: {data.progressionInfo.ageAtStart} días después de tu nacimiento</p>
-                    <p>• Válida para tu año solar: {data.progressionInfo.period}</p>
+                <div className="bg-indigo-800/30 rounded-xl p-6">
+                  <h4 className="text-indigo-300 font-semibold mb-3 flex items-center">
+                    <Brain className="w-5 h-5 mr-2" />
+                    Diferencia Clave
+                  </h4>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                      <div>
+                        <span className="text-yellow-300 font-medium">Carta Natal:</span>
+                        <span className="text-indigo-100 ml-2">Tu potencial y características innatas</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-emerald-400 rounded-full"></div>
+                      <div>
+                        <span className="text-emerald-300 font-medium">Carta Progresada:</span>
+                        <span className="text-indigo-100 ml-2">Cómo has desarrollado ese potencial</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 
-                <div className="bg-yellow-500/10 border border-yellow-400/20 rounded-xl p-4">
-                  <div className="text-yellow-300 font-semibold mb-2">Tu fase de vida actual:</div>
-                  <div className="text-yellow-100 text-sm">
-                    <p className="font-medium">{currentLifePhase.description}</p>
-                    <p className="mt-2 text-xs">{currentLifePhase.focus}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Diferencias Natal vs Progresada */}
-          <div className="bg-gradient-to-br from-emerald-900/30 to-teal-900/30 backdrop-blur-sm border border-emerald-400/20 rounded-3xl p-8">
-            <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
-              <ArrowRight className="w-6 h-6 text-emerald-400 mr-3" />
-              {progressedChartEducation.differences.title}
-            </h3>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Carta Natal */}
-              <div className="bg-blue-500/10 border border-blue-400/20 rounded-xl p-6">
-                <h4 className="text-blue-300 font-bold text-xl mb-4 flex items-center">
-                  <Star className="w-5 h-5 mr-2" />
-                  {progressedChartEducation.differences.natal.what}
-                </h4>
-                <div className="space-y-3 text-blue-100">
-                  <div>
-                    <div className="font-semibold text-blue-200">Representa:</div>
-                    <div className="text-sm">{progressedChartEducation.differences.natal.represents}</div>
-                  </div>
-                  <div>
-                    <div className="font-semibold text-blue-200">Cambia:</div>
-                    <div className="text-sm font-bold text-blue-300">{progressedChartEducation.differences.natal.changes}</div>
-                  </div>
-                  <div>
-                    <div className="font-semibold text-blue-200">Se usa para:</div>
-                    <div className="text-sm">{progressedChartEducation.differences.natal.use}</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Carta Progresada */}
-              <div className="bg-emerald-500/10 border border-emerald-400/20 rounded-xl p-6">
-                <h4 className="text-emerald-300 font-bold text-xl mb-4 flex items-center">
-                  <TrendingUp className="w-5 h-5 mr-2" />
-                  {progressedChartEducation.differences.progressed.what}
-                </h4>
-                <div className="space-y-3 text-emerald-100">
-                  <div>
-                    <div className="font-semibold text-emerald-200">Representa:</div>
-                    <div className="text-sm">{progressedChartEducation.differences.progressed.represents}</div>
-                  </div>
-                  <div>
-                    <div className="font-semibold text-emerald-200">Cambia:</div>
-                    <div className="text-sm font-bold text-emerald-300">{progressedChartEducation.differences.progressed.changes}</div>
-                  </div>
-                  <div>
-                    <div className="font-semibold text-emerald-200">Se usa para:</div>
-                    <div className="text-sm">{progressedChartEducation.differences.progressed.use}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Interpretación de cambios */}
-            <div className="mt-8 bg-purple-500/10 border border-purple-400/20 rounded-xl p-6">
-              <h4 className="text-purple-300 font-semibold text-lg mb-4 flex items-center">
-                <HelpCircle className="w-5 h-5 mr-2" />
-                Cómo interpretar las diferencias en tu carta
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-                <div className="space-y-3">
-                  <div className="bg-green-500/10 border border-green-400/20 rounded-lg p-3">
-                    <div className="text-green-300 font-semibold mb-1">Mismo signo que natal:</div>
-                    <div className="text-green-100">{progressedChartEducation.interpretation.sameSign}</div>
-                  </div>
-                  <div className="bg-blue-500/10 border border-blue-400/20 rounded-lg p-3">
-                    <div className="text-blue-300 font-semibold mb-1">Cambió de signo:</div>
-                    <div className="text-blue-100">{progressedChartEducation.interpretation.differentSign}</div>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="bg-emerald-500/10 border border-emerald-400/20 rounded-lg p-3">
-                    <div className="text-emerald-300 font-semibold mb-1">Aspectos nuevos:</div>
-                    <div className="text-emerald-100">{progressedChartEducation.interpretation.newAspects}</div>
-                  </div>
-                  <div className="bg-amber-500/10 border border-amber-400/20 rounded-lg p-3">
-                    <div className="text-amber-300 font-semibold mb-1">Aspectos que se disuelven:</div>
-                    <div className="text-amber-100">{progressedChartEducation.interpretation.dissolvedAspects}</div>
-                  </div>
+                <div className="bg-indigo-800/30 rounded-xl p-6">
+                  <h4 className="text-indigo-300 font-semibold mb-3 flex items-center">
+                    <Target className="w-5 h-5 mr-2" />
+                    Para Qué Sirve
+                  </h4>
+                  <ul className="text-indigo-100 text-sm space-y-1">
+                    <li>• Entender tu evolución personal</li>
+                    <li>• Ver patrones de crecimiento</li>
+                    <li>• Timing de cambios internos</li>
+                    <li>• Integrar nuevas facetas de ti</li>
+                  </ul>
                 </div>
               </div>
             </div>
@@ -412,46 +271,26 @@ const ProgressedChartVisual: React.FC<ProgressedChartVisualProps> = ({
 
       {/* ✅ TAB: CARTA VISUAL */}
       {activeTab === 'chart' && (
-        <div className="space-y-6">
-          <div className="bg-gradient-to-r from-red-900/30 to-pink-900/30 backdrop-blur-sm border border-red-400/20 rounded-2xl p-6">
-            <h3 className="text-lg font-bold text-white mb-4 flex items-center">
-              <Target className="w-5 h-5 text-red-400 mr-2" />
-              Tu Carta Progresada Visual
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-6">
-              <div className="text-red-200">
-                <p className="mb-2">
-                  • <strong 
-                      className="cursor-help relative"
-                      onMouseEnter={() => setHoveredAspect('outer-circle')}
-                      onMouseLeave={() => setHoveredAspect(null)}
-                    >
-                      Círculo Exterior (Rojo):
-                      {hoveredAspect === 'outer-circle' && (
-                        <span className="absolute top-full left-0 mt-1 p-2 bg-black/90 rounded text-xs text-white border border-white/20 z-50 w-64">
-                          Posiciones planetarias progresadas - dónde están tus planetas AHORA después de {data.progressionInfo.ageAtStart} años de evolución interna.
-                        </span>
-                      )}
-                    </strong> Tus planetas progresados (actuales)
-                </p>
-                <p className="mb-2">
-                  • <strong 
-                      className="cursor-help relative"
-                      onMouseEnter={() => setHoveredAspect('inner-circle')}
-                      onMouseLeave={() => setHoveredAspect(null)}
-                    >
-                      Círculo Interior (Azul):
-                      {hoveredAspect === 'inner-circle' && (
-                        <span className="absolute top-full left-0 mt-1 p-2 bg-black/90 rounded text-xs text-white border border-white/20 z-50 w-64">
-                          Tus posiciones planetarias originales del día que naciste - tu configuración base de referencia.
-                        </span>
-                      )}
-                    </strong> Tus planetas natales (referencia)
-                </p>
-              </div>
-              <div className="text-red-200">
-                <p className="mb-2">• <strong>Líneas:</strong> Aspectos entre planetas progresados</p>
-                <p className="mb-2">• <strong>Casas:</strong> Áreas de vida donde se manifiestan los cambios</p>
+        <div className="bg-gradient-to-br from-indigo-900/30 to-purple-900/30 backdrop-blur-sm border border-indigo-400/20 rounded-3xl p-8">
+          <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
+            <Star className="w-6 h-6 text-indigo-400 mr-3" />
+            Tu Carta Progresada - Evolución Interior
+          </h3>
+          
+          <div className="mb-6">
+            <div className="bg-indigo-800/30 rounded-xl p-4 mb-4">
+              <h4 className="text-indigo-300 font-medium mb-2">Cómo Leer Esta Carta</h4>
+              <div className="grid md:grid-cols-2 gap-4 text-sm">
+                <div className="text-indigo-100">
+                  <p className="mb-2">• <strong>Planetas con símbolos {
+                    Object.values(planetSymbols).slice(0, 3).join(' ')
+                  }:</strong> Tus planetas progresados (evolución)</p>
+                  <p className="mb-2">• <strong>Planetas transparentes:</strong> Posiciones natales (referencia)</p>
+                </div>
+                <div className="text-red-200">
+                  <p className="mb-2">• <strong>Líneas:</strong> Aspectos entre planetas progresados</p>
+                  <p className="mb-2">• <strong>Casas:</strong> Áreas de vida donde se manifiestan los cambios</p>
+                </div>
               </div>
             </div>
           </div>
@@ -466,7 +305,10 @@ const ProgressedChartVisual: React.FC<ProgressedChartVisualProps> = ({
             keyAspects={data.keyAspects}
             ascendant={data.ascendant}
             midheaven={data.midheaven}
-            birthData={data.birthData}
+            birthData={birthData} // ✅ CORREGIDO: usar birthData prop, no data.birthData
+            chartType="progressed"
+            progressionInfo={data.progressionInfo}
+            showOnlyProgressedAspects={true}
           />
         </div>
       )}
@@ -474,319 +316,233 @@ const ProgressedChartVisual: React.FC<ProgressedChartVisualProps> = ({
       {/* ✅ TAB: POSICIONES PLANETARIAS EDUCATIVAS */}
       {activeTab === 'positions' && (
         <div className="space-y-6">
-          <div className="bg-gradient-to-br from-indigo-900/30 to-purple-900/30 backdrop-blur-sm border border-indigo-400/20 rounded-3xl p-8">
+          <div className="bg-gradient-to-br from-emerald-900/30 to-teal-900/30 backdrop-blur-sm border border-emerald-400/20 rounded-3xl p-8">
             <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
-              <Star className="w-6 h-6 text-indigo-400 mr-3" />
+              <Compass className="w-6 h-6 text-emerald-400 mr-3" />
               Tus Planetas Progresados - Evolución Personal
             </h3>
             
-            <div className="text-indigo-100 mb-6">
+            <div className="text-emerald-100 mb-6">
               <p className="mb-2">
                 Cada planeta progresado muestra cómo has evolucionado internamente en esa área de vida desde que naciste.
               </p>
-              <p className="text-sm text-indigo-300">
+              <p className="text-sm text-emerald-300">
                 💡 <strong>Tip:</strong> Compara con tu carta natal para ver qué ha cambiado en tu personalidad.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {data.planets?.filter(planet => 
-                ['Sol', 'Luna', 'Mercurio', 'Venus', 'Marte'].includes(planet.name)
-              ).map((planet: any, index: number) => (
+            <div className="grid md:grid-cols-2 gap-6">
+              {data.planets.filter((planet: { name: string }) => ['Sol', 'Luna', 'Mercurio', 'Venus', 'Marte'].includes(planet.name)).map((planet: { name: string; degree?: number; sign?: string; housePosition?: number; house?: number }, index: number) => (
                 <div 
-                  key={index} 
-                  className="bg-black/30 rounded-xl p-6 border border-white/10 hover:border-indigo-400/30 transition-all cursor-help"
+                  key={index}
+                  className="bg-emerald-800/30 rounded-xl p-6 hover:bg-emerald-800/40 transition-colors cursor-pointer"
                   onMouseEnter={() => setHoveredPlanet(planet.name)}
                   onMouseLeave={() => setHoveredPlanet(null)}
                 >
                   <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center">
-                      <span className="text-3xl mr-3">
-                        {planetSymbols[planet.name as keyof typeof planetSymbols] || '●'}
-                      </span>
+                    <div className="flex items-center gap-3">
+                      <div className="text-2xl">
+                        {planetSymbols[planet.name] || '🪐'}
+                      </div>
                       <div>
-                        <h4 className="text-white font-semibold text-lg">{planet.name} Progresado</h4>
-                        <div className="text-indigo-300 text-sm">
-                          {planet.sign} {Math.floor(planet.degree || 0)}°{Math.floor((planet.degree || 0) % 1 * 60)}'
-                          {planet.retrograde && <span className="text-red-400 ml-2 animate-pulse">Retrógrado ℞</span>}
-                        </div>
+                        <h4 className="text-emerald-300 font-semibold">{planet.name} Progresado</h4>
+                        <p className="text-emerald-400 text-sm">
+                          {Math.floor(planet.degree || 0)}° {planet.sign} - Casa {planet.housePosition || planet.house}
+                        </p>
                       </div>
                     </div>
-                    <div className="text-right text-sm">
-                      <div className="text-gray-400">Casa {planet.housePosition || planet.house}</div>
+                    <div className="text-right">
+                      <div className="text-emerald-200 text-sm">Edad {data.progressionInfo.ageAtStart}</div>
                     </div>
                   </div>
-
-                  {/* Significado evolutivo */}
-                  <div className="space-y-3">
-                    <div className="bg-indigo-500/10 border border-indigo-400/20 rounded-lg p-3">
-                      <div className="text-indigo-300 font-semibold text-sm mb-1">
-                        ¿Cómo has evolucionado?
-                      </div>
-                      <div className="text-indigo-100 text-xs leading-relaxed">
-                        {progressedPlanetMeanings[planet.name]?.currentPhase || 'Evolución en progreso...'}
-                      </div>
+                  
+                  {hoveredPlanet === planet.name && progressedPlanetMeanings[planet.name as keyof typeof progressedPlanetMeanings] && (
+                    <div className="border-t border-emerald-600/50 pt-4 mt-4">
+                      <p className="text-emerald-100 text-sm mb-2">
+                        <strong>Significado:</strong> {progressedPlanetMeanings[planet.name as keyof typeof progressedPlanetMeanings].meaning}
+                      </p>
+                      <p className="text-emerald-200 text-xs">
+                        <strong>Evolución:</strong> {progressedPlanetMeanings[planet.name as keyof typeof progressedPlanetMeanings].evolution}
+                      </p>
                     </div>
-
-                    <div className="bg-purple-500/10 border border-purple-400/20 rounded-lg p-3">
-                      <div className="text-purple-300 font-semibold text-sm mb-1">
-                        Áreas de vida afectadas:
-                      </div>
-                      <div className="flex flex-wrap gap-1">
-                        {progressedPlanetMeanings[planet.name]?.lifeAreas.slice(0, 3).map((area: string, i: number) => (
-                          <span key={i} className="bg-purple-400/20 text-purple-200 text-xs px-2 py-1 rounded-full">
-                            {area}
-                          </span>
-                        )) || null}
-                      </div>
-                    </div>
-
-                    {hoveredPlanet === planet.name && (
-                      <div className="bg-emerald-500/10 border border-emerald-400/20 rounded-lg p-3 animate-fadeIn">
-                        <div className="text-emerald-300 font-semibold text-sm mb-1">
-                          Tiempo de evolución:
-                        </div>
-                        <div className="text-emerald-100 text-xs">
-                          {progressedPlanetMeanings[planet.name]?.timeframe || 'Consulta a un astrólogo'}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  )}
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      )}
 
-            {/* Planetas transpersonales */}
-            {data.planets?.filter(planet => 
-              ['Júpiter', 'Saturno', 'Urano', 'Neptuno', 'Plutón'].includes(planet.name)
-            ).length > 0 && (
-              <div className="mt-8">
-                <h4 className="text-white font-semibold text-lg mb-4 flex items-center">
-                  <Sparkles className="w-5 h-5 text-yellow-400 mr-2" />
-                  Planetas de Evolución Profunda
-                </h4>
-                <div className="text-yellow-100 text-sm mb-4">
-                  Estos planetas cambian muy lentamente, pero cuando lo hacen marcan transformaciones profundas en tu vida.
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {data.planets.filter(planet => 
-                    ['Júpiter', 'Saturno', 'Urano', 'Neptuno', 'Plutón'].includes(planet.name)
-                  ).map((planet: any, index: number) => (
-                    <div key={index} className="bg-black/20 rounded-lg p-4 border border-yellow-400/20">
-                      <div className="flex items-center mb-2">
-                        <span className="text-xl mr-2">
-                          {planetSymbols[planet.name as keyof typeof planetSymbols]}
-                        </span>
-                        <div>
-                          <div className="text-white font-medium">{planet.name}</div>
-                          <div className="text-yellow-300 text-xs">{planet.sign} Casa {planet.housePosition || planet.house}</div>
-                        </div>
+      {/* ✅ TAB: ASPECTOS PROGRESADOS */}
+      {activeTab === 'aspects' && (
+        <div className="bg-gradient-to-br from-amber-900/30 to-orange-900/30 backdrop-blur-sm border border-amber-400/20 rounded-3xl p-8">
+          <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
+            <Zap className="w-6 h-6 text-amber-400 mr-3" />
+            Aspectos Progresados - Nuevas Dinámicas
+          </h3>
+          
+          <div className="text-amber-100 mb-6">
+            <p className="mb-2">
+              Los aspectos progresados son nuevas dinámicas internas que has desarrollado con la edad. 
+              No estaban activas al nacer, pero han emergido con tu crecimiento.
+            </p>
+            <p className="text-sm text-amber-300">
+              ⚡ <strong>Importante:</strong> Estos aspectos muestran cómo diferentes partes de tu personalidad han aprendido a trabajar juntas.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {data.keyAspects && data.keyAspects.length > 0 ? (
+              data.keyAspects.map((aspect, index) => (
+                <div 
+                  key={index}
+                  className="bg-amber-800/30 rounded-xl p-6 hover:bg-amber-800/40 transition-colors"
+                  onMouseEnter={() => setHoveredAspect(`${aspect.planet1}-${aspect.planet2}`)}
+                  onMouseLeave={() => setHoveredAspect(null)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">{planetSymbols[aspect.planet1] || '🪐'}</span>
+                        <span className="text-amber-300 text-sm">{aspect.planet1}</span>
                       </div>
-                      <div className="text-yellow-100 text-xs">
-                        {progressedPlanetMeanings[planet.name]?.evolutiveRole.substring(0, 50)}...
+                      <div className="text-amber-400 font-medium">{aspect.type}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">{planetSymbols[aspect.planet2] || '🪐'}</span>
+                        <span className="text-amber-300 text-sm">{aspect.planet2}</span>
                       </div>
                     </div>
-                  ))}
+                    <div className="text-amber-200 text-sm">
+                      Orbe: {Math.round(aspect.orb * 10) / 10}°
+                    </div>
+                  </div>
+                  
+                  {hoveredAspect === `${aspect.planet1}-${aspect.planet2}` && (
+                    <div className="border-t border-amber-600/50 pt-4 mt-4">
+                      <p className="text-amber-100 text-sm">
+                        <strong>Dinámica Evolutiva:</strong> El diálogo interno entre tu {aspect.planet1.toLowerCase()} 
+                        y tu {aspect.planet2.toLowerCase()} ha evolucionado hacia una relación de {aspect.type.toLowerCase()}.
+                      </p>
+                    </div>
+                  )}
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <div className="text-4xl mb-4">🔍</div>
+                <p className="text-amber-200">No se encontraron aspectos progresados significativos</p>
+                <p className="text-amber-300 text-sm mt-2">Esto puede indicar un período de estabilidad interna</p>
               </div>
             )}
           </div>
         </div>
       )}
 
-      {/* ✅ TAB: ASPECTOS NUEVOS */}
-      {activeTab === 'aspects' && (
-        <div className="space-y-6">
-          <div className="bg-gradient-to-br from-emerald-900/30 to-green-900/30 backdrop-blur-sm border border-emerald-400/20 rounded-3xl p-8">
-            <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
-              <Zap className="w-6 h-6 text-emerald-400 mr-3" />
-              Aspectos en tu Carta Progresada
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-green-500/10 border border-green-400/20 rounded-xl p-4 text-center">
-                <div className="text-green-300 font-bold text-lg mb-2">
-                  {progressedAspectMeanings.forming.title}
-                </div>
-                <div className="text-green-100 text-sm mb-3">
-                  {progressedAspectMeanings.forming.meaning}
-                </div>
-                <div className="text-green-200 text-xs">
-                  {progressedAspectMeanings.forming.significance}
-                </div>
-              </div>
-
-              <div className="bg-blue-500/10 border border-blue-400/20 rounded-xl p-4 text-center">
-                <div className="text-blue-300 font-bold text-lg mb-2">
-                  {progressedAspectMeanings.exact.title}
-                </div>
-                <div className="text-blue-100 text-sm mb-3">
-                  {progressedAspectMeanings.exact.meaning}
-                </div>
-                <div className="text-blue-200 text-xs">
-                  {progressedAspectMeanings.exact.significance}
-                </div>
-              </div>
-
-              <div className="bg-amber-500/10 border border-amber-400/20 rounded-xl p-4 text-center">
-                <div className="text-amber-300 font-bold text-lg mb-2">
-                  {progressedAspectMeanings.separating.title}
-                </div>
-                <div className="text-amber-100 text-sm mb-3">
-                  {progressedAspectMeanings.separating.meaning}
-                </div>
-                <div className="text-amber-200 text-xs">
-                  {progressedAspectMeanings.separating.significance}
-                </div>
-              </div>
-            </div>
-
-            {/* Lista de aspectos progresados */}
-            <div className="space-y-4">
-              {data.aspects && data.aspects.length > 0 ? (
-                data.aspects.map((aspect: any, index: number) => (
-                  <div key={index} className="bg-black/30 rounded-xl p-4 border border-white/10 hover:border-emerald-400/30 transition-all">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <span className="text-2xl mr-3">
-                          {planetSymbols[aspect.planet1 as keyof typeof planetSymbols] || '●'}
-                        </span>
-                        <span className="text-white font-medium mr-3">{aspect.planet1}</span>
-                        <span className="text-emerald-400 mx-3 font-semibold">{aspect.type}</span>
-                        <span className="text-2xl mr-3">
-                          {planetSymbols[aspect.planet2 as keyof typeof planetSymbols] || '●'}
-                        </span>
-                        <span className="text-white font-medium">{aspect.planet2}</span>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-emerald-200 text-sm">
-                          Orb: {aspect.orb}°
-                        </div>
-                        <div className="text-gray-400 text-xs">
-                          {aspect.exact ? 'Exacto' : 'Aplicando'}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-8">
-                  <div className="text-gray-400 text-lg mb-2">No hay aspectos progresados detectados</div>
-                  <div className="text-gray-500 text-sm">
-                    Los aspectos aparecerán conforme los planetas progresen a través de sus ciclos
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ✅ TAB: TU EVOLUCIÓN */}
+      {/* ✅ TAB: EVOLUCIÓN PERSONAL */}
       {activeTab === 'evolution' && (
         <div className="space-y-6">
           <div className="bg-gradient-to-br from-violet-900/30 to-purple-900/30 backdrop-blur-sm border border-violet-400/20 rounded-3xl p-8">
             <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
-              <Brain className="w-6 h-6 text-violet-400 mr-3" />
-              Tu Evolución Personal a los {data.progressionInfo.ageAtStart} Años
+              <TrendingUp className="w-6 h-6 text-violet-400 mr-3" />
+              Tu Evolución Astrológica
             </h3>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Fase de vida actual */}
-              <div className="bg-violet-500/10 border border-violet-400/20 rounded-xl p-6">
-                <h4 className="text-violet-300 font-bold text-xl mb-4">
-                  Tu Momento de Vida Actual
-                </h4>
-                <div className="space-y-4">
-                  <div>
-                    <div className="text-violet-200 font-semibold mb-2">Rango de edad:</div>
-                    <div className="text-white text-lg">{currentLifePhase.ageRange}</div>
-                  </div>
-                  <div>
-                    <div className="text-violet-200 font-semibold mb-2">Características de esta fase:</div>
-                    <div className="text-violet-100 text-sm leading-relaxed">{currentLifePhase.description}</div>
-                  </div>
-                  <div>
-                    <div className="text-violet-200 font-semibold mb-2">En qué enfocarte:</div>
-                    <div className="text-violet-100 text-sm leading-relaxed">{currentLifePhase.focus}</div>
-                  </div>
+            
+            <div className="grid md:grid-cols-3 gap-6">
+              {/* Período Actual */}
+              <div className="bg-violet-800/30 rounded-xl p-6 text-center">
+                <Calendar className="w-8 h-8 text-violet-400 mx-auto mb-3" />
+                <h4 className="text-violet-300 font-semibold mb-2">Período Actual</h4>
+                <div className="space-y-1 text-violet-100 text-sm">
+                  <p><strong>Año:</strong> {data.progressionInfo.year}</p>
+                  <p><strong>Edad:</strong> {data.progressionInfo.ageAtStart} años</p>
+                  <p><strong>Fase:</strong> {data.progressionInfo.isCurrentYear ? 'Actual' : 'Histórica'}</p>
                 </div>
               </div>
 
-              {/* Recomendaciones personalizadas */}
-              <div className="bg-pink-500/10 border border-pink-400/20 rounded-xl p-6">
-                <h4 className="text-pink-300 font-bold text-xl mb-4">
-                  Recomendaciones para tu Evolución
+              {/* Distribución Elemental */}
+              <div className="bg-violet-800/30 rounded-xl p-6">
+                <h4 className="text-violet-300 font-semibold mb-3 flex items-center">
+                  {getElementIcon('fuego')}
+                  <span className="ml-2">Elementos Activos</span>
                 </h4>
-                <div className="space-y-3">
-                  <div className="text-pink-100 text-sm">
-                    <p className="mb-2">
-                      🌟 <strong>Consejos específicos para tus {data.progressionInfo.ageAtStart} años:</strong>
-                    </p>
-                    <p className="mb-3">
-                      {progressedTooltips.ageRelevance(data.progressionInfo.ageAtStart)}
-                    </p>
-                  </div>
-                  
-                  <div className="bg-pink-400/10 border border-pink-300/20 rounded-lg p-3">
-                    <div className="text-pink-200 font-semibold text-sm mb-2">
-                      ⏰ Validez temporal:
+                <div className="space-y-2">
+                  {Object.entries(data.elementDistribution)
+                    .sort(([, a], [, b]) => (b as number) - (a as number))
+                    .map(([element, value]) => (
+                    <div key={element} className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        {getElementIcon(element)}
+                        <span className="text-violet-100 capitalize">{element}</span>
+                      </div>
+                      <span className="text-violet-300">{value}%</span>
                     </div>
-                    <div className="text-pink-100 text-xs">
-                      {progressedTooltips.timeRelevance}
+                  ))}
+                </div>
+              </div>
+
+              {/* Modalidades */}
+              <div className="bg-violet-800/30 rounded-xl p-6">
+                <h4 className="text-violet-300 font-semibold mb-3 flex items-center">
+                  <Settings className="w-4 h-4 mr-2" />
+                  Modalidades
+                </h4>
+                <div className="space-y-2">
+                  {Object.entries(data.modalityDistribution)
+                    .sort(([, a], [, b]) => (b as number) - (a as number))
+                    .map(([modality, value]) => (
+                    <div key={modality} className="flex items-center justify-between text-sm">
+                      <span className="text-violet-100 capitalize">{modality}</span>
+                      <span className="text-violet-300">{value}%</span>
                     </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>
 
-            {/* Comparación con natal si está disponible */}
-            {data.natalComparison && (
-              <div className="mt-8 bg-indigo-500/10 border border-indigo-400/20 rounded-xl p-6">
-                <h4 className="text-indigo-300 font-bold text-lg mb-4 flex items-center">
-                  <ArrowRight className="w-5 h-5 mr-2" />
-                  Comparación con tu Carta Natal
-                </h4>
-                
-                <button
-                  onClick={() => setShowComparison(!showComparison)}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors mb-4"
-                >
-                  {showComparison ? 'Ocultar' : 'Mostrar'} Comparación Detallada
-                </button>
+            {/* Descripción del Período */}
+            <div className="bg-violet-800/20 rounded-xl p-6 mt-6">
+              <h4 className="text-violet-300 font-semibold mb-3 flex items-center">
+                <Sparkles className="w-5 h-5 mr-2" />
+                Significado de Este Período
+              </h4>
+              <p className="text-violet-100 leading-relaxed">
+                {data.progressionInfo.description || 
+                 `En este período de tu vida (edad ${data.progressionInfo.ageAtStart}), tu evolución astrológica 
+                 muestra un enfoque en el desarrollo interno y la maduración de tus capacidades innatas. 
+                 Los planetas progresados indican las áreas donde has experimentado el mayor crecimiento 
+                 desde tu nacimiento.`}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
-                {showComparison && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {data.natalComparison.significantChanges?.length > 0 && (
-                      <div>
-                        <h5 className="text-indigo-200 font-semibold mb-3">Cambios Significativos:</h5>
-                        <div className="space-y-2">
-                          {data.natalComparison.significantChanges.slice(0, 3).map((change: any, index: number) => (
-                            <div key={index} className="bg-indigo-400/10 rounded-lg p-3 text-sm">
-                              <div className="text-indigo-100">{change.description || 'Cambio detectado'}</div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {data.natalComparison.planetaryMovements?.length > 0 && (
-                      <div>
-                        <h5 className="text-indigo-200 font-semibold mb-3">Movimientos Planetarios:</h5>
-                        <div className="space-y-2">
-                          {data.natalComparison.planetaryMovements.slice(0, 3).map((movement: any, index: number) => (
-                            <div key={index} className="bg-indigo-400/10 rounded-lg p-3 text-sm">
-                              <div className="text-indigo-100">{movement.planet}: {movement.from} → {movement.to}</div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
+      {/* ✅ INFORMACIÓN CONTEXTUAL SIEMPRE VISIBLE - Solo si hay birthData */}
+      {birthData && (
+        <div className="bg-gradient-to-r from-indigo-900/20 via-purple-900/20 to-pink-900/20 backdrop-blur-sm border border-indigo-400/10 rounded-2xl p-6">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="text-indigo-300 font-semibold mb-3 flex items-center">
+                <User className="w-4 h-4 mr-2" />
+                Datos de Nacimiento
+              </h4>
+              <div className="space-y-1 text-indigo-100 text-sm">
+                <p><MapPin className="w-3 h-3 inline mr-1" /> {birthData.birthPlace}</p>
+                <p><Calendar className="w-3 h-3 inline mr-1" /> {birthData.birthDate}</p>
+                <p><Clock className="w-3 h-3 inline mr-1" /> {birthData.birthTime}</p>
               </div>
-            )}
+            </div>
+            <div>
+              <h4 className="text-purple-300 font-semibold mb-3 flex items-center">
+                <Target className="w-4 h-4 mr-2" />
+                Período de Progresión
+              </h4>
+              <div className="space-y-1 text-purple-100 text-sm">
+                <p>Año: {data.progressionInfo.year}</p>
+                <p>Edad: {data.progressionInfo.ageAtStart} años</p>
+                <p>Estado: {data.progressionInfo.isCurrentYear ? 'Período actual' : 'Período histórico'}</p>
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -11,10 +11,10 @@ export interface IChart extends Document {
   uid?: string;
   birthDataId: Types.ObjectId;
   chartType?: string;
-  
+
   // ✅ Carta natal
   natalChart: any;
-  
+
   // ✅ AMBAS estructuras de progresadas
   progressedChart?: any;  // Estructura legacy (objeto directo)
   progressedCharts?: {    // Estructura nueva (array)
@@ -26,9 +26,21 @@ export interface IChart extends Document {
     isActive: boolean;
     createdAt: Date;
   }[];
-  
+
   createdAt: Date;
   lastUpdated: Date;
+
+  // ✅ MÉTODOS DE INSTANCIA
+  getCurrentProgressedChart(): any;
+  getProgressedChartByPeriod(period: string): any;
+  addOrUpdateProgressedChart(data: {
+    period: string;
+    year: number;
+    startDate: Date;
+    endDate: Date;
+    chart: any;
+  }): Promise<IChart>;
+  updateActiveStates(): void;
 }
 
 const ChartSchema = new Schema<IChart>({

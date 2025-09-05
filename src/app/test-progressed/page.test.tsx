@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import ProgressedChartPage from '@/app/(dashboard)/progressed-chart/page';
+import ProgressedChartPage from '@/app/(dashboard)/progressed-chart/page-v0';
 
 describe('ProgressedChartPage', () => {
   it('renders the page and handles API error for insufficient credit', async () => {

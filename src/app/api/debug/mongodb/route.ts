@@ -30,7 +30,29 @@ export async function GET() {
     const chartsWithProgressed = await Chart.countDocuments({ progressedChart: { $exists: true } });
     const chartsWithProgressedArray = await Chart.countDocuments({ progressedCharts: { $exists: true, $ne: [] } });
     
-    const diagnostico = {
+    const diagnostico: {
+      timestamp: string;
+      counts: {
+        birthDataTotal: number;
+        chartTotal: number;
+        birthDataWithUserId: number;
+        birthDataWithUid: number;
+        chartsWithNatal: number;
+        chartsWithProgressed: number;
+        chartsWithProgressedArray: number;
+      };
+      samples: {
+        birthDataStructure: string[] | null;
+        chartStructure: string[] | null;
+        sampleBirthDataFields: {
+          userId: string;
+          uid: string;
+          fullName: string;
+          hasCoordinates: boolean;
+        } | null;
+      };
+      recommendations: string[];
+    } = {
       timestamp: new Date().toISOString(),
       counts: {
         birthDataTotal: birthDataCount,
@@ -45,10 +67,10 @@ export async function GET() {
         birthDataStructure: sampleBirthData ? Object.keys(sampleBirthData) : null,
         chartStructure: sampleChart ? Object.keys(sampleChart) : null,
         sampleBirthDataFields: sampleBirthData ? {
-          userId: sampleBirthData.userId,
-          uid: sampleBirthData.uid,
-          fullName: sampleBirthData.fullName,
-          hasCoordinates: !!(sampleBirthData.latitude && sampleBirthData.longitude)
+          userId: (sampleBirthData as any).userId,
+          uid: (sampleBirthData as any).uid,
+          fullName: (sampleBirthData as any).fullName,
+          hasCoordinates: !!((sampleBirthData as any).latitude && (sampleBirthData as any).longitude)
         } : null
       },
       recommendations: []

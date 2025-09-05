@@ -1,6 +1,6 @@
 // =============================================================================
-// 🌟 COPIA DE PÁGINA CARTA PROGRESADA - BASADA EN CARTA NATAL
-// src/app/(dashboard)/progressed-chart/page-copy.tsx
+// 🌟 PÁGINA CARTA PROGRESADA COMPLETA - VERSIÓN MÁS RECIENTE
+// src/app/(dashboard)/progressed-chart/page.tsx
 // =============================================================================
 
 'use client';
@@ -47,10 +47,10 @@ interface BirthData {
   fullName: string;
 }
 
-export default function ProgressedChartCopyPage() {
+export default function ProgressedChartPage() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
-  
+
   // Estados principales
   const [chartData, setChartData] = useState<ProgressedChartData | null>(null);
   const [birthData, setBirthData] = useState<BirthData | null>(null);
@@ -83,10 +83,10 @@ export default function ProgressedChartCopyPage() {
   const loadBirthDataInfo = async () => {
     try {
       const response = await fetch(`/api/birth-data?userId=${user?.uid}`);
-      
+
       if (response.ok) {
         const result = await response.json();
-        
+
         if (result.success && result.data) {
           setBirthData({
             birthDate: result.data.birthDate,
@@ -110,57 +110,57 @@ export default function ProgressedChartCopyPage() {
       setLoading(true);
       setError(null);
       setDebugInfo('🔍 Cargando carta progresada...');
-      
+
       console.log('🔍 Cargando carta progresada para usuario:', user?.uid);
-      
+
       // Intentar cargar carta progresada existente
       const response = await fetch(`/api/charts/progressed?uid=${user?.uid}`, {
         method: 'GET'
       });
-      
+
       console.log('📡 Respuesta carta progresada:', response.status);
-      
+
       if (response.ok) {
         const result = await response.json();
-        
+
         if (result.success && result.data) {
           console.log('✅ Carta progresada cargada correctamente');
           setDebugInfo('✅ Carta progresada cargada');
-          
+
           const processedData = processChartData(result.data.progressedChart || result.data);
           setChartData(processedData);
-          
+
           // Cargar datos de nacimiento para mostrar información
           await loadBirthDataInfo();
           return;
         }
       }
-      
+
       // Si no existe, generar automáticamente
       setDebugInfo('📝 Generando carta progresada automáticamente...');
       console.log('📝 No existe carta progresada, generando...');
-      
+
       const generateResponse = await fetch('/api/charts/progressed', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: user?.uid,
+          uid: user?.uid,
           regenerate: false
         })
       });
-      
+
       if (generateResponse.ok) {
         const generateResult = await generateResponse.json();
-        
+
         if (generateResult.success) {
           console.log('✅ Carta progresada generada correctamente');
           setDebugInfo('✅ Carta progresada generada');
-          
+
           const processedData = processChartData(generateResult.data.progressedChart || generateResult.data);
           setChartData(processedData);
-          
+
           await loadBirthDataInfo();
         } else {
           throw new Error(generateResult.error || 'Error generando carta progresada');
@@ -168,7 +168,7 @@ export default function ProgressedChartCopyPage() {
       } else {
         throw new Error('Error en respuesta del servidor');
       }
-      
+
     } catch (error) {
       console.error('❌ Error cargando carta progresada:', error);
       setError(error instanceof Error ? error.message : 'Error cargando carta progresada');
@@ -184,7 +184,7 @@ export default function ProgressedChartCopyPage() {
       setIsRegenerating(true);
       setError(null);
       setDebugInfo('🔄 Regenerando carta progresada...');
-      
+
       const regenerateResponse = await fetch('/api/charts/progressed', {
         method: 'POST',
         headers: {
@@ -195,22 +195,22 @@ export default function ProgressedChartCopyPage() {
           regenerate: true
         })
       });
-      
+
       if (!regenerateResponse.ok) {
         const errorResult = await regenerateResponse.json();
         throw new Error(errorResult.error || 'Error regenerando carta progresada');
       }
-      
+
       const regenerateResult = await regenerateResponse.json();
-      
+
       if (!regenerateResult.success) {
         throw new Error(regenerateResult.error || 'Error al regenerar carta progresada');
       }
-      
+
       setDebugInfo('✅ Carta progresada regenerada correctamente');
-      
+
       let dataToProcess = null;
-      
+
       if (regenerateResult.data) {
         dataToProcess = regenerateResult.data;
       } else if (regenerateResult.progressedChart) {
@@ -218,16 +218,16 @@ export default function ProgressedChartCopyPage() {
       } else {
         dataToProcess = regenerateResult;
       }
-      
+
       console.log('🔄 Datos para regeneración:', dataToProcess);
-      
+
       if (!dataToProcess) {
         throw new Error('No se encontraron datos en la respuesta de regeneración');
       }
-      
+
       const processedData = processChartData(dataToProcess);
       setChartData(processedData);
-      
+
     } catch (error) {
       console.error('❌ Error regenerando carta progresada:', error);
       setError(error instanceof Error ? error.message : 'Error desconocido');
@@ -243,7 +243,7 @@ export default function ProgressedChartCopyPage() {
       router.push('/auth/signin');
       return;
     }
-    
+
     loadChartData();
   }, [user, router]);
 
