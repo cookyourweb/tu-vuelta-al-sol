@@ -1,10 +1,44 @@
 // =============================================================================
 import fetch from 'node-fetch'
-// 🔧 CORRECCIÓN: Exports correctos del ProgressedChartService  
+// 🔧 CORRECCIÓN: Exports correctos del ProgressedChartService
 // src/services/progressedChartService.tsx
 
 import { DetailedProgressedChart, UserProfile, ElementType, ModeType, getSignElement, getSignMode } from '@/types/astrology/unified-types';
 import { calculateAllAspects } from '@/utils/astrology/aspectCalculations';
+
+// Función para obtener nuevo token de Prokerala usando client credentials
+async function getNewProkeralaToken(): Promise<string> {
+  const clientId = process.env.PROKERALA_CLIENT_ID || '';
+  const clientSecret = process.env.PROKERALA_CLIENT_SECRET || '';
+  const tokenUrl = 'https://api.prokerala.com/oauth/token';
+
+  if (!clientId || !clientSecret) {
+    throw new Error('Faltan PROKERALA_CLIENT_ID o PROKERALA_CLIENT_SECRET en variables de entorno');
+  }
+
+  const response = await fetch(tokenUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: new URLSearchParams({
+      grant_type: 'client_credentials',
+      client_id: clientId,
+      client_secret: clientSecret
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error obteniendo token Prokerala: ${response.status} ${response.statusText}`);
+  }
+
+  const data = await response.json() as { access_token?: string };
+  if (!data.access_token) {
+    throw new Error('Token de acceso no recibido de Prokerala');
+  }
+
+  return data.access_token;
+}
 
 // ✅ INTERFACES EXPORTADAS
 export interface ProgressionPeriod {
@@ -346,7 +380,22 @@ export async function generateProgressedChart(params: {
 
     // ✅ USAR PROKERALA PROGRESSION API DIRECTAMENTE
     const baseUrl = process.env.PROKERALA_BASE_URL || 'https://api.prokerala.com/v2';
-    const accessToken = process.env.PROKERALA_ACCESS_TOKEN || '';
+    let accessToken = process.env.PROKERALA_BEARER_TOKEN || '';
+
+    console.log('🔑 Token de acceso inicial:', accessToken ? 'Presente' : 'FALTANTE');
+    console.log('🌐 Base URL:', baseUrl);
+
+    // Si no hay token o está vacío, intentar obtener uno nuevo
+    if (!accessToken || accessToken.trim() === '') {
+      console.log('🔄 Intentando obtener nuevo token de Prokerala...');
+      try {
+        accessToken = await getNewProkeralaToken();
+        console.log('✅ Nuevo token obtenido exitosamente');
+      } catch (tokenError) {
+        console.error('❌ Error obteniendo nuevo token:', tokenError);
+        throw new Error('No se pudo obtener un token válido para Prokerala API');
+      }
+    }
 
     const url = new URL(`${baseUrl}/astrology/progression-chart`);
     url.searchParams.append('datetime', datetimeISO);
