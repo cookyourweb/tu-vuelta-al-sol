@@ -39,6 +39,7 @@ export default function ProkeralaTestPage() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
+          userId: "ob4p8gCQuJUf712pleFl074LqJZ2",
           birthDate: "1990-01-15",
           birthTime: "12:30:00", 
           latitude: 40.4168,

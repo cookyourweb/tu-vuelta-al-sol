@@ -65,18 +65,211 @@ export default function ProgressedChartCopyPage() {
       throw new Error('No hay datos para procesar');
     }
 
-    return {
-      planets: rawData.planets || [],
-      houses: rawData.houses || [],
-      aspects: rawData.aspects || [],
-      keyAspects: rawData.keyAspects || [],
-      elementDistribution: rawData.elementDistribution || { fire: 25, earth: 25, air: 25, water: 25 },
-      modalityDistribution: rawData.modalityDistribution || { cardinal: 33, fixed: 33, mutable: 34 },
-      ascendant: rawData.ascendant || null,
-      midheaven: rawData.midheaven || null,
-      isFallback: rawData.isFallback || false,
+    console.log('🔄 Procesando datos crudos:', rawData);
+    console.log('🔍 Claves disponibles en rawData:', Object.keys(rawData));
+
+    // ✅ TRANSFORMAR DATOS DEL SERVICIO AL FORMATO ESPERADO POR EL COMPONENTE
+    const planets = [];
+
+    // Convertir planetas individuales al formato esperado
+    if (rawData.sol_progresado) {
+      planets.push({
+        name: 'Sol',
+        sign: rawData.sol_progresado.sign,
+        degree: rawData.sol_progresado.degree,
+        house: rawData.sol_progresado.house,
+        retrograde: rawData.sol_progresado.retrograde,
+        longitude: rawData.sol_progresado.longitude,
+        symbol: rawData.sol_progresado.symbol
+      });
+    }
+
+    if (rawData.luna_progresada) {
+      planets.push({
+        name: 'Luna',
+        sign: rawData.luna_progresada.sign,
+        degree: rawData.luna_progresada.degree,
+        house: rawData.luna_progresada.house,
+        retrograde: rawData.luna_progresada.retrograde,
+        longitude: rawData.luna_progresada.longitude,
+        symbol: rawData.luna_progresada.symbol
+      });
+    }
+
+    if (rawData.mercurio_progresado) {
+      planets.push({
+        name: 'Mercurio',
+        sign: rawData.mercurio_progresado.sign,
+        degree: rawData.mercurio_progresado.degree,
+        house: rawData.mercurio_progresado.house,
+        retrograde: rawData.mercurio_progresado.retrograde,
+        longitude: rawData.mercurio_progresado.longitude,
+        symbol: rawData.mercurio_progresado.symbol
+      });
+    }
+
+    if (rawData.venus_progresada) {
+      planets.push({
+        name: 'Venus',
+        sign: rawData.venus_progresada.sign,
+        degree: rawData.venus_progresada.degree,
+        house: rawData.venus_progresada.house,
+        retrograde: rawData.venus_progresada.retrograde,
+        longitude: rawData.venus_progresada.longitude,
+        symbol: rawData.venus_progresada.symbol
+      });
+    }
+
+    if (rawData.marte_progresado) {
+      planets.push({
+        name: 'Marte',
+        sign: rawData.marte_progresado.sign,
+        degree: rawData.marte_progresado.degree,
+        house: rawData.marte_progresado.house,
+        retrograde: rawData.marte_progresado.retrograde,
+        longitude: rawData.marte_progresado.longitude,
+        symbol: rawData.marte_progresado.symbol
+      });
+    }
+
+    if (rawData.jupiter_progresado) {
+      planets.push({
+        name: 'Júpiter',
+        sign: rawData.jupiter_progresado.sign,
+        degree: rawData.jupiter_progresado.degree,
+        house: rawData.jupiter_progresado.house,
+        retrograde: rawData.jupiter_progresado.retrograde,
+        longitude: rawData.jupiter_progresado.longitude,
+        symbol: rawData.jupiter_progresado.symbol
+      });
+    }
+
+    if (rawData.saturno_progresado) {
+      planets.push({
+        name: 'Saturno',
+        sign: rawData.saturno_progresado.sign,
+        degree: rawData.saturno_progresado.degree,
+        house: rawData.saturno_progresado.house,
+        retrograde: rawData.saturno_progresado.retrograde,
+        longitude: rawData.saturno_progresado.longitude,
+        symbol: rawData.saturno_progresado.symbol
+      });
+    }
+
+    if (rawData.urano_progresado) {
+      planets.push({
+        name: 'Urano',
+        sign: rawData.urano_progresado.sign,
+        degree: rawData.urano_progresado.degree,
+        house: rawData.urano_progresado.house,
+        retrograde: rawData.urano_progresado.retrograde,
+        longitude: rawData.urano_progresado.longitude,
+        symbol: rawData.urano_progresado.symbol
+      });
+    }
+
+    if (rawData.neptuno_progresado) {
+      planets.push({
+        name: 'Neptuno',
+        sign: rawData.neptuno_progresado.sign,
+        degree: rawData.neptuno_progresado.degree,
+        house: rawData.neptuno_progresado.house,
+        retrograde: rawData.neptuno_progresado.retrograde,
+        longitude: rawData.neptuno_progresado.longitude,
+        symbol: rawData.neptuno_progresado.symbol
+      });
+    }
+
+    if (rawData.pluton_progresado) {
+      planets.push({
+        name: 'Plutón',
+        sign: rawData.pluton_progresado.sign,
+        degree: rawData.pluton_progresado.degree,
+        house: rawData.pluton_progresado.house,
+        retrograde: rawData.pluton_progresado.retrograde,
+        longitude: rawData.pluton_progresado.longitude,
+        symbol: rawData.pluton_progresado.symbol
+      });
+    }
+
+    // Procesar casas
+    const houses = rawData.houses || [];
+
+    // Calcular distribución elemental básica
+    const elementDistribution = { fire: 25, earth: 25, air: 25, water: 25 };
+    const modalityDistribution = { cardinal: 33, fixed: 33, mutable: 34 };
+
+    // Determinar ascendente y medio cielo de las casas
+    let ascendant = undefined;
+    let midheaven = undefined;
+
+    if (houses.length >= 10) {
+      // Casa 1 = Ascendente
+      const ascHouse = houses.find((h: any) => h.house === 1);
+      if (ascHouse) {
+        ascendant = {
+          longitude: ascHouse.longitude,
+          sign: ascHouse.sign,
+          degree: ascHouse.longitude % 30
+        };
+      }
+
+      // Casa 10 = Medio Cielo
+      const mcHouse = houses.find((h: any) => h.house === 10);
+      if (mcHouse) {
+        midheaven = {
+          longitude: mcHouse.longitude,
+          sign: mcHouse.sign,
+          degree: mcHouse.longitude % 30
+        };
+      }
+    }
+
+    const result = {
+      planets,
+      houses,
+      aspects: rawData.aspectos_natales_progresados || [],
+      keyAspects: rawData.aspectos_natales_progresados?.slice(0, 3) || [],
+      elementDistribution,
+      modalityDistribution,
+      ascendant,
+      midheaven,
+      progressionInfo: {
+        year: (() => {
+          if (rawData.birthDate) {
+            const birthYear = new Date(rawData.birthDate).getFullYear();
+            return birthYear + (rawData.currentAge || 0);
+          }
+          return new Date().getFullYear();
+        })(),
+        period: (() => {
+          if (rawData.birthDate) {
+            const birthYear = new Date(rawData.birthDate).getFullYear();
+            const startYear = birthYear + (rawData.currentAge || 0);
+            const endYear = startYear + 1;
+            return `${startYear} - ${endYear}`;
+          }
+          return `Año Solar ${rawData.currentAge || 'N/A'}`;
+        })(),
+        description: `Progresión para ${rawData.currentAge || 'N/A'} años`,
+        startDate: new Date().toISOString().split('T')[0],
+        endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        ageAtStart: rawData.currentAge || 0,
+        isCurrentYear: true
+      },
+      isFallback: rawData.isMockData || false,
       generatedAt: rawData.generatedAt || new Date().toISOString()
     };
+
+    console.log('✅ Datos procesados finales:', {
+      planetsCount: planets.length,
+      housesCount: houses.length,
+      aspectsCount: result.aspects.length,
+      isMockData: result.isFallback,
+      currentAge: rawData.currentAge
+    });
+
+    return result;
   };
 
   // ✅ FUNCIÓN: Cargar datos de nacimiento
@@ -125,14 +318,29 @@ export default function ProgressedChartCopyPage() {
         
         if (result.success && result.data) {
           console.log('✅ Carta progresada cargada correctamente');
+          console.log('ℹ️ Datos recibidos:', result.data);
+          console.log('ℹ️ ¿Datos mock?:', result.data.progressedChart?.isMockData === true);
+          console.log('ℹ️ Fuente:', result.data.source);
           setDebugInfo('✅ Carta progresada cargada');
-          
-          const processedData = processChartData(result.data.progressedChart || result.data);
-          setChartData(processedData);
-          
-          // Cargar datos de nacimiento para mostrar información
-          await loadBirthDataInfo();
-          return;
+
+          try {
+            const processedData = processChartData(result.data.progressedChart);
+            setChartData(processedData);
+
+            // Guardar datos en localStorage para persistencia temporal
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('progressedChartData', JSON.stringify(processedData));
+            }
+
+            // Cargar datos de nacimiento para mostrar información
+            await loadBirthDataInfo();
+            return;
+          } catch (processError) {
+            console.error('❌ Error procesando datos de carta:', processError);
+            setError('Error procesando datos de carta progresada');
+            setDebugInfo(`❌ Error procesando: ${processError instanceof Error ? processError.message : 'Error desconocido'}`);
+            return;
+          }
         }
       }
       
@@ -157,11 +365,22 @@ export default function ProgressedChartCopyPage() {
         if (generateResult.success) {
           console.log('✅ Carta progresada generada correctamente');
           setDebugInfo('✅ Carta progresada generada');
-          
-          const processedData = processChartData(generateResult.data.progressedChart || generateResult.data);
-          setChartData(processedData);
-          
-          await loadBirthDataInfo();
+
+          try {
+            const processedData = processChartData(generateResult.data.chart);
+            setChartData(processedData);
+
+            // Guardar datos generados en localStorage para persistencia temporal
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('progressedChartData', JSON.stringify(processedData));
+            }
+
+            await loadBirthDataInfo();
+          } catch (processError) {
+            console.error('❌ Error procesando datos generados:', processError);
+            setError('Error procesando datos generados de carta progresada');
+            setDebugInfo(`❌ Error procesando generados: ${processError instanceof Error ? processError.message : 'Error desconocido'}`);
+          }
         } else {
           throw new Error(generateResult.error || 'Error generando carta progresada');
         }
@@ -191,7 +410,7 @@ export default function ProgressedChartCopyPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          uid: user?.uid,
+          userId: user?.uid,
           regenerate: true
         })
       });
@@ -210,23 +429,34 @@ export default function ProgressedChartCopyPage() {
       setDebugInfo('✅ Carta progresada regenerada correctamente');
       
       let dataToProcess = null;
-      
-      if (regenerateResult.data) {
+
+      if (regenerateResult.data && regenerateResult.data.chart) {
+        dataToProcess = regenerateResult.data.chart;
+      } else if (regenerateResult.data) {
         dataToProcess = regenerateResult.data;
-      } else if (regenerateResult.progressedChart) {
-        dataToProcess = regenerateResult.progressedChart;
       } else {
         dataToProcess = regenerateResult;
       }
-      
+
       console.log('🔄 Datos para regeneración:', dataToProcess);
-      
+
       if (!dataToProcess) {
         throw new Error('No se encontraron datos en la respuesta de regeneración');
       }
-      
-      const processedData = processChartData(dataToProcess);
-      setChartData(processedData);
+
+      try {
+        const processedData = processChartData(dataToProcess);
+        setChartData(processedData);
+
+        // Guardar datos regenerados en localStorage para persistencia temporal
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('progressedChartData', JSON.stringify(processedData));
+        }
+      } catch (processError) {
+        console.error('❌ Error procesando datos regenerados:', processError);
+        setError('Error procesando datos regenerados de carta progresada');
+        setDebugInfo(`❌ Error procesando regenerados: ${processError instanceof Error ? processError.message : 'Error desconocido'}`);
+      }
       
     } catch (error) {
       console.error('❌ Error regenerando carta progresada:', error);
@@ -243,7 +473,23 @@ export default function ProgressedChartCopyPage() {
       router.push('/auth/signin');
       return;
     }
-    
+
+    // Intentar cargar datos guardados en localStorage para persistencia temporal
+    if (typeof window !== 'undefined') {
+      const savedData = localStorage.getItem('progressedChartData');
+      if (savedData) {
+        try {
+          const parsedData = JSON.parse(savedData);
+          setChartData(parsedData);
+          setLoading(false);
+          console.log('✅ Datos cargados desde localStorage');
+        } catch (e) {
+          console.warn('No se pudo parsear progressedChartData de localStorage', e);
+        }
+      }
+    }
+
+    // Siempre intentar cargar datos frescos de la API
     loadChartData();
   }, [user, router]);
 

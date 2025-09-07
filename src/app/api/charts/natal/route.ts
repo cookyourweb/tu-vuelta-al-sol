@@ -458,58 +458,147 @@ function calculateModalityDistribution(planets: any[]): { cardinal: number; fixe
 }
 
 /**
- * ✅ CARTA DE RESPALDO cuando API falla
+ * ✅ CARTA DE RESPALDO MEJORADA cuando API falla
  */
 function generateFallbackChart(birthDate: string, birthTime: string, latitude: number, longitude: number, timezone: string) {
-  console.log('⚠️ Generando carta de respaldo...');
-  
-  const seed = new Date(birthDate).getTime();
-  const seededRandom = (max: number) => Math.floor((seed % 100000) / 100000 * max);
-  
+  console.log('⚠️ Generando carta de respaldo completa...');
+
+  const seed = new Date(birthDate).getTime() + (birthTime ? new Date(`1970-01-01T${birthTime}`).getTime() : 0);
+
+  // Función para generar números consistentes basados en seed
+  const seededRandom = (max: number, offset: number = 0) => {
+    const x = Math.sin((seed + offset) * 0.001) * 10000;
+    return Math.floor((x - Math.floor(x)) * max);
+  };
+
   const SIGNS = ['Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'];
   const PLANETS = ['Sol', 'Luna', 'Mercurio', 'Venus', 'Marte', 'Júpiter', 'Saturno', 'Urano', 'Neptuno', 'Plutón'];
-  
+
+  // Generar posiciones de planetas más realistas
   const planets = PLANETS.map((name, index) => {
-    const signIndex = (seededRandom(12) + index) % 12;
+    const baseSign = seededRandom(12, index * 100);
+    const signIndex = (baseSign + Math.floor(index * 1.5)) % 12;
+    const degree = seededRandom(30, index * 200);
+    const minutes = seededRandom(60, index * 300);
+
     return {
       name,
       sign: SIGNS[signIndex],
-      degree: Math.floor(Math.random() * 30),
-      minutes: Math.floor(Math.random() * 60),
-      retrograde: name !== 'Sol' && name !== 'Luna' && Math.random() < 0.3,
-      housePosition: (index % 12) + 1
+      degree,
+      minutes,
+      retrograde: name !== 'Sol' && name !== 'Luna' && seededRandom(4, index * 400) === 0,
+      housePosition: (seededRandom(12, index * 500) + 1),
+      longitude: (signIndex * 30) + degree + (minutes / 60)
     };
   });
-  
-  const houses = Array.from({ length: 12 }, (_, i) => ({
-    number: i + 1,
-    sign: SIGNS[(seededRandom(12) + i) % 12],
-    degree: Math.floor(Math.random() * 30),
-    minutes: Math.floor(Math.random() * 60)
-  }));
-  
-  const ascSignIndex = seededRandom(12);
-  
+
+  // Generar casas
+  const houses = Array.from({ length: 12 }, (_, i) => {
+    const signIndex = seededRandom(12, i * 600 + 10000);
+    return {
+      number: i + 1,
+      sign: SIGNS[signIndex],
+      degree: seededRandom(30, i * 700 + 10000),
+      minutes: seededRandom(60, i * 800 + 10000),
+      longitude: (signIndex * 30) + seededRandom(30, i * 900 + 10000)
+    };
+  });
+
+  // Generar aspectos realistas
+  const aspects = [];
+  const aspectTypes = ['conjunction', 'opposition', 'trine', 'square', 'sextile'];
+  const aspectAngles = { conjunction: 0, opposition: 180, trine: 120, square: 90, sextile: 60 };
+
+  for (let i = 0; i < planets.length; i++) {
+    for (let j = i + 1; j < planets.length; j++) {
+      const planet1 = planets[i];
+      const planet2 = planets[j];
+
+      // Calcular ángulo real entre planetas
+      const angle = Math.abs(planet1.longitude - planet2.longitude) % 360;
+      const minAngle = Math.min(angle, 360 - angle);
+
+      // Determinar tipo de aspecto basado en el ángulo
+      let aspectType = null;
+      let orb = 0;
+
+      for (const [type, targetAngle] of Object.entries(aspectAngles)) {
+        if (Math.abs(minAngle - targetAngle) <= 8) { // Orb de 8 grados
+          aspectType = type;
+          orb = Math.abs(minAngle - targetAngle);
+          break;
+        }
+      }
+
+      if (aspectType && seededRandom(3, i * 1000 + j * 2000) === 0) { // 33% de probabilidad
+        aspects.push({
+          planet1: planet1.name,
+          planet2: planet2.name,
+          type: aspectType,
+          orb: Math.round(orb * 10) / 10
+        });
+      }
+    }
+  }
+
+  // Asegurar que haya al menos algunos aspectos
+  if (aspects.length < 3) {
+    for (let i = 0; i < 3 - aspects.length; i++) {
+      const p1 = seededRandom(planets.length, i * 3000);
+      const p2 = seededRandom(planets.length, i * 4000);
+      if (p1 !== p2) {
+        aspects.push({
+          planet1: planets[p1].name,
+          planet2: planets[p2].name,
+          type: aspectTypes[seededRandom(aspectTypes.length, i * 5000)],
+          orb: seededRandom(8, i * 6000) / 10
+        });
+      }
+    }
+  }
+
+  // Ascendente basado en hora de nacimiento
+  const birthHour = birthTime ? parseInt(birthTime.split(':')[0]) : 12;
+  const ascSignIndex = seededRandom(12, birthHour * 1000);
+
+  const ascendant = {
+    sign: SIGNS[ascSignIndex],
+    degree: seededRandom(30, 9999),
+    minutes: seededRandom(60, 9999),
+    longitude: (ascSignIndex * 30) + seededRandom(30, 9999)
+  };
+
+  // Medio cielo
+  const mcSignIndex = (ascSignIndex + 3) % 12;
+  const midheaven = {
+    sign: SIGNS[mcSignIndex],
+    degree: seededRandom(30, 8888),
+    minutes: seededRandom(60, 8888),
+    longitude: (mcSignIndex * 30) + seededRandom(30, 8888)
+  };
+
+  console.log('📊 Carta de respaldo generada:', {
+    planetsCount: planets.length,
+    housesCount: houses.length,
+    aspectsCount: aspects.length,
+    ascendant: ascendant.sign,
+    midheaven: midheaven.sign
+  });
+
   return {
     birthData: { latitude, longitude, timezone, datetime: `${birthDate}T${birthTime}` },
     planets,
     houses,
-    aspects: [],
-    ascendant: {
-      sign: SIGNS[ascSignIndex],
-      degree: Math.floor(Math.random() * 30),
-      minutes: Math.floor(Math.random() * 60)
-    },
-    midheaven: {
-      sign: SIGNS[(ascSignIndex + 3) % 12],
-      degree: Math.floor(Math.random() * 30),
-      minutes: Math.floor(Math.random() * 60)
-    },
+    aspects,
+    ascendant,
+    midheaven,
     elementDistribution: calculateElementDistribution(planets),
     modalityDistribution: calculateModalityDistribution(planets),
     latitude,
     longitude,
-    timezone
+    timezone,
+    isFallback: true,
+    generatedAt: new Date().toISOString()
   };
 }
 

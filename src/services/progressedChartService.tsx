@@ -7,13 +7,22 @@ import { DetailedProgressedChart, UserProfile, ElementType, ModeType, getSignEle
 import { calculateAllAspects } from '@/utils/astrology/aspectCalculations';
 
 // Función para obtener nuevo token de Prokerala usando client credentials
+let tokenCache: { token: string; expires: number } | null = null;
+
 async function getNewProkeralaToken(): Promise<string> {
   const clientId = process.env.PROKERALA_CLIENT_ID || '';
   const clientSecret = process.env.PROKERALA_CLIENT_SECRET || '';
-  const tokenUrl = 'https://api.prokerala.com/oauth/token';
+  const tokenUrl = 'https://api.prokerala.com/token';
 
   if (!clientId || !clientSecret) {
     throw new Error('Faltan PROKERALA_CLIENT_ID o PROKERALA_CLIENT_SECRET en variables de entorno');
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+
+  // Usar token en cache si es válido
+  if (tokenCache && tokenCache.expires > now + 300) {
+    return tokenCache.token;
   }
 
   const response = await fetch(tokenUrl, {
@@ -32,10 +41,15 @@ async function getNewProkeralaToken(): Promise<string> {
     throw new Error(`Error obteniendo token Prokerala: ${response.status} ${response.statusText}`);
   }
 
-  const data = await response.json() as { access_token?: string };
+  const data = await response.json() as { access_token?: string, expires_in?: number };
   if (!data.access_token) {
     throw new Error('Token de acceso no recibido de Prokerala');
   }
+
+  tokenCache = {
+    token: data.access_token,
+    expires: now + (data.expires_in || 3600)
+  };
 
   return data.access_token;
 }
@@ -146,89 +160,152 @@ export function getPlanetSymbol(planetName: string): string {
 }
 
 /**
- * ✅ Generar datos simulados de carta progresada
+ * ✅ Generar datos simulados mejorados de carta progresada
  */
-export function generateMockProgressedChart(): DetailedProgressedChart {
-  const currentYear = new Date().getFullYear();
-  
+export function generateMockProgressedChart(birthDate?: string, birthTime?: string): DetailedProgressedChart {
+  console.log('⚠️ Generando carta progresada de respaldo mejorada...');
+
+  // Usar fecha de nacimiento como seed para consistencia
+  const seed = birthDate ? new Date(birthDate).getTime() + (birthTime ? new Date(`1970-01-01T${birthTime}`).getTime() : 0) : Date.now();
+
+  // Función para generar números consistentes basados en seed
+  const seededRandom = (max: number, offset: number = 0) => {
+    const x = Math.sin((seed + offset) * 0.001) * 10000;
+    return Math.floor((x - Math.floor(x)) * max);
+  };
+
+  const SIGNS = ['Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'];
+  const PLANETS = ['Sol', 'Luna', 'Mercurio', 'Venus', 'Marte', 'Júpiter', 'Saturno'];
+
+  // Generar posiciones de planetas progresados más realistas
+  const planets = PLANETS.map((name, index) => {
+    const baseSign = seededRandom(12, index * 100);
+    const signIndex = (baseSign + Math.floor(index * 1.2)) % 12;
+    const degree = seededRandom(30, index * 200);
+    const minutes = seededRandom(60, index * 300);
+
+    return {
+      name,
+      sign: SIGNS[signIndex],
+      degree,
+      minutes,
+      retrograde: name !== 'Sol' && name !== 'Luna' && seededRandom(5, index * 400) === 0, // 20% de probabilidad
+      housePosition: (seededRandom(12, index * 500) + 1),
+      longitude: (signIndex * 30) + degree + (minutes / 60)
+    };
+  });
+
+  // Generar aspectos progresados realistas
+  const aspects = [];
+  const aspectTypes = ['conjunction', 'opposition', 'trine', 'square', 'sextile'];
+  const aspectAngles = { conjunction: 0, opposition: 180, trine: 120, square: 90, sextile: 60 };
+
+  for (let i = 0; i < planets.length; i++) {
+    for (let j = i + 1; j < planets.length; j++) {
+      const planet1 = planets[i];
+      const planet2 = planets[j];
+
+      // Calcular ángulo real entre planetas
+      const angle = Math.abs(planet1.longitude - planet2.longitude) % 360;
+      const minAngle = Math.min(angle, 360 - angle);
+
+      // Determinar tipo de aspecto basado en el ángulo
+      let aspectType = null;
+      let orb = 0;
+
+      for (const [type, targetAngle] of Object.entries(aspectAngles)) {
+        if (Math.abs(minAngle - targetAngle) <= 10) { // Orb de 10 grados para progresiones
+          aspectType = type;
+          orb = Math.abs(minAngle - targetAngle);
+          break;
+        }
+      }
+
+      if (aspectType && seededRandom(4, i * 1000 + j * 2000) === 0) { // 25% de probabilidad
+        aspects.push({
+          planet1: planet1.name,
+          planet2: planet2.name,
+          angle: aspectAngles[aspectType as keyof typeof aspectAngles],
+          type: aspectType === 'conjunction' ? 'Conjunción' :
+                aspectType === 'opposition' ? 'Oposición' :
+                aspectType === 'trine' ? 'Trígono' :
+                aspectType === 'square' ? 'Cuadratura' : 'Sextil',
+          orb: Math.round(orb * 10) / 10,
+          isProgressed: true
+        });
+      }
+    }
+  }
+
+  // Asegurar que haya al menos algunos aspectos
+  if (aspects.length < 2) {
+    for (let i = 0; i < 2 - aspects.length; i++) {
+      const p1 = seededRandom(planets.length, i * 3000);
+      const p2 = seededRandom(planets.length, i * 4000);
+      if (p1 !== p2) {
+        aspects.push({
+          planet1: planets[p1].name,
+          planet2: planets[p2].name,
+          angle: 120,
+          type: 'Trígono',
+          orb: seededRandom(10, i * 6000) / 10,
+          isProgressed: true
+        });
+      }
+    }
+  }
+
+  // Generar casas progresadas
+  const houses = Array.from({ length: 12 }, (_, i) => {
+    const signIndex = seededRandom(12, i * 600 + 10000);
+    return {
+      house: i + 1,
+      longitude: (signIndex * 30) + seededRandom(30, i * 700 + 10000),
+      sign: SIGNS[signIndex]
+    };
+  });
+
+  // Calcular edad actual
+  const birthDateTime = birthDate ? new Date(birthDate) : new Date('1990-01-01');
+  const currentDate = new Date();
+  const currentAge = Math.floor((currentDate.getTime() - birthDateTime.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
+
+  // Crear objetos de planetas con el formato correcto
+  const createPlanetObject = (planet: any) => ({
+    longitude: planet.longitude,
+    sign: planet.sign,
+    degree: planet.degree + (planet.minutes / 60),
+    house: planet.housePosition,
+    retrograde: planet.retrograde,
+    symbol: getPlanetSymbol(planet.name),
+    meaning: getProgressedPlanetMeaning(planet.name)
+  });
+
+  console.log('📊 Carta progresada de respaldo generada:', {
+    planetsCount: planets.length,
+    housesCount: houses.length,
+    aspectsCount: aspects.length,
+    currentAge,
+    isMockData: true
+  });
+
   return {
     // Planetas progresados principales
-    sol_progresado: {
-      longitude: 315.5,
-      sign: 'Acuario',
-      degree: 15.5,
-      house: 1,
-      retrograde: false,
-      symbol: '☉',
-      meaning: getProgressedPlanetMeaning('Sol')
-    },
-    luna_progresada: {
-      longitude: 185.3,
-      sign: 'Libra', 
-      degree: 25.3,
-      house: 7,
-      retrograde: false,
-      symbol: '☽',
-      meaning: getProgressedPlanetMeaning('Luna')
-    },
-    mercurio_progresado: {
-      longitude: 320.7,
-      sign: 'Acuario',
-      degree: 8.7, 
-      house: 1,
-      retrograde: false,
-      symbol: '☿',
-      meaning: getProgressedPlanetMeaning('Mercurio')
-    },
-    venus_progresada: {
-      longitude: 342.2,
-      sign: 'Piscis',
-      degree: 12.2,
-      house: 2, 
-      retrograde: false,
-      symbol: '♀',
-      meaning: getProgressedPlanetMeaning('Venus')
-    },
-    marte_progresado: {
-      longitude: 20.8,
-      sign: 'Aries',
-      degree: 20.8,
-      house: 3,
-      retrograde: false,
-      symbol: '♂',
-      meaning: getProgressedPlanetMeaning('Marte')
-    },
-    
+    sol_progresado: createPlanetObject(planets.find(p => p.name === 'Sol')!),
+    luna_progresada: createPlanetObject(planets.find(p => p.name === 'Luna')!),
+    mercurio_progresado: createPlanetObject(planets.find(p => p.name === 'Mercurio')!),
+    venus_progresada: createPlanetObject(planets.find(p => p.name === 'Venus')!),
+    marte_progresado: createPlanetObject(planets.find(p => p.name === 'Marte')!),
+
     // Edad actual
-    currentAge: Math.floor((new Date().getTime() - new Date('1990-01-01').getTime()) / (365.25 * 24 * 60 * 60 * 1000)),
-    
+    currentAge,
+
     // Casas progresadas
-    houses: Array.from({ length: 12 }, (_, i) => ({
-      house: i + 1,
-      longitude: i * 30 + 15,
-      sign: ['Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'][i]
-    })),
-    
+    houses,
+
     // Aspectos progresados
-    aspectos_natales_progresados: [
-      {
-        planet1: 'Sol',
-        planet2: 'Luna',
-        angle: 120,
-        type: 'Trígono',
-        orb: 2.5,
-        isProgressed: true
-      },
-      {
-        planet1: 'Venus',
-        planet2: 'Marte', 
-        angle: 60,
-        type: 'Sextil',
-        orb: 1.8,
-        isProgressed: true
-      }
-    ],
-    
+    aspectos_natales_progresados: aspects,
+
     // Metadata
     generatedAt: new Date().toISOString(),
     isMockData: true
@@ -397,7 +474,7 @@ export async function generateProgressedChart(params: {
       }
     }
 
-    const url = new URL(`${baseUrl}/astrology/progression-chart`);
+    const url = new URL(`${baseUrl}/astrology/progression-aspect-chart`);
     url.searchParams.append('datetime', datetimeISO);
     url.searchParams.append('coordinates', coordinates);
     url.searchParams.append('progression_year', params.progressionYear.toString());
@@ -453,7 +530,7 @@ export async function generateProgressedChart(params: {
 
     // Return mock data as fallback
     console.log('🔄 Usando datos simulados como fallback');
-    return generateMockProgressedChart();
+    return generateMockProgressedChart(params.birthDate, params.birthTime);
   }
 }
 
