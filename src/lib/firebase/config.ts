@@ -1,82 +1,54 @@
-// Firebase configuration and validation utilities
+// src/lib/firebase/config.ts Firebase configuration functions for Next.js
 
-/**
- * Validate Firebase environment variables
- * @throws Error if required variables are missing
- */
-export const validateFirebaseConfig = (): void => {
-  // Skip validation on client-side to prevent errors
-  if (typeof window !== 'undefined') {
-    return;
-  }
-
-  const requiredClientVars = [
-    'NEXT_PUBLIC_FIREBASE_API_KEY',
-    'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN',
-    'NEXT_PUBLIC_FIREBASE_PROJECT_ID',
-    'NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET',
-    'NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID',
-    'NEXT_PUBLIC_FIREBASE_APP_ID',
-    'NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID'
-  ];
-
-  const missingClientVars = requiredClientVars.filter(varName => {
-    const value = process.env[varName];
-    return value === undefined || value === '';
-  });
-
-  if (missingClientVars.length > 0) {
-    console.error('Missing Firebase client environment variables:', missingClientVars);
-    // Don't throw for client-side to prevent app crashes
-  }
-
-  // Server-side validation (only throws in server context)
-  const requiredServerVars = [
-    'FIREBASE_CLIENT_EMAIL',
-    'FIREBASE_PRIVATE_KEY',
-    'FIREBASE_PROJECT_ID'
-  ];
-
-  const missingServerVars = requiredServerVars.filter(varName => {
-    const value = process.env[varName];
-    return value === undefined || value === '';
-  });
-
-  if (missingServerVars.length > 0) {
-    throw new Error(`Missing Firebase server environment variables: ${missingServerVars.join(', ')}`);
-  }
-};
-
-/**
- * Get Firebase configuration for client-side use
- */
+// Client-side Firebase config
 export const getFirebaseConfig = () => {
-  // Validate but don't throw for client-side
-  try {
-    validateFirebaseConfig();
-  } catch (error) {
-    console.warn('Firebase configuration validation warning:', error);
-  }
-
   return {
-    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
-    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
-    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!,
-    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
-    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+    measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
   };
 };
 
-/**
- * Get Firebase Admin configuration for server-side use
- */
+// Server-side Firebase Admin config
 export const getFirebaseAdminConfig = () => {
-  validateFirebaseConfig();
-
   return {
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL!,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    type: "service_account",
+    project_id: process.env.FIREBASE_PROJECT_ID,
+    private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+    private_key: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    client_email: process.env.FIREBASE_CLIENT_EMAIL,
+    client_id: process.env.FIREBASE_CLIENT_ID,
+    auth_uri: "https://accounts.google.com/o/oauth2/auth",
+    token_uri: "https://oauth2.googleapis.com/token",
+    auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+    client_x509_cert_url: `https://www.googleapis.com/robot/v1/metadata/x509/${process.env.FIREBASE_CLIENT_EMAIL}`,
   };
 };
+
+// Validate Firebase configuration
+export const validateFirebaseConfig = () => {
+  const config = getFirebaseConfig();
+  
+  const missingVars = [];
+  if (!config.apiKey) missingVars.push('NEXT_PUBLIC_FIREBASE_API_KEY');
+  if (!config.authDomain) missingVars.push('NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN');
+  if (!config.projectId) missingVars.push('NEXT_PUBLIC_FIREBASE_PROJECT_ID');
+  if (!config.storageBucket) missingVars.push('NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET');
+  if (!config.messagingSenderId) missingVars.push('NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID');
+  if (!config.appId) missingVars.push('NEXT_PUBLIC_FIREBASE_APP_ID');
+
+  if (missingVars.length > 0) {
+    console.warn('Missing Firebase client environment variables:', missingVars);
+    // Solo lanzar error en producción
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error(`Missing Firebase client environment variables: ${missingVars.join(', ')}`);
+    }
+  }
+};
+
+// También exportar la configuración directa para compatibilidad
+export const firebaseConfig = getFirebaseConfig();
