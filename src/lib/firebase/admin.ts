@@ -17,7 +17,7 @@ const initializeFirebaseAdmin = (): admin.app.App => {
       
       firebaseAdmin = admin.initializeApp({
         credential: admin.credential.cert(serviceAccount as any),
-        databaseURL: `https://${serviceAccount.projectId}.firebaseio.com`,
+        databaseURL: `https://${serviceAccount.project_id}.firebaseio.com`,
       });
       
       console.log('Firebase Admin initialized successfully');
