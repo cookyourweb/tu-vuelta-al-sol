@@ -1,5 +1,5 @@
 // =============================================================================
-// 🌟 PÁGINA CARTA NATAL - DISEÑO ANTIGUO RESTAURADO
+// 🌟 PÁGINA CARTA NATAL - SIN HEADER DUPLICADO
 // src/app/(dashboard)/natal-chart/page.tsx
 // =============================================================================
 
@@ -9,7 +9,8 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import ChartDisplay from '@/components/astrology/ChartDisplay';
-import { Sparkles, Edit, Star, ArrowLeft, RefreshCw } from 'lucide-react';
+import InterpretationButton from '@/components/astrology/InterpretationButton';
+import { Sparkles, Edit, Star, RefreshCw, Brain } from 'lucide-react';
 import Button from '@/components/ui/Button';
 
 // ✅ INTERFACES
@@ -47,6 +48,8 @@ export default function NatalChartPage() {
   const [error, setError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<string>('');
   const [isRegenerating, setIsRegenerating] = useState(false);
+
+
 
   // ✅ FUNCIÓN: Procesar datos de carta
   const processChartData = (rawData: any): NatalChartData => {
@@ -239,27 +242,17 @@ export default function NatalChartPage() {
   }, [user, router]);
 
   // ✅ FUNCIONES DE NAVEGACIÓN
-  const goToDashboard = () => {
-    router.push('/dashboard');
-  };
-
-  const navigateToProgressedChart = () => {
-    router.push('/progressed-chart');
-  };
-
-  const navigateToAgenda = () => {
-    router.push('/agenda');
-  };
-
   const navigateToBirthData = () => {
     router.push('/birth-data');
   };
 
+
+
   // ✅ PANTALLA DE CARGA
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-black text-white flex items-center justify-center">
-        <div className="text-center space-y-6 max-w-md mx-auto px-6">
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center space-y-6 max-w-md mx-auto">
           <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 border border-yellow-400/30 rounded-full p-8 backdrop-blur-sm relative mx-auto w-fit">
             <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 to-orange-500/10 rounded-full animate-pulse"></div>
             <Sparkles className="w-16 h-16 text-yellow-400 animate-spin" />
@@ -297,8 +290,8 @@ export default function NatalChartPage() {
   // ✅ PANTALLA DE ERROR
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-black text-white flex items-center justify-center">
-        <div className="text-center space-y-6 max-w-md mx-auto px-6">
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center space-y-6 max-w-md mx-auto">
           <div className="bg-gradient-to-r from-red-500/20 to-pink-500/20 border border-red-400/30 rounded-full p-8 backdrop-blur-sm mx-auto w-fit">
             <Sparkles className="w-16 h-16 text-red-400" />
           </div>
@@ -331,15 +324,6 @@ export default function NatalChartPage() {
                   <span>Intentar de nuevo</span>
                 </Button>
               )}
-
-              <Button
-                onClick={goToDashboard}
-                variant="outline"
-                className="border-gray-400 text-gray-300 hover:bg-gray-400/10"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Dashboard
-              </Button>
             </div>
           </div>
         </div>
@@ -347,10 +331,10 @@ export default function NatalChartPage() {
     );
   }
 
-  // ✅ PANTALLA PRINCIPAL - CARTA NATAL
+  // ✅ PANTALLA PRINCIPAL - CARTA NATAL (Sin header propio)
   if (!chartData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-black text-white flex items-center justify-center">
+      <div className="container mx-auto px-4 py-8">
         <div className="text-center">
           <p className="text-gray-300">No hay datos de carta natal disponibles</p>
           <Button
@@ -365,73 +349,76 @@ export default function NatalChartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-black">
-      {/* Header con navegación */}
-      <div className="bg-gradient-to-r from-purple-900/50 to-indigo-900/50 backdrop-blur-sm border-b border-purple-700/30 px-4 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center">
-            <button
-              onClick={goToDashboard}
-              className="mr-4 p-2 rounded-lg hover:bg-white/10 transition-colors flex items-center text-gray-300 hover:text-white"
-            >
-              <ArrowLeft className="w-5 h-5 mr-2" />
-              Dashboard
-            </button>
-            <h1 className="text-2xl font-bold text-white flex items-center">
-              <Star className="w-6 h-6 mr-3 text-yellow-400" />
-              Tu Carta Natal
-            </h1>
+    <div className="container mx-auto px-4 py-8 space-y-8">
+      {/* Header principal */}
+      <div className="text-center space-y-6">
+        <div className="flex justify-center items-center mb-6">
+          <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 border border-yellow-400/30 rounded-full p-6 backdrop-blur-sm relative">
+            <div className="absolute -top-2 -right-2 w-4 h-4 bg-yellow-400 rounded-full animate-pulse"></div>
+            <Star className="w-12 h-12 text-yellow-400" />
           </div>
+        </div>
 
+        <h1 className="text-4xl md:text-5xl text-white font-bold">
+          Carta Natal{' '}
+          <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
+            Tu Mapa Cósmico
+          </span>
+        </h1>
+
+        <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed flex items-center justify-center gap-3">
+          <Star className="w-6 h-6 text-yellow-400 flex-shrink-0" />
+          Descubre los secretos que los astros revelaron en el momento exacto de tu nacimiento
+        </p>
+
+        {/* Botones de acción */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          {/* BOTÓN DE REGENERAR */}
           <button
             onClick={regenerateChart}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all flex items-center text-sm"
+            disabled={isRegenerating}
+            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all flex items-center text-sm disabled:opacity-50"
           >
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Regenerar
+            <RefreshCw className={`w-4 h-4 mr-2 ${isRegenerating ? 'animate-spin' : ''}`} />
+            {isRegenerating ? 'Regenerando...' : 'Regenerar Carta'}
           </button>
-        </div>
-      </div>
 
-      <div className="container mx-auto px-4 py-8 space-y-8">
-        {/* Header principal */}
-        <div className="text-center space-y-6">
-          <div className="flex justify-center items-center mb-6">
-            <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 border border-yellow-400/30 rounded-full p-6 backdrop-blur-sm relative">
-              <div className="absolute -top-2 -right-2 w-4 h-4 bg-yellow-400 rounded-full animate-pulse"></div>
-              <Star className="w-12 h-12 text-yellow-400" />
-            </div>
-          </div>
-
-          <h1 className="text-4xl md:text-5xl text-white font-bold">
-            Carta Natal{' '}
-            <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
-              Tu Mapa Cósmico
-            </span>
-          </h1>
-
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed flex items-center justify-center gap-3">
-            <Star className="w-6 h-6 text-yellow-400 flex-shrink-0" />
-            Descubre los secretos que los astros revelaron en el momento exacto de tu nacimiento
-          </p>
-        </div>
-
-        {/* Carta natal */}
-        {chartData && (
-          <div className="flex justify-center">
-            <ChartDisplay
-              planets={chartData.planets}
-              houses={chartData.houses}
-              elementDistribution={chartData.elementDistribution}
-              modalityDistribution={chartData.modalityDistribution}
-              keyAspects={chartData.keyAspects || []}
-              ascendant={chartData.ascendant}
-              midheaven={chartData.midheaven}
-              birthData={birthData || undefined}
+          {/* BOTÓN DE INTERPRETACIÓN */}
+          {chartData && birthData && (
+            <InterpretationButton
+              type="natal"
+              userId={user?.uid || ''}
+              chartData={chartData}
+              userProfile={{
+                name: birthData.fullName || 'Usuario',
+                age: new Date().getFullYear() - new Date(birthData.birthDate).getFullYear(),
+                birthPlace: birthData.birthPlace,
+                birthDate: birthData.birthDate,
+                birthTime: birthData.birthTime
+              }}
+              className="w-full sm:w-auto"
             />
-          </div>
-        )}
+          )}
+        </div>
+
+
       </div>
+
+      {/* Carta natal */}
+      {chartData && (
+        <div className="flex justify-center">
+          <ChartDisplay
+            planets={chartData.planets}
+            houses={chartData.houses}
+            elementDistribution={chartData.elementDistribution}
+            modalityDistribution={chartData.modalityDistribution}
+            keyAspects={chartData.keyAspects || []}
+            ascendant={chartData.ascendant}
+            midheaven={chartData.midheaven}
+            birthData={birthData || undefined}
+          />
+        </div>
+      )}
     </div>
   );
 }
