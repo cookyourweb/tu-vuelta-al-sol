@@ -323,7 +323,7 @@ function generatePersonalizedMantra(sunSign: string, moonSign: string, ascendant
     'Piscis': 'Fluyo con compasión'
   };
 
-  return `${mantras[sunSign as keyof typeof mantras] || 'Soy auténtico'}, ${mantras[moonSign]?.toLowerCase() || 'siento profundo'}, ${mantras[ascendant]?.toLowerCase() || 'proyecto poder'}.`;
+  return `${mantras[sunSign] || 'Soy auténtico'}, ${mantras[moonSign]?.toLowerCase() || 'siento profundo'}, ${mantras[ascendant]?.toLowerCase() || 'proyecto poder'}.`;
 }
 
 // 📋 CREAR PLAN DE ACCIÓN EDUCATIVO

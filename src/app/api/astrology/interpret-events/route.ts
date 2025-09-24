@@ -5,6 +5,7 @@ import BirthData from '@/models/BirthData';
 
 // Corregir el import
 import * as trainedAssistantService from '@/services/trainedAssistantService';
+import { generateBatchInterpretations, getInterpretationStats } from '@/services/batchInterpretations';
 import type { UserProfile, AstrologicalEvent, PersonalizedInterpretation } from '@/types/astrology/unified-types';
 
 export async function POST(request: NextRequest) {
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
     console.log(`🎯 Interpretando ${maxEventsToInterpret} eventos de alta prioridad de ${events.length} totales`);
 
     // Generar interpretaciones personalizadas con IA usando la función correcta
-    const interpretedEvents: AstrologicalEvent[] = await trainedAssistantService.generateBatchInterpretations(
+    const interpretedEvents: AstrologicalEvent[] = await generateBatchInterpretations(
       highPriorityEvents.slice(0, maxEventsToInterpret),
       userProfile
     );
@@ -95,7 +96,7 @@ export async function POST(request: NextRequest) {
     if (includeExecutiveSummary) {
       console.log('📊 Generando resumen ejecutivo del año astrológico...');
       // Crear resumen ejecutivo simple basado en estadísticas
-      const stats = trainedAssistantService.getInterpretationStats(interpretedEvents);
+      const stats = getInterpretationStats(interpretedEvents);
       executiveSummaryResult = {
         title: `Resumen Ejecutivo Astrológico ${userProfile.name}`,
         keyInsights: [

@@ -23,8 +23,7 @@ const userData = {
   "createdAt": new Date(),
   "updatedAt": new Date()
 };
-import OpenAIDirectTest from '@/components/test/OpenAIDirectTest';
-import UserDataChecker from '@/components/test/UserDataChecker';
+
 
 interface SystemStatus {
   authentication: boolean;
@@ -38,7 +37,7 @@ interface SystemStatus {
 }
 
 function TestAgendaAIContent() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [systemStatus, setSystemStatus] = useState<SystemStatus>({
     authentication: false,
     birthData: false,
@@ -216,15 +215,7 @@ function TestAgendaAIContent() {
           </div>
         )}
 
-        {/* Verificador de datos del usuario - NUEVO */}
-        <div className="max-w-4xl mx-auto mb-8">
-          <UserDataChecker />
-        </div>
 
-        {/* OpenAI Direct Test - NUEVO COMPONENTE */}
-        <div className="max-w-4xl mx-auto mb-8">
-          <OpenAIDirectTest />
-        </div>
 
         {/* Componente de test principal */}
         <AgendaAITest />
