@@ -1,5 +1,5 @@
 // =============================================================================
-// 🌟 PÁGINA CARTA PROGRESADA - SIN HEADER DUPLICADO
+// 🌟 PÁGINA CARTA PROGRESADA COMPLETA - MISMA FUNCIONALIDAD QUE NATAL
 // src/app/(dashboard)/progressed-chart/page.tsx
 // =============================================================================
 
@@ -10,10 +10,10 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import ChartDisplay from '@/components/astrology/ChartDisplay';
 import InterpretationButton from '@/components/astrology/InterpretationButton';
-import { Sparkles, Edit, TrendingUp, RefreshCw } from 'lucide-react';
+import { Sparkles, Edit, TrendingUp, RefreshCw, Calendar, Clock, Star } from 'lucide-react';
 import Button from '@/components/ui/Button';
 
-// ✅ INTERFACES
+// ✅ INTERFACES COMPLETAS
 interface ProgressedChartData {
   planets: any[];
   houses: any[];
@@ -48,240 +48,94 @@ interface BirthData {
   fullName: string;
 }
 
+interface NatalChartData {
+  planets: any[];
+  houses: any[];
+  aspects?: any[];
+  keyAspects?: any[];
+  elementDistribution: { fire: number; earth: number; air: number; water: number };
+  modalityDistribution: { cardinal: number; fixed: number; mutable: number };
+  ascendant?: { longitude?: number; sign?: string; degree?: number };
+  midheaven?: { longitude?: number; sign?: string; degree?: number };
+}
+
 export default function ProgressedChartPage() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
   
   // Estados principales
   const [chartData, setChartData] = useState<ProgressedChartData | null>(null);
+  const [natalChartData, setNatalChartData] = useState<NatalChartData | null>(null);
   const [birthData, setBirthData] = useState<BirthData | null>(null);
-  const [natalChartData, setNatalChartData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<string>('');
   const [isRegenerating, setIsRegenerating] = useState(false);
 
-  // ✅ FUNCIÓN: Procesar datos de carta progresada
-  const processChartData = (rawData: any): ProgressedChartData => {
+  // ✅ FUNCIÓN: Procesar datos de carta progresada - CORREGIDA
+  const processProgressedChartData = (rawData: any): ProgressedChartData => {
+    console.log('🔍 Datos recibidos para procesar:', rawData);
+    
     if (!rawData) {
       throw new Error('No hay datos para procesar');
     }
 
-    console.log('🔄 Procesando datos crudos:', rawData);
-    console.log('🔍 Claves disponibles en rawData:', Object.keys(rawData));
-
-    // ✅ TRANSFORMAR DATOS DEL SERVICIO AL FORMATO ESPERADO POR EL COMPONENTE
-    const planets = [];
-
-    // Convertir planetas individuales al formato esperado
-    if (rawData.sol_progresado) {
-      planets.push({
-        name: 'Sol',
-        sign: rawData.sol_progresado.sign,
-        degree: rawData.sol_progresado.degree,
-        house: rawData.sol_progresado.house,
-        retrograde: rawData.sol_progresado.retrograde,
-        longitude: rawData.sol_progresado.longitude,
-        symbol: rawData.sol_progresado.symbol
-      });
+    // Los datos pueden venir en diferentes estructuras
+    let actualData = rawData;
+    
+    // Si los datos vienen envueltos en un objeto 'data'
+    if (rawData.data && !rawData.planets) {
+      actualData = rawData.data;
+    }
+    
+    // Si los datos vienen como 'progressedChart'
+    if (rawData.progressedChart) {
+      actualData = rawData.progressedChart;
     }
 
-    if (rawData.luna_progresada) {
-      planets.push({
-        name: 'Luna',
-        sign: rawData.luna_progresada.sign,
-        degree: rawData.luna_progresada.degree,
-        house: rawData.luna_progresada.house,
-        retrograde: rawData.luna_progresada.retrograde,
-        longitude: rawData.luna_progresada.longitude,
-        symbol: rawData.luna_progresada.symbol
-      });
-    }
+    console.log('🔍 Datos reales a procesar:', actualData);
 
-    if (rawData.mercurio_progresado) {
-      planets.push({
-        name: 'Mercurio',
-        sign: rawData.mercurio_progresado.sign,
-        degree: rawData.mercurio_progresado.degree,
-        house: rawData.mercurio_progresado.house,
-        retrograde: rawData.mercurio_progresado.retrograde,
-        longitude: rawData.mercurio_progresado.longitude,
-        symbol: rawData.mercurio_progresado.symbol
-      });
-    }
-
-    if (rawData.venus_progresada) {
-      planets.push({
-        name: 'Venus',
-        sign: rawData.venus_progresada.sign,
-        degree: rawData.venus_progresada.degree,
-        house: rawData.venus_progresada.house,
-        retrograde: rawData.venus_progresada.retrograde,
-        longitude: rawData.venus_progresada.longitude,
-        symbol: rawData.venus_progresada.symbol
-      });
-    }
-
-    if (rawData.marte_progresado) {
-      planets.push({
-        name: 'Marte',
-        sign: rawData.marte_progresado.sign,
-        degree: rawData.marte_progresado.degree,
-        house: rawData.marte_progresado.house,
-        retrograde: rawData.marte_progresado.retrograde,
-        longitude: rawData.marte_progresado.longitude,
-        symbol: rawData.marte_progresado.symbol
-      });
-    }
-
-    if (rawData.jupiter_progresado) {
-      planets.push({
-        name: 'Júpiter',
-        sign: rawData.jupiter_progresado.sign,
-        degree: rawData.jupiter_progresado.degree,
-        house: rawData.jupiter_progresado.house,
-        retrograde: rawData.jupiter_progresado.retrograde,
-        longitude: rawData.jupiter_progresado.longitude,
-        symbol: rawData.jupiter_progresado.symbol
-      });
-    }
-
-    if (rawData.saturno_progresado) {
-      planets.push({
-        name: 'Saturno',
-        sign: rawData.saturno_progresado.sign,
-        degree: rawData.saturno_progresado.degree,
-        house: rawData.saturno_progresado.house,
-        retrograde: rawData.saturno_progresado.retrograde,
-        longitude: rawData.saturno_progresado.longitude,
-        symbol: rawData.saturno_progresado.symbol
-      });
-    }
-
-    if (rawData.urano_progresado) {
-      planets.push({
-        name: 'Urano',
-        sign: rawData.urano_progresado.sign,
-        degree: rawData.urano_progresado.degree,
-        house: rawData.urano_progresado.house,
-        retrograde: rawData.urano_progresado.retrograde,
-        longitude: rawData.urano_progresado.longitude,
-        symbol: rawData.urano_progresado.symbol
-      });
-    }
-
-    if (rawData.neptuno_progresado) {
-      planets.push({
-        name: 'Neptuno',
-        sign: rawData.neptuno_progresado.sign,
-        degree: rawData.neptuno_progresado.degree,
-        house: rawData.neptuno_progresado.house,
-        retrograde: rawData.neptuno_progresado.retrograde,
-        longitude: rawData.neptuno_progresado.longitude,
-        symbol: rawData.neptuno_progresado.symbol
-      });
-    }
-
-    if (rawData.pluton_progresado) {
-      planets.push({
-        name: 'Plutón',
-        sign: rawData.pluton_progresado.sign,
-        degree: rawData.pluton_progresado.degree,
-        house: rawData.pluton_progresado.house,
-        retrograde: rawData.pluton_progresado.retrograde,
-        longitude: rawData.pluton_progresado.longitude,
-        symbol: rawData.pluton_progresado.symbol
-      });
-    }
-
-    // Procesar casas
-    const houses = rawData.houses || [];
-
-    // Calcular distribución elemental básica
-    const elementDistribution = { fire: 25, earth: 25, air: 25, water: 25 };
-    const modalityDistribution = { cardinal: 33, fixed: 33, mutable: 34 };
-
-    // Determinar ascendente y medio cielo de las casas
-    let ascendant = undefined;
-    let midheaven = undefined;
-
-    if (houses.length >= 10) {
-      // Casa 1 = Ascendente
-      const ascHouse = houses.find((h: any) => h.house === 1);
-      if (ascHouse) {
-        ascendant = {
-          longitude: ascHouse.longitude,
-          sign: ascHouse.sign,
-          degree: ascHouse.longitude % 30
-        };
-      }
-
-      // Casa 10 = Medio Cielo
-      const mcHouse = houses.find((h: any) => h.house === 10);
-      if (mcHouse) {
-        midheaven = {
-          longitude: mcHouse.longitude,
-          sign: mcHouse.sign,
-          degree: mcHouse.longitude % 30
-        };
-      }
-    }
-
-    const result = {
-      planets,
-      houses,
-      aspects: rawData.aspectos_natales_progresados || [],
-      keyAspects: rawData.aspectos_natales_progresados?.slice(0, 3) || [],
-      elementDistribution,
-      modalityDistribution,
-      ascendant,
-      midheaven,
-      progressionInfo: {
-        year: (() => {
-          if (rawData.birthDate) {
-            const birthYear = new Date(rawData.birthDate).getFullYear();
-            return birthYear + (rawData.currentAge || 0);
-          }
-          return new Date().getFullYear();
-        })(),
-        period: (() => {
-          if (rawData.birthDate) {
-            const birthYear = new Date(rawData.birthDate).getFullYear();
-            const startYear = birthYear + (rawData.currentAge || 0);
-            const endYear = startYear + 1;
-            return `${startYear} - ${endYear}`;
-          }
-          return `Año Solar ${rawData.currentAge || 'N/A'}`;
-        })(),
-        description: `Progresión para ${rawData.currentAge || 'N/A'} años`,
-        startDate: new Date().toISOString().split('T')[0],
-        endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        ageAtStart: rawData.currentAge || 0,
-        isCurrentYear: true
-      },
-      isFallback: rawData.isMockData || false,
-      generatedAt: rawData.generatedAt || new Date().toISOString()
+    return {
+      planets: actualData.planets || [],
+      houses: actualData.houses || [],
+      aspects: actualData.aspects || [],
+      keyAspects: actualData.keyAspects || actualData.aspects || [],
+      elementDistribution: actualData.elementDistribution || { fire: 25, earth: 25, air: 25, water: 25 },
+      modalityDistribution: actualData.modalityDistribution || { cardinal: 33, fixed: 33, mutable: 34 },
+      ascendant: actualData.ascendant || null,
+      midheaven: actualData.midheaven || null,
+      progressionInfo: actualData.progressionInfo || actualData.progressionPeriod || null,
+      isFallback: actualData.isFallback || false,
+      generatedAt: actualData.generatedAt || new Date().toISOString()
     };
+  };
 
-    console.log('✅ Datos procesados finales:', {
-      planetsCount: planets.length,
-      housesCount: houses.length,
-      aspectsCount: result.aspects.length,
-      isMockData: result.isFallback,
-      currentAge: rawData.currentAge
-    });
+  // ✅ FUNCIÓN: Procesar datos de carta natal
+  const processNatalChartData = (rawData: any): NatalChartData => {
+    if (!rawData) {
+      throw new Error('No hay datos de carta natal');
+    }
 
-    return result;
+    return {
+      planets: rawData.planets || [],
+      houses: rawData.houses || [],
+      aspects: rawData.aspects || [],
+      keyAspects: rawData.keyAspects || [],
+      elementDistribution: rawData.elementDistribution || { fire: 25, earth: 25, air: 25, water: 25 },
+      modalityDistribution: rawData.modalityDistribution || { cardinal: 33, fixed: 33, mutable: 34 },
+      ascendant: rawData.ascendant || null,
+      midheaven: rawData.midheaven || null
+    };
   };
 
   // ✅ FUNCIÓN: Cargar datos de nacimiento
   const loadBirthDataInfo = async () => {
     try {
       const response = await fetch(`/api/birth-data?userId=${user?.uid}`);
-
+      
       if (response.ok) {
         const result = await response.json();
-
+        
         if (result.success && result.data) {
           setBirthData({
             birthDate: result.data.birthDate,
@@ -299,25 +153,31 @@ export default function ProgressedChartPage() {
     }
   };
 
-  // ✅ FUNCIÓN: Cargar carta natal para comparación
+  // ✅ FUNCIÓN: Cargar carta natal
   const loadNatalChart = async () => {
     try {
-      const response = await fetch('/api/charts/natal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user?.uid })
+      const response = await fetch(`/api/charts/natal?userId=${user?.uid}`, {
+        method: 'GET'
       });
-      const result = await response.json();
-      if (result.success) {
-        setNatalChartData(result.data?.chart || result.data);
+      
+      if (response.ok) {
+        const result = await response.json();
+        
+        if (result.success && result.natalChart) {
+          const processedNatalData = processNatalChartData(result.natalChart);
+          setNatalChartData(processedNatalData);
+          return processedNatalData;
+        }
       }
+      return null;
     } catch (error) {
-      console.log('No se pudo cargar carta natal para comparación');
+      console.log('⚠️ No se pudo cargar carta natal:', error);
+      return null;
     }
   };
 
-// ✅ FUNCIÓN: Cargar carta progresada
-  const loadChartData = async () => {
+  // ✅ FUNCIÓN: Cargar carta progresada
+  const loadProgressedChart = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -325,8 +185,11 @@ export default function ProgressedChartPage() {
       
       console.log('🔍 Cargando carta progresada para usuario:', user?.uid);
       
+      // Primero cargar carta natal (necesaria para progresada)
+      await loadNatalChart();
+      
       // Intentar cargar carta progresada existente
-      const response = await fetch(`/api/charts/progressed?uid=${user?.uid}`, {
+      const response = await fetch(`/api/charts/progressed?userId=${user?.uid}`, {
         method: 'GET'
       });
       
@@ -335,31 +198,19 @@ export default function ProgressedChartPage() {
       if (response.ok) {
         const result = await response.json();
         
-        if (result.success && result.data) {
+      if (result.success && result.progressedChart) {
           console.log('✅ Carta progresada cargada correctamente');
-          console.log('ℹ️ Datos recibidos:', result.data);
-          console.log('ℹ️ ¿Datos mock?:', result.data.progressedChart?.isMockData === true);
-          console.log('ℹ️ Fuente:', result.data.source);
           setDebugInfo('✅ Carta progresada cargada');
-
-          try {
-            const processedData = processChartData(result.data.progressedChart);
-            setChartData(processedData);
-
-            // Guardar datos en localStorage para persistencia temporal
-            if (typeof window !== 'undefined') {
-              localStorage.setItem('progressedChartData', JSON.stringify(processedData));
-            }
-
-            // Cargar datos de nacimiento para mostrar información
-            await loadBirthDataInfo();
-            return;
-          } catch (processError) {
-            console.error('❌ Error procesando datos de carta:', processError);
-            setError('Error procesando datos de carta progresada');
-            setDebugInfo(`❌ Error procesando: ${processError instanceof Error ? processError.message : 'Error desconocido'}`);
-            return;
-          }
+          
+          const dataToProcess = result.data?.progressedChart || result.progressedChart || result.data;
+          console.log('🔍 Datos para procesar:', dataToProcess);
+          
+          const processedData = processProgressedChartData(dataToProcess);
+          setChartData(processedData);
+          
+          // Cargar datos de nacimiento para mostrar información
+          await loadBirthDataInfo();
+          return;
         }
       }
       
@@ -384,22 +235,14 @@ export default function ProgressedChartPage() {
         if (generateResult.success) {
           console.log('✅ Carta progresada generada correctamente');
           setDebugInfo('✅ Carta progresada generada');
-
-          try {
-            const processedData = processChartData(generateResult.data.chart);
-            setChartData(processedData);
-
-            // Guardar datos generados en localStorage para persistencia temporal
-            if (typeof window !== 'undefined') {
-              localStorage.setItem('progressedChartData', JSON.stringify(processedData));
-            }
-
-            await loadBirthDataInfo();
-          } catch (processError) {
-            console.error('❌ Error procesando datos generados:', processError);
-            setError('Error procesando datos generados de carta progresada');
-            setDebugInfo(`❌ Error procesando generados: ${processError instanceof Error ? processError.message : 'Error desconocido'}`);
-          }
+          
+          const dataToProcess = generateResult.data?.progressedChart || generateResult.progressedChart || generateResult.data;
+          console.log('🔍 Datos para procesar:', dataToProcess);
+          
+          const processedData = processProgressedChartData(dataToProcess);
+          setChartData(processedData);
+          
+          await loadBirthDataInfo();
         } else {
           throw new Error(generateResult.error || 'Error generando carta progresada');
         }
@@ -446,36 +289,16 @@ export default function ProgressedChartPage() {
       }
       
       setDebugInfo('✅ Carta progresada regenerada correctamente');
-      
-      let dataToProcess = null;
 
-      if (regenerateResult.data && regenerateResult.data.chart) {
-        dataToProcess = regenerateResult.data.chart;
-      } else if (regenerateResult.data) {
-        dataToProcess = regenerateResult.data;
-      } else {
-        dataToProcess = regenerateResult;
-      }
-
+      const dataToProcess = regenerateResult.data?.progressedChart || regenerateResult.progressedChart || regenerateResult.data;
       console.log('🔄 Datos para regeneración:', dataToProcess);
 
       if (!dataToProcess) {
         throw new Error('No se encontraron datos en la respuesta de regeneración');
       }
 
-      try {
-        const processedData = processChartData(dataToProcess);
-        setChartData(processedData);
-
-        // Guardar datos regenerados en localStorage para persistencia temporal
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('progressedChartData', JSON.stringify(processedData));
-        }
-      } catch (processError) {
-        console.error('❌ Error procesando datos regenerados:', processError);
-        setError('Error procesando datos regenerados de carta progresada');
-        setDebugInfo(`❌ Error procesando regenerados: ${processError instanceof Error ? processError.message : 'Error desconocido'}`);
-      }
+      const processedData = processProgressedChartData(dataToProcess);
+      setChartData(processedData);
       
     } catch (error) {
       console.error('❌ Error regenerando carta progresada:', error);
@@ -492,27 +315,8 @@ export default function ProgressedChartPage() {
       router.push('/auth/signin');
       return;
     }
-
-    // Intentar cargar datos guardados en localStorage para persistencia temporal
-    if (typeof window !== 'undefined') {
-      const savedData = localStorage.getItem('progressedChartData');
-      if (savedData) {
-        try {
-          const parsedData = JSON.parse(savedData);
-          setChartData(parsedData);
-          setLoading(false);
-          console.log('✅ Datos cargados desde localStorage');
-        } catch (e) {
-          console.warn('No se pudo parsear progressedChartData de localStorage', e);
-        }
-      }
-    }
-
-    // Siempre intentar cargar datos frescos de la API
-    loadChartData();
-
-    // Cargar carta natal para comparación
-    loadNatalChart();
+    
+    loadProgressedChart();
   }, [user, router]);
 
   // ✅ FUNCIONES DE NAVEGACIÓN
@@ -525,19 +329,19 @@ export default function ProgressedChartPage() {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center space-y-6 max-w-md mx-auto">
-          <div className="bg-gradient-to-r from-green-400/20 to-emerald-500/20 border border-green-400/30 rounded-full p-8 backdrop-blur-sm relative mx-auto w-fit">
-            <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-emerald-500/10 rounded-full animate-pulse"></div>
-            <TrendingUp className="w-16 h-16 text-green-400 animate-spin" />
+          <div className="bg-gradient-to-r from-purple-400/20 to-blue-500/20 border border-purple-400/30 rounded-full p-8 backdrop-blur-sm relative mx-auto w-fit">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 to-blue-500/10 rounded-full animate-pulse"></div>
+            <TrendingUp className="w-16 h-16 text-purple-400 animate-spin" />
           </div>
 
           <div className="space-y-3">
-            <h2 className="text-2xl font-bold text-white">Cargando tu Evolución Astrológica</h2>
-            <p className="text-green-300 leading-relaxed">
-              Procesando tu progresión cósmica...
+            <h2 className="text-2xl font-bold text-white">Cargando tu Carta Progresada</h2>
+            <p className="text-gray-300 leading-relaxed">
+              Procesando tu evolución astrológica...
             </p>
 
             {debugInfo && (
-              <div className="bg-black/30 rounded-lg p-3 text-sm text-green-300 font-mono">
+              <div className="bg-black/30 rounded-lg p-3 text-sm text-blue-300 font-mono">
                 {debugInfo}
               </div>
             )}
@@ -548,7 +352,7 @@ export default function ProgressedChartPage() {
               {[0, 1, 2].map((i) => (
                 <div
                   key={i}
-                  className="w-2 h-2 bg-green-400 rounded-full animate-bounce"
+                  className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"
                   style={{ animationDelay: `${i * 0.2}s` }}
                 ></div>
               ))}
@@ -569,7 +373,7 @@ export default function ProgressedChartPage() {
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-white">Error al cargar evolución</h2>
+            <h2 className="text-2xl font-bold text-white">Error al cargar carta progresada</h2>
             <p className="text-gray-300">{error}</p>
 
             {debugInfo && (
@@ -582,15 +386,15 @@ export default function ProgressedChartPage() {
               {error.includes('datos de nacimiento') ? (
                 <Button
                   onClick={navigateToBirthData}
-                  className="bg-green-600 hover:bg-green-700 flex items-center space-x-2"
+                  className="bg-blue-600 hover:bg-blue-700 flex items-center space-x-2"
                 >
                   <Edit className="w-4 h-4" />
                   <span>Configurar datos</span>
                 </Button>
               ) : (
                 <Button
-                  onClick={() => loadChartData()}
-                  className="bg-green-600 hover:bg-green-700 flex items-center space-x-2"
+                  onClick={() => loadProgressedChart()}
+                  className="bg-purple-600 hover:bg-purple-700 flex items-center space-x-2"
                 >
                   <RefreshCw className="w-4 h-4" />
                   <span>Intentar de nuevo</span>
@@ -603,17 +407,17 @@ export default function ProgressedChartPage() {
     );
   }
 
-  // ✅ PANTALLA PRINCIPAL - CARTA PROGRESADA (Sin header propio)
+  // ✅ PANTALLA PRINCIPAL - CARTA PROGRESADA
   if (!chartData) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
           <p className="text-gray-300">No hay datos de carta progresada disponibles</p>
           <Button
-            onClick={() => loadChartData()}
-            className="mt-4 bg-green-600 hover:bg-green-700"
+            onClick={() => loadProgressedChart()}
+            className="mt-4 bg-purple-600 hover:bg-purple-700"
           >
-            Cargar carta
+            Cargar carta progresada
           </Button>
         </div>
       </div>
@@ -625,91 +429,127 @@ export default function ProgressedChartPage() {
       {/* Header principal */}
       <div className="text-center space-y-6">
         <div className="flex justify-center items-center mb-6">
-          <div className="bg-gradient-to-r from-green-400/20 to-emerald-500/20 border border-green-400/30 rounded-full p-6 backdrop-blur-sm relative">
-            <div className="absolute -top-2 -right-2 w-4 h-4 bg-green-400 rounded-full animate-pulse"></div>
-            <TrendingUp className="w-12 h-12 text-green-400" />
+          <div className="bg-gradient-to-r from-purple-400/20 to-blue-500/20 border border-purple-400/30 rounded-full p-6 backdrop-blur-sm relative">
+            <div className="absolute -top-2 -right-2 w-4 h-4 bg-purple-400 rounded-full animate-pulse"></div>
+            <TrendingUp className="w-12 h-12 text-purple-400" />
           </div>
         </div>
 
         <h1 className="text-4xl md:text-5xl text-white font-bold">
-          Tu Evolución Astrológica Personal
+          Carta Progresada{' '}
+          <span className="bg-gradient-to-r from-purple-400 via-blue-500 to-cyan-400 bg-clip-text text-transparent">
+            Tu Evolución Cósmica
+          </span>
         </h1>
 
-        <p className="text-xl text-green-300 max-w-3xl mx-auto leading-relaxed flex items-center justify-center gap-3">
-          <TrendingUp className="w-6 h-6 text-green-400 flex-shrink-0" />
-          Descubre cómo has crecido interiormente desde tu nacimiento y hacia dónde te diriges
+        <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed flex items-center justify-center gap-3">
+          <TrendingUp className="w-6 h-6 text-purple-400 flex-shrink-0" />
+          Descubre cómo has evolucionado desde tu nacimiento y hacia dónde te diriges
         </p>
 
-        {chartData && (
-          <div className="bg-gradient-to-r from-green-900/40 to-emerald-900/40 backdrop-blur-sm border border-green-400/20 rounded-2xl p-6">
-            <div className="grid md:grid-cols-3 gap-6 text-center">
-              <div>
-                <div className="text-green-400 text-2xl font-bold">
-                  {chartData.progressionInfo?.ageAtStart || 'N/A'} años
+        {/* Información de progresión */}
+        {chartData.progressionInfo && (
+          <div className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 border border-purple-400/20 rounded-xl p-6 max-w-2xl mx-auto">
+            <div className="flex items-center gap-3 mb-4">
+              <Calendar className="w-5 h-5 text-purple-400" />
+              <h3 className="text-lg font-semibold text-white">Período de Progresión Actual</h3>
+            </div>
+            
+            <div className="grid md:grid-cols-2 gap-4 text-sm">
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Año:</span>
+                  <span className="text-white font-medium">{chartData.progressionInfo.year}</span>
                 </div>
-                <div className="text-green-200 text-sm">Edad de Evolución</div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Edad:</span>
+                  <span className="text-white font-medium">{chartData.progressionInfo.ageAtStart}</span>
+                </div>
               </div>
-              <div>
-                <div className="text-emerald-400 text-2xl font-bold">
-                  {chartData.progressionInfo?.year || 'N/A'}
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Período:</span>
+                  <span className="text-white font-medium">{chartData.progressionInfo.period}</span>
                 </div>
-                <div className="text-emerald-200 text-sm">Año de Progresión</div>
-              </div>
-              <div>
-                <div className="text-green-400 text-2xl font-bold">
-                  {chartData.progressionInfo?.isCurrentYear ? 'Actual' : 'Histórico'}
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Estado:</span>
+                  <span className={`font-medium ${chartData.progressionInfo.isCurrentYear ? 'text-green-400' : 'text-yellow-400'}`}>
+                    {chartData.progressionInfo.isCurrentYear ? 'Activo' : 'Proyección'}
+                  </span>
                 </div>
-                <div className="text-green-200 text-sm">Período</div>
               </div>
             </div>
           </div>
         )}
-
-        {/* Botones de acción */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <button
-            onClick={regenerateChart}
-            disabled={isRegenerating}
-            className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-3 rounded-lg font-medium hover:from-green-700 hover:to-emerald-700 transition-all flex items-center text-sm disabled:opacity-50"
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${isRegenerating ? 'animate-spin' : ''}`} />
-            {isRegenerating ? 'Regenerando...' : 'Regenerar Carta'}
-          </button>
-
-          {chartData && birthData && natalChartData && (
-            <InterpretationButton
-              type="progressed"
-              userId={user?.uid || ''}
-              chartData={chartData}
-              natalChart={natalChartData}
-              userProfile={{
-                name: birthData.fullName || 'Usuario',
-                age: new Date().getFullYear() - new Date(birthData.birthDate).getFullYear(),
-                birthPlace: birthData.birthPlace,
-                birthDate: birthData.birthDate,
-                birthTime: birthData.birthTime
-              }}
-              className="w-full sm:w-auto"
-            />
-          )}
-        </div>
       </div>
-
-      {/* Carta progresada */}
-      {chartData && (
-        <div className="flex justify-center">
+      {/* Carta y controles */}
+      <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+        <div className="flex-shrink-0 mx-auto">
           <ChartDisplay
             planets={chartData.planets}
             houses={chartData.houses}
+            aspects={chartData.aspects || []}
+            keyAspects={chartData.keyAspects || []}
+            ascendant={chartData.ascendant ?? undefined}
+            midheaven={chartData.midheaven ?? undefined}
             elementDistribution={chartData.elementDistribution}
             modalityDistribution={chartData.modalityDistribution}
-            keyAspects={chartData.keyAspects || []}
-            ascendant={chartData.ascendant}
-            midheaven={chartData.midheaven}
-            birthData={birthData || undefined}
+            chartType="progressed"
           />
         </div>
-      )}
+
+        <div className="flex-1 space-y-6">
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+              Detalles de tu Carta Progresada
+              <Sparkles className="w-6 h-6 text-yello      -400 animate-pulse" />      
+            </h2>
+
+            <p className="text-gray-300 leading-relaxed">
+              <span className="font-medium text-white">Descripción:</span> Esta sección proporciona una visión general de los aspectos más destacados de tu carta progresada, incluyendo los tránsitos planetarios y sus influencias en tu vida.
+              <br />
+              <span className="font-medium text-white">Nota:</span> La carta progresada refleja tu evolución personal desde el momento de tu nacimiento, mostrando cómo los movimientos planetarios afectan tu desarrollo y experiencias actuales.
+
+            </p>
+          </div>
+
+          {/* Botones de acción */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <InterpretationButton
+              chartData={chartData}
+              natalChart={natalChartData}
+              className="flex-1 bg-blue-600 hover:bg-blue-700" type={'progressed'} userId={''} userProfile={{
+                name: '',
+                age: 0,
+                birthPlace: '',
+                birthDate: '',
+                birthTime: ''
+              }}            />
+
+            <Button
+              onClick={regenerateChart}
+              disabled={isRegenerating}
+              className="flex-1 bg-purple-600 hover:bg-purple-700 flex items-center justify-center gap-2"
+            >
+              {isRegenerating ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Regenerando...</span> 
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-4 h-4" />
+                  <span>Regenerar</span>
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>    
     </div>
   );
-}
+}     
+
+
+
+        

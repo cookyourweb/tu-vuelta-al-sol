@@ -328,29 +328,30 @@ function generatePersonalizedMantra(sunSign: string, moonSign: string, ascendant
 
 // 📋 CREAR PLAN DE ACCIÓN EDUCATIVO
 function createEducationalActionPlan(natalChart: DetailedNatalChart): ActionPlan[] {
+  // Explicitly cast category to the allowed literal types to satisfy TypeScript
   return [
     {
-      category: 'crecimiento',
+      category: 'crecimiento' as 'crecimiento',
       action: `INTEGRACIÓN DIARIA: Practica 10 minutos diarios conectando conscientemente con tu Sol ${natalChart.sol.sign} (propósito) y tu Luna ${natalChart.luna.sign} (emociones)`,
       timing: 'inmediato',
       difficulty: 'fácil',
       impact: 'alto'
     },
     {
-      category: 'amor',
+      category: 'amor' as 'amor',
       action: `RELACIONES AUTÉNTICAS: En tus relaciones, comunica abiertamente tus necesidades ${natalChart.luna.sign} mientras mantienes tu identidad ${natalChart.sol.sign}`,
       timing: 'esta_semana',
       difficulty: 'moderado',
       impact: 'alto'
     },
     {
-      category: 'trabajo',
+      category: 'trabajo' as 'trabajo',
       action: `CARRERA ALINEADA: Busca oportunidades profesionales que te permitan expresar tu ${natalChart.sol.sign} y que respeten tu proceso emocional ${natalChart.luna.sign}`,
       timing: 'este_mes',
       difficulty: 'desafiante',
       impact: 'alto'
     }
-  ];
+  ] as ActionPlan[];
 }
 
 // 🔧 FUNCIONES AUXILIARES
@@ -401,7 +402,7 @@ function getLifePhase(age: number): string {
 }
 
 function getAgeMaturity(age: number, sunSign: string): string {
-  const maturityLevels = {
+  const maturityLevels: Record<string, string> = {
     'Aries': age < 30 ? 'impulsividad juvenil' : 'liderazgo maduro',
     'Tauro': age < 30 ? 'terquedad básica' : 'sabiduría práctica',
     'Géminis': age < 30 ? 'dispersión curiosa' : 'comunicación profunda',
@@ -415,7 +416,7 @@ function getAgeMaturity(age: number, sunSign: string): string {
     'Acuario': age < 30 ? 'rebeldía adolescente' : 'innovación humanitaria',
     'Piscis': age < 30 ? 'sensibilidad escapista' : 'compasión universal'
   };
-  
+
   return maturityLevels[sunSign] || 'desarrollo personal';
 }
 
@@ -498,35 +499,33 @@ export async function generateEducationalProgressedComparison(
 }> {
   
   const natalSun = natalChart.sol;
-  const progressedSun = progressedChart.sol;
   const natalMoon = natalChart.luna;
-  const progressedMoon = progressedChart.luna;
   
   // 🌟 ANALIZAR EVOLUCIÓN SOLAR
-  const sunEvolution = analyzeSunEvolution(natalSun, progressedSun, userProfile.currentAge);
-  
-  // 🌙 ANALIZAR EVOLUCIÓN LUNAR  
-  const moonEvolution = analyzeMoonEvolution(natalMoon, progressedMoon, userProfile.currentAge);
+  const sunEvolution = analyzeSunEvolution(natalSun, progressedChart.sol_progresado, userProfile.currentAge);
+
+  // 🌙 ANALIZAR EVOLUCIÓN LUNAR
+  const moonEvolution = analyzeMoonEvolution(natalMoon, progressedChart.luna_progresada, userProfile.currentAge);
   
   // 🏠 ANALIZAR CAMBIOS DE CASAS
   const houseShifts = analyzeHouseShifts(natalChart, progressedChart);
   
   return {
-    evolution: `EVOLUCIÓN PERSONAL A LOS ${userProfile.currentAge} AÑOS: 
-    
-🌟 IDENTIDAD (Sol): ${sunEvolution.description}
-Tu Sol natal en ${natalSun.sign} Casa ${natalSun.house} ahora se expresa como Sol progresado en ${progressedSun.sign} Casa ${progressedSun.house}. ${sunEvolution.meaning}
+    evolution: `EVOLUCIÓN PERSONAL A LOS ${userProfile.currentAge} AÑOS:
 
-🌙 EMOCIONALIDAD (Luna): ${moonEvolution.description}  
-Tu Luna natal en ${natalMoon.sign} Casa ${natalMoon.house} ha evolucionado a Luna progresada en ${progressedMoon.sign} Casa ${progressedMoon.house}. ${moonEvolution.meaning}
+🌟 IDENTIDAD (Sol): ${sunEvolution.description}
+Tu Sol natal en ${natalSun.sign} Casa ${natalSun.house} ahora se expresa como Sol progresado en ${progressedChart.sol_progresado.sign} Casa ${progressedChart.sol_progresado.house}. ${sunEvolution.meaning}
+
+🌙 EMOCIONALIDAD (Luna): ${moonEvolution.description}
+Tu Luna natal en ${natalMoon.sign} Casa ${natalMoon.house} ha evolucionado a Luna progresada en ${progressedChart.luna_progresada.sign} Casa ${progressedChart.luna_progresada.house}. ${moonEvolution.meaning}
 
 🏠 ENFOQUES DE VIDA: ${houseShifts.description}`,
 
     keyChanges: [
-      `🔄 IDENTIDAD SOLAR: De ${natalSun.sign} (${getSunSignCore(natalSun.sign)}) a ${progressedSun.sign} (${getSunSignCore(progressedSun.sign)})`,
-      `🔄 RESPUESTA EMOCIONAL: De patrones ${natalMoon.sign} (${getMoonSignCore(natalMoon.sign)}) a ${progressedMoon.sign} (${getMoonSignCore(progressedMoon.sign)})`,
-      `🔄 ÁREA DE ENFOQUE: De Casa ${natalSun.house} (${getHouseTheme(natalSun.house)}) a Casa ${progressedSun.house} (${getHouseTheme(progressedSun.house)})`,
-      `🔄 PROCESAMIENTO EMOCIONAL: De Casa ${natalMoon.house} (${getHouseTheme(natalMoon.house)}) a Casa ${progressedMoon.house} (${getHouseTheme(progressedMoon.house)})`,
+      `🔄 IDENTIDAD SOLAR: De ${natalSun.sign} (${getSunSignCore(natalSun.sign)}) a ${progressedChart.sol_progresado.sign} (${getSunSignCore(progressedChart.sol_progresado.sign)})`,
+      `🔄 RESPUESTA EMOCIONAL: De patrones ${natalMoon.sign} (${getMoonSignCore(natalMoon.sign)}) a ${progressedChart.luna_progresada.sign} (${getMoonSignCore(progressedChart.luna_progresada.sign)})`,
+      `🔄 ÁREA DE ENFOQUE: De Casa ${natalSun.house} (${getHouseTheme(natalSun.house)}) a Casa ${progressedChart.sol_progresado.house} (${getHouseTheme(progressedChart.sol_progresado.house)})`,
+      `🔄 PROCESAMIENTO EMOCIONAL: De Casa ${natalMoon.house} (${getHouseTheme(natalMoon.house)}) a Casa ${progressedChart.luna_progresada.house} (${getHouseTheme(progressedChart.luna_progresada.house)})`,
       ...houseShifts.specificChanges
     ],
 
@@ -534,24 +533,24 @@ Tu Luna natal en ${natalMoon.sign} Casa ${natalMoon.house} ha evolucionado a Lun
 
 💡 HONRA TU BASE NATAL: Nunca abandones completamente tu esencia natal ${natalSun.sign}-${natalMoon.sign}. Es tu fundamento eterno.
 
-🌱 ABRAZA TU EVOLUCIÓN PROGRESADA: Permite que tu nuevo ${progressedSun.sign}-${progressedMoon.sign} se exprese, pero desde la sabiduría de tu base natal.
+🌱 ABRAZA TU EVOLUCIÓN PROGRESADA: Permite que tu nuevo ${progressedChart.sol_progresado.sign}-${progressedChart.luna_progresada.sign} se exprese, pero desde la sabiduría de tu base natal.
 
 🔄 CICLO DE INTEGRACIÓN DIARIA:
-- Mañana: Conecta con tu propósito progresado ${progressedSun.sign} 
+- Mañana: Conecta con tu propósito progresado ${progressedChart.sol_progresado.sign}
 - Tarde: Actúa desde tu identidad natal ${natalSun.sign}
-- Noche: Procesa emocionalmente como ${progressedMoon.sign} informado por tu ${natalMoon.sign} natal
+- Noche: Procesa emocionalmente como ${progressedChart.luna_progresada.sign} informado por tu ${natalMoon.sign} natal
 
-⚖️ NO ES REEMPLAZO, ES EVOLUCIÓN: Tu carta progresada no reemplaza la natal - la enriquece. Eres ${natalSun.sign} evolucionando hacia ${progressedSun.sign}, no ${progressedSun.sign} puro.`,
+⚖️ NO ES REEMPLAZO, ES EVOLUCIÓN: Tu carta progresada no reemplaza la natal - la enriquece. Eres ${natalSun.sign} evolucionando hacia ${progressedChart.sol_progresado.sign}, no ${progressedChart.sol_progresado.sign} puro.`,
 
     nextEvolutionStep: `PRÓXIMO NIVEL EVOLUTIVO (Años ${userProfile.currentAge + 1}-${userProfile.currentAge + 5}):
 
-🎯 MAESTRÍA DE LA TRANSICIÓN: Dominar completamente la integración ${natalSun.sign}→${progressedSun.sign} y ${natalMoon.sign}→${progressedMoon.sign}.
+🎯 MAESTRÍA DE LA TRANSICIÓN: Dominar completamente la integración ${natalSun.sign}→${progressedChart.sol_progresado.sign} y ${natalMoon.sign}→${progressedChart.luna_progresada.sign}.
 
 🚀 NUEVA EXPRESIÓN: Desarrollar un estilo único que sea auténticamente tuyo - ni puramente natal ni puramente progresado, sino una síntesis superior.
 
 🌟 SERVICIO EVOLUCIONADO: Usar tu experiencia de transición para ayudar a otros que pasen por cambios similares.
 
-📈 PREPARACIÓN: ${getNextEvolutionPreparation(progressedSun.sign, progressedMoon.sign, userProfile.currentAge)}`
+📈 PREPARACIÓN: ${getNextEvolutionPreparation(progressedChart.sol_progresado.sign, progressedChart.luna_progresada.sign, userProfile.currentAge)}`
   };
 }
 
@@ -585,27 +584,26 @@ function analyzeMoonEvolution(natalMoon: any, progressedMoon: any, age: number) 
   };
 }
 
-// 🏠 ANALIZAR CAMBIOS DE CASAS
 function analyzeHouseShifts(natalChart: DetailedNatalChart, progressedChart: DetailedProgressedChart) {
-  const sunHouseChange = natalChart.sol.house !== progressedChart.sol.house;
-  const moonHouseChange = natalChart.luna.house !== progressedChart.luna.house;
+  const sunHouseChange = natalChart.sol.house !== progressedChart.sol_progresado.house;
+  const moonHouseChange = natalChart.luna.house !== progressedChart.luna_progresada.house;
   
   const changes = [];
   let description = "Los enfoques de vida han ";
   
   if (sunHouseChange) {
-    changes.push(`🎯 ENFOQUE SOLAR: De Casa ${natalChart.sol.house} (${getHouseTheme(natalChart.sol.house)}) a Casa ${progressedChart.sol.house} (${getHouseTheme(progressedChart.sol.house)})`);
+    changes.push(`🎯 ENFOQUE SOLAR: De Casa ${natalChart.sol.house} (${getHouseTheme(natalChart.sol.house)}) a Casa ${progressedChart.sol_progresado.house} (${getHouseTheme(progressedChart.sol_progresado.house)})`);
     description += `cambiado significativamente en términos de propósito`;
   } else {
     description += `mantenido consistencia en el propósito (Casa ${natalChart.sol.house})`;
   }
   
   if (moonHouseChange) {
-    changes.push(`🌙 ENFOQUE EMOCIONAL: De Casa ${natalChart.luna.house} (${getHouseTheme(natalChart.luna.house)}) a Casa ${progressedChart.luna.house} (${getHouseTheme(progressedChart.luna.house)})`);
+    changes.push(`🌙 ENFOQUE EMOCIONAL: De Casa ${natalChart.luna.house} (${getHouseTheme(natalChart.luna.house)}) a Casa ${progressedChart.luna_progresada.house} (${getHouseTheme(progressedChart.luna_progresada.house)})`);
     if (sunHouseChange) {
       description += ` y emocional`;
     } else {
-      description += `, pero han evolucionado emocionalmente hacia Casa ${progressedChart.luna.house}`;
+      description += `, pero han evolucionado emocionalmente hacia Casa ${progressedChart.luna_progresada.house}`;
     }
   } else if (!sunHouseChange) {
     description += ` pero con mayor profundidad y madurez`;
@@ -728,27 +726,27 @@ function analyzeEventMeaning(event: any, natalChart: DetailedNatalChart, userPro
     
     actions: [
       {
-        category: 'crecimiento',
+        category: 'crecimiento' as 'crecimiento',
         action: `Estudia cómo este evento ${eventPlanet} puede potenciar tu naturaleza ${natalChart.sol.sign} sin contradecirla`,
         timing: 'inmediato',
         difficulty: 'fácil',
         impact: 'alto'
       },
       {
-        category: 'amor',
+        category: 'amor' as 'amor',
         action: `En relaciones, comunica cómo este tránsito está afectando tu proceso emocional ${natalChart.luna.sign}`,
         timing: 'esta_semana',
         difficulty: 'moderado',
         impact: 'alto'
       },
       {
-        category: 'trabajo',
+        category: 'trabajo' as 'trabajo',
         action: `Busca maneras de aplicar la nueva energía ${eventPlanet} en tu trabajo, manteniendo tu estilo ${natalChart.sol.sign}`,
         timing: 'este_mes',
         difficulty: 'moderado',
         impact: 'medio'
       }
-    ],
+    ] as ActionPlan[],
     
     alerts: {
       warnings: [
@@ -1113,11 +1111,18 @@ export async function integrateEducationalSystem(
         userProfile
       );
     } else {
-      // Fallback si no hay carta progresada
+      // Fallback si no hay carta progresada - crear una carta progresada básica
+      const mockProgressedChart: DetailedProgressedChart = {
+        sol_progresado: natalChart.sol,
+        luna_progresada: natalChart.luna,
+        aspectos_natales_progresados: [],
+        currentAge: userProfile.currentAge,
+        isMockData: true
+      };
       results.eventEducational = await generateEducationalEventInterpretation(
         specificEvent,
         natalChart,
-        natalChart, // Usar natal como progresada
+        mockProgressedChart,
         userProfile
       );
     }
@@ -1142,11 +1147,11 @@ function generateIntegrationAdvice(
   const moonSign = natalChart.luna.sign;
   
   if (progressedChart) {
-    return `${userName}, a los ${userAge} años, tu camino evolutivo combina tu esencia natal ${sunSign}-${moonSign} con tu desarrollo progresado hacia ${progressedChart.sol.sign}-${progressedChart.luna.sign}. 
+    return `${userName}, a los ${userAge} años, tu camino evolutivo combina tu esencia natal ${sunSign}-${moonSign} con tu desarrollo progresado hacia ${progressedChart.sol_progresado.sign}-${progressedChart.luna_progresada.sign}.
 
 🎯 ESTRATEGIA DE INTEGRACIÓN MAESTRA:
 1. MANTÉN TU BASE: Tu ${sunSign}-${moonSign} natal es tu fundamento eterno - nunca lo abandones
-2. ABRAZA TU EVOLUCIÓN: Permite que tu crecimiento hacia ${progressedChart.sol.sign}-${progressedChart.luna.sign} enriquezca, no reemplace, tu esencia
+2. ABRAZA TU EVOLUCIÓN: Permite que tu crecimiento hacia ${progressedChart.sol_progresado.sign}-${progressedChart.luna_progresada.sign} enriquezca, no reemplace, tu esencia
 3. SÍNTESIS CREATIVA: Crea una expresión única que sea auténticamente tuya - ni puro natal ni puro progresado
 4. SERVICIO EVOLUTIVO: Usa tu experiencia de crecimiento para ayudar a otros en su propio camino
 
@@ -1172,28 +1177,36 @@ export function validateEducationalService(): {
 } {
   const missing: string[] = [];
   const recommendations: string[] = [];
-  
-  // Verificar dependencias
+
+  // Verificar dependencias - simplificado ya que no podemos verificar tipos en runtime
   try {
-    // Verificar tipos principales
-    if (!DetailedNatalChart || !DetailedProgressedChart || !UserProfile) {
-      missing.push('Tipos astrológicos principales');
+    // Verificar que las funciones principales existen
+    if (typeof generateEducationalNatalInterpretation !== 'function') {
+      missing.push('Función generateEducationalNatalInterpretation');
     }
-    
-    if (!PersonalizedInterpretation || !ActionPlan) {
-      missing.push('Tipos de interpretación');
+
+    if (typeof generateEducationalProgressedComparison !== 'function') {
+      missing.push('Función generateEducationalProgressedComparison');
     }
-    
+
+    if (typeof generateEducationalEventInterpretation !== 'function') {
+      missing.push('Función generateEducationalEventInterpretation');
+    }
+
+    if (typeof integrateEducationalSystem !== 'function') {
+      missing.push('Función integrateEducationalSystem');
+    }
+
   } catch (error) {
-    missing.push('Imports de tipos - verificar rutas');
+    missing.push('Error al verificar funciones del servicio');
   }
-  
+
   // Recomendaciones de integración
   recommendations.push('Integrar con trainedAssistantService.ts para interpretaciones de IA');
   recommendations.push('Conectar con chartInterpretationsService.ts para interpretaciones básicas');
   recommendations.push('Usar en AgendaAIDisplay.tsx para mostrar interpretaciones educativas');
   recommendations.push('Implementar en natal-chart y progressed-chart pages');
-  
+
   return {
     isReady: missing.length === 0,
     missingComponents: missing,

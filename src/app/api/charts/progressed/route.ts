@@ -5,6 +5,65 @@ import connectDB from '@/lib/db';
 import BirthData, { castBirthData } from '@/models/BirthData';
 import Chart, { castChart } from '@/models/Chart';
 
+/**
+ * Calcular timezone offset (igual que en natal)
+ */
+function calculateTimezoneOffset(date: string, timezone: string): string {
+  console.log(`🌍 Calculando timezone para ${date} en ${timezone}`);
+
+  try {
+    const targetDate = new Date(date);
+    const year = targetDate.getFullYear();
+
+    const getLastSunday = (year: number, month: number): Date => {
+      const lastDay = new Date(year, month + 1, 0);
+      const dayOfWeek = lastDay.getDay();
+      const lastSunday = new Date(lastDay);
+      lastSunday.setDate(lastDay.getDate() - dayOfWeek);
+      return lastSunday;
+    };
+
+    // Europa Central
+    if (timezone === 'Europe/Madrid' ||
+        timezone === 'Europe/Berlin' ||
+        timezone === 'Europe/Paris' ||
+        timezone === 'Europe/Rome') {
+
+      const dstStart = getLastSunday(year, 2); // Marzo
+      const dstEnd = getLastSunday(year, 9);   // Octubre
+
+      dstStart.setUTCHours(2, 0, 0, 0);
+      dstEnd.setUTCHours(2, 0, 0, 0);
+
+      const offset = (targetDate >= dstStart && targetDate < dstEnd) ? '+02:00' : '+01:00';
+      console.log(`✅ Timezone Europa: ${offset}`);
+      return offset;
+    }
+
+    // Zonas fijas
+    const staticTimezones: Record<string, string> = {
+      'America/Argentina/Buenos_Aires': '-03:00',
+      'America/Bogota': '-05:00',
+      'America/Lima': '-05:00',
+      'America/Mexico_City': '-06:00',
+      'Asia/Tokyo': '+09:00',
+      'UTC': '+00:00',
+      'GMT': '+00:00'
+    };
+
+    if (staticTimezones[timezone]) {
+      console.log(`✅ Timezone fijo: ${staticTimezones[timezone]}`);
+      return staticTimezones[timezone];
+    }
+
+    console.warn(`⚠️ Timezone '${timezone}' no reconocida, usando UTC`);
+    return '+00:00';
+  } catch (error) {
+    console.error('❌ Error calculando timezone:', error);
+    return '+00:00';
+  }
+}
+
 // ✅ FUNCIÓN AUXILIAR: Calcular período de progresión correcto
 function calculateProgressionPeriod(birthDate: Date) {
   const today = new Date();
@@ -336,7 +395,16 @@ async function callProkeralaDirectly(birthData: any, targetYear: number) {
 
     // 2. Preparar datos (igual que natal pero con progressionYear)
     const birthDate = new Date(birthData.birthDate);
-    const datetime = `${birthDate.toISOString().split('T')[0]}T${birthData.birthTime || '07:30:00'}+01:00`;
+    const birthDateStr = birthDate.toISOString().split('T')[0];
+
+    // ✅ CORRECCIÓN: Formatear tiempo con segundos obligatorios (igual que natal)
+    let formattedBirthTime = birthData.birthTime || '12:00:00';
+    if (formattedBirthTime.length === 5) {
+      formattedBirthTime = formattedBirthTime + ':00';
+    }
+
+    const offset = calculateTimezoneOffset(birthDateStr, birthData.timezone || 'Europe/Madrid');
+    const datetime = `${birthDateStr}T${formattedBirthTime}${offset}`;
     const coordinates = `${birthData.latitude},${birthData.longitude}`;
 
     console.log('📅 [PROGRESSED] Parámetros:', {
@@ -345,29 +413,28 @@ async function callProkeralaDirectly(birthData: any, targetYear: number) {
       targetYear
     });
 
-    // 3. Llamar API de progresión (diferente endpoint que natal)
-    const chartResponse = await fetch('https://api.prokerala.com/v2/astrology/progression-chart', {
-      method: 'POST',
+    // 3. Llamar API de progresión (GET endpoint como natal)
+    const url = new URL('https://api.prokerala.com/v2/astrology/progression-aspect-chart');
+    url.searchParams.append('profile[datetime]', datetime);
+    url.searchParams.append('profile[coordinates]', coordinates);
+    url.searchParams.append('profile[birth_time_unknown]', 'false');
+    url.searchParams.append('progression_year', targetYear.toString());
+    url.searchParams.append('current_coordinates', coordinates);
+    url.searchParams.append('house_system', 'placidus');
+    url.searchParams.append('orb', 'default');
+    url.searchParams.append('birth_time_rectification', 'flat-chart');
+    url.searchParams.append('aspect_filter', 'all');
+    url.searchParams.append('la', 'es');
+    url.searchParams.append('ayanamsa', '0');
+    url.searchParams.append('format', 'json');  // ✅ FORZAR FORMATO JSON
+
+    const chartResponse = await fetch(url.toString(), {
+      method: 'GET',
       headers: {
         'Authorization': `Bearer ${access_token}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        profile: {
-          datetime: datetime,
-          coordinates: coordinates,
-          birth_time_unknown: false
-        },
-        progression_year: targetYear,
-        current_coordinates: coordinates,
-        house_system: 'placidus',
-        orb: 'default',
-        birth_time_rectification: 'flat-chart',
-        aspect_filter: 'all',
-        la: 'es',
-        ayanamsa: 0
-      })
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'  // ✅ NUEVO
+      }
     });
 
     console.log(`📊 [PROGRESSED] Respuesta API: ${chartResponse.status}`);
@@ -378,7 +445,21 @@ async function callProkeralaDirectly(birthData: any, targetYear: number) {
       throw new Error(`Progressed chart error: ${chartResponse.status}`);
     }
 
-    const chartData = await chartResponse.json();
+    // ✅ VALIDAR RESPUESTA ANTES DE PARSEAR JSON
+    console.log('📄 Content-Type recibido:', chartResponse.headers.get('content-type'));
+
+    // Solo parsear como JSON si realmente es JSON
+    const contentType = chartResponse.headers.get('content-type');
+    let chartData;
+
+    if (contentType && contentType.includes('application/json')) {
+      chartData = await chartResponse.json();
+      console.log('✅ JSON parseado correctamente');
+    } else {
+      const textResponse = await chartResponse.text();
+      console.error('❌ Respuesta no es JSON:', textResponse.substring(0, 200));
+      throw new Error('API devolvió XML en lugar de JSON');
+    }
 
     console.log('✅ [PROGRESSED] Datos recibidos:', {
       dataType: typeof chartData,
@@ -688,13 +769,24 @@ export async function POST(request: NextRequest) {
 
     try {
       // Llamar directamente a Prokerala API sin pasar por endpoint intermedio
-      const prokeralaResult = await callProkeralaDirectly(birthData, progressionPeriod.startYear);
+      const prokeralaResponse = await callProkeralaDirectly(birthData, progressionPeriod.startYear);
 
-      if (prokeralaResult.success) {
-        progressedData = processProkeralaProgressionResponse(prokeralaResult.data, progressionPeriod);
-        console.log('✅ [PROGRESSED] POST - DATOS DE PROKERALA - Carta generada exitosamente');
+      if (prokeralaResponse.success) {
+        console.log('✅ [PROGRESSED] Prokerala API exitosa');
+        try {
+          progressedData = processProkeralaProgressionResponse(prokeralaResponse.data, progressionPeriod);
+          console.log('✅ [PROGRESSED] Datos procesados correctamente:', {
+            planetsCount: progressedData.planets?.length,
+            housesCount: progressedData.houses?.length,
+            aspectsCount: progressedData.aspects?.length
+          });
+        } catch (processError) {
+          console.error('❌ [PROGRESSED] Error procesando datos Prokerala:', processError);
+          progressedData = generateProgressedFallback(birthData, progressionPeriod.startYear);
+        }
       } else {
-        throw new Error(prokeralaResult.error || 'Error llamando API Prokerala');
+        console.log('⚠️ [PROGRESSED] Prokerala falló, usando fallback:', prokeralaResponse.error);
+        progressedData = generateProgressedFallback(birthData, progressionPeriod.startYear);
       }
 
       if (progressedData) {
@@ -706,84 +798,20 @@ export async function POST(request: NextRequest) {
 
     } catch (generationError) {
       console.log('⚠️ [PROGRESSED] POST - DATOS MOCKEADOS - Usando datos de fallback:', generationError);
-
-      progressedData = {
-        sol_progresado: {
-          longitude: 315.5,
-          sign: 'Acuario',
-          degree: 15.5,
-          house: 1,
-          retrograde: false,
-          symbol: '☉',
-          meaning: 'Evolución de la identidad y propósito vital'
-        },
-        luna_progresada: {
-          longitude: 185.3,
-          sign: 'Libra',
-          degree: 25.3,
-          house: 7,
-          retrograde: false,
-          symbol: '☽',
-          meaning: 'Cambios emocionales y necesidades evolutivas'
-        },
-        mercurio_progresado: {
-          longitude: 320.7,
-          sign: 'Acuario',
-          degree: 8.7,
-          house: 1,
-          retrograde: false,
-          symbol: '☿',
-          meaning: 'Evolución del pensamiento y comunicación'
-        },
-        venus_progresado: {
-          longitude: 342.2,
-          sign: 'Piscis',
-          degree: 12.2,
-          house: 2,
-          retrograde: false,
-          symbol: '♀',
-          meaning: 'Transformación de valores y relaciones'
-        },
-        marte_progresado: {
-          longitude: 20.8,
-          sign: 'Aries',
-          degree: 20.8,
-          house: 3,
-          retrograde: false,
-          symbol: '♂',
-          meaning: 'Canalización de energía y acción'
-        },
-        currentAge: progressionPeriod.currentAge,
-        houses: Array.from({ length: 12 }, (_, i) => ({
-          house: i + 1,
-          longitude: (i * 30) + 15,
-          sign: ['Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'][i]
-        })),
-        aspectos_natales_progresados: [
-          {
-            planet1: 'Sol',
-            planet2: 'Luna',
-            angle: 120,
-            type: 'Trígono',
-            orb: 2.5,
-            isProgressed: true
-          },
-          {
-            planet1: 'Venus',
-            planet2: 'Marte',
-            angle: 60,
-            type: 'Sextil',
-            orb: 1.8,
-            isProgressed: true
-          }
-        ],
-        generatedAt: new Date().toISOString(),
-        isMockData: true,
-        progressionPeriod: progressionPeriod,
-        elementDistribution: { fire: 2, earth: 1, air: 2, water: 2 },
-        modalityDistribution: { cardinal: 2, fixed: 1, mutable: 2 }
-      };
+      progressedData = generateProgressedFallback(birthData, progressionPeriod.startYear);
     }
+
+    // ✅ VERIFICAR ANTES DE GUARDAR:
+    if (!progressedData || !progressedData.planets || progressedData.planets.length === 0) {
+      console.error('❌ [PROGRESSED] Datos vacíos antes de guardar, regenerando fallback...');
+      progressedData = generateProgressedFallback(birthData, progressionPeriod.startYear);
+    }
+
+    console.log('💾 [PROGRESSED] Guardando datos:', {
+      planetsCount: progressedData.planets?.length,
+      housesCount: progressedData.houses?.length,
+      hasAscendant: !!progressedData.ascendant
+    });
 
     try {
       const existingChart = await Chart.findOne({
@@ -869,4 +897,171 @@ export async function POST(request: NextRequest) {
       stack: error instanceof Error ? error.stack : undefined
     }, { status: 500 });
   }
+}
+
+// ✅ ASEGURAR QUE EL FALLBACK TENGA DATOS COMPLETOS:
+function generateProgressedFallback(birthData: any, targetYear: number) {
+  console.log('📋 [PROGRESSED] Generando datos de fallback con estructura completa...');
+
+  const progressionPeriod = calculateProgressionPeriod(new Date(birthData.birthDate));
+
+  return {
+    planets: [
+      { name: 'Sol', sign: 'Acuario', degree: 23.5, house: 1, longitude: 323.5, retrograde: false },
+      { name: 'Luna', sign: 'Libra', degree: 8.2, house: 7, longitude: 188.2, retrograde: false },
+      { name: 'Mercurio', sign: 'Acuario', degree: 15.7, house: 1, longitude: 315.7, retrograde: false },
+      { name: 'Venus', sign: 'Capricornio', degree: 28.9, house: 12, longitude: 298.9, retrograde: false },
+      { name: 'Marte', sign: 'Géminis', degree: 12.3, house: 4, longitude: 72.3, retrograde: false },
+      { name: 'Júpiter', sign: 'Acuario', degree: 25.1, house: 1, longitude: 325.1, retrograde: false },
+      { name: 'Saturno', sign: 'Géminis', degree: 29.8, house: 5, longitude: 89.8, retrograde: true },
+      { name: 'Urano', sign: 'Libra', degree: 28.2, house: 8, longitude: 208.2, retrograde: true },
+      { name: 'Neptuno', sign: 'Sagitario', degree: 10.5, house: 10, longitude: 250.5, retrograde: false },
+      { name: 'Plutón', sign: 'Libra', degree: 7.8, house: 8, longitude: 187.8, retrograde: true }
+    ],
+    houses: Array.from({ length: 12 }, (_, i) => ({
+      number: i + 1,
+      sign: ['Acuario', 'Piscis', 'Aries', 'Tauro', 'Géminis', 'Cáncer',
+             'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario', 'Capricornio'][i],
+      degree: (i * 30) % 30,
+      longitude: i * 30
+    })),
+    aspects: [
+      { planet1: 'Sol', planet2: 'Luna', aspect: 'trígono', orb: 2.1, exact: false },
+      { planet1: 'Sol', planet2: 'Júpiter', aspect: 'conjunción', orb: 1.4, exact: true },
+      { planet1: 'Luna', planet2: 'Venus', aspect: 'sextil', orb: 3.2, exact: false }
+    ],
+    elementDistribution: { fire: 20, earth: 25, air: 35, water: 20 },
+    modalityDistribution: { cardinal: 30, fixed: 40, mutable: 30 },
+    ascendant: {
+      sign: 'Acuario',
+      degree: 15.8,
+      longitude: 315.8
+    },
+    progressionInfo: {
+      year: targetYear,
+      period: `Progresión ${targetYear}`,
+      description: 'Datos de fallback - Estructura completa garantizada',
+      isCurrentYear: true,
+      ageAtStart: new Date().getFullYear() - new Date(birthData.birthDate).getFullYear()
+    },
+    isFallback: true,
+    isMockData: true,
+    isRegenerated: false,
+    regenerationTimestamp: new Date().toISOString(),
+    progressionPeriod: progressionPeriod,
+    generatedAt: new Date().toISOString(),
+
+    // Planetas individuales para compatibilidad
+    sol_progresado: {
+      longitude: 323.5,
+      sign: 'Acuario',
+      degree: 23.5,
+      house: 1,
+      retrograde: false,
+      symbol: '☉',
+      meaning: 'Evolución de la identidad y propósito vital'
+    },
+    luna_progresada: {
+      longitude: 188.2,
+      sign: 'Libra',
+      degree: 8.2,
+      house: 7,
+      retrograde: false,
+      symbol: '☽',
+      meaning: 'Cambios emocionales y necesidades evolutivas'
+    },
+    mercurio_progresado: {
+      longitude: 315.7,
+      sign: 'Acuario',
+      degree: 15.7,
+      house: 1,
+      retrograde: false,
+      symbol: '☿',
+      meaning: 'Evolución del pensamiento y comunicación'
+    },
+    venus_progresado: {
+      longitude: 298.9,
+      sign: 'Capricornio',
+      degree: 28.9,
+      house: 12,
+      retrograde: false,
+      symbol: '♀',
+      meaning: 'Transformación de valores y relaciones'
+    },
+    marte_progresado: {
+      longitude: 72.3,
+      sign: 'Géminis',
+      degree: 12.3,
+      house: 4,
+      retrograde: false,
+      symbol: '♂',
+      meaning: 'Canalización de energía y acción'
+    },
+    jupiter_progresado: {
+      longitude: 325.1,
+      sign: 'Acuario',
+      degree: 25.1,
+      house: 1,
+      retrograde: false,
+      symbol: '♃',
+      meaning: 'Expansión de la conciencia'
+    },
+    saturno_progresado: {
+      longitude: 89.8,
+      sign: 'Géminis',
+      degree: 29.8,
+      house: 5,
+      retrograde: true,
+      symbol: '♄',
+      meaning: 'Lecciones de responsabilidad'
+    },
+    urano_progresado: {
+      longitude: 208.2,
+      sign: 'Libra',
+      degree: 28.2,
+      house: 8,
+      retrograde: true,
+      symbol: '♅',
+      meaning: 'Cambios revolucionarios'
+    },
+    neptuno_progresado: {
+      longitude: 250.5,
+      sign: 'Sagitario',
+      degree: 10.5,
+      house: 10,
+      retrograde: false,
+      symbol: '♆',
+      meaning: 'Disolución de límites'
+    },
+    pluton_progresado: {
+      longitude: 187.8,
+      sign: 'Libra',
+      degree: 7.8,
+      house: 8,
+      retrograde: true,
+      symbol: '♇',
+      meaning: 'Transformación profunda'
+    },
+
+    aspectos_natales_progresados: [
+      {
+        planet1: 'Sol',
+        planet2: 'Luna',
+        angle: 120,
+        type: 'Trígono',
+        orb: 2.5,
+        isProgressed: true
+      },
+      {
+        planet1: 'Venus',
+        planet2: 'Marte',
+        angle: 60,
+        type: 'Sextil',
+        orb: 1.8,
+        isProgressed: true
+      }
+    ],
+
+    currentAge: progressionPeriod.currentAge
+  };
 }
