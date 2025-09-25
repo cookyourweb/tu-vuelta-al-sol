@@ -1,16 +1,16 @@
+'use client';
+
 // =============================================================================
-// 🌟 PÁGINA CARTA PROGRESADA COMPLETA - MISMA FUNCIONALIDAD QUE NATAL
+// 🌟 PÁGINA CARTA PROGRESADA - UX MEJORADA Y DIFERENCIADA
 // src/app/(dashboard)/progressed-chart/page.tsx
 // =============================================================================
-
-'use client';
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import ChartDisplay from '@/components/astrology/ChartDisplay';
 import InterpretationButton from '@/components/astrology/InterpretationButton';
-import { Sparkles, Edit, TrendingUp, RefreshCw, Calendar, Clock, Star } from 'lucide-react';
+import { Sparkles, Edit, TrendingUp, RefreshCw, Calendar, Clock, Star, Zap, RotateCcw } from 'lucide-react';
 import Button from '@/components/ui/Button';
 
 // ✅ INTERFACES COMPLETAS
@@ -72,7 +72,7 @@ export default function ProgressedChartPage() {
   const [debugInfo, setDebugInfo] = useState<string>('');
   const [isRegenerating, setIsRegenerating] = useState(false);
 
-  // ✅ FUNCIÓN: Procesar datos de carta progresada - CORREGIDA
+  // ✅ FUNCIÓN: Procesar datos de carta progresada
   const processProgressedChartData = (rawData: any): ProgressedChartData => {
     console.log('🔍 Datos recibidos para procesar:', rawData);
     
@@ -198,7 +198,7 @@ export default function ProgressedChartPage() {
       if (response.ok) {
         const result = await response.json();
         
-      if (result.success && result.progressedChart) {
+        if (result.success && (result.data?.progressedChart || result.progressedChart)) {
           console.log('✅ Carta progresada cargada correctamente');
           setDebugInfo('✅ Carta progresada cargada');
           
@@ -329,19 +329,25 @@ export default function ProgressedChartPage() {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center space-y-6 max-w-md mx-auto">
-          <div className="bg-gradient-to-r from-purple-400/20 to-blue-500/20 border border-purple-400/30 rounded-full p-8 backdrop-blur-sm relative mx-auto w-fit">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 to-blue-500/10 rounded-full animate-pulse"></div>
-            <TrendingUp className="w-16 h-16 text-purple-400 animate-spin" />
+          {/* ICONO DIFERENCIADO - PROGRESIÓN CON GRADIENTE PÚRPURA */}
+          <div className="bg-gradient-to-br from-purple-500/20 via-violet-500/20 to-indigo-500/20 border-2 border-purple-400/40 rounded-full p-8 backdrop-blur-sm relative mx-auto w-fit">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-400/10 to-violet-500/10 rounded-full animate-pulse"></div>
+            <div className="relative flex items-center justify-center">
+              <TrendingUp className="w-12 h-12 text-purple-300 animate-pulse" />
+              <RotateCcw className="w-6 h-6 text-violet-400 absolute -top-1 -right-1 animate-spin" style={{ animationDuration: '3s' }} />
+            </div>
           </div>
 
           <div className="space-y-3">
-            <h2 className="text-2xl font-bold text-white">Cargando tu Carta Progresada</h2>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-300 via-violet-300 to-indigo-300 bg-clip-text text-transparent">
+              Cargando tu Carta Progresada
+            </h2>
             <p className="text-gray-300 leading-relaxed">
               Procesando tu evolución astrológica...
             </p>
 
             {debugInfo && (
-              <div className="bg-black/30 rounded-lg p-3 text-sm text-blue-300 font-mono">
+              <div className="bg-purple-900/30 border border-purple-500/30 rounded-lg p-3 text-sm text-purple-200 font-mono">
                 {debugInfo}
               </div>
             )}
@@ -353,7 +359,7 @@ export default function ProgressedChartPage() {
                 <div
                   key={i}
                   className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"
-                  style={{ animationDelay: `${i * 0.2}s` }}
+                  style={{ animationDelay: `${i * 0.3}s` }}
                 ></div>
               ))}
             </div>
@@ -368,8 +374,8 @@ export default function ProgressedChartPage() {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center space-y-6 max-w-md mx-auto">
-          <div className="bg-gradient-to-r from-red-500/20 to-pink-500/20 border border-red-400/30 rounded-full p-8 backdrop-blur-sm mx-auto w-fit">
-            <TrendingUp className="w-16 h-16 text-red-400" />
+          <div className="bg-gradient-to-r from-red-500/20 to-orange-500/20 border-2 border-red-400/40 rounded-full p-8 backdrop-blur-sm mx-auto w-fit">
+            <TrendingUp className="w-16 h-16 text-red-300" />
           </div>
 
           <div className="space-y-4">
@@ -377,7 +383,7 @@ export default function ProgressedChartPage() {
             <p className="text-gray-300">{error}</p>
 
             {debugInfo && (
-              <div className="bg-black/30 rounded-lg p-3 text-sm text-red-300 font-mono text-left">
+              <div className="bg-red-900/30 border border-red-500/30 rounded-lg p-3 text-sm text-red-200 font-mono text-left">
                 {debugInfo}
               </div>
             )}
@@ -407,7 +413,7 @@ export default function ProgressedChartPage() {
     );
   }
 
-  // ✅ PANTALLA PRINCIPAL - CARTA PROGRESADA
+  // ✅ PANTALLA PRINCIPAL - CARTA PROGRESADA (DIFERENCIADA)
   if (!chartData) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -426,18 +432,22 @@ export default function ProgressedChartPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
-      {/* Header principal */}
+      {/* Header principal DIFERENCIADO PÚRPURA */}
       <div className="text-center space-y-6">
         <div className="flex justify-center items-center mb-6">
-          <div className="bg-gradient-to-r from-purple-400/20 to-blue-500/20 border border-purple-400/30 rounded-full p-6 backdrop-blur-sm relative">
-            <div className="absolute -top-2 -right-2 w-4 h-4 bg-purple-400 rounded-full animate-pulse"></div>
-            <TrendingUp className="w-12 h-12 text-purple-400" />
+          <div className="bg-gradient-to-br from-purple-500/25 via-violet-500/25 to-indigo-500/25 border-2 border-purple-400/50 rounded-full p-6 backdrop-blur-sm relative">
+            <div className="absolute -top-2 -right-2 w-4 h-4 bg-gradient-to-r from-purple-400 to-violet-400 rounded-full animate-pulse"></div>
+            <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-gradient-to-r from-violet-400 to-indigo-400 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+            <div className="relative flex items-center justify-center">
+              <TrendingUp className="w-12 h-12 text-purple-300" />
+              <Zap className="w-5 h-5 text-violet-400 absolute -top-1 -right-1" />
+            </div>
           </div>
         </div>
 
         <h1 className="text-4xl md:text-5xl text-white font-bold">
           Carta Progresada{' '}
-          <span className="bg-gradient-to-r from-purple-400 via-blue-500 to-cyan-400 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-purple-400 via-violet-400 to-indigo-400 bg-clip-text text-transparent">
             Tu Evolución Cósmica
           </span>
         </h1>
@@ -447,33 +457,34 @@ export default function ProgressedChartPage() {
           Descubre cómo has evolucionado desde tu nacimiento y hacia dónde te diriges
         </p>
 
-        {/* Información de progresión */}
+        {/* Información de progresión MEJORADA */}
         {chartData.progressionInfo && (
-          <div className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 border border-purple-400/20 rounded-xl p-6 max-w-2xl mx-auto">
+          <div className="bg-gradient-to-br from-purple-900/40 via-violet-900/40 to-indigo-900/40 border-2 border-purple-400/30 rounded-xl p-6 max-w-2xl mx-auto backdrop-blur-sm">
             <div className="flex items-center gap-3 mb-4">
-              <Calendar className="w-5 h-5 text-purple-400" />
+              <Calendar className="w-5 h-5 text-purple-300" />
               <h3 className="text-lg font-semibold text-white">Período de Progresión Actual</h3>
+              <Star className="w-4 h-4 text-violet-300 animate-pulse" />
             </div>
             
             <div className="grid md:grid-cols-2 gap-4 text-sm">
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-gray-400">Año:</span>
+                  <span className="text-purple-200">Año:</span>
                   <span className="text-white font-medium">{chartData.progressionInfo.year}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-400">Edad:</span>
-                  <span className="text-white font-medium">{chartData.progressionInfo.ageAtStart}</span>
+                  <span className="text-purple-200">Edad:</span>
+                  <span className="text-white font-medium">{chartData.progressionInfo.ageAtStart} años</span>
                 </div>
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-gray-400">Período:</span>
-                  <span className="text-white font-medium">{chartData.progressionInfo.period}</span>
+                  <span className="text-purple-200">Período:</span>
+                  <span className="text-white font-medium text-xs">{chartData.progressionInfo.period}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-400">Estado:</span>
-                  <span className={`font-medium ${chartData.progressionInfo.isCurrentYear ? 'text-green-400' : 'text-yellow-400'}`}>
+                  <span className="text-purple-200">Estado:</span>
+                  <span className={`font-medium ${chartData.progressionInfo.isCurrentYear ? 'text-green-300' : 'text-amber-300'}`}>
                     {chartData.progressionInfo.isCurrentYear ? 'Activo' : 'Proyección'}
                   </span>
                 </div>
@@ -482,74 +493,96 @@ export default function ProgressedChartPage() {
           </div>
         )}
       </div>
-      {/* Carta y controles */}
-      <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-        <div className="flex-shrink-0 mx-auto">
-          <ChartDisplay
-            planets={chartData.planets}
-            houses={chartData.houses}
-            aspects={chartData.aspects || []}
-            keyAspects={chartData.keyAspects || []}
-            ascendant={chartData.ascendant ?? undefined}
-            midheaven={chartData.midheaven ?? undefined}
-            elementDistribution={chartData.elementDistribution}
-            modalityDistribution={chartData.modalityDistribution}
-            chartType="progressed"
-          />
-        </div>
 
-        <div className="flex-1 space-y-6">
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-              Detalles de tu Carta Progresada
-              <Sparkles className="w-6 h-6 text-yello      -400 animate-pulse" />      
-            </h2>
+      {/* LAYOUT IGUAL QUE NATAL CHART */}
+      <div className="space-y-6">
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+            <Sparkles className="w-6 h-6 text-purple-400 animate-pulse" />
+            Detalles de tu Carta Progresada
+          </h2>
 
+          <div className="bg-gradient-to-r from-purple-900/30 via-violet-900/30 to-indigo-900/30 border border-purple-500/30 rounded-lg p-4">
             <p className="text-gray-300 leading-relaxed">
-              <span className="font-medium text-white">Descripción:</span> Esta sección proporciona una visión general de los aspectos más destacados de tu carta progresada, incluyendo los tránsitos planetarios y sus influencias en tu vida.
-              <br />
-              <span className="font-medium text-white">Nota:</span> La carta progresada refleja tu evolución personal desde el momento de tu nacimiento, mostrando cómo los movimientos planetarios afectan tu desarrollo y experiencias actuales.
-
+              <span className="font-medium text-purple-200">Evolución Personal:</span> Tu carta progresada muestra cómo has evolucionado astrológicamente desde tu nacimiento. Cada planeta progresado refleja el crecimiento y los cambios en diferentes áreas de tu vida.
+              <br className="my-2" />
+              <span className="font-medium text-violet-200">Progresión Secundaria:</span> Este método calcula un día de vida por cada año transcurrido, revelando tu desarrollo interno y las lecciones que has integrado.
             </p>
           </div>
 
-          {/* Botones de acción */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <InterpretationButton
-              chartData={chartData}
-              natalChart={natalChartData}
-              className="flex-1 bg-blue-600 hover:bg-blue-700" type={'progressed'} userId={''} userProfile={{
-                name: '',
-                age: 0,
-                birthPlace: '',
-                birthDate: '',
-                birthTime: ''
-              }}            />
-
-            <Button
-              onClick={regenerateChart}
-              disabled={isRegenerating}
-              className="flex-1 bg-purple-600 hover:bg-purple-700 flex items-center justify-center gap-2"
-            >
-              {isRegenerating ? (
-                <>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Regenerando...</span> 
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="w-4 h-4" />
-                  <span>Regenerar</span>
-                </>
-              )}
-            </Button>
-          </div>
+          {chartData.isFallback && (
+            <div className="bg-amber-900/30 border border-amber-500/30 rounded-lg p-3">
+              <p className="text-amber-200 text-sm flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                Datos de demostración. Regenera para obtener tu carta progresada real.
+              </p>
+            </div>
+          )}
         </div>
-      </div>    
+
+        {/* Botones de acción IGUAL QUE NATAL */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          {/* BOTÓN DE INTERPRETACIÓN */}
+          <InterpretationButton
+            chartData={chartData}
+            natalChart={natalChartData}
+            className="flex-1 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700"
+            type="progressed"
+            userId={user?.uid || ''}
+            userProfile={{
+              name: birthData?.fullName || 'Usuario',
+              age: chartData.progressionInfo?.ageAtStart || 0,
+              birthPlace: birthData?.birthPlace || '',
+              birthDate: birthData?.birthDate || '',
+              birthTime: birthData?.birthTime || ''
+            }}
+          />
+
+          {/* BOTÓN DE REGENERAR */}
+          <Button
+            onClick={regenerateChart}
+            disabled={isRegenerating}
+            className="flex-1 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 flex items-center justify-center gap-2"
+          >
+            {isRegenerating ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                <span>Regenerando...</span>
+              </>
+            ) : (
+              <>
+                <RotateCcw className="w-4 h-4" />
+                <span>Regenerar Carta</span>
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+
+      {/* Carta progresada */}
+      {chartData && (
+        <div className="flex justify-center">
+          <ChartDisplay
+            planets={chartData.planets}
+            houses={chartData.houses}
+            elementDistribution={chartData.elementDistribution}
+            modalityDistribution={chartData.modalityDistribution}
+            keyAspects={chartData.keyAspects || []}
+            aspects={chartData.aspects || []}
+            ascendant={chartData.ascendant}
+            midheaven={chartData.midheaven}
+            birthData={birthData || undefined}
+            chartType="progressed"
+          />
+        </div>
+      )}
+
+      {/* Debug info */}
+      {debugInfo && (
+        <div className="bg-purple-900/20 border border-purple-500/20 rounded-lg p-3 max-w-2xl mx-auto">
+          <p className="text-purple-200 text-xs font-mono text-center">{debugInfo}</p>
+        </div>
+      )}
     </div>
   );
-}     
-
-
-
-        
+}
