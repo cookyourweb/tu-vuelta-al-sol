@@ -115,10 +115,18 @@ async function generateWithOpenAI(natalChart: any, solarReturnChart: any, userPr
       solarReturnChart: JSON.stringify(solarReturnChart, null, 2)
     };
 
-    // Reemplazar variables en el prompt maestro
-    let prompt = solarReturnPrompts.master;
-    Object.entries(promptData).forEach(([key, value]) => {
-      prompt = prompt.replace(new RegExp(`{${key}}`, 'g'), String(value));
+    // Generar prompt maestro usando la función
+    const prompt = solarReturnPrompts.generateMasterPrompt({
+      natalChart: JSON.parse(promptData.natalChart),
+      solarReturnChart: JSON.parse(promptData.solarReturnChart),
+      userProfile: {
+        name: promptData.userName,
+        age: promptData.userAge,
+        birthPlace: promptData.birthPlace,
+        birthDate: promptData.birthDate,
+        birthTime: promptData.birthTime
+      },
+      returnYear: promptData.solarReturnYear
     });
 
     const completion = await openai.chat.completions.create({
@@ -158,21 +166,18 @@ async function generateWithOpenAI(natalChart: any, solarReturnChart: any, userPr
 function generateFallback(natalChart: any, solarReturnChart: any, userProfile: any): any {
   console.log('🔄 Generando fallback básico para Solar Return');
 
-  const fallback = { ...solarReturnPrompts.fallback };
-
-  // Personalizar con datos disponibles
-  const natalSun = natalChart?.planets?.find((p: any) => p.name === 'Sol' || p.name === 'Sun');
-  const solarAsc = solarReturnChart?.ascendant;
-
-  if (natalSun) {
-    fallback.esencia_revolucionaria = fallback.esencia_revolucionaria
-      .replace('{natalSunSign}', natalSun.sign || 'desconocido');
-  }
-
-  if (solarAsc) {
-    fallback.plan_accion.hoy_mismo[2] = fallback.plan_accion.hoy_mismo[2]
-      .replace('{solarAscendantSign}', solarAsc.sign || 'desconocido');
-  }
+  const fallback = solarReturnPrompts.generateFallback({
+    natalChart,
+    solarReturnChart,
+    userProfile: {
+      name: userProfile.name || 'Usuario',
+      age: userProfile.age || 0,
+      birthPlace: userProfile.birthPlace || '',
+      birthDate: userProfile.birthDate || '',
+      birthTime: userProfile.birthTime || ''
+    },
+    returnYear: solarReturnChart?.solarReturnInfo?.year || new Date().getFullYear()
+  });
 
   return fallback;
 }

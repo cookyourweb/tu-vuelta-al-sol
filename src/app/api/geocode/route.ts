@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const query = searchParams.get('q');
-  
+
   if (!query) {
     return NextResponse.json(
       { error: 'Se requiere parámetro q' },
@@ -12,29 +12,26 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // ✅ AGREGAR USER-AGENT OBLIGATORIO PARA NOMINATIM
+    console.log(`🔍 Buscando ubicación: ${query}`);
+
+    // ✅ LLAMADA DIRECTA A NOMINATIM CON USER-AGENT ADECUADO
     const response = await fetch(
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`,
       {
         headers: {
-          'User-Agent': 'TuVueltaAlSol/1.0 (contacto@tuvueltaalsol.com)', // ✅ CRÍTICO
-          'Accept-Language': 'es-ES,es;q=0.9'
+          'User-Agent': 'TuVueltaAlSol/1.0 (contacto@tuvueltaalsol.com)',
+          'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8'
         }
       }
     );
 
     if (!response.ok) {
       console.error(`❌ Nominatim respondió con status ${response.status}`);
-
-      // Si es 403, dar más información
-      if (response.status === 403) {
-        throw new Error('Servicio de geocodificación temporalmente no disponible. Por favor, intenta con coordenadas.');
-      }
-
       throw new Error(`Error HTTP ${response.status}`);
     }
 
     const data = await response.json();
+    console.log(`✅ Encontradas ${data.length} ubicaciones`);
 
     return NextResponse.json(data, {
       headers: {
@@ -44,7 +41,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('❌ Error en proxy de geocodificación:', error);
+    console.error('❌ Error en geocodificación:', error);
     return NextResponse.json(
       {
         error: 'Error al buscar ubicaciones',
