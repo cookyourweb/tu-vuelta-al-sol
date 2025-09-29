@@ -1,3 +1,4 @@
+
 // =============================================================================
 // 🔧 CORRECCIÓN CRÍTICA 1: BirthData model - Campos consistentes
 // src/models/BirthData.ts
@@ -16,6 +17,13 @@ export interface IBirthData extends Document {
   latitude: number;
   longitude: number;
   timezone: string;
+
+  // ✅ CAMPOS PARA UBICACIÓN ACTUAL (Solar Return)
+  livesInSamePlace?: boolean;
+  currentPlace?: string;
+  currentLatitude?: number;
+  currentLongitude?: number;
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -61,6 +69,24 @@ const BirthDataSchema = new Schema<IBirthData>({
   timezone: {
     type: String,
     default: "Europe/Madrid"
+  },
+
+  // ✅ CAMPOS PARA UBICACIÓN ACTUAL (Solar Return)
+  livesInSamePlace: {
+    type: Boolean,
+    default: true
+  },
+  currentPlace: {
+    type: String,
+    required: false
+  },
+  currentLatitude: {
+    type: Number,
+    required: false
+  },
+  currentLongitude: {
+    type: Number,
+    required: false
   }
 }, {
   timestamps: true, // Agrega createdAt y updatedAt automáticamente
@@ -100,6 +126,26 @@ BirthDataSchema.statics.findAllByUserId = function(userId: string) {
   });
 };
 
+// AGREGAR ESTA FUNCIÓN AL FINAL DEL SCHEMA
+BirthDataSchema.methods.getSolarReturnCoordinates = function() {
+  return {
+    birth: {
+      latitude: this.latitude,
+      longitude: this.longitude,
+      place: this.birthPlace
+    },
+    current: this.livesInSamePlace ? {
+      latitude: this.latitude,
+      longitude: this.longitude,
+      place: this.birthPlace
+    } : {
+      latitude: this.currentLatitude || this.latitude,
+      longitude: this.currentLongitude || this.longitude,
+      place: this.currentPlace || this.birthPlace
+    }
+  };
+};
+
 const BirthData = models.BirthData || model<IBirthData>('BirthData', BirthDataSchema);
 
 // ✅ FUNCIÓN DE CASTING robusta
@@ -115,13 +161,20 @@ export function castBirthData(data: any): IBirthData | null {
       _id: data._id || new Types.ObjectId(),
       userId: data.userId || data.uid,
       uid: data.uid || data.userId,
-      birthDate: data.birthDate instanceof Date 
-        ? data.birthDate 
+      birthDate: data.birthDate instanceof Date
+        ? data.birthDate
         : new Date(data.birthDate),
       latitude: Number(data.latitude),
       longitude: Number(data.longitude),
       birthTime: data.birthTime || "12:00",
       timezone: data.timezone || "Europe/Madrid",
+
+      // ✅ CAMPOS DE UBICACIÓN ACTUAL
+      livesInSamePlace: data.livesInSamePlace !== undefined ? Boolean(data.livesInSamePlace) : true,
+      currentPlace: data.currentPlace || undefined,
+      currentLatitude: data.currentLatitude ? Number(data.currentLatitude) : undefined,
+      currentLongitude: data.currentLongitude ? Number(data.currentLongitude) : undefined,
+
       createdAt: data.createdAt || new Date(),
       updatedAt: data.updatedAt || new Date()
     };
@@ -152,6 +205,7 @@ export default BirthData;
 // ✅ TIPOS ADICIONALES para TypeScript
 export interface BirthDataInput {
   userId: string;
+  uid?: string;
   fullName: string;
   birthDate: string | Date;
   birthTime: string;
@@ -159,6 +213,12 @@ export interface BirthDataInput {
   latitude: number;
   longitude: number;
   timezone?: string;
+
+  // ✅ CAMPOS PARA UBICACIÓN ACTUAL
+  livesInSamePlace?: boolean;
+  currentPlace?: string;
+  currentLatitude?: number;
+  currentLongitude?: number;
 }
 
 export interface BirthDataQuery {

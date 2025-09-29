@@ -61,7 +61,7 @@ const ChartSchema = new Schema<IChart>({
   },
   chartType: {
     type: String,
-    enum: ['natal', 'progressed', 'transit', 'composite'],
+    enum: ['natal', 'progressed', 'transit', 'composite', 'solar_return'],
     default: 'natal'
   },
   

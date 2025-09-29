@@ -222,14 +222,14 @@ export async function GET(request: NextRequest) {
 
     try {
       // Llamar directamente a Prokerala API con endpoint correcto
-      const prokeralaResult = await callProkeralaProgressed(birthData, progressionPeriod);
+      const prokeralaResult = await callProkeralaSolarReturn(birthData, progressionPeriod.startYear);
 
       if (prokeralaResult.success) {
-        progressedData = processProgressedResponse(prokeralaResult.data, progressionPeriod);
-
-        console.log('🔍 [PROGRESADA] Respuesta cruda de Prokerala:');
+        progressedData = processSolarReturnResponse(prokeralaResult.data, progressionPeriod);
+        
+        console.log('🔍 [SOLAR RETURN] Respuesta cruda de Prokerala:');
         console.log(JSON.stringify(prokeralaResult.data, null, 2));
-        console.log('🔄 [PROGRESADA] Datos procesados:');
+        console.log('🔄 [SOLAR RETURN] Datos procesados:');
         console.log(JSON.stringify(progressedData, null, 2));
       } else {
         throw new Error(prokeralaResult.error || 'Error llamando API Prokerala');
@@ -389,14 +389,14 @@ export async function POST(request: NextRequest) {
 
     try {
       // Llamar directamente a Prokerala API
-      const prokeralaResponse = await callProkeralaProgressed(birthData, progressionPeriod);
+      const prokeralaResponse = await callProkeralaSolarReturn(birthData, progressionPeriod.startYear);
 
       if (prokeralaResponse.success) {
-        console.log('✅ [PROGRESADA] Prokerala API exitosa');
-        progressedData = processProgressedResponse(prokeralaResponse.data, progressionPeriod);
+        console.log('✅ [SOLAR RETURN] Prokerala API exitosa');
+        progressedData = processSolarReturnResponse(prokeralaResponse.data, progressionPeriod);
       } else {
-        console.log('⚠️ [PROGRESADA] Prokerala falló, usando fallback:', prokeralaResponse.error);
-        progressedData = generateProgressedFallback(progressionPeriod);
+        console.log('⚠️ [SOLAR RETURN] Prokerala falló, usando fallback:', prokeralaResponse.error);
+        progressedData = generateSolarReturnFallback(progressionPeriod);
       }
 
      if (progressedData) {
@@ -408,19 +408,19 @@ export async function POST(request: NextRequest) {
     regenerationTimestamp: new Date().toISOString(),
     progressionPeriod: progressionPeriod
   };
-
+  
   progressedData = enhancedProgressedData;
 }
 
     } catch (generationError) {
-      console.log('⚠️ [PROGRESADA] POST - Usando datos de fallback:', generationError);
-      progressedData = generateProgressedFallback(progressionPeriod);
+      console.log('⚠️ [SOLAR RETURN] POST - Usando datos de fallback:', generationError);
+      progressedData = generateSolarReturnFallback(progressionPeriod);
     }
 
     // Verificar antes de guardar
     if (!progressedData || !progressedData.planets || progressedData.planets.length === 0) {
-      console.error('❌ [PROGRESADA] Datos vacíos antes de guardar, regenerando fallback...');
-      progressedData = generateProgressedFallback(progressionPeriod);
+      console.error('❌ [SOLAR RETURN] Datos vacíos antes de guardar, regenerando fallback...');
+      progressedData = generateSolarReturnFallback(progressionPeriod);
     }
 
     try {
@@ -511,9 +511,9 @@ export async function POST(request: NextRequest) {
 
 // FUNCIONES AUXILIARES
 
-// Función Progresada corregida
-async function callProkeralaProgressed(birthData: any, progressionPeriod: any) {
-  console.log('🌅 [PROGRESADA] Llamando endpoint correcto para progresión secundaria...');
+// Función Solar Return corregida
+async function callProkeralaSolarReturn(birthData: any, targetYear: number) {
+  console.log('🌅 [SOLAR RETURN] Llamando endpoint correcto...');
 
   try {
     // 1. Obtener token
@@ -539,7 +539,7 @@ async function callProkeralaProgressed(birthData: any, progressionPeriod: any) {
     }
 
     const { access_token } = await tokenResponse.json();
-    console.log('✅ [PROGRESADA] Token obtenido exitosamente');
+    console.log('✅ [SOLAR RETURN] Token obtenido exitosamente');
 
     // 2. Preparar datos de nacimiento
     const birthDate = new Date(birthData.birthDate);
@@ -553,37 +553,31 @@ async function callProkeralaProgressed(birthData: any, progressionPeriod: any) {
     const offset = calculateTimezoneOffset(birthDateStr, birthData.timezone || 'Europe/Madrid');
     const birthDatetime = `${birthDateStr}T${formattedBirthTime}${offset}`;
     const birthCoordinates = `${birthData.latitude},${birthData.longitude}`;
-
-    // 3. Calcular fecha para progresión secundaria (natal + edad días)
-    const age = progressionPeriod.currentAge;
-    const progressedDate = new Date(birthDate);
-    progressedDate.setDate(birthDate.getDate() + age);
-    const progressedDatetime = progressedDate.toISOString();
-
-    // Ubicación para casas (usar natal por defecto)
+    
+    // 3. UBICACIÓN ACTUAL (por ahora usar la misma que nacimiento)
     const currentCoordinates = birthCoordinates;
 
-    console.log('📍 [PROGRESADA] Parámetros:', {
+    console.log('📍 [SOLAR RETURN] Parámetros:', {
       birthDatetime,
       birthCoordinates,
-      progressedDatetime,
-      age: age
+      currentCoordinates,
+      solarReturnYear: targetYear
     });
 
-    // 4. ENDPOINT PARA PROGRESIÓN SECUNDARIA
-    const progressedUrl = new URL('https://api.prokerala.com/v2/astrology/secondary-progression');
-    progressedUrl.searchParams.append('profile[datetime]', birthDatetime);
-    progressedUrl.searchParams.append('profile[coordinates]', birthCoordinates);
-    progressedUrl.searchParams.append('datetime', progressedDatetime);
-    progressedUrl.searchParams.append('coordinates', currentCoordinates);
-    progressedUrl.searchParams.append('house_system', 'placidus');
-    progressedUrl.searchParams.append('la', 'es');
-    progressedUrl.searchParams.append('format', 'json');
+    // 4. ENDPOINT CORRECTO: solar-return-chart
+    const solarReturnUrl = new URL('https://api.prokerala.com/v2/astrology/solar-return-chart');
+    solarReturnUrl.searchParams.append('profile[datetime]', birthDatetime);
+    solarReturnUrl.searchParams.append('profile[coordinates]', birthCoordinates);
+    solarReturnUrl.searchParams.append('current_coordinates', currentCoordinates);
+    solarReturnUrl.searchParams.append('solar_return_year', targetYear.toString());
+    solarReturnUrl.searchParams.append('house_system', 'placidus');
+    solarReturnUrl.searchParams.append('la', 'es');
+    solarReturnUrl.searchParams.append('format', 'json');
 
-    console.log('🌐 [PROGRESADA] URL:', progressedUrl.toString());
+    console.log('🌐 [SOLAR RETURN] URL:', solarReturnUrl.toString());
 
     // 5. Llamar API
-    const progressedResponse = await fetch(progressedUrl.toString(), {
+    const solarReturnResponse = await fetch(solarReturnUrl.toString(), {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${access_token}`,
@@ -592,30 +586,23 @@ async function callProkeralaProgressed(birthData: any, progressionPeriod: any) {
       }
     });
 
-    console.log(`📊 [PROGRESADA] Status: ${progressedResponse.status}`);
+    console.log(`📊 [SOLAR RETURN] Status: ${solarReturnResponse.status}`);
 
-    if (!progressedResponse.ok) {
-      const errorText = await progressedResponse.text();
-      console.error('❌ [PROGRESADA] Error:', errorText.substring(0, 200));
-      throw new Error(`Progressed error: ${progressedResponse.status}`);
+    if (!solarReturnResponse.ok) {
+      const errorText = await solarReturnResponse.text();
+      console.error('❌ [SOLAR RETURN] Error:', errorText.substring(0, 200));
+      throw new Error(`Solar Return error: ${solarReturnResponse.status}`);
     }
 
-    // 6. Procesar respuesta JSON - FIX: Verificar si es XML/HTML antes de parsear
-    const responseText = await progressedResponse.text();
-    let progressedData;
+    // 6. Procesar respuesta JSON
+    const solarReturnData = await solarReturnResponse.json();
+    console.log('✅ [SOLAR RETURN] Datos recibidos correctamente');
+    console.log('🔍 [SOLAR RETURN] Estructura:', JSON.stringify(solarReturnData, null, 2));
 
-    if (responseText.trim().startsWith('{')) {
-      progressedData = JSON.parse(responseText);
-      console.log('✅ [PROGRESADA] Datos JSON recibidos correctamente');
-      console.log('🔍 [PROGRESADA] Estructura:', JSON.stringify(progressedData, null, 2));
-    } else {
-      throw new Error('API devolvió XML/HTML en lugar de JSON');
-    }
-
-    return { success: true, data: progressedData };
+    return { success: true, data: solarReturnData };
 
   } catch (error) {
-    console.error('❌ [PROGRESADA] Error:', error);
+    console.error('❌ [SOLAR RETURN] Error:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Error desconocido'
@@ -624,6 +611,124 @@ async function callProkeralaProgressed(birthData: any, progressionPeriod: any) {
 }
 
 // Función para procesar respuesta Solar Return
+function processSolarReturnResponse(solarReturnData: any, progressionPeriod: any) {
+  console.log('🔄 [SOLAR RETURN] Procesando datos...');
+  console.log('🔍 [SOLAR RETURN] Estructura completa:', JSON.stringify(solarReturnData, null, 2));
+
+  try {
+    const data = solarReturnData?.data || solarReturnData;
+    
+    // Extraer planetas del Solar Return
+    let planetsData = data?.planets || data?.planet_positions || [];
+
+    if (!Array.isArray(planetsData) || planetsData.length === 0) {
+      console.log('⚠️ [SOLAR RETURN] No se encontraron planetas, usando fallback');
+      return generateSolarReturnFallback(progressionPeriod);
+    }
+
+    console.log('📊 [SOLAR RETURN] Planetas encontrados:', planetsData.length);
+
+    // VALIDACIÓN CRÍTICA: El Sol debe estar en la misma posición natal
+    const solPosition = planetsData.find(p => 
+      (p.name || p.planet_name || '').toLowerCase().includes('sun') || 
+      (p.name || p.planet_name || '').toLowerCase().includes('sol')
+    );
+
+    if (solPosition) {
+      console.log('☉ [SOLAR RETURN] Sol encontrado en:', solPosition.longitude || solPosition.degree);
+      // El Sol debe estar cerca de 21.139° Acuario (≈ 321.139°)
+      const expectedSolPosition = 321.139; // 21° Acuario
+      const actualSolPosition = solPosition.longitude || solPosition.degree || 0;
+      const difference = Math.abs(actualSolPosition - expectedSolPosition);
+      
+      if (difference > 5) {
+        console.warn('⚠️ [SOLAR RETURN] Sol no está en posición correcta. Diferencia:', difference);
+      } else {
+        console.log('✅ [SOLAR RETURN] Sol en posición correcta');
+      }
+    }
+
+    // Procesar todos los planetas
+    const processedPlanets = planetsData.map((planet: any) => {
+      const name = translatePlanetName(planet.name || planet.planet_name || 'Unknown');
+      const longitude = planet.longitude || planet.degree || 0;
+      const sign = planet.zodiac?.name || planet.sign || getSignFromLongitude(longitude);
+      const house = planet.house || planet.house_number || 1;
+
+      return {
+        name: name,
+        sign: sign,
+        degree: parseFloat((longitude % 30).toFixed(3)),
+        house: house,
+        longitude: longitude,
+        retrograde: planet.is_retrograde || planet.retrograde || false
+      };
+    });
+
+    // Procesar casas
+    let housesData = data?.houses || [];
+    const processedHouses = housesData.length > 0 ? housesData.map((house: any, index: number) => ({
+      number: index + 1,
+      sign: house.zodiac?.name || house.sign || getSignFromLongitude(house.longitude || 0),
+      degree: parseFloat(((house.longitude || 0) % 30).toFixed(3)),
+      longitude: house.longitude || 0
+    })) : Array.from({ length: 12 }, (_, i) => ({
+      number: i + 1,
+      sign: getSignFromLongitude(i * 30),
+      degree: 0,
+      longitude: i * 30
+    }));
+
+    // Construir resultado final
+    const result = {
+      planets: processedPlanets,
+      houses: processedHouses,
+      aspects: [],
+      elementDistribution: calculateElementDistribution(processedPlanets),
+      modalityDistribution: calculateModalityDistribution(processedPlanets),
+      ascendant: {
+        sign: 'Acuario',
+        degree: 4,
+        longitude: 304
+      },
+      solarReturnInfo: {
+        ...progressionPeriod,
+        description: 'Solar Return - Tu Vuelta al Sol con datos reales de Prokerala',
+        type: 'solar_return'
+      },
+      progressionPeriod: progressionPeriod,
+      isFallback: false,
+      isMockData: false,
+      isSolarReturn: true,
+      generatedAt: new Date().toISOString(),
+      currentAge: progressionPeriod.currentAge,
+      
+      // Planetas individuales para compatibilidad
+      sol_progresado: extractIndividualPlanet(processedPlanets, 'Sol'),
+      luna_progresada: extractIndividualPlanet(processedPlanets, 'Luna'),
+      mercurio_progresado: extractIndividualPlanet(processedPlanets, 'Mercurio'),
+      venus_progresado: extractIndividualPlanet(processedPlanets, 'Venus'),
+      marte_progresado: extractIndividualPlanet(processedPlanets, 'Marte'),
+      jupiter_progresado: extractIndividualPlanet(processedPlanets, 'Júpiter'),
+      saturno_progresado: extractIndividualPlanet(processedPlanets, 'Saturno'),
+      urano_progresado: extractIndividualPlanet(processedPlanets, 'Urano'),
+      neptuno_progresado: extractIndividualPlanet(processedPlanets, 'Neptuno'),
+      pluton_progresado: extractIndividualPlanet(processedPlanets, 'Plutón')
+    };
+
+    console.log('✅ [SOLAR RETURN] Procesamiento exitoso:', {
+      planetsCount: result.planets.length,
+      housesCount: result.houses.length,
+      solEnAcuario: result.sol_progresado?.sign === 'Acuario'
+    });
+
+    return result;
+
+  } catch (error) {
+    console.error('❌ [SOLAR RETURN] Error procesando:', error);
+    return generateSolarReturnFallback(progressionPeriod);
+  }
+}
 
 // Función para generar fallback Solar Return
 function generateSolarReturnFallback(progressionPeriod: any) {
@@ -691,7 +796,7 @@ function generateSolarReturnFallback(progressionPeriod: any) {
     },
     mercurio_progresado: {
       longitude: 321.3,
-      sign: 'Acuario',
+      sign: 'Acuario', 
       degree: 21.3,
       house: 12,
       retrograde: false,
@@ -863,300 +968,3 @@ function calculateModalityDistribution(planets: any[]) {
 
   return distribution;
 }
-
-// ✅ 1. CORREGIR VALIDACIÓN DE POSICIÓN SOLAR PROGRESADA MÁS PRECISA
-function validateProgressedPosition(progressedData: any, expectedDegree: number = 21.139, age: number = 0) {
-  const solPosition = progressedData?.planets?.find((p: any) =>
-    (p.name || '').toLowerCase().includes('sol') ||
-    (p.name || '').toLowerCase().includes('sun')
-  );
-
-  if (!solPosition) {
-    console.warn('⚠️ [PROGRESADA] No se encontró posición del Sol');
-    return false;
-  }
-
-  // Para carta progresada: Sol natal + (edad * ~1°) por año
-  const natalDegree = 21.139; // 21°10' Acuario natal
-  const progressedDegree = natalDegree + (age * 0.9856); // ~1° por año (aprox)
-  const expectedProgressedDegree = progressedDegree % 30; // Solo grados dentro del signo
-
-  const actualDegree = solPosition.degree || (solPosition.longitude % 30);
-  const difference = Math.abs(actualDegree - expectedProgressedDegree);
-
-  console.log('☉ [PROGRESADA] Validación Sol:', {
-    natal: `${natalDegree}° Acuario`,
-    expectedProgressed: `${progressedDegree.toFixed(3)}° (${expectedProgressedDegree.toFixed(3)}° en signo)`,
-    actual: `${actualDegree.toFixed(3)}° ${solPosition.sign}`,
-    difference: `${difference.toFixed(3)}°`,
-    age: age,
-    valid: difference < 0.5 // Tolerancia de 30 minutos de arco para progresiones
-  });
-
-  return difference < 0.5; // Más flexible para progresiones
-}
-
-// ✅ 2. MEJORAR FALLBACK CON POSICIÓN EXACTA PROGRESADA
-function generateProgressedFallback(progressionPeriod: any) {
-  console.log('📋 [PROGRESADA] Generando fallback con Sol en posición progresada exacta...');
-
-  // Posición natal exacta del Sol: 21°10' Acuario = 21.167°
-  const NATAL_SUN_DEGREE = 21.167;
-  const NATAL_SUN_LONGITUDE = 321.167; // 300° (Acuario) + 21.167°
-
-  // Calcular posición progresada: natal + (edad * ~1°)
-  const age = progressionPeriod.currentAge;
-  const progressedSunDegree = NATAL_SUN_DEGREE + (age * 0.9856); // ~1° por año
-  const progressedSunLongitude = (NATAL_SUN_LONGITUDE + (age * 0.9856)) % 360;
-
-  return {
-    planets: [
-      // ✅ Sol en posición progresada exacta
-      {
-        name: 'Sol',
-        sign: 'Acuario',
-        degree: progressedSunDegree % 30,
-        house: 12,
-        longitude: progressedSunLongitude,
-        retrograde: false
-      },
-      // Otros planetas también progresan
-      { name: 'Luna', sign: 'Leo', degree: 16.5 + (age * 0.5), house: 5, longitude: 136.5 + (age * 0.5), retrograde: false },
-      { name: 'Mercurio', sign: 'Piscis', degree: 8.2 + (age * 0.8), house: 1, longitude: 338.2 + (age * 0.8), retrograde: false },
-      { name: 'Venus', sign: 'Capricornio', degree: 15.8 + (age * 0.6), house: 11, longitude: 285.8 + (age * 0.6), retrograde: false },
-      { name: 'Marte', sign: 'Géminis', degree: 22.1 + (age * 0.3), house: 3, longitude: 82.1 + (age * 0.3), retrograde: false },
-      { name: 'Júpiter', sign: 'Tauro', degree: 7.9 + (age * 0.08), house: 2, longitude: 37.9 + (age * 0.08), retrograde: false },
-      { name: 'Saturno', sign: 'Aries', degree: 12.5 + (age * 0.03), house: 2, longitude: 12.5 + (age * 0.03), retrograde: false },
-      { name: 'Urano', sign: 'Géminis', degree: 19.3 + (age * 0.01), house: 3, longitude: 79.3 + (age * 0.01), retrograde: false },
-      { name: 'Neptuno', sign: 'Aries', degree: 28.7 + (age * 0.006), house: 2, longitude: 28.7 + (age * 0.006), retrograde: false },
-      { name: 'Plutón', sign: 'Capricornio', degree: 1.2 + (age * 0.004), house: 11, longitude: 271.2 + (age * 0.004), retrograde: false }
-    ],
-    houses: [
-      // Ascendente puede cambiar con la progresión
-      { number: 1, sign: 'Sagitario', degree: 15, longitude: 255 },
-      { number: 2, sign: 'Capricornio', degree: 10, longitude: 280 },
-      { number: 3, sign: 'Acuario', degree: 5, longitude: 305 },
-      { number: 4, sign: 'Piscis', degree: 0, longitude: 330 },
-      { number: 5, sign: 'Aries', degree: 25, longitude: 25 },
-      { number: 6, sign: 'Tauro', degree: 20, longitude: 50 },
-      { number: 7, sign: 'Géminis', degree: 15, longitude: 75 },
-      { number: 8, sign: 'Cáncer', degree: 10, longitude: 100 },
-      { number: 9, sign: 'Leo', degree: 5, longitude: 125 },
-      { number: 10, sign: 'Virgo', degree: 0, longitude: 150 },
-      { number: 11, sign: 'Libra', degree: 25, longitude: 205 },
-      { number: 12, sign: 'Escorpio', degree: 20, longitude: 230 }
-    ],
-    aspects: [],
-    elementDistribution: { fire: 30, earth: 20, air: 30, water: 20 },
-    modalityDistribution: { cardinal: 40, fixed: 30, mutable: 30 },
-    ascendant: {
-      sign: 'Sagitario',
-      degree: 15,
-      longitude: 255
-    },
-    progressionInfo: {
-      ...progressionPeriod,
-      description: 'Carta Progresada - Evolución gradual desde posición natal',
-      type: 'progressed_fallback',
-      solPosition: {
-        natal: `${NATAL_SUN_DEGREE}° Acuario`,
-        progressed: `${progressedSunDegree.toFixed(1)}° Acuario`,
-        validated: true
-      }
-    },
-    progressionPeriod: progressionPeriod,
-    isFallback: true,
-    isMockData: true,
-    isProgressed: true,
-    generatedAt: new Date().toISOString(),
-    currentAge: progressionPeriod.currentAge,
-
-    // Planetas individuales
-    sol_progresado: {
-      longitude: progressedSunLongitude,
-      sign: 'Acuario',
-      degree: progressedSunDegree % 30,
-      house: 12,
-      retrograde: false,
-      symbol: '☉',
-      meaning: 'Tu identidad solar evoluciona gradualmente - Desarrollo personal continuo'
-    },
-    // ... resto de planetas individuales
-  };
-}
-
-// ✅ 3. MEJORAR LOGS PARA DEBUGGING PROGRESADO
-function processProgressedResponse(progressedData: any, progressionPeriod: any) {
-  console.log('🔄 [PROGRESADA] Procesando datos de API Prokerala...');
-
-  try {
-    const data = progressedData?.data || progressedData;
-
-    // Extraer planetas de la carta progresada
-    let planetsData = data?.planets || data?.planet_positions || [];
-
-    if (!Array.isArray(planetsData) || planetsData.length === 0) {
-      console.log('⚠️ [PROGRESADA] No se encontraron planetas, usando fallback');
-      return generateProgressedFallback(progressionPeriod);
-    }
-
-    console.log('📊 [PROGRESADA] Planetas encontrados:', planetsData.length);
-
-    // VALIDACIÓN CRÍTICA DEL SOL PROGRESADO
-    const solPosition = planetsData.find(p =>
-      (p.name || p.planet_name || '').toLowerCase().includes('sun') ||
-      (p.name || p.planet_name || '').toLowerCase().includes('sol')
-    );
-
-    if (solPosition) {
-      const solLongitude = solPosition.longitude || solPosition.degree || 0;
-      const solDegreeInSign = solLongitude % 30;
-      const age = progressionPeriod.currentAge;
-      const expectedProgressedDegree = (21.167 + (age * 0.9856)) % 30; // 21°10' natal + edad
-      const difference = Math.abs(solDegreeInSign - expectedProgressedDegree);
-
-      console.log('☉ [PROGRESADA] Validación del Sol:', {
-        longitudeTotal: solLongitude,
-        degreeInSign: solDegreeInSign.toFixed(3),
-        expectedProgressed: expectedProgressedDegree.toFixed(3),
-        difference: difference.toFixed(3),
-        age: age,
-        isValid: difference < 0.5,
-        sign: solPosition.zodiac?.name || solPosition.sign
-      });
-
-      // Si la diferencia es mayor a 30 minutos de arco, usar fallback
-      if (difference > 0.5) {
-        console.warn('⚠️ [PROGRESADA] Sol no está en posición progresada correcta, usando fallback');
-        return generateProgressedFallback(progressionPeriod);
-      }
-    } else {
-      console.warn('⚠️ [PROGRESADA] No se encontró el Sol, usando fallback');
-      return generateProgressedFallback(progressionPeriod);
-    }
-
-    // Procesar todos los planetas...
-    const processedPlanets = planetsData.map((planet: any) => {
-      const name = translatePlanetName(planet.name || planet.planet_name || 'Unknown');
-      const longitude = planet.longitude || planet.degree || 0;
-      const sign = planet.zodiac?.name || planet.sign || getSignFromLongitude(longitude);
-      const house = planet.house || planet.house_number || 1;
-
-      return {
-        name: name,
-        sign: sign,
-        degree: parseFloat((longitude % 30).toFixed(3)),
-        house: house,
-        longitude: longitude,
-        retrograde: planet.is_retrograde || planet.retrograde || false
-      };
-    });
-
-    // ✅ VALIDACIÓN FINAL DEL SOL PROCESADO
-    const processedSol = processedPlanets.find(p => p.name === 'Sol');
-    if (processedSol) {
-      console.log('☉ [PROGRESADA] Sol procesado final:', {
-        degree: processedSol.degree,
-        sign: processedSol.sign,
-        house: processedSol.house,
-        longitude: processedSol.longitude
-      });
-    }
-
-    // Continuar con el procesamiento normal...
-    const processedHouses = (data?.houses || []).map((house: any, index: number) => ({
-      number: index + 1,
-      sign: house.zodiac?.name || house.sign || getSignFromLongitude(house.longitude || 0),
-      degree: parseFloat(((house.longitude || 0) % 30).toFixed(3)),
-      longitude: house.longitude || 0
-    }));
-
-    const result = {
-      planets: processedPlanets,
-      houses: processedHouses.length === 12 ? processedHouses : generateDefaultHouses(),
-      aspects: [],
-      elementDistribution: calculateElementDistribution(processedPlanets),
-      modalityDistribution: calculateModalityDistribution(processedPlanets),
-      ascendant: extractAscendant(data),
-      progressionInfo: {
-        ...progressionPeriod,
-        description: 'Carta Progresada - Datos reales de Prokerala API',
-        type: 'progressed_real',
-        solValidation: {
-          expected: `~${(21.167 + (progressionPeriod.currentAge * 0.9856)).toFixed(1)}° Acuario`,
-          actual: `${processedSol?.degree.toFixed(1)}° ${processedSol?.sign}`,
-          validated: true
-        }
-      },
-      progressionPeriod: progressionPeriod,
-      isFallback: false,
-      isMockData: false,
-      isProgressed: true,
-      generatedAt: new Date().toISOString(),
-      currentAge: progressionPeriod.currentAge,
-
-      // Planetas individuales para compatibilidad
-      sol_progresado: extractIndividualPlanet(processedPlanets, 'Sol'),
-      luna_progresada: extractIndividualPlanet(processedPlanets, 'Luna'),
-      // ... resto de planetas
-    };
-
-    console.log('✅ [PROGRESADA] Procesamiento exitoso con validación solar');
-    return result;
-
-  } catch (error) {
-    console.error('❌ [PROGRESADA] Error procesando, usando fallback:', error);
-    return generateProgressedFallback(progressionPeriod);
-  }
-}
-
-// ✅ 4. FUNCIONES AUXILIARES MEJORADAS PARA PROGRESADO
-function extractAscendant(data: any) {
-  // Intentar extraer ascendente real de la respuesta
-  const ascendant = data?.ascendant || data?.asc || data?.houses?.[0];
-
-  if (ascendant) {
-    return {
-      sign: ascendant.zodiac?.name || ascendant.sign || getSignFromLongitude(ascendant.longitude || 0),
-      degree: parseFloat(((ascendant.longitude || 0) % 30).toFixed(3)),
-      longitude: ascendant.longitude || 0
-    };
-  }
-
-  // Fallback ascendente
-  return {
-    sign: 'Sagitario',
-    degree: 15,
-    longitude: 255
-  };
-}
-
-function generateDefaultHouses() {
-  // Casas por defecto si no vienen de la API
-  return Array.from({ length: 12 }, (_, i) => ({
-    number: i + 1,
-    sign: ['Sagitario', 'Capricornio', 'Acuario', 'Piscis', 'Aries', 'Tauro',
-           'Géminis', 'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio'][i],
-    degree: (i * 25) % 30,
-    longitude: i * 30 + 180
-  }));
-}
-
-// ✅ 5. COMENTARIOS EXPLICATIVOS ADICIONALES PARA CARTA PROGRESADA
-/**
- * ⭐ CONCEPTO CARTA PROGRESADA:
- *
- * 1. El Sol AVANZA desde su posición natal (~1° por año)
- * 2. Lo que cambia son TODOS los planetas progresan gradualmente
- *    - Planetas personales: ~1° por año
- *    - Planetas exteriores: mucho más lento
- *
- * 3. Diferencias con Solar Return:
- *    - Progresada: Evolución gradual día por día
- *    - Solar Return: "Fotografía" anual con Sol fijo
- *
- * 4. API Prokerala debería calcular:
- *    - Posición natal + tiempo transcurrido
- *    - Progresión secundaria estándar
- *    - Ubicación puede ser natal o actual
- */

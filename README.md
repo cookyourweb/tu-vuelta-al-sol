@@ -1,914 +1,1413 @@
-# Tu Vuelta al Sol
+# 🌅 Tu Vuelta al Sol
 
-## Plan de Acción para Interpretación Personalizada de Cartas Natales y Progresadas
+## Plataforma de Astrología Evolutiva Personalizada
 
-### Objetivo
-Implementar un sistema que analice la carta natal y progresada de una persona para proporcionar consejos personalizados basados en su personalidad, bloqueos y fortalezas, así como consejos específicos para eventos astrológicos.
-
-### Plan Detallado
-
-#### 1. Mejorar la Lógica de Interpretación
-- Modificar `chartInterpretationsService.ts` para incluir consejos personalizados basados en las fortalezas y desafíos del usuario
-- Integrar perspectivas de la carta progresada en las funciones de interpretación
-
-#### 2. Generación de Interpretaciones de IA
-- Actualizar `trainedAssistantService.ts` para incluir contexto adicional del perfil del usuario
-- Crear prompts específicos para análisis de personalidad astrológica
-
-#### 3. Creación de Agenda Personalizada
-- Modificar `generate-agenda-ai/route.ts` para incluir consejos específicos basados en el perfil astrológico
-- Integrar rituales y acciones personalizadas según las fortalezas y desafíos del usuario
-
-#### 4. Pruebas y Validación
-- Realizar pruebas exhaustivas para asegurar precisión en las interpretaciones
-- Validar la integración con OpenAI para respuestas correctamente formateadas
-
-### Archivos a Modificar
-- `src/services/chartInterpretationsService.ts`
-- `src/services/progressedChartService.ts` 
-- `src/services/trainedAssistantService.ts`
-- `src/utils/astrology/extractAstroProfile.ts`
-- `src/app/api/astrology/generate-agenda-ai/route.ts`
-
-### Próximos Pasos
-1. Implementar los cambios según el plan
-2. Probar la funcionalidad localmente
-3. Desplegar en entorno de staging para pruebas adicionales
-4. Monitorear rendimiento y recopilar feedback de usuarios
+Sistema completo de interpretación astrológica que combina cartas natales, Solar Return y agenda anual personalizada con enfoque transformacional y antifragilidad.
 
 ---
 
-## Sincronización de Datos de Usuario
+## 📋 Tabla de Contenidos
 
-### Actualización Automática de Nombres
-- **Sincronización Completa**: Al actualizar el nombre completo en el formulario de datos de nacimiento, se sincroniza automáticamente en:
-  - ✅ Firebase Authentication (displayName)
-  - ✅ Colección de usuarios MongoDB (fullName) 
-  - ✅ Colección BirthData MongoDB (fullName)
-  - ✅ Panel de administración (interfaz actualizable)
+- [Arquitectura del Sistema](#arquitectura-del-sistema)
+- [Tipos de Cartas Astrológicas](#tipos-de-cartas-astrológicas)
+- [Roadmap de Desarrollo](#roadmap-de-desarrollo)
+- [Stack Tecnológico](#stack-tecnológico)
+- [Instalación](#instalación)
+- [Configuración](#configuración)
+- [Estructura del Proyecto](#estructura-del-proyecto)
 
-### Panel de Administración Mejorado
-- **Botón de Actualización**: Se ha añadido un botón "🔄 Actualizar" que permite a los administradores refrescar manualmente la lista de usuarios
-- **Eventos Personalizados**: Los componentes escuchan eventos `birthDataSaved` para actualizaciones automáticas
-- **Visualización en Tiempo Real**: Los cambios se reflejan inmediatamente después de guardar datos
+---
 
-### Endpoints de Sincronización
-- **POST `/api/birth-data`**: Actualiza simultáneamente todos los sistemas
-- **GET `/api/admin/users`**: Devuelve lista actualizada de usuarios
-- **Eventos**: Sistema de eventos personalizados para sincronización cross-component
+## 🏗️ Arquitectura del Sistema
 
-## Documentación de la funcionalidad de administración de usuarios
+### Componentes Principales
 
-Se ha implementado una sección de administración para gestionar usuarios en la aplicación. A continuación se describen las funcionalidades y cómo usarlas:
+```
+┌─────────────────────────────────────────────────────────┐
+│                    USUARIO                              │
+└──────────────────┬──────────────────────────────────────┘
+                   │
+         ┌─────────┴─────────┐
+         │                   │
+    ┌────▼────┐      ┌──────▼──────┐
+    │  Carta  │      │    Solar    │
+    │  Natal  │      │   Return    │
+    └────┬────┘      └──────┬──────┘
+         │                  │
+         │         ┌────────▼────────┐
+         └────────►│     Agenda      │
+                   │  Personalizada  │
+                   │     Anual       │
+                   └─────────────────┘
+```
 
-### Endpoints API
+### Flujo de Datos
 
-#### Eliminar usuario
+1. **Usuario ingresa datos de nacimiento** → Base de datos
+2. **Sistema calcula Carta Natal** → Carta de referencia permanente
+3. **Sistema calcula Solar Return anual** → Carta para el año actual
+4. **IA genera interpretaciones** → Análisis personalizado
+5. **Sistema crea Agenda Anual** → Eventos + Consejos específicos
 
-- **URL:** `/api/admin/delete-user`
-- **Método:** POST
-- **Descripción:** Elimina un usuario y todos sus datos relacionados (charts y birthdatas).
-- **Parámetros JSON:**
-  - `uid` (string, opcional): Identificador único del usuario.
-  - `email` (string, opcional): Email del usuario.
-- **Nota:** Se debe enviar al menos `uid` o `email`. Si se envía solo `email`, el sistema buscará el `uid` correspondiente para eliminar todos los datos relacionados.
-- **Ejemplo de uso con curl:**
-  ```bash
-  curl -X POST http://localhost:3000/api/admin/delete-user \
-    -H "Content-Type: application/json" \
-    -d '{"email": "usuario@example.com"}'
+---
+
+## 📊 Tipos de Cartas Astrológicas
+
+### 1. ⭐ Carta Natal (Fundamento)
+
+**Concepto**: "Fotografía" del cielo en el momento exacto de tu nacimiento.
+
+**Características**:
+- ✅ Posiciones planetarias FIJAS
+- ✅ Tu "ADN cósmico" inmutable
+- ✅ Base para todas las demás técnicas
+
+**Uso en el sistema**:
+- Punto de referencia permanente
+- Análisis de personalidad base
+- Comparación con otras cartas
+
+**Estado**: ✅ **IMPLEMENTADO Y FUNCIONAL**
+
+---
+
+### 2. 🌅 Solar Return / Vuelta al Sol (Anual)
+
+**Concepto**: Carta levantada para el momento exacto cuando el Sol regresa a su posición natal cada año.
+
+**Características**:
+- ☀️ Sol FIJO en posición natal (ej: 21° Acuario)
+- 🔄 Otros planetas en NUEVAS posiciones
+- 🏠 Ascendente ANUAL diferente
+- 📅 Casas redistribuidas según ubicación actual
+
+**Diferencias clave**:
+```
+NATAL                    SOLAR RETURN
+Sol: 21° Acuario    →    Sol: 21° Acuario (MISMO)
+Luna: 6° Libra      →    Luna: 16° Leo (CAMBIA)
+ASC: 11° Cáncer     →    ASC: 27° Libra (CAMBIA)
+```
+
+**Uso en el sistema**:
+- ✅ Interpretación de energías del año solar
+- ✅ Predicción de áreas de vida activadas
+- ✅ Base para generación de Agenda Anual
+- ✅ Identificación de momentos clave del año
+
+**Ventajas para Agenda Anual**:
+- Enfoque claro en un período de 12 meses
+- Comparación directa: Natal vs Solar Return
+- Identificación precisa de planetas en nuevas casas
+- Interpretación de cambio de Ascendente anual
+
+**Estado**: ✅ **IMPLEMENTADO Y FUNCIONAL**
+
+**Endpoints**:
+- `POST /api/charts/progressed` → Genera Solar Return
+- `POST /api/astrology/interpret-solar-return` → Interpreta Solar Return
+
+---
+
+### 3. 📈 Carta Progresada (Evolutiva)
+
+> **⚠️ NOTA IMPORTANTE**: Por ahora NO estamos utilizando Carta Progresada en el flujo principal. Hemos optado por **Solar Return** para la agenda anual porque ofrece mejores resultados para planificación de 12 meses.
+
+**Concepto**: Evolución gradual de la carta natal donde cada día después del nacimiento = 1 año de vida.
+
+**Características**:
+- 🌱 Sol AVANZA ~1° por año
+- 📅 Evolución día a día = año a año
+- 🔄 Desarrollo personal gradual
+- 🎯 Muestra maduración del potencial natal
+
+**Diferencias con Solar Return**:
+```
+PROGRESADA (día 51 = edad 51)    SOLAR RETURN (año 2025)
+Sol: 22° Acuario (avanzó 1°) →   Sol: 21° Acuario (fijo)
+Luna: 25° Libra (avanzó)      →   Luna: 16° Leo (nueva posición)
+Enfoque: EVOLUCIÓN             →   Enfoque: ENERGÍAS ANUALES
+```
+
+**Por qué NO la usamos ahora**:
+- ❌ Enfoque de desarrollo a largo plazo (no ideal para agenda anual)
+- ❌ Cambios muy sutiles año a año
+- ❌ Más compleja de interpretar para eventos específicos
+- ✅ Solar Return da resultados más claros para planificación anual
+
+**Futuro de la Carta Progresada**:
+- 📅 **Fase 5** (Septiembre-Diciembre 2025): Posible reintegración
+- 🎯 Uso combinado: Progresada para evolución personal + Solar Return para eventos anuales
+- 💡 Interpretaciones comparativas entre ambas técnicas
+
+**Estado**: 🔶 **IMPLEMENTADO PERO NO EN USO ACTIVO**
+
+**Código disponible**:
+- Backend: `/api/charts/progressed` (funcional)
+- Frontend: `/progressed-chart` (disponible pero no en menú principal)
+- Servicios: `progressedChartService.ts` (completo)
+
+---
+
+## 🗺️ Roadmap de Desarrollo
+
+### ✅ Fase 1: Foundation Astrológica (COMPLETADA)
+
+- [x] Modelo de datos (MongoDB)
+- [x] Cálculo de Carta Natal (Prokerala API)
+- [x] Cálculo de Solar Return (Prokerala API)
+- [x] Cálculo de Carta Progresada (disponible)
+- [x] Sistema de usuarios y autenticación
+- [x] Visualización de cartas astrológicas
+
+### 🔄 Fase 2: Interpretación con IA + UX/UI (EN CURSO - ESTA SEMANA)
+
+#### 📝 A. Sistema de Interpretación Solar Return
+
+**Prioridad ALTA - Implementar primero**:
+
+- [ ] **Crear archivo**: `src/utils/prompts/solarReturnPrompts.ts`
+  - Prompts específicos Solar Return
+  - Fallbacks locales inteligentes
+  - Estructura planeta por planeta
+  
+- [ ] **Crear endpoint**: `src/app/api/astrology/interpret-solar-return/route.ts`
+  - API interpretación Solar Return
+  - Integración OpenAI
+  - Sistema de caché
+  
+- [ ] **Actualizar**: `src/components/astrology/InterpretationButton.tsx`
+  - Agregar soporte `type="solar-return"`
+  - Modal específico Solar Return
+  - Carga de carta natal automática
+
+#### 🎨 B. Mejoras UX/UI Dashboard
+
+**Dashboard - 4 Pasos Numerados**:
+
+- [ ] Cambiar de 3 bloques a 4 bloques con números de paso:
+  ```
+  1️⃣ Datos de Nacimiento
+  2️⃣ Carta Natal
+  3️⃣ Tu Revolución Solar (nuevo nombre)
+  4️⃣ Tu Agenda Astrológica Personalizada
   ```
 
-#### Listar usuarios
+**Nomenclatura Nueva**:
+- [ ] Cambiar "Carta Progresada" → "Tu Revolución Solar" en menú superior
+- [ ] Actualizar breadcrumbs y títulos de página
+- [ ] Rename URL `/progressed-chart` → `/revolucion-solar` (opcional, no crítico)
 
-- **URL:** `/api/admin/users`
-- **Método:** GET
-- **Descripción:** Devuelve una lista de usuarios con información básica (uid, email, fullName).
-- **Ejemplo de uso con curl:**
-  ```bash
-  curl http://localhost:3000/api/admin/users
-  ```
+#### 🎨 C. Sección Flotante Lateral
 
-### Interfaz de administración
+**En páginas**: Natal Chart y Solar Return
 
-- **URL:** `/admin`
-- **Descripción:** Página web que muestra la lista de usuarios existentes y un formulario para eliminar usuarios por `uid` o `email`.
-- **Uso:**
-  1. Navegar a `http://localhost:3000/admin`.
-  2. Visualizar la lista de usuarios.
-  3. Ingresar el `uid` o `email` del usuario a eliminar en el formulario.
-  4. Presionar el botón "Eliminar Usuario".
-  5. Ver el mensaje de confirmación o error.
+**Ubicación**: Panel flotante a la derecha (siempre visible)
 
-### Notas adicionales
+**Contenido** (orden específico):
+```
+🔮 Interpretar Carta [Natal/Solar]
+🔄 Regenerar Carta
+```
 
-- La eliminación de un usuario borra también todos los charts y birthdatas asociados.
-- El formulario y la página admin están implementados con React y Next.js, usando hooks y API routes.
+**Implementación**:
+- [ ] Crear componente `FloatingActionPanel.tsx`
+- [ ] Integrar en `natal-chart/page.tsx`
+- [ ] Integrar en `progressed-chart/page.tsx` (Revolución Solar)
+- [ ] Diseño responsive (ocultar en móvil, mostrar en menú)
+
+#### 🎨 D. Menú Superior de Interpretación
+
+**Actualizar componente modal de interpretación**:
+
+**Actual**:
+```
+Regenerar | Copiar | TXT | ✕
+```
+
+**Nuevo** (orden específico):
+```
+📄 Descargar | 🔄 Regenerar | 💳 Quiero verlo entero | ✕
+```
+
+**Cambios específicos**:
+- [ ] Eliminar botón "Copiar"
+- [ ] Cambiar "TXT" → "Descargar" (genera PDF)
+- [ ] Agregar "💳 Quiero verlo entero" → Link a plan de pago
+- [ ] Implementar generación PDF básica
+
+#### 📊 E. Estructura Interpretación Mejorada
+
+**Ampliar interpretación actual de**:
+```
+⭐ Tu Esencia Revolucionaria
+🎯 Tu Propósito de Vida
+```
+
+**A estructura completa**:
+```
+⭐ Tu Esencia Revolucionaria
+🎯 Tu Propósito de Vida
+
+☉ Sol en [Signo] → Propósito de Vida
+   - Posición: [Grado]° [Signo] - Casa [X]
+   - Significado detallado
+
+☽ Luna en [Signo] → Tus emociones
+   - Posición: [Grado]° [Signo] - Casa [X]
+   - Significado detallado
+
+☿ Mercurio en [Signo] → Cómo piensas y hablas
+♀ Venus en [Signo] → Cómo amas
+♂ Marte en [Signo] → Cómo enfrentas la vida
+♃ Júpiter en [Signo] → Tu suerte, tus ganancias
+♄ Saturno en [Signo] → Karma, responsabilidades
+♅ Urano en [Signo] → Tu revolución personal
+♆ Neptuno en [Signo] → Tu conexión espiritual
+♇ Plutón en [Signo] → Tu transformación profunda
+
+🏠 Ascendente en [Signo] → Tu personalidad
+```
+
+**Implementación**:
+- [ ] Actualizar prompts (natal + solar return)
+- [ ] Actualizar componente modal interpretación
+- [ ] Agregar iconos planetas
+- [ ] Diseño visual mejorado con secciones colapsables
+
+#### 🎨 F. Limpieza Home Post-Interpretación
+
+**Problema**: Después de generar interpretación, aparecen botones duplicados en home
+
+**Solución**:
+- [ ] Eliminar botones "Regenerar" y "Ver Completo" que aparecen en dashboard después de interpretación
+- [ ] Mantener solo los 4 bloques principales del dashboard
+- [ ] Los botones de acción solo deben estar DENTRO del modal de interpretación
 
 ---
 
-## 🌞 Sobre el Producto
+### 📅 Fase 3: Agenda Personalizada (SIGUIENTE - POST UX/UI)
 
-**"Tu Vuelta al Sol"** es una aplicación web que genera agendas astrológicas personalizadas basadas en la carta natal y progresada del usuario. La aplicación combina precisión astrológica máxima con inteligencia artificial para crear consejos personalizados y herramientas prácticas de planificación.
+**Basada en Solar Return**:
 
-## 📅 ¿Qué es la Agenda Astrológica?
+- [x] Generación de eventos astrológicos anuales
+- [x] Tránsitos planetarios
+- [x] Lunas Nueva y Llena
+- [x] Retrogradaciones
+- [ ] Interpretaciones personalizadas por evento
+- [ ] Sistema de recomendaciones (rituales, acciones)
+- [ ] UX/UI optimizada para agenda
+- [ ] Exportación a Google Calendar
 
-La **Agenda Astrológica Personalizada** es el corazón de "Tu Vuelta al Sol". Es un calendario único que combina:
-
-### 🔮 **Predicciones Basadas en Tu Carta Natal**
-- **Tránsitos personales**: Cómo los planetas en movimiento afectan tu carta natal específica
-- **Aspectos importantes**: Conjunciones, oposiciones, trígonos y cuadraturas que impactan tu energía
-- **Retrogradaciones**: Efectos personalizados de Mercurio, Venus y Marte retrógrados
-
-### 🌙 **Eventos Astrológicos Anuales**
-- **Fases lunares**: Lunas nuevas y llenas con rituales específicos
-- **Eclipses**: Momentos de transformación y nuevos comienzos
-- **Cambios de estación**: Equinoccios y solsticios con significado personal
-- **Ingresos planetarios**: Cuando los planetas cambian de signo
-
-### 🤖 **Consejos de IA Personalizados**
-- **Acciones recomendadas**: Qué hacer en cada fase astrológica
-- **Evitar decisiones**: Cuándo postergar decisiones importantes
-- **Enfoque energético**: Dónde dirigir tu energía según los tránsitos
-- **Rituales específicos**: Ceremonias y prácticas para cada evento
-
-## 📊 **Características Únicas de la Agenda**
-- **Generación con IA**: Usa inteligencia artificial para interpretaciones personalizadas
-- **Integración Google Calendar**: Sincronización automática con tu calendario
-- **Recordatorios proactivos**: Alertas antes de eventos importantes
-- **Formato PDF descargable**: Agenda imprimible de alta calidad
-- **Actualizaciones mensuales**: Contenido fresco y relevante
-- **Base de conocimiento astrológico**: Sistema de búsqueda en libros de astrología procesados
-
-## 📚 Sistema de Procesamiento de Libros Astrológicos
-
-El proyecto incluye un sistema avanzado para procesar y buscar en libros de astrología:
-
-### 🛠 **Script de Procesamiento**
-- **`scripts/parse_and_chunk_pdfs.js`**: Convierte PDFs de astrología en chunks de texto
-- **Genera `astrology_books/chunks.json`**: Archivo con fragmentos de texto procesados
-- **Búsqueda por chunks**: Sistema optimizado para búsqueda rápida
-
-### 🚀 **Integración con Vercel**
-
-#### Opción 1: Incluir chunks.json en el proyecto (si es < 50MB)
-```typescript
-// src/lib/astrologyBooks.ts
-import booksData from 'astrology_books/chunks.json';
-
-export function searchInBooks(query: string) {
-  const results = booksData.filter(chunk => 
-    chunk.text.toLowerCase().includes(query.toLowerCase())
-  );
-  return results.slice(0, 5);
-}
-```
-
-#### Opción 2: Cargar dinámicamente (para archivos grandes)
-```typescript
-// src/app/api/astrology/search-books/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-
-let chunksCache: any[] | null = null;
-
-export async function POST(request: NextRequest) {
-  try {
-    const { query } = await request.json();
-    
-    if (!chunksCache) {
-      const chunksPath = path.join(process.cwd(), 'astrology_books', 'chunks.json');
-      const fileContent = fs.readFileSync(chunksPath, 'utf-8');
-      chunksCache = JSON.parse(fileContent);
-    }
-    
-    const results = chunksCache.filter(chunk =>
-      chunk.text.toLowerCase().includes(query.toLowerCase())
-    );
-    
-    return NextResponse.json({ success: true, results: results.slice(0, 10) });
-  } catch (error) {
-    return NextResponse.json({ success: false, error: 'Error buscando en libros' });
-  }
-}
-```
-
-### 🔍 **Verificación Rápida**
-```bash
-# Ejecutar script de procesamiento
-node scripts/parse_and_chunk_pdfs.js
-
-# Verificar tamaño del archivo
-ls -lh astrology_books/chunks.json
-
-# Si es mayor a 50MB, usar Git LFS
-git lfs track "astrology_books/chunks.json"
-git add .gitattributes
-git add astrology_books/chunks.json
-```
-
-### 📦 **Para Desplegar en Vercel**
-1. Generar chunks.json localmente
-2. Verificar tamaño del archivo
-3. Subir con el proyecto (o usar Git LFS si es grande)
-4. El sistema de búsqueda estará disponible automáticamente
-
-### 🎯 **Beneficios para el Usuario**
-- **Planificación estratégica**: Mejores fechas para proyectos importantes
-- **Autoconocimiento**: Entender tus patrones energéticos naturales
-- **Prevención**: Evitar conflictos durante tránsitos difíciles
-- **Aprovechamiento**: Maximizar oportunidades durante tránsitos favorables
-- **Conexión cósmica**: Sentirse en sintonía con los ciclos naturales
-
-La agenda cubre desde tu cumpleaños actual hasta tu próximo cumpleaños, creando un ciclo completo de "tu vuelta al sol" con guidance astrológico personalizado para cada mes.
-
-## 🚀 Funcionalidades Futuras Planeadas
-
-- **Carta Progresada Mejorada:** Corrección y optimización de la carta progresada para mayor precisión.
-- **Agenda Anual Personalizada con IA:** Generación automática de agendas astrológicas anuales usando inteligencia artificial para predicciones y consejos personalizados.
-- **Integración Completa con Google Calendar:** Sincronización bidireccional con Google Calendar para eventos astrológicos, recordatorios y alertas personalizadas.
-- **Eventos Astrológicos Anuales Completos:** Inclusión de retrogradaciones, fases lunares, eclipses y tránsitos importantes.
-- **Sistema de Pagos y Suscripciones:** Implementación de planes freemium y premium con funcionalidades exclusivas.
-- **Mejoras en UX/UI:** Formularios avanzados, autocompletado de lugares, validación en tiempo real y manejo de datos incompletos.
-- **Notificaciones y Alertas Personalizadas:** Alertas proactivas basadas en tránsitos y eventos astrológicos.
-- **Expansión a Plataformas Móviles:** Desarrollo de app móvil nativa y widgets personalizados.
-- **Integraciones Adicionales:** Spotify, Notion, Apple Health, Slack Bot y más.
-
-Estas funcionalidades están planificadas para ser implementadas en los próximos meses, con un enfoque en ofrecer la experiencia astrológica más completa y personalizada del mercado.
-
-
-
-### Estructura de Archivos del Proyecto
-
-### Estructura de Archivos Actualizada
-
-El proyecto está organizado de la siguiente manera:
-
-```
-tu-vuelta-al-sol/
-├── .gitignore
-├── .vercelignore
-├── eslint.config.mjs
-├── next.config.js
-├── next.config.ts
-├── package-lock.json
-├── package.json
-├── postcss.config.mjs
-├── Prokerala_Carta_Natal.postman_collection.json
-├── prokerala-token-test.js
-├── README.md
-├── tsconfig.json
-├── vercel.json
-├── public/
-│   ├── file.svg
-│   ├── globe.svg
-│   ├── next.svg
-│   ├── site.webmanifest
-│   ├── vercel.svg
-│   └── window.svg
-├── scripts/
-│   ├── fix-quotes.sh
-│   ├── parse_and_chunk_pdfs.js
-│   └── professional-quote-fix.sh
-├── src/
-│   ├── app/
-│   │   ├── favicon.ico
-│   │   ├── globals.css
-│   │   ├── layout.tsx
-│   │   ├── layout.tsx.backup
-│   │   ├── page.tsx
-│   │   ├── (auth)/
-│   │   ├── (dashboard)/
-│   │   ├── admin/
-│   │   │   └── page.tsx
-│   │   ├── api/
-│   │   │   ├── admin/
-│   │   │   │   ├── delete-user/
-│   │   │   │   ├── update-role/
-│   │   │   │   └── update-role.ts
-│   │   │   ├── astrology/
-│   │   │   │   ├── generate-agenda-ai/
-│   │   │   │   └── generate-agenda-ai/route.ts
-│   │   │   ├── birth-data/
-│   │   │   │   └── route.ts
-│   │   │   ├── cache/
-│   │   │   ├── charts/
-│   │   │   ├── debug/
-│   │   │   │   ├── assistants/
-│   │   │   │   ├── auth/
-│   │   │   │   ├── auth-context/
-│   │   │   │   ├── firebase/
-│   │   │   │   └── route.ts
-│   │   │   ├── events/
-│   │   │   ├── geocode/
-│   │   │   ├── pdf/
-│   │   │   │   └── generate/
-│   │   │   ├── prokerala/
-│   │   │   ├── reverse-geocode/
-│   │   │   ├── test-mongodb/
-│   │   │   └── users/
-│   │   │   │   └── route.ts
-│   │   ├── clear-chart-cache/
-│   │   │   └── route.ts
-│   │   ├── debug/
-│   │   │   └── page.tsx
-│   │   ├── postman-test/
-│   │   │   └── page.tsx
-│   │   ├── test-agenda-ai/
-│   │   │   └── page.tsx
-│   │   ├── test-api/
-│   │   │   └── page.tsx
-│   │   ├── test-chart-display/
-│   │   │   └── page.tsx
-│   │   ├── test-mongodb/
-│   │   │   └── page.tsx
-│   │   ├── test-natal-chart/
-│   │   │   ├── page.tsx
-│   │   │   └── page.tsx.backup
-│   │   ├── test-progressed/
-│   │   │   ├── page.test.tsx
-│   │   │   └── page.tsx
-│   │   ├── test-timezone/
-│   │   │   └── page.tsx
-│   │   └── types/
-│   │   │   └── astrology.ts
-│   ├── components/
-│   │   ├── admin/
-│   │   │   ├── BirthDataAdminTable.tsx
-│   │   │   └── DeleteUserForm.tsx
-│   │   ├── astrology/
-│   │   │   ├── AgendaAIDisplay.tsx
-│   │   │   ├── AgendaLoadingStates.tsx
-│   │   │   ├── AscendantCard.tsx
-│   │   │   ├── AspectControlPanel.tsx
-│   │   │   ├── AspectLines.tsx
-│   │   │   ├── AstrologicalAgenda.tsx
-│   │   │   ├── AstrologicalAgendaGenerator.tsx
-│   │   │   ├── AstrologicalCalendar.tsx
-│   │   │   ├── BirthDataCard.tsx
-│   │   │   ├── BirthDataForm.tsx
-│   │   │   ├── ChartDisplay.tsx
-│   │   │   ├── ChartDisplaycompletosinrefactorizar.tsx
-│   │   │   ├── ChartDisplayrefactorizadSinLineasniAspeectos.tsx
-│   │   │   ├── ChartTooltips.tsx
-│   │   │   ├── ChartWheel.tsx
-│   │   │   ├── CombinedAscendantMCCard.tsx
-│   │   │   ├── CosmicFootprint.tsx
-│   │   │   ├── ElementsModalitiesCard.tsx
-│   │   │   ├── HouseGrid.tsx
-│   │   │   ├── MidheavenCard.tsx
-│   │   │   ├── NatalChartWheel.tsx
-│   │   │   ├── PlanetSymbol.tsx
-│   │   │   ├── ProgressedChartVisual.tsx
-│   │   │   ├── SectionMenu.tsx
-│   │   │   └── tooltips/
-│   │   ├── auth/
-│   │   │   ├── LoginForm.tsx
-│   │   │   └── RegisterForm.tsx
-│   │   ├── dashboard/
-│   │   │   ├── BirthDataForm.tsx
-│   │   │   └── NatalChartCard.tsx
-│   │   ├── debug/
-│   │   │   └── ForceRegenerateChart.tsx
-│   │   ├── layout/
-│   │   │   ├── Footer.tsx
-│   │   │   ├── Footer.tsx.backup
-│   │   │   └── PrimaryHeader.tsx
-│   │   ├── test/
-│   │   │   ├── AgendaAITest.tsx
-│   │   │   ├── MongoDBTest.tsx
-│   │   │   ├── NatalChartTest.tsx
-│   │   │   ├── PostmanTest.tsx
-│   │   │   ├── ProkeralaNatalTest.tsx
-│   │   │   ├── SimpleTimezonetest.tsx
-│   │   │   └── TimezoneTestComponent.tsx
-│   │   └── ui/
-│   │   │   ├── Alert.tsx
-│   │   │   ├── Button.tsx
-│   │   │   └── Input.tsx
-│   ├── constants/
-│   │   ├── astrology.ts
-│   │   └── astrology/
-│   │   │   ├── chartConstants.ts
-│   │   │   └── progressedChartConstants.ts
-│   ├── context/
-│   │   ├── AuthContext.tsx
-│   │   └── NotificationContext.tsx
-│   ├── hooks/
-│   │   ├── useAspects.ts
-│   │   ├── useChart.ts
-│   │   ├── useChartDisplay.ts
-│   │   ├── usePlanets.ts
-│   │   ├── useProkeralaApi.ts
-│   │   ├── astrology/
-│   │   │   └── useChartDisplay.ts
-│   │   └── lib/
-│   │   │   ├── db.ts
-│   │   │   ├── firebase.ts
-│   │   │   ├── utils.ts
-│   │   │   └── prokerala/
-│   ├── lib/
-│   │   ├── db.ts
-│   │   ├── firebase-client.ts
-│   │   ├── firebase.ts
-│   │   ├── firebaseAdmin.ts
-│   │   ├── utils.ts
-│   │   ├── firebase/
-│   │   │   ├── admin.ts
-│   │   │   ├── client.ts
-│   │   │   ├── config.ts
-│   │   │   └── index.ts
-│   │   └── prokerala/
-│   │   │   ├── client.ts
-│   │   │   ├── endpoints.ts
-│   │   │   ├── types.ts
-│   │   │   └── utils.ts
-│   ├── models/
-│   │   ├── AIUsage.ts
-│   │   ├── BirthData.ts
-│   │   ├── Chart.ts
-│   │   └── User.ts
-│   ├── services/
-│   │   ├── astrologicalEventsService.ts
-│   │   ├── astrologyService.ts
-│   │   ├── cacheService.ts
-│   │   ├── chartCalculationsService.ts
-│   │   ├── chartInterpretationsService.ts
-│   │   ├── chartRenderingService.tsx
-│   │   ├── progressedChartService.ts
-│   │   ├── prokeralaService.ts
-│   │   ├── trainedAssistantService.ts
-│   │   └── userDataService.ts
-│   ├── types/
-│   │   └── astrology/
-│   │   │   ├── aspects.ts
-│   │   │   ├── basic.ts
-│   │   │   ├── chart.ts
-│   │   │   ├── chartConstants.ts
-│   │   │   ├── chartDisplay.ts
-│   │   │   ├── chartDisplaycopy.ts
-│   │   │   ├── index.ts
-│   │   │   ├── unified-types.ts
-│   │   │   └── utils.ts
-│   └── utils/
-│   │   ├── agendaCalculator.ts
-│   │   ├── dateTimeUtils.ts
-│   │   └── astrology/
-│   │   │   ├── aspectCalculations.ts
-│   │   │   ├── coordinateUtils.ts
-│   │   │   ├── degreeConverter.ts
-│   │   │   ├── disruptiveMotivationalSystem.ts
-│   │   │   ├── events.ts
-│   │   │   ├── extractAstroProfile.ts
-│   │   │   ├── intelligentFallbacks.ts
-│   │   │   └── planetPositions.ts
-└── TODO.md
-```
-
-**Nota**: Esta estructura refleja la organización actual del proyecto con todos los archivos y directorios existentes.
-
-### Funcionalidades Principales:
-1. **Carta natal con precisión máxima** usando Swiss Ephemeris
-2. **Carta progresada** para el año actual   desde la fecha  de nacimiento del  año en curso, hasta la fecha de nacimiento del año siguiente.
-3. **Eventos astrológicos anuales** completos (retrogradaciones, lunas, eclipses)
-4. **Agenda personalizada con IA** usando prompts específicos
-5. **Integración Google Calendar** (funcionalidad estrella única)
-6. **Consejos accionables** basados en tránsitos personales
-7. **Sistema de pagos** y suscripciones
-8. **Generación PDF** de alta calidad
-
-## ⚠️ AJUSTES CRÍTICOS PARA PROKERALA API
-
-### 🔑 Parámetros obligatorios para precisión máxima:
-
-```javascript
-// ✅ CONFIGURACIÓN CORRECTA (OBLIGATORIA)
-const criticalParams = {
-  'profile[datetime]': '1974-02-10T07:30:00+01:00',  // Formato ISO con timezone
-  'profile[coordinates]': '40.4164,-3.7025',          // Coordenadas precisas (4 decimales)
-  'ayanamsa': '0',                                    // 🚨 CRÍTICO: 0=Tropical, 1=Sideral
-  'house_system': 'placidus',                         // Sistema de casas
-  'birth_time_rectification': 'flat-chart',           // flat-chart | true-sunrise-chart
-  'aspect_filter': 'all',                             // all | major | minor
-  'la': 'es'                                          // Idioma español
-};
-
-// ❌ ERRORES COMUNES QUE EVITAR:
-// - ayanamsa: '1' (Lahiri/Sideral) → Usa '0' (Tropical/Occidental)
-// - datetime sin timezone → Siempre incluir +01:00 o usar Z para UTC
-// - Coordenadas imprecisas → Usar máximo 4 decimales
-// - birth_time_rectification: 'none' → No válido, usar 'flat-chart'
-```
-
-### 🌟 Endpoints Prokerala funcionando correctamente:
-
-#### **Carta Natal:**
-```bash
-GET https://api.prokerala.com/v2/astrology/natal-aspect-chart?profile[datetime]=YYYY-MM-DDTHH:mm:ss+01:00&profile[coordinates]=LAT,LON&ayanamsa=0&house_system=placidus&birth_time_rectification=flat-chart&aspect_filter=all&la=es
-```
-
-#### **Carta Progresada:**
-```bash
-GET https://api.prokerala.com/v2/astrology/progression-chart?profile[datetime]=YYYY-MM-DDTHH:mm:ss+01:00&profile[coordinates]=LAT,LON&progression_year=2025&ayanamsa=0&house_system=placidus&birth_time_rectification=flat-chart&aspect_filter=all&la=es
-```
-
-## 🎯 ROADMAP COMPLETO - TU VUELTA AL SOL
-
-### **FASE 1: FOUNDATION ASTROLÓGICA** *(Mayo 2025 - ACTUAL)*
-**Estado**: 🔄 85% completo
-
-#### ✅ Completado y Verificado
-- **Carta natal con precisión máxima** (datos exactos verificados)
-- **Integración Prokerala API** optimizada y funcionando
-- **Autenticación Firebase** configurada
-- **Base de datos MongoDB** integrada
-- **Despliegue Vercel** sin errores
-- **Parámetros astrológicos** corregidos (ayanamsa=0, coordenadas precisas)
-
-#### 🔄 En Progreso INMEDIATO (Esta semana)
-- [ ] **Corregir carta progresada** verificar que usa loparámetros exactos (ayanamsa=0) arreglar ux
-- [ ] **Implementar prompt de IA** para generación de agenda personalizada
-- [ ] **Eventos astrológicos anuales** completos
-- [ ] **Mejorar UX formulario de nacimiento**:
-  - [ ] **Búsqueda de lugares** con autocompletado
-  - [ ] **Entrada manual de coordenadas** (opción avanzada)
-  - [ ] **Manejo de hora desconocida** (mediodía por defecto + advertencia)
-  - [ ] **Validación de coordenadas** y timezones automáticos
-- [ ] **Deploy con últimas correcciones**
+**Enfoque Antifragilidad**:
+- Preparación mental para eventos
+- Herramientas específicas por fase
+- Patrones personales detectados
+- No predicción pasiva, sino entrenamiento activo
 
 ---
 
-### **FASE 2: GENERACIÓN INTELIGENTE CON IA** *(julio 2025)*
-**Objetivo**: Agenda astrológica completa y personalizada
+### 💰 Fase 4: Monetización (SEPTIEMBRE 2025)
 
-#### **2.1 Core de IA Astrológica** 🤖
-- [ ] **Prompt engineering** optimizado para astrología personalizada
-- [ ] **Generación de interpretaciones** basadas en carta natal + progresada
-- [ ] **Consejos específicos** según tránsitos personales
-- [ ] **Análisis de patrones** astrológicos individuales
-- [ ] **Endpoint**: `/api/astrology/generate-agenda-ai`
+- [ ] Sistema de pagos (Stripe)
+- [ ] Planes de suscripción
+- [ ] Interpretaciones premium completas
+- [ ] Consultas personalizadas
+- [ ] Exportación PDF profesional
+- [ ] Acceso a interpretaciones archivadas
 
-#### **2.2 Eventos Astrológicos Anuales Completos** 🌟
-- [ ] **Retrogradaciones detalladas**: Mercurio (3-4/año), Venus, Marte
-- [ ] **Fases lunares**: Lunas nuevas, llenas, cuartos (12+ eventos/año)
-- [ ] **Eclipses**: Solares y lunares con impacto personal (2-4/año)
-- [ ] **Tránsitos importantes**: Planetas lentos sobre puntos natales
-- [ ] **Aspectos temporales**: Conjunciones, oposiciones críticas
-- [ ] **Estaciones astrológicas**: Solsticios, equinoccios
-- [ ] **Ingresos planetarios**: Cambios de signo importantes
-- [ ] **Endpoint**: `/api/astrology/annual-events`
+**Plan de Pago - Primer Nivel**:
+- Interpretación completa (todos los planetas detallados)
+- PDF premium descargable
+- Agenda anual sin límites
+- Soporte prioritario
 
 ---
 
-### **FASE 3: MONETIZACIÓN Y SISTEMA DE PAGOS** *(Julio 2025)*
-**Objetivo**: Convertir en producto rentable
+### 🔗 Fase 5: Integración Google Calendar (SEPTIEMBRE 2025)
 
-#### **3.1 Sistema de Pagos Stripe** 💳
-- [ ] **Integración Stripe** completa con webhooks
-- [ ] **Planes de suscripción**:
-  - **Básico** (€19/año): Agenda anual completa
-  - **Premium** (€39/año): + Google Calendar + actualizaciones mensuales
-  - **VIP** (€79/año): + consultas personales + informes especiales
-- [ ] **Pagos únicos** para productos específicos
-- [ ] **Sistema de cupones** y descuentos
-- [ ] **Dashboard de suscripciones** para usuarios
-
-### **3.2 Productos Adicionales** 🎁
-- [ ] **Compatibilidad de pareja** (€29): Carta sinastría
-- [ ] **Carta para bebés** (€24): Regalo para padres
-- [ ] **Informes temáticos** (€15 c/u): Amor, carrera, salud
-- [ ] **Calendario lunar físico** (€35): Producto físico personalizado
-- [ ] **Consultas 1:1** (€75/hora): Con astrólogos certificados
-- [ ] **Regalos Astrológicos** (€25-50): Crear cartas y agendas personalizadas para familiares y amigos como regalo especial
-  - **Funcionalidad**: Los usuarios pueden ingresar datos de nacimiento de sus seres queridos
-  - **Entrega**: Envío por email con diseño premium y mensaje personalizado
-  - **Packaging**: PDF de alta calidad con diseño de regalo
-  - **Personalización**: Mensaje personalizado del remitente
-  - **Seguimiento**: Notificación cuando el regalo es abierto
+- [ ] OAuth Google
+- [ ] Sincronización bidireccional
+- [ ] Notificaciones automáticas
+- [ ] Recordatorios personalizados
 
 ---
 
-### **FASE 4: INTEGRACIÓN GOOGLE CALENDAR** *(Agosto 2025)* 🚀
-**¡FUNCIONALIDAD ESTRELLA ÚNICA EN EL MERCADO!**
+### 🚀 Fase 6: Expansión y Optimización (OCT-DIC 2025)
 
-#### **4.1 Integración Básica** 📅
-- [ ] **OAuth Google** para autorización segura
-- [ ] **Sincronización automática** de eventos astrológicos
-- [ ] **Recordatorios personalizados**:
-  - "Hoy Mercurio sale de retrógrado"
-  - "Luna nueva en tu signo - tiempo de intenciones"
-- [ ] **Eventos recurrentes**: Fases lunares, aspectos importantes
-
-#### **4.2 Funcionalidades Avanzadas** ⭐
-- [ ] **Smart scheduling**: Sugerir mejores días para reuniones importantes
-- [ ] **Alertas proactivas**: "Evita decisiones grandes mañana (Mercurio Rx)"
-- [ ] **Rituales automáticos**: Recordatorios de ceremonias lunares
-- [ ] **Sincronización bidireccional**: Análisis de eventos del usuario
-- [ ] **Análisis de productividad** basado en tránsitos personales
-
-#### **4.3 Valor Agregado Premium** 💎
-- [ ] **Planificación estratégica**: Mejores fechas para proyectos importantes
-- [ ] **Optimización de horarios** según energía astrológica personal
-- [ ] **Integración múltiple**: Outlook, Apple Calendar
-- [ ] **Widget personalizado** para escritorio/móvil
+- [ ] Carta Progresada reintegrada
+- [ ] Comparación Progresada vs Solar Return
+- [ ] Análisis de ciclos largos
+- [ ] Machine Learning para patrones
+- [ ] App móvil nativa
+- [ ] Comunidad y networking
 
 ---
 
-### **FASE 5: EXPANSIÓN Y OPTIMIZACIÓN** *(Sept-Dic 2025)*
+## 🎯 Checklist Inmediato (Esta Semana)
 
-#### **5.1 Funcionalidades Premium** 🌟
-- [ ] **App móvil nativa** (React Native)
-- [ ] **Notificaciones push** astrológicas personalizadas
-- [ ] **Widget de escritorio** con tránsitos diarios
-- [ ] **Comunidad de usuarios** (foro astrológico)
-- [ ] **Sistema de referidos** con recompensas
+### Día 1-2: Backend Solar Return
+- [ ] Crear `solarReturnPrompts.ts` con estructura completa planeta por planeta
+- [ ] Crear endpoint `interpret-solar-return/route.ts`
+- [ ] Testing básico de interpretación
 
-#### **5.2 Integraciones Adicionales** 🔗
-- [ ] **Spotify**: Playlists según estado astrológico
-- [ ] **Notion**: Templates de planificación astrológica
-- [ ] **Apple Health**: Correlación con ciclos lunares
-- [ ] **Slack Bot**: Astrología para equipos de trabajo
+### Día 2-3: UX/UI Core
+- [ ] Dashboard 4 bloques numerados
+- [ ] Cambiar "Carta Progresada" → "Tu Revolución Solar" en menú
+- [ ] Actualizar títulos y breadcrumbs
+
+### Día 3-4: Interpretación Mejorada
+- [ ] Modal con estructura planeta por planeta
+- [ ] Menú superior nuevo: Descargar | Regenerar | Ver Completo | ✕
+- [ ] Eliminar botones duplicados en home
+
+### Día 4-5: Panel Flotante + Testing
+- [ ] Componente `FloatingActionPanel.tsx`
+- [ ] Integración en Natal Chart
+- [ ] Integración en Solar Return
+- [ ] Testing completo del flujo
+
+### Opcional (si da tiempo):
+- [ ] Generación PDF básica
+- [ ] Landing page plan de pago
+- [ ] Responsive mobile optimizations
 
 ---
 
-## 🧪 ENDPOINTS DISPONIBLES
+## 🛠️ Stack Tecnológico
 
-### **✅ Funcionando Perfectamente:**
+### Frontend
+- **Next.js 14** (App Router)
+- **React 18**
+- **TypeScript**
+- **Tailwind CSS**
+- **Lucide Icons**
 
-#### **1. Test de Conectividad**
+### Backend
+- **Next.js API Routes**
+- **MongoDB + Mongoose**
+- **Firebase Authentication**
+
+### APIs Externas
+- **Prokerala Astrology API** (cálculos astrológicos)
+- **OpenAI GPT-4** (interpretaciones IA)
+- **Google Calendar API** (futura integración)
+
+### Deployment
+- **Vercel** (hosting y CI/CD)
+- **MongoDB Atlas** (base de datos)
+
+---
+
+## 🚀 Instalación
+
 ```bash
-GET /api/prokerala/test
-POST /api/prokerala/test
-```
-**Estado**: ✅ Funcionando - Verifica autenticación OAuth2
+# Clonar repositorio
+git clone https://github.com/tu-usuario/tu-vuelta-al-sol.git
+cd tu-vuelta-al-sol
 
-#### **2. Carta Natal Precisa** ⭐
-```bash
-POST /api/astrology/natal-chart-accurate
-```
-**Estado**: ✅ **Precisión máxima verificada**
-**Datos verificados**: Sol, Luna, Mercurio, Venus coinciden exactamente con carta de referencia
+# Instalar dependencias
+npm install
 
-**Opciones de entrada de ubicación**:
-```json
-// Opción 1: Coordenadas manuales (máxima precisión)
-{
-  "birthDate": "1974-02-10",
-  "birthTime": "07:30:00", 
-  "latitude": 40.4164,
-  "longitude": -3.7025,
-  "timezone": "Europe/Madrid",
-  "fullName": "Nombre Completo",
-  "inputMethod": "coordinates"
-}
+# Configurar variables de entorno
+cp .env.example .env.local
+# Editar .env.local con tus credenciales
 
-// Opción 2: Lugar de nacimiento (búsqueda automática)
-{
-  "birthDate": "1974-02-10",
-  "birthTime": "07:30:00",
-  "birthPlace": "Madrid, España",
-  "fullName": "Nombre Completo", 
-  "inputMethod": "location"
-}
-
-// Opción 3: Datos incompletos (hora aproximada)
-{
-  "birthDate": "1974-02-10",
-  "birthTime": "12:00:00", // Mediodía por defecto
-  "birthTimeKnown": false,
-  "birthPlace": "Madrid, España",
-  "fullName": "Nombre Completo",
-  "inputMethod": "location"
-}
+# Ejecutar en desarrollo
+npm run dev
 ```
 
-### **🔄 Próximos a Implementar:**
+---
 
-#### **3. Carta Progresada Corregida**
+## ⚙️ Configuración
+
+### Variables de Entorno Requeridas
+
 ```bash
-POST /api/astrology/progressed-chart-accurate
-```
-**Acción**: Aplicar mismos parámetros corregidos (ayanamsa=0)
-
-#### **4. Eventos Astrológicos Anuales**
-```bash
-GET /api/astrology/annual-events?year=2025&latitude=40.4164&longitude=-3.7025
-```
-**Incluye**: Fases lunares, retrogradaciones, eclipses, tránsitos
-
-#### **6. Búsqueda de Lugares** ⚡
-```bash
-GET /api/astrology/location-search?q=Madrid
-```
-**Función**: Autocompletar lugares y obtener coordenadas automáticamente
-**Incluye**: Coordenadas precisas, timezone, país, región
-
-#### **7. Validador de Datos de Nacimiento**
-```bash
-POST /api/astrology/validate-birth-data
-```
-**Función**: Validar y completar datos de nacimiento incompletos
-**Maneja**: Hora desconocida, coordenadas aproximadas, timezone automático
-
-## 💰 ESTRATEGIA DE MONETIZACIÓN
-
-### **Modelo Freemium** 📊
-- **Gratis**: Carta natal básica + preview de agenda (1 mes)
-- **Básico** (€19/año): Agenda anual completa
-- **Premium** (€39/año): + Google Calendar + actualizaciones mensuales
-- **VIP** (€79/año): + consultas personales + informes especiales
-
-### **Proyección de Ingresos** 📈
-- **Año 1**: 1,000 usuarios → €30,000 (mix de planes)
-- **Año 2**: 5,000 usuarios → €150,000
-- **Año 3**: 15,000 usuarios → €450,000
-
-### **Diferenciadores Únicos** 🌟
-1. **Google Calendar Integration** - Único en el mercado
-2. **Precisión máxima** - Swiss Ephemeris + parámetros corregidos  
-3. **IA personalizada** - Consejos específicos, no genéricos
-4. **Enfoque práctico** - Qué hacer, no solo qué va a pasar
-
-## 🚀 PRÓXIMOS PASOS INMEDIATOS
-
-### **Próximos Pasos Inmediatos (Esta Semana)**
-
-#### **🔄 Prioridad 1: UX Carta Progresada y Agenda IA**
-- [ ] **Arreglar UX carta progresada** - Mejorar interfaz y visualización
-- [ ] **Corregir agenda IA** - Comprobar que está siendo alimentada correctamente por la IA
-- [ ] **Generar todos los meses** - Asegurar que la agenda cubra todo el año astrológico
-- [ ] **Arreglar UX general** - Mejorar experiencia de usuario en todo el flujo
-
-#### **🌟 Prioridad 2: Generación Inteligente con IA (Septiembre 2025)**
-- [ ] **Agenda astrológica completa** y personalizada con IA
-- [ ] **Prompt engineering optimizado** para astrología personalizada
-- [ ] **Generación de interpretaciones** basadas en carta natal + progresada
-- [ ] **Consejos específicos** según tránsitos personales
-- [ ] **Endpoint**: `/api/astrology/generate-agenda-ai`
-
-#### **🚀 Prioridad 3: Deploy y Testing**
-- [ ] **Deploy con últimas correcciones** - Implementar todas las mejoras
-- [ ] **Testing exhaustivo** - Verificar funcionalidad completa
-- [ ] **Optimización de performance** - Mejorar tiempos de carga
-
-### **Septiembre 2025 - Objetivos del Mes**
-- [ ] **Producto funcional completo** (cartas + IA + eventos)
-- [ ] **50 usuarios beta** testeando el producto
-- [ ] **Feedback loop** implementado
-- [ ] **Preparación para Google Calendar** integration
-
-## 📊 CASOS DE PRUEBA VERIFICADOS
-
-### **Datos de Referencia: Verónica (10/02/1974)**
-- **Fecha**: 10 febrero 1974, 07:30 CET
-- **Lugar**: Madrid (40.4164, -3.7025)
-- **Carta natal**: ✅ **100% verificada y precisa**
-- **Carta progresada 2025**: 🔄 Pendiente corrección
-
-### **Resultados Exactos Verificados**:
-- **Sol**: 21°08'22" Acuario Casa 1 ✅
-- **Luna**: 06°03'31" Libra Casa 8 ✅
-- **Ascendente**: 04°09'26" Acuario ✅
-- **Sistema**: Tropical/Placidus ✅
-- **Precisión**: Máxima (coincide 100% con carta de referencia)
-
-## 🧪 PRUEBAS DE API Y DATOS MOCK
-
-### **Estado Actual de la API de Prokerala**
-
-La aplicación está **100% funcional** con un sistema robusto de datos mock mientras se resuelven los créditos de Prokerala:
-
-#### **✅ Funcionando Perfectamente:**
-- **Autenticación**: Token OAuth2 se obtiene correctamente
-- **Credenciales**: Client ID y Secret válidos
-- **Sistema de Fallback**: Datos mock de alta calidad cuando API falla
-- **Interfaz Completa**: Carta progresada visual funciona perfectamente
-- **UX/UI**: Navegación por pestañas, interpretaciones, comparación de cartas
-
-#### **⚠️ Limitación Temporal:**
-- **Créditos Insuficientes**: La cuenta de Prokerala tiene 0 créditos disponibles
-- **Error 403**: "Your account does not have sufficient credit balance"
-- **Solución**: Recargar créditos en Prokerala para activar API real
-
-#### **🎯 Estrategia de Desarrollo:**
-- **Desarrollo Ágil**: Funciona perfectamente con datos mock
-- **Transición Transparente**: Cuando tengas créditos, la API real se activa automáticamente
-- **Calidad Garantizada**: Los datos mock tienen la misma estructura y calidad que la API real
-
-### **Scripts de Prueba Disponibles:**
-
-#### **1. Prueba de Conexión Básica:**
-```bash
-node test-prokerala-connection.js
-```
-- Verifica autenticación OAuth2
-- Prueba endpoints básicos (carta natal, aspectos)
-- Confirma estado de créditos
-
-#### **2. Prueba de Carta Progresada:**
-```bash
-node test-simple-prokerala.js
-```
-- Prueba específicamente la carta progresada
-- Verifica parámetros de API
-- Confirma funcionamiento del endpoint
-
-### **Próximos Pasos para API Real:**
-
-1. **Recargar Créditos**: Agregar créditos a la cuenta de Prokerala
-2. **Verificar Estado**: Confirmar que los créditos aparecen en el dashboard
-3. **Probar API**: Los scripts de prueba confirmarán funcionamiento
-4. **Activación Automática**: La aplicación usará automáticamente la API real
-
-### **Beneficios del Sistema Actual:**
-
-- **🚀 Desarrollo Continuo**: No se detiene el progreso por falta de créditos
-- **🔧 Testing Completo**: Toda la funcionalidad se puede probar exhaustivamente
-- **📊 UX Perfecta**: Los usuarios no notan diferencia entre mock y API real
-- **🔄 Transición Fluida**: Cuando se activen los créditos, todo funciona automáticamente
-
-## 🔧 CONFIGURACIÓN TÉCNICA
-
-### **Variables de Entorno OBLIGATORIAS**:
-```bash
-# Prokerala API (FUNCIONANDO)
-NEXT_PUBLIC_PROKERALA_CLIENT_ID=tu_client_id
-NEXT_PUBLIC_PROKERALA_CLIENT_SECRET=tu_client_secret
-
 # MongoDB
-MONGODB_URI=tu_mongodb_uri
+MONGODB_URI=mongodb+srv://...
 
 # Firebase
-NEXT_PUBLIC_FIREBASE_API_KEY=tu_api_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=tu_auth_domain
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=tu_project_id
+NEXT_PUBLIC_FIREBASE_API_KEY=...
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
 
-# Stripe (Próximamente)
-STRIPE_SECRET_KEY=tu_stripe_secret
-STRIPE_PUBLISHABLE_KEY=tu_stripe_public
+# Prokerala API
+PROKERALA_CLIENT_ID=...
+PROKERALA_CLIENT_SECRET=...
 
-# Google Calendar (Fase 4)  
-GOOGLE_CLIENT_ID=tu_google_client_id
-GOOGLE_CLIENT_SECRET=tu_google_client_secret
+# OpenAI (opcional - fallbacks disponibles)
+OPENAI_API_KEY=sk-...
+
+# Google Calendar (Fase 5)
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
 ```
-
-### **Stack Tecnológico Actual**:
-- **Frontend**: Next.js 15.2.3 + TypeScript + Tailwind CSS
-- **Backend**: Next.js API Routes + MongoDB + Mongoose
-- **Autenticación**: Firebase Authentication
-- **APIs**: Prokerala (Swiss Ephemeris) configurado perfectamente
-- **Despliegue**: Vercel (sin errores)
-
-## 🎯 MÉTRICAS DE ÉXITO
-
-### **KPIs Principales** 📊
-- **Conversión**: Visitante → Usuario registrado (objetivo: 15%)
-- **Activación**: Usuario → Genera primera agenda (objetivo: 60%)
-- **Retención**: Usuarios activos mes 2 (objetivo: 60%)
-- **Monetización**: Freemium → Pago (objetivo: 8%)
-- **NPS**: Net Promoter Score (objetivo: >50)
-
-### **Métricas Google Calendar** (Fase 4) 📅
-- **Adopción**: % usuarios premium que conectan calendar
-- **Engagement**: Interacciones con eventos astrológicos
-- **Retention boost**: Mejora en retención vs usuarios sin integración
-
-## 🔍 PROBLEMAS RESUELTOS
-
-### **✅ CRÍTICOS SOLUCIONADOS:**
-
-#### **❌ → ✅ Carta natal imprecisa**
-- **Causa**: `ayanamsa=1` (Lahiri/Sideral)
-- **Solución**: `ayanamsa=0` (Tropical/Occidental)
-- **Estado**: **RESUELTO** - Precisión 100%
-
-#### **❌ → ✅ Luna en signo incorrecto**  
-- **Causa**: Coordenadas imprecisas + sistema sideral
-- **Solución**: Coordenadas exactas (4 decimales) + tropical
-- **Estado**: **RESUELTO** - Datos exactos verificados
-
-#### **❌ → ✅ Build fails en Vercel**
-- **Causa**: Exportaciones inválidas en route handlers
-- **Solución**: Limpiar exports incorrectos
-- **Estado**: **RESUELTO** - Deploy sin errores
-
-#### **❌ → ✅ Timezone parsing error**
-- **Causa**: URL encoding incorrecto de `+` → espacio
-- **Solución**: Usar `%2B` para `+` en URL encoding
-- **Estado**: **RESUELTO** - Formato ISO correcto
-
-## 📞 CONTACTO Y RECURSOS
-
-**Email**: wunjocreations@gmail.com  
-**Proyecto**: Tu Vuelta al Sol - Agenda Astrológica Personalizada  
-**Repositorio**: Privado  
-**Despliegue**: Vercel  
 
 ---
 
-**Última actualización**: 27 Mayo 2025  
-**Estado del proyecto**: Foundation astrológica completa ✅  
-**Próximo hito**: IA + Eventos anuales (Septiembre 2025) 🎯  
-**Funcionalidad estrella**: Google Calendar Integration (Agosto 2025) 🚀  
-**Visión**: La app de astrología más práctica y útil del mercado hispanohablante 🌟
+## 📁 Estructura del Proyecto
+
+```
+src/
+├── app/
+│   ├── globals.css
+│   ├── layout.tsx
+│   ├── page.tsx
+│   ├── favicon.ico
+│   ├── (auth)/                    # Autenticación (login/register)
+│   ├── (dashboard)/
+│   │   ├── natal-chart/page.tsx   # Carta Natal
+│   │   └── progressed-chart/page.tsx  # Solar Return (temporal naming)
+│   ├── admin/page.tsx
+│   ├── api/
+│   │   ├── admin/
+│   │   ├── astrology/
+│   │   │   ├── generate-agenda-ai/route.ts  # Generación agenda IA
+│   │   │   ├── natal-chart/route.ts
+│   │   │   └── interpret-progressed/route.ts
+│   │   ├── birth-data/route.ts
+│   │   ├── cache/
+│   │   ├── charts/
+│   │   │   ├── natal/route.ts             # Cálculo carta natal
+│   │   │   └── progressed/route.ts        # Cálculo Solar Return ✅
+│   │   ├── debug/
+│   │   ├── events/
+│   │   ├── geocode/
+│   │   ├── interpretations/
+│   │   ├── pdf/
+│   │   ├── prokerala/
+│   │   ├── reverse-geocode/
+│   │   ├── test-mongodb/
+│   │   └── users/
+│   ├── clear-chart-cache/
+│   ├── debug/
+│   ├── postman-test/
+│   ├── test-agenda-ai/
+│   ├── test-api/
+│   ├── test-chart-display/
+│   ├── test-mongodb/
+│   ├── test-natal-chart/
+│   ├── test-progressed/
+│   ├── test-timezone/
+│   ├── types/
+│   └── cspell.config.js
+│
+├── components/
+│   ├── admin/
+│   │   ├── BirthDataAdminTable.tsx
+│   │   └── DeleteUserForm.tsx
+│   ├── astrology/
+│   │   ├── AgendaAIDisplay.tsx
+│   │   ├── AgendaLoadingStates.tsx
+│   │   ├── AscendantCard.tsx
+│   │   ├── AspectControlPanel.tsx
+│   │   ├── AspectLines.tsx
+│   │   ├── AstrologicalAgenda.tsx
+│   │   ├── AstrologicalAgendaGenerator.tsx
+│   │   ├── AstrologicalCalendar.tsx
+│   │   ├── BirthDataCard.tsx
+│   │   ├── BirthDataForm.tsx
+│   │   ├── ChartComparisonComponent.tsx
+│   │   ├── ChartDisplay.tsx              # Visualización cartas ✅
+│   │   ├── ChartTooltips.tsx
+│   │   ├── ChartWheel.tsx
+│   │   ├── CombinedAscendantMCCard.tsx
+│   │   ├── CosmicFootprint.tsx
+│   │   ├── ElementsModalitiesCard.tsx
+│   │   ├── HouseGrid.tsx
+│   │   ├── InterpretationButton.tsx      # Botón interpretación ✅
+│   │   ├── MidheavenCard.tsx
+│   │   ├── NatalChartWheel.tsx
+│   │   ├── PlanetSymbol.tsx
+│   │   ├── ProgressedChartVisual.tsx
+│   │   ├── ProgressedInterpretationDisplay.tsx
+│   │   ├── SectionMenu.tsx
+│   │   └── tooltips/
+│   ├── auth/
+│   │   ├── LoginForm.tsx
+│   │   └── RegisterForm.tsx
+│   ├── dashboard/
+│   │   └── BirthDataForm.tsx
+│   ├── debug/
+│   │   └── ForceRegenerateChart.tsx
+│   ├── layout/
+│   │   ├── Footer.tsx
+│   │   └── PrimaryHeader.tsx
+│   ├── test/
+│   │   ├── AgendaAITest.tsx
+│   │   ├── GenerateAgendaAITest.tsx
+│   │   ├── MongoDBTest.tsx
+│   │   ├── NatalChartTest.tsx
+│   │   ├── OpenAITest.tsx
+│   │   ├── PostmanTest.tsx
+│   │   ├── ProkeralaNatalTest.tsx
+│   │   ├── SimpleTimezonetest.tsx
+│   │   └── TimezoneTestComponent.tsx
+│   └── ui/
+│       ├── Alert.tsx
+│       ├── Button.tsx
+│       └── Input.tsx
+│
+├── models/
+│   ├── AIUsage.ts
+│   ├── BirthData.ts               # Modelo datos nacimiento
+│   ├── Chart.ts                   # Modelo cartas (Natal/Solar Return)
+│   └── User.ts                    # Modelo usuario
+│
+├── types/
+│   ├── astrology/
+│   │   └── unified-types.ts       # Tipos TypeScript
+│   └── astrology.ts
+│
+├── services/
+│   ├── astrologicalEventsService.ts
+│   ├── astrologyService.ts
+│   ├── batchInterpretations.ts
+│   ├── cacheService.ts
+│   ├── chartCalculationsService.ts
+│   ├── chartInterpretationsService.ts
+│   ├── chartRenderingService.tsx
+│   ├── educationalInterpretationService.ts
+│   ├── prokeralaService.ts
+│   ├── solarReturnInterpretationService.ts  # Solar Return ✅
+│   ├── trainedAssistantService.ts
+│   ├── userDataService.ts
+│   └── progressedChartService.tsx  # 🔶 Disponible pero no en uso
+│
+├── utils/
+│   ├── agendaCalculator.ts
+│   ├── dateTimeUtils.ts
+│   ├── astrology/
+│   │   ├── calculations.ts        # Cálculos astrológicos
+│   │   └── intelligentFallbacks.ts # Fallbacks locales
+│   └── prompts/
+│       ├── disruptivePrompts.ts   # Prompts natales
+│       └── solarReturnPrompts.ts  # Prompts Solar Return (NEW) 📝
+│
+├── context/
+│   ├── AuthContext.tsx
+│   └── NotificationContext.tsx
+│
+├── hooks/
+│   ├── useAspects.ts
+│   ├── useChart.ts
+│   ├── useChartDisplay.ts
+│   ├── usePlanets.ts
+│   ├── useProkeralaApi.ts
+│   ├── astrology/
+│   └── lib/
+│
+└── lib/
+    ├── db.ts                      # MongoDB connection
+    ├── firebase.ts
+    ├── firebaseAdmin.ts
+    ├── firebase-client.ts
+    ├── utils.ts
+    ├── firebase/
+    └── prokerala/
+
+public/
+├── file.svg
+├── globe.svg
+├── next.svg
+├── site.webmanifest
+├── vercel.svg
+└── window.svg
+
+scripts/
+├── diagnose-mongodb.js
+├── fix-quotes.sh
+├── insert-test-user-birthdata.js
+├── parse_and_chunk_pdfs.js
+└── professional-quote-fix.sh
+
+astrology_books/
+└── chunks.json                    # Knowledge base para IA
+
+📋 Key Files:
+├── README.md                      # Documentación del proyecto
+├── TODO.md                        # Lista de tareas
+├── PLAN_ACCION_INTERPRETACION.md # Plan de interpretación
+└── Prokerala_Carta_Natal.postman_collection.json # Testing API
+```
+
+### 🔑 Archivos Críticos para Solar Return
+
+**Pendientes de crear** (según artifacts generados):
+```
+📝 src/utils/prompts/solarReturnPrompts.ts      # Prompts específicos
+📝 src/app/api/astrology/interpret-solar-return/route.ts  # API endpoint
+```
+
+**Archivos a modificar**:
+```
+🔧 src/components/astrology/InterpretationButton.tsx  # Agregar soporte solar-return
+🔧 src/app/(dashboard)/progressed-chart/page.tsx      # Cambiar de progressed a solar-return
+```
+
+### 📊 Estado de Implementación
+
+| Componente | Estado | Prioridad |
+|-----------|--------|-----------|
+| Cálculo Solar Return | ✅ Funcional | Completado |
+| Prompts Solar Return | 📝 Pendiente | Alta |
+| API Interpretación | 📝 Pendiente | Alta |
+| InterpretationButton | 🔧 Modificar | Alta |
+| Página Solar Return | 🔧 Modificar | Media |
+| Integración Agenda | ⏳ Siguiente fase | Media |
+
+---
+
+## 🎯 Decisiones de Arquitectura
+
+### ¿Por qué Solar Return en lugar de Carta Progresada?
+
+**Para Agenda Anual**:
+
+1. **Claridad temporal**: Solar Return = exactamente 12 meses
+2. **Comparación directa**: Fácil ver qué cambió vs carta natal
+3. **Interpretación precisa**: Planetas en nuevas casas = áreas de vida activadas
+4. **Experiencia usuario**: Más intuitivo entender "tu año solar"
+
+**Carta Progresada** sigue siendo valiosa para:
+- Desarrollo personal a largo plazo
+- Evolución de la identidad
+- Ciclos de maduración
+- Análisis de vida completa
+
+**Solución**: Usar ambas en fases futuras, cada una para su propósito específico.
+
+---
+
+## 📞 Contacto y Soporte
+
+- **Email**: wunjocreations@gmail.com
+- **Instagram**: @wunjocreations
+- **Website**: [tu-vuelta-al-sol.com](#)
+
+---
+
+## 📄 Licencia
+
+© 2025 Wunjo Creations. Todos los derechos reservados.
+
+---
+
+## 🙏 Agradecimientos
+
+- Prokerala por la API de cálculos astrológicos
+- OpenAI por las capacidades de interpretación
+- Comunidad astrológica evolutiva
+
+---
+
+**Última actualización**: 29 de septiembre de 2025  
+**Versión**: 2.0 (Solar Return Integration)  
+**Estado**: 🚀 Desarrollo Activo - Agenda Anual con Solar Return# 🌅 Tu Vuelta al Sol
+
+## Plataforma de Astrología Evolutiva Personalizada
+
+Sistema completo de interpretación astrológica que combina cartas natales, Solar Return y agenda anual personalizada con enfoque transformacional y antifragilidad.
+
+---
+
+## 📋 Tabla de Contenidos
+
+- [Arquitectura del Sistema](#arquitectura-del-sistema)
+- [Tipos de Cartas Astrológicas](#tipos-de-cartas-astrológicas)
+- [Roadmap de Desarrollo](#roadmap-de-desarrollo)
+- [Stack Tecnológico](#stack-tecnológico)
+- [Instalación](#instalación)
+- [Configuración](#configuración)
+- [Estructura del Proyecto](#estructura-del-proyecto)
+
+---
+
+## 🏗️ Arquitectura del Sistema
+
+### Componentes Principales
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    USUARIO                              │
+└──────────────────┬──────────────────────────────────────┘
+                   │
+         ┌─────────┴─────────┐
+         │                   │
+    ┌────▼────┐      ┌──────▼──────┐
+    │  Carta  │      │    Solar    │
+    │  Natal  │      │   Return    │
+    └────┬────┘      └──────┬──────┘
+         │                  │
+         │         ┌────────▼────────┐
+         └────────►│     Agenda      │
+                   │  Personalizada  │
+                   │     Anual       │
+                   └─────────────────┘
+```
+
+### Flujo de Datos
+
+1. **Usuario ingresa datos de nacimiento** → Base de datos
+2. **Sistema calcula Carta Natal** → Carta de referencia permanente
+3. **Sistema calcula Solar Return anual** → Carta para el año actual
+4. **IA genera interpretaciones** → Análisis personalizado
+5. **Sistema crea Agenda Anual** → Eventos + Consejos específicos
+
+---
+
+## 📊 Tipos de Cartas Astrológicas
+
+### 1. ⭐ Carta Natal (Fundamento)
+
+**Concepto**: "Fotografía" del cielo en el momento exacto de tu nacimiento.
+
+**Características**:
+- ✅ Posiciones planetarias FIJAS
+- ✅ Tu "ADN cósmico" inmutable
+- ✅ Base para todas las demás técnicas
+
+**Uso en el sistema**:
+- Punto de referencia permanente
+- Análisis de personalidad base
+- Comparación con otras cartas
+
+**Estado**: ✅ **IMPLEMENTADO Y FUNCIONAL**
+
+---
+
+### 2. 🌅 Solar Return / Vuelta al Sol (Anual)
+
+**Concepto**: Carta levantada para el momento exacto cuando el Sol regresa a su posición natal cada año.
+
+**Características**:
+- ☀️ Sol FIJO en posición natal (ej: 21° Acuario)
+- 🔄 Otros planetas en NUEVAS posiciones
+- 🏠 Ascendente ANUAL diferente
+- 📅 Casas redistribuidas según ubicación actual
+
+**Diferencias clave**:
+```
+NATAL                    SOLAR RETURN
+Sol: 21° Acuario    →    Sol: 21° Acuario (MISMO)
+Luna: 6° Libra      →    Luna: 16° Leo (CAMBIA)
+ASC: 11° Cáncer     →    ASC: 27° Libra (CAMBIA)
+```
+
+**Uso en el sistema**:
+- ✅ Interpretación de energías del año solar
+- ✅ Predicción de áreas de vida activadas
+- ✅ Base para generación de Agenda Anual
+- ✅ Identificación de momentos clave del año
+
+**Ventajas para Agenda Anual**:
+- Enfoque claro en un período de 12 meses
+- Comparación directa: Natal vs Solar Return
+- Identificación precisa de planetas en nuevas casas
+- Interpretación de cambio de Ascendente anual
+
+**Estado**: ✅ **IMPLEMENTADO Y FUNCIONAL**
+
+**Endpoints**:
+- `POST /api/charts/progressed` → Genera Solar Return
+- `POST /api/astrology/interpret-solar-return` → Interpreta Solar Return
+
+---
+
+### 3. 📈 Carta Progresada (Evolutiva)
+
+> **⚠️ NOTA IMPORTANTE**: Por ahora NO estamos utilizando Carta Progresada en el flujo principal. Hemos optado por **Solar Return** para la agenda anual porque ofrece mejores resultados para planificación de 12 meses.
+
+**Concepto**: Evolución gradual de la carta natal donde cada día después del nacimiento = 1 año de vida.
+
+**Características**:
+- 🌱 Sol AVANZA ~1° por año
+- 📅 Evolución día a día = año a año
+- 🔄 Desarrollo personal gradual
+- 🎯 Muestra maduración del potencial natal
+
+**Diferencias con Solar Return**:
+```
+PROGRESADA (día 51 = edad 51)    SOLAR RETURN (año 2025)
+Sol: 22° Acuario (avanzó 1°) →   Sol: 21° Acuario (fijo)
+Luna: 25° Libra (avanzó)      →   Luna: 16° Leo (nueva posición)
+Enfoque: EVOLUCIÓN             →   Enfoque: ENERGÍAS ANUALES
+```
+
+**Por qué NO la usamos ahora**:
+- ❌ Enfoque de desarrollo a largo plazo (no ideal para agenda anual)
+- ❌ Cambios muy sutiles año a año
+- ❌ Más compleja de interpretar para eventos específicos
+- ✅ Solar Return da resultados más claros para planificación anual
+
+**Futuro de la Carta Progresada**:
+- 📅 **Fase 5** (Septiembre-Diciembre 2025): Posible reintegración
+- 🎯 Uso combinado: Progresada para evolución personal + Solar Return para eventos anuales
+- 💡 Interpretaciones comparativas entre ambas técnicas
+
+**Estado**: 🔶 **IMPLEMENTADO PERO NO EN USO ACTIVO**
+
+**Código disponible**:
+- Backend: `/api/charts/progressed` (funcional)
+- Frontend: `/progressed-chart` (disponible pero no en menú principal)
+- Servicios: `progressedChartService.ts` (completo)
+
+---
+
+## 🗺️ Roadmap de Desarrollo
+
+### ✅ Fase 1: Foundation Astrológica (COMPLETADA)
+
+- [x] Modelo de datos (MongoDB)
+- [x] Cálculo de Carta Natal (Prokerala API)
+- [x] Cálculo de Solar Return (Prokerala API)
+- [x] Cálculo de Carta Progresada (disponible)
+- [x] Sistema de usuarios y autenticación
+- [x] Visualización de cartas astrológicas
+
+### 🔄 Fase 2: Interpretación con IA + UX/UI (EN CURSO - ESTA SEMANA)
+
+#### 📝 A. Sistema de Interpretación Solar Return
+
+**Prioridad ALTA - Implementar primero**:
+
+- [ ] **Crear archivo**: `src/utils/prompts/solarReturnPrompts.ts`
+  - Prompts específicos Solar Return
+  - Fallbacks locales inteligentes
+  - Estructura planeta por planeta
+  
+- [ ] **Crear endpoint**: `src/app/api/astrology/interpret-solar-return/route.ts`
+  - API interpretación Solar Return
+  - Integración OpenAI
+  - Sistema de caché
+  
+- [ ] **Actualizar**: `src/components/astrology/InterpretationButton.tsx`
+  - Agregar soporte `type="solar-return"`
+  - Modal específico Solar Return
+  - Carga de carta natal automática
+
+#### 🎨 B. Mejoras UX/UI Dashboard
+
+**Dashboard - 4 Pasos Numerados**:
+
+- [ ] Cambiar de 3 bloques a 4 bloques con números de paso:
+  ```
+  1️⃣ Datos de Nacimiento
+  2️⃣ Carta Natal
+  3️⃣ Tu Revolución Solar (nuevo nombre)
+  4️⃣ Tu Agenda Astrológica Personalizada
+  ```
+
+**Nomenclatura Nueva**:
+- [ ] Cambiar "Carta Progresada" → "Tu Revolución Solar" en menú superior
+- [ ] Actualizar breadcrumbs y títulos de página
+- [ ] Rename URL `/progressed-chart` → `/revolucion-solar` (opcional, no crítico)
+
+#### 🎨 C. Sección Flotante Lateral
+
+**En páginas**: Natal Chart y Solar Return
+
+**Ubicación**: Panel flotante a la derecha (siempre visible)
+
+**Contenido** (orden específico):
+```
+🔮 Interpretar Carta [Natal/Solar]
+🔄 Regenerar Carta
+```
+
+**Implementación**:
+- [ ] Crear componente `FloatingActionPanel.tsx`
+- [ ] Integrar en `natal-chart/page.tsx`
+- [ ] Integrar en `progressed-chart/page.tsx` (Revolución Solar)
+- [ ] Diseño responsive (ocultar en móvil, mostrar en menú)
+
+#### 🎨 D. Menú Superior de Interpretación
+
+**Actualizar componente modal de interpretación**:
+
+**Actual**:
+```
+Regenerar | Copiar | TXT | ✕
+```
+
+**Nuevo** (orden específico):
+```
+📄 Descargar | 🔄 Regenerar | 💳 Quiero verlo entero | ✕
+```
+
+**Cambios específicos**:
+- [ ] Eliminar botón "Copiar"
+- [ ] Cambiar "TXT" → "Descargar" (genera PDF)
+- [ ] Agregar "💳 Quiero verlo entero" → Link a plan de pago
+- [ ] Implementar generación PDF básica
+
+#### 📊 E. Estructura Interpretación Mejorada
+
+**Ampliar interpretación actual de**:
+```
+⭐ Tu Esencia Revolucionaria
+🎯 Tu Propósito de Vida
+```
+
+**A estructura completa**:
+```
+⭐ Tu Esencia Revolucionaria
+🎯 Tu Propósito de Vida
+
+☉ Sol en [Signo] → Propósito de Vida
+   - Posición: [Grado]° [Signo] - Casa [X]
+   - Significado detallado
+
+☽ Luna en [Signo] → Tus emociones
+   - Posición: [Grado]° [Signo] - Casa [X]
+   - Significado detallado
+
+☿ Mercurio en [Signo] → Cómo piensas y hablas
+♀ Venus en [Signo] → Cómo amas
+♂ Marte en [Signo] → Cómo enfrentas la vida
+♃ Júpiter en [Signo] → Tu suerte, tus ganancias
+♄ Saturno en [Signo] → Karma, responsabilidades
+♅ Urano en [Signo] → Tu revolución personal
+♆ Neptuno en [Signo] → Tu conexión espiritual
+♇ Plutón en [Signo] → Tu transformación profunda
+
+🏠 Ascendente en [Signo] → Tu personalidad
+```
+
+**Implementación**:
+- [ ] Actualizar prompts (natal + solar return)
+- [ ] Actualizar componente modal interpretación
+- [ ] Agregar iconos planetas
+- [ ] Diseño visual mejorado con secciones colapsables
+
+#### 🎨 F. Limpieza Home Post-Interpretación
+
+**Problema**: Después de generar interpretación, aparecen botones duplicados en home
+
+**Solución**:
+- [ ] Eliminar botones "Regenerar" y "Ver Completo" que aparecen en dashboard después de interpretación
+- [ ] Mantener solo los 4 bloques principales del dashboard
+- [ ] Los botones de acción solo deben estar DENTRO del modal de interpretación
+
+---
+
+### 📅 Fase 3: Agenda Personalizada (SIGUIENTE - POST UX/UI)
+
+**Basada en Solar Return**:
+
+- [x] Generación de eventos astrológicos anuales
+- [x] Tránsitos planetarios
+- [x] Lunas Nueva y Llena
+- [x] Retrogradaciones
+- [ ] Interpretaciones personalizadas por evento
+- [ ] Sistema de recomendaciones (rituales, acciones)
+- [ ] UX/UI optimizada para agenda
+- [ ] Exportación a Google Calendar
+
+**Enfoque Antifragilidad**:
+- Preparación mental para eventos
+- Herramientas específicas por fase
+- Patrones personales detectados
+- No predicción pasiva, sino entrenamiento activo
+
+---
+
+### 💰 Fase 4: Monetización (SEPTIEMBRE 2025)
+
+- [ ] Sistema de pagos (Stripe)
+- [ ] Planes de suscripción
+- [ ] Interpretaciones premium completas
+- [ ] Consultas personalizadas
+- [ ] Exportación PDF profesional
+- [ ] Acceso a interpretaciones archivadas
+
+**Plan de Pago - Primer Nivel**:
+- Interpretación completa (todos los planetas detallados)
+- PDF premium descargable
+- Agenda anual sin límites
+- Soporte prioritario
+
+---
+
+### 🔗 Fase 5: Integración Google Calendar (SEPTIEMBRE 2025)
+
+- [ ] OAuth Google
+- [ ] Sincronización bidireccional
+- [ ] Notificaciones automáticas
+- [ ] Recordatorios personalizados
+
+---
+
+### 🚀 Fase 6: Expansión y Optimización (OCT-DIC 2025)
+
+- [ ] Carta Progresada reintegrada
+- [ ] Comparación Progresada vs Solar Return
+- [ ] Análisis de ciclos largos
+- [ ] Machine Learning para patrones
+- [ ] App móvil nativa
+- [ ] Comunidad y networking
+
+---
+
+## 🎯 Checklist Inmediato (Esta Semana)
+
+### Día 1-2: Backend Solar Return
+- [ ] Crear `solarReturnPrompts.ts` con estructura completa planeta por planeta
+- [ ] Crear endpoint `interpret-solar-return/route.ts`
+- [ ] Testing básico de interpretación
+
+### Día 2-3: UX/UI Core
+- [ ] Dashboard 4 bloques numerados
+- [ ] Cambiar "Carta Progresada" → "Tu Revolución Solar" en menú
+- [ ] Actualizar títulos y breadcrumbs
+
+### Día 3-4: Interpretación Mejorada
+- [ ] Modal con estructura planeta por planeta
+- [ ] Menú superior nuevo: Descargar | Regenerar | Ver Completo | ✕
+- [ ] Eliminar botones duplicados en home
+
+### Día 4-5: Panel Flotante + Testing
+- [ ] Componente `FloatingActionPanel.tsx`
+- [ ] Integración en Natal Chart
+- [ ] Integración en Solar Return
+- [ ] Testing completo del flujo
+
+### Opcional (si da tiempo):
+- [ ] Generación PDF básica
+- [ ] Landing page plan de pago
+- [ ] Responsive mobile optimizations
+
+---
+
+## 🛠️ Stack Tecnológico
+
+### Frontend
+- **Next.js 14** (App Router)
+- **React 18**
+- **TypeScript**
+- **Tailwind CSS**
+- **Lucide Icons**
+
+### Backend
+- **Next.js API Routes**
+- **MongoDB + Mongoose**
+- **Firebase Authentication**
+
+### APIs Externas
+- **Prokerala Astrology API** (cálculos astrológicos)
+- **OpenAI GPT-4** (interpretaciones IA)
+- **Google Calendar API** (futura integración)
+
+### Deployment
+- **Vercel** (hosting y CI/CD)
+- **MongoDB Atlas** (base de datos)
+
+---
+
+## 🚀 Instalación
+
+```bash
+# Clonar repositorio
+git clone https://github.com/tu-usuario/tu-vuelta-al-sol.git
+cd tu-vuelta-al-sol
+
+# Instalar dependencias
+npm install
+
+# Configurar variables de entorno
+cp .env.example .env.local
+# Editar .env.local con tus credenciales
+
+# Ejecutar en desarrollo
+npm run dev
+```
+
+---
+
+## ⚙️ Configuración
+
+### Variables de Entorno Requeridas
+
+```bash
+# MongoDB
+MONGODB_URI=mongodb+srv://...
+
+# Firebase
+NEXT_PUBLIC_FIREBASE_API_KEY=...
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
+
+# Prokerala API
+PROKERALA_CLIENT_ID=...
+PROKERALA_CLIENT_SECRET=...
+
+# OpenAI (opcional - fallbacks disponibles)
+OPENAI_API_KEY=sk-...
+
+# Google Calendar (Fase 5)
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+```
+
+---
+
+## 📁 Estructura del Proyecto
+
+```
+src/
+├── app/
+│   ├── globals.css
+│   ├── layout.tsx
+│   ├── page.tsx
+│   ├── favicon.ico
+│   ├── (auth)/                    # Autenticación (login/register)
+│   ├── (dashboard)/
+│   │   ├── natal-chart/page.tsx   # Carta Natal
+│   │   └── progressed-chart/page.tsx  # Solar Return (temporal naming)
+│   ├── admin/page.tsx
+│   ├── api/
+│   │   ├── admin/
+│   │   ├── astrology/
+│   │   │   ├── generate-agenda-ai/route.ts  # Generación agenda IA
+│   │   │   ├── natal-chart/route.ts
+│   │   │   └── interpret-progressed/route.ts
+│   │   ├── birth-data/route.ts
+│   │   ├── cache/
+│   │   ├── charts/
+│   │   │   ├── natal/route.ts             # Cálculo carta natal
+│   │   │   └── progressed/route.ts        # Cálculo Solar Return ✅
+│   │   ├── debug/
+│   │   ├── events/
+│   │   ├── geocode/
+│   │   ├── interpretations/
+│   │   ├── pdf/
+│   │   ├── prokerala/
+│   │   ├── reverse-geocode/
+│   │   ├── test-mongodb/
+│   │   └── users/
+│   ├── clear-chart-cache/
+│   ├── debug/
+│   ├── postman-test/
+│   ├── test-agenda-ai/
+│   ├── test-api/
+│   ├── test-chart-display/
+│   ├── test-mongodb/
+│   ├── test-natal-chart/
+│   ├── test-progressed/
+│   ├── test-timezone/
+│   ├── types/
+│   └── cspell.config.js
+│
+├── components/
+│   ├── admin/
+│   │   ├── BirthDataAdminTable.tsx
+│   │   └── DeleteUserForm.tsx
+│   ├── astrology/
+│   │   ├── AgendaAIDisplay.tsx
+│   │   ├── AgendaLoadingStates.tsx
+│   │   ├── AscendantCard.tsx
+│   │   ├── AspectControlPanel.tsx
+│   │   ├── AspectLines.tsx
+│   │   ├── AstrologicalAgenda.tsx
+│   │   ├── AstrologicalAgendaGenerator.tsx
+│   │   ├── AstrologicalCalendar.tsx
+│   │   ├── BirthDataCard.tsx
+│   │   ├── BirthDataForm.tsx
+│   │   ├── ChartComparisonComponent.tsx
+│   │   ├── ChartDisplay.tsx              # Visualización cartas ✅
+│   │   ├── ChartTooltips.tsx
+│   │   ├── ChartWheel.tsx
+│   │   ├── CombinedAscendantMCCard.tsx
+│   │   ├── CosmicFootprint.tsx
+│   │   ├── ElementsModalitiesCard.tsx
+│   │   ├── HouseGrid.tsx
+│   │   ├── InterpretationButton.tsx      # Botón interpretación ✅
+│   │   ├── MidheavenCard.tsx
+│   │   ├── NatalChartWheel.tsx
+│   │   ├── PlanetSymbol.tsx
+│   │   ├── ProgressedChartVisual.tsx
+│   │   ├── ProgressedInterpretationDisplay.tsx
+│   │   ├── SectionMenu.tsx
+│   │   └── tooltips/
+│   ├── auth/
+│   │   ├── LoginForm.tsx
+│   │   └── RegisterForm.tsx
+│   ├── dashboard/
+│   │   └── BirthDataForm.tsx
+│   ├── debug/
+│   │   └── ForceRegenerateChart.tsx
+│   ├── layout/
+│   │   ├── Footer.tsx
+│   │   └── PrimaryHeader.tsx
+│   ├── test/
+│   │   ├── AgendaAITest.tsx
+│   │   ├── GenerateAgendaAITest.tsx
+│   │   ├── MongoDBTest.tsx
+│   │   ├── NatalChartTest.tsx
+│   │   ├── OpenAITest.tsx
+│   │   ├── PostmanTest.tsx
+│   │   ├── ProkeralaNatalTest.tsx
+│   │   ├── SimpleTimezonetest.tsx
+│   │   └── TimezoneTestComponent.tsx
+│   └── ui/
+│       ├── Alert.tsx
+│       ├── Button.tsx
+│       └── Input.tsx
+│
+├── models/
+│   ├── AIUsage.ts
+│   ├── BirthData.ts               # Modelo datos nacimiento
+│   ├── Chart.ts                   # Modelo cartas (Natal/Solar Return)
+│   └── User.ts                    # Modelo usuario
+│
+├── types/
+│   ├── astrology/
+│   │   └── unified-types.ts       # Tipos TypeScript
+│   └── astrology.ts
+│
+├── services/
+│   ├── astrologicalEventsService.ts
+│   ├── astrologyService.ts
+│   ├── batchInterpretations.ts
+│   ├── cacheService.ts
+│   ├── chartCalculationsService.ts
+│   ├── chartInterpretationsService.ts
+│   ├── chartRenderingService.tsx
+│   ├── educationalInterpretationService.ts
+│   ├── prokeralaService.ts
+│   ├── solarReturnInterpretationService.ts  # Solar Return ✅
+│   ├── trainedAssistantService.ts
+│   ├── userDataService.ts
+│   └── progressedChartService.tsx  # 🔶 Disponible pero no en uso
+│
+├── utils/
+│   ├── agendaCalculator.ts
+│   ├── dateTimeUtils.ts
+│   ├── astrology/
+│   │   ├── calculations.ts        # Cálculos astrológicos
+│   │   └── intelligentFallbacks.ts # Fallbacks locales
+│   └── prompts/
+│       ├── disruptivePrompts.ts   # Prompts natales
+│       └── solarReturnPrompts.ts  # Prompts Solar Return (NEW) 📝
+│
+├── context/
+│   ├── AuthContext.tsx
+│   └── NotificationContext.tsx
+│
+├── hooks/
+│   ├── useAspects.ts
+│   ├── useChart.ts
+│   ├── useChartDisplay.ts
+│   ├── usePlanets.ts
+│   ├── useProkeralaApi.ts
+│   ├── astrology/
+│   └── lib/
+│
+└── lib/
+    ├── db.ts                      # MongoDB connection
+    ├── firebase.ts
+    ├── firebaseAdmin.ts
+    ├── firebase-client.ts
+    ├── utils.ts
+    ├── firebase/
+    └── prokerala/
+
+public/
+├── file.svg
+├── globe.svg
+├── next.svg
+├── site.webmanifest
+├── vercel.svg
+└── window.svg
+
+scripts/
+├── diagnose-mongodb.js
+├── fix-quotes.sh
+├── insert-test-user-birthdata.js
+├── parse_and_chunk_pdfs.js
+└── professional-quote-fix.sh
+
+astrology_books/
+└── chunks.json                    # Knowledge base para IA
+
+📋 Key Files:
+├── README.md                      # Documentación del proyecto
+├── TODO.md                        # Lista de tareas
+├── PLAN_ACCION_INTERPRETACION.md # Plan de interpretación
+└── Prokerala_Carta_Natal.postman_collection.json # Testing API
+```
+
+### 🔑 Archivos Críticos para Solar Return
+
+**Pendientes de crear** (según artifacts generados):
+```
+📝 src/utils/prompts/solarReturnPrompts.ts      # Prompts específicos
+📝 src/app/api/astrology/interpret-solar-return/route.ts  # API endpoint
+```
+
+**Archivos a modificar**:
+```
+🔧 src/components/astrology/InterpretationButton.tsx  # Agregar soporte solar-return
+🔧 src/app/(dashboard)/progressed-chart/page.tsx      # Cambiar de progressed a solar-return
+```
+
+### 📊 Estado de Implementación
+
+| Componente | Estado | Prioridad |
+|-----------|--------|-----------|
+| Cálculo Solar Return | ✅ Funcional | Completado |
+| Prompts Solar Return | 📝 Pendiente | Alta |
+| API Interpretación | 📝 Pendiente | Alta |
+| InterpretationButton | 🔧 Modificar | Alta |
+| Página Solar Return | 🔧 Modificar | Media |
+| Integración Agenda | ⏳ Siguiente fase | Media |
+
+---
+
+## 🎯 Decisiones de Arquitectura
+
+### ¿Por qué Solar Return en lugar de Carta Progresada?
+
+**Para Agenda Anual**:
+
+1. **Claridad temporal**: Solar Return = exactamente 12 meses
+2. **Comparación directa**: Fácil ver qué cambió vs carta natal
+3. **Interpretación precisa**: Planetas en nuevas casas = áreas de vida activadas
+4. **Experiencia usuario**: Más intuitivo entender "tu año solar"
+
+**Carta Progresada** sigue siendo valiosa para:
+- Desarrollo personal a largo plazo
+- Evolución de la identidad
+- Ciclos de maduración
+- Análisis de vida completa
+
+**Solución**: Usar ambas en fases futuras, cada una para su propósito específico.
+
+---
+
+## 📞 Contacto y Soporte
+
+- **Email**: wunjocreations@gmail.com
+- **Instagram**: @wunjocreations
+- **Website**: [tu-vuelta-al-sol.com](#)
+
+---
+
+## 📄 Licencia
+
+© 2025 Wunjo Creations. Todos los derechos reservados.
+
+---
+
+## 🙏 Agradecimientos
+
+- Prokerala por la API de cálculos astrológicos
+- OpenAI por las capacidades de interpretación
+- Comunidad astrológica evolutiva
+
+---
+
+**Última actualización**: 29 de septiembre de 2025  
+**Versión**: 2.0 (Solar Return Integration)  
+**Estado**: 🚀 Desarrollo Activo - Agenda Anual con Solar Return

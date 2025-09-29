@@ -157,22 +157,27 @@ export async function POST(request: NextRequest) {
       const offset = getTimezoneOffset(timezone || 'UTC');
       const datetime = `${birthDate}T${formattedBirthTime}${offset}`;
       
-      // Create URL with parameters in the exact format needed
-      const url = new URL(`${API_BASE_URL}/astrology/natal-chart`);
-      url.searchParams.append('profile[datetime]', datetime);
-      url.searchParams.append('profile[coordinates]', `${latitude},${longitude}`);
-      url.searchParams.append('birth_time_unknown', 'false');
-      url.searchParams.append('house_system', 'placidus');
-      url.searchParams.append('orb', 'default');
-      url.searchParams.append('birth_time_rectification', 'flat-chart');
-      url.searchParams.append('aspect_filter', 'all');
-      url.searchParams.append('la', 'es');
-      url.searchParams.append('ayanamsa', '0');
+      // ✅ CORREGIDO: Usar endpoint natal-aspect-chart con método GET
+      const apiUrl = 'https://api.prokerala.com/v2/astrology/natal-aspect-chart';
+
+      const params = new URLSearchParams({
+        'profile[datetime]': datetime,
+        'profile[coordinates]': `${latitude},${longitude}`,
+        'profile[birth_time_unknown]': 'false',
+        'house_system': 'placidus',
+        'orb': 'default',
+        'birth_time_rectification': 'flat-chart',
+        'aspect_filter': 'all',
+        'la': 'es',
+        'ayanamsa': '0'
+      });
+
+      const url = `${apiUrl}?${params}`;
       
       console.log('Prokerala natal chart request URL:', url.toString());
       
       // Make the request
-      const response = await axios.get(url.toString(), {
+      const response = await axios.get(url, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json'

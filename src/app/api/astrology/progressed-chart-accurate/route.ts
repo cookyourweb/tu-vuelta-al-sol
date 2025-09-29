@@ -157,23 +157,29 @@ export async function POST(request: NextRequest) {
       const offset = getTimezoneOffset(timezone || 'UTC');
       const datetime = `${birthDate}T${formattedBirthTime}${offset}`;
 
-      // Create URL with parameters in the exact format needed for progressed chart
-      const url = new URL(`${API_BASE_URL}/astrology/progression-chart`);
-      url.searchParams.append('profile[datetime]', datetime);
-      url.searchParams.append('profile[coordinates]', `${latitude},${longitude}`);
-      url.searchParams.append('progression_year', progressionYear?.toString() || new Date().getFullYear().toString());
-      url.searchParams.append('birth_time_unknown', 'false');
-      url.searchParams.append('house_system', 'placidus');
-      url.searchParams.append('orb', 'default');
-      url.searchParams.append('birth_time_rectification', 'flat-chart');
-      url.searchParams.append('aspect_filter', 'all');
-      url.searchParams.append('la', 'es');
-      url.searchParams.append('ayanamsa', '0'); // ✅ CRÍTICO: Usar Tropical (0) no Sideral (1)
+      // ✅ CORREGIDO: Usar endpoint progression-chart con método GET
+      const apiUrl = 'https://api.prokerala.com/v2/astrology/progression-chart';
 
-      console.log('Prokerala progressed chart request URL:', url.toString());
+      const params = new URLSearchParams({
+        'profile[datetime]': datetime,
+        'profile[coordinates]': `${latitude},${longitude}`,
+        'profile[birth_time_unknown]': 'false',
+        'progression_year': progressionYear?.toString() || new Date().getFullYear().toString(),
+        'current_coordinates': `${latitude},${longitude}`,
+        'house_system': 'placidus',
+        'orb': 'default',
+        'birth_time_rectification': 'flat-chart',
+        'aspect_filter': 'all',
+        'la': 'es',
+        'ayanamsa': '0'
+      });
+
+      const url = `${apiUrl}?${params}`;
+
+      console.log('Prokerala progressed chart request URL:', url);
 
       // Make the request
-      const response = await axios.get(url.toString(), {
+      const response = await axios.get(url, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json'

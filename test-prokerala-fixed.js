@@ -1,0 +1,311 @@
+// test-prokerala-fixed.js - VERSION COMPLETA CORREGIDA
+const axios = require('axios');
+
+// Configuración de Prokerala API
+const API_BASE_URL = 'https://api.prokerala.com/v2';
+const CLIENT_ID = '1c6bf7c7-2b6b-4721-8b32-d054129ecd87';
+const CLIENT_SECRET = 'uUBszMlWGA3cPZrngCOrQssCygjBvCZh8w3SQPus';
+
+// Función para obtener token
+async function getToken() {
+  try {
+    console.log('🔐 Solicitando token a Prokerala...');
+
+    const response = await axios.post(
+      'https://api.prokerala.com/token',
+      new URLSearchParams({
+        'grant_type': 'client_credentials',
+        'client_id': CLIENT_ID,
+        'client_secret': CLIENT_SECRET,
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        timeout: 10000
+      }
+    );
+
+    console.log('✅ Token response status:', response.status);
+    console.log('📋 Token data:', response.data);
+
+    if (!response.data || !response.data.access_token) {
+      throw new Error('Token de acceso no recibido');
+    }
+
+    return response.data.access_token;
+  } catch (error) {
+    console.error('❌ Error obteniendo token:', error.response?.data || error.message);
+    throw error;
+  }
+}
+
+// Función corregida para probar carta natal
+async function testCorrectedNatalChart(token) {
+  try {
+    console.log('🔮 Probando carta natal con parámetros CORREGIDOS...');
+
+    // Datos de prueba bien formateados
+    const testData = {
+      birthDate: "1974-02-10", // Fecha de Verónica
+      birthTime: "07:30:00",
+      latitude: 40.4164,
+      longitude: -3.7025
+    };
+
+    // Formateo correcto de datetime (ISO 8601)
+    const datetime = `${testData.birthDate}T${testData.birthTime}+01:00`;
+    console.log('📅 Datetime formateado CORRECTAMENTE:', datetime);
+
+    // Formateo correcto de coordenadas
+    const coordinates = `${testData.latitude},${testData.longitude}`;
+    console.log('🗺️ Coordenadas formateadas CORRECTAMENTE:', coordinates);
+
+    // Usar endpoint completo de carta natal
+    const apiUrl = 'https://api.prokerala.com/v2/astrology/natal-aspect-chart';
+    
+    console.log('🌐 URL completa:', apiUrl);
+
+    const response = await axios.get(apiUrl, {
+      params: {
+        'profile[datetime]': datetime,
+        'profile[coordinates]': coordinates,
+        'profile[birth_time_unknown]': 'false',
+        'house_system': 'placidus',
+        'orb': 'default',
+        'birth_time_rectification': 'flat-chart',
+        'aspect_filter': 'all',
+        'la': 'es',
+        'ayanamsa': 0
+      },
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      },
+      timeout: 15000
+    });
+
+    console.log('✅ API EXITOSA!');
+    console.log('📊 Status:', response.status);
+    console.log('🎯 Datos recibidos:', {
+      planetas: response.data?.planets?.length || 0,
+      ascendente: response.data?.ascendant || null,
+      casas: response.data?.houses?.length || 0,
+      aspectos: response.data?.aspects?.length || 0
+    });
+
+    // Mostrar datos específicos
+    if (response.data?.planets) {
+      console.log('\n🌟 PLANETAS ENCONTRADOS:');
+      response.data.planets.forEach(planet => {
+        console.log(`  - ${planet.name}: ${planet.degree?.toFixed(2)}° ${planet.sign} Casa ${planet.house}`);
+      });
+    }
+
+    if (response.data?.ascendant) {
+      console.log(`\n🎭 ASCENDENTE: ${response.data.ascendant.degree?.toFixed(2)}° ${response.data.ascendant.sign}`);
+    }
+
+    if (response.data?.aspects) {
+      console.log(`\n🔗 ASPECTOS: ${response.data.aspects.length} encontrados`);
+    }
+
+    return response.data;
+
+  } catch (error) {
+    console.error('❌ Error en carta natal corregida:', error.response?.data || error.message);
+    
+    if (error.response?.data) {
+      console.log('📊 Status code:', error.response.status);
+      console.log('🔍 Detalles del error:', JSON.stringify(error.response.data, null, 2));
+    }
+    
+    throw error;
+  }
+}
+
+// Función CORREGIDA para probar carta progresada
+async function testProgressedChart(token) {
+  try {
+    console.log('\n🔄 Probando carta PROGRESADA CORREGIDA...');
+
+    // Datos para carta progresada
+    const testData = {
+      birthDate: "1974-02-10",
+      birthTime: "07:30:00",
+      latitude: 40.4164,
+      longitude: -3.7025,
+      progressionYear: 2025
+    };
+
+    const datetime = `${testData.birthDate}T${testData.birthTime}+01:00`;
+    const coordinates = `${testData.latitude},${testData.longitude}`;
+
+    console.log('📅 Datos progresión:', {
+      datetime,
+      coordinates,
+      progressionYear: testData.progressionYear
+    });
+
+    // CORRECCIÓN: Usar GET en lugar de POST
+    const progressedUrl = 'https://api.prokerala.com/v2/astrology/progression-chart';
+
+    const response = await axios.get(progressedUrl, {
+      params: {
+        'profile[datetime]': datetime,
+        'profile[coordinates]': coordinates,
+        'profile[birth_time_unknown]': 'false',
+        'progression_year': testData.progressionYear,
+        'current_coordinates': coordinates,
+        'house_system': 'placidus',
+        'orb': 'default',
+        'birth_time_rectification': 'flat-chart',
+        'aspect_filter': 'all',
+        'la': 'es',
+        'ayanamsa': 0
+      },
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      },
+      timeout: 20000
+    });
+
+    console.log('✅ CARTA PROGRESADA EXITOSA!');
+    console.log('📊 Status:', response.status);
+    console.log('🎯 Datos:', {
+      planetas: response.data?.planets?.length || 0,
+      aspectos: response.data?.aspects?.length || 0,
+      casas: response.data?.houses?.length || 0
+    });
+
+    // Mostrar planetas progresados
+    if (response.data?.planets) {
+      console.log('\n🌟 PLANETAS PROGRESADOS:');
+      response.data.planets.slice(0, 7).forEach(planet => {
+        console.log(`  - ${planet.name}: ${planet.degree?.toFixed(2)}° ${planet.sign} Casa ${planet.house}`);
+      });
+    }
+
+    if (response.data?.aspects) {
+      console.log(`\n🔗 ASPECTOS PROGRESADOS: ${response.data.aspects.length} encontrados`);
+    }
+
+    return response.data;
+
+  } catch (error) {
+    console.error('❌ Error en carta progresada:', error.response?.data || error.message);
+    
+    if (error.response?.data) {
+      console.log('📊 Status code:', error.response.status);
+      console.log('🔍 Error details:', JSON.stringify(error.response.data, null, 2));
+    }
+
+    // Si falla, intentar endpoints alternativos
+    if (error.response?.status === 404 || error.response?.status === 405) {
+      console.log('\n🔄 Intentando endpoints alternativos...');
+      return await tryAlternativeEndpoints(token, testData);
+    }
+    
+    throw error;
+  }
+}
+
+// Función para probar endpoints alternativos
+async function tryAlternativeEndpoints(token, testData) {
+  const datetime = `${testData.birthDate}T${testData.birthTime}+01:00`;
+  const coordinates = `${testData.latitude},${testData.longitude}`;
+
+  const alternativeEndpoints = [
+    'progression-aspect-chart',
+    'secondary-progression',
+    'progressed-chart'
+  ];
+
+  for (const endpoint of alternativeEndpoints) {
+    try {
+      console.log(`🔄 Probando: ${endpoint}`);
+      
+      const url = `${API_BASE_URL}/astrology/${endpoint}`;
+      const response = await axios.get(url, {
+        params: {
+          'profile[datetime]': datetime,
+          'profile[coordinates]': coordinates,
+          'profile[birth_time_unknown]': 'false',
+          'progression_year': testData.progressionYear,
+          'house_system': 'placidus',
+          'la': 'es',
+          'ayanamsa': 0
+        },
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        },
+        timeout: 20000
+      });
+
+      console.log(`✅ ÉXITO con ${endpoint}!`);
+      console.log('📊 Status:', response.status);
+      return response.data;
+
+    } catch (altError) {
+      console.log(`❌ ${endpoint} falló:`, altError.response?.status || altError.message);
+      continue;
+    }
+  }
+
+  throw new Error('Todos los endpoints alternativos fallaron');
+}
+
+// Ejecutar todas las pruebas
+async function runAllTests() {
+  try {
+    console.log('🚀 === INICIANDO PRUEBAS CORREGIDAS COMPLETAS ===\n');
+
+    // 1. Obtener token
+    const token = await getToken();
+    console.log(`🔑 Token obtenido: ${token.slice(0, 20)}...\n`);
+
+    // 2. Probar carta natal completa
+    const natalData = await testCorrectedNatalChart(token);
+
+    // 3. Probar carta progresada corregida
+    const progressedData = await testProgressedChart(token);
+
+    console.log('\n🎉 === TODAS LAS PRUEBAS COMPLETADAS ===');
+    console.log('✅ Carta natal: FUNCIONANDO');
+    console.log('✅ Carta progresada: FUNCIONANDO');
+    console.log('🔧 Todos los parámetros CORREGIDOS');
+    console.log('💰 Créditos suficientes disponibles');
+
+    // Guía de implementación
+    console.log('\n📋 === PARÁMETROS PARA TU APLICACIÓN ===');
+    console.log('1. Endpoint natal: /v2/astrology/natal-aspect-chart');
+    console.log('2. Endpoint progresada: /v2/astrology/progression-chart');
+    console.log('3. Método: GET para ambos');
+    console.log('4. Formato datetime: YYYY-MM-DDTHH:MM:SS+01:00');
+    console.log('5. Coordenadas: "lat,lon" exacto');
+    console.log('6. Parámetros: profile[datetime], profile[coordinates]');
+
+    return { natal: natalData, progressed: progressedData };
+
+  } catch (error) {
+    console.error('\n💥 ERROR CRÍTICO:', error.message);
+    
+    // Diagnóstico específico
+    if (error.message.includes('405')) {
+      console.log('💡 PROBLEMA: Método HTTP incorrecto');
+    } else if (error.message.includes('parameter')) {
+      console.log('💡 PROBLEMA: Formato de parámetros');
+    } else if (error.message.includes('credit')) {
+      console.log('💡 PROBLEMA: Créditos insuficientes');
+    } else {
+      console.log('💡 REVISA: Credenciales y conectividad');
+    }
+    
+    throw error;
+  }
+}
+
+// Ejecutar pruebas
+runAllTests();

@@ -67,6 +67,10 @@ export default function BirthDataAdminTable() {
               <th className="border px-2">longitude</th>
               <th className="border px-2">timezone</th>
               <th className="border px-2">fullName</th>
+              <th className="border px-2">livesInSamePlace</th>
+              <th className="border px-2">currentPlace</th>
+              <th className="border px-2">currentLat</th>
+              <th className="border px-2">currentLng</th>
               <th className="border px-2">_id</th>
               <th className="border px-2">Acción</th>
             </tr>
@@ -82,6 +86,10 @@ export default function BirthDataAdminTable() {
                 <td className="border px-2">{row.longitude}</td>
                 <td className="border px-2">{row.timezone || ''}</td>
                 <td className="border px-2">{row.fullName || ''}</td>
+                <td className="border px-2">{row.livesInSamePlace ? 'Sí' : 'No'}</td>
+                <td className="border px-2">{row.currentPlace || '-'}</td>
+                <td className="border px-2">{row.currentLatitude || '-'}</td>
+                <td className="border px-2">{row.currentLongitude || '-'}</td>
                 <td className="border px-2">{row._id}</td>
                 <td className="border px-2">
                   <button

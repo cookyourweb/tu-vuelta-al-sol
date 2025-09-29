@@ -7,9 +7,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { 
-  User, Calendar, Clock, MapPin, Star, AlertCircle, CheckCircle2, 
-  Search, Target, Timer, ArrowRight
+import {
+  User, Calendar, Clock, MapPin, Star, AlertCircle, CheckCircle2,
+  Search, Target, Timer, ArrowRight, Home, Navigation // ✅ Agregar Home y Navigation
 } from 'lucide-react';
 
 // ==========================================
@@ -28,6 +28,13 @@ const schema = z.object({
   timezone: z.string().optional(),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
+
+  // ✅ AGREGAR ESTOS CAMPOS:
+  currentLocationMethod: z.enum(['location', 'coordinates', 'same']).optional(),
+  currentPlace: z.string().optional(),
+  currentLatitude: z.number().optional(),
+  currentLongitude: z.number().optional(),
+  livesInSamePlace: z.boolean(),
 });
 
 type FormData = {
@@ -40,6 +47,13 @@ type FormData = {
   timezone?: string;
   latitude?: number;
   longitude?: number;
+
+  // ✅ AGREGAR ESTOS CAMPOS:
+  currentLocationMethod?: 'location' | 'coordinates' | 'same';
+  currentPlace?: string;
+  currentLatitude?: number;
+  currentLongitude?: number;
+  livesInSamePlace: boolean;
 };
 
 
@@ -117,7 +131,17 @@ export default function BirthDataForm() {
   const [googleCoords, setGoogleCoords] = useState('');
   const [detectedLocation, setDetectedLocation] = useState('');
   const [showDetection, setShowDetection] = useState(false);
-  
+
+  // ✅ NUEVOS ESTADOS PARA UBICACIÓN ACTUAL
+  const [currentLocationMethod, setCurrentLocationMethod] = useState<'location' | 'coordinates' | 'same'>('same');
+  const [currentLocationSuggestions, setCurrentLocationSuggestions] = useState<LocationSuggestion[]>([]);
+  const [selectedCurrentLocation, setSelectedCurrentLocation] = useState<LocationSuggestion | null>(null);
+  const [isCurrentLocationSearching, setIsCurrentLocationSearching] = useState(false);
+  const [currentGoogleCoords, setCurrentGoogleCoords] = useState('');
+  const [currentDetectedLocation, setCurrentDetectedLocation] = useState('');
+  const [showCurrentDetection, setShowCurrentDetection] = useState(false);
+  const [livesInSamePlace, setLivesInSamePlace] = useState(true);
+
   const { user, refreshUser } = useAuth();
   const router = useRouter();
 
@@ -131,6 +155,9 @@ export default function BirthDataForm() {
       inputMethod: 'location',
       birthPlace: '',
       timezone: 'Europe/Madrid',
+      // ✅ AGREGAR:
+      currentLocationMethod: 'same',
+      livesInSamePlace: true,
     }
   });
 
@@ -169,12 +196,51 @@ export default function BirthDataForm() {
     }
   }, []);
 
+  // ✅ NUEVA FUNCIÓN: BÚSQUEDA UBICACIÓN ACTUAL
+  const searchCurrentLocations = useCallback(async (query: string) => {
+    if (query.length < 3) {
+      setCurrentLocationSuggestions([]);
+      return;
+    }
+
+    setIsCurrentLocationSearching(true);
+    try {
+      const response = await fetch(`/api/geocode?q=${encodeURIComponent(query)}`);
+      if (!response.ok) {
+        throw new Error('Error al buscar ubicaciones');
+      }
+
+      const data = await response.json();
+      const locations = data.map((item: any) => ({
+        name: item.display_name,
+        latitude: parseFloat(item.lat),
+        longitude: parseFloat(item.lon),
+        country: item.address?.country || ''
+      }));
+
+      setCurrentLocationSuggestions(locations);
+    } catch (error) {
+      setCurrentLocationSuggestions([]);
+    } finally {
+      setIsCurrentLocationSearching(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (inputMethod === 'location' && watchedBirthPlace) {
       const timer = setTimeout(() => searchLocations(watchedBirthPlace), 500);
       return () => clearTimeout(timer);
     }
   }, [watchedBirthPlace, inputMethod, searchLocations]);
+
+  // ✅ EFECTO PARA UBICACIÓN ACTUAL
+  const watchedCurrentPlace = watch('currentPlace');
+  useEffect(() => {
+    if (currentLocationMethod === 'location' && watchedCurrentPlace) {
+      const timer = setTimeout(() => searchCurrentLocations(watchedCurrentPlace), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [watchedCurrentPlace, currentLocationMethod, searchCurrentLocations]);
 
   // ==========================================
   // MANEJO DE COORDENADAS GOOGLE MAPS
@@ -205,6 +271,26 @@ export default function BirthDataForm() {
     }
   };
 
+  // ✅ NUEVA FUNCIÓN: Manejar coordenadas ubicación actual
+  const handleCurrentCoordsChange = async (coords: string) => {
+    setCurrentGoogleCoords(coords);
+    const parsed = parseCoords(coords);
+    
+    if (parsed) {
+      setCurrentDetectedLocation('Detectando ubicación...');
+      setShowCurrentDetection(true);
+      
+      try {
+        const location = await reverseGeocode(parsed.lat, parsed.lng);
+        setCurrentDetectedLocation(location);
+      } catch (error) {
+        setCurrentDetectedLocation(`${parsed.lat.toFixed(4)}, ${parsed.lng.toFixed(4)}`);
+      }
+    } else {
+      setShowCurrentDetection(false);
+    }
+  };
+
   // ==========================================
   // CARGA DE DATOS EXISTENTES
   // ==========================================
@@ -229,9 +315,36 @@ export default function BirthDataForm() {
             setValue('fullName', data.fullName || user.displayName || '');
             setValue('birthDate', birthDate);
             setValue('birthTime', data.birthTime || '');
+            setBirthTimeKnown(!!(data.birthTime && data.birthTime.trim())); // ✅ Actualizar estado birthTimeKnown
             setValue('birthPlace', data.birthPlace || '');
             setValue('timezone', data.timezone || 'Europe/Madrid');
-            // Lógica coords
+
+            // ✅ CARGAR CAMPOS DE UBICACIÓN ACTUAL
+            setValue('livesInSamePlace', data.livesInSamePlace !== false); // Default true
+            setValue('currentPlace', data.currentPlace || '');
+            setValue('currentLatitude', data.currentLatitude);
+            setValue('currentLongitude', data.currentLongitude);
+            setLivesInSamePlace(data.livesInSamePlace !== false); // Actualizar estado local
+
+            // Configurar método de ubicación actual si no vive en mismo lugar
+            if (data.livesInSamePlace === false) {
+              if (data.currentPlace) {
+                setCurrentLocationMethod('location');
+                setSelectedCurrentLocation({
+                  name: data.currentPlace,
+                  latitude: data.currentLatitude || 0,
+                  longitude: data.currentLongitude || 0,
+                  country: ''
+                });
+              } else if (data.currentLatitude && data.currentLongitude) {
+                setCurrentLocationMethod('coordinates');
+                setCurrentGoogleCoords(`${data.currentLatitude}, ${data.currentLongitude}`);
+                setCurrentDetectedLocation(data.currentPlace || `${data.currentLatitude}, ${data.currentLongitude}`);
+                setShowCurrentDetection(true);
+              }
+            }
+
+            // Lógica coords de nacimiento
             if (data.latitude && data.longitude) {
               setInputMethod('coordinates');
               setGoogleCoords(`${data.latitude}, ${data.longitude}`);
@@ -302,11 +415,41 @@ export default function BirthDataForm() {
         finalPlace = await reverseGeocode(finalLat, finalLng);
       }
 
+      // ✅ PROCESAR UBICACIÓN ACTUAL
+      let currentLat: number | undefined, currentLng: number | undefined, currentPlaceFinal: string | undefined;
+
+      if (!livesInSamePlace) {
+        if (currentLocationMethod === 'location') {
+          if (selectedCurrentLocation) {
+            currentLat = selectedCurrentLocation.latitude;
+            currentLng = selectedCurrentLocation.longitude;
+            currentPlaceFinal = selectedCurrentLocation.name;
+          } else if (data.currentPlace) {
+            const geoResponse = await fetch(`/api/geocode?q=${encodeURIComponent(data.currentPlace)}`);
+            const geoData = await geoResponse.json();
+
+            if (geoData && geoData.length > 0) {
+              currentLat = parseFloat(geoData[0].lat);
+              currentLng = parseFloat(geoData[0].lon);
+              currentPlaceFinal = data.currentPlace;
+            }
+          }
+        } else if (currentLocationMethod === 'coordinates') {
+          const parsed = parseCoords(currentGoogleCoords);
+          if (parsed) {
+            currentLat = parsed.lat;
+            currentLng = parsed.lng;
+            currentPlaceFinal = currentDetectedLocation || `${parsed.lat}, ${parsed.lng}`;
+          }
+        }
+      }
+
       // Formatear coordenadas (4 decimales máximo)
       const lat = Math.round(finalLat * 10000) / 10000;
       const lng = Math.round(finalLng * 10000) / 10000;
       
       const birthData = {
+        uid: user.uid,
         userId: user.uid,
         fullName: data.fullName || user.displayName || 'Usuario',
         birthDate: data.birthDate,
@@ -315,10 +458,16 @@ export default function BirthDataForm() {
         birthPlace: finalPlace,
         latitude: lat,
         longitude: lng,
-        timezone: data.timezone || 'Europe/Madrid'
+        timezone: data.timezone || 'Europe/Madrid',
+
+        // ✅ CAMPOS DE UBICACIÓN ACTUAL
+        livesInSamePlace: livesInSamePlace,
+        currentPlace: currentPlaceFinal,
+        currentLatitude: currentLat,
+        currentLongitude: currentLng,
       };
       
-      console.log('🔍 Enviando datos de nacimiento:', birthData);
+      console.log('� Enviando datos de nacimiento:', birthData);
       const response = await fetch('/api/birth-data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -671,6 +820,152 @@ export default function BirthDataForm() {
                     </div>
                   </div>
                 )}
+
+                {/* Timezone */}
+                <div>
+                  <label className="block text-sm font-semibold text-white mb-2 flex items-center">
+                    <Clock className="w-4 h-4 mr-2" />
+                    Zona horaria
+                  </label>
+                  <select
+                    {...register('timezone')}
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/20 transition-colors"
+                  >
+                    <option value="Europe/Madrid">Europe/Madrid (CET/CEST)</option>
+                    <option value="America/Argentina/Buenos_Aires">America/Argentina/Buenos_Aires</option>
+                    <option value="America/Bogota">America/Bogota</option>
+                    <option value="America/Lima">America/Lima</option>
+                    <option value="America/Mexico_City">America/Mexico_City</option>
+                    <option value="Asia/Tokyo">Asia/Tokyo</option>
+                    <option value="UTC">UTC</option>
+                  </select>
+                </div>
+
+                {/* ✅ NUEVA SECCIÓN: UBICACIÓN ACTUAL */}
+                <div className="pt-6 border-t border-white/20">
+                  <div className="space-y-4">
+                    <label className="block text-sm font-medium text-purple-200 flex items-center">
+                      <Home className="w-4 h-4 mr-2" />
+                      ¿Dónde vives actualmente?
+                      <span className="ml-2 text-xs text-purple-300">(Para Solar Return preciso)</span>
+                    </label>
+                    
+                    {/* Checkbox: "Vivo en el mismo lugar" */}
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="checkbox"
+                        checked={livesInSamePlace}
+                        onChange={(e) => {
+                          setLivesInSamePlace(e.target.checked);
+                          setValue('livesInSamePlace', e.target.checked);
+                          if (e.target.checked) {
+                            setCurrentLocationMethod('same');
+                            setSelectedCurrentLocation(null);
+                            setValue('currentPlace', '');
+                          }
+                        }}
+                        className="rounded border-purple-400/30 bg-white/10 text-purple-400"
+                      />
+                      <label className="text-purple-200 text-sm">
+                        Vivo en el mismo lugar donde nací
+                      </label>
+                    </div>
+
+                    {/* Solo mostrar opciones si NO vive en el mismo lugar */}
+                    {!livesInSamePlace && (
+                      <>
+                        {/* Método de ubicación actual */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <button
+                            type="button"
+                            onClick={() => setCurrentLocationMethod('location')}
+                            className={`p-4 rounded-lg border text-center transition-all ${
+                              currentLocationMethod === 'location'
+                                ? 'border-green-400 bg-green-400/20 text-white'
+                                : 'border-gray-600 bg-white/5 text-gray-300 hover:bg-white/10'
+                            }`}
+                          >
+                            <Search className="w-6 h-6 mx-auto mb-2" />
+                            <div className="font-medium">Buscar lugar actual</div>
+                            <div className="text-sm opacity-75">Ciudad, país</div>
+                          </button>
+                          
+                          <button
+                            type="button"
+                            onClick={() => setCurrentLocationMethod('coordinates')}
+                            className={`p-4 rounded-lg border text-center transition-all ${
+                              currentLocationMethod === 'coordinates'
+                                ? 'border-green-400 bg-green-400/20 text-white'
+                                : 'border-gray-600 bg-white/5 text-gray-300 hover:bg-white/10'
+                            }`}
+                          >
+                            <Navigation className="w-6 h-6 mx-auto mb-2" />
+                            <div className="font-medium">Coordenadas actuales</div>
+                            <div className="text-sm opacity-75">Google Maps</div>
+                          </button>
+                        </div>
+
+                        {/* Campo de ubicación actual */}
+                        {currentLocationMethod === 'location' ? (
+                          <div className="space-y-4">
+                            <input
+                              {...register('currentPlace')}
+                              type="text"
+                              className="w-full px-4 py-3 bg-white/10 border border-green-400/30 rounded-lg text-white placeholder-gray-400"
+                              placeholder="Ej: Barcelona, España"
+                            />
+                            
+                            {currentLocationSuggestions.length > 0 && (
+                              <div className="bg-white/10 border border-green-400/30 rounded-lg max-h-40 overflow-y-auto">
+                                {currentLocationSuggestions.map((location, index) => (
+                                  <button
+                                    key={index}
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedCurrentLocation(location);
+                                      setValue('currentPlace', location.name);
+                                      setCurrentLocationSuggestions([]);
+                                    }}
+                                    className="w-full px-4 py-2 text-left hover:bg-white/10 text-white text-sm border-b border-white/10 last:border-b-0"
+                                  >
+                                    {location.name}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            <div className="bg-gradient-to-r from-green-500/10 to-blue-500/10 border border-green-400/30 rounded-xl p-4">
+                              <h4 className="text-green-300 font-semibold mb-2">Coordenadas actuales de Google Maps</h4>
+                              <p className="text-green-200 text-sm mb-3">
+                                Busca tu ubicación actual en Google Maps y copia las coordenadas.
+                              </p>
+                              
+                              <input
+                                type="text"
+                                value={currentGoogleCoords}
+                                onChange={(e) => handleCurrentCoordsChange(e.target.value)}
+                                className="w-full px-4 py-3 bg-white/10 border border-green-400/30 rounded-lg text-white placeholder-gray-400"
+                                placeholder="Ej: 41.3851, 2.1734"
+                              />
+                              
+                              {showCurrentDetection && (
+                                <div className="mt-3 bg-green-400/10 border border-green-400/30 rounded-lg p-4">
+                                  <div className="flex items-center mb-2">
+                                    <CheckCircle2 className="w-5 h-5 text-green-400 mr-2" />
+                                    <span className="text-green-300 font-medium">Ubicación actual detectada</span>
+                                  </div>
+                                  <p className="text-white">{currentDetectedLocation}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
 
                 {/* Error */}
                 {error && (
