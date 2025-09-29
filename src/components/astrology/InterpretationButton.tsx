@@ -8,7 +8,7 @@ import { Brain, Sparkles, RefreshCw, Eye, X, Star, Target, Zap, Copy, Check, Dow
 import Button from '@/components/ui/Button';
 
 interface InterpretationButtonProps {
-  type: 'natal' | 'progressed';
+  type: 'natal' | 'progressed' | 'solar-return';
   userId: string;
   chartData: any;
   natalChart?: any; // Para progresada
@@ -59,7 +59,10 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
   const modalContentRef = useRef<HTMLDivElement>(null);
 
   const isNatal = type === 'natal';
-  const endpoint = isNatal ? '/api/astrology/interpret-natal' : '/api/astrology/interpret-progressed';
+  const isSolarReturn = type === 'solar-return';
+  const endpoint = isNatal ? '/api/astrology/interpret-natal' :
+                isSolarReturn ? '/api/astrology/interpret-solar-return' :
+                '/api/astrology/interpret-progressed';
 
   // ✅ CARGAR INTERPRETACIONES GUARDADAS AL INICIAR
   useEffect(() => {
@@ -127,13 +130,21 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
     try {
       console.log(`🤖 Generando nueva interpretación ${type} (forzada: ${forceRegenerate})`);
 
-      const requestBody = isNatal 
+      const requestBody = isNatal
         ? {
             userId,
             natalChart: chartData,
             userProfile,
             regenerate: forceRegenerate,
             disruptiveMode: true // ✅ ACTIVAR MODO DISRUPTIVO
+          }
+        : isSolarReturn
+        ? {
+            userId,
+            natalChart: natalChart || {},
+            solarReturnChart: chartData,
+            userProfile,
+            regenerate: forceRegenerate
           }
         : {
             userId,
@@ -489,7 +500,9 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
             ) : (
               <>
                 <Brain className="w-4 h-4 mr-2" />
-                {isNatal ? 'Interpretar Carta Natal Disruptiva' : 'Interpretar Evolución Progresada'}
+                {isNatal ? 'Interpretar Carta Natal Disruptiva' :
+                 isSolarReturn ? 'Interpretar Solar Return Revolucionario' :
+                 'Interpretar Evolución Progresada'}
               </>
             )}
           </Button>
@@ -550,7 +563,9 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                   )}
                   <div>
                     <h3 className="text-2xl font-bold text-white">
-                      {isNatal ? 'Interpretación Revolucionaria Natal' : 'Evolución Progresada Disruptiva'}
+                      {isNatal ? 'Interpretación Revolucionaria Natal' :
+                       isSolarReturn ? 'Solar Return Revolucionario' :
+                       'Evolución Progresada Disruptiva'}
                     </h3>
                     <p className="text-purple-200 text-sm">
                       {userProfile.name} • {new Date(interpretation.generatedAt).toLocaleDateString('es-ES')}

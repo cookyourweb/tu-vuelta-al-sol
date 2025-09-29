@@ -94,8 +94,8 @@ const BirthDataSchema = new Schema<IBirthData>({
 });
 
 // ✅ ÍNDICES para búsquedas eficientes
-BirthDataSchema.index({ userId: 1 });
-BirthDataSchema.index({ uid: 1 }, { sparse: true });
+// BirthDataSchema.index({ userId: 1 }); // ❌ REMOVIDO - ya definido en el campo
+// BirthDataSchema.index({ uid: 1 }, { sparse: true }); // ❌ REMOVIDO - ya definido en el campo
 BirthDataSchema.index({ createdAt: 1 });
 
 // ✅ HOOK PRE-SAVE: Sincronizar uid con userId si no existe
