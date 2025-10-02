@@ -4,6 +4,9 @@ interface SolarReturnData {
   userProfile: {
     name: string;
     age: number;
+    birthPlace: string;
+    birthDate: string;
+    birthTime: string;
   };
   returnYear: number;
 }
