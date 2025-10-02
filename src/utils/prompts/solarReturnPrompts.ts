@@ -1,3 +1,40 @@
+interface SolarReturnData {
+  natalChart: any;
+  solarReturnChart: any;
+  userProfile: {
+    name: string;
+    age: number;
+  };
+  returnYear: number;
+}
+
+// ✅ HELPER FUNCTIONS
+const extractPlanetPosition = (chart: any, planetName: string): any => {
+  if (!chart?.planets) return null;
+  return chart.planets.find((p: any) =>
+    p.name === planetName ||
+    (planetName === 'Sol' && p.name === 'Sun') ||
+    (planetName === 'Luna' && p.name === 'Moon') ||
+    (planetName === 'Marte' && p.name === 'Mars') ||
+    (planetName === 'Venus' && p.name === 'Venus')
+  );
+};
+
+const extractHouseConfig = (chart: any): string => {
+  if (!chart?.planets) return 'Configuración no disponible';
+
+  const sun = extractPlanetPosition(chart, 'Sol');
+  const moon = extractPlanetPosition(chart, 'Luna');
+  const venus = extractPlanetPosition(chart, 'Venus');
+
+  let config = '';
+  if (sun) config += `Sol en ${sun.sign} Casa ${sun.house || sun.houseNumber || '?'}. `;
+  if (moon) config += `Luna en ${moon.sign} Casa ${moon.house || moon.houseNumber || '?'}. `;
+  if (venus) config += `Venus en ${venus.sign} Casa ${venus.house || venus.houseNumber || '?'}. `;
+
+  return config || 'Configuración revolucionaria única';
+};
+
 export const generateSolarReturnMasterPrompt = (data: SolarReturnData): string => {
   const { natalChart, solarReturnChart, userProfile, returnYear } = data;
   
