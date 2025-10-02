@@ -5,12 +5,13 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { 
-  User, 
-  LogOut, 
+import {
+  User,
+  LogOut,
   ChevronDown,
   Star,
   Moon,
+  Sunrise,
   Sparkles,
   Calendar,
   Menu,
@@ -48,10 +49,10 @@ const navItems = [
     icon: Star,      // ⭐ Estrella - Base astrológica
     description: 'Tu mapa astrológico personal'
   },
-  { 
-    href: '/progressed-chart',   
-    label: 'Carta Progresada',   
-    icon: Moon,      // 🌙 Luna - Evolución anual
+  {
+    href: '/progressed-chart',
+    label: 'Retorno Solar',
+    icon: Sunrise,      // 🌅 Sol - Retorno Solar
     description: 'Tu evolución astrológica anual'
   },
   { 

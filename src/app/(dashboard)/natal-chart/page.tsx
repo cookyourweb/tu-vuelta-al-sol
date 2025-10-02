@@ -72,29 +72,40 @@ export default function NatalChartPage() {
   };
 
   // ✅ FUNCIÓN: Cargar datos de nacimiento
-  const loadBirthDataInfo = async () => {
-    try {
-      const response = await fetch(`/api/birth-data?userId=${user?.uid}`);
+ const loadBirthDataInfo = async () => {
+  try {
+    const response = await fetch(`/api/birth-data?userId=${user?.uid}`);
+    
+    if (response.ok) {
+      const result = await response.json();
       
-      if (response.ok) {
-        const result = await response.json();
-        
-        if (result.success && result.data) {
-          setBirthData({
-            birthDate: result.data.birthDate,
-            birthTime: result.data.birthTime,
-            birthPlace: result.data.birthPlace,
-            latitude: result.data.latitude,
-            longitude: result.data.longitude,
-            timezone: result.data.timezone,
-            fullName: result.data.fullName
-          });
-        }
+      // ✅ LOG PARA VER QUÉ LLEGA
+      console.log('🔍 API Response completa:', result.data);
+      console.log('📅 Campos específicos:', {
+        date: result.data.date,
+        birthDate: result.data.birthDate,
+        time: result.data.time,
+        birthTime: result.data.birthTime,
+        location: result.data.location,
+        birthPlace: result.data.birthPlace
+      });
+      
+      if (result.success && result.data) {
+        setBirthData({
+          birthDate: result.data.date || result.data.birthDate,
+          birthTime: result.data.time || result.data.birthTime,
+          birthPlace: result.data.location || result.data.birthPlace,
+          latitude: result.data.latitude,
+          longitude: result.data.longitude,
+          timezone: result.data.timezone,
+          fullName: result.data.fullName
+        });
       }
-    } catch (error) {
-      console.log('⚠️ No se pudieron cargar datos de nacimiento:', error);
     }
-  };
+  } catch (error) {
+    console.log('⚠️ Error:', error);
+  }
+};
 
   // ✅ FUNCIÓN: Cargar carta natal
   const loadChartData = async () => {

@@ -93,21 +93,19 @@ export default function DashboardPage() {
           if (res.ok) {
             const data = await res.json();
             
-            if (data && data.data) {
-              const birthDate = new Date(data.data.birthDate);
-              const formattedDate = birthDate.toLocaleDateString('es-ES');
-              
-              setBirthData({
-                birthDate: formattedDate,
-                birthTime: data.data.birthTime || '',
-                birthPlace: data.data.birthPlace || '',
-                latitude: data.data.latitude,
-                longitude: data.data.longitude,
-                timezone: data.data.timezone || ''
-              });
-              
-              checkNatalChart(user.uid);
-            }
+        if (data && data.data) {
+  const birthDate = new Date(data.data.birthDate || data.data.date);
+  const formattedDate = birthDate.toLocaleDateString('es-ES');
+  
+  setBirthData({
+    birthDate: formattedDate,
+    birthTime: data.data.time || data.data.birthTime || '',        // ← USAR "time"
+    birthPlace: data.data.location || data.data.birthPlace || '',  // ← USAR "location"
+    latitude: data.data.latitude,
+    longitude: data.data.longitude,
+    timezone: data.data.timezone || ''
+  });
+}
           } else {
             console.log('No se encontraron datos de nacimiento');
           }

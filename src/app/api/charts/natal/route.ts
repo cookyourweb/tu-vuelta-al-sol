@@ -741,6 +741,7 @@ export async function POST(request: NextRequest) {
     
     console.log('✅ Datos de nacimiento encontrados:', {
       birthDate: birthData.birthDate,
+      birthTime: birthData.birthTime,
       birthPlace: birthData.birthPlace,
       latitude: birthData.latitude,
       longitude: birthData.longitude

@@ -27,6 +27,9 @@ export interface IChart extends Document {
     createdAt: Date;
   }[];
 
+  // ✅ Carta Solar Return
+  solarReturnChart?: any;
+
   createdAt: Date;
   lastUpdated: Date;
 
@@ -109,7 +112,13 @@ const ChartSchema = new Schema<IChart>({
       default: Date.now
     }
   }],
-  
+
+  // ✅ Carta Solar Return
+  solarReturnChart: {
+    type: Schema.Types.Mixed,
+    default: null
+  },
+
   lastUpdated: {
     type: Date,
     default: Date.now

@@ -264,8 +264,11 @@ const processSolarReturnData = (rawData: any): SolarReturnData => {
     actualData = rawData.data;
   }
   
-  if (rawData.progressedChart) {
-    console.log('⚠️ CUIDADO: Los datos vienen como "progressedChart" pero tratamos como Solar Return');
+  if (rawData.solarReturnChart) {
+    console.log('✅ Datos vienen como solarReturnChart');
+    actualData = rawData.solarReturnChart;
+  } else if (rawData.progressedChart) {
+    console.log('⚠️ Datos vienen como progressedChart (legacy)');
     actualData = rawData.progressedChart;
   }
 
@@ -372,7 +375,7 @@ const SolarReturnPage: React.FC = () => {
       await loadBirthDataInfo();
       
       // ✅ CAMBIAR ENDPOINT A SOLAR RETURN CUANDO ESTÉ DISPONIBLE
-      const response = await fetch(`/api/charts/progressed?userId=${user?.uid}`, {
+      const response = await fetch(`/api/charts/solar-return?userId=${user?.uid}`, {
         method: 'GET'
       });
       
@@ -397,16 +400,15 @@ const SolarReturnPage: React.FC = () => {
       setDebugInfo('📝 Generando Solar Return automáticamente...');
       console.log('📝 No existe Solar Return, generando...');
       
-      // ✅ ENDPOINT CARTA PROGRESADA
-      const generateResponse = await fetch('/api/charts/progressed', {
+      // ✅ ENDPOINT CARTA SOLAR RETURN
+      const generateResponse = await fetch('/api/charts/solar-return', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           userId: user?.uid,
-          regenerate: false,
-          year: new Date().getFullYear()
+          regenerate: false
         })
       });
       
@@ -551,33 +553,16 @@ const SolarReturnPage: React.FC = () => {
           Tu nuevo año astrológico - Las energías que dominarán los próximos 12 meses
         </p>
 
-        {/* Controles */}
-        <div className="flex items-center justify-center space-x-4 mb-6">
-          <Button
-            onClick={() => setShowEducation(!showEducation)}
-            className="bg-amber-600/20 border border-amber-400/30 text-amber-300 hover:bg-amber-600/30"
-          >
-            <BookOpen className="w-4 h-4 mr-2" />
-            {showEducation ? 'Ocultar' : 'Mostrar'} Guía
-          </Button>
-          
-          <Button
-            onClick={() => router.push('/progressed-chart')}
-            className="bg-purple-600/20 border border-purple-400/30 text-purple-300 hover:bg-purple-600/30"
-          >
-            <TrendingUp className="w-4 h-4 mr-2" />
-            Ver Carta Progresada
-          </Button>
-          
-          <Button
-            onClick={() => router.push('/agenda')}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700"
-          >
-            <Calendar className="w-4 h-4 mr-2" />
-            Ver Agenda Anual
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
-        </div>
+{/* Controles */}
+<div className="flex items-center justify-center space-x-4 mb-6">
+  <Button
+    onClick={() => setShowEducation(!showEducation)}
+    className="bg-amber-600/20 border border-amber-400/30 text-amber-300 hover:bg-amber-600/30"
+  >
+    <BookOpen className="w-4 h-4 mr-2" />
+    {showEducation ? 'Ocultar' : 'Mostrar'} Guía
+  </Button>
+</div>
       </div>
 
       {/* Sección Educativa */}
@@ -781,49 +766,35 @@ const SolarReturnPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Botones de acción */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-center">
-        <InterpretationButton
-          chartData={chartData}
-          className="flex-1 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700"
-          type="progressed"
-          userId={user?.uid || ''}
-          userProfile={{
-            name: birthData?.fullName || 'Usuario',
-            age: chartData.solarReturnInfo?.ageAtStart || 0,
-            birthPlace: birthData?.birthPlace || '',
-            birthDate: birthData?.birthDate || '',
-            birthTime: birthData?.birthTime || ''
-          }}
-        />
 
-        <Button
-          onClick={() => router.push('/progressed-chart')}
-          className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 flex items-center justify-center gap-2"
-        >
-          <TrendingUp className="w-4 h-4" />
-          <span>Ver Carta Progresada</span>
-        </Button>
-      </div>
 
-      {/* Call to action final */}
+      {/* Botón de interpretación final - igual que carta natal */}
       <div className="text-center bg-gradient-to-r from-amber-900/20 via-orange-900/20 to-red-900/20 backdrop-blur-sm border border-amber-400/20 rounded-3xl p-8">
         <h2 className="text-2xl font-bold text-amber-300 mb-4 flex items-center justify-center">
           <Gift className="w-6 h-6 mr-3" />
-          Tu Solar Return {chartData.solarReturnInfo?.year || new Date().getFullYear()} está listo
+          🎯 Solar Return {chartData.solarReturnInfo?.year || new Date().getFullYear()} cargado
         </h2>
         <p className="text-amber-200 mb-6 max-w-2xl mx-auto">
-          Tu carta anual está calculada con el Sol fijo en Acuario 21°. Ahora descubre 
-          qué eventos astrológicos específicos te esperan cada mes con tu agenda personalizada.
+          Tu carta anual está calculada con el Sol fijo en Acuario 21°.
+          Descubre el significado profundo de este nuevo ciclo solar.
         </p>
-        <Button
-          onClick={() => router.push('/agenda')}
-          className="bg-gradient-to-r from-amber-600 via-orange-600 to-red-600 text-white hover:from-amber-700 hover:via-orange-700 hover:to-red-700 text-lg px-8 py-3"
-        >
-          <Calendar className="w-5 h-5 mr-3" />
-          Generar Mi Agenda Anual
-          <Sparkles className="w-5 h-5 ml-3" />
-        </Button>
+
+        <div className="flex justify-center">
+          <InterpretationButton
+            chartData={chartData}
+            className="max-w-xl w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700"
+            type="solar-return"
+            userId={user?.uid || ''}
+            userProfile={{
+              name: birthData?.fullName || 'Usuario',
+              age: chartData.solarReturnInfo?.ageAtStart || 0,
+              birthPlace: birthData?.birthPlace || '',
+              birthDate: birthData?.birthDate || '',
+              birthTime: birthData?.birthTime || ''
+            }}
+            natalChart={null}
+          />
+        </div>
       </div>
 
       {/* Debug info */}

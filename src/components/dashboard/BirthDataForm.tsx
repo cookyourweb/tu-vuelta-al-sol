@@ -310,21 +310,30 @@ export default function BirthDataForm() {
           const { data } = await response.json();
           if (data) {
             hasBirthData = true;
-            // Llenar datos de la API birthData
-            const birthDate = data.birthDate ? new Date(data.birthDate).toISOString().split('T')[0] : '';
+
+            // ✅ USAR NOMBRES CORRECTOS DE LA API
+            const birthDate = data.date || data.birthDate
+              ? new Date(data.date || data.birthDate).toISOString().split('T')[0]
+              : '';
+
+            // ✅ FORMATEAR HORA PARA INPUT type="time"
+            const formattedTime = (data.time || data.birthTime)
+              ? (data.time || data.birthTime).split(':').slice(0, 2).join(':')  // "07:30:00" → "07:30"
+              : '';
+
             setValue('fullName', data.fullName || user.displayName || '');
             setValue('birthDate', birthDate);
-            setValue('birthTime', data.birthTime || '');
-            setBirthTimeKnown(!!(data.birthTime && data.birthTime.trim())); // ✅ Actualizar estado birthTimeKnown
-            setValue('birthPlace', data.birthPlace || '');
+            setValue('birthTime', formattedTime);  // ← Usar formattedTime
+            setBirthTimeKnown(!!(formattedTime && formattedTime.trim()));
+            setValue('birthPlace', data.location || data.birthPlace || '');
             setValue('timezone', data.timezone || 'Europe/Madrid');
 
             // ✅ CARGAR CAMPOS DE UBICACIÓN ACTUAL
-            setValue('livesInSamePlace', data.livesInSamePlace !== false); // Default true
+            setValue('livesInSamePlace', data.livesInSamePlace !== false);
             setValue('currentPlace', data.currentPlace || '');
             setValue('currentLatitude', data.currentLatitude);
             setValue('currentLongitude', data.currentLongitude);
-            setLivesInSamePlace(data.livesInSamePlace !== false); // Actualizar estado local
+            setLivesInSamePlace(data.livesInSamePlace !== false);
 
             // Configurar método de ubicación actual si no vive en mismo lugar
             if (data.livesInSamePlace === false) {
@@ -348,7 +357,7 @@ export default function BirthDataForm() {
             if (data.latitude && data.longitude) {
               setInputMethod('coordinates');
               setGoogleCoords(`${data.latitude}, ${data.longitude}`);
-              setDetectedLocation(data.birthPlace || 'Ubicación guardada');
+              setDetectedLocation(data.location || data.birthPlace || 'Ubicación guardada');
               setShowDetection(true);
             }
           }

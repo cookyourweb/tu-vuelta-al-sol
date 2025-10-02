@@ -52,18 +52,25 @@ export default function BirthDataForm() {
           const { data } = await response.json();
           
           if (data) {
-            const birthDate = new Date(data.birthDate);
-            const formattedDate = birthDate.toISOString().split('T')[0];
-            
+            // ✅ USAR NOMBRES CORRECTOS DE LA API
+            const birthDate = data.date || data.birthDate
+              ? new Date(data.date || data.birthDate).toISOString().split('T')[0]
+              : '';
+
             console.log('Datos cargados:', {
               ...data,
-              birthDate: formattedDate,
+              birthDate: birthDate,
             });
-            
+
+            // ✅ FORMATEAR HORA PARA INPUT type="time"
+            const formattedTime = (data.time || data.birthTime)
+              ? (data.time || data.birthTime).split(':').slice(0, 2).join(':')  // "07:30:00" → "07:30"
+              : '';
+
             setValue('fullName', data.fullName || user.displayName || '');
-            setValue('birthDate', formattedDate);
-            setValue('birthTime', data.birthTime || '');
-            setValue('birthPlace', data.birthPlace || '');
+            setValue('birthDate', birthDate);
+            setValue('birthTime', formattedTime);
+            setValue('birthPlace', data.location || data.birthPlace || '');
           } else {
             if (user.displayName) {
               setValue('fullName', user.displayName);
@@ -111,16 +118,18 @@ export default function BirthDataForm() {
         return;
       }
       
-      const birthData = {
-        userId: user.uid,
-        fullName: data.fullName || user.displayName || 'Usuario',
-        birthDate: data.birthDate,
-        birthTime: data.birthTime || '00:00',
-        birthPlace: data.birthPlace,
-        latitude: parseFloat(geoData[0].lat),
-        longitude: parseFloat(geoData[0].lon),
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-      };
+      const birthData: any = {
+  userId: user.uid,
+  fullName: data.fullName || user.displayName || 'Usuario',
+  birthDate: data.birthDate,
+  birthPlace: data.birthPlace,
+  latitude: parseFloat(geoData[0].lat),
+  longitude: parseFloat(geoData[0].lon),
+  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+};// ✅ Solo agregar birthTime si el usuario lo ingresó
+if (data.birthTime && data.birthTime.trim()) {
+  birthData.birthTime = data.birthTime;
+}
       
       console.log('Datos a enviar al servidor:', birthData);
       

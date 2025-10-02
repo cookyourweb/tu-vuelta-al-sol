@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     );
 
     // Combinar eventos interpretados con el resto
-    const allEvents = [
+    const allEvents: AstrologicalEvent[] = [
       ...interpretedEvents,
       ...events.filter((event: any) => !highPriorityEvents.some(hp => hp.id === event.id))
     ];
