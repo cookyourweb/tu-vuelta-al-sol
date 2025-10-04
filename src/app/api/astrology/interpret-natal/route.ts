@@ -233,20 +233,11 @@ function generateFallbackInterpretation(userProfile: UserProfile, chartData: Cha
 }
 
 export async function POST(request: NextRequest) {
-  console.log('🌟 [INTERPRET-NATAL] === INICIO ===');
+  console.log('🌟 [INTERPRET-NATAL] Iniciando interpretación natal');
 
   try {
     const body: NatalInterpretationRequest = await request.json();
     const { userId, natalChart, userProfile, regenerate = false, disruptiveMode = true } = body;
-
-    console.log('📊 [INTERPRET-NATAL] Parámetros recibidos:', {
-      userId,
-      userName: userProfile?.name,
-      planetsCount: natalChart?.planets?.length,
-      disruptiveMode,
-      regenerate,
-      hasOpenAIKey: !!process.env.OPENAI_API_KEY
-    });
 
     if (!userId || !natalChart || !userProfile) {
       return NextResponse.json({
@@ -257,51 +248,35 @@ export async function POST(request: NextRequest) {
 
     // Verificar caché
     const cacheKey = `natal_${userId}_${disruptiveMode ? 'disruptive' : 'standard'}`;
-
-    console.log('🔍 [INTERPRET-NATAL] Verificando caché:', { cacheKey, regenerate });
-
     if (!regenerate) {
       const cached = interpretationCache.get(cacheKey);
       if (cached && (Date.now() - cached.timestamp < CACHE_DURATION)) {
-        console.log('✅ [INTERPRET-NATAL] RETORNANDO DESDE CACHÉ EN MEMORIA');
+        console.log('✅ [INTERPRET-NATAL] Usando interpretación en caché');
         return NextResponse.json({
           success: true,
           data: {
             interpretation: cached.interpretation,
             cached: true,
             generatedAt: new Date(cached.timestamp).toISOString(),
-            method: 'memory_cache'
+            method: 'cached'
           }
         });
       }
-    } else {
-      console.log('🔄 [INTERPRET-NATAL] Regeneración forzada - limpiando caché');
-      interpretationCache.delete(cacheKey);
     }
 
     let interpretation: any;
 
     // Generar interpretación
     if (disruptiveMode && process.env.OPENAI_API_KEY) {
-      console.log('🔥 [INTERPRET-NATAL] Modo DISRUPTIVO - Llamando a OpenAI');
-      console.log('🪐 [INTERPRET-NATAL] Planetas a enviar:', natalChart.planets?.map(p =>
-        `${p.name}: ${p.sign} Casa ${p.houseNumber || p.house || '?'}`
-      ));
-
+      console.log('🔥 [INTERPRET-NATAL] Modo disruptivo con IA activado');
       try {
         interpretation = await generateDisruptiveInterpretation(natalChart, userProfile);
-        console.log('✅ [INTERPRET-NATAL] OpenAI respondió correctamente');
       } catch (error) {
-        console.error('❌ [INTERPRET-NATAL] Error en OpenAI:', error);
-        console.log('📋 [INTERPRET-NATAL] Usando FALLBACK por error de IA');
+        console.warn('⚠️ [INTERPRET-NATAL] IA falló, usando fallback:', error);
         interpretation = generateFallbackInterpretation(userProfile, natalChart);
       }
     } else {
-      if (!disruptiveMode) {
-        console.log('📋 [INTERPRET-NATAL] Modo estándar - usando FALLBACK');
-      } else if (!process.env.OPENAI_API_KEY) {
-        console.log('⚠️ [INTERPRET-NATAL] NO HAY OPENAI_API_KEY - usando FALLBACK');
-      }
+      console.log('📋 [INTERPRET-NATAL] Usando fallback con datos reales');
       interpretation = generateFallbackInterpretation(userProfile, natalChart);
     }
 
@@ -311,8 +286,7 @@ export async function POST(request: NextRequest) {
       timestamp: Date.now()
     });
 
-    console.log('✅ [INTERPRET-NATAL] Interpretación guardada en caché');
-    console.log('📦 [INTERPRET-NATAL] Claves de interpretación:', Object.keys(interpretation));
+    console.log('✅ [INTERPRET-NATAL] Interpretación generada exitosamente');
 
     return NextResponse.json({
       success: true,
@@ -325,11 +299,10 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('❌ [INTERPRET-NATAL] Error general:', error);
+    console.error('❌ [INTERPRET-NATAL] Error:', error);
     return NextResponse.json({
       success: false,
-      error: 'Error interno del servidor',
-      details: error instanceof Error ? error.message : 'Unknown'
+      error: 'Error interno del servidor'
     }, { status: 500 });
   }
 }
