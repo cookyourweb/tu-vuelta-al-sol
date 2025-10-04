@@ -169,22 +169,22 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       }
 
       const result = await response.json();
-      
+
       if (result.success) {
         const newInterpretation = {
-          interpretation: result.interpretation || result.data?.interpretation,
+          interpretation: result.data?.interpretation || result.interpretation, // ← INVERTIR ORDEN
           cached: false,
-          generatedAt: new Date().toISOString(),
-          method: 'api'
+          generatedAt: result.data?.generatedAt || new Date().toISOString(),
+          method: result.data?.method || 'api'
         };
-        
+
         setInterpretation(newInterpretation);
         setHasRecentInterpretation(true);
         setShowModal(true);
 
         // Auto-guardar la nueva interpretación
         await autoSaveInterpretation(newInterpretation);
-        
+
         console.log('✅ Nueva interpretación generada y guardada');
       } else {
         throw new Error(result.error || 'Error desconocido');
@@ -197,22 +197,36 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
     }
   };
 
-  // ✅ FUNCIÓN: Auto-guardar interpretación
+  // ✅ FUNCIÓN CORREGIDA: Auto-guardar interpretación
   const autoSaveInterpretation = async (interpretationData: InterpretationData) => {
     try {
-      await fetch('/api/interpretations/save', {
+      console.log('💾 Guardando interpretación en MongoDB...');
+
+      const response = await fetch('/api/interpretations/save', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           userId,
           chartType: type,
-          interpretation: interpretationData.interpretation,
+          interpretation: interpretationData.interpretation, // ✅ ASEGURAR QUE SEA EL OBJETO CORRECTO
           userProfile,
-          generatedAt: interpretationData.generatedAt
+          generatedAt: interpretationData.generatedAt || new Date().toISOString()
         })
       });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ Interpretación guardada en MongoDB:', data);
+
+        // ✅ RECARGAR LISTA DE INTERPRETACIONES GUARDADAS
+        await loadSavedInterpretations();
+      } else {
+        console.error('❌ Error guardando en MongoDB:', await response.text());
+      }
     } catch (error) {
-      console.error('Error auto-guardando:', error);
+      console.error('❌ Error en autoSave:', error);
     }
   };
 

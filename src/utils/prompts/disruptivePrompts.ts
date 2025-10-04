@@ -1,6 +1,7 @@
 // src/utils/prompts/disruptivePrompts.ts
 // SISTEMA DE PROMPTS DISRUPTIVOS PARA INTERPRETACIONES ASTROLÓGICAS
 
+// ✅ INTERFACES
 export interface ChartData {
   planets: any[];
   houses: any[];
@@ -16,21 +17,64 @@ export interface UserProfile {
   birthTime: string;
 }
 
-// ✅ HELPER CORREGIDO: Extraer configuración principal
+// ✅ HELPER: Extraer signo principal
 const extractMainSign = (chartData: ChartData): string => {
   if (chartData.ascendant?.sign) return chartData.ascendant.sign;
   const sun = chartData.planets?.find(p => p.name === 'Sol' || p.name === 'Sun');
   return sun?.sign || 'Acuario';
 };
 
-// ✅ CORREGIDO: Usar houseNumber en lugar de house
+// ✅ HELPER: Extraer signo solar
+const extractSolarSign = (chartData: ChartData): string => {
+  const sun = chartData.planets?.find(p => p.name === 'Sol' || p.name === 'Sun');
+  return sun?.sign || 'Acuario';
+};
+
+// ✅ HELPER: Extraer grado solar
+const extractSolarDegree = (chartData: ChartData): string => {
+  const sun = chartData.planets?.find(p => p.name === 'Sol' || p.name === 'Sun');
+  return sun?.degree?.toFixed(0) || '0';
+};
+
+// ✅ HELPER: Extraer minutos solar
+const extractSolarMinutes = (chartData: ChartData): string => {
+  const sun = chartData.planets?.find(p => p.name === 'Sol' || p.name === 'Sun');
+  return sun?.minutes?.toString() || '0';
+};
+
+// ✅ HELPER: Extraer casa solar
+const extractSolarHouse = (chartData: ChartData): string => {
+  const sun = chartData.planets?.find(p => p.name === 'Sol' || p.name === 'Sun');
+  return (sun?.houseNumber || sun?.house || '?').toString();
+};
+
+// ✅ HELPER: Significado de casa
+const getCasaMeaning = (house: string | number): string => {
+  const meanings: { [key: string]: string } = {
+    '1': 'identidad y presencia',
+    '2': 'recursos y valores',
+    '3': 'comunicación y aprendizaje',
+    '4': 'hogar y raíces',
+    '5': 'creatividad y romance',
+    '6': 'trabajo y salud',
+    '7': 'relaciones y asociaciones',
+    '8': 'transformación profunda',
+    '9': 'sabiduría y expansión',
+    '10': 'carrera y legado',
+    '11': 'comunidad e ideales',
+    '12': 'espiritualidad y liberación',
+    '?': 'tu zona de poder'
+  };
+  return meanings[house.toString()] || 'tu zona de poder';
+};
+
+// ✅ HELPER: Extraer configuración de casas
 const extractHouseConfig = (chartData: ChartData): string => {
   const sun = chartData.planets?.find(p => p.name === 'Sol' || p.name === 'Sun');
   const moon = chartData.planets?.find(p => p.name === 'Luna' || p.name === 'Moon');
   const venus = chartData.planets?.find(p => p.name === 'Venus');
   
   let config = '';
-  // ✅ CAMBIO CRÍTICO: sun.house → sun.houseNumber
   if (sun) config += `Sol en ${sun.sign} Casa ${sun.houseNumber || sun.house || 'desconocida'}. `;
   if (moon) config += `Luna en ${moon.sign} Casa ${moon.houseNumber || moon.house || 'desconocida'}. `;
   if (venus) config += `Venus en ${venus.sign} Casa ${venus.houseNumber || venus.house || 'desconocida'}. `;
@@ -38,7 +82,7 @@ const extractHouseConfig = (chartData: ChartData): string => {
   return config || 'Configuración revolucionaria única';
 };
 
-// ✅ HELPER NUEVO: Formatear todos los planetas con casas
+// ✅ HELPER: Formatear todos los planetas
 const formatAllPlanets = (chartData: ChartData): string => {
   if (!chartData.planets) return 'Planetas no disponibles';
   
@@ -51,12 +95,19 @@ const formatAllPlanets = (chartData: ChartData): string => {
     .join('\n');
 };
 
-// ✅ PROMPT DISRUPTIVO MEJORADO CON ESTRUCTURA PLANETA POR PLANETA
+// ✅ PROMPT PRINCIPAL NATAL
 export const generateDisruptiveNatalPrompt = (chartData: ChartData, userProfile: UserProfile): string => {
   const mainSign = extractMainSign(chartData);
   const houseConfig = extractHouseConfig(chartData);
   const allPlanets = formatAllPlanets(chartData);
   
+  // Extraer datos específicos para el template
+  const solarSign = extractSolarSign(chartData);
+  const solarDegree = extractSolarDegree(chartData);
+  const solarMinutes = extractSolarMinutes(chartData);
+  const solarHouse = extractSolarHouse(chartData);
+  const casaMeaning = getCasaMeaning(solarHouse);
+
   return `
 Actúa como un astrólogo evolutivo DISRUPTIVO y REVOLUCIONARIO con enfoque transformacional extremo.
 
@@ -73,123 +124,132 @@ ENFOQUE OBLIGATORIO - ASTROLOGÍA ANTIFRAGILE:
 4. PLAN DE ACCIÓN ESPECÍFICO: Qué hacer HOY, ESTA SEMANA, ESTE MES.
 5. INTERPRETACIÓN PLANETA POR PLANETA: Cada planeta debe tener su sección única.
 
-ESTRUCTURA JSON OBLIGATORIA:
+ESTRUCTURA JSON OBLIGATORIA (RESPONDE SOLO CON ESTE JSON, sin markdown ni texto extra):
 {
-  "esencia_revolucionaria": "Declaración potente de 2-3 líneas sobre su naturaleza disruptiva única basada en ${mainSign}",
-  "proposito_vida": "Su misión específica en este planeta - qué vino a revolucionar exactamente",
+  "esencia_revolucionaria": "Declaración potente de 2-3 líneas sobre ${userProfile.name}",
+  "proposito_vida": "Misión específica en este planeta - qué vino a revolucionar",
   
   "planetas": {
     "sol": {
-      "titulo": "☉ Sol en [SIGNO] - Casa [X] → Propósito de Vida",
-      "descripcion": "Interpretación disruptiva del Sol - mínimo 3 párrafos",
-      "poder_especifico": "Qué poder único le da esta posición del Sol",
-      "accion_inmediata": "Qué debe hacer HOY para activar este poder",
-      "ritual": "Ritual específico conectado con su Sol"
+      "titulo": "☉ Sol en ${solarSign} ${solarDegree}° - Casa ${solarHouse} → A qué has venido a este mundo",
+      "posicion_tecnica": "${solarDegree}°${solarMinutes}' ${solarSign} - Casa ${solarHouse} (${casaMeaning})",
+      "descripcion": "Interpretación en 2-3 párrafos NATURALES. Párrafo 1: Explica qué significa el Sol en este signo y casa de forma educativa. Párrafo 2: Cómo se manifiesta específicamente en la vida de ${userProfile.name}. Párrafo 3 (opcional): Retos y oportunidades. Mantén tono disruptivo pero claro.",
+      "poder_especifico": "Poder único que le da esta posición del Sol",
+      "accion_inmediata": "Acción concreta que ${userProfile.name} puede hacer HOY",
+      "ritual": "Ritual específico relacionado con el Sol"
     },
     "luna": {
-      "titulo": "☽ Luna en [SIGNO] - Casa [X] → Tus Emociones",
-      "descripcion": "Interpretación disruptiva de la Luna - mínimo 3 párrafos",
-      "poder_especifico": "Qué poder emocional único tiene",
-      "accion_inmediata": "Cómo honrar sus necesidades lunares HOY",
+      "titulo": "☽ Luna en [Signo Real] [Grado]° - Casa [X] → Tus emociones",
+      "posicion_tecnica": "[Grado]°[Minutos]' [Signo] - Casa [X] ([significado casa])",
+      "descripcion": "2-3 párrafos naturales y educativos sobre emociones",
+      "poder_especifico": "Inteligencia emocional única",
+      "accion_inmediata": "Cómo honrar emociones HOY",
       "ritual": "Ritual lunar específico"
     },
     "mercurio": {
-      "titulo": "☿ Mercurio en [SIGNO] - Casa [X] → Cómo Piensas y Comunicas",
-      "descripcion": "Interpretación de Mercurio - mínimo 2 párrafos",
-      "poder_especifico": "Su genialidad mental única",
-      "accion_inmediata": "Cómo usar su Mercurio hoy"
+      "titulo": "☿ Mercurio en [Signo] [Grado]° - Casa [X] → Cómo piensas y hablas",
+      "posicion_tecnica": "[Grado]°[Minutos]' [Signo] - Casa [X] ([significado])",
+      "descripcion": "2 párrafos sobre mente y comunicación",
+      "poder_especifico": "Genialidad mental única",
+      "accion_inmediata": "Cómo usar Mercurio HOY"
     },
     "venus": {
-      "titulo": "♀ Venus en [SIGNO] - Casa [X] → Cómo Amas y Atraes",
-      "descripcion": "Interpretación de Venus - mínimo 2 párrafos",
-      "poder_especifico": "Su magnetismo único",
-      "accion_inmediata": "Cómo activar su Venus hoy"
+      "titulo": "♀ Venus en [Signo] [Grado]° - Casa [X] → Cómo amas",
+      "posicion_tecnica": "[Grado]°[Minutos]' [Signo] - Casa [X] ([significado])",
+      "descripcion": "2 párrafos sobre amor y valores",
+      "poder_especifico": "Magnetismo único",
+      "accion_inmediata": "Cómo activar Venus HOY"
     },
     "marte": {
-      "titulo": "♂ Marte en [SIGNO] - Casa [X] → Tu Fuerza de Acción",
-      "descripcion": "Interpretación de Marte - mínimo 2 párrafos",
-      "poder_especifico": "Su poder de acción único",
-      "accion_inmediata": "Cómo canalizar su Marte hoy"
+      "titulo": "♂ Marte en [Signo] [Grado]° - Casa [X] → Cómo enfrentas la vida",
+      "posicion_tecnica": "[Grado]°[Minutos]' [Signo] - Casa [X] ([significado])",
+      "descripcion": "2 párrafos sobre acción y deseo",
+      "poder_especifico": "Poder de acción único",
+      "accion_inmediata": "Cómo canalizar Marte HOY"
     },
     "jupiter": {
-      "titulo": "♃ Júpiter en [SIGNO] - Casa [X] → Tu Suerte y Expansión",
-      "descripcion": "Interpretación de Júpiter - mínimo 2 párrafos",
+      "titulo": "♃ Júpiter en [Signo] - Casa [X] → Tu suerte, tus ganancias",
+      "posicion_tecnica": "[Grado]° [Signo] - Casa [X] ([significado])",
+      "descripcion": "2 párrafos sobre expansión y suerte",
       "poder_especifico": "Dónde tiene suerte natural",
-      "accion_inmediata": "Cómo expandir hoy"
+      "accion_inmediata": "Cómo expandir HOY"
     },
     "saturno": {
-      "titulo": "♄ Saturno en [SIGNO] - Casa [X] → Tu Maestría y Karma",
-      "descripcion": "Interpretación de Saturno - mínimo 2 párrafos",
-      "poder_especifico": "Su lección maestra",
-      "accion_inmediata": "Cómo trabajar con Saturno hoy"
+      "titulo": "♄ Saturno en [Signo] - Casa [X] → Tu karma, tus responsabilidades",
+      "posicion_tecnica": "[Grado]° [Signo] - Casa [X] ([significado])",
+      "descripcion": "2 párrafos sobre maestría y lecciones",
+      "poder_especifico": "Lección maestra de vida",
+      "accion_inmediata": "Cómo trabajar con Saturno HOY"
     },
     "urano": {
-      "titulo": "♅ Urano en [SIGNO] - Casa [X] → Tu Revolución Personal",
-      "descripcion": "Interpretación de Urano - mínimo 1 párrafo",
+      "titulo": "♅ Urano en [Signo] - Casa [X] → Tu revolución personal",
+      "posicion_tecnica": "[Grado]° [Signo] - Casa [X] ([significado])",
+      "descripcion": "1-2 párrafos sobre innovación",
       "poder_especifico": "Dónde es revolucionario"
     },
     "neptuno": {
-      "titulo": "♆ Neptuno en [SIGNO] - Casa [X] → Tu Espiritualidad",
-      "descripcion": "Interpretación de Neptuno - mínimo 1 párrafo",
-      "poder_especifico": "Su conexión espiritual única"
+      "titulo": "♆ Neptuno en [Signo] - Casa [X] → Tu espiritualidad",
+      "posicion_tecnica": "[Grado]° [Signo] - Casa [X] ([significado])",
+      "descripcion": "1-2 párrafos sobre conexión espiritual",
+      "poder_especifico": "Conexión espiritual única"
     },
     "pluton": {
-      "titulo": "♇ Plutón en [SIGNO] - Casa [X] → Tu Poder de Transformación",
-      "descripcion": "Interpretación de Plutón - mínimo 1 párrafo",
-      "poder_especifico": "Dónde tiene poder regenerativo"
+      "titulo": "♇ Plutón en [Signo] - Casa [X] → Tu poder de transformación",
+      "posicion_tecnica": "[Grado]° [Signo] - Casa [X] ([significado])",
+      "descripcion": "1-2 párrafos sobre regeneración",
+      "poder_especifico": "Poder regenerativo"
     }
   },
   
-  "plan_accion": {
-    "hoy_mismo": [
-      "Acción específica que puede hacer hoy para activar su poder",
-      "Algo que debe eliminar/rechazar hoy mismo",
-      "Una verdad radical que debe declarar hoy"
+  "integracion_carta": {
+    "titulo": "Integración de tu Carta Natal",
+    "sintesis": "Párrafo integrando los elementos principales de la carta de ${userProfile.name}. Conecta Sol, Luna, Ascendente y configuraciones destacadas en una visión coherente del camino evolutivo.",
+    "elementos_destacados": [
+      "Configuración o patrón destacado 1 (ej: stellium, gran trígono, etc.)",
+      "Configuración o patrón destacado 2"
     ],
-    "esta_semana": [
-      "Proyecto/conexión que debe iniciar esta semana",
-      "Límite que debe establecer esta semana",
-      "Oportunidad que debe rechazar si no honra su naturaleza"
-    ],
-    "este_mes": [
-      "Algo tangible que debe lanzar/crear este mes",
-      "Inversión en su poder personal (educación/herramientas)",
-      "Transformación completa de un área de su vida"
-    ]
+    "camino_evolutivo": "Qué viene a aprender y manifestar ${userProfile.name} en esta encarnación. Visión del propósito global de la carta."
   },
   
-  "declaracion_poder": "Declaración en primera persona que debe repetir diariamente - poderosa, específica a su carta natal",
+  "plan_accion": {
+    "hoy_mismo": ["acción específica 1", "acción 2", "acción 3"],
+    "esta_semana": ["acción 1", "acción 2", "acción 3"],
+    "este_mes": ["acción 1", "acción 2", "acción 3"]
+  },
+  
+  "declaracion_poder": "YO, ${userProfile.name.toUpperCase()}, [declaración poderosa en primera persona]",
   
   "advertencias": [
-    "Advertencia brutalmente honesta sobre lo que le está limitando",
-    "Patrón autodestructivo que debe romper YA",
-    "Mentira que se está diciendo a sí mismo/a"
+    "Advertencia honesta 1 sobre lo que limita a ${userProfile.name}",
+    "Patrón autodestructivo 2",
+    "Mentira que se está diciendo 3"
   ],
   
   "insights_transformacionales": [
-    "3-5 insights específicos basados en sus aspectos exactos",
-    "Cada insight debe conectar posiciones planetarias con PODER REAL"
+    "Insight 1 basado en aspectos reales",
+    "Insight 2",
+    "Insight 3",
+    "Insight 4",
+    "Insight 5"
   ],
   
   "rituales_recomendados": [
-    "3 rituales específicos basados en su configuración astrológica",
-    "Deben ser prácticos y activadores de su esencia"
+    "Ritual 1 específico basado en la configuración",
+    "Ritual 2",
+    "Ritual 3"
   ]
 }
 
-REGLAS CRÍTICAS:
-- USA los datos astrológicos ESPECÍFICOS - menciona grados, casas, aspectos exactos
-- Conecta cada consejo con su configuración planetaria real
-- CADA PLANETA debe tener su interpretación completa - no omitas ninguno
-- EVITA generalidades - todo debe ser específico para ${userProfile.name}
-- Lenguaje directo, sin suavizar - la transformación real requiere honestidad brutal
-- Cada elemento debe activar su ANTIFRAGILIDAD astrológica
-- Los títulos de planetas deben usar los signos y casas REALES de la carta
-
-RESPONDE SOLO CON JSON VÁLIDO - NO agregues explicaciones adicionales.`;
+RECUERDA: 
+- Usa signos, casas y grados REALES de los datos proporcionados
+- Mantén tono disruptivo pero natural y educativo
+- No exageres - sé poderoso pero claro
+- Cada descripción debe tener 2-3 párrafos bien estructurados
+- NO uses markdown, NO agregues texto fuera del JSON
+`;
 };
 
-// ✅ PROMPT DISRUPTIVO PARA CARTA PROGRESADA (también corregido)
+// ✅ PROMPT PROGRESADA
 export const generateDisruptiveProgressedPrompt = (
   progressedChart: ChartData, 
   natalChart: ChartData, 
@@ -265,7 +325,7 @@ REGLAS ESPECÍFICAS:
 RESPONDE SOLO CON JSON VÁLIDO.`;
 };
 
-// ✅ PROMPT PARA AGENDA CON INTERPRETACIONES
+// ✅ PROMPT AGENDA
 export const generateAgendaInterpretationPrompt = (
   userProfile: UserProfile,
   natalChart: ChartData,
@@ -309,7 +369,7 @@ REGLAS:
 RESPONDE CON ARRAY JSON DE 12 EVENTOS.`;
 };
 
-// ✅ FUNCIONES DE UTILIDAD MEJORADAS
+// ✅ UTILIDADES
 export const formatChartForPrompt = (chartData: ChartData): string => {
   if (!chartData) return 'Datos no disponibles';
   

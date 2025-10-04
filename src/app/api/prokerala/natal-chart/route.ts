@@ -541,13 +541,17 @@ function processChartData(apiResponse: unknown, latitude: number, longitude: num
   // ✅ Process planets - USAR ESTRUCTURA CORRECTA
   const planets = (data.planet_positions || data.planets || []).map((planet: unknown) => {
     const p = planet as any;
+    const houseValue = p.house_number || p.house || p.housePosition || 1; // ← Obtener valor de casa
+
     return {
       name: translatePlanetNameToSpanish(p.name),
       sign: p.zodiac?.name || getSignNameFromLongitude(p.longitude),
       degree: Math.floor(p.degree || (p.longitude % 30)),
       minutes: Math.floor(((p.degree || p.longitude) % 1) * 60),
       retrograde: p.is_retrograde || false,
-      housePosition: p.house_number || p.house || 1
+      housePosition: houseValue,  // ← Para el servicio
+      houseNumber: houseValue,    // ← Para los prompts (NUEVO)
+      house: houseValue           // ← Para compatibilidad (NUEVO)
     };
   });
 

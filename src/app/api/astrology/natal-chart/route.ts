@@ -222,13 +222,17 @@ function processChartData(apiResponse: unknown, latitude: number, longitude: num
   // Process planets
   const planets = (data.planets || []).map((planet: unknown) => {
     const p = planet as any;
+    const houseValue = p.house_number || p.house || p.housePosition || 1; // ← Obtener valor de casa
+
     return {
       name: translatePlanetNameToSpanish(p.name),
       sign: p.sign || getSignNameFromLongitude(p.longitude),
       degree: Math.floor(p.longitude % 30),
       minutes: Math.floor((p.longitude % 1) * 60),
       retrograde: p.is_retrograde || false,
-      housePosition: p.house || 1
+      housePosition: houseValue,  // ← Para el servicio
+      houseNumber: houseValue,    // ← Para los prompts (NUEVO)
+      house: houseValue           // ← Para compatibilidad (NUEVO)
     };
   });
 

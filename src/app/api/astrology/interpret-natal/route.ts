@@ -1,6 +1,4 @@
 // src/app/api/astrology/interpret-natal/route.ts
-// ENDPOINT ACTUALIZADO PARA INTERPRETACIÓN NATAL DISRUPTIVA
-
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import {
@@ -10,7 +8,7 @@ import {
   type UserProfile
 } from '@/utils/prompts/disruptivePrompts';
 
-// Cache en memoria para evitar regenerar interpretaciones duplicadas
+// Cache en memoria
 const interpretationCache = new Map<string, { interpretation: any; timestamp: number }>();
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 horas
 
@@ -31,24 +29,48 @@ function getOpenAIClient() {
   });
 }
 
-// ✅ FUNCIÓN: Generar interpretación disruptiva
+// Helper para significados de casas
+function getCasaMeaning(house: any): string {
+  const meanings: { [key: number]: string } = {
+    1: 'identidad y presencia',
+    2: 'recursos y valores',
+    3: 'comunicación y aprendizaje',
+    4: 'hogar y raíces',
+    5: 'creatividad y romance',
+    6: 'trabajo y salud',
+    7: 'relaciones y asociaciones',
+    8: 'transformación profunda',
+    9: 'sabiduría y expansión',
+    10: 'carrera y legado',
+    11: 'comunidad e ideales',
+    12: 'espiritualidad y liberación'
+  };
+  return meanings[Number(house)] || 'tu zona de poder';
+}
+
+// ✅ FUNCIÓN ACTUALIZADA CON LOGS
 async function generateDisruptiveInterpretation(
   chartData: ChartData,
   userProfile: UserProfile
 ): Promise<any> {
   const openai = getOpenAIClient();
-
   const prompt = generateDisruptiveNatalPrompt(chartData, userProfile);
 
-  console.log('🔥 Generando interpretación disruptiva con prompt:', prompt.substring(0, 200) + '...');
+  // ✅ LOGS INICIALES
+  console.log('🤖 === LLAMANDO A OPENAI PARA INTERPRETACIÓN ===');
+  console.log('👤 Usuario:', userProfile.name);
+  console.log('🪐 Planetas enviados:', chartData.planets?.length);
+  console.log('🏠 Planetas con casa definida:', chartData.planets?.filter(p => p.houseNumber || p.house).length);
+  console.log('📝 Longitud del prompt:', prompt.length, 'caracteres');
+  console.log('📄 Preview del prompt (primeros 200 chars):', prompt.substring(0, 200) + '...');
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4-turbo-preview",
+      model: "gpt-4o",
       messages: [
         {
           role: "system",
-          content: "Eres un astrólogo evolutivo revolucionario. Respondes SOLO con JSON válido, sin texto adicional. Tu enfoque es disruptivo, transformacional y activador de poder personal."
+          content: "Eres un astrólogo evolutivo revolucionario siguiendo el sistema de TuVueltaAlSol.es. CRÍTICO: Debes responder con JSON válido COMPLETO. Asegúrate de cerrar TODAS las strings, arrays y objetos. Si te quedas sin espacio, prioriza completar el JSON correctamente aunque acortes contenido. Mantén un tono disruptivo pero educativo, como en los ejemplos proporcionados."
         },
         {
           role: "user",
@@ -56,120 +78,231 @@ async function generateDisruptiveInterpretation(
         }
       ],
       temperature: 0.8,
-      max_tokens: 2000,
+      max_tokens: 8000,
     });
 
     const response = completion.choices[0]?.message?.content;
+
+    // ✅ LOGS DE RESPUESTA
+    console.log('✅ RESPUESTA DE OPENAI RECIBIDA');
+    console.log('📏 Longitud de respuesta:', response?.length || 0, 'caracteres');
+    console.log('🔤 Primeros 300 chars:', response?.substring(0, 300));
+    console.log('🔤 Últimos 200 chars:', response?.substring((response?.length || 0) - 200));
 
     if (!response) {
       throw new Error('No se recibió respuesta de OpenAI');
     }
 
-    // Limpiar respuesta y parsear JSON
-    const cleanedResponse = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    // Limpiar respuesta
+    let cleanedResponse = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+
+    // ✅ INTENTAR REPARAR JSON INCOMPLETO
+    if (!cleanedResponse.endsWith('}')) {
+      console.warn('⚠️ JSON incompleto detectado, intentando reparar...');
+      
+      const openBraces = (cleanedResponse.match(/{/g) || []).length;
+      const closeBraces = (cleanedResponse.match(/}/g) || []).length;
+      const missing = openBraces - closeBraces;
+      
+      console.log(`🔧 Faltan ${missing} llaves de cierre`);
+      
+      // Cerrar strings abiertas
+      const openQuotes = (cleanedResponse.match(/"/g) || []).length;
+      if (openQuotes % 2 !== 0) {
+        console.log('🔧 Cerrando comilla abierta');
+        cleanedResponse += '"';
+      }
+      
+      // Cerrar llaves faltantes
+      for (let i = 0; i < missing; i++) {
+        cleanedResponse += '}';
+      }
+      
+      console.log('✅ JSON reparado, intentando parsear...');
+    }
 
     try {
-      return JSON.parse(cleanedResponse);
+      const parsed = JSON.parse(cleanedResponse);
+      
+      // ✅ LOGS DE ÉXITO
+      console.log('✅ JSON PARSEADO EXITOSAMENTE');
+      console.log('🔑 Claves principales:', Object.keys(parsed));
+      console.log('🪐 Planetas interpretados:', Object.keys(parsed.planetas || {}));
+      
+      return parsed;
+      
     } catch (parseError) {
-      console.error('Error parseando JSON:', parseError);
-      console.error('Respuesta recibida:', cleanedResponse);
-      throw new Error('Respuesta de IA no válida');
+      console.error('❌ Error parseando JSON:', parseError);
+      console.error('📄 Respuesta problemática (primeros 500):', cleanedResponse.substring(0, 500));
+      console.error('📄 Respuesta problemática (últimos 300):', cleanedResponse.substring(Math.max(0, cleanedResponse.length - 300)));
+      throw new Error('Respuesta de IA no válida - JSON malformado');
     }
 
   } catch (error) {
-    console.error('Error en OpenAI:', error);
+    console.error('❌ Error en llamada a OpenAI:', error);
     throw error;
   }
 }
 
-// ✅ FUNCIÓN: Interpretación de fallback
-function generateFallbackInterpretation(userProfile: UserProfile): any {
+// Fallback con datos reales
+function generateFallbackInterpretation(userProfile: UserProfile, chartData: ChartData): any {
+  console.log('📋 Generando interpretación de fallback con datos reales');
+  
+  const sun = chartData.planets?.find(p => p.name === 'Sol' || p.name === 'Sun');
+  const moon = chartData.planets?.find(p => p.name === 'Luna' || p.name === 'Moon');
+  const mercury = chartData.planets?.find(p => p.name === 'Mercurio' || p.name === 'Mercury');
+  const venus = chartData.planets?.find(p => p.name === 'Venus');
+  const mars = chartData.planets?.find(p => p.name === 'Marte' || p.name === 'Mars');
+
+  const getHouse = (planet: any) => planet?.houseNumber || planet?.house || '?';
+
   return {
-    esencia_revolucionaria: `${userProfile.name}, eres una fuerza revolucionaria auténtica encarnada. Tu presencia cambia energías automáticamente.`,
-    proposito_vida: "Activar el potencial humano dormido través de tu autenticidad radical y visión de futuro.",
+    esencia_revolucionaria: `${userProfile.name}, con tu Sol en ${sun?.sign || 'tu signo'} Casa ${getHouse(sun)}, eres una fuerza única de transformación en el área de ${getCasaMeaning(getHouse(sun))}.`,
+    
+    proposito_vida: `Tu misión en este planeta es activar el potencial humano a través de tu autenticidad radical en ${getCasaMeaning(getHouse(sun))}.`,
+    
+    planetas: {
+      sol: {
+        titulo: `☉ Sol en ${sun?.sign || 'Tu Signo'} ${sun?.degree ? sun.degree.toFixed(1) + '°' : ''} - Casa ${getHouse(sun)} → A qué has venido a este mundo`,
+        posicion_tecnica: `${sun?.degree?.toFixed(0) || '?'}°${sun?.minutes || '?'}' ${sun?.sign || '?'} - Casa ${getHouse(sun)} (${getCasaMeaning(getHouse(sun))})`,
+        descripcion: `${userProfile.name}, tu Sol en ${sun?.sign || 'tu signo'} en Casa ${getHouse(sun)} define tu propósito vital.\n\nCasa ${getHouse(sun)} es el área de ${getCasaMeaning(getHouse(sun))}. Esto significa que tu esencia se manifiesta principalmente en esta zona de tu vida.\n\nNo viniste a ser como otros esperan - viniste a manifestar tu verdad única desde esta posición específica de poder.`,
+        poder_especifico: `Tu Sol en Casa ${getHouse(sun)} te da poder natural para brillar en ${getCasaMeaning(getHouse(sun))}. Este es tu superpoder más visible.`,
+        accion_inmediata: `Hoy, pregúntate: '¿Estoy usando mi Casa ${getHouse(sun)} para brillar o para esconderme?' Da un paso concreto hacia tu autenticidad en esta área.`,
+        ritual: `Ritual solar: Cada mañana, declara en voz alta: 'Hoy activo mi poder en ${getCasaMeaning(getHouse(sun))} sin disculpas.'`
+      },
+      
+      luna: {
+        titulo: `☽ Luna en ${moon?.sign || 'Tu Signo'} ${moon?.degree ? moon.degree.toFixed(1) + '°' : ''} - Casa ${getHouse(moon)} → Tus emociones`,
+        posicion_tecnica: `${moon?.degree?.toFixed(0) || '?'}°${moon?.minutes || '?'}' ${moon?.sign || '?'} - Casa ${getHouse(moon)} (${getCasaMeaning(getHouse(moon))})`,
+        descripcion: `${userProfile.name}, tu Luna en ${moon?.sign || 'tu signo'} en Casa ${getHouse(moon)} revela tu naturaleza emocional.\n\nTus emociones se activan especialmente en ${getCasaMeaning(getHouse(moon))}. No es debilidad - es tu brújula interna más precisa.\n\nCuando honras tu Luna aquí, encuentras tu verdadero refugio emocional.`,
+        poder_especifico: `Tu Luna en Casa ${getHouse(moon)} te da inteligencia emocional profunda en esta área. Sabes leer energías donde otros están ciegos.`,
+        accion_inmediata: `Esta semana, cuando sientas algo intenso relacionado con ${getCasaMeaning(getHouse(moon))}, pregúntate: '¿Qué intenta enseñarme mi Luna?' Anota la respuesta.`,
+        ritual: `Ritual lunar: En Luna Llena, escribe emociones que ya no te sirven. En Luna Nueva, siembra intenciones para nutrir esta área.`
+      }
+    },
+    
+    integracion_carta: {
+      titulo: "Integración de tu Carta Natal",
+      sintesis: `${userProfile.name}, tu carta revela un camino único de liderazgo y transformación. Con ${chartData.planets?.length || 10} planetas activando diferentes áreas, eres multidimensional - no te limites a un solo rol.`,
+      elementos_destacados: [
+        `Sol en Casa ${getHouse(sun)} - Tu zona de máximo poder`,
+        `Luna en Casa ${getHouse(moon)} - Tu brújula emocional`
+      ],
+      camino_evolutivo: `Tu configuración te invita a integrar tu identidad pública (Sol) con tus necesidades emocionales (Luna), creando un camino de autenticidad radical.`
+    },
+    
     plan_accion: {
       hoy_mismo: [
-        "Identifica UNA mentira que estás viviendo para 'encajar'",
-        "Declara públicamente una verdad radical sobre ti",
-        "Elimina UNA cosa/persona/compromiso que apaga tu fuego"
+        `Activa tu Sol en Casa ${getHouse(sun)} - haz una cosa que te haga brillar en ${getCasaMeaning(getHouse(sun))}`,
+        `Honra tu Luna en Casa ${getHouse(moon)} - identifica una necesidad emocional y atiéndela`,
+        `Declara en voz alta: "Hoy soy auténtica/o en todas mis áreas de vida"`
       ],
       esta_semana: [
-        "Conecta con UNA persona que comparta tu visión de futuro",
-        "Inicia UN proyecto que exprese tu naturaleza revolucionaria",
-        "Rechaza UNA oportunidad que requiera que seas 'menos'"
+        `Inicia una conversación importante en ${getCasaMeaning(getHouse(mercury))}`,
+        `Invierte en lo que realmente valoras (Casa ${getHouse(venus)})`,
+        `Establece un límite claro donde has estado cediendo`
       ],
       este_mes: [
-        "Lanza algo al mundo que sea auténticamente tuyo",
-        "Establece límites férricos con personas que no honren tu naturaleza",
-        "Invierte en herramientas/educación que amplifiquen tu poder"
+        `Lanza un proyecto que refleje tu verdad en Casa ${getHouse(sun)}`,
+        `Transforma completamente un área que está pidiendo regeneración`,
+        `Invierte en formación que potencie tu zona de abundancia natural`
       ]
     },
-    declaracion_poder: `SOY ${userProfile.name.toUpperCase()}, REVOLUCIONARIO/A ENCARNADO/A. MI AUTENTICIDAD RADICAL ES MI SERVICIO A LA HUMANIDAD. NO VINE A ENCAJAR - VINE A DESPERTAR.`,
+    
+    declaracion_poder: `YO, ${userProfile.name.toUpperCase()}, SOY UN CANAL DE TRANSFORMACIÓN EN ${getCasaMeaning(getHouse(sun)).toUpperCase()}. MI AUTENTICIDAD ES MI REVOLUCIÓN.`,
+    
     advertencias: [
-      "Si estás en un trabajo que te aburre, tu alma se está muriendo",
-      "Si escondes tu rareza por 'seguridad', estás saboteando tu propósito",
-      "Si no estás incomodando a alguien con tu autenticidad, no estás siendo lo suficientemente real"
+      `${userProfile.name}, tu mayor limitación es NO activar tu poder en Casa ${getHouse(sun)}. Deja de jugar pequeña.`,
+      `Tu Luna pide que honres tus emociones en ${getCasaMeaning(getHouse(moon))} - deja de ignorar tu brújula interna.`,
+      `El atajo no existe - tu maestría requiere trabajo profundo y constante.`
     ],
+    
     insights_transformacionales: [
-      "Tu configuración natal te diseñó para ser catalizador de evolución humana",
-      "Cada casa contiene un aspecto específico de tu misión revolucionaria",
-      "Tu carta natal es tu mapa del tesoro para liberar potencial dormido"
+      `Tu Sol en Casa ${getHouse(sun)} es tu zona de máximo poder - cuando la activas conscientemente, todo se alinea.`,
+      `Luna en Casa ${getHouse(moon)} te revela que tus emociones son tu brújula más precisa - confía en lo que sientes.`,
+      `Eres multidimensional - no te limites a un solo rol o identidad.`,
+      `Tu configuración es tu mapa de posibilidades, no tu destino fijo - tú decides qué activas cada día.`
     ],
+    
     rituales_recomendados: [
-      "Declara diariamente tu declaración de poder frente al espejo",
-      "Dedica 20 minutos diarios a actividades que expresen tu esencia auténtica",
-      "Establece un ritual semanal de revisión: ¿Estás viviendo tu carta natal?"
+      `Ritual Solar Diario: Cada mañana, activa conscientemente Casa ${getHouse(sun)} como tu prioridad.`,
+      `Ritual Lunar Mensual: En Lunas Nuevas y Llenas, trabaja las emociones de Casa ${getHouse(moon)}.`,
+      `Ritual Anual de Revisión: En tu cumpleaños, revisa cómo has usado tus casas principales.`
     ]
   };
 }
 
 export async function POST(request: NextRequest) {
-  console.log('🌟 [INTERPRET-NATAL] Iniciando interpretación natal disruptiva');
+  console.log('🌟 [INTERPRET-NATAL] === INICIO ===');
 
   try {
     const body: NatalInterpretationRequest = await request.json();
-    const { userId, natalChart, userProfile, regenerate = false, disruptiveMode = false } = body;
+    const { userId, natalChart, userProfile, regenerate = false, disruptiveMode = true } = body;
 
-    // Validación
+    console.log('📊 [INTERPRET-NATAL] Parámetros recibidos:', {
+      userId,
+      userName: userProfile?.name,
+      planetsCount: natalChart?.planets?.length,
+      disruptiveMode,
+      regenerate,
+      hasOpenAIKey: !!process.env.OPENAI_API_KEY
+    });
+
     if (!userId || !natalChart || !userProfile) {
       return NextResponse.json({
         success: false,
-        error: 'Datos incompletos: userId, natalChart y userProfile son requeridos'
+        error: 'Datos incompletos'
       }, { status: 400 });
     }
 
-    // Verificar caché (si no se fuerza regenerar)
+    // Verificar caché
     const cacheKey = `natal_${userId}_${disruptiveMode ? 'disruptive' : 'standard'}`;
+
+    console.log('🔍 [INTERPRET-NATAL] Verificando caché:', { cacheKey, regenerate });
+
     if (!regenerate) {
       const cached = interpretationCache.get(cacheKey);
       if (cached && (Date.now() - cached.timestamp < CACHE_DURATION)) {
-        console.log('✅ [INTERPRET-NATAL] Interpretación encontrada en caché');
+        console.log('✅ [INTERPRET-NATAL] RETORNANDO DESDE CACHÉ EN MEMORIA');
         return NextResponse.json({
           success: true,
           data: {
             interpretation: cached.interpretation,
             cached: true,
             generatedAt: new Date(cached.timestamp).toISOString(),
-            method: 'cached'
+            method: 'memory_cache'
           }
         });
       }
+    } else {
+      console.log('🔄 [INTERPRET-NATAL] Regeneración forzada - limpiando caché');
+      interpretationCache.delete(cacheKey);
     }
 
     let interpretation: any;
 
     // Generar interpretación
     if (disruptiveMode && process.env.OPENAI_API_KEY) {
-      console.log('🔥 [INTERPRET-NATAL] Modo disruptivo activado con IA');
+      console.log('🔥 [INTERPRET-NATAL] Modo DISRUPTIVO - Llamando a OpenAI');
+      console.log('🪐 [INTERPRET-NATAL] Planetas a enviar:', natalChart.planets?.map(p =>
+        `${p.name}: ${p.sign} Casa ${p.houseNumber || p.house || '?'}`
+      ));
+
       try {
         interpretation = await generateDisruptiveInterpretation(natalChart, userProfile);
+        console.log('✅ [INTERPRET-NATAL] OpenAI respondió correctamente');
       } catch (error) {
-        console.warn('⚠️ [INTERPRET-NATAL] IA falló, usando fallback:', error);
-        interpretation = generateFallbackInterpretation(userProfile);
+        console.error('❌ [INTERPRET-NATAL] Error en OpenAI:', error);
+        console.log('📋 [INTERPRET-NATAL] Usando FALLBACK por error de IA');
+        interpretation = generateFallbackInterpretation(userProfile, natalChart);
       }
     } else {
-      console.log('📋 [INTERPRET-NATAL] Usando interpretación de fallback');
-      interpretation = generateFallbackInterpretation(userProfile);
+      if (!disruptiveMode) {
+        console.log('📋 [INTERPRET-NATAL] Modo estándar - usando FALLBACK');
+      } else if (!process.env.OPENAI_API_KEY) {
+        console.log('⚠️ [INTERPRET-NATAL] NO HAY OPENAI_API_KEY - usando FALLBACK');
+      }
+      interpretation = generateFallbackInterpretation(userProfile, natalChart);
     }
 
     // Guardar en caché
@@ -178,7 +311,8 @@ export async function POST(request: NextRequest) {
       timestamp: Date.now()
     });
 
-    console.log('✅ [INTERPRET-NATAL] Interpretación generada exitosamente');
+    console.log('✅ [INTERPRET-NATAL] Interpretación guardada en caché');
+    console.log('📦 [INTERPRET-NATAL] Claves de interpretación:', Object.keys(interpretation));
 
     return NextResponse.json({
       success: true,
@@ -186,15 +320,16 @@ export async function POST(request: NextRequest) {
         interpretation,
         cached: false,
         generatedAt: new Date().toISOString(),
-        method: disruptiveMode ? 'openai_disruptive' : 'fallback'
+        method: disruptiveMode ? 'openai_disruptive' : 'fallback_with_real_data'
       }
     });
 
   } catch (error) {
-    console.error('❌ [INTERPRET-NATAL] Error:', error);
+    console.error('❌ [INTERPRET-NATAL] Error general:', error);
     return NextResponse.json({
       success: false,
-      error: 'Error interno del servidor'
+      error: 'Error interno del servidor',
+      details: error instanceof Error ? error.message : 'Unknown'
     }, { status: 500 });
   }
 }

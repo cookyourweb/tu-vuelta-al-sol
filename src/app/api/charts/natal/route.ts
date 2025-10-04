@@ -257,13 +257,17 @@ function processProkeralaData(apiResponse: any, latitude: number, longitude: num
   console.log('🪐 Procesando planetas:', planetData.length);
   
   const planets = planetData.map((planet: any) => {
+    const houseValue = planet.house_number || planet.house || planet.housePosition || 1; // ← Obtener valor de casa
+
     const result = {
       name: translatePlanet(planet.name || 'Unknown'),
       sign: planet.zodiac?.name || planet.sign || getSignFromLongitude(planet.longitude || 0),
       degree: planet.degree || Math.floor((planet.longitude || 0) % 30),
       minutes: planet.minutes || Math.floor(((planet.longitude || 0) % 1) * 60),
       retrograde: planet.is_retrograde || planet.retrograde || false,
-      housePosition: planet.house_number || planet.house || 1,
+      housePosition: houseValue,  // ← Para el servicio
+      houseNumber: houseValue,    // ← Para los prompts (NUEVO)
+      house: houseValue,          // ← Para compatibilidad (NUEVO)
       longitude: planet.longitude || 0
     };
     
