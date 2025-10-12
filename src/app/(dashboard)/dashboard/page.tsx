@@ -1,4 +1,4 @@
-// src/app/(dashboard)/dashboard/page.tsx - CORREGIDO
+// src/app/(dashboard)/dashboard/page.tsx - PARTE 1/3
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -24,14 +24,14 @@ import {
   CheckCircle,
   Eye,
   Download,
-  X
+  X,
+  CalendarDays
 } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user, isLoading } = useAuth();
   const searchParams = useSearchParams();
   
-  // ✅ NUEVO: Estados para manejar mensajes de éxito
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   
@@ -45,34 +45,24 @@ export default function DashboardPage() {
   });
   const [loadingBirthData, setLoadingBirthData] = useState(true);
   const [hasNatalChart, setHasNatalChart] = useState(false);
+  const [hasSolarReturn, setHasSolarReturn] = useState(false);
 
-  // ✅ NUEVO: Detectar parámetros de URL para mostrar mensajes de éxito
   useEffect(() => {
     const datosGuardados = searchParams.get('datos');
     const cartaGenerada = searchParams.get('carta');
-    const pasoCompletado = searchParams.get('paso');
 
     if (datosGuardados === 'guardados') {
       setSuccessMessage('✨ ¡Datos de nacimiento guardados exitosamente! Ya puedes generar tu carta natal.');
       setShowSuccessMessage(true);
-      
-      // Auto-ocultar después de 8 segundos
-      setTimeout(() => {
-        setShowSuccessMessage(false);
-      }, 8000);
+      setTimeout(() => setShowSuccessMessage(false), 8000);
     }
 
     if (cartaGenerada === 'generada') {
       setSuccessMessage('🌟 ¡Carta natal generada exitosamente! Tu mapa cósmico está listo.');
       setShowSuccessMessage(true);
-      
-      // Auto-ocultar después de 8 segundos
-      setTimeout(() => {
-        setShowSuccessMessage(false);
-      }, 8000);
+      setTimeout(() => setShowSuccessMessage(false), 8000);
     }
 
-    // Limpiar parámetros de URL después de procesar
     if (datosGuardados || cartaGenerada) {
       const url = new URL(window.location.href);
       url.searchParams.delete('datos');
@@ -81,8 +71,42 @@ export default function DashboardPage() {
       window.history.replaceState({}, '', url.toString());
     }
   }, [searchParams]);
+
+  const checkNatalChart = async (userId: string): Promise<void> => {
+    try {
+      const res = await fetch(`/api/charts/natal?userId=${userId}`);
+      if (res.ok) {
+        const data = await res.json();
+        const hasNatal = !!data.natalChart;
+        setHasNatalChart(hasNatal);
+        
+        if (hasNatal) {
+          await checkSolarReturn(userId);
+        }
+      } else {
+        setHasNatalChart(false);
+      }
+    } catch (error) {
+      console.error('Error checking natal chart:', error);
+      setHasNatalChart(false);
+    }
+  };
+
+  const checkSolarReturn = async (userId: string): Promise<void> => {
+    try {
+      const res = await fetch(`/api/charts/solar-return?userId=${userId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setHasSolarReturn(!!data.data || !!data.progressedChart || !!data.solarReturnChart);
+      } else {
+        setHasSolarReturn(false);
+      }
+    } catch (error) {
+      console.error('Error checking solar return:', error);
+      setHasSolarReturn(false);
+    }
+  };
   
-  // Cargar datos de nacimiento del usuario
   useEffect(() => {
     if (user) {
       const fetchBirthData = async () => {
@@ -93,21 +117,21 @@ export default function DashboardPage() {
           if (res.ok) {
             const data = await res.json();
             
-        if (data && data.data) {
-  const birthDate = new Date(data.data.birthDate || data.data.date);
-  const formattedDate = birthDate.toLocaleDateString('es-ES');
-  
-  setBirthData({
-    birthDate: formattedDate,
-    birthTime: data.data.time || data.data.birthTime || '',        // ← USAR "time"
-    birthPlace: data.data.location || data.data.birthPlace || '',  // ← USAR "location"
-    latitude: data.data.latitude,
-    longitude: data.data.longitude,
-    timezone: data.data.timezone || ''
-  });
-}
-          } else {
-            console.log('No se encontraron datos de nacimiento');
+            if (data && data.data) {
+              const birthDate = new Date(data.data.birthDate || data.data.date);
+              const formattedDate = birthDate.toLocaleDateString('es-ES');
+              
+              setBirthData({
+                birthDate: formattedDate,
+                birthTime: data.data.time || data.data.birthTime || '',
+                birthPlace: data.data.location || data.data.birthPlace || '',
+                latitude: data.data.latitude,
+                longitude: data.data.longitude,
+                timezone: data.data.timezone || ''
+              });
+              
+              await checkNatalChart(user.uid);
+            }
           }
         } catch (error) {
           console.error('Error fetching birth data:', error);
@@ -120,25 +144,7 @@ export default function DashboardPage() {
     } else {
       setLoadingBirthData(false);
     }
-  }, [user]);
-  
-  // Verificar si el usuario tiene una carta natal
-  const checkNatalChart = async (userId: string): Promise<void> => {
-    try {
-      const res = await fetch(`/api/charts/natal?userId=${userId}`);
-      if (res.ok) {
-        const data = await res.json();
-        setHasNatalChart(!!data.natalChart);
-      } else {
-        setHasNatalChart(false);
-      }
-    } catch (error) {
-      console.error('Error checking natal chart:', error);
-      setHasNatalChart(false);
-    }
-  };
-
-  if (isLoading || loadingBirthData) {
+  }, [user]);if (isLoading || loadingBirthData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-black text-white relative overflow-hidden flex justify-center items-center">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900/30 via-blue-900/20 to-pink-900/30"></div>
@@ -159,7 +165,6 @@ export default function DashboardPage() {
     <div className="text-white relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
-        {/* ✅ NUEVO: Mensaje de éxito flotante */}
         {showSuccessMessage && (
           <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-in slide-in-from-top-4 duration-500">
             <div className="bg-gradient-to-r from-green-500/90 to-emerald-600/90 backdrop-blur-lg border border-green-400/30 rounded-2xl px-8 py-4 shadow-2xl max-w-lg">
@@ -179,7 +184,6 @@ export default function DashboardPage() {
           </div>
         )}
         
-        {/* Header principal con mensaje personalizado */}
         <div className="text-center mb-16">
           <div className="flex justify-center items-center mb-8">
             <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 border border-yellow-400/30 rounded-full p-8 backdrop-blur-sm relative">
@@ -200,7 +204,6 @@ export default function DashboardPage() {
               aquí encontrarás todo lo que necesitas para descubrir tu mapa astrológico y conectar con la energía transformadora del cosmos.
             </p>
             
-            {/* Estadísticas de progreso */}
             <div className="flex justify-center items-center space-x-6 text-sm">
               <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
                 <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
@@ -218,7 +221,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Información personal - Tarjeta principal mejorada */}
         {birthData.birthDate ? (
           <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-3xl p-8 md:p-12 mb-12 relative overflow-hidden">
             <div className="absolute top-6 right-6 w-5 h-5 bg-green-400 rounded-full animate-pulse"></div>
@@ -269,7 +271,6 @@ export default function DashboardPage() {
               </div>
             </div>
             
-            {/* Progreso completado */}
             <div className="mt-8 bg-green-500/10 border border-green-400/30 rounded-2xl p-4">
               <div className="flex items-center">
                 <CheckCircle className="w-5 h-5 text-green-400 mr-3" />
@@ -304,12 +305,8 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
-        )}
-        
-        {/* Grid de funcionalidades principales mejorado */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+        )}<div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
           
-          {/* Datos de Nacimiento */}
           <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm border border-purple-400/30 rounded-3xl p-8 relative group hover:scale-105 transition-all duration-300 overflow-hidden">
             <div className="absolute top-4 right-4 w-3 h-3 bg-purple-400 rounded-full animate-pulse"></div>
             <div className="absolute -top-10 -right-10 w-20 h-20 bg-purple-400/10 rounded-full"></div>
@@ -347,7 +344,6 @@ export default function DashboardPage() {
             </Link>
           </div>
           
-          {/* Carta Natal */}
           <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm border border-blue-400/30 rounded-3xl p-8 relative group hover:scale-105 transition-all duration-300 overflow-hidden">
             <div className="absolute top-4 right-4 w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
             <div className="absolute -bottom-10 -left-10 w-20 h-20 bg-blue-400/10 rounded-full"></div>
@@ -389,7 +385,7 @@ export default function DashboardPage() {
                 <button className={`w-full py-4 rounded-2xl font-bold transition-all duration-300 shadow-xl flex items-center justify-center group ${
                   hasNatalChart 
                     ? 'bg-gradient-to-r from-blue-400 to-cyan-500 text-white hover:from-blue-300 hover:to-cyan-400' 
-                    : 'bg-gradient-to-r from-gray-600 to-gray-700 text-gray-300 hover:from-gray-500 hover:to-gray-600'
+                    : 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-500 hover:to-cyan-500'
                 }`}>
                   {hasNatalChart ? (
                     <>
@@ -412,7 +408,6 @@ export default function DashboardPage() {
             )}
           </div>
           
-          {/* Agenda Astrológica */}
           <div className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 backdrop-blur-sm border border-yellow-400/30 rounded-3xl p-8 relative group hover:scale-105 transition-all duration-300 overflow-hidden">
             <div className="absolute top-4 right-4 w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></div>
             <div className="absolute -top-10 -left-10 w-20 h-20 bg-yellow-400/10 rounded-full"></div>
@@ -421,18 +416,25 @@ export default function DashboardPage() {
               <Sun className="w-8 h-8 text-yellow-400" />
             </div>
             
-            <h3 className="text-2xl font-bold text-white mb-4">Agenda Astrológica</h3>
+            <h3 className="text-2xl font-bold text-white mb-4">Retorno Solar</h3>
             <p className="text-gray-300 mb-6 leading-relaxed">
-              {hasNatalChart 
-                ? '☀️ Descubre eventos cósmicos importantes y momentos de poder personal.'
-                : '🌟 Primero necesitas generar tu carta natal para acceder al calendario.'}
+              {hasSolarReturn 
+                ? '☀️ Explora tu carta de Retorno Solar y descubre las energías del año.'
+                : hasNatalChart 
+                  ? '🌟 Genera tu Retorno Solar para conocer las tendencias de tu año astrológico.'
+                  : '🔮 Primero necesitas generar tu carta natal para acceder.'}
             </p>
             
             <div className="mb-6">
-              {hasNatalChart ? (
+              {hasSolarReturn ? (
                 <div className="flex items-center text-green-300 text-sm">
                   <CheckCircle className="w-4 h-4 mr-2" />
-                  Agenda personalizada lista
+                  Retorno Solar disponible
+                </div>
+              ) : hasNatalChart ? (
+                <div className="flex items-center text-yellow-300 text-sm">
+                  <Sun className="w-4 h-4 mr-2" />
+                  Listo para generar
                 </div>
               ) : (
                 <div className="flex items-center text-gray-400 text-sm">
@@ -443,23 +445,33 @@ export default function DashboardPage() {
             </div>
             
             {hasNatalChart ? (
-              <Link href="/agenda">
+              <Link href="/progressed-chart">
                 <button className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-black py-4 rounded-2xl font-bold hover:from-yellow-300 hover:to-orange-400 transition-all duration-300 shadow-xl flex items-center justify-center group">
-                  <Calendar className="w-5 h-5 mr-2" />
-                  Ver Agenda Astrológica
+                  {hasSolarReturn ? (
+                    <>
+                      <Eye className="w-5 h-5 mr-2" />
+                      Ver Retorno Solar
+                    </>
+                  ) : (
+                    <>
+                      <Sun className="w-5 h-5 mr-2" />
+                      Generar Retorno Solar
+                    </>
+                  )}
                   <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </button>
               </Link>
             ) : (
               <button disabled className="w-full bg-gray-600 text-gray-400 py-4 rounded-2xl font-bold cursor-not-allowed opacity-50">
-                Agenda no disponible
+                Retorno Solar no disponible
               </button>
             )}
           </div>
         </div>
         
-        {/* Próximos eventos astrológicos mejorado */}
-        {hasNatalChart && (
+
+        
+        {hasNatalChart && !hasSolarReturn && (
           <div className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-8 md:p-12 relative overflow-hidden">
             <div className="absolute top-6 right-6 w-5 h-5 bg-yellow-400 rounded-full animate-pulse"></div>
             <div className="absolute bottom-6 left-6 w-4 h-4 bg-purple-400 rounded-full animate-bounce"></div>
@@ -484,11 +496,10 @@ export default function DashboardPage() {
               </div>
               <h3 className="text-2xl font-bold text-white mb-4">🔮 Preparando tu calendario mágico</h3>
               <p className="text-xl text-gray-400 leading-relaxed max-w-2xl mx-auto mb-8">
-                Estamos alineando las energías cósmicas para crear tu calendario personalizado de eventos astrológicos. 
-                Muy pronto podrás ver las fechas más importantes para tu crecimiento personal y espiritual.
+                Genera tu Retorno Solar para desbloquear tu agenda astrológica personalizada con eventos cósmicos, 
+                fases lunares y los momentos más importantes para tu crecimiento personal.
               </p>
               
-              {/* Vista previa de lo que vendrá */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
                 <div className="bg-purple-500/10 border border-purple-400/30 rounded-2xl p-6">
                   <Moon className="w-8 h-8 text-purple-400 mx-auto mb-3" />
@@ -512,7 +523,6 @@ export default function DashboardPage() {
           </div>
         )}
         
-        {/* Mensaje motivacional final */}
         <div className="mt-16 text-center">
           <div className="bg-gradient-to-r from-pink-500/10 to-purple-500/10 border border-pink-400/30 rounded-3xl p-8 backdrop-blur-sm max-w-4xl mx-auto relative overflow-hidden">
             <div className="absolute top-4 right-4 w-3 h-3 bg-pink-400 rounded-full animate-pulse"></div>
@@ -527,8 +537,87 @@ export default function DashboardPage() {
               Cada día es una nueva oportunidad para alinearte con las energías cósmicas y manifestar tu mejor versión. 
               Las estrellas te guían, pero tu voluntad determina el camino.
             </p>
+
+            {hasSolarReturn ? (
+              <div className="mt-8 bg-gradient-to-r from-yellow-500/20 via-orange-500/20 to-pink-500/20 border-2 border-yellow-400/40 rounded-2xl p-6 relative overflow-hidden">
+                <div className="absolute -top-6 -right-6 w-24 h-24 bg-yellow-400/10 rounded-full blur-2xl"></div>
+                <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-pink-400/10 rounded-full blur-2xl"></div>
+                
+                <div className="relative z-10">
+                  <div className="flex items-center justify-center mb-4">
+                    <CalendarDays className="w-8 h-8 text-yellow-400 mr-3" />
+                    <h4 className="text-2xl font-bold text-white">
+                      🔥 Tu Agenda Astrológica Personalizada
+                    </h4>
+                  </div>
+
+                  <p className="text-xl text-yellow-100 font-semibold leading-relaxed mb-4">
+                    ¿Y si supieras EXACTAMENTE cuándo es el mejor momento para...
+                  </p>
+
+               <div className="grid md:grid-cols-2 gap-3 text-left max-w-2xl mx-auto mb-6">
+                    <div className="bg-black/30 backdrop-blur-sm rounded-lg p-3 border border-yellow-400/30">
+                      <div className="flex items-start">
+                        <Zap className="w-4 h-4 text-yellow-400 mr-2 mt-1 flex-shrink-0" />
+                        <p className="text-white text-sm font-medium">Iniciar ese proyecto que llevas meses postergando</p>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-black/30 backdrop-blur-sm rounded-lg p-3 border border-pink-400/30">
+                      <div className="flex items-start">
+                        <Heart className="w-4 h-4 text-pink-400 mr-2 mt-1 flex-shrink-0" />
+                        <p className="text-white text-sm font-medium">Tener esa conversación difícil que cambiará tu relación</p>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-black/30 backdrop-blur-sm rounded-lg p-3 border border-blue-400/30">
+                      <div className="flex items-start">
+                        <TrendingUp className="w-4 h-4 text-blue-400 mr-2 mt-1 flex-shrink-0" />
+                        <p className="text-white text-sm font-medium">Pedir ese aumento o hacer esa inversión importante</p>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-black/30 backdrop-blur-sm rounded-lg p-3 border border-purple-400/30">
+                      <div className="flex items-start">
+                        <Star className="w-4 h-4 text-purple-400 mr-2 mt-1 flex-shrink-0" />
+                        <p className="text-white text-sm font-medium">Soltar lo que ya no te sirve y abrirte a lo nuevo</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-pink-900/40 to-purple-900/40 backdrop-blur-sm rounded-xl p-4 border border-pink-400/30 max-w-2xl mx-auto mb-6">
+                    <p className="text-base text-pink-100 leading-relaxed">
+                      <strong className="text-yellow-300">La diferencia entre las personas que logran sus sueños y las que se quedan estancadas</strong> no es el talento ni la suerte.
+                    </p>
+                    <p className="text-base text-pink-100 leading-relaxed mt-2">
+                      Es <strong className="text-white">TIMING</strong>. Y el universo ya te dio el manual de instrucciones.
+                    </p>
+                  </div>
+
+                  <p className="text-lg text-white font-bold mb-6">
+                    Tu Agenda te dice CUÁNDO actuar para que el cosmos trabaje a tu favor.
+                  </p>
+
+                  <Link href="/agenda">
+                    <button className="bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 text-white px-8 py-4 rounded-full text-lg font-bold hover:from-pink-400 hover:via-purple-500 hover:to-indigo-500 transition-all duration-300 transform hover:scale-105 shadow-2xl flex items-center justify-center mx-auto group">
+                      <CalendarDays className="w-5 h-5 mr-2" />
+                      🔥 ABRIR MI AGENDA AHORA
+                      <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  </Link>
+
+                  <p className="text-xs text-yellow-200 mt-4">
+                    ✨ Ya tienes todo listo. Solo falta dar el paso.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-gray-300 text-lg leading-relaxed mt-6">
+                Por eso hemos preparado tu Agenda Astrológica Personalizada, donde podrás descubrir los momentos más propicios para tomar decisiones importantes, iniciar proyectos y conectar con tu propósito de vida.
+              </p>
+            )}
             
-            <div className="flex justify-center items-center space-x-4 text-sm">
+            <div className="flex justify-center items-center space-x-4 text-sm mt-6">
               <span className="bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 flex items-center">
                 <Star className="w-4 h-4 text-yellow-400 mr-2" />
                 Conectado con el cosmos

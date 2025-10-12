@@ -124,8 +124,8 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
     return {
       ...planet,
       position: realPosition,
-      house: planet.house || planet.houseNumber || planet.housePosition || 1,
-      retrograde: planet.retrograde || planet.isRetrograde || false
+      house: planet.house || planet.houseNumber || 1,
+      retrograde: planet.retrograde || false
     };
   }).filter(Boolean);
 
@@ -664,10 +664,10 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
 {chartType !== 'progressed' && (
   <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
     {/* Card 1: Datos de Nacimiento (Izquierda) */}
-    <BirthDataCard birthData={birthData} ascendant={ascendant} />
+    <BirthDataCard birthData={birthData} ascendant={ascendant ?? undefined} />
     
     {/* Card 2: Ascendente + Medio Cielo (Centro) */}
-    <CombinedAscendantMCCard ascendant={ascendant} midheaven={midheaven} />
+    <CombinedAscendantMCCard ascendant={ascendant ?? undefined} midheaven={midheaven ?? undefined} />
     
     {/* Card 3: Elementos + Modalidades (Derecha) */}
     <ElementsModalitiesCard 

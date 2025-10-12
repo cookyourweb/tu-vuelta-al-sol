@@ -53,13 +53,7 @@ const Footer: React.FC = () => {
               <p className="text-gray-300 text-sm mb-4">
                 Únete a miles de personas que han transformado sus vidas con la sabiduría de las estrellas.
               </p>
-              <Link 
-                href="/register"
-                className="inline-flex items-center px-6 py-3 rounded-2xl text-sm font-bold bg-gradient-to-r from-yellow-400 to-orange-500 text-black hover:from-yellow-300 hover:to-orange-400 transition-all duration-300 transform hover:scale-105"
-              >
-                <Star className="w-4 h-4 mr-2" />
-                Comenzar mi viaje
-              </Link>
+              
             </div>
           </div>
           

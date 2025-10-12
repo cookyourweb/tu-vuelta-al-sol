@@ -1,13 +1,3 @@
-// =============================================================================
-// 🔧 CORRECCIONES TYPESCRIPT PARA SOLAR RETURN PAGE
-// src/app/(dashboard)/progressed-chart/page.tsx
-// =============================================================================
-
-// =============================================================================
-// 🌅 CORRECCIÓN CONCEPTUAL: SOLAR RETURN vs CARTA PROGRESADA
-// src/app/(dashboard)/solar-return/page.tsx
-// =============================================================================
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -15,466 +5,140 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import ChartDisplay from '@/components/astrology/ChartDisplay';
 import InterpretationButton from '@/components/astrology/InterpretationButton';
-import { 
-  Sunrise, Calendar, TrendingUp, RefreshCw, Sun, 
-  Settings, MapPin, Clock, User, Target, Gift,
-  Sparkles, Eye, BookOpen, Lightbulb, Zap,
-  ArrowRight, RotateCcw, AlertTriangle
+import {
+  Sun, RefreshCw, MapPin, Target,
+  Sparkles, AlertTriangle, Info
 } from 'lucide-react';
-import Button from '@/components/ui/Button';
 
-// ✅ INTERFACES CORREGIDAS PARA SOLAR RETURN
-interface SolarReturnData {
-  planets: any[];
-  houses: any[];
-  aspects?: any[];
-  keyAspects?: any[];
-  elementDistribution: { fire: number; earth: number; air: number; water: number };
-  modalityDistribution: { cardinal: number; fixed: number; mutable: number };
-  ascendant?: { longitude?: number; sign?: string; degree?: number } | null;
-  midheaven?: { longitude?: number; sign?: string; degree?: number } | null;
-  solarReturnInfo?: {
-    year: number;
-    period: string;
-    description: string;
-    startDate: string;
-    endDate: string;
-    ageAtStart: number;
-    isCurrentYear: boolean;
-    location?: string;
-    returnMoment?: string; // Momento exacto del retorno
-  } | null;
-  sol_natal?: {
-    longitude: number;
-    degree: number;
-    sign: string;
-    house: number;
-    name: string;
-  } | null;
-  isFallback?: boolean;
-  generatedAt?: string;
-}
-
-interface BirthData {
-  birthDate: string;
-  birthTime: string;
-  birthPlace: string;
-  latitude: number;
-  longitude: number;
-  timezone: string;
-  fullName: string;
-  currentPlace?: string;
-  livesInSamePlace?: boolean;
-}
-
-// ✅ COMPONENTE EDUCATIVO CORREGIDO PARA SOLAR RETURN
-const SolarReturnEducationCard: React.FC = () => (
-  <div className="bg-gradient-to-r from-amber-900/20 via-orange-900/20 to-red-900/20 backdrop-blur-sm border border-amber-400/20 rounded-2xl p-6 mb-8">
-    <div className="flex items-start space-x-4">
-      <div className="bg-gradient-to-r from-amber-400/20 to-orange-500/20 border border-amber-400/30 rounded-full p-3 backdrop-blur-sm flex-shrink-0">
-        <Sunrise className="w-6 h-6 text-amber-400" />
-      </div>
-      <div>
-        <h3 className="text-xl font-bold text-amber-300 mb-3 flex items-center">
-          🌅 ¿Qué es tu Solar Return (Vuelta al Sol)?
-          <Lightbulb className="w-4 h-4 ml-2 text-amber-400" />
-        </h3>
-        <div className="space-y-3 text-amber-100 leading-relaxed">
-          <p>
-            <strong>Solar Return</strong> es el momento exacto cada año cuando el Sol regresa 
-            a la <strong>misma posición zodiacal</strong> que tenía en tu nacimiento. 
-            No es tu cumpleaños civil, sino tu <strong>cumpleaños astrológico</strong>.
-          </p>
-          <div className="grid md:grid-cols-2 gap-4 mt-4">
-            <div className="bg-amber-900/30 border border-amber-400/20 rounded-lg p-4">
-              <h4 className="font-semibold text-amber-300 mb-2 flex items-center">
-                <Target className="w-4 h-4 mr-2" />
-                Lo que NO cambia
-              </h4>
-              <p className="text-sm text-amber-200">
-                • Tu Sol permanece en <strong>Acuario 21°</strong><br/>
-                • Tu esencia fundamental<br/>
-                • Tu propósito natal
-              </p>
-            </div>
-            <div className="bg-orange-900/30 border border-orange-400/20 rounded-lg p-4">
-              <h4 className="font-semibold text-orange-300 mb-2 flex items-center">
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Lo que SÍ cambia
-              </h4>
-              <p className="text-sm text-orange-200">
-                • Posiciones de otros planetas<br/>
-                • Tu Ascendente anual<br/>
-                • Casas donde se expresan las energías
-              </p>
-            </div>
-          </div>
-          <div className="bg-red-900/30 border border-red-400/20 rounded-lg p-4 mt-4">
-            <h4 className="font-semibold text-red-300 mb-2">
-              ⚡ Diferencia clave con Carta Progresada
-            </h4>
-            <p className="text-sm text-red-200">
-              A diferencia de la Carta Progresada (evolución gradual), 
-              el Solar Return es como una "foto" anual de las energías 
-              que influirán en tu año de vida.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
-// ✅ COMPONENTE CARDS CORREGIDO PARA SOLAR RETURN
-interface SolarReturnInfoCardsProps {
-  data: SolarReturnData;
-  birthData: BirthData | null;
-}
-
-const SolarReturnInfoCards: React.FC<SolarReturnInfoCardsProps> = ({ data, birthData }) => (
-  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-    
-    {/* Card 1: Info Solar Return */}
-    <div className="bg-gradient-to-br from-blue-900/30 to-indigo-900/30 backdrop-blur-sm border border-blue-400/20 rounded-2xl p-6">
-      <div className="flex items-center mb-4">
-        <div className="bg-gradient-to-r from-blue-400/20 to-indigo-500/20 border border-blue-400/30 rounded-full p-3 backdrop-blur-sm mr-4">
-          <TrendingUp className="w-6 h-6 text-blue-400" />
-        </div>
-        <div>
-          <h3 className="text-lg font-bold text-blue-300">
-            Solar Return {data.solarReturnInfo?.year || 'N/A'}
-          </h3>
-          <p className="text-blue-200 text-sm">
-            {data.solarReturnInfo?.period || 'Período no disponible'}
-          </p>
-        </div>
-      </div>
-      
-      <div className="space-y-3 text-sm">
-        <div className="flex justify-between items-center">
-          <span className="text-blue-200">Edad al inicio:</span>
-          <span className="text-blue-100 font-medium">
-            {data.solarReturnInfo?.ageAtStart || 'N/A'} años
-          </span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-blue-200">Estado:</span>
-          <span className={`font-medium ${data.solarReturnInfo?.isCurrentYear ? 'text-green-300' : 'text-yellow-300'}`}>
-            {data.solarReturnInfo?.isCurrentYear ? '🔥 Activo' : '📊 Proyección'}
-          </span>
-        </div>
-        {data.solarReturnInfo?.returnMoment && (
-          <div className="flex justify-between items-center">
-            <span className="text-blue-200">Momento exacto:</span>
-            <span className="text-blue-100 font-medium text-xs">
-              {new Date(data.solarReturnInfo.returnMoment).toLocaleDateString('es-ES')}
-            </span>
-          </div>
-        )}
-      </div>
-    </div>
-
-    {/* Card 2: Validación Solar Return */}
-    <div className="bg-gradient-to-br from-indigo-900/30 to-purple-900/30 backdrop-blur-sm border border-indigo-400/20 rounded-2xl p-6">
-      <div className="flex items-center mb-4">
-        <div className="bg-gradient-to-r from-indigo-400/20 to-purple-500/20 border border-indigo-400/30 rounded-full p-3 backdrop-blur-sm mr-4">
-          <Settings className="w-6 h-6 text-indigo-400" />
-        </div>
-        <div>
-          <h3 className="text-lg font-bold text-indigo-300">Validación Solar Return</h3>
-          <p className="text-indigo-200 text-sm">Posición del Sol verificada</p>
-        </div>
-      </div>
-      
-      <div className="space-y-3 text-sm">
-        <div className="flex justify-between items-center">
-          <span className="text-indigo-200">Sol Natal:</span>
-          <span className="text-indigo-100 font-mono">21° Acuario</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-indigo-200">Sol Solar Return:</span>
-          <span className="text-indigo-100 font-mono">
-            {data.sol_natal?.degree?.toFixed(0) || '21'}° {data.sol_natal?.sign || 'Acuario'}
-          </span>
-        </div>
-        {/* ✅ VALIDACIÓN CORRECTA PARA SOLAR RETURN */}
-        {data.sol_natal && Math.abs(data.sol_natal.degree - 21) < 0.5 ? (
-          <div className="flex items-center">
-            <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-            <span className="text-green-300 text-xs">✅ Solar Return válido</span>
-          </div>
-        ) : (
-          <div className="flex items-center">
-            <div className="w-2 h-2 bg-yellow-400 rounded-full mr-2"></div>
-            <span className="text-yellow-300 text-xs">⚠️ Verificar cálculo</span>
-          </div>
-        )}
-      </div>
-    </div>
-
-    {/* Card 3: Impacto Ubicación */}
-    <div className="bg-gradient-to-br from-purple-900/30 to-violet-900/30 backdrop-blur-sm border border-purple-400/20 rounded-2xl p-6">
-      <div className="flex items-center mb-4">
-        <div className="bg-gradient-to-r from-purple-400/20 to-violet-500/20 border border-purple-400/30 rounded-full p-3 backdrop-blur-sm mr-4">
-          <MapPin className="w-6 h-6 text-purple-400" />
-        </div>
-        <div>
-          <h3 className="text-lg font-bold text-purple-300">Ubicación Solar Return</h3>
-          <p className="text-purple-200 text-sm">Impacto en casas astrológicas anuales</p>
-        </div>
-      </div>
-      
-      <div className="space-y-3 text-sm">
-        <div className="text-purple-200">
-          <strong>Nacimiento:</strong> {birthData?.birthPlace || 'No disponible'}
-        </div>
-        <div className="text-purple-200">
-          <strong>Solar Return:</strong> {data.solarReturnInfo?.location || birthData?.currentPlace || birthData?.birthPlace || 'No disponible'}
-        </div>
-        {birthData?.livesInSamePlace === false ? (
-          <div className="bg-amber-900/30 border border-amber-400/20 rounded p-2">
-            <span className="text-amber-300 text-xs">
-              ⚠️ Ubicación diferente puede cambiar casas
-            </span>
-          </div>
-        ) : (
-          <div className="bg-green-900/30 border border-green-400/20 rounded p-2">
-            <span className="text-green-300 text-xs">
-              ✅ Misma ubicación, cálculo estándar
-            </span>
-          </div>
-        )}
-      </div>
-    </div>
-  </div>
-);
-
-// ✅ FUNCIÓN: Procesar datos Solar Return
-const processSolarReturnData = (rawData: any): SolarReturnData => {
-  console.log('🔍 Procesando datos Solar Return:', rawData);
-  
-  if (!rawData) {
-    throw new Error('No hay datos Solar Return para procesar');
-  }
-
-  let actualData = rawData;
-  
-  // Detectar estructura de datos
-  if (rawData.data && !rawData.planets) {
-    actualData = rawData.data;
-  }
-  
-  if (rawData.solarReturnChart) {
-    console.log('✅ Datos vienen como solarReturnChart');
-    actualData = rawData.solarReturnChart;
-  } else if (rawData.progressedChart) {
-    console.log('⚠️ Datos vienen como progressedChart (legacy)');
-    actualData = rawData.progressedChart;
-  }
-
-  // ✅ VALIDAR QUE EL SOL ESTÉ EN LA POSICIÓN CORRECTA
-  const solData = actualData.planets?.find((p: any) => p.name === 'Sol' || p.name === 'Sun');
-  if (solData) {
-    console.log('🌟 Posición del Sol en Solar Return:', {
-      degree: solData.degree,
-      sign: solData.sign,
-      isValid: Math.abs(solData.degree - 21) < 1 // Tolerancia de 1 grado
-    });
-  }
-
-  return {
-    planets: actualData.planets || [],
-    houses: actualData.houses || [],
-    aspects: actualData.aspects || [],
-    keyAspects: actualData.keyAspects || actualData.aspects || [],
-    elementDistribution: actualData.elementDistribution || { fire: 25, earth: 25, air: 25, water: 25 },
-    modalityDistribution: actualData.modalityDistribution || { cardinal: 33, fixed: 33, mutable: 34 },
-    ascendant: actualData.ascendant || null,
-    midheaven: actualData.midheaven || null,
-    solarReturnInfo: actualData.progressionInfo || actualData.solarReturnInfo || null,
-    sol_natal: solData || null,
-    isFallback: actualData.isFallback || false,
-    generatedAt: actualData.generatedAt || new Date().toISOString()
-  };
-};
-
-// ✅ FUNCIÓN: Validar Solar Return
-const validateSolarReturnPosition = (data: SolarReturnData): void => {
-  const solPosition = data.sol_natal;
-  if (!solPosition) {
-    console.warn('⚠️ No se encontró posición del Sol en Solar Return');
-    return;
-  }
-
-  // ✅ VALIDACIÓN ESPECÍFICA PARA SOLAR RETURN
-  const expectedDegree = 21; // Grado natal del Sol en Acuario
-  const actualDegree = solPosition.degree;
-  const difference = Math.abs(actualDegree - expectedDegree);
-
-  if (difference > 0.5) {
-    console.warn('⚠️ Solar Return puede ser incorrecto:', {
-      expected: `${expectedDegree}° Acuario`,
-      actual: `${actualDegree}° ${solPosition.sign}`,
-      difference: `${difference.toFixed(2)}°`
-    });
-  } else {
-    console.log('✅ Solar Return validado correctamente');
-  }
-};
-
-// ✅ COMPONENTE PRINCIPAL CORREGIDO
-const SolarReturnPage: React.FC = () => {
-  const { user, isLoading: authLoading } = useAuth();
+export default function SolarReturnPage() {
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   
-  // Estados principales
-  const [chartData, setChartData] = useState<SolarReturnData | null>(null);
-  const [birthData, setBirthData] = useState<BirthData | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [chartData, setChartData] = useState<any>(null);
+  const [natalChart, setNatalChart] = useState<any>(null);
+  const [birthData, setBirthData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [debugInfo, setDebugInfo] = useState<string>('');
-  const [isRegenerating, setIsRegenerating] = useState<boolean>(false);
-  const [showEducation, setShowEducation] = useState<boolean>(true);
+  const [regenerating, setRegenerating] = useState(false);
 
-  // ✅ FUNCIÓN: Cargar datos de nacimiento
-  const loadBirthDataInfo = async (): Promise<void> => {
-    try {
-      const response = await fetch(`/api/birth-data?userId=${user?.uid}`);
-      
-      if (response.ok) {
-        const result = await response.json();
-        
-        if (result.success && result.data) {
-          setBirthData({
-            birthDate: result.data.birthDate,
-            birthTime: result.data.birthTime,
-            birthPlace: result.data.birthPlace,
-            latitude: result.data.latitude,
-            longitude: result.data.longitude,
-            timezone: result.data.timezone,
-            fullName: result.data.fullName,
-            currentPlace: result.data.currentPlace,
-            livesInSamePlace: result.data.livesInSamePlace
-          });
-        }
-      }
-    } catch (error) {
-      console.log('⚠️ No se pudieron cargar datos de nacimiento:', error);
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+    } else if (user) {
+      loadAllData();
     }
-  };
+  }, [user, authLoading, router]);
 
-  // ✅ FUNCIÓN: Cargar Solar Return
-  const loadSolarReturn = async (): Promise<void> => {
+  const loadAllData = async () => {
+    if (!user?.uid) return;
+
     try {
       setLoading(true);
       setError(null);
-      setDebugInfo('🌅 Calculando tu Solar Return...');
-      
-      console.log('🔍 Cargando Solar Return para usuario:', user?.uid);
-      
-      await loadBirthDataInfo();
-      
-      // ✅ CAMBIAR ENDPOINT A SOLAR RETURN CUANDO ESTÉ DISPONIBLE
-      const response = await fetch(`/api/charts/solar-return?userId=${user?.uid}`, {
-        method: 'GET'
-      });
-      
-      console.log('📡 Respuesta Solar Return:', response.status);
-      
-      if (response.ok) {
-        const result = await response.json();
-        
-        if (result.success && (result.data || result.progressedChart)) {
-          console.log('✅ Solar Return cargado correctamente');
-          setDebugInfo('✅ Solar Return cargado');
-          
-          const dataToProcess = result.data || result.progressedChart || result;
-          const processedData = processSolarReturnData(dataToProcess);
 
-          validateSolarReturnPosition(processedData);
-          setChartData(processedData);
-          return;
+      // 1. Cargar Birth Data
+      const birthResponse = await fetch(`/api/birth-data?userId=${user.uid}`);
+      if (birthResponse.ok) {
+        const birthResult = await birthResponse.json();
+        if (birthResult.success && birthResult.data) {
+          setBirthData(birthResult.data);
+          console.log('✅ Birth Data cargado:', birthResult.data);
         }
       }
-      
-      setDebugInfo('📝 Generando Solar Return automáticamente...');
-      console.log('📝 No existe Solar Return, generando...');
-      
-      // ✅ ENDPOINT CARTA SOLAR RETURN
-      const generateResponse = await fetch('/api/charts/solar-return', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: user?.uid,
-          regenerate: false
-        })
-      });
-      
-      if (generateResponse.ok) {
-        const generateResult = await generateResponse.json();
-        
-        if (generateResult.success) {
-          console.log('✅ Solar Return generado correctamente');
-          setDebugInfo('✅ Solar Return generado');
-          
-          const dataToProcess = generateResult.data || generateResult.solarReturn || generateResult;
-          const processedData = processSolarReturnData(dataToProcess);
 
-          validateSolarReturnPosition(processedData);
-          setChartData(processedData);
+      // 2. Cargar Carta Natal
+      const natalResponse = await fetch(`/api/charts/natal?userId=${user.uid}`);
+      if (natalResponse.ok) {
+        const natalResult = await natalResponse.json();
+        if (natalResult.success && natalResult.natalChart) {
+          setNatalChart(natalResult.natalChart);
+          console.log('✅ Carta Natal cargada');
+        }
+      }
+
+      // 3. Cargar Solar Return
+      const solarResponse = await fetch(`/api/charts/progressed?userId=${user.uid}`);
+      
+      if (!solarResponse.ok) {
+        throw new Error('Error al obtener Solar Return');
+      }
+
+      const solarResult = await solarResponse.json();
+      console.log('📦 Solar Return Response completo:', solarResult);
+
+      if (solarResult.success && solarResult.data) {
+        const solarReturnData = solarResult.data.solarReturnChart || 
+                                solarResult.data.progressedChart || 
+                                solarResult.data;
+
+        console.log('🌅 Solar Return Data extraído:', solarReturnData);
+
+        if (solarReturnData && solarReturnData.planets) {
+          setChartData(solarReturnData);
+          console.log('✅ Solar Return cargado con', solarReturnData.planets.length, 'planetas');
         } else {
-          throw new Error(generateResult.error || 'Error generando Solar Return');
+          throw new Error('Solar Return sin datos de planetas');
         }
       } else {
-        throw new Error('Error en respuesta del servidor');
+        throw new Error(solarResult.error || 'Solar Return no disponible');
       }
-      
-    } catch (error) {
-      console.error('❌ Error cargando Solar Return:', error);
-      setError(error instanceof Error ? error.message : 'Error cargando Solar Return');
-      setDebugInfo(`❌ Error: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+
+    } catch (err) {
+      console.error('❌ Error cargando datos:', err);
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ USEEFFECT
-  useEffect(() => {
-    if (!user) {
-      router.push('/auth/signin');
-      return;
-    }
-    
-    loadSolarReturn();
-  }, [user, router]);
+  const handleRegenerate = async () => {
+    if (!user?.uid) return;
 
-  // ✅ RENDERIZADO CON LOADING/ERROR STATES
-  if (loading) {
+    try {
+      setRegenerating(true);
+      setError(null);
+
+      const response = await fetch('/api/charts/progressed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          userId: user.uid,
+          force: true 
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Error regenerando Solar Return');
+      }
+
+      const result = await response.json();
+      console.log('🔄 Regeneración resultado:', result);
+      
+      if (result.success && result.data) {
+        const solarReturnData = result.data.solarReturnChart || 
+                                result.data.progressedChart || 
+                                result.data;
+        
+        if (solarReturnData && solarReturnData.planets) {
+          setChartData(solarReturnData);
+          console.log('✅ Solar Return regenerado');
+        }
+      }
+
+    } catch (err) {
+      console.error('❌ Error regenerando:', err);
+      setError(err instanceof Error ? err.message : 'Error regenerando');
+    } finally {
+      setRegenerating(false);
+    }
+  };
+
+  if (authLoading || loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center space-y-6 max-w-md mx-auto">
-          <div className="bg-gradient-to-br from-amber-500/20 via-orange-500/20 to-red-500/20 border-2 border-amber-400/40 rounded-full p-8 backdrop-blur-sm relative mx-auto w-fit">
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-400/10 to-orange-500/10 rounded-full animate-pulse"></div>
-            <div className="relative flex items-center justify-center">
-              <Sunrise className="w-12 h-12 text-amber-300 animate-pulse" />
-              <RotateCcw className="w-6 h-6 text-orange-400 absolute -top-1 -right-1 animate-spin" style={{ animationDuration: '3s' }} />
-            </div>
-          </div>
-          <div className="space-y-3">
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-amber-300 via-orange-300 to-red-300 bg-clip-text text-transparent">
-              Calculando tu Solar Return
-            </h2>
-            <p className="text-amber-200 leading-relaxed">
-              Determinando las energías de tu nuevo año astrológico...
-            </p>
-            {debugInfo && (
-              <div className="bg-amber-900/30 border border-amber-500/30 rounded-lg p-3 text-sm text-amber-200 font-mono">
-                {debugInfo}
-              </div>
-            )}
-          </div>
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-orange-900/10 to-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <Sun className="w-16 h-16 text-orange-400 mx-auto mb-4 animate-pulse" />
+          <p className="text-orange-200 text-lg">Cargando tu Solar Return...</p>
         </div>
       </div>
     );
@@ -482,29 +146,18 @@ const SolarReturnPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center space-y-6 max-w-md mx-auto">
-          <div className="bg-gradient-to-r from-red-500/20 to-orange-500/20 border-2 border-red-400/40 rounded-full p-8 backdrop-blur-sm mx-auto w-fit">
-            <AlertTriangle className="w-16 h-16 text-red-300" />
-          </div>
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-white">Error al cargar Solar Return</h2>
-            <p className="text-gray-300">{error}</p>
-            {debugInfo && (
-              <div className="bg-red-900/30 border border-red-500/30 rounded-lg p-3 text-sm text-red-200 font-mono text-left">
-                {debugInfo}
-              </div>
-            )}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                onClick={() => loadSolarReturn()}
-                className="bg-amber-600 hover:bg-amber-700 flex items-center space-x-2"
-              >
-                <RefreshCw className="w-4 h-4" />
-                <span>Intentar de nuevo</span>
-              </Button>
-            </div>
-          </div>
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-red-900/10 to-gray-900 flex items-center justify-center p-4">
+        <div className="bg-red-900/30 border border-red-500/30 rounded-2xl p-8 max-w-md">
+          <AlertTriangle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-red-300 mb-4 text-center">Error</h2>
+          <p className="text-red-200 mb-6 text-center">{error}</p>
+          <button
+            onClick={loadAllData}
+            className="w-full bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded-lg font-semibold transition-all"
+          >
+            <RefreshCw className="w-5 h-5 inline mr-2" />
+            Reintentar
+          </button>
         </div>
       </div>
     );
@@ -512,299 +165,242 @@ const SolarReturnPage: React.FC = () => {
 
   if (!chartData) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <p className="text-gray-300">No hay datos de Solar Return disponibles</p>
-          <Button
-            onClick={() => loadSolarReturn()}
-            className="mt-4 bg-amber-600 hover:bg-amber-700"
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-orange-900/10 to-gray-900 flex items-center justify-center p-4">
+        <div className="bg-orange-900/30 border border-orange-500/30 rounded-2xl p-8 max-w-md text-center">
+          <Sun className="w-16 h-16 text-orange-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-orange-300 mb-4">Solar Return No Disponible</h2>
+          <p className="text-orange-200 mb-6">
+            Necesitas generar tu Solar Return primero.
+          </p>
+          <button
+            onClick={handleRegenerate}
+            disabled={regenerating}
+            className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 px-6 rounded-lg font-semibold transition-all disabled:opacity-50"
           >
-            Cargar Solar Return
-          </Button>
+            {regenerating ? (
+              <>
+                <RefreshCw className="w-5 h-5 inline mr-2 animate-spin" />
+                Generando...
+              </>
+            ) : (
+              <>
+                <Sun className="w-5 h-5 inline mr-2" />
+                Generar Solar Return
+              </>
+            )}
+          </button>
         </div>
       </div>
     );
   }
 
+  // ✅ Calcular el año del Solar Return y la edad
+  const solarReturnYear = chartData.solarReturnInfo?.year || 
+                          chartData.progressionInfo?.year || 
+                          new Date().getFullYear();
+  
+  const nextYear = solarReturnYear + 1;
+
+  // ✅ Calcular edad correctamente
+  const calculateAge = () => {
+    if (chartData.solarReturnInfo?.ageAtStart) {
+      return chartData.solarReturnInfo.ageAtStart;
+    }
+    if (chartData.progressionInfo?.ageAtStart) {
+      return chartData.progressionInfo.ageAtStart;
+    }
+    if (birthData?.birthDate) {
+      const birthYear = new Date(birthData.birthDate).getFullYear();
+      return solarReturnYear - birthYear;
+    }
+    return null;
+  };
+
+  const userAge = calculateAge();
+
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8">
-      {/* Header principal */}
-      <div className="text-center space-y-6">
-        <div className="flex justify-center items-center mb-6">
-          <div className="bg-gradient-to-br from-amber-500/25 via-orange-500/25 to-red-500/25 border-2 border-amber-400/50 rounded-full p-6 backdrop-blur-sm relative">
-            <div className="absolute -top-2 -right-2 w-4 h-4 bg-gradient-to-r from-amber-400 to-orange-400 rounded-full animate-pulse"></div>
-            <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-gradient-to-r from-orange-400 to-red-400 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-            <div className="relative flex items-center justify-center">
-              <Sunrise className="w-12 h-12 text-amber-300" />
-              <Zap className="w-5 h-5 text-orange-400 absolute -top-1 -right-1" />
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-orange-900/10 to-gray-900 py-12 px-4">
+      <div className="max-w-6xl mx-auto space-y-8">
+        
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="inline-block bg-gradient-to-r from-orange-400/20 to-red-400/20 border border-orange-400/30 rounded-full px-6 py-2 mb-4">
+            <span className="text-orange-300 font-semibold flex items-center gap-2">
+              <Sun className="w-5 h-5" />
+              Solar Return {solarReturnYear}-{nextYear}
+            </span>
+          </div>
+          <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-300 via-amber-300 to-yellow-300 mb-4">
+            ☀️ Tu Vuelta al Sol
+          </h1>
+          <p className="text-gray-300 text-lg max-w-2xl mx-auto">
+            Tu carta astrológica anual - válida desde tu cumpleaños {solarReturnYear} hasta tu cumpleaños {nextYear}
+          </p>
+        </div>
+
+        {/* Education Card */}
+        <div className="bg-gradient-to-r from-amber-900/20 via-orange-900/20 to-red-900/20 backdrop-blur-sm border border-amber-400/20 rounded-2xl p-6 mb-8">
+          <div className="flex items-start space-x-4">
+            <div className="bg-gradient-to-r from-amber-400/20 to-orange-500/20 border border-amber-400/30 rounded-full p-3 backdrop-blur-sm flex-shrink-0">
+              <Sun className="w-6 h-6 text-amber-400" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-amber-300 mb-3">
+                ☀️ ¿Qué es tu Solar Return?
+              </h3>
+              <p className="text-amber-100 leading-relaxed mb-3">
+                Tu Solar Return (Revolución Solar) es una carta astrológica especial que se calcula para el momento exacto 
+                cuando el Sol regresa a la misma posición que tenía en tu nacimiento. Esto ocurre cada año cerca de tu cumpleaños.
+              </p>
+              <div className="grid md:grid-cols-2 gap-4 mt-4">
+                <div className="bg-amber-800/20 rounded-lg p-4">
+                  <h4 className="text-amber-300 font-semibold mb-2 flex items-center gap-2">
+                    <Target className="w-4 h-4" />
+                    Características Únicas
+                  </h4>
+                  <ul className="text-amber-100 text-sm space-y-1">
+                    <li>• Sol FIJO en tu posición natal</li>
+                    <li>• Otros planetas en NUEVAS posiciones</li>
+                    <li>• Ascendente ANUAL diferente</li>
+                    <li>• Válido 12 meses (cumpleaños a cumpleaños)</li>
+                  </ul>
+                </div>
+                <div className="bg-amber-800/20 rounded-lg p-4">
+                  <h4 className="text-amber-300 font-semibold mb-2 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4" />
+                    Para Qué Sirve
+                  </h4>
+                  <ul className="text-amber-100 text-sm space-y-1">
+                    <li>• Identificar energías del año</li>
+                    <li>• Ver áreas de vida activadas</li>
+                    <li>• Planificar proyectos importantes</li>
+                    <li>• Prepararse para desafíos</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <h1 className="text-4xl md:text-5xl text-white font-bold">
-          Tu Solar Return{' '}
-          <span className="bg-gradient-to-r from-amber-400 via-orange-400 to-red-400 bg-clip-text text-transparent">
-            {chartData.solarReturnInfo?.year || new Date().getFullYear()}
-          </span>
-        </h1>
+        {/* Solar Return Info Cards */}
+        <div className="grid md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-orange-900/30 border border-orange-500/20 rounded-xl p-5">
+            <div className="flex items-center gap-2 mb-2">
+              <Sun className="w-5 h-5 text-orange-400" />
+              <span className="text-orange-300 font-semibold">Período</span>
+            </div>
+            <p className="text-white text-lg font-bold">
+              {solarReturnYear} - {nextYear}
+            </p>
+            <p className="text-gray-400 text-sm mt-1">
+              {birthData?.birthDate ? new Date(birthData.birthDate).toLocaleDateString('es-ES', { day: 'numeric', month: 'long' }) : 'Tu cumpleaños'} → próximo año
+            </p>
+          </div>
 
-        <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed flex items-center justify-center gap-3">
-          <Sun className="w-6 h-6 text-amber-400 flex-shrink-0" />
-          Tu nuevo año astrológico - Las energías que dominarán los próximos 12 meses
-        </p>
+          <div className="bg-orange-900/30 border border-orange-500/20 rounded-xl p-5">
+            <div className="flex items-center gap-2 mb-2">
+              <Info className="w-5 h-5 text-orange-400" />
+              <span className="text-orange-300 font-semibold">Edad</span>
+            </div>
+            <p className="text-white text-lg font-bold">
+              {userAge !== null ? `${userAge} años` : 'Calculando...'}
+            </p>
+            <p className="text-gray-400 text-sm mt-1">edad durante este ciclo</p>
+          </div>
 
-{/* Controles */}
-<div className="flex items-center justify-center space-x-4 mb-6">
-  <Button
-    onClick={() => setShowEducation(!showEducation)}
-    className="bg-amber-600/20 border border-amber-400/30 text-amber-300 hover:bg-amber-600/30"
-  >
-    <BookOpen className="w-4 h-4 mr-2" />
-    {showEducation ? 'Ocultar' : 'Mostrar'} Guía
-  </Button>
-</div>
-      </div>
-
-      {/* Sección Educativa */}
-      {showEducation && <SolarReturnEducationCard />}
-
-      {/* Cards principales */}
-      <SolarReturnInfoCards data={chartData} birthData={birthData} />
-
-      {/* Descripción técnica */}
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-          <Sparkles className="w-6 h-6 text-amber-400 animate-pulse" />
-          Tu Solar Return {chartData.solarReturnInfo?.year || new Date().getFullYear()}
-        </h2>
-
-        <div className="bg-gradient-to-r from-amber-900/30 via-orange-900/30 to-red-900/30 border border-amber-500/30 rounded-lg p-4">
-          <p className="text-gray-300 leading-relaxed">
-            <span className="font-medium text-amber-200">Solar Return:</span> Es la carta astrológica levantada para el momento exacto cuando el Sol regresa a su posición natal cada año. Tu Sol permanece fijo en <strong>21° Acuario</strong>, pero cambian las posiciones de otros planetas y las casas, revelando las influencias del próximo año.
-            <br className="my-2" />
-            <span className="font-medium text-orange-200">Diferencia clave:</span> A diferencia de la Carta Progresada (evolución gradual), el Solar Return es una "fotografía anual" de las energías disponibles durante tu nuevo ciclo solar.
-          </p>
+          <div className="bg-orange-900/30 border border-orange-500/20 rounded-xl p-5">
+            <div className="flex items-center gap-2 mb-2">
+              <MapPin className="w-5 h-5 text-orange-400" />
+              <span className="text-orange-300 font-semibold">Ubicación</span>
+            </div>
+            <p className="text-white text-sm">
+              {birthData?.livesInSamePlace ? birthData?.birthPlace : birthData?.currentPlace || 'No especificado'}
+            </p>
+            <p className="text-gray-400 text-xs mt-1">lugar del cálculo</p>
+          </div>
         </div>
 
-        {chartData.isFallback && (
-          <div className="bg-amber-900/30 border border-amber-500/30 rounded-lg p-3">
-            <p className="text-amber-200 text-sm flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              Datos de demostración. Para obtener tu Solar Return real, completa tus datos de nacimiento.
+        {/* Chart Display */}
+        <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+              <Sun className="w-6 h-6 text-orange-400" />
+              Carta Solar Return {solarReturnYear}
+            </h2>
+          </div>
+
+          <ChartDisplay
+            planets={chartData.planets || []}
+            houses={chartData.houses || []}
+            elementDistribution={chartData.elementDistribution || { fire: 0, earth: 0, air: 0, water: 0 }}
+            modalityDistribution={chartData.modalityDistribution || { cardinal: 0, fixed: 0, mutable: 0 }}
+            keyAspects={chartData.keyAspects || chartData.aspects || []}
+            aspects={chartData.aspects || []}
+            ascendant={chartData.ascendant || undefined}
+            midheaven={chartData.midheaven || undefined}
+            birthData={birthData || undefined}
+            chartType="progressed"
+            showOnlyProgressedAspects={false}
+            progressionInfo={chartData.solarReturnInfo || chartData.progressionInfo || undefined}
+          />
+        </div>
+
+        {/* Botón de Interpretación */}
+        {natalChart && birthData && (
+          <div className="bg-gradient-to-r from-purple-900/40 to-pink-900/40 backdrop-blur-sm border border-purple-400/20 rounded-3xl p-8">
+            <div className="text-center mb-6">
+              <Sparkles className="w-12 h-12 text-purple-400 mx-auto mb-4 animate-pulse" />
+              <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-300 mb-4">
+                Interpreta Tu Solar Return {solarReturnYear}-{nextYear}
+              </h2>
+              <p className="text-purple-200 leading-relaxed max-w-2xl mx-auto">
+                Descubre el significado profundo de este nuevo ciclo solar con una interpretación personalizada,
+                disruptiva y transformadora basada en tu carta natal y tu Solar Return.
+              </p>
+            </div>
+
+            <div className="flex justify-center">
+              <InterpretationButton
+                type="solar-return"
+                userId={user?.uid || ''}
+                chartData={chartData}
+                natalChart={natalChart}
+                userProfile={{
+                  name: birthData?.fullName || 'Usuario',
+                  age: userAge || 0,
+                  birthPlace: birthData?.birthPlace || '',
+                  birthDate: birthData?.birthDate || '',
+                  birthTime: birthData?.birthTime || ''
+                }}
+                className="max-w-xl w-full"
+              />
+            </div>
+
+            <p className="text-purple-300 text-sm mt-6 text-center">
+              💡 Interpretación generada con IA + Metodología profesional (Shea-Teal-Louis)
             </p>
           </div>
         )}
-      </div>
 
-      {/* Carta visual */}
-      <div className="space-y-8">
-        <div className="bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center">
-              <svg className="w-5 h-5 text-amber-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10"/>
-                <circle cx="12" cy="12" r="6"/>
-                <circle cx="12" cy="12" r="2"/>
-              </svg>
-              <h3 className="text-lg font-bold text-white">Rueda Solar Return {chartData.solarReturnInfo?.year || new Date().getFullYear()}</h3>
-            </div>
-          </div>
-
-          <div className="text-center text-amber-200 text-sm">
-            La configuración planetaria para tu nuevo año astrológico - Sol fijo en Acuario 21°
-          </div>
-        </div>
-
-        {chartData && (
-          <div className="flex justify-center">
-            <ChartDisplay
-              planets={chartData.planets}
-              houses={chartData.houses}
-              elementDistribution={chartData.elementDistribution}
-              modalityDistribution={chartData.modalityDistribution}
-              keyAspects={chartData.keyAspects || []}
-              aspects={chartData.aspects || []}
-              ascendant={chartData.ascendant || undefined}
-              midheaven={chartData.midheaven || undefined}
-              birthData={birthData || undefined}
-              chartType="progressed"
-            />
+        {/* Botón Regenerar - SOLO SI HAY ERROR O ADMIN */}
+        {(error || user?.email === 'admin@tuvueltaalsol.com') && (
+          <div className="text-center mt-8">
+            <button
+              onClick={handleRegenerate}
+              disabled={regenerating}
+              className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white px-6 py-3 rounded-lg font-semibold transition-all mx-auto"
+            >
+              <RefreshCw className={`w-5 h-5 ${regenerating ? 'animate-spin' : ''}`} />
+              {regenerating ? 'Regenerando...' : 'Regenerar Solar Return'}
+            </button>
+            {error && (
+              <p className="text-red-400 text-sm mt-2">
+                Hay un error con tu Solar Return. Usa este botón para regenerarlo.
+              </p>
+            )}
           </div>
         )}
       </div>
-
-      {/* Planetas en casas */}
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-          <Target className="w-6 h-6 text-blue-400" />
-          Planetas en Casas Solar Return
-        </h2>
-        
-        <div className="bg-gradient-to-r from-blue-900/20 via-indigo-900/20 to-purple-900/20 border border-blue-500/20 rounded-lg p-4">
-          <p className="text-blue-200 text-sm mb-4">
-            Las casas donde caen los planetas en tu Solar Return indican las áreas de vida que se activarán durante tu próximo año astrológico.
-          </p>
-          
-          {chartData.planets && chartData.planets.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {chartData.planets.map((planet: any, index: number) => (
-                <div key={index} className="bg-amber-800/30 rounded-lg p-3">
-                  <div className="flex items-center mb-2">
-                    <Sun className="w-4 h-4 text-amber-400 mr-2" />
-                    <span className="font-semibold text-amber-300">{planet.name || 'Planeta'}</span>
-                    {planet.name === 'Sol' && (
-                      <span className="ml-2 text-xs bg-green-600/30 text-green-200 px-2 py-1 rounded">
-                        FIJO
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-sm text-amber-200">
-                    <div>Casa {planet.house || 'N/A'}</div>
-                    <div>{planet.sign || 'N/A'} {planet.degree ? `${planet.degree.toFixed(1)}°` : ''}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center text-amber-300 py-8">
-              <Sun className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>Datos de planetas en proceso de carga...</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Aspectos clave */}
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-          <Zap className="w-6 h-6 text-indigo-400" />
-          Aspectos Clave del Año
-        </h2>
-        
-        <div className="bg-gradient-to-r from-indigo-900/20 via-purple-900/20 to-violet-900/20 border border-indigo-500/20 rounded-lg p-4">
-          <p className="text-indigo-200 text-sm mb-4">
-            Los aspectos entre planetas en tu Solar Return revelan las dinámicas y oportunidades principales de tu próximo año astrológico.
-          </p>
-          
-          {chartData.keyAspects && chartData.keyAspects.length > 0 ? (
-            <div className="space-y-3">
-              {chartData.keyAspects.slice(0, 6).map((aspect: any, index: number) => (
-                <div key={index} className="bg-orange-800/30 rounded-lg p-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <Zap className="w-4 h-4 text-orange-400 mr-2" />
-                      <span className="font-semibold text-orange-300">
-                        {aspect.planet1} {aspect.aspectType} {aspect.planet2}
-                      </span>
-                    </div>
-                    <span className="text-xs text-orange-200">
-                      {aspect.orb ? `${aspect.orb.toFixed(1)}°` : ''}
-                    </span>
-                  </div>
-                  {aspect.meaning && (
-                    <p className="text-sm text-orange-200 mt-2">{aspect.meaning}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center text-orange-300 py-8">
-              <Zap className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>Analizando aspectos planetarios...</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Elementos y modalidades */}
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-          <Sparkles className="w-6 h-6 text-purple-400" />
-          Distribución Energética Anual
-        </h2>
-        
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-gradient-to-br from-red-900/20 to-pink-900/20 border border-red-500/20 rounded-lg p-6">
-            <h3 className="text-red-300 font-semibold mb-4">Elementos del Año</h3>
-            <div className="space-y-3">
-              {Object.entries(chartData.elementDistribution).map(([element, percentage]) => (
-                <div key={element} className="flex items-center justify-between">
-                  <span className="text-red-200 capitalize">{element}</span>
-                  <div className="flex items-center">
-                    <div className="w-20 h-2 bg-red-800/30 rounded-full mr-2">
-                      <div 
-                        className="h-full bg-gradient-to-r from-red-400 to-pink-400 rounded-full"
-                        style={{ width: `${percentage}%` }}
-                      ></div>
-                    </div>
-                    <span className="text-red-100 text-sm">{percentage}%</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-pink-900/20 to-purple-900/20 border border-pink-500/20 rounded-lg p-6">
-            <h3 className="text-pink-300 font-semibold mb-4">Modalidades del Año</h3>
-            <div className="space-y-3">
-              {Object.entries(chartData.modalityDistribution).map(([mode, percentage]) => (
-                <div key={mode} className="flex items-center justify-between">
-                  <span className="text-pink-200 capitalize">{mode}</span>
-                  <div className="flex items-center">
-                    <div className="w-20 h-2 bg-pink-800/30 rounded-full mr-2">
-                      <div 
-                        className="h-full bg-gradient-to-r from-pink-400 to-purple-400 rounded-full"
-                        style={{ width: `${percentage}%` }}
-                      ></div>
-                    </div>
-                    <span className="text-pink-100 text-sm">{percentage}%</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-
-
-      {/* Botón de interpretación final - igual que carta natal */}
-      <div className="text-center bg-gradient-to-r from-amber-900/20 via-orange-900/20 to-red-900/20 backdrop-blur-sm border border-amber-400/20 rounded-3xl p-8">
-        <h2 className="text-2xl font-bold text-amber-300 mb-4 flex items-center justify-center">
-          <Gift className="w-6 h-6 mr-3" />
-          🎯 Solar Return {chartData.solarReturnInfo?.year || new Date().getFullYear()} cargado
-        </h2>
-        <p className="text-amber-200 mb-6 max-w-2xl mx-auto">
-          Tu carta anual está calculada con el Sol fijo en Acuario 21°.
-          Descubre el significado profundo de este nuevo ciclo solar.
-        </p>
-
-        <div className="flex justify-center">
-          <InterpretationButton
-            chartData={chartData}
-            className="max-w-xl w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700"
-            type="solar-return"
-            userId={user?.uid || ''}
-            userProfile={{
-              name: birthData?.fullName || 'Usuario',
-              age: chartData.solarReturnInfo?.ageAtStart || 0,
-              birthPlace: birthData?.birthPlace || '',
-              birthDate: birthData?.birthDate || '',
-              birthTime: birthData?.birthTime || ''
-            }}
-            natalChart={null}
-          />
-        </div>
-      </div>
-
-      {/* Debug info */}
-      {debugInfo && (
-        <div className="bg-amber-900/20 border border-amber-500/20 rounded-lg p-3 max-w-2xl mx-auto">
-          <p className="text-amber-200 text-xs font-mono text-center">{debugInfo}</p>
-        </div>
-      )}
     </div>
   );
-};
-
-export default SolarReturnPage;// =============================================================================
+}

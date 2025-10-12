@@ -1,115 +1,116 @@
-// src/types/astrology/chartDisplay.ts - TIPOS ACTUALIZADOS PARA CARTA PROGRESADA
+// src/types/astrology/chartDisplay.ts
+// ✅ FIXED - Added "solar-return" to chartType
 
-import { JSX } from 'react';
+export interface ChartDisplayProps {
+  houses?: House[];
+  planets?: Planet[];
+  elementDistribution?: ElementDistribution;
+  modalityDistribution?: ModalityDistribution;
+  keyAspects?: KeyAspect[];
+  aspects?: Aspect[]; // ✅ AÑADIDA
 
-// =============================================================================
-// INTERFACES PRINCIPALES PARA CHARTDISPLAY ACTUALIZADAS
-// =============================================================================
-
-export interface Planet {
-  name: string;
-  degree: number;
-  sign: string;
-  minutes?: number;
-  longitude?: number;
-  houseNumber?: number;
-  housePosition?: number;
-  isRetrograde?: boolean;
-  retrograde?: boolean;
-  position?: number;
-  house?: number;
-  element?: string;
-  modality?: string;
+  ascendant?: Angle | null;
+  midheaven?: Angle | null;
+  birthData?: BirthData;
+  showInterpretation?: boolean;
+  onInterpretationGenerated?: (interpretation: any) => void;
+  
+  // ✅ FIXED: Added "solar-return" as valid value
+  chartType?: 'natal' | 'progressed' | 'solar-return';
+  showOnlyProgressedAspects?: boolean;
+  progressionInfo?: ProgressionInfo;
+  data?: any; // For flexibility
 }
 
+// Rest of interfaces remain the same
 export interface House {
   number: number;
   sign: string;
   degree: number;
-  minutes?: number;
   longitude?: number;
-  position?: number;
-  element?: string;
-  modality?: string;
 }
 
-export interface Aspect {
-  planet1: string;
-  planet2: string;
-  angle?: number;
-  type: string;
-  orb: number;
-  applying?: boolean;
-}
-
-// ✅ INTERFACE ACTUALIZADA CON PROPS PARA CARTA PROGRESADA
-export interface ChartDisplayProps {
-  houses: House[];
-  planets: Planet[];
-  elementDistribution: { fire: number; earth: number; air: number; water: number };
-  modalityDistribution: { cardinal: number; fixed: number; mutable: number };
-  keyAspects: Aspect[];
-  aspects?: any[];
-  angles?: any[];
-  ascendant?: { 
-    longitude?: number; 
-    sign?: string; 
-    degree?: number; 
-    minutes?: number;
-  };
-  midheaven?: { 
-    longitude?: number; 
-    sign?: string; 
-    degree?: number; 
-    minutes?: number;
-  };
-  birthData?: {
-    birthDate?: string;
-    birthTime?: string;
-    birthPlace?: string;
-    latitude?: number;
-    longitude?: number;
-    timezone?: string;
-  };
-  // ✅ NUEVAS PROPS PARA CARTA PROGRESADA
-  chartType?: 'natal' | 'progressed';
-  progressionInfo?: {
-    year: number;
-    period: string;
-    description: string;
-    startDate?: string;
-    endDate?: string;
-    ageAtStart?: number;
-    isCurrentYear?: boolean;
-    progressionDate?: string;
-    progressionTime?: string;
-  };
-  showOnlyProgressedAspects?: boolean; // ✅ NUEVA PROP CLAVE
-  progressionLocation?: {
-    progressionPlace: string;
-    latitude: number;
-    longitude: number;
-    timezone: string;
-  };
-}
-
-export interface AspectConfig {
-  angle: number;
-  orb: number;
-  color: string;
+export interface Planet {
   name: string;
-  difficulty: 'neutral' | 'easy' | 'hard' | 'minor';
+  sign: string;
+  degree: number;
+  house?: number;
+  houseNumber?: number;
+  retrograde?: boolean;
+  longitude?: number;
+  latitude?: number;
+  speed?: number;
+  element?: string;
+  mode?: string;
+}
+
+export interface ElementDistribution {
+  fire: number;
+  earth: number;
+  air: number;
+  water: number;
+}
+
+export interface ModalityDistribution {
+  cardinal: number;
+  fixed: number;
+  mutable: number;
+}
+
+export interface KeyAspect {
+  id?: number | string;
+  planet1?: string;
+  planet2?: string;
+  type?: string;
+  aspect?: string;
+  degree?: number;
+  orb?: number;
+  description?: string;
+  importance?: number;
+}
+
+export interface Angle {
+  sign?: string;
+  degree?: number;
+  longitude?: number;
+  name?: string;
+}
+
+export interface BirthData {
+  name?: string;
+  fullName?: string;
+  birthDate?: string;
+  birthTime?: string;
+  location?: string;
+  birthPlace?: string;
+  latitude?: number;
+  longitude?: number;
+  timezone?: string;
+}
+
+export interface ProgressionInfo {
+  year?: number;
+  period?: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  ageAtStart?: number;
+  isCurrentYear?: boolean;
+  progressionDate?: string;
+  progressionTime?: string;
 }
 
 export interface CalculatedAspect {
   planet1: string;
   planet2: string;
-  angle: number;
   type: string;
+  aspect: string;
   orb: number;
-  config: AspectConfig;
-  exact: boolean;
-  isProgressed?: boolean; // ✅ NUEVO: Para distinguir aspectos progresados
+  degree: number;
+  category: 'major' | 'minor';
+  isHard: boolean;
+  isEasy: boolean;
+  key: string;
 }
 
 export interface SelectedAspectTypes {
@@ -122,47 +123,4 @@ export interface SelectedAspectTypes {
 export interface TooltipPosition {
   x: number;
   y: number;
-}
-
-export interface CirclePosition {
-  x: number;
-  y: number;
-}
-
-export interface MenuItemConfig {
-  id: string;
-  label: string;
-  icon: () => JSX.Element;
-}
-
-export interface BirthDataCardProps {
-  birthData?: {
-    birthDate?: string;
-    birthTime?: string;
-    birthPlace?: string;
-  };
-  ascendant?: { 
-    longitude?: number; 
-    sign?: string; 
-    degree?: number; 
-    minutes?: number;
-  };
-}
-
-export interface AscendantCardProps {
-  ascendant?: { 
-    longitude?: number; 
-    sign?: string; 
-    degree?: number; 
-    minutes?: number;
-  };
-}
-
-export interface MidheavenCardProps {
-  midheaven?: { 
-    longitude?: number; 
-    sign?: string; 
-    degree?: number; 
-    minutes?: number;
-  };
 }
