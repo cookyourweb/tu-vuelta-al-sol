@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 
 export default function SolarReturnPage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
   
   const [chartData, setChartData] = useState<any>(null);

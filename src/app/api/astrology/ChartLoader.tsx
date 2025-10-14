@@ -252,9 +252,12 @@ const ChartLoader: React.FC<ChartLoaderProps> = ({
         degree: planet.degree,
       }))}
       aspects={chartData.aspects.map(aspect => ({
-        planet1: { name: aspect.planet1 },
-        planet2: { name: aspect.planet2 },
+        planet1: aspect.planet1,
+        planet2: aspect.planet2,
         type: aspect.type,
+        aspect: aspect.type, // Map type to aspect field
+        orb: 0, // Default orb value
+        degree: aspect.degree,
       }))}
       elementDistribution={{
         fire: chartData.elementDistribution.fire || 0,

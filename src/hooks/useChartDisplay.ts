@@ -200,8 +200,8 @@ export const useChartDisplay = ({
 
   const filteredAspects = useMemo(() => {
     return calculatedAspects.filter(aspect => {
-      const isHard = aspect.config.difficulty === 'hard';
-      const isEasy = aspect.config.difficulty === 'easy';
+      const isHard = aspect.config?.difficulty === 'hard';
+      const isEasy = aspect.config?.difficulty === 'easy';
       const isMajor = ['conjunction', 'sextile', 'square', 'trine', 'opposition'].includes(aspect.type);
       const isMinor = !isMajor;
 
@@ -237,8 +237,8 @@ export const useChartDisplay = ({
       return {
         ...planet,
         position: realPosition,
-        house: planet.house || planet.houseNumber || planet.housePosition || 1,
-        retrograde: planet.retrograde || planet.isRetrograde || false
+        house: planet.house || planet.houseNumber || 1,
+        retrograde: planet.retrograde || false
       } as Planet;
     }).filter((planet): planet is Planet => planet !== null);
   }, [planets, convertAstrologicalDegreeToPosition]);

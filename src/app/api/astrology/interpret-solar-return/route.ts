@@ -103,71 +103,85 @@ async function generateWithOpenAI(natalChart: any, solarReturnChart: any, userPr
   try {
     console.log('🤖 Generando interpretación Solar Return con OpenAI...');
 
-    // Preparar datos para el prompt
-    const promptData = {
-      userName: userProfile.name || 'Usuario',
-      userAge: userProfile.age || 0,
-      birthDate: userProfile.birthDate || '',
-      birthTime: userProfile.birthTime || '',
-      birthPlace: userProfile.birthPlace || '',
-      solarReturnYear: solarReturnChart?.solarReturnInfo?.year || new Date().getFullYear(),
-      natalChart: JSON.stringify(natalChart, null, 2),
-      solarReturnChart: JSON.stringify(solarReturnChart, null, 2)
+    // ✅ Extraer solo datos esenciales para reducir tokens
+    const natalEssentials = {
+      sun: natalChart.planets?.find((p: any) => p.name === 'Sol' || p.name === 'Sun'),
+      moon: natalChart.planets?.find((p: any) => p.name === 'Luna' || p.name === 'Moon'),
+      ascendant: natalChart.ascendant,
+      midheaven: natalChart.midheaven
     };
 
-    // Generar prompt maestro usando la función
-    const prompt = generateSolarReturnMasterPrompt({
-      natalChart: JSON.parse(promptData.natalChart),
-      solarReturnChart: JSON.parse(promptData.solarReturnChart),
-      userProfile: {
-        name: promptData.userName,
-        age: promptData.userAge,
-        birthPlace: promptData.birthPlace,
-        birthDate: promptData.birthDate,
-        birthTime: promptData.birthTime
-      },
-      returnYear: promptData.solarReturnYear
-    });
+    const solarEssentials = {
+      sun: solarReturnChart.planets?.find((p: any) => p.name === 'Sol' || p.name === 'Sun'),
+      moon: solarReturnChart.planets?.find((p: any) => p.name === 'Luna' || p.name === 'Moon'),
+      ascendant: solarReturnChart.ascendant,
+      midheaven: solarReturnChart.midheaven,
+      year: solarReturnChart.solarReturnInfo?.year || new Date().getFullYear()
+    };
+
+    // ✅ Prompt ULTRA-COMPACTO (metodología Shea-Teal-Louis)
+    const prompt = `Genera interpretación Solar Return año ${solarEssentials.year} para ${userProfile.name}.
+
+DATOS CLAVE:
+Natal: Sol ${natalEssentials.sun?.sign || ''} Casa ${natalEssentials.sun?.house || 1}, ASC ${natalEssentials.ascendant?.sign || ''}
+Solar: Sol ${solarEssentials.sun?.sign || ''} Casa ${solarEssentials.sun?.house || 1}, ASC ${solarEssentials.ascendant?.sign || ''}
+
+METODOLOGÍA (Shea-Teal-Louis):
+1. ASC Solar en casa natal = tema central año
+2. Sol Solar en casa natal = energía vital
+3. Comparar posiciones natal vs solar
+
+Responde SOLO con JSON válido en español:
+{
+  "esencia_revolucionaria_anual": "Declaración disruptiva del año (150 palabras)",
+  "proposito_vida_anual": "Misión del año (100 palabras)",
+  "tema_central_del_anio": "Título del año",
+  "plan_accion": {
+    "hoy_mismo": ["acción 1", "acción 2", "acción 3"],
+    "esta_semana": ["acción 1", "acción 2", "acción 3"],
+    "este_mes": ["acción 1", "acción 2", "acción 3"]
+  },
+  "declaracion_poder_anual": "Frase de poder",
+  "advertencias": ["advertencia 1", "advertencia 2", "advertencia 3"],
+  "eventos_clave_del_anio": [
+    {
+      "periodo": "Trimestre 1",
+      "evento": "Nombre",
+      "tipo": "Tipo",
+      "descripcion": "Descripción breve",
+      "accion_recomendada": "Acción"
+    }
+  ],
+  "insights_transformacionales": ["insight 1", "insight 2", "insight 3"],
+  "rituales_recomendados": ["ritual 1", "ritual 2", "ritual 3"]
+}`;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4',
+      model: 'gpt-4-turbo', // ✅ CAMBIADO de 'gpt-4' a 'gpt-4-turbo'
       messages: [
         {
           role: 'system',
-          content: `Eres un astrólogo profesional especializado en SOLAR RETURN (Revolución Solar), siguiendo la metodología de Mary Fortier Shea, Celeste Teal y Anthony Louis.
+          content: `Eres astrólogo profesional especializado en Solar Return (metodología Shea-Teal-Louis).
 
-CONTEXTO: Solar Return es la carta astrológica levantada para el momento exacto cuando el Sol regresa a su posición natal cada año. NO es carta progresada - es una fotografía anual de energías disponibles.
-
-METODOLOGÍA PROFESIONAL:
-1. Ascendente Solar Return en Casa Natal = INDICADOR #1 (Shea)
-2. Sol en Casa Solar Return = Tema central del año (Teal)
-3. Planetas Angulares Solar Return = Asuntos dominantes (Louis)
-4. Superposición Natal-Solar Return = Áreas de vida activadas (Shea)
-5. Aspectos cruzados = Dinámicas específicas (Louis)
-6. Timing mensual basado en aspectos del Sol transitante (Teal)
-
-PRINCIPIOS:
-- El Sol SIEMPRE está en el mismo grado natal en Solar Return
-- La ubicación de cálculo debe ser el lugar de residencia actual
-- Los otros planetas SÍ cambian de posición cada año
-- Las casas se recalculan para el año solar
-- Es una herramienta predictiva Y de empoderamiento
+PRINCIPIOS TÉCNICOS:
+- Solar Return = carta cuando Sol regresa a posición natal cada año
+- ASC Solar en casa natal = INDICADOR #1 (tema central año)
+- Sol Solar en casa natal = dónde fluye energía vital
+- Comparar posiciones natal vs solar = áreas activadas
 
 LENGUAJE:
 - Profesional pero transformacional
-- Directo sin ser agresivo
-- Específico con casas, grados, signos reales
-- Sin eufemismos innecesarios
-- Enfocado en ACCIÓN, no solo descripción
+- Directo, específico, sin eufemismos
+- Enfocado en ACCIÓN
 
-RESPONDE SOLO CON JSON VÁLIDO EN ESPAÑOL. Sin texto adicional antes o después del JSON.`
+RESPONDE SOLO JSON VÁLIDO EN ESPAÑOL. Sin texto adicional.`
         },
         {
           role: 'user',
           content: prompt
         }
       ],
-      max_tokens: 2000,
+      max_tokens: 3000, // ✅ Aumentado de 2000
       temperature: 0.8,
     });
 
@@ -176,11 +190,19 @@ RESPONDE SOLO CON JSON VÁLIDO EN ESPAÑOL. Sin texto adicional antes o después
       throw new Error('No response from OpenAI');
     }
 
-    // Parsear JSON
-    const interpretation = JSON.parse(response);
+    // Limpiar markdown si existe
+    let cleanedResponse = response.trim();
+    if (cleanedResponse.startsWith('```json')) {
+      cleanedResponse = cleanedResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    }
+
+  
+
+  const interpretation = JSON.parse(cleanedResponse);
+    console.log('🎯 INTERPRETACIÓN GENERADA:', JSON.stringify(interpretation, null, 2)); // ✅ AÑADIR
     console.log('✅ Interpretación Solar Return generada exitosamente');
 
-    return interpretation;
+    return interpretation;;
 
   } catch (error) {
     console.error('❌ Error generando con OpenAI:', error);
@@ -189,6 +211,7 @@ RESPONDE SOLO CON JSON VÁLIDO EN ESPAÑOL. Sin texto adicional antes o después
 }
 
 // ✅ FUNCIÓN: Generar fallback disruptivo en ESPAÑOL
+
 function generateFallback(natalChart: any, solarReturnChart: any, userProfile: any): any {
   console.log('🔄 Generando fallback disruptivo para Solar Return');
 
@@ -197,98 +220,84 @@ function generateFallback(natalChart: any, solarReturnChart: any, userProfile: a
   const solarSol = solarReturnChart.planets?.find((p: any) => p.name === 'Sol' || p.name === 'Sun');
 
   return {
-    esencia_revolucionaria_anual: `¡${userProfile.name || 'Usuario'}, DESPIERTA! Tu año ${returnYear}-${returnYear + 1} NO es un ciclo más. Es tu REVOLUCIÓN PERSONAL obligatoria. Con Ascendente ${solarAsc}, te conviertes en un AGENTE DE CAMBIO que no puede ser ignorado. Este Solar Return te obliga a EVOLUCIONAR o PERECER en la mediocridad.`,
+    esencia_revolucionaria_anual: `${userProfile.name || 'Usuario'}, tu año ${returnYear}-${returnYear + 1} NO es un ciclo más. Es tu REVOLUCIÓN PERSONAL obligatoria. Con Ascendente ${solarAsc}, te conviertes en un AGENTE DE CAMBIO que no puede ser ignorado. Este Solar Return te obliga a EVOLUCIONAR o quedarte atrás.`,
 
-    proposito_vida_anual: `Tu MISIÓN NO NEGOCIABLE: DESMANTELAR toda estructura mental que te mantiene pequeño/a. En Casa ${solarSol?.house || 1}, tu Sol SR exige que emerjas como la AUTORIDAD que siempre has sido. No hay excusas. No hay retrasos. ACTIVA tu poder AHORA.`,
+    proposito_vida_anual: `Tu MISIÓN este año: DESMANTELAR toda estructura mental que te mantiene pequeño/a. En Casa ${solarSol?.house || 1}, tu Sol exige que emerjas como la AUTORIDAD que siempre has sido. No hay excusas. ACTIVA tu poder AHORA.`,
 
-    tema_central_del_anio: `REVOLUCIÓN ${solarAsc} - Año de PODER OBLIGATORIO`,
+    tema_central_del_anio: `REVOLUCIÓN ${solarAsc} - Año de PODER TOTAL`,
 
     plan_accion: {
       hoy_mismo: [
         `¡URGENTE! Elimina TODA duda sobre tu valor. Tu Ascendente ${solarAsc} exige PRESENCIA TOTAL.`,
         "DESTRUYE cualquier excusa que te mantenga en la zona de confort. Escribe 3 acciones CONCRETAS que te aterroricen.",
-        `Declara en voz ALTA y FURIOSA: "Soy ${solarAsc} en acción. Mi poder es IRREFUTABLE durante ${returnYear}."`
+        `Declara en voz ALTA: "Soy ${solarAsc} en acción. Mi poder es IRREFUTABLE durante ${returnYear}."`
       ],
       esta_semana: [
-        `INVESTIGA sin piedad las debilidades de ${solarAsc} que has estado evitando. Es hora de CONQUISTARLAS.`,
-        "Establece un RITUAL DIARIO de activación. No es opcional, es OBLIGATORIO para sobrevivir este año.",
-        "IDENTIFICA y ELIMINA la relación/hábito tóxico que te mantiene en el pasado. Sin anestesia."
+        `INVESTIGA sin piedad las debilidades de ${solarAsc} que has estado evitando.`,
+        "Establece un RITUAL DIARIO de activación. No es opcional.",
+        "IDENTIFICA y ELIMINA la relación/hábito tóxico que te mantiene en el pasado."
       ],
       este_mes: [
-        "LANZA un proyecto que refleje tu energía lunar anual SIN CENSURA. El miedo es para los débiles.",
-        "REORGANIZA tu vida física según tu Ascendente SR. Si algo no vibra con tu poder, ¡FUERA!",
-        "INVIERTE en formación que potencie tu Casa 10 SR. Tu carrera NO es un hobby, es tu DOMINIO."
+        "LANZA un proyecto que refleje tu energía lunar anual SIN CENSURA.",
+        "REORGANIZA tu vida física según tu Ascendente Solar Return.",
+        "INVIERTE en formación que potencie tu Casa 10. Tu carrera es tu DOMINIO."
       ]
     },
 
-    declaracion_poder_anual: `Soy ${solarAsc} en acción destructiva y creadora. Mi año ${returnYear} es mi CAMPO DE BATALLA. Emergeré victorioso/a o no emergeré.`,
+    declaracion_poder_anual: `Soy ${solarAsc} en acción destructiva y creadora. Mi año ${returnYear} es mi CAMPO DE BATALLA. Emergeré victorioso/a.`,
 
     advertencias: [
-      "¡PELIGRO! Si ignoras Saturno SR, te aplastará como a un insecto. Sus lecciones son BRUTALES pero necesarias.",
-      "Verifica tu ubicación SR con PRECISIÓN MILIMÉTRICA. Un error aquí arruina todo el año.",
-      "Cuando Marte SR forme aspectos tensos, ¡DETENTE! Las decisiones impulsivas te costarán sangre, sudor y lágrimas."
+      "¡PELIGRO! Si ignoras Saturno Solar Return, te aplastará. Sus lecciones son BRUTALES pero necesarias.",
+      "Verifica tu ubicación Solar Return con PRECISIÓN. Un error aquí arruina todo el año.",
+      "Cuando Marte forme aspectos tensos, ¡DETENTE! Las decisiones impulsivas te costarán."
     ],
-
-    comparacion_natal_vs_solar_return: {
-      planetas_que_cambian_casa: [
-        {
-          planeta: "Luna",
-          natal: natalChart.planets?.find((p: any) => p.name === 'Luna' || p.name === 'Moon')?.house || 7,
-          solar_return: solarReturnChart.planets?.find((p: any) => p.name === 'Luna' || p.name === 'Moon')?.house || 5,
-          significado: "Tu corazón emocional MIGRA de zona segura a TERRITORIO DE GUERRA. Este año sientes TODO más INTENSAMENTE."
-        }
-      ],
-      nuevos_aspectos_formados: "Aspectos SR que NO existían en tu natal: estas son tus NUEVAS HERRAMIENTAS DE PODER. Apréndelas o quédate obsoleto.",
-      casas_activadas_este_anio: [1, 4, 7, 10]
-    },
 
     eventos_clave_del_anio: [
       {
         periodo: "Primer trimestre - ACTIVACIÓN OBLIGATORIA",
-        evento: "EL ASCENDENTE ${solarAsc} TE RECLAMA",
+        evento: `ASCENDENTE ${solarAsc} TE RECLAMA`,
         tipo: "OBLIGACIÓN CÓSMICA",
-        descripcion: "Las primeras 90 días son tu PRUEBA DE FUEGO. Si fallas aquí, el año entero es un desastre.",
-        accion_recomendada: "ESTABLECE tu identidad anual con MANO DE HIERRO. ¿Quién demonios eres en este ciclo?"
+        descripcion: "Los primeros 90 días son tu PRUEBA DE FUEGO. Si fallas aquí, el año entero es un desastre.",
+        accion_recomendada: "ESTABLECE tu identidad anual con MANO DE HIERRO. ¿Quién eres en este ciclo?"
       },
       {
         periodo: "Segundo trimestre - CONFRONTACIÓN DIRECTA",
         evento: "OPOSICIÓN SOLAR - EL ESPEJO BRUTAL",
         tipo: "DESAFÍO MORTAL",
-        descripcion: "La realidad te golpea como un tren de carga. Tus excusas quedan expuestas y destruidas.",
-        accion_recomendada: "REVISA todo. ADAPTA o MUERE. La flexibilidad no es opcional, es tu ÚNICA SALVACIÓN."
+        descripcion: "La realidad te golpea. Tus excusas quedan expuestas y destruidas.",
+        accion_recomendada: "REVISA todo. ADAPTA o MUERE. La flexibilidad es tu ÚNICA SALVACIÓN."
       },
       {
         periodo: "Tercer trimestre - DOMINIO Y EXPANSIÓN",
         evento: "COSECHA DEL PODER GANADO",
         tipo: "TRIUNFO OBLIGATORIO",
-        descripcion: "Lo que sembraste florece. Es momento de ESCALAR sin piedad o perderlo todo.",
-        accion_recomendada: "DUPLICA esfuerzos en Casa ${solarSol?.house}. Tu zona de PODER máximo debe ser IMPARABLE."
+        descripcion: "Lo que sembraste florece. Momento de ESCALAR sin piedad.",
+        accion_recomendada: `DUPLICA esfuerzos en Casa ${solarSol?.house || 1}. Tu zona de PODER máximo debe ser IMPARABLE.`
       },
       {
         periodo: "Cuarto trimestre - INTEGRACIÓN FINAL",
         evento: "PREPARACIÓN PARA EL SIGUIENTE CICLO",
         tipo: "SABIDURÍA FORZADA",
-        descripcion: "Cierre consciente. DOCUMENTA todo o repite los errores el próximo año.",
-        accion_recomendada: "Escribe tu carta al futuro YO. ¿Sobreviviste? ¿Evolucionaste? ¿Estás listo para más?"
+        descripcion: "Cierre consciente. DOCUMENTA todo o repites los errores.",
+        accion_recomendada: "Escribe tu carta al futuro YO. ¿Sobreviviste? ¿Evolucionaste?"
       }
     ],
 
     insights_transformacionales: [
-      `Ascendente ${solarAsc} no es una máscara, es tu NUEVA PIEL. Úsala o arráncala, pero no la ignores.`,
-      "Casas vacías en SR son TU TERRITORIO VIRGEN. Conquista o quédate estancado para siempre.",
-      "Aspectos al Sol SR son tus CÓDIGOS DE ACTIVACIÓN. Estúdialos como tu vida depende de ello.",
-      "Tu ubicación SR determina si eres REY o ESCLAVO este año. Elige tu trono con precisión."
+      `Ascendente ${solarAsc} no es una máscara, es tu NUEVA PIEL.`,
+      "Casas vacías en Solar Return son TU TERRITORIO VIRGEN. Conquista o quédate estancado.",
+      "Aspectos al Sol Solar Return son tus CÓDIGOS DE ACTIVACIÓN.",
+      "Tu ubicación Solar Return determina si eres REY o ESCLAVO este año."
     ],
 
     rituales_recomendados: [
-      "RITUAL DE INICIO: Día exacto cumpleaños - Quema tu carta de 'excusas pasadas' en fuego sagrado.",
-      `RITUAL LUNAR: Cada Luna Nueva - Conecta con elementos de ${solarAsc}. Sin piedad, sin excusas.`,
+      "RITUAL DE INICIO: Día exacto cumpleaños - Quema tu carta de 'excusas pasadas'.",
+      `RITUAL LUNAR: Cada Luna Nueva - Conecta con elementos de ${solarAsc}.`,
       "RITUAL DIARIO: 5 minutos de MEDITACIÓN DE PODER. Visualiza tu dominación del año.",
-      "RITUAL DE CIERRE: 3 días pre-cumpleaños - Escribe sangre, sudor y lágrimas. ¿Valió la pena?"
+      "RITUAL DE CIERRE: 3 días pre-cumpleaños - Escribe sangre, sudor y lágrimas."
     ]
   };
 }
-
 // ✅ POST HANDLER PRINCIPAL
 export async function POST(request: NextRequest) {
   try {

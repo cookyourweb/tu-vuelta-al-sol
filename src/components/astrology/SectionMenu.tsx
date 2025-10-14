@@ -2,7 +2,11 @@
 // Componente de menú de navegación extraído del ChartDisplay
 
 import React from 'react';
-import type { MenuItemConfig } from '../../types/astrology/chartDisplay';
+type MenuItemConfig = {
+  id: string;
+  label: string;
+  icon: React.FC;
+};
 
 interface SectionMenuProps {
   activeSection: string;

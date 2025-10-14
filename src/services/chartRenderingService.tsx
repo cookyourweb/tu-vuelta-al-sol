@@ -1,3 +1,4 @@
+
 // src/services/astrology/chartRenderingService.ts
 // Servicio especializado para renderizado de elementos SVG de la carta - TIPOS CORREGIDOS
 
@@ -46,8 +47,8 @@ export class ChartRenderingService {
           
           if (!planet1 || !planet2) return null;
 
-          const isHard = aspect.config.difficulty === 'hard';
-          const isEasy = aspect.config.difficulty === 'easy';
+          const isHard = aspect.config?.difficulty === 'hard';
+          const isEasy = aspect.config?.difficulty === 'easy';
           const isMajor = ['conjunction', 'sextile', 'square', 'trine', 'opposition'].includes(aspect.type);
           const isMinor = !isMajor;
 
@@ -73,7 +74,7 @@ export class ChartRenderingService {
               y1={pos1.y}
               x2={pos2.x}
               y2={pos2.y}
-              stroke={aspect.config.color}
+              stroke={aspect.config?.color || '#666'}
               strokeWidth={isHovered ? strokeWidth + 1 : strokeWidth}
               opacity={isHovered ? 1 : opacity}
               strokeDasharray={isMinor ? "3,3" : "none"}
@@ -167,8 +168,9 @@ export class ChartRenderingService {
                 className="animate-pulse"
                 style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}
               >
-                R
-              </text>
+                R 
+                
+                </text>
             )}
           </g>
         );

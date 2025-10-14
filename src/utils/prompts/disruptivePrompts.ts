@@ -231,6 +231,112 @@ Genera AHORA el JSON completo con TODOS los planetas interpretados usando SOLO d
 }
 
 /**
+ * Genera el prompt disruptivo para interpretación de carta progresada
+ */
+export function generateDisruptiveProgressedPrompt(
+  progressedChart: ChartData,
+  natalChart: ChartData,
+  userProfile: UserProfile,
+  natalInterpretation?: any
+): string {
+  const progressedPlanets = progressedChart.planets || [];
+  const natalPlanets = natalChart.planets || [];
+  const userName = userProfile.name || 'Usuario';
+
+  // Crear lista detallada de posiciones progresadas
+  const progressedPositions = progressedPlanets
+    .map((p) => {
+      const house = p.houseNumber || p.house || 'sin casa específica';
+      const degree = p.degree ? Math.floor(p.degree) : '?';
+      const retrograde = p.isRetrograde ? ' (Retrógrado)' : '';
+      return `${p.name} progresado en ${p.sign} ${degree}° Casa ${house}${retrograde}`;
+    })
+    .join('. ');
+
+  // Comparación con carta natal
+  const natalPositions = natalPlanets
+    .map((p) => {
+      const house = p.houseNumber || p.house || 'sin casa específica';
+      const degree = p.degree ? Math.floor(p.degree) : '?';
+      return `${p.name} natal en ${p.sign} ${degree}° Casa ${house}`;
+    })
+    .join('. ');
+
+  const prompt = `
+Actúa como un astrólogo evolutivo DISRUPTIVO especializado en PROGRESIONES SECUNDARIAS.
+
+USUARIO: ${userName.toUpperCase()}
+EDAD: ${userProfile.age || '?'} años
+NACIMIENTO: ${userProfile.birthDate} a las ${userProfile.birthTime} en ${userProfile.birthPlace}
+
+CARTA NATAL REAL:
+${natalPositions}
+
+CARTA PROGRESADA ACTUAL:
+${progressedPositions}
+
+🚨 REGLAS ABSOLUTAS PARA PROGRESIONES:
+
+1. COMPARA SIEMPRE natal vs progresada para mostrar EVOLUCIÓN
+2. Enfócate en cómo las posiciones progresadas ACTIVAN o TRANSFORMAN el potencial natal
+3. Usa el nombre ${userName} frecuentemente y personaliza todo
+4. TONO: Disruptivo, evolutivo, activador de poder personal
+
+FORMATO JSON EXACTO REQUERIDO:
+
+{
+  "tema_anual": "El tema central de este año de ${userName} basado en posiciones progresadas específicas",
+  "evolucion_personalidad": "Cómo ha evolucionado la personalidad de ${userName} desde la carta natal",
+  "nuevas_fortalezas": [
+    "Fortaleza 1 específica de las progresiones",
+    "Fortaleza 2 activada por posiciones progresadas",
+    "Fortaleza 3 que ${userName} puede aprovechar ahora"
+  ],
+  "plan_accion_evolutivo": {
+    "activar_ahora": [
+      "Acción inmediata 1 basada en progresiones actuales",
+      "Acción inmediata 2 para activar el potencial progresado"
+    ],
+    "soltar_obsoleto": [
+      "Qué debe soltar ${userName} de patrones natales obsoletos",
+      "Limitación que las progresiones han superado"
+    ],
+    "expandir_territorio": [
+      "Nuevo territorio que ${userName} puede explorar",
+      "Área de vida donde puede expandir su influencia"
+    ]
+  },
+  "comparacion_evolutiva": {
+    "natal_vs_progresada": "Comparación específica entre posiciones natales y progresadas de ${userName}",
+    "activaciones_casas": "Cómo las casas progresadas activan potenciales natales",
+    "aspectos_evolutivos": "Aspectos progresados que facilitan la evolución"
+  },
+  "mensaje_activacion": "Mensaje poderoso de activación para ${userName} basado en sus progresiones específicas",
+  "rituales_integracion": [
+    "Ritual 1 específico para integrar las progresiones",
+    "Ritual 2 mensual para honrar la evolución",
+    "Ritual 3 anual de celebración del crecimiento"
+  ]
+}
+
+DATOS COMPLETOS:
+CARTA NATAL: ${JSON.stringify(natalPlanets, null, 2)}
+CARTA PROGRESADA: ${JSON.stringify(progressedPlanets, null, 2)}
+
+IMPORTANTE:
+- Responde SOLO con JSON válido
+- NO uses markdown
+- Personaliza TODO para ${userName}
+- Compara SIEMPRE natal vs progresada
+- Enfócate en EVOLUCIÓN y ACTIVACIÓN
+
+Genera AHORA el JSON completo con la evolución progresada de ${userName}.
+`;
+
+  return prompt;
+}
+
+/**
  * Formatea datos de carta para el prompt (legacy - mantener por compatibilidad)
  */
 export function formatChartForPrompt(chartData: ChartData): string {

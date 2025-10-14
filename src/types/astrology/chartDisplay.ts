@@ -34,6 +34,7 @@ export interface Planet {
   name: string;
   sign: string;
   degree: number;
+  position?: number; // ✅ AÑADIDO para ChartWheel
   house?: number;
   houseNumber?: number;
   retrograde?: boolean;
@@ -111,6 +112,14 @@ export interface CalculatedAspect {
   isHard: boolean;
   isEasy: boolean;
   key: string;
+  config?: { // ✅ AÑADIDO para ChartTooltips
+    color: string;
+    name: string;
+    angle: number;
+    orb: number;
+    difficulty?: 'easy' | 'hard' | 'neutral' | 'minor';
+  };
+  exact?: boolean; // ✅ AÑADIDO para ChartTooltips
 }
 
 export interface SelectedAspectTypes {
@@ -123,4 +132,20 @@ export interface SelectedAspectTypes {
 export interface TooltipPosition {
   x: number;
   y: number;
+}
+
+export interface CirclePosition {
+  x: number;
+  y: number;
+}
+
+// Define Aspect interface (adjust fields as needed)
+export interface Aspect {
+  planet1: string;
+  planet2: string;
+  type: string;
+  aspect: string;
+  orb: number;
+  degree: number;
+  description?: string;
 }

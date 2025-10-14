@@ -164,7 +164,7 @@ const PostmanTest: React.FC = () => {
             houses={chartData.houses || []}
             planets={chartData.planets || []}
             aspects={chartData.aspects || []}
-            angles={chartData.angles || []}
+            // angles={chartData.angles || []} // REMOVED - not in ChartDisplayProps
             elementDistribution={chartData.elementDistribution || { fire: 0, earth: 0, air: 0, water: 0 }}
             modalityDistribution={chartData.modalityDistribution || { cardinal: 0, fixed: 0, mutable: 0 }}
             keyAspects={chartData.keyAspects || []}

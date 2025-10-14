@@ -173,10 +173,10 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
         <div className="flex items-center mb-3">
           <div 
             className="w-6 h-6 rounded-full mr-3" 
-            style={{ backgroundColor: currentAspect.config.color }}
+            style={{ backgroundColor: currentAspect.config?.color || '#666' }}
           ></div>
           <div>
-            <div className="text-white font-bold text-lg">{currentAspect.config.name}</div>
+            <div className="text-white font-bold text-lg">{currentAspect.config?.name || currentAspect.type}</div>
             <div className="text-gray-200 text-sm">
               entre {currentAspect.planet1} ({planet1Desc}) y {currentAspect.planet2} ({planet2Desc})
             </div>
@@ -185,10 +185,10 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
         
         <div className="mb-3 p-3 bg-white/10 rounded-lg border border-white/10">
           <div className="text-blue-300 text-xs mb-1">
-            <strong>Ángulo:</strong> {currentAspect.config.angle}°
+            <strong>Ángulo:</strong> {currentAspect.config?.angle || 'N/A'}°
           </div>
           <div className="text-blue-300 text-xs mb-1">
-            <strong>Orbe máximo:</strong> ±{currentAspect.config.orb}°
+            <strong>Orbe máximo:</strong> ±{currentAspect.config?.orb || 'N/A'}°
           </div>
           <div className="text-yellow-300 text-xs font-semibold">
             {currentAspect.exact ? 'EXACTO' : `Orbe: ${currentAspect.orb.toFixed(2)}°`}

@@ -165,49 +165,63 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
 
       const result = await response.json();
 
-      // ✅ LOGS DE DEBUGGING
-      console.log('🔍 ===== DEBUGGING RESPUESTA ENDPOINT =====');
-      console.log('🔍 result completo:', result);
-      console.log('🔍 result.success:', result.success);
-      console.log('🔍 result.data:', result.data);
-      console.log('🔍 result.data?.interpretation (primeras claves):', 
-        result.data?.interpretation ? Object.keys(result.data.interpretation) : 'NO EXISTE');
-      console.log('🔍 Esencia en result.data.interpretation:', 
-        result.data?.interpretation?.esencia_revolucionaria);
-      console.log('🔍 Esencia en result.interpretation:', 
-        result.interpretation?.esencia_revolucionaria);
-
       if (result.success) {
-        const newInterpretation = {
-          interpretation: result.data?.interpretation || result.interpretation,
-          cached: false,
-          generatedAt: result.data?.generatedAt || new Date().toISOString(),
-          method: result.data?.method || 'api'
-        };
-
-        // ✅ LOG DEL ESTADO QUE SE VA A SETEAR
         console.log('📺 ===== ESTADO QUE SE VA A SETEAR =====');
-        console.log('📺 newInterpretation completo:', newInterpretation);
-        console.log('📺 Esencia que se mostrará:', 
-          newInterpretation.interpretation?.esencia_revolucionaria);
-        console.log('📺 Propósito que se mostrará:', 
-          newInterpretation.interpretation?.proposito_vida);
-        console.log('📺 Tiene plan_accion:', 
-          !!newInterpretation.interpretation?.plan_accion);
+        
+        const rawInterpretation = result.data?.interpretation || result.interpretation;
+        
+        if (!rawInterpretation) {
+          throw new Error('No se encontró interpretación en la respuesta');
+        }
+        
+        console.log('🔍 rawInterpretation obtenida:', Object.keys(rawInterpretation));
+        
+        let interpretationData;
+        
+        if (type === 'natal') {
+          interpretationData = {
+            esencia_revolucionaria: rawInterpretation.esencia_revolucionaria,
+            proposito_vida: rawInterpretation.proposito_vida,
+            planetas: rawInterpretation.planetas,
+            plan_accion: rawInterpretation.plan_accion,
+            declaracion_poder: rawInterpretation.declaracion_poder,
+            advertencias: rawInterpretation.advertencias,
+            insights_transformacionales: rawInterpretation.insights_transformacionales,
+            rituales_recomendados: rawInterpretation.rituales_recomendados,
+            integracion_carta: rawInterpretation.integracion_carta
+          };
+        } else if (type === 'solar-return') {
+          interpretationData = {
+            esencia_revolucionaria: rawInterpretation.esencia_revolucionaria_anual,
+            proposito_vida: rawInterpretation.proposito_vida_anual,
+            tema_anual: rawInterpretation.tema_central_del_anio,
+            plan_accion: rawInterpretation.plan_accion,
+            declaracion_poder: rawInterpretation.declaracion_poder_anual,
+            advertencias: rawInterpretation.advertencias,
+            eventos_clave: rawInterpretation.eventos_clave_del_anio,
+            insights_transformacionales: rawInterpretation.insights_transformacionales,
+            rituales_recomendados: rawInterpretation.rituales_recomendados
+          };
+        } else {
+          interpretationData = rawInterpretation;
+        }
+        
+        const newInterpretation = {
+          interpretation: interpretationData,
+          cached: result.cached || result.data?.cached || false,
+          generatedAt: result.generatedAt || result.data?.generatedAt || new Date().toISOString(),
+          method: result.method || result.data?.method || 'api'
+        };
+        
+        console.log('📺 Esencia que se mostrará:', newInterpretation.interpretation.esencia_revolucionaria);
 
         setInterpretation(newInterpretation);
         setHasRecentInterpretation(true);
         setShowModal(true);
 
-        // Auto-guardar la nueva interpretación
         await autoSaveInterpretation(newInterpretation);
 
-        console.log('✅ Nueva interpretación generada y guardada');
-        
-        // ✅ VERIFICACIÓN FINAL DEL ESTADO
-        console.log('🎯 ===== VERIFICACIÓN FINAL =====');
-        console.log('🎯 Estado interpretation actual:', interpretation);
-        console.log('🎯 hasRecentInterpretation:', hasRecentInterpretation);
+        console.log('✅ Nueva interpretación generada');
       } else {
         throw new Error(result.error || 'Error desconocido');
       }
@@ -223,12 +237,6 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
   const autoSaveInterpretation = async (interpretationData: InterpretationData) => {
     try {
       console.log('💾 ===== GUARDANDO EN MONGODB =====');
-      console.log('💾 Datos a guardar:', {
-        userId,
-        chartType: type,
-        tieneInterpretacion: !!interpretationData.interpretation,
-        esencia: interpretationData.interpretation?.esencia_revolucionaria
-      });
 
       const response = await fetch('/api/interpretations/save', {
         method: 'POST',
@@ -245,35 +253,8 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       });
 
       if (response.ok) {
-        const data = await response.json();
-        console.log('✅ Interpretación guardada en MongoDB:', data);
-
-        // ✅ RECARGAR LISTA
-        console.log('🔄 Recargando lista de interpretaciones guardadas...');
+        console.log('✅ Interpretación guardada en MongoDB');
         await loadSavedInterpretations();
-        
-        // ✅ FORZAR ACTUALIZACIÓN DEL ESTADO
-        setInterpretation(prev => {
-          const updated = {
-            ...prev!,
-            interpretation: interpretationData.interpretation,
-            cached: false,
-            generatedAt: interpretationData.generatedAt || new Date().toISOString()
-          };
-          
-          console.log('🔄 Estado actualizado después de guardar:', {
-            esencia: updated.interpretation?.esencia_revolucionaria,
-            cached: updated.cached,
-            generatedAt: updated.generatedAt
-          });
-          
-          return updated;
-        });
-
-        console.log('✅ Lista de interpretaciones recargada y estado actualizado');
-      } else {
-        const errorText = await response.text();
-        console.error('❌ Error guardando en MongoDB:', errorText);
       }
     } catch (error) {
       console.error('❌ Error en autoSave:', error);
@@ -334,16 +315,10 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
 
   const renderInterpretationContent = () => {
     if (!interpretation?.interpretation) {
-      console.log('⚠️ renderInterpretationContent: NO HAY INTERPRETATION');
       return null;
     }
 
     const data = interpretation.interpretation;
-    
-    // ✅ LOG AL RENDERIZAR
-    console.log('🎨 ===== RENDERIZANDO INTERPRETACIÓN =====');
-    console.log('🎨 Esencia a renderizar:', data.esencia_revolucionaria);
-    console.log('🎨 Propósito a renderizar:', data.proposito_vida);
 
     return (
       <div className="space-y-8">
@@ -363,7 +338,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               <Target className="w-8 h-8 text-blue-300" />
               Tu Propósito de Vida
             </h4>
-            <p className="text-blue-50 text-lg leading-relaxed font-medium">{data.proposito_vida}</p>
+      <p className="text-blue-50 text-lg leading-relaxed font-medium">{data.proposito_vida}</p>
           </div>
         )}
 
@@ -379,28 +354,24 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                 key={planetKey}
                 className="bg-gradient-to-br from-indigo-900/30 to-purple-900/30 rounded-xl p-6 border border-indigo-400/20"
               >
-                {/* Título del Planeta */}
                 {planetData.titulo && (
                   <h4 className="text-indigo-100 font-bold text-xl mb-4">
                     {planetData.titulo}
                   </h4>
                 )}
 
-                {/* Posición Técnica */}
                 {planetData.posicion_tecnica && (
                   <p className="text-indigo-300 text-sm mb-3 font-mono">
                     📍 {planetData.posicion_tecnica}
                   </p>
                 )}
 
-                {/* Descripción */}
                 {planetData.descripcion && (
                   <div className="text-indigo-50 leading-relaxed mb-4 whitespace-pre-line">
                     {planetData.descripcion}
                   </div>
                 )}
 
-                {/* Poder Específico */}
                 {planetData.poder_especifico && (
                   <div className="bg-indigo-800/30 rounded-lg p-4 mb-3">
                     <p className="text-indigo-200 font-semibold text-sm mb-1">⚡ TU SUPERPODER:</p>
@@ -408,7 +379,6 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                   </div>
                 )}
 
-                {/* Acción Inmediata */}
                 {planetData.accion_inmediata && (
                   <div className="bg-green-900/30 rounded-lg p-4 mb-3">
                     <p className="text-green-200 font-semibold text-sm mb-1">🎯 ACCIÓN HOY:</p>
@@ -416,7 +386,6 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                   </div>
                 )}
 
-                {/* Ritual */}
                 {planetData.ritual && (
                   <div className="bg-purple-900/30 rounded-lg p-4">
                     <p className="text-purple-200 font-semibold text-sm mb-1">🕯️ RITUAL:</p>
@@ -627,7 +596,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           <div className="mt-3">
             <p className="text-gray-400 text-xs mb-2">Interpretaciones anteriores:</p>
             <div className="space-y-1">
-              {savedInterpretations.slice(1, 3).map((saved, index) => (
+              {savedInterpretations.slice(1, 3).map((saved) => (
                 <button
                   key={saved._id}
                   onClick={() => loadSpecificInterpretation(saved)}
