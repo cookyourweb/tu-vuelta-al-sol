@@ -21,6 +21,7 @@ interface InterpretationButtonProps {
   };
   natalInterpretation?: any;
   className?: string;
+  isAdmin?: boolean;
 }
 
 interface InterpretationData {
@@ -46,7 +47,8 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
   natalChart,
   userProfile,
   natalInterpretation,
-  className = ""
+  className = "",
+  isAdmin = false
 }) => {
   const [interpretation, setInterpretation] = useState<InterpretationData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -56,6 +58,11 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
   const [copied, setCopied] = useState(false);
   const [savedInterpretations, setSavedInterpretations] = useState<SavedInterpretation[]>([]);
   const [hasRecentInterpretation, setHasRecentInterpretation] = useState(false);
+
+  // ✅ ADD THESE NEW STATES
+  const [regenerating, setRegenerating] = useState(false);
+  const [generationProgress, setGenerationProgress] = useState('');
+
   const modalContentRef = useRef<HTMLDivElement>(null);
 
   const isNatal = type === 'natal';
@@ -73,57 +80,149 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
   const loadSavedInterpretations = async () => {
     setCheckingCache(true);
     try {
+      console.log(`🔍 ===== CARGANDO INTERPRETACIONES GUARDADAS =====`);
+      console.log(`🔍 userId: ${userId}, type: ${type}`);
+
       const response = await fetch(`/api/interpretations/save?userId=${userId}&chartType=${type}`);
-      if (response.ok) {
-        const data = await response.json();
-        setSavedInterpretations(data.interpretations || []);
-        
-        if (data.interpretations && data.interpretations.length > 0) {
-          const latest = data.interpretations[0];
-          const generatedTime = new Date(latest.generatedAt).getTime();
-          const now = new Date().getTime();
-          const hoursDiff = (now - generatedTime) / (1000 * 60 * 60);
-          
-          const isRecent = hoursDiff < 24;
-          setHasRecentInterpretation(isRecent);
-          
-          if (isRecent) {
-            setInterpretation({
-              interpretation: latest.interpretation,
-              cached: true,
-              generatedAt: latest.generatedAt,
-              method: 'cached'
-            });
-            console.log(`✅ Interpretación ${type} cargada desde caché (${hoursDiff.toFixed(1)}h ago)`);
-          } else {
-            console.log(`⚠️ Interpretación ${type} expirada (${hoursDiff.toFixed(1)}h ago) - se generará nueva`);
-          }
+
+      console.log(`📡 Respuesta API: ${response.status}`);
+
+      if (!response.ok) {
+        // 404 = No interpretation found (normal on first load)
+        if (response.status === 404) {
+          console.log('ℹ️ No hay interpretación guardada aún (primera vez)');
+          setSavedInterpretations([]);
+          setHasRecentInterpretation(false);
+          return;
         }
+
+        console.error(`❌ Error en respuesta API: ${response.status}`);
+        setSavedInterpretations([]);
+        setHasRecentInterpretation(false);
+        return;
+      }
+
+      const data = await response.json();
+      console.log(`📦 Datos completos recibidos:`, data);
+
+      // ✅ HANDLE SINGLE INTERPRETATION RESPONSE (not array!)
+      if (data.success && data.interpretation) {
+        const generatedTime = new Date(data.generatedAt).getTime();
+        const now = new Date().getTime();
+        const hoursDiff = (now - generatedTime) / (1000 * 60 * 60);
+
+        console.log(`⏰ Interpretación encontrada: ${hoursDiff.toFixed(1)}h atrás`);
+
+        const isRecent = hoursDiff < 24;
+        setHasRecentInterpretation(isRecent);
+
+        // ✅ Convert single interpretation to array format for compatibility
+        const singleInterpretation = {
+          _id: 'current',
+          interpretation: data.interpretation,
+          generatedAt: data.generatedAt,
+          chartType: type,
+          userProfile: userProfile,
+          isActive: true
+        };
+
+        setSavedInterpretations([singleInterpretation]);
+
+        if (isRecent) {
+          // ✅ LOAD INTERPRETATION FROM CACHE
+          const cachedInterpretation = {
+            interpretation: data.interpretation,
+            cached: true,
+            generatedAt: data.generatedAt,
+            method: data.method || 'cached'
+          };
+
+          console.log(`✅ ===== CARGANDO DESDE CACHÉ =====`);
+          console.log(`✅ Interpretación ${type} encontrada (${hoursDiff.toFixed(1)}h ago)`);
+
+          // ✅ FIX: Check correct field names based on type
+          if (type === 'solar-return') {
+            console.log(`✅ Esencia revolucionaria anual:`,
+              data.interpretation.esencia_revolucionaria_anual?.substring(0, 100) || 'NOT FOUND');
+            console.log(`✅ Propósito de vida anual:`,
+              data.interpretation.proposito_vida_anual?.substring(0, 100) || 'NOT FOUND');
+
+            // ✅ VALIDATE: If fields are undefined, don't use cache
+            if (!data.interpretation.esencia_revolucionaria_anual ||
+                !data.interpretation.proposito_vida_anual) {
+              console.warn('⚠️ Cached interpretation has incorrect structure, will regenerate');
+              setHasRecentInterpretation(false);
+              setSavedInterpretations([]);
+              return; // Don't load broken cache
+            }
+          } else {
+            console.log(`✅ Esencia revolucionaria:`,
+              data.interpretation.esencia_revolucionaria?.substring(0, 100) || 'NOT FOUND');
+            console.log(`✅ Propósito de vida:`,
+              data.interpretation.proposito_vida?.substring(0, 100) || 'NOT FOUND');
+          }
+
+          setInterpretation(cachedInterpretation);
+          console.log(`✅ Interpretación ${type} cargada desde caché exitosamente`);
+        } else {
+          console.log(`⚠️ ===== INTERPRETACIÓN EXPIRADA =====`);
+          console.log(`⚠️ Interpretación ${type} expirada (${hoursDiff.toFixed(1)}h ago) - se generará nueva`);
+        }
+      } else {
+        console.log(`ℹ️ No hay interpretaciones guardadas para ${type}`);
+        setSavedInterpretations([]);
+        setHasRecentInterpretation(false);
       }
     } catch (error) {
-      console.error('Error cargando interpretaciones guardadas:', error);
+      console.error('❌ Error cargando interpretaciones guardadas:', error);
+      setSavedInterpretations([]);
+      setHasRecentInterpretation(false);
     } finally {
       setCheckingCache(false);
     }
   };
 
   const generateInterpretation = async (forceRegenerate = false) => {
+    // ✅ If has recent interpretation and NOT force regenerating, just show modal
     if (hasRecentInterpretation && interpretation && !forceRegenerate) {
+      console.log('🔄 ===== USANDO INTERPRETACIÓN EXISTENTE =====');
       console.log('🔄 Usando interpretación existente para evitar gasto de créditos');
       setShowModal(true);
       return;
     }
 
     if (!userId || !chartData) {
+      console.log('❌ ===== ERROR: DATOS INSUFICIENTES =====');
+      console.log('❌ userId:', userId);
+      console.log('❌ chartData:', !!chartData);
       setError('Datos insuficientes para generar interpretación');
       return;
     }
 
-    setLoading(true);
+    // ✅ Use regenerating state for force regenerate
+    if (forceRegenerate) {
+      setRegenerating(true);
+      setGenerationProgress('Iniciando regeneración revolucionaria...');
+    } else {
+      setLoading(true);
+    }
+
     setError(null);
 
     try {
-      console.log(`🤖 Generando nueva interpretación ${type} (forzada: ${forceRegenerate})`);
+      console.log(`🤖 ===== GENERANDO NUEVA INTERPRETACIÓN =====`);
+      console.log(`🤖 Tipo: ${type}, Forzada: ${forceRegenerate}`);
+      console.log(`🤖 userId: ${userId}`);
+      console.log(`🤖 userProfile:`, userProfile); // ✅ ADD THIS
+
+      // ✅ Simulate progress messages
+      if (forceRegenerate) {
+        setTimeout(() => setGenerationProgress('Conectando con los astros...'), 500);
+        setTimeout(() => setGenerationProgress('Analizando tu carta natal...'), 2000);
+        setTimeout(() => setGenerationProgress('Calculando posiciones planetarias...'), 4000);
+        setTimeout(() => setGenerationProgress('Generando interpretación disruptiva con IA...'), 6000);
+        setTimeout(() => setGenerationProgress('Casi listo... Creando tu revolución personal...'), 10000);
+      }
 
       const requestBody = isNatal
         ? {
@@ -151,6 +250,14 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
             disruptiveMode: true
           };
 
+      console.log(`📦 Request body:`, {
+        userId: requestBody.userId,
+        userProfileName: (requestBody as any).userProfile?.name,
+        userProfileAge: (requestBody as any).userProfile?.age,
+        hasSolarReturnChart: !!(requestBody as any).solarReturnChart,
+        hasNatalChart: !!(requestBody as any).natalChart
+      }); // ✅ ADD THIS
+
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
@@ -159,25 +266,31 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         body: JSON.stringify(requestBody)
       });
 
+      console.log(`📡 Response status: ${response.status}`); // ✅ ADD THIS
+
       if (!response.ok) {
-        throw new Error('Error generando interpretación');
+        const errorText = await response.text(); // ✅ ADD THIS
+        console.error(`❌ API Error Response:`, errorText); // ✅ ADD THIS
+        throw new Error(`Error ${response.status}: ${errorText}`); // ✅ CHANGE THIS
       }
 
       const result = await response.json();
 
       if (result.success) {
-        console.log('📺 ===== ESTADO QUE SE VA A SETEAR =====');
-        
+        console.log('📺 ===== PROCESANDO RESPUESTA DE INTERPRETACIÓN =====');
+
         const rawInterpretation = result.data?.interpretation || result.interpretation;
-        
+
         if (!rawInterpretation) {
+          console.log('❌ No se encontró interpretación en la respuesta');
           throw new Error('No se encontró interpretación en la respuesta');
         }
-        
-        console.log('🔍 rawInterpretation obtenida:', Object.keys(rawInterpretation));
-        
+
+        console.log('🔍 ===== DATOS RECIBIDOS =====');
+        console.log('🔍 Claves en rawInterpretation:', Object.keys(rawInterpretation));
+
         let interpretationData;
-        
+
         if (type === 'natal') {
           interpretationData = {
             esencia_revolucionaria: rawInterpretation.esencia_revolucionaria,
@@ -195,69 +308,105 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
             esencia_revolucionaria: rawInterpretation.esencia_revolucionaria_anual,
             proposito_vida: rawInterpretation.proposito_vida_anual,
             tema_anual: rawInterpretation.tema_central_del_anio,
+            analisis_tecnico: rawInterpretation.analisis_tecnico_profesional,
             plan_accion: rawInterpretation.plan_accion,
+            calendario_lunar: rawInterpretation.calendario_lunar_anual,
             declaracion_poder: rawInterpretation.declaracion_poder_anual,
             advertencias: rawInterpretation.advertencias,
             eventos_clave: rawInterpretation.eventos_clave_del_anio,
             insights_transformacionales: rawInterpretation.insights_transformacionales,
-            rituales_recomendados: rawInterpretation.rituales_recomendados
+            rituales_recomendados: rawInterpretation.rituales_recomendados,
+            integracion_final: rawInterpretation.integracion_final
           };
         } else {
           interpretationData = rawInterpretation;
         }
-        
+
         const newInterpretation = {
           interpretation: interpretationData,
           cached: result.cached || result.data?.cached || false,
           generatedAt: result.generatedAt || result.data?.generatedAt || new Date().toISOString(),
           method: result.method || result.data?.method || 'api'
         };
-        
-        console.log('📺 Esencia que se mostrará:', newInterpretation.interpretation.esencia_revolucionaria);
+
+        console.log('✅ ===== INTERPRETACIÓN PROCESADA EXITOSAMENTE =====');
 
         setInterpretation(newInterpretation);
         setHasRecentInterpretation(true);
-        setShowModal(true);
+
+        // ✅ Only show modal after regeneration is complete
+        if (forceRegenerate) {
+          setGenerationProgress('¡Revolución completada! 🎉');
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          setShowModal(true);
+        } else {
+          setShowModal(true);
+        }
 
         await autoSaveInterpretation(newInterpretation);
 
-        console.log('✅ Nueva interpretación generada');
+        console.log('✅ ===== INTERPRETACIÓN COMPLETADA =====');
       } else {
         throw new Error(result.error || 'Error desconocido');
       }
 
     } catch (err) {
-      console.error('❌ Error en generateInterpretation:', err);
+      console.error('❌ ===== ERROR EN GENERATEINTERPRETATION =====');
+      console.error('❌ Error:', err);
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
+      setRegenerating(false);
+      setGenerationProgress('');
     }
   };
 
   const autoSaveInterpretation = async (interpretationData: InterpretationData) => {
     try {
-      console.log('💾 ===== GUARDANDO EN MONGODB =====');
+      console.log('💾 ===== GUARDANDO INTERPRETACIÓN EN MONGODB =====');
+      console.log('💾 userId:', userId);
+      console.log('💾 chartType:', type);
+      console.log('💾 generatedAt:', interpretationData.generatedAt);
+
+      const saveData = {
+        userId,
+        chartType: type,
+        interpretation: interpretationData.interpretation, // ✅ Debe ser el objeto completo
+        userProfile,
+        generatedAt: interpretationData.generatedAt || new Date().toISOString()
+      };
+
+      console.log('💾 Datos a enviar:', {
+        userId: saveData.userId,
+        chartType: saveData.chartType,
+        interpretationKeys: Object.keys(saveData.interpretation),
+        generatedAt: saveData.generatedAt
+      });
 
       const response = await fetch('/api/interpretations/save', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          userId,
-          chartType: type,
-          interpretation: interpretationData.interpretation,
-          userProfile,
-          generatedAt: interpretationData.generatedAt || new Date().toISOString()
-        })
+        body: JSON.stringify(saveData)
       });
 
       if (response.ok) {
-        console.log('✅ Interpretación guardada en MongoDB');
+        const data = await response.json();
+        console.log('✅ ===== INTERPRETACIÓN GUARDADA =====');
+        console.log('✅ Respuesta MongoDB:', data);
+
+        // ✅ RECARGAR LISTA
         await loadSavedInterpretations();
+      } else {
+        const errorText = await response.text();
+        console.error('❌ ===== ERROR GUARDANDO EN MONGODB =====');
+        console.error('❌ Status:', response.status);
+        console.error('❌ Error:', errorText);
       }
     } catch (error) {
-      console.error('❌ Error en autoSave:', error);
+      console.error('❌ ===== ERROR EN AUTOSAVE =====');
+      console.error('❌ Error:', error);
     }
   };
 
@@ -339,6 +488,157 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               Tu Propósito de Vida
             </h4>
       <p className="text-blue-50 text-lg leading-relaxed font-medium">{data.proposito_vida}</p>
+          </div>
+        )}
+
+        {/* ✅ SOLAR RETURN: TEMA CENTRAL DEL AÑO */}
+        {data.tema_anual && type === 'solar-return' && (
+          <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 rounded-2xl p-8 border border-amber-400/30">
+            <h4 className="text-amber-100 font-bold text-xl mb-4 flex items-center gap-3">
+              <Sparkles className="w-8 h-8 text-amber-300" />
+              Tema Central del Año
+            </h4>
+            <p className="text-amber-50 text-2xl leading-relaxed font-bold text-center italic">
+              "{data.tema_anual}"
+            </p>
+          </div>
+        )}
+
+        {/* ✅ SOLAR RETURN: ANÁLISIS TÉCNICO PROFESIONAL */}
+        {data.analisis_tecnico && type === 'solar-return' && (
+          <div className="space-y-6">
+            <h3 className="text-3xl font-bold text-white text-center mb-8">
+              📊 Análisis Técnico Profesional
+            </h3>
+
+            {/* ASC SR en Casa Natal */}
+            {data.analisis_tecnico.asc_sr_en_casa_natal && (
+              <div className="bg-gradient-to-br from-indigo-900/40 to-blue-900/40 rounded-2xl p-8 border border-indigo-400/30">
+                <h4 className="text-indigo-100 font-bold text-2xl mb-4">
+                  🎯 Ascendente Solar Return en Casa {data.analisis_tecnico.asc_sr_en_casa_natal.casa_natal} Natal
+                </h4>
+                <p className="text-indigo-200 text-sm mb-3">
+                  Signo: {data.analisis_tecnico.asc_sr_en_casa_natal.signo_asc_sr}
+                </p>
+                <p className="text-indigo-50 text-lg leading-relaxed mb-4">
+                  {data.analisis_tecnico.asc_sr_en_casa_natal.interpretacion}
+                </p>
+                {data.analisis_tecnico.asc_sr_en_casa_natal.palabras_clave && (
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    {data.analisis_tecnico.asc_sr_en_casa_natal.palabras_clave.map((palabra: string, i: number) => (
+                      <span key={i} className="bg-indigo-600/40 text-indigo-100 px-3 py-1 rounded-full text-sm font-semibold">
+                        {palabra}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Sol en Casa SR */}
+            {data.analisis_tecnico.sol_en_casa_sr && (
+              <div className="bg-gradient-to-br from-yellow-900/40 to-amber-900/40 rounded-2xl p-8 border border-yellow-400/30">
+                <h4 className="text-yellow-100 font-bold text-2xl mb-4">
+                  ☀️ Sol en Casa {data.analisis_tecnico.sol_en_casa_sr.casa_sr} Solar Return
+                </h4>
+                <p className="text-yellow-200 text-sm mb-3">
+                  Casa Natal del Sol: {data.analisis_tecnico.sol_en_casa_sr.casa_natal_sol} |
+                  {data.analisis_tecnico.sol_en_casa_sr.cambio_de_casa ? ' ⚡ Casa cambió' : ' ✓ Misma casa'}
+                </p>
+                <p className="text-yellow-50 text-lg leading-relaxed mb-4">
+                  {data.analisis_tecnico.sol_en_casa_sr.interpretacion}
+                </p>
+                {data.analisis_tecnico.sol_en_casa_sr.energia_disponible && (
+                  <div className="bg-yellow-800/30 rounded-lg p-4 mt-4">
+                    <p className="text-yellow-100 font-semibold">
+                      💪 Energía Disponible: {data.analisis_tecnico.sol_en_casa_sr.energia_disponible}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Planetas Angulares */}
+            {data.analisis_tecnico.planetas_angulares_sr && data.analisis_tecnico.planetas_angulares_sr.length > 0 && (
+              <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 rounded-2xl p-8 border border-purple-400/30">
+                <h4 className="text-purple-100 font-bold text-2xl mb-6">
+                  ⭐ Planetas Angulares (Los Más Poderosos del Año)
+                </h4>
+                <div className="space-y-4">
+                  {data.analisis_tecnico.planetas_angulares_sr.map((planeta: any, i: number) => (
+                    <div key={i} className="bg-purple-800/30 rounded-lg p-4">
+                      <h5 className="text-purple-200 font-bold text-lg mb-2">
+                        {planeta.planeta} en {planeta.angulo}
+                      </h5>
+                      <p className="text-purple-50">{planeta.interpretacion}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ✅ SOLAR RETURN: CALENDARIO LUNAR ANUAL */}
+        {data.calendario_lunar && type === 'solar-return' && (
+          <div className="bg-gradient-to-br from-slate-900/60 to-slate-800/60 rounded-2xl p-8 border border-slate-400/30">
+            <h3 className="text-3xl font-bold text-white text-center mb-8">
+              🌙 Calendario Lunar Anual 2025-2026
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {data.calendario_lunar.map((mes: any, i: number) => (
+                <div key={i} className="bg-slate-800/50 rounded-xl p-4 border border-slate-500/20">
+                  <h4 className="text-slate-100 font-bold text-lg mb-3">{mes.mes}</h4>
+
+                  {mes.luna_nueva && (
+                    <div className="mb-3 p-3 bg-blue-900/30 rounded-lg">
+                      <p className="text-blue-200 font-semibold text-sm">🌑 Luna Nueva</p>
+                      <p className="text-blue-100 text-xs">{mes.luna_nueva.fecha}</p>
+                      <p className="text-blue-100 text-sm">{mes.luna_nueva.signo}</p>
+                      <p className="text-blue-50 text-xs mt-2">{mes.luna_nueva.mensaje}</p>
+                    </div>
+                  )}
+
+                  {mes.luna_llena && (
+                    <div className="p-3 bg-yellow-900/30 rounded-lg">
+                      <p className="text-yellow-200 font-semibold text-sm">🌕 Luna Llena</p>
+                      <p className="text-yellow-100 text-xs">{mes.luna_llena.fecha}</p>
+                      <p className="text-yellow-100 text-sm">{mes.luna_llena.signo}</p>
+                      <p className="text-yellow-50 text-xs mt-2">{mes.luna_llena.mensaje}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ✅ SOLAR RETURN: EVENTOS CLAVE DEL AÑO */}
+        {data.eventos_clave && type === 'solar-return' && (
+          <div className="bg-gradient-to-br from-rose-900/40 to-red-900/40 rounded-2xl p-8 border border-rose-400/30">
+            <h3 className="text-3xl font-bold text-white text-center mb-8">
+              📅 Eventos Clave del Año
+            </h3>
+            <div className="space-y-6">
+              {data.eventos_clave.map((evento: any, i: number) => (
+                <div key={i} className="bg-rose-800/30 rounded-xl p-6 border border-rose-500/20">
+                  <div className="flex justify-between items-start mb-3">
+                    <h4 className="text-rose-100 font-bold text-lg">{evento.evento}</h4>
+                    <span className="bg-rose-600/40 text-rose-100 px-3 py-1 rounded-full text-xs">
+                      {evento.periodo}
+                    </span>
+                  </div>
+                  <p className="text-rose-200 text-sm mb-2">Tipo: {evento.tipo}</p>
+                  <p className="text-rose-50 leading-relaxed mb-4">{evento.descripcion}</p>
+                  {evento.accion_recomendada && (
+                    <div className="bg-green-900/30 rounded-lg p-3">
+                      <p className="text-green-200 font-semibold text-sm">🎯 Acción Recomendada:</p>
+                      <p className="text-green-50 text-sm">{evento.accion_recomendada}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
@@ -508,6 +808,33 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
             </ul>
           </div>
         )}
+
+        {/* ✅ SOLAR RETURN: INTEGRACIÓN FINAL */}
+        {data.integracion_final && type === 'solar-return' && (
+          <div className="bg-gradient-to-br from-emerald-900/40 to-teal-900/40 rounded-2xl p-8 border border-emerald-400/30">
+            <h3 className="text-3xl font-bold text-white text-center mb-8">
+              🌟 Integración Final
+            </h3>
+
+            {data.integracion_final.sintesis && (
+              <div className="mb-6">
+                <h4 className="text-emerald-200 font-bold text-xl mb-3">Síntesis del Año</h4>
+                <p className="text-emerald-50 text-lg leading-relaxed">
+                  {data.integracion_final.sintesis}
+                </p>
+              </div>
+            )}
+
+            {data.integracion_final.pregunta_reflexion && (
+              <div className="bg-emerald-800/30 rounded-xl p-6 border border-emerald-400/20">
+                <p className="text-emerald-200 font-semibold mb-2">💭 Pregunta para Reflexionar:</p>
+                <p className="text-emerald-50 text-lg italic">
+                  "{data.integracion_final.pregunta_reflexion}"
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     );
   };
@@ -545,51 +872,79 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               </span>
             </Button>
             
+            {isAdmin && (
+              <Button
+                onClick={() => generateInterpretation(true)}
+                disabled={loading}
+                variant="outline"
+                className={`w-full ${isNatal
+                  ? 'border-blue-400 text-blue-300 hover:bg-blue-400/20'
+                  : 'border-purple-400 text-purple-300 hover:bg-purple-400/20'
+                }`}
+              >
+                {loading ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Regenerando...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    🔑 Regenerar Nueva (Admin)
+                  </>
+                )}
+              </Button>
+            )}
+          </>
+        ) : (
+          <>
             <Button
-              onClick={() => generateInterpretation(true)}
+              onClick={() => generateInterpretation(false)}
               disabled={loading}
-              variant="outline"
-              className={`w-full ${isNatal 
-                ? 'border-blue-400 text-blue-300 hover:bg-blue-400/20' 
-                : 'border-purple-400 text-purple-300 hover:bg-purple-400/20'
+              className={`w-full ${isNatal
+                ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'
+                : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
               }`}
             >
               {loading ? (
                 <>
                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                  Regenerando...
+                  Generando Interpretación Revolucionaria...
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Generar Nueva Interpretación Disruptiva
+                  <Brain className="w-4 h-4 mr-2" />
+                  {isNatal ? 'Interpretar Carta Natal Disruptiva' :
+                   isSolarReturn ? 'Interpretar Solar Return Revolucionario' :
+                   'Interpretar Evolución Progresada'}
                 </>
               )}
             </Button>
-          </>
-        ) : (
-          <Button
-            onClick={() => generateInterpretation(false)}
-            disabled={loading}
-            className={`w-full ${isNatal 
-              ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700' 
-              : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
-            }`}
-          >
-            {loading ? (
-              <>
-                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                Generando Interpretación Revolucionaria...
-              </>
-            ) : (
-              <>
-                <Brain className="w-4 h-4 mr-2" />
-                {isNatal ? 'Interpretar Carta Natal Disruptiva' :
-                 isSolarReturn ? 'Interpretar Solar Return Revolucionario' :
-                 'Interpretar Evolución Progresada'}
-              </>
+
+            {isAdmin && (
+              <Button
+                onClick={() => generateInterpretation(true)}
+                disabled={loading}
+                variant="outline"
+                className={`w-full mt-2 ${isNatal
+                  ? 'border-yellow-400 text-yellow-300 hover:bg-yellow-400/20'
+                  : 'border-yellow-400 text-yellow-300 hover:bg-yellow-400/20'
+                }`}
+              >
+                {loading ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Regenerando...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    🔑 Regenerar Nueva (Admin)
+                  </>
+                )}
+              </Button>
             )}
-          </Button>
+          </>
         )}
 
         {savedInterpretations.length > 1 && (
@@ -626,6 +981,60 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         )}
       </div>
 
+      {/* ✅ REGENERATION LOADING MODAL */}
+      {regenerating && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-center justify-center p-4">
+          <div className="bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900 rounded-3xl max-w-md w-full p-8 shadow-2xl border-2 border-purple-400/50 animate-pulse-slow">
+            <div className="text-center space-y-6">
+              {/* Animated Icon */}
+              <div className="relative mx-auto w-24 h-24">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-spin" style={{ animationDuration: '3s' }}></div>
+                <div className="absolute inset-2 bg-purple-900 rounded-full flex items-center justify-center">
+                  <Sparkles className="w-12 h-12 text-purple-300 animate-pulse" />
+                </div>
+              </div>
+
+              {/* Title */}
+              <h3 className="text-2xl font-bold text-white">
+                🔮 Regenerando tu Revolución Cósmica
+              </h3>
+
+              {/* Progress Message */}
+              <div className="bg-purple-800/50 rounded-xl p-4 border border-purple-400/30">
+                <p className="text-purple-100 text-lg font-semibold animate-pulse">
+                  {generationProgress}
+                </p>
+              </div>
+
+              {/* Info Text */}
+              <div className="space-y-3 text-purple-200 text-sm">
+                <p className="flex items-center justify-center gap-2">
+                  <span className="animate-bounce">⚡</span>
+                  Estamos consultando los astros...
+                </p>
+                <p className="flex items-center justify-center gap-2">
+                  <span className="animate-bounce delay-100">🌟</span>
+                  Generando interpretación única con IA
+                </p>
+                <p className="flex items-center justify-center gap-2">
+                  <span className="animate-bounce delay-200">🎯</span>
+                  Esto puede tardar 10-30 segundos
+                </p>
+              </div>
+
+              {/* Loading Bar */}
+              <div className="w-full bg-purple-950/50 rounded-full h-3 overflow-hidden">
+                <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 h-full animate-loading-bar"></div>
+              </div>
+
+              <p className="text-purple-300 text-xs italic">
+                💫 "La paciencia cósmica será recompensada con sabiduría estelar"
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showModal && interpretation && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl max-w-6xl w-full max-h-[95vh] flex flex-col shadow-2xl border border-purple-500/30">
@@ -661,14 +1070,24 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                 <div className="flex flex-wrap items-center gap-2">
                   <Button
                     onClick={() => {
-                      setShowModal(false);
-                      setTimeout(() => generateInterpretation(true), 300);
+                      // ✅ Don't close modal - keep it open and start regeneration
+                      generateInterpretation(true);
                     }}
                     size="sm"
                     className="bg-yellow-600 hover:bg-yellow-700"
+                    disabled={loading || regenerating}
                   >
-                    <RefreshCw className="w-4 h-4 mr-1" />
-                    Regenerar
+                    {regenerating ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 mr-1 animate-spin" />
+                        Regenerando...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="w-4 h-4 mr-1" />
+                        Regenerar
+                      </>
+                    )}
                   </Button>
 
                   <Button
@@ -729,6 +1148,32 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
           background: rgba(139, 92, 246, 0.8);
+        }
+
+        /* ✅ ADD THESE ANIMATIONS */
+        @keyframes loading-bar {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
+        }
+
+        .animate-loading-bar {
+          animation: loading-bar 2s ease-in-out infinite;
+        }
+
+        .animate-pulse-slow {
+          animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .delay-100 {
+          animation-delay: 100ms;
+        }
+
+        .delay-200 {
+          animation-delay: 200ms;
         }
       `}</style>
     </>

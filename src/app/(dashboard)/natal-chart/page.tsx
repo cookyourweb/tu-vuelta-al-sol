@@ -48,6 +48,7 @@ export default function NatalChartPage() {
   const [error, setError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<string>('');
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('🌌 Conectando con el cosmos...');
 
 
 
@@ -248,9 +249,32 @@ export default function NatalChartPage() {
       router.push('/auth/signin');
       return;
     }
-    
+
     loadChartData();
   }, [user, router]);
+
+  // ✅ USEEFFECT PARA MENSAJES DE CARGA
+  useEffect(() => {
+    if (loading) {
+      const messages = [
+        '🌌 Conectando con el cosmos...',
+        '⚡ Calculando posiciones planetarias exactas...',
+        '🔮 Descifrando tu mapa cósmico...',
+        '✨ Interpretando las energías astrales...',
+        '🪐 Analizando aspectos planetarios...',
+        '🌟 Revelando tu configuración única...',
+        '💫 Casi listo... preparando tu revolución personal...'
+      ];
+
+      let index = 0;
+      const interval = setInterval(() => {
+        index = (index + 1) % messages.length;
+        setLoadingMessage(messages[index]);
+      }, 2000); // Cambia cada 2 segundos
+
+      return () => clearInterval(interval);
+    }
+  }, [loading]);
 
   // ✅ FUNCIONES DE NAVEGACIÓN
   const navigateToBirthData = () => {
@@ -262,36 +286,33 @@ export default function NatalChartPage() {
   // ✅ PANTALLA DE CARGA
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center space-y-6 max-w-md mx-auto">
-          <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 border border-yellow-400/30 rounded-full p-8 backdrop-blur-sm relative mx-auto w-fit">
-            <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 to-orange-500/10 rounded-full animate-pulse"></div>
-            <Sparkles className="w-16 h-16 text-yellow-400 animate-spin" />
-          </div>
-
-          <div className="space-y-3">
-            <h2 className="text-2xl font-bold text-white">Cargando tu Carta Natal</h2>
-            <p className="text-gray-300 leading-relaxed">
-              Procesando información astrológica...
-            </p>
-
-            {debugInfo && (
-              <div className="bg-black/30 rounded-lg p-3 text-sm text-blue-300 font-mono">
-                {debugInfo}
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900/20 to-gray-900 flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <div className="relative mb-8">
+            {/* Círculo pulsante */}
+            <div className="w-24 h-24 mx-auto relative">
+              <div className="absolute inset-0 bg-purple-500 rounded-full animate-ping opacity-20"></div>
+              <div className="absolute inset-0 bg-purple-600 rounded-full animate-pulse"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Sparkles className="w-12 h-12 text-white animate-spin" />
               </div>
-            )}
+            </div>
           </div>
 
-          <div className="flex justify-center">
-            <div className="flex space-x-1">
-              {[0, 1, 2].map((i) => (
-                <div
-                  key={i}
-                  className="w-2 h-2 bg-yellow-400 rounded-full animate-bounce"
-                  style={{ animationDelay: `${i * 0.2}s` }}
-                ></div>
-              ))}
-            </div>
+          <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-300 mb-4 animate-pulse">
+            {loadingMessage}
+          </h2>
+
+          <div className="bg-purple-900/30 backdrop-blur-sm border border-purple-400/30 rounded-xl p-4">
+            <p className="text-purple-200 text-sm">
+              Estamos calculando tu carta natal con precisión astronómica.
+              Este proceso puede tomar hasta 60 segundos...
+            </p>
+          </div>
+
+          {/* Barra de progreso simulada */}
+          <div className="mt-6 w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500 animate-progress"></div>
           </div>
         </div>
       </div>
@@ -396,19 +417,32 @@ export default function NatalChartPage() {
 
           {/* BOTÓN DE INTERPRETACIÓN */}
           {chartData && birthData && (
-            <InterpretationButton
-              type="natal"
-              userId={user?.uid || ''}
-              chartData={chartData}
-              userProfile={{
+            <>
+              {console.log('🎯 ===== RENDERIZANDO BOTÓN DE INTERPRETACIÓN NATAL =====')}
+              {console.log('🎯 userId:', user?.uid)}
+              {console.log('🎯 chartData disponible:', !!chartData)}
+              {console.log('🎯 birthData disponible:', !!birthData)}
+              {console.log('🎯 userProfile:', {
                 name: birthData.fullName || 'Usuario',
                 age: new Date().getFullYear() - new Date(birthData.birthDate).getFullYear(),
                 birthPlace: birthData.birthPlace,
                 birthDate: birthData.birthDate,
                 birthTime: birthData.birthTime
-              }}
-              className="w-full sm:w-auto"
-            />
+              })}
+              <InterpretationButton
+                type="natal"
+                userId={user?.uid || ''}
+                chartData={chartData}
+                userProfile={{
+                  name: birthData.fullName || 'Usuario',
+                  age: new Date().getFullYear() - new Date(birthData.birthDate).getFullYear(),
+                  birthPlace: birthData.birthPlace,
+                  birthDate: birthData.birthDate,
+                  birthTime: birthData.birthTime
+                }}
+                className="w-full sm:w-auto"
+              />
+            </>
           )}
         </div>
 
@@ -430,6 +464,16 @@ export default function NatalChartPage() {
           />
         </div>
       )}
+
+      <style jsx>{`
+        @keyframes progress {
+          0% { width: 0%; }
+          100% { width: 100%; }
+        }
+        .animate-progress {
+          animation: progress 60s linear infinite;
+        }
+      `}</style>
     </div>
   );
 }

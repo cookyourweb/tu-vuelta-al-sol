@@ -1,3 +1,4 @@
+// src/components/astrology/ChartDisplay.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -32,13 +33,17 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
   ascendant,
   midheaven,
   birthData,
-  // ✅ NUEVAS PROPS PARA CARTA PROGRESADA
   chartType = 'natal',
   showOnlyProgressedAspects = false,
-  progressionInfo
+  progressionInfo,
+  // ✅ NUEVAS PROPS PARA SOLAR RETURN
+  birthDate,
+  birthTime,
+  birthPlace,
+  solarReturnYear,
+  solarReturnTheme,
+  ascSRInNatalHouse
 }) => {
-
-
 
   // ✅ ESTADOS
   const [showAspects, setShowAspects] = useState(true);
@@ -242,7 +247,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
       const isMinor = !isMajor;
 
       if (!selectedAspectTypes.hard && isHard) return null;
-      if (!selectedAspectTypes.easy && isEasy) return null
+      if (!selectedAspectTypes.easy && isEasy) return null;
       if (!selectedAspectTypes.major && isMajor) return null;
       if (!selectedAspectTypes.minor && isMinor) return null;
 
@@ -257,13 +262,13 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
 
       return (
         <g key={index}>
-      <line
-          x1={pos1.x}
-          y1={pos1.y}
-          x2={pos2.x}
-          y2={pos2.y}
-          stroke={showOnlyProgressedAspects ? '#ef4444' : aspect.config.color}
-          strokeWidth={isHovered ? strokeWidth + 1 : strokeWidth}
+          <line
+            x1={pos1.x}
+            y1={pos1.y}
+            x2={pos2.x}
+            y2={pos2.y}
+            stroke={showOnlyProgressedAspects ? '#ef4444' : aspect.config.color}
+            strokeWidth={isHovered ? strokeWidth + 1 : strokeWidth}
             opacity={isHovered ? 1 : opacity}
             strokeDasharray={isMinor ? "3,3" : "none"}
             className="transition-all duration-200 cursor-pointer"
@@ -655,25 +660,377 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
         </div>
       )}
 
-      {/* ✨ MENÚ DE NAVEGACIÓN PRINCIPAL */}
-      <SectionMenu activeSection={activeSection} scrollToSection={scrollToSection} />
+      {/* ✅ NAVEGACIÓN PRINCIPAL - TOP */}
+      <div className="flex justify-center items-center gap-4 mb-8">
+        <button
+          onClick={() => scrollToSection('carta-visual')}
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
+            activeSection === 'carta-visual'
+              ? 'bg-gradient-to-r from-blue-500/30 to-purple-500/30 border-2 border-blue-400/50 text-blue-300 shadow-lg shadow-blue-500/20'
+              : 'bg-slate-800/50 border border-slate-600/30 text-slate-400 hover:border-slate-500/50 hover:text-slate-300'
+          }`}
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 16v-4"/>
+            <path d="M12 8h.01"/>
+          </svg>
+          Carta
+        </button>
 
-     
-      {/* 🎯 SECCIÓN: TRES CARDS PRINCIPALES - SOLO PARA CARTA NATAL */}
+        <button
+          onClick={() => scrollToSection('aspectos-detectados')}
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
+            activeSection === 'aspectos-detectados'
+              ? 'bg-gradient-to-r from-yellow-500/30 to-orange-500/30 border-2 border-yellow-400/50 text-yellow-300 shadow-lg shadow-yellow-500/20'
+              : 'bg-slate-800/50 border border-slate-600/30 text-slate-400 hover:border-slate-500/50 hover:text-slate-300'
+          }`}
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+          </svg>
+          Aspectos
+        </button>
 
-{chartType !== 'progressed' && (
+        <button
+          onClick={() => scrollToSection('posiciones-planetarias')}
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
+            activeSection === 'posiciones-planetarias'
+              ? 'bg-gradient-to-r from-cyan-500/30 to-blue-500/30 border-2 border-cyan-400/50 text-cyan-300 shadow-lg shadow-cyan-500/20'
+              : 'bg-slate-800/50 border border-slate-600/30 text-slate-400 hover:border-slate-500/50 hover:text-slate-300'
+          }`}
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          Planetas
+        </button>
+
+        {/* ✅ NEW: LÍNEA DE TIEMPO TAB - ONLY FOR SOLAR RETURN */}
+        {chartType === 'solar-return' && (
+          <button
+            onClick={() => {
+              const timelineSection = document.getElementById('linea-tiempo-solar');
+              if (timelineSection) {
+                timelineSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }}
+            className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 bg-slate-800/50 border border-slate-600/30 text-slate-400 hover:border-rose-500/50 hover:text-rose-300"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12,6 12,12 16,14"/>
+            </svg>
+            Línea de Tiempo
+          </button>
+        )}
+      </div>
+
+{/* 🎯 SECCIÓN: TRES CARDS PRINCIPALES - ADAPTATIVO SEGÚN TIPO DE CARTA */}
+{(chartType === 'natal' || chartType === 'solar-return') && (
   <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-    {/* Card 1: Datos de Nacimiento (Izquierda) */}
-    <BirthDataCard birthData={birthData} ascendant={ascendant ?? undefined} />
-    
-    {/* Card 2: Ascendente + Medio Cielo (Centro) */}
-    <CombinedAscendantMCCard ascendant={ascendant ?? undefined} midheaven={midheaven ?? undefined} />
-    
-    {/* Card 3: Elementos + Modalidades (Derecha) */}
-    <ElementsModalitiesCard 
-      elementDistribution={elementDistribution} 
-      modalityDistribution={modalityDistribution} 
-    />
+
+    {/* ✅ CARD 1: BIRTH DATA - SAME EXACT STYLES FOR BOTH */}
+    <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-xl p-4 relative group hover:scale-[1.02] transition-all duration-300 overflow-hidden">
+      <div className="absolute top-3 right-3 w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+
+      <div className="flex items-center mb-4">
+        <div className="bg-gradient-to-r from-green-400/20 to-blue-500/20 border border-green-400/30 rounded-full p-2 mr-3">
+          <svg className="w-4 h-4 text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+        </div>
+        <h3 className="text-white font-bold text-lg">Tu Momento Cósmico</h3>
+      </div>
+
+      <div className="space-y-3">
+        {/* Fecha compacta */}
+        <div className="flex items-center justify-between p-3 bg-black/30 rounded-lg border border-white/10">
+          <div className="flex items-center">
+            <svg className="w-4 h-4 text-yellow-400 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <span className="text-gray-300 text-sm">Fecha{chartType === 'solar-return' ? ' Nacimiento' : ''}</span>
+          </div>
+          <span className="text-white font-semibold text-sm">
+            {(() => {
+              let dateStr = '';
+              if (chartType === 'solar-return') {
+                dateStr = birthDate || '';
+              } else {
+                dateStr = birthData?.birthDate || '';
+              }
+
+              if (!dateStr) return 'No disponible';
+
+              try {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('es-ES', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric'
+                });
+              } catch {
+                return dateStr;
+              }
+            })()}
+          </span>
+        </div>
+
+        {/* Hora compacta */}
+        <div className="flex items-center justify-between p-3 bg-black/30 rounded-lg border border-white/10">
+          <div className="flex items-center">
+            <svg className="w-4 h-4 text-blue-400 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12,6 12,12 16,14"/>
+            </svg>
+            <span className="text-gray-300 text-sm">Hora</span>
+          </div>
+          <span className="text-white font-semibold text-sm">
+            {chartType === 'solar-return'
+              ? (birthTime || 'No disponible')
+              : (birthData?.birthTime || 'No disponible')
+            }
+          </span>
+        </div>
+
+        {/* Lugar compacto */}
+        <div className="flex items-center justify-between p-3 bg-black/30 rounded-lg border border-white/10">
+          <div className="flex items-center">
+            <svg className="w-4 h-4 text-green-400 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            <span className="text-gray-300 text-sm">Lugar</span>
+          </div>
+          <span className="text-white font-semibold text-sm text-right max-w-[120px] truncate">
+            {(() => {
+              let place = '';
+              if (chartType === 'solar-return') {
+                place = birthPlace || '';
+              } else {
+                place = birthData?.birthPlace || birthData?.location || '';
+              }
+
+              if (!place) return 'No disponible';
+
+              // Show only first 2 parts (city, country)
+              return place.split(',').slice(0, 2).join(', ');
+            })()}
+          </span>
+        </div>
+
+        {/* Estado de precisión compacto */}
+        <div className="flex items-center justify-center p-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/30 rounded-lg">
+          <svg className="w-3 h-3 text-green-400 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+          </svg>
+          <span className="text-green-300 font-semibold text-xs">Precisión Exacta</span>
+        </div>
+      </div>
+    </div>
+
+    {/* ✅ CARD 2: ANGLES - CONDITIONAL DISTRIBUTIONS */}
+    <div className="bg-gradient-to-br from-indigo-900/40 to-purple-900/40 rounded-xl p-6 border border-indigo-400/30">
+      <h3 className="text-xl font-bold text-indigo-100 mb-4 flex items-center gap-2">
+        <span className="text-2xl">⚡</span>
+        Ángulos Principales
+      </h3>
+      <div className="space-y-3 mb-4">
+        {/* Ascendente */}
+        {ascendant && (
+          <div className="bg-indigo-800/30 rounded-lg p-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-indigo-300">↑</span>
+              <span className="text-indigo-200 text-sm">Ascendente</span>
+            </div>
+            <div className="text-right">
+              <p className="text-indigo-50 font-bold">{ascendant.sign}</p>
+              <p className="text-indigo-300 text-xs">{Math.floor(ascendant.degree || 0)}°</p>
+            </div>
+          </div>
+        )}
+
+        {/* Medio Cielo */}
+        {midheaven ? (
+          <div className="bg-purple-800/30 rounded-lg p-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-purple-300">⬆</span>
+              <span className="text-purple-200 text-sm">Medio Cielo</span>
+            </div>
+            <div className="text-right">
+              <p className="text-purple-50 font-bold">{midheaven.sign}</p>
+              <p className="text-purple-300 text-xs">{Math.floor(midheaven.degree || 0)}°</p>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-purple-800/30 rounded-lg p-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-purple-300">⬆</span>
+              <span className="text-purple-200 text-sm">Medio Cielo</span>
+            </div>
+            <span className="text-purple-400 text-xs">No disponible</span>
+          </div>
+        )}
+      </div>
+
+      {/* ✅ ONLY FOR SOLAR RETURN: Add mini distributions */}
+      {chartType === 'solar-return' && (
+        <div className="mt-4 pt-4 border-t border-indigo-400/20">
+          <h4 className="text-indigo-200 font-semibold text-sm mb-3">Distribuciones Energéticas</h4>
+
+          {/* Elementos */}
+          {elementDistribution && Object.keys(elementDistribution).length > 0 && (
+            <div className="mb-3">
+              <p className="text-indigo-300 text-xs mb-2">✨ Elementos</p>
+              <div className="space-y-1">
+                {Object.entries(elementDistribution).map(([element, percentage]: [string, any]) => {
+                  const elementNames: { [key: string]: string } = {
+                    fire: 'Fuego',
+                    earth: 'Tierra',
+                    air: 'Aire',
+                    water: 'Agua'
+                  };
+                  const elementColors: { [key: string]: string } = {
+                    fire: 'bg-red-500',
+                    earth: 'bg-green-500',
+                    air: 'bg-blue-500',
+                    water: 'bg-purple-500'
+                  };
+                  return (
+                    <div key={element} className="flex items-center gap-2">
+                      <span className="text-indigo-100 text-xs w-16">{elementNames[element]}</span>
+                      <div className="flex-1 bg-indigo-900/40 rounded-full h-2 overflow-hidden">
+                        <div
+                          className={`h-full ${elementColors[element]}`}
+                          style={{ width: `${percentage || 0}%` }}
+                        />
+                      </div>
+                      <span className="text-indigo-300 text-xs w-10 text-right">{percentage || 0}%</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Modalidades */}
+          {modalityDistribution && Object.keys(modalityDistribution).length > 0 && (
+            <div>
+              <p className="text-indigo-300 text-xs mb-2">⚡ Modalidades</p>
+              <div className="space-y-1">
+                {Object.entries(modalityDistribution).map(([modality, percentage]: [string, any]) => {
+                  const modalityNames: { [key: string]: string } = {
+                    cardinal: 'Cardinal',
+                    fixed: 'Fijo',
+                    mutable: 'Mutable'
+                  };
+                  return (
+                    <div key={modality} className="flex items-center gap-2">
+                      <span className="text-indigo-100 text-xs w-16">{modalityNames[modality]}</span>
+                      <div className="flex-1 bg-indigo-900/40 rounded-full h-2 overflow-hidden">
+                        <div
+                          className="h-full bg-indigo-500"
+                          style={{ width: `${percentage || 0}%` }}
+                        />
+                      </div>
+                      <span className="text-indigo-300 text-xs w-10 text-right">{percentage || 0}%</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Perfil energético */}
+          <div className="mt-3 bg-indigo-900/40 rounded-lg p-2">
+            <p className="text-indigo-200 text-xs text-center">
+              🌟 Perfil energético único
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+
+    {/* ✅ CARD 3: CONDITIONAL - NATAL vs SOLAR RETURN */}
+    {chartType === 'natal' ? (
+      // NATAL: Full distributions card on the right
+      <ElementsModalitiesCard
+        elementDistribution={elementDistribution}
+        modalityDistribution={modalityDistribution}
+      />
+    ) : (
+      // SOLAR RETURN: Cycle info
+      <div className="bg-gradient-to-br from-rose-900/40 to-pink-900/40 rounded-xl p-6 border border-rose-400/30">
+        <h3 className="text-xl font-bold text-rose-100 mb-4 flex items-center gap-2">
+          <span className="text-2xl">✨</span>
+          Solar Return {solarReturnYear}
+        </h3>
+        <div className="space-y-3">
+          <div className="bg-rose-800/30 rounded-lg p-3">
+            <p className="text-rose-200 text-xs mb-1">🎂 Ciclo Anual</p>
+            <p className="text-rose-50 font-semibold text-sm">
+              {birthDate ? (
+                <>
+                  {new Date(birthDate).toLocaleDateString('es-ES', {
+                    day: 'numeric',
+                    month: 'long'
+                  })} {solarReturnYear}
+                  <br />
+                  <span className="text-rose-300 text-xs">→</span>
+                  <br />
+                  {new Date(birthDate).toLocaleDateString('es-ES', {
+                    day: 'numeric',
+                    month: 'long'
+                  })} {(solarReturnYear || 0) + 1}
+                </>
+              ) : 'No disponible'}
+            </p>
+          </div>
+
+          <div className="bg-rose-800/30 rounded-lg p-3">
+            <p className="text-rose-200 text-xs mb-1">📍 Lugar del SR</p>
+            <p className="text-rose-50 text-sm line-clamp-2">
+              {birthPlace?.split(',').slice(0, 2).join(', ') || 'No disponible'}
+            </p>
+          </div>
+
+          {solarReturnTheme && (
+            <div className="bg-rose-800/30 rounded-lg p-3">
+              <p className="text-rose-200 text-xs mb-1">⭐ Tema Central</p>
+              <p className="text-rose-50 text-sm italic line-clamp-3">
+                "{solarReturnTheme}"
+              </p>
+            </div>
+          )}
+
+          {ascSRInNatalHouse && (
+            <div className="bg-green-900/30 rounded-lg p-3 border border-green-400/20">
+              <p className="text-green-200 text-xs mb-1">🏠 ASC SR en Casa Natal</p>
+              <p className="text-green-100 font-bold text-lg">Casa {ascSRInNatalHouse}</p>
+              <p className="text-green-200 text-xs mt-1">
+                Área de vida activada este año
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    )}
+
   </div>
 )}
 
@@ -719,7 +1076,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
             </button>
           </div>
           
-      {showAspects && (
+          {showAspects && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {Object.entries({
                 major: { 
@@ -826,12 +1183,74 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
         </div>
       </div>
 
-      {/* ✨ MENÚ DE NAVEGACIÓN */}
-      <SectionMenu activeSection={activeSection} scrollToSection={scrollToSection} />
+      {/* ✅ NAVEGACIÓN - AFTER CARTA */}
+      <div className="flex justify-center items-center gap-4 my-8">
+        <button
+          onClick={() => scrollToSection('carta-visual')}
+          className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 bg-slate-800/50 border border-slate-600/30 text-slate-400 hover:border-blue-500/50 hover:text-blue-300"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 16v-4"/>
+            <path d="M12 8h.01"/>
+          </svg>
+          Carta
+        </button>
+
+        <button
+          onClick={() => scrollToSection('aspectos-detectados')}
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
+            activeSection === 'aspectos-detectados'
+              ? 'bg-gradient-to-r from-yellow-500/30 to-orange-500/30 border-2 border-yellow-400/50 text-yellow-300 shadow-lg shadow-yellow-500/20'
+              : 'bg-slate-800/50 border border-slate-600/30 text-slate-400 hover:border-slate-500/50 hover:text-slate-300'
+          }`}
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+          </svg>
+          Aspectos
+        </button>
+
+        <button
+          onClick={() => scrollToSection('posiciones-planetarias')}
+          className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 bg-slate-800/50 border border-slate-600/30 text-slate-400 hover:border-cyan-500/50 hover:text-cyan-300"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          Planetas
+        </button>
+
+        {chartType === 'solar-return' && (
+          <button
+            onClick={() => {
+              const timelineSection = document.getElementById('linea-tiempo-solar');
+              if (timelineSection) {
+                timelineSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }}
+            className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 bg-slate-800/50 border border-slate-600/30 text-slate-400 hover:border-rose-500/50 hover:text-rose-300"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12,6 12,12 16,14"/>
+            </svg>
+            Línea de Tiempo
+          </button>
+        )}
+      </div>
 
       {/* 🎯 SECCIÓN 2: ASPECTOS DETECTADOS */}
       {calculatedAspects.length > 0 && (
-        <div id="aspectos-detectados" className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
+        <div id="aspectos-detectados" className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-600/30 rounded-2xl p-6">
           <div className="flex items-center mb-6">
             <svg className="w-6 h-6 text-yellow-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
@@ -924,11 +1343,73 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
         </div>
       )}
 
-      {/* ✨ MENÚ DE NAVEGACIÓN */}
-      <SectionMenu activeSection={activeSection} scrollToSection={scrollToSection} />
+      {/* ✅ NAVEGACIÓN - AFTER ASPECTOS */}
+      <div className="flex justify-center items-center gap-4 my-8">
+        <button
+          onClick={() => scrollToSection('carta-visual')}
+          className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 bg-slate-800/50 border border-slate-600/30 text-slate-400 hover:border-blue-500/50 hover:text-blue-300"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 16v-4"/>
+            <path d="M12 8h.01"/>
+          </svg>
+          Carta
+        </button>
+
+        <button
+          onClick={() => scrollToSection('aspectos-detectados')}
+          className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 bg-slate-800/50 border border-slate-600/30 text-slate-400 hover:border-yellow-500/50 hover:text-yellow-300"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+          </svg>
+          Aspectos
+        </button>
+
+        <button
+          onClick={() => scrollToSection('posiciones-planetarias')}
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
+            activeSection === 'posiciones-planetarias'
+              ? 'bg-gradient-to-r from-cyan-500/30 to-blue-500/30 border-2 border-cyan-400/50 text-cyan-300 shadow-lg shadow-cyan-500/20'
+              : 'bg-slate-800/50 border border-slate-600/30 text-slate-400 hover:border-slate-500/50 hover:text-slate-300'
+          }`}
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          Planetas
+        </button>
+
+        {chartType === 'solar-return' && (
+          <button
+            onClick={() => {
+              const timelineSection = document.getElementById('linea-tiempo-solar');
+              if (timelineSection) {
+                timelineSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }}
+            className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 bg-slate-800/50 border border-slate-600/30 text-slate-400 hover:border-rose-500/50 hover:text-rose-300"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12,6 12,12 16,14"/>
+            </svg>
+            Línea de Tiempo
+          </button>
+        )}
+      </div>
 
       {/* 🎯 SECCIÓN 3: POSICIONES PLANETARIAS */}
-      <div id="posiciones-planetarias" className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
+      <div id="posiciones-planetarias" className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-600/30 rounded-2xl p-6">
         <div className="flex items-center mb-6">
           <svg className="w-6 h-6 text-yellow-400 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="12" cy="12" r="5"/>
@@ -997,6 +1478,67 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
             ) : null
           ))}
         </div>
+      </div>
+
+      {/* ✅ NAVEGACIÓN FINAL - BEFORE TIMELINE */}
+      <div className="flex justify-center items-center gap-4 my-8">
+        <button
+          onClick={() => scrollToSection('carta-visual')}
+          className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 bg-slate-800/50 border border-slate-600/30 text-slate-400 hover:border-blue-500/50 hover:text-blue-300"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 16v-4"/>
+            <path d="M12 8h.01"/>
+          </svg>
+          Carta
+        </button>
+
+        <button
+          onClick={() => scrollToSection('aspectos-detectados')}
+          className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 bg-slate-800/50 border border-slate-600/30 text-slate-400 hover:border-yellow-500/50 hover:text-yellow-300"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+          </svg>
+          Aspectos
+        </button>
+
+        <button
+          onClick={() => scrollToSection('posiciones-planetarias')}
+          className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 bg-slate-800/50 border border-slate-600/30 text-slate-400 hover:border-cyan-500/50 hover:text-cyan-300"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          Planetas
+        </button>
+
+        {chartType === 'solar-return' && (
+          <button
+            onClick={() => {
+              const timelineSection = document.getElementById('linea-tiempo-solar');
+              if (timelineSection) {
+                timelineSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 bg-gradient-to-r from-rose-500/30 to-pink-500/30 border-2 border-rose-400/50 text-rose-300 shadow-lg shadow-rose-500/20`}
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12,6 12,12 16,14"/>
+            </svg>
+            Línea de Tiempo
+          </button>
+        )}
       </div>
 
       {/* 📊 SECCIONES EDUCATIVAS */}
@@ -1112,7 +1654,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
         </div>
       </div>
 
-      {/* 🎯 TOOLTIPS DINÁMICOS - TODOS LOS TOOLTIPS DEL ORIGINAL */}
+      {/* 🎯 TOOLTIPS DINÁMICOS */}
       {hoveredPlanet && hoveredPlanet !== 'Ascendente' && hoveredPlanet !== 'Medio Cielo' && (
         <div 
           className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm pointer-events-none"

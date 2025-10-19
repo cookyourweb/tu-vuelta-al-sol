@@ -20,6 +20,14 @@ export interface ChartDisplayProps {
   showOnlyProgressedAspects?: boolean;
   progressionInfo?: ProgressionInfo;
   data?: any; // For flexibility
+
+  // ✅ NEW PROPS FOR SOLAR RETURN
+  birthDate?: string;
+  birthTime?: string;
+  birthPlace?: string;
+  solarReturnYear?: number;
+  solarReturnTheme?: string;
+  ascSRInNatalHouse?: number;
 }
 
 // Rest of interfaces remain the same

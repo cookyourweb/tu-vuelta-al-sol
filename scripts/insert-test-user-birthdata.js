@@ -1,50 +1,58 @@
 const mongoose = require('mongoose');
-const path = require('path');
-const BirthData = require(path.resolve(__dirname, '../src/models/BirthData')).default || require(path.resolve(__dirname, '../src/models/BirthData'));
-const User = require(path.resolve(__dirname, '../src/models/User')).default || require(path.resolve(__dirname, '../src/models/User'));
 
+// Conectar directamente a MongoDB
 async function main() {
-  await mongoose.connect('mongodb://localhost:27017/your-db-name', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
-
-  // Create test user if not exists
-  let user = await User.findOne({ uid: 'test-user' });
-  if (!user) {
-    user = new User({
-      uid: 'test-user',
-      email: 'testuser@example.com',
-      name: 'Test User',
-      // Add other required fields if any
+  try {
+    await mongoose.connect('mongodb://localhost:27017/astrology-app', {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
     });
-    await user.save();
-    console.log('Test user created');
-  } else {
-    console.log('Test user already exists');
-  }
 
-  // Create birth data for test user
-  let birthData = await BirthData.findOne({ userId: 'test-user' });
-  if (!birthData) {
-    birthData = new BirthData({
-      userId: 'test-user',
-      birthDate: new Date('1990-01-15'),
-      birthTime: '12:30:00',
-      latitude: 40.4168,
-      longitude: -3.7038,
-      timezone: 'Europe/Madrid',
+    console.log('✅ Conectado a MongoDB');
+
+    // Crear datos de nacimiento directamente
+    const birthDataCollection = mongoose.connection.collection('birthdatas');
+
+    // Verificar si ya existe
+    const existing = await birthDataCollection.findOne({
+      $or: [
+        { userId: 'test-user-id' },
+        { uid: 'test-user-id' }
+      ]
     });
-    await birthData.save();
-    console.log('Birth data for test user created');
-  } else {
-    console.log('Birth data for test user already exists');
-  }
 
-  mongoose.connection.close();
+    if (existing) {
+      console.log('✅ Birth data ya existe para test-user-id');
+      console.log('Datos existentes:', existing);
+    } else {
+      // Crear datos de nacimiento para test
+      const testBirthData = {
+        userId: 'test-user-id',
+        uid: 'test-user-id',
+        fullName: 'Usuario de Prueba',
+        birthDate: new Date('1974-02-10'),
+        birthTime: '07:30:00',
+        birthPlace: 'Madrid, Spain',
+        latitude: 40.4168,
+        longitude: -3.7038,
+        timezone: 'Europe/Madrid',
+        livesInSamePlace: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      const result = await birthDataCollection.insertOne(testBirthData);
+      console.log('✅ Birth data creado para test-user-id:', result.insertedId);
+      console.log('Datos creados:', testBirthData);
+    }
+
+    mongoose.connection.close();
+    console.log('✅ Conexión cerrada');
+
+  } catch (error) {
+    console.error('❌ Error:', error);
+    mongoose.connection.close();
+  }
 }
 
-main().catch(err => {
-  console.error(err);
-  mongoose.connection.close();
-});
+main();

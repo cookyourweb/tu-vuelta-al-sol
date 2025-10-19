@@ -1,382 +1,777 @@
 // src/app/api/astrology/interpret-solar-return/route.ts
-// =============================================================================
-// ENDPOINT PARA INTERPRETACIONES DE SOLAR RETURN
-// Integración OpenAI GPT-4 + Caché MongoDB + Fallbacks
-// =============================================================================
+// 🔥 COMPLETE SOLAR RETURN INTERPRETATION WITH 12 SECTIONS
+// Methodology: Shea + Teal + Louis (Professional Astrology)
+// Output: Full year prediction with actionable insights
 
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import { MongoClient } from 'mongodb';
+import connectDB from '@/lib/db';
+import Interpretation from '@/models/Interpretation';
 import { generateSolarReturnMasterPrompt } from '@/utils/prompts/solarReturnPrompts';
+import { generateSRComparison } from '@/utils/astrology/solarReturnComparison';
 
-// ✅ CONFIGURACIÓN OPENAI
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// ✅ CONFIGURACIÓN MONGODB
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/astrology';
-const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 horas en ms
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
-// ✅ INTERFACES
-interface SolarReturnRequest {
-  userId: string;
-  natalChart: any;
-  solarReturnChart: any;
-  userProfile: {
-    name: string;
-    age: number;
-    birthPlace: string;
-    birthDate: string;
-    birthTime: string;
+// ==========================================
+// 📊 COMPLETE SOLAR RETURN INTERFACE
+// ==========================================
+
+interface CompleteSolarReturnInterpretation {
+  // CORE ESSENCE (3 fields - you already have these)
+  esencia_revolucionaria_anual: string;
+  proposito_vida_anual: string;
+  tema_central_del_anio: string;
+  
+  // TECHNICAL ANALYSIS (professional methodology)
+  analisis_tecnico_profesional: {
+    asc_sr_en_casa_natal: {
+      casa: number;
+      signo_asc_sr: string;
+      significado: string;
+      area_vida_dominante: string;
+    };
+    sol_en_casa_sr: {
+      casa: number;
+      significado: string;
+    };
+    planetas_angulares_sr: Array<{
+      planeta: string;
+      posicion: string;
+      impacto: string;
+    }>;
+    aspectos_cruzados_natal_sr: Array<{
+      planeta_natal: string;
+      planeta_sr: string;
+      aspecto: string;
+      orbe: number;
+      significado: string;
+    }>;
+    configuraciones_especiales: string[];
   };
-  regenerate?: boolean;
+  
+  // ACTION PLAN (quarterly breakdown)
+  plan_accion: {
+    trimestre_1: { foco: string; acciones: string[] };
+    trimestre_2: { foco: string; acciones: string[] };
+    trimestre_3: { foco: string; acciones: string[] };
+    trimestre_4: { foco: string; acciones: string[] };
+  };
+  
+  // LUNAR CALENDAR (12 months)
+  calendario_lunar_anual: Array<{
+    mes: string;
+    luna_nueva: { fecha: string; signo: string; mensaje: string };
+    luna_llena: { fecha: string; signo: string; mensaje: string };
+  }>;
+  
+  // POWER DECLARATION
+  declaracion_poder_anual: string;
+  
+  // WARNINGS
+  advertencias: string[];
+  
+  // KEY EVENTS (timeline)
+  eventos_clave_del_anio: Array<{
+    periodo: string;
+    evento: string;
+    tipo: string;
+    descripcion: string;
+    planetas_involucrados?: string[];
+    accion_recomendada: string;
+  }>;
+  
+  // INSIGHTS
+  insights_transformacionales: string[];
+  
+  // RITUALS
+  rituales_recomendados: string[];
+  
+  // INTEGRATION
+  integracion_final: {
+    sintesis: string;
+    pregunta_reflexion: string;
+  };
 }
 
-interface CachedInterpretation {
-  _id?: string;
-  userId: string;
-  chartType: 'solar-return';
-  natalChart: any;
-  solarReturnChart: any;
-  userProfile: any;
-  interpretation: any;
-  generatedAt: string;
-  expiresAt: Date;
-}
+// ==========================================
+// 🤖 GENERATE WITH OPENAI
+// ==========================================
 
-// ✅ FUNCIÓN: Verificar caché MongoDB
-async function checkCache(userId: string, natalChart: any, solarReturnChart: any): Promise<CachedInterpretation | null> {
-  try {
-    const client = new MongoClient(MONGODB_URI);
-    await client.connect();
+async function generateCompleteWithOpenAI(
+  natalChart: any,
+  solarReturnChart: any,
+  userProfile: any,
+  returnYear: number,
+  srComparison?: any
+): Promise<CompleteSolarReturnInterpretation> {
 
-    const db = client.db('astrology');
-    const collection = db.collection('interpretations');
+  console.log('🤖 ===== GENERATING WITH OPENAI =====');
+  console.log('🤖 Input validation:', {
+    userName: userProfile?.name,
+    userAge: userProfile?.age,
+    natalPlanets: natalChart?.planets?.length,
+    srPlanets: solarReturnChart?.planets?.length,
+    returnYear
+  });
 
-    // Buscar interpretación válida (no expirada)
-    const cached = await collection.findOne({
-      userId,
-      chartType: 'solar-return',
-      'natalChart.planets': { $exists: true },
-      'solarReturnChart.planets': { $exists: true },
-      expiresAt: { $gt: new Date() }
-    });
+  // ✅ GENERATE PROMPT
+  const prompt = generateSolarReturnMasterPrompt({
+    natalChart,
+    solarReturnChart,
+    userProfile,
+    returnYear,
+    srComparison
+  });
 
-    await client.close();
+  console.log('📏 Prompt stats:', {
+    length: prompt.length,
+    containsUserName: prompt.includes(userProfile.name),
+    containsReturnYear: prompt.includes(returnYear.toString())
+  });
 
-    if (cached) {
-      console.log('✅ Interpretación Solar Return encontrada en caché');
-      return cached as unknown as CachedInterpretation;
-    }
+  // ✅ SYSTEM PROMPT WITH STRICT REQUIREMENTS
+  let systemPrompt = `You are a PROFESSIONAL astrologer specializing in Solar Return (Annual Revolution) following Shea, Teal, and Louis methodology.
 
-    return null;
-  } catch (error) {
-    console.error('❌ Error verificando caché:', error);
-    return null;
-  }
-}
+⚠️ CRITICAL REQUIREMENTS:
+1. You MUST respond with VALID JSON containing ALL 12 required sections
+2. Use the REAL astronomical data provided (planets, houses, signs, degrees)
+3. Use the REAL user data: ${userProfile.name}, age ${userProfile.age}, from ${userProfile.birthPlace}
+4. Reference SPECIFIC positions like "Sol en ${solarReturnChart?.planets?.find((p: any) => p.name === 'Sol')?.sign} Casa ${solarReturnChart?.planets?.find((p: any) => p.name === 'Sol')?.house}"
+5. Calculate ASC SR position in NATAL houses using the comparison data provided
+6. Use disruptive Spanish language but BE SPECIFIC with astronomical data
+7. NO generic placeholders like "Libra" or "Casa 1" - use REAL data
 
-// ✅ FUNCIÓN: Guardar en caché
-async function saveToCache(interpretation: CachedInterpretation): Promise<void> {
-  try {
-    const client = new MongoClient(MONGODB_URI);
-    await client.connect();
-
-    const db = client.db('astrology');
-    const collection = db.collection('interpretations');
-
-    // Establecer expiración
-    interpretation.expiresAt = new Date(Date.now() + CACHE_DURATION);
-
-    await collection.insertOne(interpretation as any);
-    await client.close();
-
-    console.log('💾 Interpretación Solar Return guardada en caché');
-  } catch (error) {
-    console.error('❌ Error guardando en caché:', error);
-  }
-}
-
-// ✅ FUNCIÓN: Generar interpretación con OpenAI
-async function generateWithOpenAI(natalChart: any, solarReturnChart: any, userProfile: any): Promise<any> {
-  try {
-    console.log('🤖 Generando interpretación Solar Return con OpenAI...');
-
-    // ✅ Extraer solo datos esenciales para reducir tokens
-    const natalEssentials = {
-      sun: natalChart.planets?.find((p: any) => p.name === 'Sol' || p.name === 'Sun'),
-      moon: natalChart.planets?.find((p: any) => p.name === 'Luna' || p.name === 'Moon'),
-      ascendant: natalChart.ascendant,
-      midheaven: natalChart.midheaven
-    };
-
-    const solarEssentials = {
-      sun: solarReturnChart.planets?.find((p: any) => p.name === 'Sol' || p.name === 'Sun'),
-      moon: solarReturnChart.planets?.find((p: any) => p.name === 'Luna' || p.name === 'Moon'),
-      ascendant: solarReturnChart.ascendant,
-      midheaven: solarReturnChart.midheaven,
-      year: solarReturnChart.solarReturnInfo?.year || new Date().getFullYear()
-    };
-
-    // ✅ Prompt ULTRA-COMPACTO (metodología Shea-Teal-Louis)
-    const prompt = `Genera interpretación Solar Return año ${solarEssentials.year} para ${userProfile.name}.
-
-DATOS CLAVE:
-Natal: Sol ${natalEssentials.sun?.sign || ''} Casa ${natalEssentials.sun?.house || 1}, ASC ${natalEssentials.ascendant?.sign || ''}
-Solar: Sol ${solarEssentials.sun?.sign || ''} Casa ${solarEssentials.sun?.house || 1}, ASC ${solarEssentials.ascendant?.sign || ''}
-
-METODOLOGÍA (Shea-Teal-Louis):
-1. ASC Solar en casa natal = tema central año
-2. Sol Solar en casa natal = energía vital
-3. Comparar posiciones natal vs solar
-
-Responde SOLO con JSON válido en español:
+Required JSON structure:
 {
-  "esencia_revolucionaria_anual": "Declaración disruptiva del año (150 palabras)",
-  "proposito_vida_anual": "Misión del año (100 palabras)",
-  "tema_central_del_anio": "Título del año",
-  "plan_accion": {
-    "hoy_mismo": ["acción 1", "acción 2", "acción 3"],
-    "esta_semana": ["acción 1", "acción 2", "acción 3"],
-    "este_mes": ["acción 1", "acción 2", "acción 3"]
+  "esencia_revolucionaria_anual": "string with SPECIFIC references to ${userProfile.name}'s chart",
+  "proposito_vida_anual": "string",
+  "tema_central_del_anio": "string",
+  "analisis_tecnico_profesional": {
+    "asc_sr_en_casa_natal": {
+      "casa": number (from comparison data),
+      "signo_asc_sr": "string (${solarReturnChart?.ascendant?.sign})",
+      "significado": "string with REAL data",
+      "area_vida_dominante": "string"
+    },
+    "sol_en_casa_sr": {
+      "casa": number,
+      "significado": "string"
+    },
+    "planetas_angulares_sr": [],
+    "aspectos_cruzados_natal_sr": [],
+    "configuraciones_especiales": []
   },
-  "declaracion_poder_anual": "Frase de poder",
-  "advertencias": ["advertencia 1", "advertencia 2", "advertencia 3"],
-  "eventos_clave_del_anio": [
-    {
-      "periodo": "Trimestre 1",
-      "evento": "Nombre",
-      "tipo": "Tipo",
-      "descripcion": "Descripción breve",
-      "accion_recomendada": "Acción"
+  "plan_accion": {
+    "trimestre_1": {"foco": "string", "acciones": []},
+    "trimestre_2": {"foco": "string", "acciones": []},
+    "trimestre_3": {"foco": "string", "acciones": []},
+    "trimestre_4": {"foco": "string", "acciones": []}
+  },
+  "calendario_lunar_anual": [...12 months with REAL 2025-2026 dates...],
+  "declaracion_poder_anual": "string with ${userProfile.name.toUpperCase()}",
+  "advertencias": [...],
+  "eventos_clave_del_anio": [...],
+  "insights_transformacionales": [...],
+  "rituales_recomendados": [...],
+  "integracion_final": {
+    "sintesis": "string mentioning ${userProfile.name}",
+    "pregunta_reflexion": "string"
+  }
+}
+
+⚠️ OUTPUT ONLY JSON - NO markdown, NO explanations, NO text before/after`;
+
+  // ✅ CALL OPENAI WITH RETRIES
+  let attempts = 0;
+  const MAX_ATTEMPTS = 2;
+  let parsedResponse: any;
+
+  while (attempts < MAX_ATTEMPTS) {
+    try {
+      console.log(`🤖 OpenAI attempt ${attempts + 1}/${MAX_ATTEMPTS}`);
+
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4o-2024-08-06',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.7,
+        max_tokens: 6000,
+        response_format: { type: "json_object" }
+      });
+
+      const rawResponse = completion.choices[0]?.message?.content;
+
+      if (!rawResponse) {
+        throw new Error('Empty response from OpenAI');
+      }
+
+      console.log('📦 Response received:', {
+        length: rawResponse.length,
+        first100: rawResponse.substring(0, 100)
+      });
+
+      // ✅ PARSE & VALIDATE
+      parsedResponse = JSON.parse(rawResponse);
+
+      // Required sections
+      const requiredSections = [
+        'esencia_revolucionaria_anual',
+        'proposito_vida_anual',
+        'tema_central_del_anio',
+        'analisis_tecnico_profesional',
+        'plan_accion',
+        'calendario_lunar_anual',
+        'declaracion_poder_anual',
+        'advertencias',
+        'eventos_clave_del_anio',
+        'insights_transformacionales',
+        'rituales_recomendados',
+        'integracion_final'
+      ];
+
+      const missingSections = requiredSections.filter(
+        section => !parsedResponse[section]
+      );
+
+      if (missingSections.length === 0) {
+        // ✅ VALIDATE CONTENT QUALITY
+        const hasUserName = parsedResponse.esencia_revolucionaria_anual.includes(userProfile.name) ||
+                           parsedResponse.declaracion_poder_anual.includes(userProfile.name.toUpperCase());
+
+        const hasRealData = parsedResponse.esencia_revolucionaria_anual !== "Usuario, este año 2025-2026 marca tu REVOLUCIÓN PERSONAL";
+
+        if (!hasUserName || !hasRealData) {
+          console.warn('⚠️ Response has all sections but uses generic data');
+          throw new Error('OpenAI used generic fallback data instead of real user data');
+        }
+
+        console.log(`✅ Complete valid response on attempt ${attempts + 1}`);
+        break;
+      } else {
+        console.warn(`⚠️ Attempt ${attempts + 1}: Missing ${missingSections.length} sections:`, missingSections);
+        attempts++;
+
+        if (attempts < MAX_ATTEMPTS) {
+          systemPrompt += `\n\n🚨 RETRY: Previous response missing: ${missingSections.join(', ')}. Include them NOW with REAL data.`;
+        }
+      }
+
+    } catch (error) {
+      console.error(`❌ Attempt ${attempts + 1} failed:`, error);
+      attempts++;
+
+      if (attempts >= MAX_ATTEMPTS) {
+        throw error;
+      }
     }
-  ],
-  "insights_transformacionales": ["insight 1", "insight 2", "insight 3"],
-  "rituales_recomendados": ["ritual 1", "ritual 2", "ritual 3"]
-}`;
+  }
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4-turbo', // ✅ CAMBIADO de 'gpt-4' a 'gpt-4-turbo'
-      messages: [
+  if (!parsedResponse || attempts >= MAX_ATTEMPTS) {
+    throw new Error('Failed to generate valid interpretation after retries');
+  }
+
+  console.log('✅ OpenAI interpretation validated:', {
+    sections: Object.keys(parsedResponse).length,
+    hasUserName: parsedResponse.esencia_revolucionaria_anual.includes(userProfile.name)
+  });
+
+  return parsedResponse;
+}
+
+// ==========================================
+// 🔧 COMPLETE MISSING KEYS (FALLBACK)
+// ==========================================
+
+function completeMissingKeys(
+  partial: any,
+  userProfile: any,
+  returnYear: number
+): CompleteSolarReturnInterpretation {
+  
+  const userName = userProfile.name || 'Usuario';
+  const locationContext = userProfile.locationContext;
+  const relocated = locationContext?.relocated || false;
+  const currentLocation = locationContext?.currentPlace || userProfile.birthPlace || 'tu ubicación actual';
+  
+  // ✅ RELOCATION MESSAGE (critical for Solar Return accuracy)
+  const relocationNote = relocated 
+    ? `⚠️ IMPORTANTE: Tu Solar Return está calculado para ${currentLocation}, NO para tu lugar de nacimiento (${locationContext.birthPlace}). La ubicación CAMBIA completamente la interpretación del año.`
+    : '';
+  
+  const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  
+  return {
+    esencia_revolucionaria_anual: partial.esencia_revolucionaria_anual || 
+      `${userName}, este año ${returnYear}-${returnYear + 1} marca tu REVOLUCIÓN PERSONAL en ${currentLocation}. No es un ciclo más - es tu momento de REESCRIBIR tu realidad desde la autenticidad radical. ${relocationNote}`,
+    
+    proposito_vida_anual: partial.proposito_vida_anual ||
+      `Tu misión NO NEGOCIABLE: Desmantelar estructuras mentales limitantes y emerger como la AUTORIDAD de tu propia vida. Sin disculpas. Sin retrasos.`,
+    
+    tema_central_del_anio: partial.tema_central_del_anio ||
+      `Reinvención Consciente y Empoderamiento Personal`,
+    
+    analisis_tecnico_profesional: partial.analisis_tecnico_profesional || {
+      asc_sr_en_casa_natal: {
+        casa: 1,
+        signo_asc_sr: 'Libra',
+        significado: 'El ascendente de tu Solar Return cae en tu Casa 1 natal, activando el eje de IDENTIDAD y PRESENCIA personal. Este año eres el PROTAGONISTA.',
+        area_vida_dominante: 'Desarrollo de identidad auténtica y liderazgo personal'
+      },
+      sol_en_casa_sr: {
+        casa: 1,
+        significado: 'El Sol en Casa 1 de tu Solar Return amplifica tu VISIBILIDAD y poder de manifestación. Es tu año para SER VISTO sin filtros.'
+      },
+      planetas_angulares_sr: [
         {
-          role: 'system',
-          content: `Eres astrólogo profesional especializado en Solar Return (metodología Shea-Teal-Louis).
-
-PRINCIPIOS TÉCNICOS:
-- Solar Return = carta cuando Sol regresa a posición natal cada año
-- ASC Solar en casa natal = INDICADOR #1 (tema central año)
-- Sol Solar en casa natal = dónde fluye energía vital
-- Comparar posiciones natal vs solar = áreas activadas
-
-LENGUAJE:
-- Profesional pero transformacional
-- Directo, específico, sin eufemismos
-- Enfocado en ACCIÓN
-
-RESPONDE SOLO JSON VÁLIDO EN ESPAÑOL. Sin texto adicional.`
-        },
-        {
-          role: 'user',
-          content: prompt
+          planeta: 'Luna',
+          posicion: 'Casa 10 (MC)',
+          impacto: 'Emociones públicas y reconocimiento profesional dominan este año'
         }
       ],
-      max_tokens: 3000, // ✅ Aumentado de 2000
-      temperature: 0.8,
-    });
-
-    const response = completion.choices[0]?.message?.content;
-    if (!response) {
-      throw new Error('No response from OpenAI');
-    }
-
-    // Limpiar markdown si existe
-    let cleanedResponse = response.trim();
-    if (cleanedResponse.startsWith('```json')) {
-      cleanedResponse = cleanedResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    }
-
-  
-
-  const interpretation = JSON.parse(cleanedResponse);
-    console.log('🎯 INTERPRETACIÓN GENERADA:', JSON.stringify(interpretation, null, 2)); // ✅ AÑADIR
-    console.log('✅ Interpretación Solar Return generada exitosamente');
-
-    return interpretation;;
-
-  } catch (error) {
-    console.error('❌ Error generando con OpenAI:', error);
-    throw error;
-  }
-}
-
-// ✅ FUNCIÓN: Generar fallback disruptivo en ESPAÑOL
-
-function generateFallback(natalChart: any, solarReturnChart: any, userProfile: any): any {
-  console.log('🔄 Generando fallback disruptivo para Solar Return');
-
-  const returnYear = solarReturnChart?.solarReturnInfo?.year || new Date().getFullYear();
-  const solarAsc = solarReturnChart.ascendant?.sign || 'Libra';
-  const solarSol = solarReturnChart.planets?.find((p: any) => p.name === 'Sol' || p.name === 'Sun');
-
-  return {
-    esencia_revolucionaria_anual: `${userProfile.name || 'Usuario'}, tu año ${returnYear}-${returnYear + 1} NO es un ciclo más. Es tu REVOLUCIÓN PERSONAL obligatoria. Con Ascendente ${solarAsc}, te conviertes en un AGENTE DE CAMBIO que no puede ser ignorado. Este Solar Return te obliga a EVOLUCIONAR o quedarte atrás.`,
-
-    proposito_vida_anual: `Tu MISIÓN este año: DESMANTELAR toda estructura mental que te mantiene pequeño/a. En Casa ${solarSol?.house || 1}, tu Sol exige que emerjas como la AUTORIDAD que siempre has sido. No hay excusas. ACTIVA tu poder AHORA.`,
-
-    tema_central_del_anio: `REVOLUCIÓN ${solarAsc} - Año de PODER TOTAL`,
-
-    plan_accion: {
-      hoy_mismo: [
-        `¡URGENTE! Elimina TODA duda sobre tu valor. Tu Ascendente ${solarAsc} exige PRESENCIA TOTAL.`,
-        "DESTRUYE cualquier excusa que te mantenga en la zona de confort. Escribe 3 acciones CONCRETAS que te aterroricen.",
-        `Declara en voz ALTA: "Soy ${solarAsc} en acción. Mi poder es IRREFUTABLE durante ${returnYear}."`
+      aspectos_cruzados_natal_sr: [
+        {
+          planeta_natal: 'Sol Natal',
+          planeta_sr: 'Luna SR',
+          aspecto: 'Trígono',
+          orbe: 3.5,
+          significado: 'Flujo natural entre identidad esencial y expresión emocional anual'
+        }
       ],
-      esta_semana: [
-        `INVESTIGA sin piedad las debilidades de ${solarAsc} que has estado evitando.`,
-        "Establece un RITUAL DIARIO de activación. No es opcional.",
-        "IDENTIFICA y ELIMINA la relación/hábito tóxico que te mantiene en el pasado."
-      ],
-      este_mes: [
-        "LANZA un proyecto que refleje tu energía lunar anual SIN CENSURA.",
-        "REORGANIZA tu vida física según tu Ascendente Solar Return.",
-        "INVIERTE en formación que potencie tu Casa 10. Tu carrera es tu DOMINIO."
+      configuraciones_especiales: [
+        'Ascendente SR en Casa Angular Natal',
+        'Sol SR en posición de alto impacto',
+        'Énfasis en eje relacional Casa 1-7'
       ]
     },
-
-    declaracion_poder_anual: `Soy ${solarAsc} en acción destructiva y creadora. Mi año ${returnYear} es mi CAMPO DE BATALLA. Emergeré victorioso/a.`,
-
-    advertencias: [
-      "¡PELIGRO! Si ignoras Saturno Solar Return, te aplastará. Sus lecciones son BRUTALES pero necesarias.",
-      "Verifica tu ubicación Solar Return con PRECISIÓN. Un error aquí arruina todo el año.",
-      "Cuando Marte forme aspectos tensos, ¡DETENTE! Las decisiones impulsivas te costarán."
+    
+    plan_accion: partial.plan_accion || {
+      trimestre_1: {
+        foco: 'Sembrar Semillas Revolucionarias',
+        acciones: [
+          'Definir intenciones anuales con CLARIDAD radical',
+          'Identificar patrones autodestructivos del año anterior',
+          'Establecer rituales de Luna Nueva mensuales',
+          'Crear declaración de poder personal'
+        ]
+      },
+      trimestre_2: {
+        foco: 'Ejecutar con Valentía Disruptiva',
+        acciones: [
+          'Tomar ACCIÓN decisiva en área dominante (Casa SR)',
+          'Expandir zona de confort sin piedad',
+          'Manifestar visibilidad pública sin filtros',
+          'Capitalizar oportunidades con timing preciso'
+        ]
+      },
+      trimestre_3: {
+        foco: 'Ajustar y Perfeccionar con Honestidad',
+        acciones: [
+          'Evaluar progreso con BRUTAL honestidad',
+          'Eliminar lo que NO funciona sin apegos',
+          'Refinar estrategia según resultados reales',
+          'Preparar cosecha consciente de logros'
+        ]
+      },
+      trimestre_4: {
+        foco: 'Consolidar y Celebrar Victorias',
+        acciones: [
+          'Integrar aprendizajes profundos del año',
+          'Documentar transformaciones tangibles',
+          'Celebrar victorias sin minimizar',
+          'Preparar fundamentos para siguiente ciclo solar'
+        ]
+      }
+    },
+    
+    calendario_lunar_anual: partial.calendario_lunar_anual || meses.map((mes, idx) => ({
+      mes,
+      luna_nueva: {
+        fecha: `${mes} ${returnYear + (idx >= 2 ? 1 : 0)}`,
+        signo: ['Capricornio', 'Acuario', 'Piscis', 'Aries', 'Tauro', 'Géminis', 
+                'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario'][idx],
+        mensaje: 'Momento de plantar intenciones y nuevos comienzos en el área de vida correspondiente'
+      },
+      luna_llena: {
+        fecha: `${mes} ${returnYear + (idx >= 2 ? 1 : 0)}`,
+        signo: ['Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario',
+                'Capricornio', 'Acuario', 'Piscis', 'Aries', 'Tauro', 'Géminis'][idx],
+        mensaje: 'Momento de culminación y liberación - soltar lo que ya no sirve'
+      }
+    })),
+    
+    declaracion_poder_anual: partial.declaracion_poder_anual ||
+      `YO, ${userName.toUpperCase()}, RECLAMO MI PODER SOBERANO. ESTE AÑO ${returnYear}-${returnYear + 1} SOY EL ARQUITECTO CONSCIENTE DE MI REALIDAD. MANIFIESTO MI AUTENTICIDAD SIN DISCULPAS, AVANZO CON VALENTÍA DISRUPTIVA, Y ABRAZO MI TRANSFORMACIÓN EVOLUTIVA. ASÍ ES, ASÍ SERÁ.`,
+    
+    advertencias: partial.advertencias || [
+      '⚠️ No repitas patrones autodestructivos de años anteriores - rompe el ciclo AHORA',
+      '⚠️ Evita la auto-sabotaje cuando el éxito se acerque - mereces brillar',
+      '⚠️ No minimices tu poder por miedo al juicio ajeno - tu autenticidad es tu superpoder',
+      '⚠️ Cuidado con dispersión energética - enfócate en Casa SR dominante',
+      '⚠️ No pospongas decisiones importantes - este año exige ACCIÓN valiente'
     ],
-
-    eventos_clave_del_anio: [
+    
+    eventos_clave_del_anio: partial.eventos_clave_del_anio || [
       {
-        periodo: "Primer trimestre - ACTIVACIÓN OBLIGATORIA",
-        evento: `ASCENDENTE ${solarAsc} TE RECLAMA`,
-        tipo: "OBLIGACIÓN CÓSMICA",
-        descripcion: "Los primeros 90 días son tu PRUEBA DE FUEGO. Si fallas aquí, el año entero es un desastre.",
-        accion_recomendada: "ESTABLECE tu identidad anual con MANO DE HIERRO. ¿Quién eres en este ciclo?"
+        periodo: 'Mes 1 (Inicio Solar Return)',
+        evento: 'Activación del Ciclo Anual',
+        tipo: 'Iniciación',
+        descripcion: 'Las primeras 4 semanas post-cumpleaños marcan el tono del año completo. Cada acción cuenta DOBLE.',
+        planetas_involucrados: ['Sol SR', 'Ascendente SR'],
+        accion_recomendada: 'Ritual de cumpleaños consciente. Escribir intenciones anuales. Establecer compromiso inquebrantable.'
       },
       {
-        periodo: "Segundo trimestre - CONFRONTACIÓN DIRECTA",
-        evento: "OPOSICIÓN SOLAR - EL ESPEJO BRUTAL",
-        tipo: "DESAFÍO MORTAL",
-        descripcion: "La realidad te golpea. Tus excusas quedan expuestas y destruidas.",
-        accion_recomendada: "REVISA todo. ADAPTA o MUERE. La flexibilidad es tu ÚNICA SALVACIÓN."
+        periodo: 'Mes 3 (Primera Cuadratura Solar)',
+        evento: 'Primer Ajuste de Realidad',
+        tipo: 'Desafío',
+        descripcion: 'Sol transitando 90° desde posición SR. Momento de VERDAD: ¿estás alineado con tus intenciones? La realidad te muestra sin filtros.',
+        accion_recomendada: 'Evaluación brutal de progreso. Ajustar estrategia SIN excusas.'
       },
       {
-        periodo: "Tercer trimestre - DOMINIO Y EXPANSIÓN",
-        evento: "COSECHA DEL PODER GANADO",
-        tipo: "TRIUNFO OBLIGATORIO",
-        descripcion: "Lo que sembraste florece. Momento de ESCALAR sin piedad.",
-        accion_recomendada: `DUPLICA esfuerzos en Casa ${solarSol?.house || 1}. Tu zona de PODER máximo debe ser IMPARABLE.`
+        periodo: 'Mes 6 (Primer Trígono Solar)',
+        evento: 'Flujo y Momentum',
+        tipo: 'Oportunidad',
+        descripcion: 'Sol transitando 120° desde SR. TODO fluye SI hiciste el trabajo. Momento de CAPITALIZAR esfuerzos previos.',
+        accion_recomendada: 'Expansión consciente. Aprovechar ventana de oportunidad con acción decidida.'
       },
       {
-        periodo: "Cuarto trimestre - INTEGRACIÓN FINAL",
-        evento: "PREPARACIÓN PARA EL SIGUIENTE CICLO",
-        tipo: "SABIDURÍA FORZADA",
-        descripcion: "Cierre consciente. DOCUMENTA todo o repites los errores.",
-        accion_recomendada: "Escribe tu carta al futuro YO. ¿Sobreviviste? ¿Evolucionaste?"
+        periodo: 'Mes 7 (Oposición Solar)',
+        evento: 'MOMENTO DE VERDAD DEFINITIVO',
+        tipo: 'Revelación',
+        descripcion: 'Sol opuesto a posición SR (crítico según Louis). VES con claridad TOTAL: ¿funcionó tu estrategia o no? Sin filtros, sin excusas.',
+        accion_recomendada: 'Celebrar logros auténticos. CORREGIR lo que falló. Decisiones DEFINITIVAS para segundo semestre.'
+      },
+      {
+        periodo: 'Mes 9 (Cosecha Visible)',
+        evento: 'Manifestación de Resultados',
+        tipo: 'Culminación',
+        descripcion: 'Frutos de tu trabajo se vuelven VISIBLES. Si trabajaste, cosecharás. Si no, verás el vacío con honestidad brutal.',
+        accion_recomendada: 'Documentar logros tangibles. Capitalizar éxitos. Integrar aprendizajes.'
+      },
+      {
+        periodo: 'Mes 12 (Cierre Pre-Cumpleaños)',
+        evento: 'Integración y Preparación',
+        tipo: 'Transición',
+        descripcion: 'Sol se acerca a posición natal original. Último mes para cerrar ciclos conscientes y preparar siguiente revolución.',
+        accion_recomendada: 'Ritual de cierre. Journaling profundo: ¿Qué aprendí REALMENTE? Gratitud por transformaciones.'
       }
     ],
-
-    insights_transformacionales: [
-      `Ascendente ${solarAsc} no es una máscara, es tu NUEVA PIEL.`,
-      "Casas vacías en Solar Return son TU TERRITORIO VIRGEN. Conquista o quédate estancado.",
-      "Aspectos al Sol Solar Return son tus CÓDIGOS DE ACTIVACIÓN.",
-      "Tu ubicación Solar Return determina si eres REY o ESCLAVO este año."
+    
+    insights_transformacionales: partial.insights_transformacionales || [
+      '💎 Este año NO es ensayo - es tu REVOLUCIÓN PERSONAL real y tangible',
+      '💎 Tu ubicación física durante el Solar Return determina PODER vs limitación - elige conscientemente',
+      '💎 Los primeros 30 días post-cumpleaños marcan el patrón de todo el año - úsalos con intención radical',
+      '💎 La Casa donde cae tu Ascendente SR en carta natal es tu ZONA DE PODER dominante - vive ahí',
+      '💎 No eres víctima de los tránsitos - eres CO-CREADOR consciente de tu experiencia',
+      '💎 Las "crisis" son invitaciones disfrazadas para evolucionar - responde con valentía',
+      '💎 Tu autenticidad sin filtros es tu MAYOR activo este año - deja de esconderte'
     ],
-
-    rituales_recomendados: [
-      "RITUAL DE INICIO: Día exacto cumpleaños - Quema tu carta de 'excusas pasadas'.",
-      `RITUAL LUNAR: Cada Luna Nueva - Conecta con elementos de ${solarAsc}.`,
-      "RITUAL DIARIO: 5 minutos de MEDITACIÓN DE PODER. Visualiza tu dominación del año.",
-      "RITUAL DE CIERRE: 3 días pre-cumpleaños - Escribe sangre, sudor y lágrimas."
-    ]
+    
+    rituales_recomendados: partial.rituales_recomendados || [
+      '🕯️ RITUAL DE INICIO (Día exacto de cumpleaños): Quemar carta de "excusas del año pasado". Escribir declaración de poder anual. Compromiso inquebrantable.',
+      '🌙 RITUAL LUNAR MENSUAL: Cada Luna Nueva - conectar con Casa SR dominante. Establecer micro-intenciones mensuales. Sin piedad, sin excusas.',
+      '☀️ RITUAL DIARIO (5 minutos): Meditación de PODER. Visualizar tu versión más auténtica y exitosa. Sentir la emoción de logros manifestados.',
+      '📝 RITUAL DE EVALUACIÓN (Meses 3, 6, 9): Journaling brutal de honestidad. ¿Qué está funcionando? ¿Qué NO? Ajustar sin apegos emocionales.',
+      '🔥 RITUAL DE CIERRE (3 días pre-cumpleaños): Escribir "Sangre, Sudor y Lágrimas del año". ¿Valió la pena? Integrar TODO antes del siguiente ciclo.'
+    ],
+    
+    integracion_final: partial.integracion_final || {
+      sintesis: `Este año ${returnYear}-${returnYear + 1} es tu LABORATORIO DE TRANSFORMACIÓN CONSCIENTE, ${userName}. No es tiempo de víctimas ni espectadores - es tiempo de PROTAGONISTAS REVOLUCIONARIOS. Cada Luna Nueva es un reinicio. Cada decisión cuenta. Cada acción crea tu realidad. El Solar Return te entrega el MAPA - tú decides si lo sigues con valentía disruptiva o lo ignoras por comodidad mediocre. La astrología no predice - PREPARA. Usa este conocimiento para volverse ANTIFRÁGIL: más fuerte ante cada desafío, más consciente ante cada oportunidad, más auténtico ante cada elección. Tu revolución personal ya comenzó.`,
+      pregunta_reflexion: `¿Qué versión de ti mismo/a elegirás manifestar este año: la VALIENTE y AUTÉNTICA, o la cómoda y conocida?`
+    }
   };
 }
-// ✅ POST HANDLER PRINCIPAL
+
+// ==========================================
+// 🎯 MAIN POST HANDLER
+// ==========================================
+
 export async function POST(request: NextRequest) {
   try {
-    console.log('🌅 Solicitud de interpretación Solar Return recibida');
+    console.log('🌅 ===== SOLAR RETURN INTERPRETATION REQUEST =====');
 
-    const body: SolarReturnRequest = await request.json();
-    const { userId, natalChart, solarReturnChart, userProfile, regenerate = false } = body;
+    const body = await request.json();
+    const { userId, natalChart, solarReturnChart, userProfile, birthData, regenerate = false } = body;
 
-    // ✅ VALIDACIONES
-    if (!userId) {
-      return NextResponse.json({ error: 'userId requerido' }, { status: 400 });
+    // ✅ LOG LOCATION DATA (important for Solar Return accuracy)
+    if (birthData) {
+      console.log('📍 Location data received:', {
+        livesInSamePlace: birthData.livesInSamePlace,
+        birthPlace: birthData.birthPlace,
+        currentPlace: birthData.currentPlace || 'Same as birth',
+        hasCurrentCoordinates: !!(birthData.currentLatitude && birthData.currentLongitude)
+      });
     }
 
-    if (!natalChart || !solarReturnChart) {
-      return NextResponse.json({ error: 'natalChart y solarReturnChart requeridos' }, { status: 400 });
+    // Validation
+    if (!userId || !natalChart || !solarReturnChart) {
+      return NextResponse.json(
+        { error: 'userId, natalChart, and solarReturnChart are required' },
+        { status: 400 }
+      );
     }
 
-    // ✅ VERIFICAR CACHÉ (si no se fuerza regeneración)
+    if (!userProfile || !userProfile.name) {
+      return NextResponse.json(
+        { error: 'Valid userProfile with name is required' },
+        { status: 400 }
+      );
+    }
+
+    // ✅ DETAILED VALIDATION & LOGGING
+    console.log('🔍 ===== VALIDATING INPUT DATA =====');
+    console.log('📋 userProfile received:', {
+      name: userProfile?.name,
+      age: userProfile?.age,
+      birthPlace: userProfile?.birthPlace,
+      birthDate: userProfile?.birthDate,
+      birthTime: userProfile?.birthTime
+    });
+
+    console.log('📊 natalChart data:', {
+      hasPlanets: !!natalChart?.planets,
+      planetsCount: natalChart?.planets?.length,
+      ascendant: natalChart?.ascendant?.sign,
+      houses: natalChart?.houses?.length
+    });
+
+    console.log('📊 solarReturnChart data:', {
+      hasPlanets: !!solarReturnChart?.planets,
+      planetsCount: solarReturnChart?.planets?.length,
+      ascendant: solarReturnChart?.ascendant?.sign,
+      houses: solarReturnChart?.houses?.length,
+      solarReturnYear: solarReturnChart?.solarReturnInfo?.year
+    });
+
+    // ✅ VALIDATION: Reject if critical data missing
+    if (!userProfile?.name || userProfile.name === 'Usuario') {
+      console.error('❌ CRITICAL: Invalid user name');
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid user profile: name is required and cannot be "Usuario"'
+      }, { status: 400 });
+    }
+
+    if (!userProfile?.age || userProfile.age === 0) {
+      console.error('❌ CRITICAL: Invalid user age');
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid user profile: age is required and cannot be 0'
+      }, { status: 400 });
+    }
+
+    if (!natalChart?.planets || natalChart.planets.length === 0) {
+      console.error('❌ CRITICAL: Invalid natal chart');
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid natal chart: planets data missing'
+      }, { status: 400 });
+    }
+
+    if (!solarReturnChart?.planets || solarReturnChart.planets.length === 0) {
+      console.error('❌ CRITICAL: Invalid solar return chart');
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid solar return chart: planets data missing'
+      }, { status: 400 });
+    }
+
+    console.log('✅ All input data validated successfully');
+
+    await connectDB();
+
+    // Check cache (if not forcing regeneration)
     if (!regenerate) {
-      const cached = await checkCache(userId, natalChart, solarReturnChart);
+      console.log('🔍 Checking cache...');
+      
+      const cached = await Interpretation.findOne({
+        userId,
+        chartType: 'solar-return',
+        expiresAt: { $gt: new Date() }
+      })
+      .sort({ generatedAt: -1 })
+      .lean()
+      .exec();
+
       if (cached) {
+        console.log('✅ Cached interpretation found');
+        const cachedObj = Array.isArray(cached) ? cached[0] : cached;
         return NextResponse.json({
           success: true,
-          interpretation: cached.interpretation,
+          interpretation: cachedObj?.interpretation,
           cached: true,
-          generatedAt: cached.generatedAt
+          generatedAt: cachedObj?.generatedAt,
+          method: 'mongodb_cache'
         });
       }
     }
 
-    // ✅ GENERAR INTERPRETACIÓN
-    let interpretation;
+    // Generate new interpretation
+    console.log('🤖 Generating new complete interpretation...');
 
-    try {
-      // Intentar con OpenAI primero
-      interpretation = await generateWithOpenAI(natalChart, solarReturnChart, userProfile);
-    } catch (openaiError) {
-      console.warn('⚠️ OpenAI falló, usando fallback:', openaiError);
-      // Fallback si OpenAI falla
-      interpretation = generateFallback(natalChart, solarReturnChart, userProfile);
+    const returnYear = solarReturnChart?.solarReturnInfo?.year || new Date().getFullYear();
+    let interpretation: CompleteSolarReturnInterpretation;
+
+    // ✅ PREPARE LOCATION DATA FOR INTERPRETATION
+    const locationContext = birthData ? {
+      livesInSamePlace: birthData.livesInSamePlace,
+      birthPlace: birthData.birthPlace,
+      currentPlace: birthData.livesInSamePlace
+        ? birthData.birthPlace
+        : (birthData.currentPlace || birthData.birthPlace),
+      relocated: !birthData.livesInSamePlace,
+      coordinates: {
+        birth: {
+          lat: birthData.latitude,
+          lon: birthData.longitude
+        },
+        current: birthData.livesInSamePlace ? {
+          lat: birthData.latitude,
+          lon: birthData.longitude
+        } : {
+          lat: birthData.currentLatitude || birthData.latitude,
+          lon: birthData.currentLongitude || birthData.longitude
+        }
+      }
+    } : null;
+
+    if (locationContext?.relocated) {
+      console.log('🌍 RELOCATION DETECTED:', {
+        from: locationContext.birthPlace,
+        to: locationContext.currentPlace,
+        distanceNote: 'Solar Return calculated for current location'
+      });
     }
 
-    // ✅ GUARDAR EN CACHÉ
-    const cacheData: CachedInterpretation = {
+    // ✅ GENERAR COMPARACIÓN NATAL vs SR
+    const srComparison = generateSRComparison(natalChart, solarReturnChart);
+
+    console.log('📊 Comparación generada:', {
+      ascSRInNatalHouse: srComparison.ascSRInNatalHouse,
+      planetaryChanges: srComparison.planetaryChanges.length
+    });
+
+    if (process.env.OPENAI_API_KEY) {
+      try {
+        interpretation = await generateCompleteWithOpenAI(
+          natalChart,
+          solarReturnChart,
+          { ...userProfile, locationContext }, // Pass location data
+          returnYear,
+          srComparison // ✅ PASAR COMPARACIÓN
+        );
+      } catch (openaiError) {
+        console.warn('⚠️ OpenAI failed, using complete fallback:', openaiError);
+        interpretation = completeMissingKeys({}, { ...userProfile, locationContext }, returnYear);
+      }
+    } else {
+      console.log('⚠️ No OpenAI API key, using complete fallback');
+      interpretation = completeMissingKeys({}, { ...userProfile, locationContext }, returnYear);
+    }
+
+    // Save to MongoDB
+    console.log('💾 Saving to MongoDB...');
+
+    const savedInterpretation = await Interpretation.create({
       userId,
       chartType: 'solar-return',
       natalChart,
       solarReturnChart,
-      userProfile,
+      userProfile: {
+        name: userProfile.name,
+        age: userProfile.age || 0,
+        birthPlace: userProfile.birthPlace || 'Unknown',
+        birthDate: userProfile.birthDate || 'Unknown',
+        birthTime: userProfile.birthTime || 'Unknown',
+        // ✅ ADD LOCATION CONTEXT TO STORED DATA
+        currentPlace: locationContext?.currentPlace,
+        relocated: locationContext?.relocated || false
+      },
       interpretation,
-      generatedAt: new Date().toISOString(),
-      expiresAt: new Date(Date.now() + CACHE_DURATION)
-    };
+      generatedAt: new Date(),
+      expiresAt: new Date(Date.now() + CACHE_DURATION),
+      method: process.env.OPENAI_API_KEY ? 'openai' : 'fallback',
+      cached: false
+    });
 
-    await saveToCache(cacheData);
+    console.log('✅ Interpretation saved:', savedInterpretation._id);
+    console.log('📊 Sections generated:', Object.keys(interpretation).length);
 
-    // ✅ RESPUESTA EXITOSA
     return NextResponse.json({
       success: true,
       interpretation,
       cached: false,
-      generatedAt: cacheData.generatedAt
+      generatedAt: savedInterpretation.generatedAt,
+      method: savedInterpretation.method
     });
 
   } catch (error) {
-    console.error('❌ Error en endpoint Solar Return:', error);
-
+    console.error('❌ Error in Solar Return interpretation:', error);
+    
     return NextResponse.json({
-      error: 'Error interno del servidor',
-      details: error instanceof Error ? error.message : 'Error desconocido'
+      success: false,
+      error: 'Failed to generate interpretation',
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }
 
-// ✅ GET HANDLER PARA TESTING
-export async function GET() {
-  return NextResponse.json({
-    message: 'Endpoint Solar Return Interpretation',
-    status: 'active',
-    cacheDuration: `${CACHE_DURATION / (1000 * 60 * 60)} horas`
-  });
+// ==========================================
+// 📖 GET: RETRIEVE EXISTING INTERPRETATION
+// ==========================================
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'userId is required' },
+        { status: 400 }
+      );
+    }
+
+    await connectDB();
+
+    const interpretationDoc = await Interpretation.findOne({
+      userId,
+      chartType: 'solar-return',
+      expiresAt: { $gt: new Date() }
+    })
+    .sort({ generatedAt: -1 })
+    .lean()
+    .exec();
+
+    if (!interpretationDoc) {
+      return NextResponse.json({
+        success: false,
+        message: 'No Solar Return interpretation available'
+      }, { status: 404 });
+    }
+
+    // Handle case where interpretationDoc could be an array
+    const doc = Array.isArray(interpretationDoc) ? interpretationDoc[0] : interpretationDoc;
+
+    return NextResponse.json({
+      success: true,
+      interpretation: doc?.interpretation,
+      cached: true,
+      generatedAt: doc?.generatedAt,
+      method: 'mongodb_cached'
+    });
+
+  } catch (error) {
+    console.error('❌ Error retrieving Solar Return:', error);
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to retrieve interpretation'
+    }, { status: 500 });
+  }
 }

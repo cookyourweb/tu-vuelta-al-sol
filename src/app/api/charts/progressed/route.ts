@@ -99,230 +99,76 @@ function calculateProgressionPeriod(birthDate: Date) {
   };
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
+  console.log('🔍 [SOLAR RETURN] GET - Iniciando búsqueda');
+  
   try {
-    await connectDB();
-
     const { searchParams } = new URL(request.url);
-    const uid = searchParams.get('uid') || searchParams.get('userId');
-    const forceRegenerate = searchParams.get('force') === 'true';
+    const userId = searchParams.get('userId');
 
-    if (!uid) {
-      return NextResponse.json({
-        success: false,
-        error: 'UID requerido'
+    if (!userId) {
+      console.error('❌ [SOLAR RETURN] GET - userId faltante');
+      return NextResponse.json({ 
+        success: false, 
+        error: 'userId es requerido' 
       }, { status: 400 });
     }
 
-    console.log('🔍 [SOLAR RETURN] Buscando datos para UID:', uid);
-    console.log('🔄 [SOLAR RETURN] Force regenerate:', forceRegenerate);
+    console.log('🔍 [SOLAR RETURN] GET - Buscando para userId:', userId);
 
-    // Buscar datos de nacimiento
-    const birthDataRaw = await BirthData.findOne({
-      $or: [
-        { uid: uid },
-        { userId: uid }
-      ]
-    }).lean();
+    await connectDB();
 
-    console.log('🔍 [SOLAR RETURN] Resultado búsqueda BirthData:', {
-      encontrado: !!birthDataRaw,
-      campos: birthDataRaw ? Object.keys(birthDataRaw) : [],
-      userId: (birthDataRaw as any)?.userId,
-      uid: (birthDataRaw as any)?.uid
-    });
+    const solarReturn = await Chart.findOne({
+      userId,
+      solarReturnChart: { $exists: true }
+    }).sort({ createdAt: -1 });
 
-    const birthData = castBirthData(birthDataRaw);
-
-    if (!birthData) {
-      return NextResponse.json({
-        success: false,
-        error: 'No se encontraron datos de nacimiento para UID: ' + uid
+    if (!solarReturn) {
+      console.log('❌ [SOLAR RETURN] GET - No encontrado (404)');
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Solar Return no encontrado' 
       }, { status: 404 });
     }
 
-    // Validar campos requeridos
-    const requiredFields = ['birthDate', 'latitude', 'longitude'];
-    const missingFields = requiredFields.filter(field => !birthData[field as keyof typeof birthData]);
-
-    if (missingFields.length > 0) {
-      return NextResponse.json({
-        success: false,
-        error: 'Datos de nacimiento incompletos',
-        missingFields: missingFields
-      }, { status: 400 });
-    }
-
-    console.log('✅ [SOLAR RETURN] BirthData válido encontrado:', {
-      id: birthData._id?.toString(),
-      fullName: birthData.fullName,
-      birthPlace: birthData.birthPlace
+    console.log('✅ [SOLAR RETURN] GET - Encontrado:', {
+      _id: solarReturn._id,
+      hasSolarReturnChart: !!solarReturn.solarReturnChart,
+      planetsCount: solarReturn.solarReturnChart?.planets?.length,
+      hasAscendant: !!solarReturn.solarReturnChart?.ascendant,
+      ascendantSign: solarReturn.solarReturnChart?.ascendant?.sign
     });
 
-    // Calcular período de progresión
-    const birthDateObj = birthData.birthDate instanceof Date
-      ? birthData.birthDate
-      : new Date(birthData.birthDate);
-
-    const progressionPeriod = calculateProgressionPeriod(birthDateObj);
-
-    console.log('📅 [SOLAR RETURN] Período calculado:', {
-      edad: progressionPeriod.currentAge,
-      año: progressionPeriod.startYear,
-      período: progressionPeriod.period
-    });
-
-    // Buscar carta existente (solo si no es force regenerate)
-    let existingChart;
-    if (!forceRegenerate) {
-      existingChart = await Chart.findOne({
-        $or: [
-          { userId: uid },
-          { uid: uid }
-        ]
-      });
-
-      if (existingChart?.progressedChart) {
-        console.log('✅ [SOLAR RETURN] Carta progresada existente encontrada (no force)');
-
-        return NextResponse.json({
-          success: true,
-          data: {
-            progressedChart: existingChart.progressedChart,
-            period: {
-              from: `Cumpleaños ${progressionPeriod.currentAge}`,
-              to: `Cumpleaños ${progressionPeriod.currentAge + 1}`,
-              solarYear: progressionPeriod.startYear,
-              description: progressionPeriod.description
-            },
-            source: 'existing',
-            age: progressionPeriod.currentAge,
-            metadata: {
-              birthPlace: birthData.birthPlace,
-              fullName: birthData.fullName,
-              generatedAt: new Date().toISOString()
-            }
-          }
-        });
-      }
-    } else {
-      // Si es force regenerate, buscar la carta existente para actualizarla
-      existingChart = await Chart.findOne({
-        $or: [
-          { userId: uid },
-          { uid: uid }
-        ]
-      });
-    }
-
-    // Si no existe, generar automáticamente
-    console.log('🔄 [SOLAR RETURN] Generando nueva carta Solar Return...');
-
-    let progressedData;
-
-    try {
-      // Llamar directamente a Prokerala API con endpoint correcto
-      const prokeralaResult = await callProkeralaProgressed(birthData, progressionPeriod);
-
-      if (prokeralaResult.success) {
-        progressedData = processProgressedResponse(prokeralaResult.data, progressionPeriod);
-
-        console.log('🔍 [PROGRESADA] Respuesta cruda de Prokerala:');
-        console.log(JSON.stringify(prokeralaResult.data, null, 2));
-        console.log('🔄 [PROGRESADA] Datos procesados:');
-        console.log(JSON.stringify(progressedData, null, 2));
-      } else {
-        throw new Error(prokeralaResult.error || 'Error llamando API Prokerala');
-      }
-
-      // Validación y mejora de datos
-      if (progressedData) {
-        progressedData.generatedAt = new Date().toISOString();
-        progressedData.isMockData = false;
-        progressedData.progressionPeriod = progressionPeriod;
-      }
-
-    } catch (generationError) {
-      console.log('⚠️ [SOLAR RETURN] Usando datos de fallback:', generationError);
-      progressedData = generateSolarReturnFallback(progressionPeriod);
-    }
-
-    // Guardar o actualizar carta
-    try {
-      if (existingChart) {
-        console.log('🔄 [SOLAR RETURN] Actualizando carta existente');
-
-        await existingChart.addOrUpdateProgressedChart({
-          period: progressionPeriod.period,
-          year: progressionPeriod.startYear,
-          startDate: progressionPeriod.startDate,
-          endDate: progressionPeriod.endDate,
-          chart: progressedData
-        });
-
-        existingChart.progressedChart = progressedData;
-        existingChart.lastUpdated = new Date();
-
-        await existingChart.save();
-        console.log('💾 [SOLAR RETURN] Carta actualizada correctamente');
-      } else {
-        console.log('🆕 [SOLAR RETURN] Creando nueva carta');
-
-        const newChart = new Chart({
-          userId: uid,
-          uid: uid,
-          birthDataId: birthData._id,
-          chartType: 'solar_return',
-          natalChart: {},
-          progressedCharts: [{
-            period: progressionPeriod.period,
-            year: progressionPeriod.startYear,
-            startDate: progressionPeriod.startDate,
-            endDate: progressionPeriod.endDate,
-            chart: progressedData,
-            isActive: true,
-            createdAt: new Date()
-          }],
-          progressedChart: progressedData,
-          lastUpdated: new Date()
-        });
-
-        await newChart.save();
-        console.log('💾 [SOLAR RETURN] Nueva carta guardada correctamente');
-      }
-    } catch (saveError) {
-      console.log('⚠️ [SOLAR RETURN] Error guardando/actualizando (continuando):', saveError);
-    }
-
-    return NextResponse.json({
+    // ✅ DEVOLVER EN FORMATO CORRECTO (IGUAL QUE POST)
+    const response = {
       success: true,
-      data: {
-        progressedChart: progressedData,
-        period: {
-          from: `Cumpleaños ${progressionPeriod.currentAge}`,
-          to: `Cumpleaños ${progressionPeriod.currentAge + 1}`,
-          solarYear: progressionPeriod.startYear,
-          description: progressionPeriod.description
-        },
-        source: progressedData.isMockData ? 'mock' : 'prokerala',
-        age: progressionPeriod.currentAge,
-        regenerated: forceRegenerate,
-        metadata: {
-          birthPlace: birthData.birthPlace,
-          fullName: birthData.fullName,
-          generatedAt: new Date().toISOString()
-        }
-      }
+      solarReturnChart: {
+        planets: solarReturn.solarReturnChart?.planets || [],
+        houses: solarReturn.solarReturnChart?.houses || [],
+        ascendant: solarReturn.solarReturnChart?.ascendant,
+        aspects: solarReturn.solarReturnChart?.aspects || [],
+        solarReturnInfo: solarReturn.solarReturnChart?.solarReturnInfo
+      },
+      natalChart: solarReturn.natalChart,
+      solarReturnInfo: solarReturn.solarReturnChart?.solarReturnInfo
+    };
+
+    console.log('📦 [SOLAR RETURN] GET - Respuesta preparada:', {
+      success: response.success,
+      hasSolarReturnChart: !!response.solarReturnChart,
+      planetsCount: response.solarReturnChart.planets?.length,
+      ascendant: response.solarReturnChart.ascendant?.sign
     });
+
+    console.log('✅ [SOLAR RETURN] GET - Devolviendo respuesta');
+
+    return NextResponse.json(response);
 
   } catch (error) {
-    console.error('❌ [SOLAR RETURN] Error crítico:', error);
-
-    return NextResponse.json({
-      success: false,
-      error: 'Error interno del servidor',
-      details: error instanceof Error ? error.message : 'Error desconocido',
-      stack: error instanceof Error ? error.stack : undefined
+    console.error('❌ [SOLAR RETURN] GET - Error:', error);
+    return NextResponse.json({ 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Error desconocido' 
     }, { status: 500 });
   }
 }
@@ -434,15 +280,8 @@ export async function POST(request: NextRequest) {
       if (existingChart) {
         console.log('🔄 [SOLAR RETURN] POST - Actualizando carta existente');
 
-        await existingChart.addOrUpdateProgressedChart({
-          period: progressionPeriod.period,
-          year: progressionPeriod.startYear,
-          startDate: progressionPeriod.startDate,
-          endDate: progressionPeriod.endDate,
-          chart: progressedData
-        });
-
-        existingChart.progressedChart = progressedData;
+        // Guardar como Solar Return Chart
+        existingChart.solarReturnChart = progressedData;
         existingChart.lastUpdated = new Date();
 
         await existingChart.save();
@@ -456,47 +295,52 @@ export async function POST(request: NextRequest) {
           birthDataId: birthData._id,
           chartType: 'solar_return',
           natalChart: {},
-          progressedCharts: [{
-            period: progressionPeriod.period,
-            year: progressionPeriod.startYear,
-            startDate: progressionPeriod.startDate,
-            endDate: progressionPeriod.endDate,
-            chart: progressedData,
-            isActive: true,
-            createdAt: new Date()
-          }],
-          progressedChart: progressedData,
+          solarReturnChart: progressedData,
           lastUpdated: new Date()
         });
 
         await newChart.save();
         console.log('💾 [SOLAR RETURN] POST - Nueva carta guardada correctamente');
       }
-    } catch (saveError) {
-      console.log('⚠️ [SOLAR RETURN] POST - Error guardando/actualizando (continuando):', saveError);
-    }
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        progressedChart: progressedData,
-        period: {
-          from: `Cumpleaños ${progressionPeriod.currentAge}`,
-          to: `Cumpleaños ${progressionPeriod.currentAge + 1}`,
-          solarYear: progressionPeriod.startYear,
-          description: progressionPeriod.description
+      // ✅ RESPUESTA FINAL (MISMO FORMATO QUE GET)
+      console.log('✅ [SOLAR RETURN] POST - Devolviendo respuesta final');
+
+      const isUpdate = !!existingChart;
+      const savedSolarReturn = progressedData;
+
+      const finalResponse = {
+        success: true,
+        message: isUpdate ? 'Carta actualizada' : 'Carta creada',
+        solarReturnChart: {
+          planets: savedSolarReturn.planets || [],
+          houses: savedSolarReturn.houses || [],
+          ascendant: savedSolarReturn.ascendant,
+          aspects: savedSolarReturn.aspects || [],
+          solarReturnInfo: savedSolarReturn.progressionInfo
         },
-        source: progressedData.isMockData ? 'mock' : 'prokerala',
-        age: progressionPeriod.currentAge,
-        metadata: {
-          birthPlace: birthData.birthPlace,
-          fullName: birthData.fullName,
-          generatedAt: new Date().toISOString(),
-          isRegenerated: true
-        }
-      }
-    });
+        natalChart: {},
+        solarReturnInfo: savedSolarReturn.progressionInfo
+      };
 
+      console.log('📦 [SOLAR RETURN] POST - Respuesta final estructura:', {
+        success: finalResponse.success,
+        hasSolarReturnChart: !!finalResponse.solarReturnChart,
+        planetsCount: finalResponse.solarReturnChart.planets?.length,
+        ascendant: finalResponse.solarReturnChart.ascendant?.sign,
+        hasNatalChart: !!finalResponse.natalChart
+      });
+
+      return NextResponse.json(finalResponse);
+
+    } catch (error) {
+      console.error('❌ [SOLAR RETURN] POST - Error al guardar carta:', error);
+      return NextResponse.json({
+        success: false,
+        error: 'Error al guardar la carta',
+        details: error instanceof Error ? error.message : 'Error desconocido'
+      }, { status: 500 });
+    }
   } catch (error) {
     console.error('❌ [SOLAR RETURN] POST - Error crítico:', error);
 

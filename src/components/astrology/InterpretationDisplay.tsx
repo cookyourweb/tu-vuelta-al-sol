@@ -1,368 +1,415 @@
-// src/components/astrology/InterpretationDisplay.tsx
-// ✅ VERSIÓN MEJORADA CON TODOS LOS PLANETAS
-
-'use client';
+// src/components/astrology/InterpretationDisplay.tsx (versión COMPLETA)
+// 🔥 DISPLAY ÉPICO PARA SOLAR RETURN CON TODAS LAS SECCIONES
 
 import React, { useState } from 'react';
-import { X, Download, RefreshCw, ShoppingCart, ChevronDown, ChevronUp } from 'lucide-react';
+import { 
+  Star, Sparkles, Zap, Calendar, AlertTriangle, 
+  Target, TrendingUp, Moon, Sun, ChevronDown, ChevronUp
+} from 'lucide-react';
 
-interface PlanetInterpretation {
-  titulo: string;
-  descripcion: string;
-  poder_especifico: string;
-  accion_inmediata?: string;
-  ritual?: string;
-}
-
-interface InterpretationData {
-  esencia_revolucionaria: string;
-  proposito_vida: string;
-  planetas?: {
-    sol?: PlanetInterpretation;
-    luna?: PlanetInterpretation;
-    mercurio?: PlanetInterpretation;
-    venus?: PlanetInterpretation;
-    marte?: PlanetInterpretation;
-    jupiter?: PlanetInterpretation;
-    saturno?: PlanetInterpretation;
-    urano?: PlanetInterpretation;
-    neptuno?: PlanetInterpretation;
-    pluton?: PlanetInterpretation;
-  };
-  declaracion_poder?: string;
-  plan_accion?: {
-    hoy_mismo?: string[];
-    esta_semana?: string[];
-    este_mes?: string[];
-  };
+interface CompleteSolarReturnInterpretation {
+  esencia_revolucionaria_anual: string;
+  proposito_vida_anual: string;
+  tema_central_del_anio: string;
+  analisis_tecnico_profesional?: any;
+  plan_accion?: any;
+  calendario_lunar_anual?: any[];
+  declaracion_poder_anual?: string;
   advertencias?: string[];
+  eventos_clave_del_anio?: any[];
   insights_transformacionales?: string[];
   rituales_recomendados?: string[];
+  integracion_final?: any;
 }
 
-interface InterpretationDisplayProps {
-  data: InterpretationData;
-  onClose: () => void;
-  onRegenerate?: () => void;
-  onPurchase?: () => void;
-  isFullVersion?: boolean;
+interface Props {
+  interpretation: CompleteSolarReturnInterpretation;
+  chartType: 'natal' | 'solar-return' | 'progressed';
 }
 
-export default function InterpretationDisplay({
-  data,
-  onClose,
-  onRegenerate,
-  onPurchase,
-  isFullVersion = false
-}: InterpretationDisplayProps) {
-  const [expandedPlanets, setExpandedPlanets] = useState<Set<string>>(new Set(['sol', 'luna']));
+export default function InterpretationDisplayComplete({ interpretation, chartType }: Props) {
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(
+    new Set(['esencia', 'proposito'])
+  );
 
-  const togglePlanet = (planet: string) => {
-    setExpandedPlanets(prev => {
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(planet)) {
-        newSet.delete(planet);
+      if (newSet.has(section)) {
+        newSet.delete(section);
       } else {
-        newSet.add(planet);
+        newSet.add(section);
       }
       return newSet;
     });
   };
 
-  const handleDownloadPDF = () => {
-    // TODO: Implementar generación PDF
-    alert('Generación de PDF disponible próximamente. Instalar librería: npm install jspdf html2canvas');
-  };
+  if (chartType !== 'solar-return') {
+    return <div className="text-white">Display solo para Solar Return por ahora</div>;
+  }
 
-  const planetsOrder = [
-    { key: 'sol', icon: '☉' },
-    { key: 'luna', icon: '☽' },
-    { key: 'mercurio', icon: '☿' },
-    { key: 'venus', icon: '♀' },
-    { key: 'marte', icon: '♂' },
-    { key: 'jupiter', icon: '♃' },
-    { key: 'saturno', icon: '♄' },
-    { key: 'urano', icon: '♅' },
-    { key: 'neptuno', icon: '♆' },
-    { key: 'pluton', icon: '♇' }
-  ];
+  const i = interpretation;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="relative w-full max-w-5xl max-h-[90vh] bg-gradient-to-br from-purple-900 via-indigo-900 to-black rounded-2xl shadow-2xl overflow-hidden">
-        
-        {/* ✅ HEADER CON MENÚ NUEVO */}
-        <div className="sticky top-0 z-10 bg-gradient-to-r from-purple-800 to-indigo-800 px-6 py-4 flex items-center justify-between border-b border-white/10">
-          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            <span className="text-3xl">🌟</span>
-            Tu Interpretación Astrológica
-          </h2>
-          
-          <div className="flex items-center gap-2">
-            {/* ✅ BOTÓN REGENERAR */}
-            {onRegenerate && (
-              <button
-                onClick={onRegenerate}
-                className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors text-sm font-medium"
-                title="Regenerar interpretación"
-              >
-                <RefreshCw className="w-4 h-4" />
-                <span className="hidden sm:inline">Regenerar</span>
-              </button>
-            )}
-            
-            {/* ✅ BOTÓN PDF */}
-            <button
-              onClick={handleDownloadPDF}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors text-sm font-medium"
-              title="Descargar PDF"
-            >
-              <Download className="w-4 h-4" />
-              <span className="hidden sm:inline">PDF</span>
-            </button>
-            
-            {/* ✅ BOTÓN COMPRAR (placeholder) */}
-            {!isFullVersion && onPurchase && (
-              <button
-                onClick={() => alert('Sistema de pagos disponible próximamente. Fase 3: Septiembre 2025')}
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 rounded-lg transition-colors text-sm font-medium"
-                title="Comprar versión completa"
-              >
-                <ShoppingCart className="w-4 h-4" />
-                <span className="hidden sm:inline">Comprar</span>
-              </button>
-            )}
-            
-            {/* ✅ BOTÓN CERRAR */}
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-              title="Cerrar"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+    <div className="space-y-6">
+      
+      {/* 🌟 ESENCIA REVOLUCIONARIA */}
+      <Section
+        title="Tu Esencia Revolucionaria Anual"
+        icon={<Star className="w-6 h-6" />}
+        isExpanded={expandedSections.has('esencia')}
+        onToggle={() => toggleSection('esencia')}
+        gradient="from-purple-900/40 to-pink-900/40"
+      >
+        <p className="text-purple-50 text-lg leading-relaxed font-medium">
+          {i.esencia_revolucionaria_anual}
+        </p>
+      </Section>
+
+      {/* 🎯 PROPÓSITO DE VIDA ANUAL */}
+      <Section
+        title="Tu Propósito de Vida Este Año"
+        icon={<Target className="w-6 h-6" />}
+        isExpanded={expandedSections.has('proposito')}
+        onToggle={() => toggleSection('proposito')}
+        gradient="from-blue-900/40 to-cyan-900/40"
+      >
+        <p className="text-blue-50 text-lg leading-relaxed">
+          {i.proposito_vida_anual}
+        </p>
+      </Section>
+
+      {/* 🔥 TEMA CENTRAL */}
+      <Section
+        title="Tema Central del Año"
+        icon={<Zap className="w-6 h-6" />}
+        isExpanded={expandedSections.has('tema')}
+        onToggle={() => toggleSection('tema')}
+        gradient="from-orange-900/40 to-red-900/40"
+      >
+        <div className="text-orange-50">
+          <h3 className="text-2xl font-bold mb-4">{i.tema_central_del_anio}</h3>
+          <p className="text-lg">
+            Este será tu hilo conductor durante los próximos 12 meses.
+          </p>
         </div>
+      </Section>
 
-        {/* ✅ CONTENIDO SCROLLABLE */}
-        <div className="overflow-y-auto max-h-[calc(90vh-80px)] p-6 custom-scrollbar">
-          
-          {/* ESENCIA REVOLUCIONARIA */}
-          <section className="mb-8 p-6 bg-gradient-to-r from-purple-800/50 to-pink-800/50 rounded-xl border border-purple-500/30">
-            <h3 className="text-2xl font-bold mb-4 text-yellow-300">✨ Tu Esencia Revolucionaria</h3>
-            <p className="text-lg leading-relaxed text-white/90">{data.esencia_revolucionaria}</p>
-          </section>
+      {/* 📊 ANÁLISIS TÉCNICO PROFESIONAL */}
+      {i.analisis_tecnico_profesional && (
+        <Section
+          title="Análisis Técnico Profesional"
+          icon={<TrendingUp className="w-6 h-6" />}
+          isExpanded={expandedSections.has('tecnico')}
+          onToggle={() => toggleSection('tecnico')}
+          gradient="from-green-900/40 to-emerald-900/40"
+        >
+          <div className="space-y-4 text-green-50">
+            {/* ASC SR en Casa Natal */}
+            {i.analisis_tecnico_profesional.asc_sr_en_casa_natal && (
+              <div className="p-4 bg-green-950/30 rounded-lg">
+                <h4 className="font-bold text-lg mb-2">
+                  🔑 Ascendente Solar Return en Casa {i.analisis_tecnico_profesional.asc_sr_en_casa_natal.casa} Natal
+                </h4>
+                <p className="text-sm mb-2">
+                  <strong>Signo:</strong> {i.analisis_tecnico_profesional.asc_sr_en_casa_natal.signo_asc_sr}
+                </p>
+                <p className="mb-2">{i.analisis_tecnico_profesional.asc_sr_en_casa_natal.significado}</p>
+                <p className="text-sm italic">
+                  Área de vida dominante: {i.analisis_tecnico_profesional.asc_sr_en_casa_natal.area_vida_dominante}
+                </p>
+              </div>
+            )}
 
-          {/* PROPÓSITO DE VIDA */}
-          <section className="mb-8 p-6 bg-gradient-to-r from-blue-800/50 to-purple-800/50 rounded-xl border border-blue-500/30">
-            <h3 className="text-2xl font-bold mb-4 text-cyan-300">🎯 Tu Propósito de Vida</h3>
-            <p className="text-lg leading-relaxed text-white/90">{data.proposito_vida}</p>
-          </section>
+            {/* Sol en Casa SR */}
+            {i.analisis_tecnico_profesional.sol_en_casa_sr && (
+              <div className="p-4 bg-yellow-950/30 rounded-lg">
+                <h4 className="font-bold text-lg mb-2">
+                  ☀️ Sol en Casa {i.analisis_tecnico_profesional.sol_en_casa_sr.casa} de Solar Return
+                </h4>
+                <p>{i.analisis_tecnico_profesional.sol_en_casa_sr.significado}</p>
+              </div>
+            )}
 
-          {/* ✅ PLANETAS - SECCIÓN EXPANDIBLE */}
-          {data.planetas && (
-            <section className="mb-8">
-              <h3 className="text-3xl font-bold mb-6 text-white flex items-center gap-3">
-                <span>🪐</span>
-                Tus Planetas: Tu Arquitectura Cósmica
-              </h3>
-              
-              <div className="space-y-4">
-                {planetsOrder.map(({ key, icon }) => {
-                  const planet = data.planetas?.[key as keyof typeof data.planetas];
-                  if (!planet) return null;
-
-                  const isExpanded = expandedPlanets.has(key);
-
-                  return (
-                    <div 
-                      key={key}
-                      className="bg-gradient-to-r from-indigo-900/50 to-purple-900/50 rounded-xl border border-indigo-500/30 overflow-hidden transition-all"
-                    >
-                      {/* HEADER CLICKEABLE */}
-                      <button
-                        onClick={() => togglePlanet(key)}
-                        className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/5 transition-colors text-left"
-                      >
-                        <h4 className="text-xl font-bold text-white flex items-center gap-3">
-                          <span className="text-2xl">{icon}</span>
-                          {planet.titulo}
-                        </h4>
-                        {isExpanded ? (
-                          <ChevronUp className="w-5 h-5 text-white/60" />
-                        ) : (
-                          <ChevronDown className="w-5 h-5 text-white/60" />
-                        )}
-                      </button>
-
-                      {/* CONTENIDO EXPANDIBLE */}
-                      {isExpanded && (
-                        <div className="px-6 pb-6 space-y-4">
-                          {/* Descripción */}
-                          <div>
-                            <h5 className="text-sm font-semibold text-purple-300 mb-2">Interpretación</h5>
-                            <p className="text-white/90 leading-relaxed">{planet.descripcion}</p>
-                          </div>
-
-                          {/* Poder Específico */}
-                          {planet.poder_especifico && (
-                            <div className="bg-purple-800/30 p-4 rounded-lg border-l-4 border-yellow-400">
-                              <h5 className="text-sm font-semibold text-yellow-300 mb-2">💫 Tu Poder Único</h5>
-                              <p className="text-white/90">{planet.poder_especifico}</p>
-                            </div>
-                          )}
-
-                          {/* Acción Inmediata */}
-                          {planet.accion_inmediata && (
-                            <div className="bg-green-800/30 p-4 rounded-lg border-l-4 border-green-400">
-                              <h5 className="text-sm font-semibold text-green-300 mb-2">⚡ Acción para Hoy</h5>
-                              <p className="text-white/90">{planet.accion_inmediata}</p>
-                            </div>
-                          )}
-
-                          {/* Ritual */}
-                          {planet.ritual && (
-                            <div className="bg-pink-800/30 p-4 rounded-lg border-l-4 border-pink-400">
-                              <h5 className="text-sm font-semibold text-pink-300 mb-2">🔮 Ritual Recomendado</h5>
-                              <p className="text-white/90">{planet.ritual}</p>
-                            </div>
-                          )}
-                        </div>
-                      )}
+            {/* Planetas Angulares */}
+            {i.analisis_tecnico_profesional.planetas_angulares_sr?.length > 0 && (
+              <div className="p-4 bg-purple-950/30 rounded-lg">
+                <h4 className="font-bold text-lg mb-3">⚡ Planetas Angulares (Poder Dominante)</h4>
+                <div className="space-y-2">
+                  {i.analisis_tecnico_profesional.planetas_angulares_sr.map((p: any, idx: number) => (
+                    <div key={idx} className="border-l-2 border-purple-400 pl-3">
+                      <p className="font-semibold">{p.planeta} en {p.posicion}</p>
+                      <p className="text-sm">{p.impacto}</p>
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
-            </section>
-          )}
+            )}
 
-          {/* DECLARACIÓN DE PODER */}
-          {data.declaracion_poder && (
-            <section className="mb-8 p-6 bg-gradient-to-r from-yellow-800/50 to-orange-800/50 rounded-xl border border-yellow-500/30">
-              <h3 className="text-2xl font-bold mb-4 text-yellow-200">💎 Tu Declaración de Poder</h3>
-              <p className="text-xl leading-relaxed text-white font-semibold italic">"{data.declaracion_poder}"</p>
-              <p className="text-sm text-white/70 mt-3">Repite esta declaración cada mañana para activar tu poder.</p>
-            </section>
-          )}
-
-          {/* PLAN DE ACCIÓN */}
-          {data.plan_accion && (
-            <section className="mb-8">
-              <h3 className="text-3xl font-bold mb-6 text-white flex items-center gap-3">
-                <span>⚡</span>
-                Tu Plan de Acción
-              </h3>
-              
-              <div className="grid md:grid-cols-3 gap-4">
-                {/* Hoy Mismo */}
-                {data.plan_accion.hoy_mismo && (
-                  <div className="bg-red-900/30 p-5 rounded-xl border border-red-500/30">
-                    <h4 className="text-lg font-bold text-red-300 mb-3">🔥 Hoy Mismo</h4>
-                    <ul className="space-y-2">
-                      {data.plan_accion.hoy_mismo.map((accion, i) => (
-                        <li key={i} className="text-white/90 text-sm flex items-start gap-2">
-                          <span className="text-red-400 mt-1">•</span>
-                          <span>{accion}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Esta Semana */}
-                {data.plan_accion.esta_semana && (
-                  <div className="bg-orange-900/30 p-5 rounded-xl border border-orange-500/30">
-                    <h4 className="text-lg font-bold text-orange-300 mb-3">📅 Esta Semana</h4>
-                    <ul className="space-y-2">
-                      {data.plan_accion.esta_semana.map((accion, i) => (
-                        <li key={i} className="text-white/90 text-sm flex items-start gap-2">
-                          <span className="text-orange-400 mt-1">•</span>
-                          <span>{accion}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Este Mes */}
-                {data.plan_accion.este_mes && (
-                  <div className="bg-green-900/30 p-5 rounded-xl border border-green-500/30">
-                    <h4 className="text-lg font-bold text-green-300 mb-3">🌙 Este Mes</h4>
-                    <ul className="space-y-2">
-                      {data.plan_accion.este_mes.map((accion, i) => (
-                        <li key={i} className="text-white/90 text-sm flex items-start gap-2">
-                          <span className="text-green-400 mt-1">•</span>
-                          <span>{accion}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+            {/* Aspectos Cruzados */}
+            {i.analisis_tecnico_profesional.aspectos_cruzados_natal_sr?.length > 0 && (
+              <div className="p-4 bg-blue-950/30 rounded-lg">
+                <h4 className="font-bold text-lg mb-3">🔄 Aspectos Natal vs Solar Return</h4>
+                <div className="space-y-2">
+                  {i.analisis_tecnico_profesional.aspectos_cruzados_natal_sr.map((a: any, idx: number) => (
+                    <div key={idx} className="text-sm">
+                      <p>
+                        <strong>{a.planeta_natal} (Natal)</strong> {a.aspecto} 
+                        <strong> {a.planeta_sr} (SR)</strong> 
+                        {a.orbe && ` | Orbe: ${a.orbe}°`}
+                      </p>
+                      <p className="text-blue-200 italic">{a.significado}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </section>
-          )}
-
-          {/* ADVERTENCIAS */}
-          {data.advertencias && data.advertencias.length > 0 && (
-            <section className="mb-8 p-6 bg-gradient-to-r from-red-900/50 to-orange-900/50 rounded-xl border border-red-500/30">
-              <h3 className="text-2xl font-bold mb-4 text-red-300">⚠️ Advertencias Importantes</h3>
-              <ul className="space-y-3">
-                {data.advertencias.map((advertencia, i) => (
-                  <li key={i} className="text-white/90 flex items-start gap-3">
-                    <span className="text-red-400 text-xl mt-1">⚠</span>
-                    <span>{advertencia}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {/* INSIGHTS TRANSFORMACIONALES */}
-          {data.insights_transformacionales && data.insights_transformacionales.length > 0 && (
-            <section className="mb-8 p-6 bg-gradient-to-r from-cyan-900/50 to-blue-900/50 rounded-xl border border-cyan-500/30">
-              <h3 className="text-2xl font-bold mb-4 text-cyan-300">💡 Insights Transformacionales</h3>
-              <ul className="space-y-3">
-                {data.insights_transformacionales.map((insight, i) => (
-                  <li key={i} className="text-white/90 flex items-start gap-3">
-                    <span className="text-cyan-400 text-xl mt-1">💡</span>
-                    <span>{insight}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {/* RITUALES RECOMENDADOS */}
-          {data.rituales_recomendados && data.rituales_recomendados.length > 0 && (
-            <section className="mb-8 p-6 bg-gradient-to-r from-purple-900/50 to-pink-900/50 rounded-xl border border-purple-500/30">
-              <h3 className="text-2xl font-bold mb-4 text-purple-300">🔮 Rituales Recomendados</h3>
-              <ul className="space-y-3">
-                {data.rituales_recomendados.map((ritual, i) => (
-                  <li key={i} className="text-white/90 flex items-start gap-3">
-                    <span className="text-purple-400 text-xl mt-1">🔮</span>
-                    <span>{ritual}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {/* FOOTER CON LLAMADO A LA ACCIÓN */}
-          <div className="mt-8 p-6 bg-gradient-to-r from-indigo-800/50 to-purple-800/50 rounded-xl border border-indigo-500/30 text-center">
-            <p className="text-white/80 mb-4">
-              ✨ Esta es tu brújula cósmica. Úsala para navegar tu poder único.
-            </p>
-            {!isFullVersion && (
-              <button
-                onClick={() => alert('Sistema de pagos disponible próximamente. Fase 3: Septiembre 2025')}
-                className="px-8 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 rounded-full font-bold text-lg transition-all transform hover:scale-105"
-              >
-                Desbloquear Versión Completa 💎
-              </button>
             )}
           </div>
+        </Section>
+      )}
+
+      {/* 📅 PLAN DE ACCIÓN TRIMESTRAL */}
+      {i.plan_accion && (
+        <Section
+          title="Plan de Acción Trimestral"
+          icon={<Calendar className="w-6 h-6" />}
+          isExpanded={expandedSections.has('plan')}
+          onToggle={() => toggleSection('plan')}
+          gradient="from-indigo-900/40 to-purple-900/40"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[1, 2, 3, 4].map(t => {
+              const trimestre = i.plan_accion[`trimestre_${t}` as keyof typeof i.plan_accion];
+              if (!trimestre) return null;
+              
+              return (
+                <div key={t} className="p-4 bg-indigo-950/40 rounded-lg border border-indigo-500/30">
+                  <h4 className="font-bold text-indigo-200 mb-2">Trimestre {t}</h4>
+                  <p className="text-indigo-100 font-semibold mb-3">{trimestre.foco}</p>
+                  <ul className="space-y-1 text-sm text-indigo-200">
+                    {trimestre.acciones?.map((accion: string, idx: number) => (
+                      <li key={idx}>✓ {accion}</li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
+        </Section>
+      )}
+
+      {/* 🌙 CALENDARIO LUNAR ANUAL */}
+      {i.calendario_lunar_anual && i.calendario_lunar_anual.length > 0 && (
+        <Section
+          title="Calendario Lunar Anual"
+          icon={<Moon className="w-6 h-6" />}
+          isExpanded={expandedSections.has('lunar')}
+          onToggle={() => toggleSection('lunar')}
+          gradient="from-slate-900/40 to-gray-900/40"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {i.calendario_lunar_anual.map((mes, idx) => (
+              <div key={idx} className="p-3 bg-slate-950/40 rounded-lg border border-slate-600/30">
+                <h4 className="font-bold text-slate-200 mb-2">{mes.mes}</h4>
+                
+                <div className="text-xs space-y-2">
+                  <div className="bg-yellow-950/30 p-2 rounded">
+                    <p className="font-semibold text-yellow-200">🌑 Luna Nueva</p>
+                    <p className="text-yellow-100">{mes.luna_nueva.fecha}</p>
+                    <p className="text-yellow-100">{mes.luna_nueva.signo}</p>
+                    <p className="italic text-yellow-200/80 text-xs">{mes.luna_nueva.mensaje}</p>
+                  </div>
+                  
+                  <div className="bg-blue-950/30 p-2 rounded">
+                    <p className="font-semibold text-blue-200">🌕 Luna Llena</p>
+                    <p className="text-blue-100">{mes.luna_llena.fecha}</p>
+                    <p className="text-blue-100">{mes.luna_llena.signo}</p>
+                    <p className="italic text-blue-200/80 text-xs">{mes.luna_llena.mensaje}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* 💎 DECLARACIÓN DE PODER */}
+      {i.declaracion_poder_anual && (
+        <Section
+          title="Tu Declaración de Poder Anual"
+          icon={<Sparkles className="w-6 h-6" />}
+          isExpanded={expandedSections.has('declaracion')}
+          onToggle={() => toggleSection('declaracion')}
+          gradient="from-yellow-900/40 to-amber-900/40"
+        >
+          <div className="p-6 bg-gradient-to-r from-yellow-950/50 to-amber-950/50 rounded-xl border-2 border-yellow-500/50">
+            <p className="text-yellow-100 text-xl font-bold text-center leading-relaxed">
+              {i.declaracion_poder_anual}
+            </p>
+            <p className="text-yellow-200/70 text-center mt-4 text-sm italic">
+              Repite esta declaración en voz alta en lunas nuevas y momentos clave
+            </p>
+          </div>
+        </Section>
+      )}
+
+      {/* ⚠️ ADVERTENCIAS */}
+      {i.advertencias && i.advertencias.length > 0 && (
+        <Section
+          title="Advertencias y Desafíos a Evitar"
+          icon={<AlertTriangle className="w-6 h-6" />}
+          isExpanded={expandedSections.has('advertencias')}
+          onToggle={() => toggleSection('advertencias')}
+          gradient="from-red-900/40 to-orange-900/40"
+        >
+          <div className="space-y-3">
+            {i.advertencias.map((advertencia, idx) => (
+              <div key={idx} className="flex gap-3 p-3 bg-red-950/30 rounded-lg border-l-4 border-red-500">
+                <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-1" />
+                <p className="text-red-100">{advertencia}</p>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* 🎯 EVENTOS CLAVE DEL AÑO */}
+      {i.eventos_clave_del_anio && i.eventos_clave_del_anio.length > 0 && (
+        <Section
+          title="Eventos Clave del Año"
+          icon={<Calendar className="w-6 h-6" />}
+          isExpanded={expandedSections.has('eventos')}
+          onToggle={() => toggleSection('eventos')}
+          gradient="from-teal-900/40 to-cyan-900/40"
+        >
+          <div className="space-y-4">
+            {i.eventos_clave_del_anio.map((evento, idx) => (
+              <div key={idx} className="p-4 bg-teal-950/30 rounded-lg border border-teal-600/30">
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className="font-bold text-teal-200">{evento.evento}</h4>
+                  <span className="text-xs bg-teal-700/50 px-2 py-1 rounded text-teal-100">
+                    {evento.tipo}
+                  </span>
+                </div>
+                <p className="text-sm text-teal-300 mb-2">{evento.periodo}</p>
+                <p className="text-teal-100 mb-3">{evento.descripcion}</p>
+                {evento.accion_recomendada && (
+                  <div className="mt-3 p-2 bg-teal-900/40 rounded">
+                    <p className="text-sm text-teal-200">
+                      <strong>Acción:</strong> {evento.accion_recomendada}
+                    </p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* 💡 INSIGHTS TRANSFORMACIONALES */}
+      {i.insights_transformacionales && i.insights_transformacionales.length > 0 && (
+        <Section
+          title="Insights Transformacionales"
+          icon={<Zap className="w-6 h-6" />}
+          isExpanded={expandedSections.has('insights')}
+          onToggle={() => toggleSection('insights')}
+          gradient="from-violet-900/40 to-fuchsia-900/40"
+        >
+          <div className="space-y-2">
+            {i.insights_transformacionales.map((insight, idx) => (
+              <div key={idx} className="flex gap-3 items-start p-3 bg-violet-950/30 rounded-lg">
+                <Sparkles className="w-5 h-5 text-violet-400 flex-shrink-0 mt-1" />
+                <p className="text-violet-100">{insight}</p>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* 🕯️ RITUALES RECOMENDADOS */}
+      {i.rituales_recomendados && i.rituales_recomendados.length > 0 && (
+        <Section
+          title="Rituales Recomendados"
+          icon={<Sun className="w-6 h-6" />}
+          isExpanded={expandedSections.has('rituales')}
+          onToggle={() => toggleSection('rituales')}
+          gradient="from-amber-900/40 to-orange-900/40"
+        >
+          <div className="space-y-3">
+            {i.rituales_recomendados.map((ritual, idx) => (
+              <div key={idx} className="p-4 bg-amber-950/30 rounded-lg border-l-4 border-amber-500">
+                <p className="text-amber-100">{ritual}</p>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* 🌈 INTEGRACIÓN FINAL */}
+      {i.integracion_final && (
+        <Section
+          title="Integración Final"
+          icon={<Star className="w-6 h-6" />}
+          isExpanded={expandedSections.has('integracion')}
+          onToggle={() => toggleSection('integracion')}
+          gradient="from-pink-900/40 to-rose-900/40"
+        >
+          <div className="space-y-4">
+            <div className="p-4 bg-pink-950/30 rounded-lg">
+              <h4 className="font-bold text-pink-200 mb-3">Síntesis del Año</h4>
+              <p className="text-pink-100 leading-relaxed">{i.integracion_final.sintesis}</p>
+            </div>
+            
+            {i.integracion_final.pregunta_reflexion && (
+              <div className="p-4 bg-rose-950/30 rounded-lg border-2 border-rose-500/50">
+                <h4 className="font-bold text-rose-200 mb-2">Pregunta para Reflexión</h4>
+                <p className="text-rose-100 text-lg italic">{i.integracion_final.pregunta_reflexion}</p>
+              </div>
+            )}
+          </div>
+        </Section>
+      )}
+
+    </div>
+  );
+}
+
+// ==========================================
+// 🎨 COMPONENTE SECTION REUTILIZABLE
+// ==========================================
+
+interface SectionProps {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  isExpanded: boolean;
+  onToggle: () => void;
+  gradient: string;
+}
+
+function Section({ title, icon, children, isExpanded, onToggle, gradient }: SectionProps) {
+  return (
+    <div className={`bg-gradient-to-br ${gradient} rounded-2xl border border-white/10 overflow-hidden`}>
+      <button
+        onClick={onToggle}
+        className="w-full p-5 flex items-center justify-between hover:bg-white/5 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <div className="text-white">{icon}</div>
+          <h3 className="text-white font-bold text-xl">{title}</h3>
         </div>
-      </div>
+        {isExpanded ? (
+          <ChevronUp className="w-6 h-6 text-white" />
+        ) : (
+          <ChevronDown className="w-6 h-6 text-white" />
+        )}
+      </button>
+      
+      {isExpanded && (
+        <div className="p-6 pt-0">
+          {children}
+        </div>
+      )}
     </div>
   );
 }
