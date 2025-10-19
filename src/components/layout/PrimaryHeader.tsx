@@ -50,7 +50,7 @@ const navItems = [
     description: 'Tu mapa astrológico personal'
   },
   {
-    href: '/progressed-chart',
+    href: '/solar-return',
     label: 'Retorno Solar',
     icon: Sunrise,      // 🌅 Sol - Retorno Solar
     description: 'Tu evolución astrológica anual'

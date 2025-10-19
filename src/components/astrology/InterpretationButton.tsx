@@ -371,7 +371,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       const saveData = {
         userId,
         chartType: type,
-        interpretation: interpretationData.interpretation, // ✅ Debe ser el objeto completo
+        interpretation: interpretationData.interpretation,
         userProfile,
         generatedAt: interpretationData.generatedAt || new Date().toISOString()
       };
@@ -395,9 +395,52 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         const data = await response.json();
         console.log('✅ ===== INTERPRETACIÓN GUARDADA =====');
         console.log('✅ Respuesta MongoDB:', data);
+        console.log('✅ ID guardado:', data.interpretationId);
 
-        // ✅ RECARGAR LISTA
-        await loadSavedInterpretations();
+        // ✅ FIX: Esperar 1 segundo para que MongoDB actualice índices
+        console.log('⏳ Esperando 1s para actualización de índices...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // ✅ FIX: Recargar usando el ID específico que acabamos de guardar
+        if (data.interpretationId) {
+          console.log('🔄 Recargando interpretación por ID:', data.interpretationId);
+
+          const getResponse = await fetch(
+            `/api/interpretations/save?userId=${userId}&id=${data.interpretationId}`
+          );
+
+          if (getResponse.ok) {
+            const freshData = await getResponse.json();
+
+            if (freshData.success) {
+              console.log('✅ Interpretación recargada exitosamente desde MongoDB');
+
+              // ✅ Actualizar el estado con la interpretación fresca
+              const freshInterpretation = {
+                interpretation: freshData.interpretation,
+                cached: true,
+                generatedAt: freshData.generatedAt,
+                method: freshData.method || 'openai'
+              };
+
+              setInterpretation(freshInterpretation);
+              setHasRecentInterpretation(true);
+
+              // ✅ Actualizar lista de interpretaciones guardadas
+              setSavedInterpretations([{
+                _id: data.interpretationId,
+                interpretation: freshData.interpretation,
+                generatedAt: freshData.generatedAt,
+                chartType: type,
+                userProfile: userProfile,
+                isActive: true
+              }]);
+            }
+          }
+        } else {
+          // Fallback: recargar normalmente si no hay ID
+          await loadSavedInterpretations();
+        }
       } else {
         const errorText = await response.text();
         console.error('❌ ===== ERROR GUARDANDO EN MONGODB =====');

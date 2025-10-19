@@ -1192,7 +1192,7 @@ export function validateEducationalService(): {
   recommendations.push('Integrar con trainedAssistantService.ts para interpretaciones de IA');
   recommendations.push('Conectar con chartInterpretationsService.ts para interpretaciones básicas');
   recommendations.push('Usar en AgendaAIDisplay.tsx para mostrar interpretaciones educativas');
-  recommendations.push('Implementar en natal-chart y progressed-chart pages');
+  recommendations.push('Implementar en natal-chart y solar-return pages');
   
   return {
     isReady: missing.length === 0,

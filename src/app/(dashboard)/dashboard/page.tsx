@@ -445,7 +445,7 @@ export default function DashboardPage() {
             </div>
             
             {hasNatalChart ? (
-              <Link href="/progressed-chart">
+              <Link href="/solar-return">
                 <button className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-black py-4 rounded-2xl font-bold hover:from-yellow-300 hover:to-orange-400 transition-all duration-300 shadow-xl flex items-center justify-center group">
                   {hasSolarReturn ? (
                     <>

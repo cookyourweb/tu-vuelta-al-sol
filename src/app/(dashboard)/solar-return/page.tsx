@@ -1,4 +1,4 @@
-//src/app/(dashboard)/progressed-chart/page.tsx
+//src/app/(dashboard)/solar-return/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -10,7 +10,7 @@ import {
   Sun, RefreshCw, Sparkles, AlertTriangle
 } from 'lucide-react';
 
-export default function ProgressedChartPage() {
+export default function SolarReturnPage() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
   

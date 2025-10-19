@@ -229,7 +229,7 @@ function TestAgendaAIContent() {
               <ul className="text-gray-400 text-sm space-y-1">
                 <li>• <a href="/birth-data" className="text-blue-400 hover:underline">Configurar datos de nacimiento</a></li>
                 <li>• <a href="/natal-chart" className="text-blue-400 hover:underline">Generar carta natal</a></li>
-                <li>• <a href="/progressed-chart" className="text-blue-400 hover:underline">Carta progresada</a></li>
+                <li>• <a href="/solar-return" className="text-blue-400 hover:underline">Carta progresada</a></li>
                 <li>• <a href="/agenda" className="text-blue-400 hover:underline">Ver agenda astrológica</a></li>
               </ul>
             </div>

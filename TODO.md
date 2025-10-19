@@ -9,7 +9,7 @@
 - [x] Todos los errores de TypeScript resueltos
 
 ### ✅ 2. INTEGRACIÓN ENTRE PÁGINAS
-- [x] Página de progressed-chart guarda datos en localStorage
+- [x] Página de solar-return guarda datos en localStorage
 - [x] Página de agenda lee datos de carta progresada
 - [x] Navegación fluida entre páginas con contexto
 - [x] Validación de datos frescos (24 horas)

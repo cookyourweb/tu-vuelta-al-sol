@@ -850,6 +850,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
         <span className="text-2xl">⚡</span>
         Ángulos Principales
       </h3>
+
       <div className="space-y-3 mb-4">
         {/* Ascendente */}
         {ascendant && (
@@ -888,78 +889,147 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({
         )}
       </div>
 
-      {/* ✅ ONLY FOR SOLAR RETURN: Add mini distributions */}
+      {/* ✅ ONLY FOR SOLAR RETURN: Add FULL distributions with bars */}
       {chartType === 'solar-return' && (
         <div className="mt-4 pt-4 border-t border-indigo-400/20">
           <h4 className="text-indigo-200 font-semibold text-sm mb-3">Distribuciones Energéticas</h4>
 
-          {/* Elementos */}
-          {elementDistribution && Object.keys(elementDistribution).length > 0 && (
-            <div className="mb-3">
-              <p className="text-indigo-300 text-xs mb-2">✨ Elementos</p>
-              <div className="space-y-1">
-                {Object.entries(elementDistribution).map(([element, percentage]: [string, any]) => {
-                  const elementNames: { [key: string]: string } = {
-                    fire: 'Fuego',
-                    earth: 'Tierra',
-                    air: 'Aire',
-                    water: 'Agua'
-                  };
-                  const elementColors: { [key: string]: string } = {
-                    fire: 'bg-red-500',
-                    earth: 'bg-green-500',
-                    air: 'bg-blue-500',
-                    water: 'bg-purple-500'
-                  };
-                  return (
-                    <div key={element} className="flex items-center gap-2">
-                      <span className="text-indigo-100 text-xs w-16">{elementNames[element]}</span>
-                      <div className="flex-1 bg-indigo-900/40 rounded-full h-2 overflow-hidden">
-                        <div
-                          className={`h-full ${elementColors[element]}`}
-                          style={{ width: `${percentage || 0}%` }}
-                        />
-                      </div>
-                      <span className="text-indigo-300 text-xs w-10 text-right">{percentage || 0}%</span>
-                    </div>
-                  );
-                })}
+          {/* ✨ ELEMENTOS CON BARRAS */}
+          <div className="mb-4">
+            <p className="text-indigo-300 text-xs mb-2 font-semibold">✨ Elementos</p>
+            <div className="space-y-2">
+              {/* FUEGO */}
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 w-16">
+                  <span className="text-red-400">🔥</span>
+                  <span className="text-indigo-100 text-xs">Fuego</span>
+                </div>
+                <div className="flex-1 bg-indigo-900/40 rounded-full h-2.5 overflow-hidden">
+                  <div
+                    className="h-full bg-red-500 transition-all duration-500"
+                    style={{ width: `${elementDistribution?.fire || 0}%` }}
+                  />
+                </div>
+                <span className="text-indigo-300 text-xs w-10 text-right font-semibold">
+                  {elementDistribution?.fire || 0}%
+                </span>
               </div>
-            </div>
-          )}
 
-          {/* Modalidades */}
-          {modalityDistribution && Object.keys(modalityDistribution).length > 0 && (
-            <div>
-              <p className="text-indigo-300 text-xs mb-2">⚡ Modalidades</p>
-              <div className="space-y-1">
-                {Object.entries(modalityDistribution).map(([modality, percentage]: [string, any]) => {
-                  const modalityNames: { [key: string]: string } = {
-                    cardinal: 'Cardinal',
-                    fixed: 'Fijo',
-                    mutable: 'Mutable'
-                  };
-                  return (
-                    <div key={modality} className="flex items-center gap-2">
-                      <span className="text-indigo-100 text-xs w-16">{modalityNames[modality]}</span>
-                      <div className="flex-1 bg-indigo-900/40 rounded-full h-2 overflow-hidden">
-                        <div
-                          className="h-full bg-indigo-500"
-                          style={{ width: `${percentage || 0}%` }}
-                        />
-                      </div>
-                      <span className="text-indigo-300 text-xs w-10 text-right">{percentage || 0}%</span>
-                    </div>
-                  );
-                })}
+              {/* TIERRA */}
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 w-16">
+                  <span className="text-green-400">🌱</span>
+                  <span className="text-indigo-100 text-xs">Tierra</span>
+                </div>
+                <div className="flex-1 bg-indigo-900/40 rounded-full h-2.5 overflow-hidden">
+                  <div
+                    className="h-full bg-green-500 transition-all duration-500"
+                    style={{ width: `${elementDistribution?.earth || 0}%` }}
+                  />
+                </div>
+                <span className="text-indigo-300 text-xs w-10 text-right font-semibold">
+                  {elementDistribution?.earth || 0}%
+                </span>
+              </div>
+
+              {/* AIRE */}
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 w-16">
+                  <span className="text-blue-400">💨</span>
+                  <span className="text-indigo-100 text-xs">Aire</span>
+                </div>
+                <div className="flex-1 bg-indigo-900/40 rounded-full h-2.5 overflow-hidden">
+                  <div
+                    className="h-full bg-blue-500 transition-all duration-500"
+                    style={{ width: `${elementDistribution?.air || 0}%` }}
+                  />
+                </div>
+                <span className="text-indigo-300 text-xs w-10 text-right font-semibold">
+                  {elementDistribution?.air || 0}%
+                </span>
+              </div>
+
+              {/* AGUA */}
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 w-16">
+                  <span className="text-purple-400">💧</span>
+                  <span className="text-indigo-100 text-xs">Agua</span>
+                </div>
+                <div className="flex-1 bg-indigo-900/40 rounded-full h-2.5 overflow-hidden">
+                  <div
+                    className="h-full bg-purple-500 transition-all duration-500"
+                    style={{ width: `${elementDistribution?.water || 0}%` }}
+                  />
+                </div>
+                <span className="text-indigo-300 text-xs w-10 text-right font-semibold">
+                  {elementDistribution?.water || 0}%
+                </span>
               </div>
             </div>
-          )}
+          </div>
+
+          {/* ⚡ MODALIDADES CON BARRAS */}
+          <div className="mb-4">
+            <p className="text-indigo-300 text-xs mb-2 font-semibold">⚡ Modalidades</p>
+            <div className="space-y-2">
+              {/* CARDINAL */}
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 w-16">
+                  <span className="text-yellow-400">⚡</span>
+                  <span className="text-indigo-100 text-xs">Cardinal</span>
+                </div>
+                <div className="flex-1 bg-indigo-900/40 rounded-full h-2.5 overflow-hidden">
+                  <div
+                    className="h-full bg-yellow-500 transition-all duration-500"
+                    style={{ width: `${modalityDistribution?.cardinal || 0}%` }}
+                  />
+                </div>
+                <span className="text-indigo-300 text-xs w-10 text-right font-semibold">
+                  {modalityDistribution?.cardinal || 0}%
+                </span>
+              </div>
+
+              {/* FIJO */}
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 w-16">
+                  <span className="text-orange-400">🔒</span>
+                  <span className="text-indigo-100 text-xs">Fijo</span>
+                </div>
+                <div className="flex-1 bg-indigo-900/40 rounded-full h-2.5 overflow-hidden">
+                  <div
+                    className="h-full bg-orange-500 transition-all duration-500"
+                    style={{ width: `${modalityDistribution?.fixed || 0}%` }}
+                  />
+                </div>
+                <span className="text-indigo-300 text-xs w-10 text-right font-semibold">
+                  {modalityDistribution?.fixed || 0}%
+                </span>
+              </div>
+
+              {/* MUTABLE */}
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 w-16">
+                  <span className="text-cyan-400">🌀</span>
+                  <span className="text-indigo-100 text-xs">Mutable</span>
+                </div>
+                <div className="flex-1 bg-indigo-900/40 rounded-full h-2.5 overflow-hidden">
+                  <div
+                    className="h-full bg-cyan-500 transition-all duration-500"
+                    style={{ width: `${modalityDistribution?.mutable || 0}%` }}
+                  />
+                </div>
+                <span className="text-indigo-300 text-xs w-10 text-right font-semibold">
+                  {modalityDistribution?.mutable || 0}%
+                </span>
+              </div>
+            </div>
+          </div>
 
           {/* Perfil energético */}
-          <div className="mt-3 bg-indigo-900/40 rounded-lg p-2">
-            <p className="text-indigo-200 text-xs text-center">
-              🌟 Perfil energético único
+          <div className="bg-indigo-900/40 rounded-lg p-2 border border-indigo-400/20">
+            <p className="text-indigo-200 text-xs text-center flex items-center justify-center gap-1">
+              <span>🌟</span>
+              <span className="font-semibold">Perfil energético único</span>
             </p>
           </div>
         </div>

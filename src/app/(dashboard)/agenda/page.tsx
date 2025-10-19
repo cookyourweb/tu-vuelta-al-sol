@@ -77,7 +77,7 @@ const AgendaPersonalizada = () => {
   // 🔧 NUEVO: Cargar datos de carta progresada si vienen desde esa página
   React.useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const fromProgressedChart = urlParams.get('from') === 'progressed-chart';
+    const fromProgressedChart = urlParams.get('from') === 'solar-return';
 
     if (fromProgressedChart) {
       const progressedData = localStorage.getItem('progressedChartData');

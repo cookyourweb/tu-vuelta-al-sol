@@ -87,51 +87,61 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔍 ===== RETRIEVING INTERPRETATION =====');
-
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
     const chartType = searchParams.get('chartType');
 
     if (!userId || !chartType) {
       return NextResponse.json(
-        { success: false, error: 'userId and chartType required' },
+        { error: 'userId and chartType are required' },
         { status: 400 }
       );
     }
 
     await connectDB();
 
-    const latestInterpretation = await Interpretation.findOne({
+    // ✅ FIX: Find THE MOST RECENT interpretation (not just any valid one)
+    const interpretationDoc = await Interpretation.findOne({
       userId,
       chartType,
-      expiresAt: { $gt: new Date() }
+      // ❌ REMOVE: expiresAt filter (we want latest even if expired)
+      // expiresAt: { $gt: new Date() }
     })
-    .sort({ generatedAt: -1 })
+    .sort({ generatedAt: -1, _id: -1 }) // ✅ Sort by date DESC + _id DESC
     .lean()
     .exec() as any;
 
-    if (!latestInterpretation) {
-      console.log(`❌ No active ${chartType} interpretation found`);
+    if (!interpretationDoc) {
       return NextResponse.json({
         success: false,
-        message: `No active ${chartType} interpretation found`
+        message: `No ${chartType} interpretation available`
       }, { status: 404 });
     }
 
-    console.log('✅ Latest interpretation found:', latestInterpretation._id);
+    // ✅ Check if expired (but still return it with warning)
+    const isExpired = new Date(interpretationDoc.expiresAt) < new Date();
+    const hoursSinceGeneration = (Date.now() - new Date(interpretationDoc.generatedAt).getTime()) / (1000 * 60 * 60);
+
+    console.log(`✅ Found ${chartType} interpretation:`, {
+      _id: interpretationDoc._id,
+      generatedAt: interpretationDoc.generatedAt,
+      hoursSinceGeneration: hoursSinceGeneration.toFixed(1),
+      isExpired,
+      isRecent: hoursSinceGeneration < 24
+    });
 
     return NextResponse.json({
       success: true,
-      interpretation: latestInterpretation.interpretation,
-      generatedAt: latestInterpretation.generatedAt,
-      expiresAt: latestInterpretation.expiresAt,
-      method: latestInterpretation.method,
-      cached: true
+      interpretation: interpretationDoc.interpretation,
+      cached: true,
+      generatedAt: interpretationDoc.generatedAt,
+      method: interpretationDoc.method || 'mongodb_cached',
+      expired: isExpired,
+      hoursSinceGeneration: hoursSinceGeneration.toFixed(1)
     });
 
   } catch (error) {
-    console.error('❌ Error retrieving:', error);
+    console.error('❌ Error retrieving interpretation:', error);
     return NextResponse.json({
       success: false,
       error: 'Failed to retrieve interpretation'
