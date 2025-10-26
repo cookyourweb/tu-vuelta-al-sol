@@ -293,7 +293,7 @@ export async function POST(request: NextRequest) {
           userId: uid,
           uid: uid,
           birthDataId: birthData._id,
-          chartType: 'solar_return',
+          chartType: 'solar-return',
           natalChart: {},
           solarReturnChart: progressedData,
           lastUpdated: new Date()

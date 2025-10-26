@@ -1,6 +1,8 @@
 // src/app/api/astrology/interpret-natal/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import connectDB from '@/lib/db';
+import Interpretation from '@/models/Interpretation';
 import {
   generateDisruptiveNatalPrompt,
   formatChartForPrompt,
@@ -164,7 +166,7 @@ function generateFallbackInterpretation(userProfile: UserProfile, chartData: Cha
     planetas: {
       sol: {
         titulo: `☉ Sol en ${sun?.sign || 'Tu Signo'} ${sun?.degree ? sun.degree.toFixed(1) + '°' : ''} - Casa ${getHouse(sun)} → A qué has venido a este mundo`,
-        posicion_tecnica: `${sun?.degree?.toFixed(0) || '?'}°${sun?.minutes || '?'}' ${sun?.sign || '?'} - Casa ${getHouse(sun)} (${getCasaMeaning(getHouse(sun))})`,
+        posicion_tecnica: `${sun?.degree?.toFixed(0) || '?'}° ${sun?.sign || '?'} - Casa ${getHouse(sun)} (${getCasaMeaning(getHouse(sun))})`,
         descripcion: `${userProfile.name}, tu Sol en ${sun?.sign || 'tu signo'} en Casa ${getHouse(sun)} define tu propósito vital.\n\nCasa ${getHouse(sun)} es el área de ${getCasaMeaning(getHouse(sun))}. Esto significa que tu esencia se manifiesta principalmente en esta zona de tu vida.\n\nNo viniste a ser como otros esperan - viniste a manifestar tu verdad única desde esta posición específica de poder.`,
         poder_especifico: `Tu Sol en Casa ${getHouse(sun)} te da poder natural para brillar en ${getCasaMeaning(getHouse(sun))}. Este es tu superpoder más visible.`,
         accion_inmediata: `Hoy, pregúntate: '¿Estoy usando mi Casa ${getHouse(sun)} para brillar o para esconderme?' Da un paso concreto hacia tu autenticidad en esta área.`,
@@ -173,7 +175,7 @@ function generateFallbackInterpretation(userProfile: UserProfile, chartData: Cha
       
       luna: {
         titulo: `☽ Luna en ${moon?.sign || 'Tu Signo'} ${moon?.degree ? moon.degree.toFixed(1) + '°' : ''} - Casa ${getHouse(moon)} → Tus emociones`,
-        posicion_tecnica: `${moon?.degree?.toFixed(0) || '?'}°${moon?.minutes || '?'}' ${moon?.sign || '?'} - Casa ${getHouse(moon)} (${getCasaMeaning(getHouse(moon))})`,
+        posicion_tecnica: `${moon?.degree?.toFixed(0) || '?'}° ${moon?.sign || '?'} - Casa ${getHouse(moon)} (${getCasaMeaning(getHouse(moon))})`,
         descripcion: `${userProfile.name}, tu Luna en ${moon?.sign || 'tu signo'} en Casa ${getHouse(moon)} revela tu naturaleza emocional.\n\nTus emociones se activan especialmente en ${getCasaMeaning(getHouse(moon))}. No es debilidad - es tu brújula interna más precisa.\n\nCuando honras tu Luna aquí, encuentras tu verdadero refugio emocional.`,
         poder_especifico: `Tu Luna en Casa ${getHouse(moon)} te da inteligencia emocional profunda en esta área. Sabes leer energías donde otros están ciegos.`,
         accion_inmediata: `Esta semana, cuando sientas algo intenso relacionado con ${getCasaMeaning(getHouse(moon))}, pregúntate: '¿Qué intenta enseñarme mi Luna?' Anota la respuesta.`,
@@ -285,6 +287,49 @@ export async function POST(request: NextRequest) {
       interpretation,
       timestamp: Date.now()
     });
+
+    // ✅ SAVE TO MONGODB FOR PERSISTENCE
+    try {
+      await connectDB();
+
+      // Check for recent duplicate (within 5 minutes)
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+      const recentDuplicate = await Interpretation.findOne({
+        userId,
+        chartType: 'natal',
+        generatedAt: { $gte: fiveMinutesAgo }
+      });
+
+      if (recentDuplicate) {
+        console.log('⚠️ Duplicate prevention: Skipping save (interpretation generated within last 5 minutes)');
+      } else {
+        // Save new interpretation
+        const expirationDate = new Date(Date.now() + CACHE_DURATION);
+
+        await Interpretation.create({
+          userId,
+          chartType: 'natal',
+          userProfile: {
+            name: userProfile.name,
+            age: userProfile.age,
+            birthPlace: userProfile.birthPlace,
+            birthDate: userProfile.birthDate,
+            birthTime: userProfile.birthTime
+          },
+          interpretation,
+          generatedAt: new Date(),
+          expiresAt: expirationDate,
+          method: disruptiveMode ? 'openai_disruptive' : 'fallback_with_real_data',
+          isActive: true
+        });
+
+        console.log('✅ [INTERPRET-NATAL] Interpretación guardada en MongoDB');
+      }
+
+    } catch (dbError) {
+      // Don't fail if MongoDB save fails, cache is enough
+      console.warn('⚠️ [INTERPRET-NATAL] No se pudo guardar en MongoDB:', dbError);
+    }
 
     console.log('✅ [INTERPRET-NATAL] Interpretación generada exitosamente');
 

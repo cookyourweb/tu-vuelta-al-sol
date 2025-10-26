@@ -1,4 +1,4 @@
-// src/app/api/astrology/interpret-progressed/route.ts
+// src/app/api/astrology/interpret-solar/route.ts
 // ENDPOINT PARA INTERPRETACIÓN PROGRESADA DISRUPTIVA
 
 import { NextRequest, NextResponse } from 'next/server';

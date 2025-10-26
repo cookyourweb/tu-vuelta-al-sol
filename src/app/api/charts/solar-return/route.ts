@@ -341,7 +341,7 @@ export async function GET(request: NextRequest) {
         userId: uid,
         uid,
         birthDataId: birthData._id,
-        chartType: 'solar_return',
+        chartType: 'solar-return',
         solarReturnChart: solarReturnData,
         lastUpdated: new Date()
       });

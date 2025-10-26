@@ -289,12 +289,28 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         console.log('🔍 ===== DATOS RECIBIDOS =====');
         console.log('🔍 Claves en rawInterpretation:', Object.keys(rawInterpretation));
 
+        // ✅ AÑADIR LOGS PARA VERIFICAR DATOS COMPLETOS
+        console.log('🔍 ===== VERIFICANDO DATOS COMPLETOS =====');
+        console.log('🔍 formacion_temprana:', rawInterpretation.formacion_temprana ? 'SÍ' : 'NO');
+        console.log('🔍 patrones_psicologicos:', rawInterpretation.patrones_psicologicos ? 'SÍ' : 'NO');
+        console.log('🔍 planetas_profundos:', rawInterpretation.planetas_profundos ? 'SÍ' : 'NO');
+        console.log('🔍 nodos_lunares:', rawInterpretation.nodos_lunares ? 'SÍ' : 'NO');
+
+        // Si están, mostrar un preview
+        if (rawInterpretation.formacion_temprana) {
+          console.log('📖 formacion_temprana completa:', rawInterpretation.formacion_temprana);
+        }
+
         let interpretationData;
 
         if (type === 'natal') {
           interpretationData = {
             esencia_revolucionaria: rawInterpretation.esencia_revolucionaria,
             proposito_vida: rawInterpretation.proposito_vida,
+            formacion_temprana: rawInterpretation.formacion_temprana,
+            patrones_psicologicos: rawInterpretation.patrones_psicologicos,
+            planetas_profundos: rawInterpretation.planetas_profundos,
+            nodos_lunares: rawInterpretation.nodos_lunares,
             planetas: rawInterpretation.planetas,
             plan_accion: rawInterpretation.plan_accion,
             declaracion_poder: rawInterpretation.declaracion_poder,
@@ -397,54 +413,29 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         console.log('✅ Respuesta MongoDB:', data);
         console.log('✅ ID guardado:', data.interpretationId);
 
-        // ✅ FIX: Esperar 1 segundo para que MongoDB actualice índices
+        // ✅ FIX: Esperar para que MongoDB actualice índices
         console.log('⏳ Esperando 1s para actualización de índices...');
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        // ✅ FIX: Recargar usando el ID específico que acabamos de guardar
-        if (data.interpretationId) {
-          console.log('🔄 Recargando interpretación por ID:', data.interpretationId);
+        // ✅ FIX: Recargar usando chartType (más confiable que ID)
+        console.log('🔄 Recargando interpretación desde BD...');
 
-          const getResponse = await fetch(
-            `/api/interpretations/save?userId=${userId}&id=${data.interpretationId}`
-          );
+        const getResponse = await fetch(`/api/interpretations/save?userId=${userId}&chartType=${type}`);
 
-          if (getResponse.ok) {
-            const freshData = await getResponse.json();
-
-            if (freshData.success) {
-              console.log('✅ Interpretación recargada exitosamente desde MongoDB');
-
-              // ✅ Actualizar el estado con la interpretación fresca
-              const freshInterpretation = {
-                interpretation: freshData.interpretation,
-                cached: true,
-                generatedAt: freshData.generatedAt,
-                method: freshData.method || 'openai'
-              };
-
-              setInterpretation(freshInterpretation);
-              setHasRecentInterpretation(true);
-
-              // ✅ Actualizar lista de interpretaciones guardadas
-              setSavedInterpretations([{
-                _id: data.interpretationId,
-                interpretation: freshData.interpretation,
-                generatedAt: freshData.generatedAt,
-                chartType: type,
-                userProfile: userProfile,
-                isActive: true
-              }]);
-            }
-          }
+        if (getResponse.ok) {
+          const savedData = await getResponse.json();
+          console.log('✅ Interpretación recargada exitosamente');
+          console.log('✅ Datos actualizados:', {
+            hasInterpretation: !!savedData.interpretation,
+            generatedAt: savedData.generatedAt
+          });
         } else {
-          // Fallback: recargar normalmente si no hay ID
-          await loadSavedInterpretations();
+          console.warn('⚠️ No se pudo recargar interpretación, pero está guardada');
         }
       } else {
-        const errorText = await response.text();
         console.error('❌ ===== ERROR GUARDANDO EN MONGODB =====');
         console.error('❌ Status:', response.status);
+        const errorText = await response.text();
         console.error('❌ Error:', errorText);
       }
     } catch (error) {
@@ -531,6 +522,262 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               Tu Propósito de Vida
             </h4>
       <p className="text-blue-50 text-lg leading-relaxed font-medium">{data.proposito_vida}</p>
+          </div>
+        )}
+
+        {/* ✅ NUEVA SECCIÓN: FORMACIÓN TEMPRANA */}
+        {data.formacion_temprana && (
+          <div className="bg-gradient-to-br from-cyan-900/40 to-teal-900/40 rounded-2xl p-8 border border-cyan-400/30">
+            <h4 className="text-cyan-100 font-bold text-xl mb-6 flex items-center gap-3">
+              <Star className="w-8 h-8 text-cyan-300" />
+              Formación Temprana (Casa Lunar, Saturnina, Venusina)
+            </h4>
+            <div className="space-y-6">
+              {data.formacion_temprana.casa_lunar && (
+                <div className="bg-cyan-800/30 rounded-lg p-4">
+                  <h5 className="text-cyan-200 font-semibold mb-2">🌙 Casa Lunar (Infancia y Raíces)</h5>
+                  {typeof data.formacion_temprana.casa_lunar === 'string' ? (
+                    <p className="text-cyan-50">{data.formacion_temprana.casa_lunar}</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {data.formacion_temprana.casa_lunar.signo_casa && (
+                        <p className="text-cyan-200 text-sm font-semibold">
+                          📍 {data.formacion_temprana.casa_lunar.signo_casa}
+                        </p>
+                      )}
+                      {data.formacion_temprana.casa_lunar.interpretacion && (
+                        <p className="text-cyan-50 text-sm">
+                          {data.formacion_temprana.casa_lunar.interpretacion}
+                        </p>
+                      )}
+                      {data.formacion_temprana.casa_lunar.influencia && (
+                        <div className="bg-cyan-700/30 rounded-lg p-2 mt-2">
+                          <p className="text-cyan-200 font-semibold text-xs mb-1">
+                            🌟 Influencia:
+                          </p>
+                          <p className="text-cyan-50 text-xs">
+                            {data.formacion_temprana.casa_lunar.influencia}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+              {data.formacion_temprana.casa_saturnina && (
+                <div className="bg-cyan-800/30 rounded-lg p-4">
+                  <h5 className="text-cyan-200 font-semibold mb-2">🪐 Casa Saturnina (Lecciones y Disciplina)</h5>
+                  {typeof data.formacion_temprana.casa_saturnina === 'string' ? (
+                    <p className="text-cyan-50">{data.formacion_temprana.casa_saturnina}</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {data.formacion_temprana.casa_saturnina.signo_casa && (
+                        <p className="text-cyan-200 text-sm font-semibold">
+                          📍 {data.formacion_temprana.casa_saturnina.signo_casa}
+                        </p>
+                      )}
+                      {data.formacion_temprana.casa_saturnina.interpretacion && (
+                        <p className="text-cyan-50 text-sm">
+                          {data.formacion_temprana.casa_saturnina.interpretacion}
+                        </p>
+                      )}
+                      {data.formacion_temprana.casa_saturnina.leccion && (
+                        <div className="bg-cyan-700/30 rounded-lg p-2 mt-2">
+                          <p className="text-cyan-200 font-semibold text-xs mb-1">
+                            📚 Lección:
+                          </p>
+                          <p className="text-cyan-50 text-xs">
+                            {data.formacion_temprana.casa_saturnina.leccion}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+              {data.formacion_temprana.casa_venusina && (
+                <div className="bg-cyan-800/30 rounded-lg p-4">
+                  <h5 className="text-cyan-200 font-semibold mb-2">💕 Casa Venusina (Amor y Valores)</h5>
+                  {typeof data.formacion_temprana.casa_venusina === 'string' ? (
+                    <p className="text-cyan-50">{data.formacion_temprana.casa_venusina}</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {data.formacion_temprana.casa_venusina.signo_casa && (
+                        <p className="text-cyan-200 text-sm font-semibold">
+                          📍 {data.formacion_temprana.casa_venusina.signo_casa}
+                        </p>
+                      )}
+                      {data.formacion_temprana.casa_venusina.interpretacion && (
+                        <p className="text-cyan-50 text-sm">
+                          {data.formacion_temprana.casa_venusina.interpretacion}
+                        </p>
+                      )}
+                      {data.formacion_temprana.casa_venusina.valores && (
+                        <div className="bg-cyan-700/30 rounded-lg p-2 mt-2">
+                          <p className="text-cyan-200 font-semibold text-xs mb-1">
+                            💎 Valores:
+                          </p>
+                          <p className="text-cyan-50 text-xs">
+                            {data.formacion_temprana.casa_venusina.valores}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ✅ NUEVA SECCIÓN: PATRONES PSICOLÓGICOS */}
+        {data.patrones_psicologicos && (
+          <div className="bg-gradient-to-br from-indigo-900/40 to-purple-900/40 rounded-2xl p-8 border border-indigo-400/30">
+            <h4 className="text-indigo-100 font-bold text-xl mb-6 flex items-center gap-3">
+              <Brain className="w-8 h-8 text-indigo-300" />
+              Patrones Psicológicos Profundos
+            </h4>
+            <div className="space-y-4">
+              {Array.isArray(data.patrones_psicologicos) ? (
+                data.patrones_psicologicos.map((patron: string | any, index: number) => (
+                  <div key={index} className="bg-indigo-800/30 rounded-lg p-4">
+                    {typeof patron === 'string' ? (
+                      <p className="text-indigo-50 leading-relaxed">{patron}</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {patron.planeta && <p className="text-indigo-200 font-semibold">🪐 {patron.planeta}</p>}
+                        {patron.infancia_emocional && <p className="text-indigo-50">👶 {patron.infancia_emocional}</p>}
+                        {patron.patron_formado && <p className="text-indigo-50">🔄 {patron.patron_formado}</p>}
+                        {patron.impacto_adulto && <p className="text-indigo-50">👤 {patron.impacto_adulto}</p>}
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p className="text-indigo-50 leading-relaxed">{data.patrones_psicologicos}</p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ✅ NUEVA SECCIÓN: PLANETAS PROFUNDOS */}
+        {data.planetas_profundos && (
+          <div className="bg-gradient-to-br from-violet-900/40 to-purple-900/40 rounded-2xl p-8 border border-violet-400/30">
+            <h4 className="text-violet-100 font-bold text-xl mb-6 flex items-center gap-3">
+              <Sparkles className="w-8 h-8 text-violet-300" />
+              Planetas Profundos (Urano, Neptuno, Plutón)
+            </h4>
+            <div className="space-y-4">
+              {data.planetas_profundos.urano && (
+                <div className="bg-violet-800/30 rounded-lg p-4">
+                  <h5 className="text-violet-200 font-semibold mb-2">⚡ Urano (Revolución e Innovación)</h5>
+                  <p className="text-violet-50">{data.planetas_profundos.urano}</p>
+                </div>
+              )}
+              {data.planetas_profundos.neptuno && (
+                <div className="bg-violet-800/30 rounded-lg p-4">
+                  <h5 className="text-violet-200 font-semibold mb-2">🌊 Neptuno (Espiritualidad y Sueños)</h5>
+                  <p className="text-violet-50">{data.planetas_profundos.neptuno}</p>
+                </div>
+              )}
+              {data.planetas_profundos.pluton && (
+                <div className="bg-violet-800/30 rounded-lg p-4">
+                  <h5 className="text-violet-200 font-semibold mb-2">🕳️ Plutón (Transformación y Poder)</h5>
+                  <p className="text-violet-50">{data.planetas_profundos.pluton}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ✅ NUEVA SECCIÓN: NODOS LUNALES */}
+        {data.nodos_lunares && (
+          <div className="bg-gradient-to-br from-slate-900/40 to-gray-900/40 rounded-2xl p-8 border border-slate-400/30">
+            <h4 className="text-slate-100 font-bold text-xl mb-6 flex items-center gap-3">
+              <Target className="w-8 h-8 text-slate-300" />
+              Nodos Lunares (Camino de Vida)
+            </h4>
+            <div className="space-y-6">
+              {data.nodos_lunares.nodo_norte && (
+                <div className="bg-gradient-to-br from-green-900/40 to-emerald-900/40 rounded-lg p-6">
+                  <h5 className="text-green-200 font-semibold text-lg mb-3">⬆️ Nodo Norte (Destino y Crecimiento)</h5>
+
+                  {typeof data.nodos_lunares.nodo_norte === 'string' ? (
+                    <p className="text-green-50">{data.nodos_lunares.nodo_norte}</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {data.nodos_lunares.nodo_norte.signo_casa && (
+                        <p className="text-green-200 text-sm font-semibold">
+                          📍 {data.nodos_lunares.nodo_norte.signo_casa}
+                        </p>
+                      )}
+
+                      {data.nodos_lunares.nodo_norte.direccion_evolutiva && (
+                        <div className="bg-green-800/30 rounded-lg p-3">
+                          <p className="text-green-200 font-semibold text-sm mb-1">
+                            🎯 Dirección Evolutiva:
+                          </p>
+                          <p className="text-green-50 text-sm">
+                            {data.nodos_lunares.nodo_norte.direccion_evolutiva}
+                          </p>
+                        </div>
+                      )}
+
+                      {data.nodos_lunares.nodo_norte.desafio && (
+                        <div className="bg-green-800/30 rounded-lg p-3">
+                          <p className="text-green-200 font-semibold text-sm mb-1">
+                            🚀 Desafío:
+                          </p>
+                          <p className="text-green-50 text-sm">
+                            {data.nodos_lunares.nodo_norte.desafio}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {data.nodos_lunares.nodo_sur && (
+                <div className="bg-gradient-to-br from-orange-900/40 to-amber-900/40 rounded-lg p-6">
+                  <h5 className="text-orange-200 font-semibold text-lg mb-3">⬇️ Nodo Sur (Pasado y Lecciones)</h5>
+
+                  {typeof data.nodos_lunares.nodo_sur === 'string' ? (
+                    <p className="text-orange-50">{data.nodos_lunares.nodo_sur}</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {data.nodos_lunares.nodo_sur.signo_casa && (
+                        <p className="text-orange-200 text-sm font-semibold">
+                          📍 {data.nodos_lunares.nodo_sur.signo_casa}
+                        </p>
+                      )}
+
+                      {data.nodos_lunares.nodo_sur.zona_comfort && (
+                        <div className="bg-orange-800/30 rounded-lg p-3">
+                          <p className="text-orange-200 font-semibold text-sm mb-1">
+                            ✅ Zona de Confort:
+                          </p>
+                          <p className="text-orange-50 text-sm">
+                            {data.nodos_lunares.nodo_sur.zona_comfort}
+                          </p>
+                        </div>
+                      )}
+
+                      {data.nodos_lunares.nodo_sur.patron_repetitivo && (
+                        <div className="bg-red-900/30 rounded-lg p-3 border border-red-500/30">
+                          <p className="text-red-200 font-semibold text-sm mb-1">
+                            ⚠️ Patrón Repetitivo:
+                          </p>
+                          <p className="text-red-50 text-sm">
+                            {data.nodos_lunares.nodo_sur.patron_repetitivo}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -959,7 +1206,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                   <Brain className="w-4 h-4 mr-2" />
                   {isNatal ? 'Interpretar Carta Natal Disruptiva' :
                    isSolarReturn ? 'Interpretar Solar Return Revolucionario' :
-                   'Interpretar Evolución Progresada'}
+                   'Interpretar Evolución Solar'}
                 </>
               )}
             </Button>
@@ -1094,11 +1341,11 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                     <Sparkles className="w-6 h-6 text-purple-400 mr-3" />
                   )}
                   <div>
-                    <h3 className="text-2xl font-bold text-white">
+                    <div role="heading" aria-level={3} className="text-2xl font-bold text-white">
                       {isNatal ? 'Interpretación Revolucionaria Natal' :
                        isSolarReturn ? 'Solar Return Revolucionario' :
-                       'Evolución Progresada Disruptiva'}
-                    </h3>
+                       'Evolución Solar Disruptiva'}
+                    </div>
                     <p className="text-purple-200 text-sm">
                       {userProfile.name} • {new Date(interpretation.generatedAt).toLocaleDateString('es-ES')}
                       {interpretation.cached && (

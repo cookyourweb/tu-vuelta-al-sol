@@ -214,8 +214,6 @@ Example start:
     const savedInterpretation = await Interpretation.create({
       userId,
       chartType: 'solar-return',
-      natalChart,
-      solarReturnChart,
       userProfile: {
         name: userProfile.name,
         age: userProfile.age,

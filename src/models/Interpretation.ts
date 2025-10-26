@@ -7,12 +7,12 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IInterpretation extends Document {
   userId: string;
   chartType: 'natal' | 'solar-return' | 'progressed';
-  
-  // Datos de entrada
-  natalChart?: any;
-  solarReturnChart?: any;
-  progressedChart?: any;
-  userProfile: {
+
+  // ✅ REMOVED: natalChart, solarReturnChart, progressedChart fields
+  // These should NOT be in the interpretations collection!
+  // Chart data belongs in the 'charts' collection, not here.
+
+  userProfile?: {
     name: string;
     age: number;
     birthPlace: string;
@@ -76,27 +76,15 @@ const InterpretationSchema = new Schema<IInterpretation>({
     index: true
   },
   
-  natalChart: {
-    type: Schema.Types.Mixed,
-    required: false
-  },
-  
-  solarReturnChart: {
-    type: Schema.Types.Mixed,
-    required: false
-  },
-  
-  progressedChart: {
-    type: Schema.Types.Mixed,
-    required: false
-  },
-  
+  // ✅ REMOVED: natalChart, solarReturnChart, progressedChart fields
+  // These should NOT be in the interpretations collection!
+
   userProfile: {
-    name: { type: String, required: true },
-    age: { type: Number, required: true },
-    birthPlace: { type: String, required: true },
-    birthDate: { type: String, required: true },
-    birthTime: { type: String, required: true }
+    name: { type: String, required: false },
+    age: { type: Number, required: false },
+    birthPlace: { type: String, required: false },
+    birthDate: { type: String, required: false },
+    birthTime: { type: String, required: false }
   },
   
   interpretation: {

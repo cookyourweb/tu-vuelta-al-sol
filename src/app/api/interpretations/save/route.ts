@@ -7,20 +7,30 @@ const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('💾 ===== SAVING INTERPRETATION =====');
-
     const body = await request.json();
+    const { chartType } = body;
+
+    // ✅ DETECTAR TIPO: NATAL o SOLAR RETURN
+    if (chartType === 'natal') {
+      return handleNatalInterpretationSave(body);
+    }
+
+    // ✅ SOLAR RETURN (código existente)
+    console.log('🌅 ===== SOLAR RETURN INTERPRETATION REQUEST =====');
+
     const {
       userId,
-      chartType,
-      interpretation,
       userProfile,
-      generatedAt,
+      regenerate = false
+    }: {
+      userId: string;
+      userProfile: any;
+      regenerate?: boolean;
     } = body;
 
-    if (!userId || !chartType || !interpretation || !userProfile) {
+    if (!userId) {
       return NextResponse.json(
-        { success: false, error: 'Missing required fields' },
+        { success: false, error: 'Missing required fields for solar return' },
         { status: 400 }
       );
     }
@@ -33,7 +43,7 @@ export async function POST(request: NextRequest) {
     const result = await Interpretation.findOneAndUpdate(
       {
         userId,
-        chartType,
+        chartType: 'solar-return',
         expiresAt: { $gt: new Date() } // Only update active interpretations
       },
       {
@@ -45,8 +55,11 @@ export async function POST(request: NextRequest) {
             birthDate: userProfile.birthDate || 'Unknown',
             birthTime: userProfile.birthTime || 'Unknown'
           },
-          interpretation,
-          generatedAt: generatedAt ? new Date(generatedAt) : new Date(),
+          interpretation: {
+            // Solar return specific structure
+            ...body.interpretation
+          },
+          generatedAt: body.generatedAt ? new Date(body.generatedAt) : new Date(),
           expiresAt: expirationDate,
           method: 'openai',
           cached: false,
@@ -57,6 +70,81 @@ export async function POST(request: NextRequest) {
         upsert: true, // Create if doesn't exist
         new: true,    // Return updated document
         runValidators: true
+      }
+    );
+
+    console.log('✅ SOLAR RETURN UPSERT successful:', {
+      _id: result._id,
+      userId: result.userId,
+      chartType: result.chartType,
+      generatedAt: result.generatedAt
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Solar return interpretation saved successfully',
+      interpretationId: result._id.toString(),
+      interpretation: result.interpretation,
+      generatedAt: result.generatedAt,
+      expiresAt: result.expiresAt
+    });
+
+  } catch (error) {
+    console.error('❌ Error saving solar return:', error);
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to save solar return interpretation'
+    }, { status: 500 });
+  }
+}
+
+// ✅ HANDLER PARA INTERPRETACIÓN NATAL
+async function handleNatalInterpretationSave(body: any) {
+  try {
+    console.log('💾 ===== SAVING NATAL INTERPRETATION =====');
+
+    const { userId, chartType, interpretation, userProfile, generatedAt } = body;
+
+    // Validación
+    if (!userId || !interpretation) {
+      return NextResponse.json(
+        { success: false, error: 'Faltan datos requeridos' },
+        { status: 400 }
+      );
+    }
+
+    // ✅ LOGS PARA DEBUG
+    console.log('🔍 Claves recibidas:', Object.keys(interpretation));
+    console.log('🔍 formacion_temprana:', interpretation.formacion_temprana ?
+      'SÍ (' + Object.keys(interpretation.formacion_temprana).length + ' keys)' : 'NO');
+    console.log('🔍 patrones_psicologicos:', interpretation.patrones_psicologicos ?
+      'SÍ (' + interpretation.patrones_psicologicos.length + ' items)' : 'NO');
+    console.log('🔍 planetas_profundos:', interpretation.planetas_profundos ?
+      'SÍ (' + Object.keys(interpretation.planetas_profundos).length + ' keys)' : 'NO');
+    console.log('🔍 nodos_lunares:', interpretation.nodos_lunares ?
+      'SÍ (' + Object.keys(interpretation.nodos_lunares).length + ' keys)' : 'NO');
+
+    await connectDB();
+
+    const expirationDate = new Date(Date.now() + CACHE_DURATION);
+
+    // ✅ UPSERT
+    const result = await Interpretation.findOneAndUpdate(
+      { userId, chartType },
+      {
+        userId,
+        chartType,
+        interpretation, // ← Guarda TODO sin filtros
+        userProfile: userProfile || {},
+        generatedAt: generatedAt ? new Date(generatedAt) : new Date(),
+        expiresAt: expirationDate,
+        method: 'openai',
+        cached: false
+      },
+      {
+        upsert: true,
+        new: true,
+        runValidators: false
       }
     );
 
@@ -77,10 +165,10 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('❌ Error saving:', error);
+    console.error('❌ Error saving natal interpretation:', error);
     return NextResponse.json({
       success: false,
-      error: 'Failed to save interpretation'
+      error: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }
@@ -145,6 +233,59 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: false,
       error: 'Failed to retrieve interpretation'
+    }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
+    const chartType = searchParams.get('chartType');
+
+    if (!userId || !chartType) {
+      return NextResponse.json(
+        { success: false, error: 'userId and chartType are required' },
+        { status: 400 }
+      );
+    }
+
+    await connectDB();
+
+    console.log(`🗑️ === DELETING ${chartType.toUpperCase()} INTERPRETATION CACHE ===`);
+    console.log('👤 User:', userId);
+    console.log('📋 Chart Type:', chartType);
+
+    // Delete all interpretations for this user and chart type
+    const result = await Interpretation.deleteMany({
+      userId,
+      chartType
+    });
+
+    console.log('📊 Deletion result:', result);
+
+    if (result.deletedCount > 0) {
+      console.log(`✅ Deleted ${result.deletedCount} cached interpretations`);
+      return NextResponse.json({
+        success: true,
+        message: `${chartType} interpretation cache cleared`,
+        deletedCount: result.deletedCount
+      });
+    } else {
+      console.log('📭 No cached interpretations found to delete');
+      return NextResponse.json({
+        success: true,
+        message: `No cached ${chartType} interpretations found`,
+        deletedCount: 0
+      });
+    }
+
+  } catch (error) {
+    console.error('❌ Error deleting interpretation cache:', error);
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to delete interpretation cache',
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }

@@ -657,12 +657,23 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { userId } = body;
-    
+    // ✅ FIX: Handle both query params and body
+    const { searchParams } = new URL(request.url);
+    let userId = searchParams.get('userId');
+
+    // If not in query params, try to get from body
+    if (!userId) {
+      try {
+        const body = await request.json();
+        userId = body.userId;
+      } catch (e) {
+        // Body might be empty, that's ok
+      }
+    }
+
     if (!userId) {
       return NextResponse.json(
-        { success: false, error: 'Se requiere el ID de usuario' }, 
+        { success: false, error: 'Se requiere el ID de usuario' },
         { status: 400 }
       );
     }

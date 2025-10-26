@@ -1,5 +1,5 @@
 // =============================================================================
-// 🌟 PÁGINA CARTA NATAL - SIN HEADER DUPLICADO
+// 🌟 PÁGINA CARTA NATAL - ✅ FIXED VERSION (NO CONSOLE.LOGS IN JSX)
 // src/app/(dashboard)/natal-chart/page.tsx
 // =============================================================================
 
@@ -80,7 +80,7 @@ export default function NatalChartPage() {
     if (response.ok) {
       const result = await response.json();
       
-      // ✅ LOG PARA VER QUÉ LLEGA
+      // ✅ LOG PARA VER QUÉ LLEGA (OUTSIDE JSX - OK!)
       console.log('🔍 API Response completa:', result.data);
       console.log('📅 Campos específicos:', {
         date: result.data.date,
@@ -184,76 +184,68 @@ export default function NatalChartPage() {
 
   // ✅ FUNCIÓN: Regenerar carta
   const regenerateChart = async () => {
+    if (!user?.uid) return;
+
+    setIsRegenerating(true);
+    setLoadingMessage('🔄 Regenerando tu carta natal...');
+
     try {
-      setIsRegenerating(true);
-      setError(null);
-      setDebugInfo('🔄 Regenerando carta natal...');
-      
-      const regenerateResponse = await fetch('/api/charts/natal', {
+      console.log('🔄 Iniciando regeneración...');
+
+      // 1. Borrar carta existente
+      const deleteResponse = await fetch(`/api/charts/natal?userId=${user.uid}`, {
+        method: 'DELETE'
+      });
+      console.log('🗑️ Carta borrada:', deleteResponse.ok);
+
+      // 2. Borrar interpretación cacheada
+      const deleteInterpResponse = await fetch(`/api/interpretations/save?userId=${user.uid}&chartType=natal`, {
+        method: 'DELETE'
+      });
+      console.log('🗑️ Interpretación borrada:', deleteInterpResponse.ok);
+
+      // 3. Generar nueva carta
+      const response = await fetch('/api/charts/natal', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: user?.uid,
+          userId: user.uid,
           regenerate: true
         })
       });
-      
-      if (!regenerateResponse.ok) {
-        const errorResult = await regenerateResponse.json();
-        throw new Error(errorResult.error || 'Error regenerando carta');
-      }
-      
-      const regenerateResult = await regenerateResponse.json();
-      
-      if (!regenerateResult.success) {
-        throw new Error(regenerateResult.error || 'Error al regenerar carta natal');
-      }
-      
-      setDebugInfo('✅ Carta natal regenerada correctamente');
-      
-      let dataToProcess = null;
-      
-      if (regenerateResult.data) {
-        dataToProcess = regenerateResult.data;
-      } else if (regenerateResult.natalChart) {
-        dataToProcess = regenerateResult.natalChart;
-      } else if (regenerateResult.chartData) {
-        dataToProcess = regenerateResult.chartData;
+
+      console.log('📡 Response status:', response.status);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('📦 Data recibida:', data);
+
+        if (data.success && data.natalChart) {
+          const processedData = processChartData(data.natalChart);
+          setChartData(processedData);
+          await loadBirthDataInfo();
+          console.log('✅ Regeneración completada');
+        }
       } else {
-        dataToProcess = regenerateResult;
+        throw new Error('Error en la regeneración');
       }
-      
-      console.log('🔄 Datos para regeneración:', dataToProcess);
-      
-      if (!dataToProcess) {
-        throw new Error('No se encontraron datos en la respuesta de regeneración');
-      }
-      
-      const processedData = processChartData(dataToProcess);
-      setChartData(processedData);
-      
+
     } catch (error) {
-      console.error('❌ Error regenerando carta:', error);
-      setError(error instanceof Error ? error.message : 'Error desconocido');
-      setDebugInfo(`❌ Error regenerando: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+      console.error('❌ Error regenerando:', error);
+      setError(error instanceof Error ? error.message : 'Error regenerando');
     } finally {
       setIsRegenerating(false);
     }
   };
 
-  // ✅ USEEFFECT
+  // ✅ CARGAR DATOS AL MONTAR
   useEffect(() => {
-    if (!user) {
-      router.push('/auth/signin');
-      return;
+    if (user?.uid && !authLoading) {
+      loadChartData();
     }
+  }, [user?.uid, authLoading]);
 
-    loadChartData();
-  }, [user, router]);
-
-  // ✅ USEEFFECT PARA MENSAJES DE CARGA
+  // ✅ ANIMACIÓN DE MENSAJES DE CARGA
   useEffect(() => {
     if (loading) {
       const messages = [
@@ -415,34 +407,21 @@ export default function NatalChartPage() {
             {isRegenerating ? 'Regenerando...' : 'Regenerar Carta'}
           </button>
 
-          {/* BOTÓN DE INTERPRETACIÓN */}
+          {/* ✅ BOTÓN DE INTERPRETACIÓN - FIXED: NO CONSOLE.LOGS IN JSX */}
           {chartData && birthData && (
-            <>
-              {console.log('🎯 ===== RENDERIZANDO BOTÓN DE INTERPRETACIÓN NATAL =====')}
-              {console.log('🎯 userId:', user?.uid)}
-              {console.log('🎯 chartData disponible:', !!chartData)}
-              {console.log('🎯 birthData disponible:', !!birthData)}
-              {console.log('🎯 userProfile:', {
+            <InterpretationButton
+              type="natal"
+              userId={user?.uid || ''}
+              chartData={chartData}
+              userProfile={{
                 name: birthData.fullName || 'Usuario',
                 age: new Date().getFullYear() - new Date(birthData.birthDate).getFullYear(),
                 birthPlace: birthData.birthPlace,
                 birthDate: birthData.birthDate,
                 birthTime: birthData.birthTime
-              })}
-              <InterpretationButton
-                type="natal"
-                userId={user?.uid || ''}
-                chartData={chartData}
-                userProfile={{
-                  name: birthData.fullName || 'Usuario',
-                  age: new Date().getFullYear() - new Date(birthData.birthDate).getFullYear(),
-                  birthPlace: birthData.birthPlace,
-                  birthDate: birthData.birthDate,
-                  birthTime: birthData.birthTime
-                }}
-                className="w-full sm:w-auto"
-              />
-            </>
+              }}
+              className="w-full sm:w-auto"
+            />
           )}
         </div>
 
