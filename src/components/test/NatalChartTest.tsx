@@ -97,7 +97,7 @@ export default function NatalChartTest() {
       // ✅ PASO 4: FINALMENTE generar carta progresada
       console.log('🔮 Generando carta progresada...');
       
-      const progressedResponse = await fetch('/api/charts/progressed', {
+      const progressedResponse = await fetch('/api/charts/solar-return', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -427,7 +427,7 @@ export default function NatalChartTest() {
           <div>
             <h4 className="font-semibold text-gray-700 mb-2">🔮**Carta Progresada**</h4>
             <ul className="text-gray-600 text-sm space-y-1">
-              <li>• **Endpoint:** /api/charts/progressed</li>
+            <li>• **Endpoint:** /api/charts/solar-return</li>
               <li>• **Método:** POST</li>
               <li>• **Calcula:** Progresiones secundarias</li>
               <li>• **Años:** Actual + Siguiente automático</li>

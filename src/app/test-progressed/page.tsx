@@ -53,7 +53,7 @@ export default function TestProgressedChart() {
     setLoading(true);
     try {
       // Simular llamada con userId ficticio
-      const response = await fetch('/api/charts/progressed', {
+      const response = await fetch('/api/charts/solar-return', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

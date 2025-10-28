@@ -1,405 +1,364 @@
-# 📁 Estructura del Proyecto: Tu Vuelta al Sol
+# Proyecto Agenda Tu Vuelta al Sol - Estructura de Archivos
 
-## 📋 Resumen General
-Proyecto de astrología desarrollado con Next.js 15, TypeScript, MongoDB y Firebase. Incluye cálculo de cartas natales, solares return, interpretaciones con IA y agenda astrológica.
+## Archivos Raíz
+- `.gitignore`
+- `.vercelignore`
+- `debug-token.js`
+- `eslint.config.mjs`
+- `fix-import-PostmanTest.txt`
+- `jest.config.js`
+- `jest.setup.ts`
+- `next.config.js`
+- `next.config.ts`
+- `package-lock.json`
+- `package.json`
+- `PLAN_ACCION_INTERPRETACION.md`
+- `postcss.config.mjs`
+- `PROJECT_STRUCTURE.md`
+- `Prokerala_Carta_Natal.postman_collection.json`
+- `prokerala-response.json`
+- `prokerala-token-test.js`
+- `README.md`
+- `test-books.ts`
+- `test-build-no-openai.ts`
+- `test-force-regenerate.js`
+- `test-prokerala-connection.js`
+- `test-prokerala-fixed.js`
+- `test-simple-prokerala.js`
+- `TODO.md`
+- `tsconfig.json`
+- `vercel.env`
+- `vercel.json`
 
-## 🏗️ Arquitectura Principal
+## Directorio `astrology_books/`
+- `chunks.json`
 
-### 📦 Raíz del Proyecto
-```
-/
-├── 📄 Configuración
-│   ├── next.config.js/ts          # Configuración Next.js
-│   ├── tsconfig.json              # Configuración TypeScript
-│   ├── package.json               # Dependencias y scripts
-│   ├── eslint.config.mjs          # Configuración ESLint
-│   ├── postcss.config.mjs         # Configuración PostCSS
-│   ├── jest.config.js             # Configuración de pruebas
-│   └── vercel.json                # Configuración de despliegue
-│
-├── 📚 Documentación
-│   ├── README.md                  # Documentación principal
-│   ├── TODO.md                    # Lista de tareas pendientes
-│   └── PLAN_ACCION_INTERPRETACION.md
-│
-├── 🛠️ Scripts de Utilidad
-│   ├── scripts/                   # Scripts de mantenimiento
-│   │   ├── clear-cache.js
-│   │   ├── diagnose-mongodb.js
-│   │   ├── verify-solar-return.ts
-│   │   └── parse_and_chunk_pdfs.js
-│   └── astrology_books/           # Base de datos de libros
-│
-└── 📱 Código Fuente (src/)
-```
+## Directorio `public/`
+- `file.svg`
+- `globe.svg`
+- `next.svg`
+- `site.webmanifest`
+- `vercel.svg`
+- `window.svg`
 
-## 🎯 Aplicación Principal (src/)
+## Directorio `scripts/`
+- `cleanup-all-interpretations.js`
+- `clear-cache.js`
+- `compare-birth-data.js`
+- `diagnose-collections.js`
+- `diagnose-mongodb.js`
+- `fix-quotes.sh`
+- `insert-test-user-birthdata.js`
+- `manage-cache.js`
+- `migrate-test-to-astrology.js`
+- `parse_and_chunk_pdfs.js`
+- `professional-quote-fix.sh`
+- `prokerala-diagnostic.js`
+- `verify-solar-return.ts`
 
-### 🏠 Páginas de la App (src/app/)
-```
-src/app/
-├── 📄 layout.tsx                 # Layout principal
-├── 📄 page.tsx                   # Página de inicio
-├── 📄 globals.css                # Estilos globales
-│
-├── 🔐 Autenticación (auth)/
-│   ├── login/                    # Página de login
-│   └── register/                 # Página de registro
-│
-├── 📊 Dashboard (dashboard)/
-│   ├── page.tsx                  # Dashboard principal
-│   ├── natal-chart/              # Carta natal
-│   ├── progressed-chart/         # Carta progresada/solar return
-│   └── profile/                  # Perfil de usuario
-│
-├── ⚙️ Administración
-│   ├── admin/                    # Panel de administración
-│   └── debug/                    # Página de debug
-│
-├── 🧪 Páginas de Testing
-│   ├── test-api/                 # Test de APIs
-│   ├── test-mongodb/             # Test de MongoDB
-│   ├── test-natal-chart/         # Test carta natal
-│   ├── test-progressed/          # Test carta progresada
-│   ├── test-agenda-ai/           # Test agenda con IA
-│   ├── test-chart-display/       # Test visualización de cartas
-│   ├── test-timezone/            # Test zonas horarias
-│   └── postman-test/             # Tests con Postman
-│
-└── 🌐 APIs (api/)
-```
+## Directorio `src/`
 
-### 🔌 APIs Backend (src/app/api/)
+### `src/app/`
+- `favicon.ico`
+- `globals.css`
+- `layout.tsx`
+- `page.tsx`
 
-#### 🏥 APIs de Salud del Sistema
-```
-api/
-├── 🔧 debug/                     # Endpoints de debug
-│   ├── debug-auth/               # Debug autenticación
-│   ├── debug-firebase/           # Debug Firebase
-│   └── debug-credentials/        # Debug credenciales
-│
-├── 📊 cache/                     # Gestión de caché
-│   ├── check/                    # Verificar caché
-│   ├── save/                     # Guardar en caché
-│   └── stats/                    # Estadísticas de caché
-│
-└── 🧪 test-mongodb/              # Test de conexión MongoDB
-```
+#### `src/app/(auth)/`
+- `login/`
+- `register/`
 
-#### 👤 APIs de Usuarios
-```
-api/
-├── 👥 users/                     # Gestión de usuarios
-├── 👨‍👩‍👧‍👦 admin/                     # Administración de usuarios
-│   ├── users/                    # Lista de usuarios
-│   ├── delete-user/              # Eliminar usuario
-│   └── update-role/              # Actualizar rol
-│
-└── 👶 birth-data/                # Datos de nacimiento
-    ├── all/                      # Todos los datos
-    └── [userId]                  # Datos por usuario
-```
+#### `src/app/(dashboard)/`
+- `layout.tsx`
+- `agenda/`
+- `birth-data/`
+- `dashboard/`
+- `natal-chart/`
+- `profile/`
+- `solar-return/`
 
-#### 🔮 APIs de Astrología
-```
-api/astrology/
-├── 📈 natal-chart/               # Carta natal
-├── 🔄 progressed-chart-accurate/ # Carta progresada precisa
-├── ☀️ solar-return/              # Solar return
-│
-├── 🤖 generate-agenda-ai/        # Generar agenda con IA
-├── 📅 get-agenda/                # Obtener agenda
-├── 🔍 interpret-events/          # Interpretar eventos
-│
-├── 🌟 interpret-natal/           # Interpretación carta natal
-├── 🌅 interpret-solar-return/    # Interpretación solar return
-├── 🔄 interpret-progressed/      # Interpretación carta progresada
-├── 🧹 interpret-natal-clean/     # Interpretación limpia
-│
-├── ✅ complete-events/           # Completar eventos
-├── 📝 simple-agenda/             # Agenda simple
-└── 🧪 test-postman/              # Tests con Postman
-```
+#### `src/app/admin/`
+- `page.tsx`
 
-#### 🗺️ APIs de Ubicación
-```
-api/
-├── 🗺️ geocode/                   # Geocodificación
-├── 🗺️ reverse-geocode/           # Geocodificación inversa
-└── 📍 events/astrological/       # Eventos astrológicos
-```
+#### `src/app/api/`
 
-#### 📊 APIs de Cartas
-```
-api/charts/
-├── 🌟 natal/                     # Carta natal
-├── ☀️ solar-return/              # Solar return
-└── 🔄 progressed/                # Carta progresada
-```
+##### `src/app/api/admin/`
+- *(vacío)*
 
-#### 💾 APIs de Persistencia
-```
-api/
-├── 💾 interpretations/save/      # Guardar interpretaciones
-└── 📄 pdf/generate/              # Generar PDFs
-```
+##### `src/app/api/astrology/`
+- `ChartLoader.tsx`
+- `complete-events/`
+- `generate-agenda-ai/`
+- `get-agenda/`
+- `interpret-chunk/`
+- `interpret-events/`
+- `interpret-natal/`
+- `interpret-natal-clean/`
+- `interpret-solar/`
+- `interpret-solar-return/`
+- `interpretations/`
+- `natal-chart/`
+- `progressed-chart-accurate/`
+- `progressed-interpretation/`
+- `simple-agenda/`
+- `test-postman/`
 
-#### 🔗 APIs Externas
-```
-api/prokerala/
-├── 🔑 token/                     # Obtener token
-├── 🧪 test/                      # Test de conexión
-├── 📍 location-search/           # Buscar ubicaciones
-├── 🌟 natal-chart/               # Carta natal Prokerala
-├── 🌟 natal-horoscope/           # Horóscopo natal
-├── 🔄 progressed-chart/          # Carta progresada
-├── ☀️ direct-test/               # Test directo
-└── 📄 test-page/                 # Página de test
-```
+##### `src/app/api/birth-data/`
+- `route.ts`
+- `all/`
 
-### 🧩 Componentes (src/components/)
+##### `src/app/api/cache/`
+- *(vacío)*
 
-#### 🎨 UI y Layout
-```
-components/
-├── 🎨 ui/                        # Componentes base de UI
-├── 🏗️ layout/                    # Layout components
-│   ├── PrimaryHeader.tsx         # Header principal
-│   └── Footer.tsx                # Footer
-│
-└── 🔐 auth/                      # Componentes de autenticación
-    ├── LoginForm.tsx             # Formulario de login
-    └── RegisterForm.tsx          # Formulario de registro
-```
+##### `src/app/api/charts/`
+- `natal/`
+- `progressed/`
+- `solar-return/`
 
-#### 🔮 Componentes de Astrología
-```
-components/astrology/
-├── 📊 ChartDisplay.tsx           # Visualización de cartas
-├── ☸️ ChartWheel.tsx             # Rueda zodiacal
-├── 🌟 NatalChartWheel.tsx        # Rueda carta natal
-├── 🔄 ProgressedChartVisual.tsx  # Visualización progresada
-│
-├── 🏠 HouseGrid.tsx              # Cuadrícula de casas
-├── 🪐 PlanetSymbol.tsx           # Símbolos planetarios
-├── 📏 AspectLines.tsx            # Líneas de aspectos
-│
-├── 💳 BirthDataCard.tsx          # Tarjeta datos nacimiento
-├── 💳 BirthDataForm.tsx          # Formulario datos nacimiento
-├── 🏠 AscendantCard.tsx          # Tarjeta ascendente
-├── 🏠 MidheavenCard.tsx          # Tarjeta medio cielo
-├── 🏠 CombinedAscendantMCCard.tsx # Tarjeta combinada
-│
-├── ⚖️ ElementsModalitiesCard.tsx # Elementos y modalidades
-├── 🌌 CosmicFootprint.tsx        # Huella cósmica
-│
-├── 📅 AstrologicalCalendar.tsx   # Calendario astrológico
-├── 📝 AstrologicalAgenda.tsx     # Agenda astrológica
-├── 🤖 AstrologicalAgendaGenerator.tsx
-│
-├── 🎛️ AspectControlPanel.tsx     # Panel control aspectos
-├── 📊 ChartComparisonComponent.tsx # Comparación de cartas
-│
-├── 💬 InterpretationButton.tsx   # Botón de interpretación
-├── 💬 InterpretationDisplay.tsx  # Visualización interpretación
-├── 💬 ProgressedInterpretationDisplay.tsx
-│
-├── 🤖 AgendaAIDisplay.tsx        # Display agenda IA
-├── ⏳ AgendaLoadingStates.tsx    # Estados de carga agenda
-│
-└── 🔍 tooltips/                  # Tooltips
-    └── ChartTooltips.tsx         # Tooltips de cartas
-```
+##### `src/app/api/debug/`
+- *(vacío)*
 
-#### 🛠️ Componentes de Administración
-```
-components/admin/
-├── 👶 BirthDataAdminTable.tsx    # Tabla admin datos nacimiento
-└── 🗑️ DeleteUserForm.tsx         # Formulario eliminar usuario
-```
+##### `src/app/api/debug-auth/`
+- *(vacío)*
 
-#### 🧪 Componentes de Testing
-```
-components/test/
-├── 🤖 AgendaAITest.tsx           # Test agenda IA
-├── 🤖 GenerateAgendaAITest.tsx   # Test generar agenda IA
-├── 🗄️ MongoDBTest.tsx            # Test MongoDB
-├── 🌟 NatalChartTest.tsx         # Test carta natal
-└── 🤖 OpenAITest.tsx             # Test OpenAI
-```
+##### `src/app/api/debug-auth-context/`
+- *(vacío)*
 
-#### 🐛 Componentes de Debug
-```
-components/debug/
-└── 🔄 ForceRegenerateChart.tsx   # Forzar regeneración carta
-```
+##### `src/app/api/debug-credentials/`
+- *(vacío)*
 
-#### 📊 Componentes de Dashboard
-```
-components/dashboard/
-├── 💳 BirthDataForm.tsx          # Formulario datos nacimiento
-└── 🌟 NatalChartCard.tsx         # Tarjeta carta natal
-```
+##### `src/app/api/debug-firebase/`
+- *(vacío)*
 
-### 🎣 Hooks (src/hooks/)
-```
-hooks/
-├── 📊 useChart.ts                # Hook para cartas
-├── 📊 useChartDisplay.ts         # Hook visualización cartas
-├── 🪐 usePlanets.ts              # Hook planetas
-├── 📐 useAspects.ts              # Hook aspectos
-├── 🔗 useProkeralaApi.ts         # Hook API Prokerala
-│
-├── 🔮 astrology/                 # Hooks específicos astrología
-└── 📚 lib/                       # Hooks de librería
-```
+##### `src/app/api/events/`
+- *(vacío)*
 
-### 📚 Modelos de Datos (src/models/)
-```
-models/
-├── 👤 User.ts                    # Modelo usuario
-├── 👶 BirthData.ts               # Modelo datos nacimiento
-├── 📊 Chart.ts                   # Modelo carta
-├── 💬 Interpretation.ts          # Modelo interpretación
-└── 🤖 AIUsage.ts                 # Modelo uso IA
-```
+##### `src/app/api/geocode/`
+- *(vacío)*
 
-### 🔧 Servicios (src/services/)
-```
-services/
-├── 🔮 astrologyService.ts        # Servicio astrología general
-├── 🗄️ cacheService.ts            # Servicio de caché
-├── 📊 chartCalculationsService.ts # Cálculos de cartas
-├── 💬 chartInterpretationsService.ts # Interpretaciones
-├── 🎨 chartRenderingService.tsx  # Renderizado de cartas
-│
-├── 📅 astrologicalEventsService.ts # Eventos astrológicos
-├── 🤖 batchInterpretations.ts    # Interpretaciones por lotes
-├── 📚 educationalInterpretationService.ts # Interpretaciones educativas
-│
-├── 🔄 progressedChartService.tsx # Servicio cartas progresadas
-├── ☀️ solarReturnInterpretationService.ts # Interpretaciones solar return
-├── 🤖 trainedAssistantService.ts # Asistente entrenado
-│
-├── 👤 userDataService.ts         # Servicio datos usuario
-└── 🌐 prokeralaService.ts        # Servicio Prokerala
-```
+##### `src/app/api/interpretations/`
+- `clear-cache/`
+- `save/`
 
-### 🛠️ Utilidades (src/utils/)
-```
-utils/
-├── 📅 agendaCalculator.ts        # Calculador de agenda
-├── 🕐 dateTimeUtils.ts           # Utilidades fecha/hora
-│
-├── 🔮 astrology/                 # Utilidades astrología
-└── 🤖 prompts/                   # Prompts para IA
-```
+##### `src/app/api/pdf/`
+- *(vacío)*
 
-### 📋 Tipos (src/types/)
-```
-types/
-├── 🔮 astrology.ts               # Tipos astrología
-└── 🔮 astrology/                 # Tipos específicos astrología
-```
+##### `src/app/api/prokerala/`
+- `client-v2.ts`
+- `utils.ts`
+- `chart/`
+- `direct-test/`
+- `location-search/`
+- `natal-chart/`
+- `natal-horoscope/`
+- `progressed-chart/`
+- `test/`
+- `test-page/`
+- `token/`
 
-### 📚 Constantes (src/constants/)
-```
-constants/
-├── 🔮 astrology.ts               # Constantes astrología
-└── 🔮 astrology/                 # Constantes específicas
-```
+##### `src/app/api/reverse-geocode/`
+- *(vacío)*
 
-### 🔗 Librerías (src/lib/)
-```
-lib/
-├── 🗄️ db.ts                      # Conexión base de datos
-├── 🔥 firebase.ts                # Firebase cliente
-├── 🔥 firebaseAdmin.ts           # Firebase admin
-├── 🔥 firebase-client.ts         # Cliente Firebase
-├── 🛠️ utils.ts                   # Utilidades generales
-│
-├── 🔥 firebase/                  # Utilidades Firebase
-└── 🌐 prokerala/                 # Utilidades Prokerala
-```
+##### `src/app/api/test-mongodb/`
+- *(vacío)*
 
-### 🔐 Contextos (src/context/)
-```
-context/
-├── 🔐 AuthContext.tsx            # Contexto autenticación
-└── 🔔 NotificationContext.tsx    # Contexto notificaciones
-```
+##### `src/app/api/users/`
+- `route.ts`
 
-## 🚀 Tecnologías Utilizadas
+#### `src/app/clear-chart-cache/`
+- `route.ts`
 
-### 🎨 Frontend
-- **Next.js 15** - Framework React
-- **TypeScript** - Tipado estático
-- **Tailwind CSS** - Estilos
-- **Lucide React** - Iconos
+#### `src/app/debug/`
+- `page.tsx`
 
-### 🔧 Backend
-- **Next.js API Routes** - APIs
-- **MongoDB** - Base de datos
-- **Firebase** - Autenticación y hosting
+#### `src/app/postman-test/`
+- `page.tsx`
 
-### 🤖 IA e Integraciones
-- **OpenAI GPT-4** - Interpretaciones
-- **Prokerala API** - Cálculos astrológicos
-- **Google Maps API** - Geocodificación
+#### `src/app/test-agenda-ai/`
+- `page.tsx`
 
-### 🧪 Testing y Calidad
-- **Jest** - Testing framework
-- **ESLint** - Linting
-- **Prettier** - Formateo código
+#### `src/app/test-api/`
+- `page.tsx`
 
-## 📊 Estadísticas del Proyecto
+#### `src/app/test-chart-display/`
+- `page.tsx`
 
-- **Total de archivos**: ~200+
-- **Líneas de código**: ~15,000+
-- **Componentes React**: ~50+
-- **APIs**: ~30+
-- **Modelos de datos**: 5
-- **Servicios**: 15+
+#### `src/app/test-mongodb/`
+- `page.tsx`
 
-## 🎯 Funcionalidades Principales
+#### `src/app/test-natal-chart/`
+- `page.tsx`
 
-1. **📊 Cálculo de Cartas Astrológicas**
-   - Carta natal
-   - Carta solar return
-   - Carta progresada
+#### `src/app/test-progressed/`
+- `page.test.tsx`
+- `page.tsx`
 
-2. **🤖 Interpretaciones con IA**
-   - Interpretaciones detalladas
-   - Comparaciones carta natal vs solar return
-   - Agenda astrológica personalizada
+#### `src/app/test-timezone/`
+- `page.tsx`
 
-3. **👤 Gestión de Usuarios**
-   - Autenticación Firebase
-   - Perfiles de usuario
-   - Datos de nacimiento
+#### `src/app/types/`
+- `astrology.ts`
 
-4. **💾 Persistencia de Datos**
-   - MongoDB para interpretaciones
-   - Sistema de caché
-   - Backup automático
+### `src/components/`
 
-5. **🗺️ Integración Geográfica**
-   - Geocodificación
-   - Zonas horarias
-   - Ubicaciones precisas
+#### `src/components/admin/`
+- `BirthDataAdminTable.tsx`
+- `DeleteUserForm.tsx`
 
-6. **📱 Interfaz de Usuario**
-   - Diseño responsive
-   - Visualizaciones interactivas
-   - Tooltips informativos
+#### `src/components/astrology/`
+- `AgendaAIDisplay.tsx`
+- `AgendaLoadingStates.tsx`
+- `AscendantCard.tsx`
+- `AspectControlPanel.tsx`
+- `AspectLines.tsx`
+- `AstrologicalAgenda.tsx`
+- `AstrologicalAgendaGenerator.tsx`
+- `AstrologicalCalendar.tsx`
+- `BirthDataCard.tsx`
+- `BirthDataForm.tsx`
+- `ChartComparisonComponent.tsx`
+- `ChartDisplay.tsx`
+- `ChartTooltips.tsx`
+- `ChartWheel.tsx`
+- `CombinedAscendantMCCard.tsx`
+- `CosmicFootprint.tsx`
+- `ElementsModalitiesCard.tsx`
+- `HouseGrid.tsx`
+- `InterpretationButton.tsx`
+- `InterpretationDisplay.tsx`
+- `MidheavenCard.tsx`
+- `NatalChartWheel.tsx`
+- `PlanetSymbol.tsx`
+- `ProgressedChartVisual.tsx`
+- `ProgressedInterpretationDisplay.tsx`
+- `SectionMenu.tsx`
 
-## 🔄 Flujo de Datos
+##### `src/components/astrology/tooltips/`
+- *(vacío)*
 
-```
-Usuario → Autenticación → Datos Nacimiento → Cálculo Carta → Interpretación IA → Almacenamiento → Visualización
-```
+#### `src/components/auth/`
+- `LoginForm.tsx`
+- `RegisterForm.tsx`
 
----
+#### `src/components/dashboard/`
+- `BirthDataForm.tsx`
+- `NatalChartCard.tsx`
 
-*Documento generado automáticamente - Última actualización: $(date)*
+#### `src/components/debug/`
+- `ForceRegenerateChart.tsx`
+
+#### `src/components/layout/`
+- `Footer.tsx`
+- `PrimaryHeader.tsx`
+
+#### `src/components/test/`
+- `AgendaAITest.tsx`
+
+#### `src/components/ui/`
+- `Alert.tsx`
+- `Button.tsx`
+- `FloatingActionPanel.tsx`
+- `Input.tsx`
+
+### `src/constants/`
+- `astrology.ts`
+
+#### `src/constants/astrology/`
+- `chartConstants.ts`
+- `progressedChartConstants.ts`
+- `psychologicalTooltips.ts`
+
+### `src/context/`
+- `AuthContext.tsx`
+- `NotificationContext.tsx`
+
+### `src/hooks/`
+
+#### `src/hooks/astrology/`
+- `useChartDisplay.ts`
+
+#### `src/hooks/lib/`
+- `db.ts`
+- `firebase.ts`
+- `utils.ts`
+- `prokerala/`
+
+### `src/lib/`
+- `db.ts`
+- `firebase-client.ts`
+- `firebase.ts`
+- `firebaseAdmin.ts`
+- `utils.ts`
+
+#### `src/lib/firebase/`
+- `admin.ts`
+- `client.ts`
+- `config.ts`
+- `index.ts`
+
+#### `src/lib/prokerala/`
+- `client.ts`
+- `endpoints.ts`
+- `types.ts`
+- `utils.ts`
+
+### `src/models/`
+- `AIUsage.ts`
+- `BirthData.ts`
+- `Chart.ts`
+- `Interpretation.ts`
+- `User.ts`
+
+### `src/services/`
+- `astrologicalEventsService.ts`
+- `astrologyService.ts`
+- `batchInterpretations.ts`
+- `cacheService.ts`
+- `chartCalculationsService.ts`
+- `chartInterpretationsService.ts`
+- `chartRenderingService.tsx`
+- `educationalInterpretationService.ts`
+- `educationalInterpretationService.ts.backup`
+- `progressedChartService.tsx`
+- `prokeralaService.ts`
+- `solarReturnInterpretationService.ts`
+- `trainedAssistantService.ts`
+- `trainedAssistantService.ts.bak`
+- `userDataService.ts`
+
+### `src/types/`
+
+#### `src/types/astrology/`
+- `aspects.ts`
+- `basic.ts`
+- `chart.ts`
+- `chartConstants.ts`
+- `chartDisplay.ts`
+- `chartDisplaycopy.ts`
+- `index.ts`
+- `interpretation.ts`
+- `unified-types.ts`
+- `utils.ts`
+
+### `src/utils/`
+- `agendaCalculator.ts`
+- `dateTimeUtils.ts`
+
+#### `src/utils/astrology/`
+- `agendaDateCalculator.ts`
+- `aspectCalculations.ts`
+- `completeEventGenerator.ts`
+- `coordinateUtils.ts`
+- `degreeConverter.ts`
+- `disruptiveMotivationalSystem.ts`
+- `enrichUserProfile.ts`
+- `events.ts`
+- `extractAstroProfile.ts`
+- `generateCharts.ts`
+- `intelligentFallbacks.ts`
+- `planetPositions.ts`
+- `solarReturnComparison.ts`
+
+#### `src/utils/prompts/`
+- `disruptivePrompts.ts`
+- `solarReturnPrompts.ts`

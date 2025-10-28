@@ -424,6 +424,41 @@ export async function getNatalHoroscope(
 }
 
 /**
+ * Calculate house position from planet longitude and house cusps
+ */
+function calculateHousePosition(
+  planetLongitude: number,
+  houses: ProkeralaApiHouse[]
+): number {
+  if (!houses || houses.length === 0) return 1;
+
+  // Normalize longitude to 0-360
+  const normLong = ((planetLongitude % 360) + 360) % 360;
+
+  // Find which house the planet is in
+  for (let i = 0; i < houses.length; i++) {
+    const currentHouse = houses[i];
+    const nextHouse = houses[(i + 1) % houses.length];
+
+    const currentLong = ((currentHouse.longitude % 360) + 360) % 360;
+    const nextLong = ((nextHouse.longitude % 360) + 360) % 360;
+
+    // Handle houses that cross 0° Aries
+    if (currentLong > nextLong) {
+      if (normLong >= currentLong || normLong < nextLong) {
+        return currentHouse.number;
+      }
+    } else {
+      if (normLong >= currentLong && normLong < nextLong) {
+        return currentHouse.number;
+      }
+    }
+  }
+
+  return 1; // Default to house 1
+}
+
+/**
  * Convierte la respuesta de Prokerala API a formato interno NatalChart
  */
 export function convertProkeralaToNatalChart(
@@ -434,26 +469,56 @@ export function convertProkeralaToNatalChart(
 ): NatalChart {
   try {
     console.log('🔄 Convirtiendo datos de Prokerala a formato interno...');
-    
-    // Procesar planetas
-    const planets: PlanetPosition[] = (apiResponse.planets || []).map((planet: ProkeralaApiPlanet) => ({
-      name: translatePlanetName(planet.name),
-      sign: planet.sign || getSignFromLongitude(planet.longitude),
-      degree: Math.floor(planet.longitude % 30),
-      minutes: Math.floor((planet.longitude % 1) * 60),
-      retrograde: planet.is_retrograde || false,
-      housePosition: planet.house || 1,
-      longitude: planet.longitude
-    }));
 
-    // Procesar casas
+    // ✅ STEP 1: Process houses FIRST (before planets)
     const houses: House[] = (apiResponse.houses || []).map((house: ProkeralaApiHouse) => ({
       number: house.number,
-      sign: house.sign || getSignFromLongitude(house.longitude),
+      sign: getSignFromLongitude(house.longitude),  // ✅ Eliminar "house.sign ||"
       degree: Math.floor(house.longitude % 30),
       minutes: Math.floor((house.longitude % 1) * 60),
       longitude: house.longitude
     }));
+
+    // ✅ STEP 2: Calculate house from longitude
+
+    // ✅ STEP 3: Process planets WITH house calculation
+    const planets: PlanetPosition[] = (apiResponse.planets || []).map((planet: ProkeralaApiPlanet) => {
+      // Calculate house position if not provided by API
+      let housePosition = planet.house || 1;
+      if (!planet.house && houses.length === 12) {
+        const normalizedPlanet = ((planet.longitude % 360) + 360) % 360;
+        for (let i = 0; i < 12; i++) {
+          const currentHouse = houses[i];
+          const nextHouse = houses[(i + 1) % 12];
+          const startLong = currentHouse.longitude!;
+          const endLong = nextHouse.longitude!;
+
+          if (endLong < startLong) {
+            // House crosses 0° Aries
+            if (normalizedPlanet >= startLong || normalizedPlanet < endLong) {
+              housePosition = currentHouse.number;
+              break;
+            }
+          } else {
+            // Normal house
+            if (normalizedPlanet >= startLong && normalizedPlanet < endLong) {
+              housePosition = currentHouse.number;
+              break;
+            }
+          }
+        }
+      }
+
+      return {
+        name: translatePlanetName(planet.name),
+        sign: getSignFromLongitude(planet.longitude),  // ✅ Eliminar "planet.sign ||"
+        degree: Math.floor(planet.longitude % 30),
+        minutes: Math.floor((planet.longitude % 1) * 60),
+        retrograde: planet.is_retrograde || false,
+        housePosition: housePosition,
+        longitude: planet.longitude
+      };
+    });
 
     // Procesar aspectos
     const aspects: Aspect[] = (apiResponse.aspects || []).map((aspect: ProkeralaApiAspect) => ({
@@ -468,7 +533,7 @@ export function convertProkeralaToNatalChart(
     let ascendant;
     if (apiResponse.ascendant) {
       ascendant = {
-        sign: apiResponse.ascendant.sign || getSignFromLongitude(apiResponse.ascendant.longitude),
+        sign: getSignFromLongitude(apiResponse.ascendant.longitude),  // ✅ Eliminar "apiResponse.ascendant.sign ||"
         degree: Math.floor(apiResponse.ascendant.longitude % 30),
         minutes: Math.floor((apiResponse.ascendant.longitude % 1) * 60),
         longitude: apiResponse.ascendant.longitude
@@ -478,7 +543,7 @@ export function convertProkeralaToNatalChart(
     let midheaven;
     if (apiResponse.mc) {
       midheaven = {
-        sign: apiResponse.mc.sign || getSignFromLongitude(apiResponse.mc.longitude),
+        sign: getSignFromLongitude(apiResponse.mc.longitude),  // ✅ Eliminar "apiResponse.mc.sign ||"
         degree: Math.floor(apiResponse.mc.longitude % 30),
         minutes: Math.floor((apiResponse.mc.longitude % 1) * 60),
         longitude: apiResponse.mc.longitude

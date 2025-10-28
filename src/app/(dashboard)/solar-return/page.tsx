@@ -99,7 +99,7 @@ export default function SolarReturnPage() {
 
       // STEP 3: Load Solar Return
       console.log('📋 Paso 3: Cargando Solar Return...');
-      const srResponse = await fetch(`/api/charts/progressed?userId=${user?.uid}`);
+      const srResponse = await fetch(`/api/charts/solar-return?userId=${user?.uid}`);
 
       if (!srResponse.ok) {
         throw new Error('Error cargando solar return');
@@ -135,7 +135,7 @@ export default function SolarReturnPage() {
     setError(null);
 
     try {
-      const response = await fetch('/api/charts/progressed', {
+      const response = await fetch('/api/charts/solar-return', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

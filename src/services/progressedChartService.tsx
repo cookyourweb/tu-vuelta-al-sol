@@ -588,6 +588,25 @@ function processProkeralaProgressedData(apiData: any, params: any): DetailedProg
       sign: getSignFromLongitude(house.longitude || (index * 30 + 15))
     }));
 
+    // ✅ ADD THIS NEW CODE (after line 589):
+    // Extract Ascendant and Midheaven from Solar Return API
+    const ascendant = apiData?.data?.ascendant ? {
+      longitude: apiData.data.ascendant.longitude || 0,
+      sign: getSignFromLongitude(apiData.data.ascendant.longitude || 0),
+      degree: (apiData.data.ascendant.longitude || 0) % 30,
+      minutes: Math.floor(((apiData.data.ascendant.longitude || 0) % 1) * 60)
+    } : undefined;
+
+    const midheaven = apiData?.data?.mc ? {
+      longitude: apiData.data.mc.longitude || 0,
+      sign: getSignFromLongitude(apiData.data.mc.longitude || 0),
+      degree: (apiData.data.mc.longitude || 0) % 30,
+      minutes: Math.floor(((apiData.data.mc.longitude || 0) % 1) * 60)
+    } : undefined;
+
+    console.log('🔍 SOLAR RETURN - Ascendant extracted:', ascendant);
+    console.log('🔍 SOLAR RETURN - MC extracted:', midheaven);
+
     // Aspectos básicos (se pueden extraer de la API si están disponibles)
     const aspectos = apiData?.data?.aspects || [];
 
@@ -638,6 +657,10 @@ function processProkeralaProgressedData(apiData: any, params: any): DetailedProg
         symbol: '♂',
         meaning: getProgressedPlanetMeaning('Marte')
       },
+
+      // ✅ ADD THESE TWO LINES:
+      ascendant: ascendant,
+      midheaven: midheaven,
 
       // Edad actual
       currentAge: currentAge,

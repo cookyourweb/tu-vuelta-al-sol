@@ -68,8 +68,8 @@ function TestAgendaAIContent() {
         const natalResponse = await fetch(`/api/charts/natal?userId=${user.uid}`);
         const natalData = await natalResponse.json();
 
-        // Verificar carta progresada  
-        const progressedResponse = await fetch(`/api/charts/progressed?userId=${user.uid}`);
+        // Verificar carta progresada
+        const progressedResponse = await fetch(`/api/charts/solar-return?userId=${user.uid}`);
         const progressedData = await progressedResponse.json();
 
         // Verificar OpenAI

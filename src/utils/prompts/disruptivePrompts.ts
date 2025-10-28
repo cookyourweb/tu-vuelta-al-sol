@@ -119,9 +119,28 @@ export function generateDisruptiveNatalPrompt(
   chartData: ChartData,
   userProfile: UserProfile
 ): string {
-  
+
+  console.log('🎨 Building Disruptive Prompt...');
+  console.log('📊 Chart Data for Prompt:', {
+    planets: chartData.planets?.map((p: any) => ({
+      name: p.name,
+      sign: p.sign,
+      house: p.house || p.houseNumber,
+      degree: p.degree
+    })),
+    ascendant: chartData.ascendant
+  });
+
+  // Verify all planets have houses
+  const missingHouses = chartData.planets?.filter((p: any) =>
+    !p.house && !p.houseNumber
+  );
+
+  if (missingHouses?.length > 0) {
+    console.warn('⚠️ Planets missing house positions:', missingHouses);
+  }
+
   const userName = userProfile.name || 'Usuario';
-  const userAge = userProfile.age || 0;
   
   // Extraer planetas clave
   const sol = chartData.planets.find(p => p.name === 'Sol');
@@ -178,7 +197,7 @@ Tu tarea: Interpretar la carta natal de ${userName.toUpperCase()} con PROFUNDIDA
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Nombre: ${userName}
-Edad: ${userAge} años
+Edad: ${userProfile.age} años
 Nacimiento: ${userProfile.birthDate} a las ${userProfile.birthTime}
 Lugar: ${userProfile.birthPlace}
 
@@ -244,6 +263,25 @@ Casa 12: Espiritualidad, subconsciente, karma, retiro, lo oculto
 - NO incluyas "haz esto hoy/semana/mes"
 - SÍ incluye preguntas de reflexión profunda
 - SÍ explica CÓMO se formó cada patrón
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚡ ÃNGULOS VITALES - INTERPRETACIÃ"N OBLIGATORIA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ASCENDENTE (AC): ${chartData.ascendant?.sign} ${chartData.ascendant?.degree}°
+- Representa cÃ³mo ${userName} se presenta al mundo
+- Su "mÃ¡scara social" y primera impresiÃ³n
+- El enfoque automÃ¡tico que tiene hacia la vida
+- DEBE interpretarse en "angulos_vitales.ascendente"
+
+MEDIO CIELO (MC): ${chartData.midheaven?.sign} ${chartData.midheaven?.degree}°
+- Representa su vocaciÃ³n y propÃ³sito pÃºblico
+- Su imagen profesional y reputaciÃ³n
+- El tipo de legado que quiere dejar
+- DEBE interpretarse en "angulos_vitales.medio_cielo"
+
+⚠️ IMPORTANTE: Estos Ã¡ngulos son TAN importantes como el Sol y la Luna.
+NO los omitas. Son OBLIGATORIOS en la respuesta JSON.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📋 ESTRUCTURA JSON REQUERIDA
@@ -316,6 +354,25 @@ Debes responder SOLO con JSON válido en este formato exacto:
     }
   ],
   
+  "angulos_vitales": {
+    "ascendente": {
+      "posicion": "${chartData.ascendant?.sign} ${chartData.ascendant?.degree}°",
+      "mascara_social": "String: Cómo ${userName} se presenta al mundo. Su 'primera impresión'. La energía que proyecta ANTES de que la conozcan de verdad. Ejemplos concretos de cómo esto se manifiesta en su vida.",
+      "cuerpo_fisico": "String: Cómo se manifiesta en su cuerpo, su apariencia física, su vitalidad, su forma de moverse en el mundo. El Ascendente se ve en el físico.",
+      "enfoque_vida": "String: El LENTE a través del cual ve y experimenta la vida. Su approach natural a nuevas situaciones. Su instinto automático.",
+      "desafio_evolutivo": "String: Qué necesita desarrollar conscientemente para evolucionar más allá de su Ascendente. El Ascendente puede ser una máscara que oculta su verdadero ser (Sol).",
+      "superpoder": "String: Cuando usa su Ascendente conscientemente e intencionalmente, qué poder tiene. Cómo puede aprovechar esta energía."
+    },
+    "medio_cielo": {
+      "posicion": "${chartData.midheaven?.sign} ${chartData.midheaven?.degree}°",
+      "vocacion_soul": "String: Su verdadera vocación del alma. Qué vino a HACER en el mundo. No es solo 'trabajo', es CONTRIBUCIÓN. Sea específico con ejemplos.",
+      "imagen_publica": "String: Cómo la ve el mundo profesionalmente. Su reputación natural. Qué tipo de autoridad proyecta cuando está en su elemento.",
+      "legado": "String: Qué tipo de huella o legado quiere dejar en el mundo. Qué quiere que digan de ella cuando no esté.",
+      "carrera_ideal": "String: Tipos de carreras, roles o contextos profesionales donde brillaría naturalmente. Sé MUY específico con ejemplos reales de profesiones o industrias.",
+      "autoridad_interna": "String: Cómo desarrolla su propia autoridad y liderazgo. Qué tipo de líder es naturalmente. Cómo se empodera profesionalmente."
+    }
+  },
+
   "nodos_lunares": {
     "nodo_sur": {
       "signo_casa": "Acuario 21° en Casa 1",
@@ -329,7 +386,7 @@ Debes responder SOLO con JSON válido en este formato exacto:
     },
     "eje_completo": "String: Explicación del balance entre ambos nodos. Su GPS evolutivo."
   },
-  
+
   "declaracion_poder": "String: Declaración poderosa en primera persona como si ${userName} la dijera. Ejemplo: 'YO, ${userName.toUpperCase()}, SOY...'",
   
   "advertencias": [

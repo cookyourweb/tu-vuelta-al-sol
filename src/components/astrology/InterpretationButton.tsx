@@ -62,8 +62,26 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
   // ✅ ADD THESE NEW STATES
   const [regenerating, setRegenerating] = useState(false);
   const [generationProgress, setGenerationProgress] = useState('');
+  const [waitTime, setWaitTime] = useState(0);
+  const [generationStartTime, setGenerationStartTime] = useState<number | null>(null);
+  const [chunkProgress, setChunkProgress] = useState(0);
+  const [currentChunk, setCurrentChunk] = useState('');
 
   const modalContentRef = useRef<HTMLDivElement>(null);
+
+  // ✅ ADD WAIT TIME COUNTER EFFECT
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (regenerating && generationStartTime) {
+      interval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - generationStartTime) / 1000);
+        setWaitTime(elapsed);
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [regenerating, generationStartTime]);
 
   const isNatal = type === 'natal';
   const isSolarReturn = type === 'solar-return';
@@ -203,6 +221,9 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
     if (forceRegenerate) {
       setRegenerating(true);
       setGenerationProgress('Iniciando regeneración revolucionaria...');
+      setGenerationStartTime(Date.now());
+      setChunkProgress(0);
+      setCurrentChunk('');
     } else {
       setLoading(true);
     }
@@ -213,157 +234,233 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       console.log(`🤖 ===== GENERANDO NUEVA INTERPRETACIÓN =====`);
       console.log(`🤖 Tipo: ${type}, Forzada: ${forceRegenerate}`);
       console.log(`🤖 userId: ${userId}`);
-      console.log(`🤖 userProfile:`, userProfile); // ✅ ADD THIS
+      console.log(`🤖 userProfile:`, userProfile);
 
-      // ✅ Simulate progress messages
-      if (forceRegenerate) {
-        setTimeout(() => setGenerationProgress('Conectando con los astros...'), 500);
-        setTimeout(() => setGenerationProgress('Analizando tu carta natal...'), 2000);
-        setTimeout(() => setGenerationProgress('Calculando posiciones planetarias...'), 4000);
-        setTimeout(() => setGenerationProgress('Generando interpretación disruptiva con IA...'), 6000);
-        setTimeout(() => setGenerationProgress('Casi listo... Creando tu revolución personal...'), 10000);
-      }
+      // ✅ CHUNKED GENERATION FOR FASTER RESULTS
+      if (forceRegenerate && type === 'natal') {
+        console.log('🔄 ===== GENERANDO EN CHUNKS =====');
 
-      const requestBody = isNatal
-        ? {
-            userId,
-            natalChart: chartData,
-            userProfile,
-            regenerate: forceRegenerate,
-            disruptiveMode: true
+        const chunks: Record<string, any> = {};
+        const sections = [
+          { key: 'esencia', section: 'esencia_revolucionaria', label: 'Esencia Revolucionaria', progress: 20 },
+          { key: 'proposito', section: 'proposito_vida', label: 'Propósito de Vida', progress: 40 },
+          { key: 'formacion', section: 'formacion_temprana', label: 'Formación Temprana', progress: 60 },
+          { key: 'nodos', section: 'nodos_lunares', label: 'Nodos Lunares', progress: 80 },
+          { key: 'declaracion', section: 'declaracion_poder', label: 'Declaración de Poder', progress: 100 }
+        ];
+
+        for (const { key, section, label, progress } of sections) {
+          setCurrentChunk(`Generando ${label}...`);
+          setGenerationProgress(`Consultando los astros para ${label.toLowerCase()}...`);
+
+          const chunkResponse = await fetch('/api/astrology/interpret-chunk', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId,
+              chartData,
+              section,
+              userProfile,
+              type,
+              natalChart
+            })
+          });
+
+          if (!chunkResponse.ok) {
+            throw new Error(`Error generando ${label}`);
           }
-        : isSolarReturn
-        ? {
-            userId,
-            natalChart: natalChart || {},
-            solarReturnChart: chartData,
-            userProfile,
-            regenerate: forceRegenerate
-          }
-        : {
-            userId,
-            progressedChart: chartData,
-            natalChart: natalChart || {},
-            userProfile,
-            natalInterpretation,
-            regenerate: forceRegenerate,
-            disruptiveMode: true
-          };
 
-      console.log(`📦 Request body:`, {
-        userId: requestBody.userId,
-        userProfileName: (requestBody as any).userProfile?.name,
-        userProfileAge: (requestBody as any).userProfile?.age,
-        hasSolarReturnChart: !!(requestBody as any).solarReturnChart,
-        hasNatalChart: !!(requestBody as any).natalChart
-      }); // ✅ ADD THIS
+          const chunkData = await chunkResponse.json();
+          chunks[key] = chunkData.data;
+          setChunkProgress(progress);
 
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody)
-      });
-
-      console.log(`📡 Response status: ${response.status}`); // ✅ ADD THIS
-
-      if (!response.ok) {
-        const errorText = await response.text(); // ✅ ADD THIS
-        console.error(`❌ API Error Response:`, errorText); // ✅ ADD THIS
-        throw new Error(`Error ${response.status}: ${errorText}`); // ✅ CHANGE THIS
-      }
-
-      const result = await response.json();
-
-      if (result.success) {
-        console.log('📺 ===== PROCESANDO RESPUESTA DE INTERPRETACIÓN =====');
-
-        const rawInterpretation = result.data?.interpretation || result.interpretation;
-
-        if (!rawInterpretation) {
-          console.log('❌ No se encontró interpretación en la respuesta');
-          throw new Error('No se encontró interpretación en la respuesta');
+          console.log(`✅ Chunk ${label} completado`);
         }
 
-        console.log('🔍 ===== DATOS RECIBIDOS =====');
-        console.log('🔍 Claves en rawInterpretation:', Object.keys(rawInterpretation));
-
-        // ✅ AÑADIR LOGS PARA VERIFICAR DATOS COMPLETOS
-        console.log('🔍 ===== VERIFICANDO DATOS COMPLETOS =====');
-        console.log('🔍 formacion_temprana:', rawInterpretation.formacion_temprana ? 'SÍ' : 'NO');
-        console.log('🔍 patrones_psicologicos:', rawInterpretation.patrones_psicologicos ? 'SÍ' : 'NO');
-        console.log('🔍 planetas_profundos:', rawInterpretation.planetas_profundos ? 'SÍ' : 'NO');
-        console.log('🔍 nodos_lunares:', rawInterpretation.nodos_lunares ? 'SÍ' : 'NO');
-
-        // Si están, mostrar un preview
-        if (rawInterpretation.formacion_temprana) {
-          console.log('📖 formacion_temprana completa:', rawInterpretation.formacion_temprana);
-        }
-
-        let interpretationData;
-
-        if (type === 'natal') {
-          interpretationData = {
-            esencia_revolucionaria: rawInterpretation.esencia_revolucionaria,
-            proposito_vida: rawInterpretation.proposito_vida,
-            formacion_temprana: rawInterpretation.formacion_temprana,
-            patrones_psicologicos: rawInterpretation.patrones_psicologicos,
-            planetas_profundos: rawInterpretation.planetas_profundos,
-            nodos_lunares: rawInterpretation.nodos_lunares,
-            planetas: rawInterpretation.planetas,
-            plan_accion: rawInterpretation.plan_accion,
-            declaracion_poder: rawInterpretation.declaracion_poder,
-            advertencias: rawInterpretation.advertencias,
-            insights_transformacionales: rawInterpretation.insights_transformacionales,
-            rituales_recomendados: rawInterpretation.rituales_recomendados,
-            integracion_carta: rawInterpretation.integracion_carta
-          };
-        } else if (type === 'solar-return') {
-          interpretationData = {
-            esencia_revolucionaria: rawInterpretation.esencia_revolucionaria_anual,
-            proposito_vida: rawInterpretation.proposito_vida_anual,
-            tema_anual: rawInterpretation.tema_central_del_anio,
-            analisis_tecnico: rawInterpretation.analisis_tecnico_profesional,
-            plan_accion: rawInterpretation.plan_accion,
-            calendario_lunar: rawInterpretation.calendario_lunar_anual,
-            declaracion_poder: rawInterpretation.declaracion_poder_anual,
-            advertencias: rawInterpretation.advertencias,
-            eventos_clave: rawInterpretation.eventos_clave_del_anio,
-            insights_transformacionales: rawInterpretation.insights_transformacionales,
-            rituales_recomendados: rawInterpretation.rituales_recomendados,
-            integracion_final: rawInterpretation.integracion_final
-          };
-        } else {
-          interpretationData = rawInterpretation;
-        }
+        // Combine chunks
+        const interpretationData = {
+          esencia_revolucionaria: chunks['esencia'],
+          proposito_vida: chunks['proposito'],
+          formacion_temprana: chunks['formacion'],
+          nodos_lunares: chunks['nodos'],
+          declaracion_poder: chunks['declaracion'],
+          planetas: [],
+          plan_accion: [],
+          advertencias: [],
+          insights_transformacionales: [],
+          rituales_recomendados: [],
+          integracion_carta: ''
+        };
 
         const newInterpretation = {
           interpretation: interpretationData,
-          cached: result.cached || result.data?.cached || false,
-          generatedAt: result.generatedAt || result.data?.generatedAt || new Date().toISOString(),
-          method: result.method || result.data?.method || 'api'
+          cached: false,
+          generatedAt: new Date().toISOString(),
+          method: 'chunked'
         };
 
-        console.log('✅ ===== INTERPRETACIÓN PROCESADA EXITOSAMENTE =====');
+        console.log('✅ ===== INTERPRETACIÓN EN CHUNKS COMPLETADA =====');
 
         setInterpretation(newInterpretation);
         setHasRecentInterpretation(true);
-
-        // ✅ Only show modal after regeneration is complete
-        if (forceRegenerate) {
-          setGenerationProgress('¡Revolución completada! 🎉');
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          setShowModal(true);
-        } else {
-          setShowModal(true);
-        }
+        setGenerationProgress('¡Revolución completada! 🎉');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        setShowModal(true);
 
         await autoSaveInterpretation(newInterpretation);
 
-        console.log('✅ ===== INTERPRETACIÓN COMPLETADA =====');
       } else {
-        throw new Error(result.error || 'Error desconocido');
+        // ✅ ORIGINAL SINGLE REQUEST FOR NON-NATAL OR NON-FORCE REGENERATE
+        // ✅ Simulate progress messages
+        if (forceRegenerate) {
+          setTimeout(() => setGenerationProgress('Conectando con los astros...'), 500);
+          setTimeout(() => setGenerationProgress('Analizando tu carta natal...'), 2000);
+          setTimeout(() => setGenerationProgress('Calculando posiciones planetarias...'), 4000);
+          setTimeout(() => setGenerationProgress('Generando interpretación disruptiva con IA...'), 6000);
+          setTimeout(() => setGenerationProgress('Casi listo... Creando tu revolución personal...'), 10000);
+        }
+
+        const requestBody = isNatal
+          ? {
+              userId,
+              natalChart: chartData,
+              userProfile,
+              regenerate: forceRegenerate,
+              disruptiveMode: true
+            }
+          : isSolarReturn
+          ? {
+              userId,
+              natalChart: natalChart || {},
+              solarReturnChart: chartData,
+              userProfile,
+              regenerate: forceRegenerate
+            }
+          : {
+              userId,
+              progressedChart: chartData,
+              natalChart: natalChart || {},
+              userProfile,
+              natalInterpretation,
+              regenerate: forceRegenerate,
+              disruptiveMode: true
+            };
+
+        console.log(`📦 Request body:`, {
+          userId: requestBody.userId,
+          userProfileName: (requestBody as any).userProfile?.name,
+          userProfileAge: (requestBody as any).userProfile?.age,
+          hasSolarReturnChart: !!(requestBody as any).solarReturnChart,
+          hasNatalChart: !!(requestBody as any).natalChart
+        });
+
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody)
+        });
+
+        console.log(`📡 Response status: ${response.status}`);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`❌ API Error Response:`, errorText);
+          throw new Error(`Error ${response.status}: ${errorText}`);
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+          console.log('📺 ===== PROCESANDO RESPUESTA DE INTERPRETACIÓN =====');
+
+          const rawInterpretation = result.data?.interpretation || result.interpretation;
+
+          if (!rawInterpretation) {
+            console.log('❌ No se encontró interpretación en la respuesta');
+            throw new Error('No se encontró interpretación en la respuesta');
+          }
+
+          console.log('🔍 ===== DATOS RECIBIDOS =====');
+          console.log('🔍 Claves en rawInterpretation:', Object.keys(rawInterpretation));
+
+          // ✅ AÑADIR LOGS PARA VERIFICAR DATOS COMPLETOS
+          console.log('🔍 ===== VERIFICANDO DATOS COMPLETOS =====');
+          console.log('🔍 formacion_temprana:', rawInterpretation.formacion_temprana ? 'SÍ' : 'NO');
+          console.log('🔍 patrones_psicologicos:', rawInterpretation.patrones_psicologicos ? 'SÍ' : 'NO');
+          console.log('🔍 planetas_profundos:', rawInterpretation.planetas_profundos ? 'SÍ' : 'NO');
+          console.log('🔍 nodos_lunares:', rawInterpretation.nodos_lunares ? 'SÍ' : 'NO');
+
+          // Si están, mostrar un preview
+          if (rawInterpretation.formacion_temprana) {
+            console.log('📖 formacion_temprana completa:', rawInterpretation.formacion_temprana);
+          }
+
+          let interpretationData;
+
+          if (type === 'natal') {
+            interpretationData = {
+              esencia_revolucionaria: rawInterpretation.esencia_revolucionaria,
+              proposito_vida: rawInterpretation.proposito_vida,
+              formacion_temprana: rawInterpretation.formacion_temprana,
+              patrones_psicologicos: rawInterpretation.patrones_psicologicos,
+              planetas_profundos: rawInterpretation.planetas_profundos,
+              nodos_lunares: rawInterpretation.nodos_lunares,
+              planetas: rawInterpretation.planetas,
+              plan_accion: rawInterpretation.plan_accion,
+              declaracion_poder: rawInterpretation.declaracion_poder,
+              advertencias: rawInterpretation.advertencias,
+              insights_transformacionales: rawInterpretation.insights_transformacionales,
+              rituales_recomendados: rawInterpretation.rituales_recomendados,
+              integracion_carta: rawInterpretation.integracion_carta
+            };
+          } else if (type === 'solar-return') {
+            interpretationData = {
+              esencia_revolucionaria: rawInterpretation.esencia_revolucionaria_anual,
+              proposito_vida: rawInterpretation.proposito_vida_anual,
+              tema_anual: rawInterpretation.tema_central_del_anio,
+              analisis_tecnico: rawInterpretation.analisis_tecnico_profesional,
+              plan_accion: rawInterpretation.plan_accion,
+              calendario_lunar: rawInterpretation.calendario_lunar_anual,
+              declaracion_poder: rawInterpretation.declaracion_poder_anual,
+              advertencias: rawInterpretation.advertencias,
+              eventos_clave: rawInterpretation.eventos_clave_del_anio,
+              insights_transformacionales: rawInterpretation.insights_transformacionales,
+              rituales_recomendados: rawInterpretation.rituales_recomendados,
+              integracion_final: rawInterpretation.integracion_final
+            };
+          } else {
+            interpretationData = rawInterpretation;
+          }
+
+          const newInterpretation = {
+            interpretation: interpretationData,
+            cached: result.cached || result.data?.cached || false,
+            generatedAt: result.generatedAt || result.data?.generatedAt || new Date().toISOString(),
+            method: result.method || result.data?.method || 'api'
+          };
+
+          console.log('✅ ===== INTERPRETACIÓN PROCESADA EXITOSAMENTE =====');
+
+          setInterpretation(newInterpretation);
+          setHasRecentInterpretation(true);
+
+          // ✅ Only show modal after regeneration is complete
+          if (forceRegenerate) {
+            setGenerationProgress('¡Revolución completada! 🎉');
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            setShowModal(true);
+          } else {
+            setShowModal(true);
+          }
+
+          await autoSaveInterpretation(newInterpretation);
+
+          console.log('✅ ===== INTERPRETACIÓN COMPLETADA =====');
+        } else {
+          throw new Error(result.error || 'Error desconocido');
+        }
       }
 
     } catch (err) {
@@ -374,6 +471,10 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       setLoading(false);
       setRegenerating(false);
       setGenerationProgress('');
+      setGenerationStartTime(null);
+      setWaitTime(0);
+      setChunkProgress(0);
+      setCurrentChunk('');
     }
   };
 
@@ -1294,6 +1395,33 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                 <p className="text-purple-100 text-lg font-semibold animate-pulse">
                   {generationProgress}
                 </p>
+                {currentChunk && (
+                  <div className="mt-2 flex items-center justify-center gap-2">
+                    <span className="text-purple-300 text-sm font-medium">
+                      {currentChunk}
+                    </span>
+                  </div>
+                )}
+                <div className="mt-3 flex items-center justify-center gap-2">
+                  <Clock className="w-4 h-4 text-purple-300" />
+                  <span className="text-purple-200 text-sm">
+                    Tiempo transcurrido: {waitTime}s
+                  </span>
+                </div>
+                {chunkProgress > 0 && (
+                  <div className="mt-3">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-purple-200 text-xs">Progreso</span>
+                      <span className="text-purple-200 text-xs">{chunkProgress}%</span>
+                    </div>
+                    <div className="w-full bg-purple-950/50 rounded-full h-2 overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-purple-500 to-pink-500 h-full transition-all duration-500 ease-out"
+                        style={{ width: `${chunkProgress}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Info Text */}

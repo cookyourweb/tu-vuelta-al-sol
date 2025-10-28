@@ -33,7 +33,7 @@ export default function ProkeralaTestPage() {
     try {
       console.log('🔮 Iniciando test de carta progresada...');
       
-      const response = await fetch('/api/charts/progressed', {
+      const response = await fetch('/api/charts/solar-return', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -41,7 +41,7 @@ export default function ProkeralaTestPage() {
         body: JSON.stringify({
           userId: "ob4p8gCQuJUf712pleFl074LqJZ2",
           birthDate: "1990-01-15",
-          birthTime: "12:30:00", 
+          birthTime: "12:30:00",
           latitude: 40.4168,
           longitude: -3.7038,
           timezone: "Europe/Madrid"
@@ -237,7 +237,7 @@ export default function ProkeralaTestPage() {
               <li>• ✅ Respuesta exitosa (success: true)</li>
               <li>• ✅ Dos cartas progresadas automáticas</li>
               <li>• ✅ Cálculo de años completos</li>
-              <li>• ✅ Endpoint: /api/charts/progressed</li>
+              <li>• ✅ Endpoint: /api/charts/solar-return</li>
             </ul>
           </div>
         </div>

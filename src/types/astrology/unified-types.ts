@@ -215,19 +215,22 @@ export interface DetailedProgressedChart {
   // Puntos progresados
   ascendente?: PlanetPosition;
   mediocielo?: PlanetPosition;
-  
+
+  // ✅ COMPATIBILIDAD con diferentes estructuras de datos
+  ascendant?: any;      // Para compatibilidad con APIs externas
+  midheaven?: any;      // Para compatibilidad con APIs externas
+
   // Datos adicionales
   currentAge?: number;
   houses?: any[];
   aspectos_natales_progresados: any[];
-  
+
   // Metadata
   generatedAt?: string;
   isMockData?: boolean;
   progressionPeriod?: any;
-  
+
   // ✅ COMPATIBILIDAD con diferentes estructuras de datos
-  ascendant?: any;      // Para compatibilidad con APIs externas
   planets?: any;        // Para compatibilidad con APIs externas
 }
 
