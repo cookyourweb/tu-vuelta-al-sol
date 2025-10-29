@@ -255,13 +255,13 @@ function processProkeralaData(apiResponse: any, latitude: number, longitude: num
   // Procesar planetas
   const planetData = apiResponse.planet_positions || apiResponse.planets || [];
   console.log('🪐 Procesando planetas:', planetData.length);
-  
+
   const planets = planetData.map((planet: any) => {
     const houseValue = planet.house_number || planet.house || planet.housePosition || 1; // ← Obtener valor de casa
 
     const result = {
       name: translatePlanet(planet.name || 'Unknown'),
-      sign: planet.zodiac?.name || planet.sign || getSignFromLongitude(planet.longitude || 0),
+      sign: getSignFromLongitude(planet.longitude || 0),
       degree: planet.degree || Math.floor((planet.longitude || 0) % 30),
       minutes: planet.minutes || Math.floor(((planet.longitude || 0) % 1) * 60),
       retrograde: planet.is_retrograde || planet.retrograde || false,
@@ -270,16 +270,16 @@ function processProkeralaData(apiResponse: any, latitude: number, longitude: num
       house: houseValue,          // ← Para compatibilidad (NUEVO)
       longitude: planet.longitude || 0
     };
-    
+
     console.log(`🪐 ${result.name}: ${result.sign} ${result.degree}°${result.minutes}' (Casa ${result.housePosition})`);
     return result;
   });
-  
+
   // Procesar casas
   const houseData = apiResponse.houses || [];
   const houses = houseData.map((house: any, index: number) => ({
     number: house.number || (index + 1),
-    sign: house.start_cusp?.zodiac?.name || house.zodiac?.name || house.sign || getSignFromLongitude(house.start_cusp?.longitude || house.longitude || 0),
+    sign: getSignFromLongitude(house.start_cusp?.longitude || house.longitude || 0),
     degree: house.start_cusp?.degree || house.degree || Math.floor((house.start_cusp?.longitude || house.longitude || 0) % 30),
     minutes: house.start_cusp?.minutes || house.minutes || Math.floor(((house.start_cusp?.longitude || house.longitude || 0) % 1) * 60),
     longitude: house.start_cusp?.longitude || house.longitude || 0
@@ -294,54 +294,64 @@ function processProkeralaData(apiResponse: any, latitude: number, longitude: num
     orb: aspect.orb || 0
   }));
   
-  // Procesar ascendente
+  // ✅ CORRECCIÓN CRÍTICA: Usar HOUSES en lugar de ANGLES
+  // Casa 1 = Ascendente, Casa 10 = Medio Cielo
+  // Los angles del API tienen valores incorrectos, pero houses son correctos
+  
   let ascendant;
-  if (apiResponse.angles && Array.isArray(apiResponse.angles)) {
-    const ascendantAngle = apiResponse.angles.find((angle: any) => 
-      angle.name === 'Ascendente' || 
-      angle.name === 'Ascendant' ||
-      angle.name === 'ASC' ||
-      (angle.name && angle.name.toLowerCase().includes('ascend'))
-    );
-    
-    if (ascendantAngle) {
+  let midheaven;
+  
+  if (houses && houses.length >= 10) {
+    // ✅ Casa 1 = Ascendente
+    const casa1 = houses[0];
+    if (casa1 && typeof casa1.longitude === 'number') {
       ascendant = {
-        sign: ascendantAngle.zodiac?.name || getSignFromLongitude(ascendantAngle.longitude || 0),
-        degree: ascendantAngle.degree || Math.floor((ascendantAngle.longitude || 0) % 30),
-        minutes: ascendantAngle.minutes || Math.floor(((ascendantAngle.longitude || 0) % 1) * 60),
-        longitude: ascendantAngle.longitude || 0
+        sign: getSignFromLongitude(casa1.longitude),
+        degree: Math.floor(casa1.longitude % 30),
+        minutes: Math.floor((casa1.longitude % 1) * 60),
+        longitude: casa1.longitude
       };
+      
+      console.log('✅ Ascendente desde Casa 1:', {
+        longitude: casa1.longitude,
+        sign: ascendant.sign,
+        position: `${ascendant.sign} ${ascendant.degree}° ${ascendant.minutes}'`
+      });
     }
-  } else if (apiResponse.ascendant) {
+    
+    // ✅ Casa 10 = Medio Cielo
+    const casa10 = houses[9]; // Índice 9 = Casa 10
+    if (casa10 && typeof casa10.longitude === 'number') {
+      midheaven = {
+        sign: getSignFromLongitude(casa10.longitude),
+        degree: Math.floor(casa10.longitude % 30),
+        minutes: Math.floor((casa10.longitude % 1) * 60),
+        longitude: casa10.longitude
+      };
+      
+      console.log('✅ Medio Cielo desde Casa 10:', {
+        longitude: casa10.longitude,
+        sign: midheaven.sign,
+        position: `${midheaven.sign} ${midheaven.degree}° ${midheaven.minutes}'`
+      });
+    }
+  }
+  
+  // ⚠️ FALLBACK: Solo si no hay houses (no debería pasar)
+  if (!ascendant && apiResponse.ascendant) {
+    console.warn('⚠️ Usando fallback para ascendente desde apiResponse.ascendant');
     ascendant = {
-      sign: apiResponse.ascendant.sign || getSignFromLongitude(apiResponse.ascendant.longitude || 0),
+      sign: getSignFromLongitude(apiResponse.ascendant.longitude || 0),
       degree: Math.floor((apiResponse.ascendant.longitude || 0) % 30),
       minutes: Math.floor(((apiResponse.ascendant.longitude || 0) % 1) * 60),
       longitude: apiResponse.ascendant.longitude || 0
     };
   }
   
-  // Procesar medio cielo
-  let midheaven;
-  if (apiResponse.angles && Array.isArray(apiResponse.angles)) {
-    const midheavenAngle = apiResponse.angles.find((angle: any) => 
-      angle.name === 'Midheaven' || 
-      angle.name === 'MC' || 
-      angle.name === 'Medio Cielo' ||
-      (angle.name && angle.name.toLowerCase().includes('midheaven'))
-    );
-    
-    if (midheavenAngle) {
-      midheaven = {
-        sign: midheavenAngle.zodiac?.name || getSignFromLongitude(midheavenAngle.longitude || 0),
-        degree: midheavenAngle.degree || Math.floor((midheavenAngle.longitude || 0) % 30),
-        minutes: midheavenAngle.minutes || Math.floor(((midheavenAngle.longitude || 0) % 1) * 60),
-        longitude: midheavenAngle.longitude || 0
-      };
-    }
-  } else if (apiResponse.mc) {
+  if (!midheaven && apiResponse.mc) {
+    console.warn('⚠️ Usando fallback para medio cielo desde apiResponse.mc');
     midheaven = {
-      sign: apiResponse.mc.sign || getSignFromLongitude(apiResponse.mc.longitude || 0),
+      sign: getSignFromLongitude(apiResponse.mc.longitude || 0),
       degree: Math.floor((apiResponse.mc.longitude || 0) % 30),
       minutes: Math.floor(((apiResponse.mc.longitude || 0) % 1) * 60),
       longitude: apiResponse.mc.longitude || 0

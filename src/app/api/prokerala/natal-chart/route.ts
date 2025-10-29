@@ -545,7 +545,7 @@ function processChartData(apiResponse: unknown, latitude: number, longitude: num
 
     return {
       name: translatePlanetNameToSpanish(p.name),
-      sign: p.zodiac?.name || getSignNameFromLongitude(p.longitude),
+      sign: getSignNameFromLongitude(p.longitude),
       degree: Math.floor(p.degree || (p.longitude % 30)),
       minutes: Math.floor(((p.degree || p.longitude) % 1) * 60),
       retrograde: p.is_retrograde || false,
@@ -560,7 +560,7 @@ function processChartData(apiResponse: unknown, latitude: number, longitude: num
     const h = house as any;
     return {
       number: h.number,
-      sign: h.start_cusp?.zodiac?.name || getSignNameFromLongitude(h.start_cusp?.longitude || 0),
+      sign: getSignNameFromLongitude(h.start_cusp?.longitude || 0),
       degree: Math.floor(h.start_cusp?.degree || (h.start_cusp?.longitude % 30) || 0),
       minutes: Math.floor(((h.start_cusp?.degree || h.start_cusp?.longitude || 0) % 1) * 60)
     };
@@ -584,7 +584,7 @@ function processChartData(apiResponse: unknown, latitude: number, longitude: num
     if (ascendantData) {
       console.log('🔺 Procesando ascendente raw desde angles:', ascendantData);
       ascendant = {
-        sign: ascendantData.zodiac?.name || getSignNameFromLongitude(ascendantData.longitude),
+        sign: getSignNameFromLongitude(ascendantData.longitude),
         degree: Math.floor(ascendantData.degree || (ascendantData.longitude % 30)),
         minutes: Math.floor(((ascendantData.degree || ascendantData.longitude) % 1) * 60),
         longitude: ascendantData.longitude
@@ -611,15 +611,15 @@ function processChartData(apiResponse: unknown, latitude: number, longitude: num
     const mcData = data.angles.find((angle: any) => angle.name === 'Medio Cielo');
     if (mcData) {
       midheaven = {
-        sign: mcData.zodiac?.name || getSignNameFromLongitude(mcData.longitude),
+        sign: getSignNameFromLongitude(mcData.longitude),
         degree: Math.floor(mcData.degree || (mcData.longitude % 30)),
         minutes: Math.floor(((mcData.degree || mcData.longitude) % 1) * 60)
       };
     }
   } else if (data.mc) {
-    // Fallback a estructura antigua
+    // Fallback a estructura antigua - ALWAYS calculate from longitude
     midheaven = {
-      sign: data.mc.sign || getSignNameFromLongitude(data.mc.longitude),
+      sign: getSignNameFromLongitude(data.mc.longitude),
       degree: Math.floor(data.mc.longitude % 30),
       minutes: Math.floor((data.mc.longitude % 1) * 60)
     };

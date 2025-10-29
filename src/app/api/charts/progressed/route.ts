@@ -883,7 +883,7 @@ function processProgressedResponse(progressedData: any, progressionPeriod: any) 
     const processedPlanets = planetsData.map((planet: any) => {
       const name = translatePlanetName(planet.name || planet.planet_name || 'Unknown');
       const longitude = planet.longitude || planet.degree || 0;
-      const sign = planet.zodiac?.name || planet.sign || getSignFromLongitude(longitude);
+    const sign = getSignFromLongitude(longitude);
       const house = planet.house || planet.house_number || 1;
 
       return {
@@ -910,7 +910,7 @@ function processProgressedResponse(progressedData: any, progressionPeriod: any) 
     // Continuar con el procesamiento normal...
     const processedHouses = (data?.houses || []).map((house: any, index: number) => ({
       number: index + 1,
-      sign: house.zodiac?.name || house.sign || getSignFromLongitude(house.longitude || 0),
+      sign: getSignFromLongitude(house.longitude || 0),
       degree: parseFloat(((house.longitude || 0) % 30).toFixed(3)),
       longitude: house.longitude || 0
     }));
@@ -961,7 +961,7 @@ function extractAscendant(data: any) {
 
   if (ascendant) {
     return {
-      sign: ascendant.zodiac?.name || ascendant.sign || getSignFromLongitude(ascendant.longitude || 0),
+      sign: getSignFromLongitude(ascendant.longitude || 0),
       degree: parseFloat(((ascendant.longitude || 0) % 30).toFixed(3)),
       longitude: ascendant.longitude || 0
     };

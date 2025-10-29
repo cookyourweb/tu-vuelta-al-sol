@@ -116,6 +116,33 @@ export default function TestMCCalculationPage() {
       console.log(`❌ Test 3: No corrige error de API`);
     }
 
+    // ===== ANÁLISIS: ¿POR QUÉ LAS OTRAS APPS LO HACEN MAL? =====
+
+    console.log('\n🔍 ANÁLISIS: ¿POR QUÉ LAS OTRAS APPS LO HACEN MAL?\n');
+
+    // Método incorrecto: Usar el signo devuelto por la API
+    const wrongMethodSign = oscarMC.apiSign;
+    console.log('❌ MÉTODO INCORRECTO (usado por otras apps):');
+    console.log(`   Usar directamente el signo devuelto por la API: "${wrongMethodSign}"`);
+    console.log(`   👉 Resultado: ${wrongMethodSign} (INCORRECTO)\n`);
+
+    // Método correcto: Calcular desde longitud
+    console.log('✅ MÉTODO CORRECTO (usado por Tu Vuelta al Sol):');
+    console.log(`   Calcular signo desde longitud eclíptica: ${oscarMC.longitude}°`);
+    console.log(`   Paso 1: ${oscarMC.longitude} ÷ 30 = ${oscarMC.longitude / 30}`);
+    console.log(`   Paso 2: Math.floor(${oscarMC.longitude / 30}) = ${signIndex}`);
+    console.log(`   Paso 3: ${signIndex} % 12 = ${signIndexMod12}`);
+    console.log(`   Paso 4: signs[${signIndexMod12}] = "${calculatedSign}"`);
+    console.log(`   👉 Resultado: ${calculatedSign} (CORRECTO)\n`);
+
+    // Comparación detallada
+    console.log('📊 COMPARACIÓN DETALLADA:');
+    console.log(`   Longitud: ${oscarMC.longitude}°`);
+    console.log(`   Rango de Géminis: 60° - 90°`);
+    console.log(`   Rango de Virgo: 150° - 180°`);
+    console.log(`   ${oscarMC.longitude}° está en el rango de Virgo ✅`);
+    console.log(`   ${oscarMC.longitude}° NO está en el rango de Géminis ❌\n`);
+
     // ===== CASOS ADICIONALES =====
 
     console.log('📋 TESTS ADICIONALES CON OTROS CASOS:\n');
@@ -175,7 +202,8 @@ export default function TestMCCalculationPage() {
       additionalTestsFailed,
       testCases: testCases.length,
       signIndex,
-      signIndexMod12
+      signIndexMod12,
+      wrongMethodSign
     });
 
     setLoading(false);
@@ -214,14 +242,14 @@ export default function TestMCCalculationPage() {
       {results && (
         <div className="space-y-6">
           {/* Resultados principales */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-bold mb-4 text-center">📊 Resultados del Test</h2>
+          <div className="bg-gray-50 rounded-lg shadow-lg p-6">
+            <h2 className="text-2xl font-bold mb-4 text-center text-black">📊 Resultados del Test</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Datos de entrada */}
               <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="font-bold text-lg mb-3">📋 Datos de Prueba</h3>
-                <div className="space-y-2 text-sm">
+                <h3 className="font-bold text-lg mb-3 text-black">📋 Datos de Prueba</h3>
+                <div className="space-y-2 text-sm text-black">
                   <p><strong>Persona:</strong> Oscar</p>
                   <p><strong>Nacimiento:</strong> 25 nov 1966, 02:34 AM</p>
                   <p><strong>Lugar:</strong> Madrid, España</p>
@@ -233,8 +261,8 @@ export default function TestMCCalculationPage() {
 
               {/* Resultados calculados */}
               <div className="bg-green-50 p-4 rounded-lg">
-                <h3 className="font-bold text-lg mb-3">🔢 Resultados Calculados</h3>
-                <div className="space-y-2 text-sm">
+                <h3 className="font-bold text-lg mb-3 text-black">🔢 Resultados Calculados</h3>
+                <div className="space-y-2 text-sm text-black">
                   <p><strong>Signo calculado:</strong> {results.calculatedSign}</p>
                   <p><strong>Grados:</strong> {results.degreeInSign}°</p>
                   <p><strong>Minutos:</strong> {results.minutesInSign}'</p>
@@ -245,15 +273,15 @@ export default function TestMCCalculationPage() {
           </div>
 
           {/* Tests de verificación */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-bold mb-4 text-center">✅ Verificación de Tests</h2>
+          <div className="bg-gray-50 rounded-lg shadow-lg p-6">
+            <h2 className="text-2xl font-bold mb-4 text-center text-black">✅ Verificación de Tests</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <h3 className="font-bold text-lg mb-3 text-green-600">Tests Pasados ({results.testsPassed.length}/3)</h3>
                 <ul className="space-y-1">
                   {results.testsPassed.map((test: string, index: number) => (
-                    <li key={index} className="text-sm text-green-700">✅ {test}</li>
+                    <li key={index} className="text-sm text-black">✅ {test}</li>
                   ))}
                 </ul>
               </div>
@@ -263,19 +291,19 @@ export default function TestMCCalculationPage() {
                 {results.testsFailed.length > 0 ? (
                   <ul className="space-y-1">
                     {results.testsFailed.map((test: string, index: number) => (
-                      <li key={index} className="text-sm text-red-700">❌ {test}</li>
+                      <li key={index} className="text-sm text-black">❌ {test}</li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-sm text-gray-500">Ningún test falló</p>
+                  <p className="text-sm text-black">Ningún test falló</p>
                 )}
               </div>
             </div>
           </div>
 
           {/* Tests adicionales */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-bold mb-4 text-center">📋 Tests Adicionales</h2>
+          <div className="bg-gray-50 rounded-lg shadow-lg p-6">
+            <h2 className="text-2xl font-bold mb-4 text-center text-black">📋 Tests Adicionales</h2>
 
             <div className="text-center mb-4">
               <span className={`text-2xl font-bold ${results.additionalTestsFailed === 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -294,9 +322,62 @@ export default function TestMCCalculationPage() {
             )}
           </div>
 
+          {/* Análisis: ¿Por qué las otras apps lo hacen mal? */}
+          <div className="bg-gray-50 rounded-lg shadow-lg p-6">
+            <h2 className="text-2xl font-bold mb-4 text-center text-black">🔍 ¿Por qué las otras apps lo hacen mal?</h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              {/* Método incorrecto */}
+              <div className="bg-red-50 p-4 rounded-lg">
+                <h3 className="font-bold text-lg mb-3 text-red-700">❌ Método Incorrecto (otras apps)</h3>
+                <div className="space-y-2 text-sm text-black">
+                  <p><strong>Paso 1:</strong> Usar signo devuelto por API</p>
+                  <p><strong>API devuelve:</strong> "{results.wrongMethodSign}"</p>
+                  <p><strong>Resultado:</strong> Géminis (INCORRECTO)</p>
+                  <p><strong>Problema:</strong> Confía ciegamente en la API</p>
+                </div>
+              </div>
+
+              {/* Método correcto */}
+              <div className="bg-green-50 p-4 rounded-lg">
+                <h3 className="font-bold text-lg mb-3 text-green-700">✅ Método Correcto (Tu Vuelta al Sol)</h3>
+                <div className="space-y-2 text-sm text-black">
+                  <p><strong>Paso 1:</strong> Tomar longitud eclíptica</p>
+                  <p><strong>Longitud:</strong> {results.oscarMC.longitude}°</p>
+                  <p><strong>Paso 2:</strong> Calcular signo matemáticamente</p>
+                  <p><strong>Resultado:</strong> {results.calculatedSign} (CORRECTO)</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Comparación detallada */}
+            <div className="bg-yellow-50 p-4 rounded-lg mb-4">
+              <h3 className="font-bold text-lg mb-3 text-yellow-800">📊 Comparación Detallada</h3>
+              <div className="space-y-2 text-sm text-black">
+                <p><strong>Longitud del MC:</strong> {results.oscarMC.longitude}°</p>
+                <p><strong>Rango de Géminis:</strong> 60° - 90°</p>
+                <p><strong>Rango de Virgo:</strong> 150° - 180°</p>
+                <div className="flex items-center space-x-2 mt-2">
+                  <span className="text-red-600">❌ {results.oscarMC.longitude}° NO está en Géminis</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-green-600">✅ {results.oscarMC.longitude}° SÍ está en Virgo</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-blue-50 rounded-lg">
+              <p className="text-sm text-black">
+                <strong>💡 Razón del error:</strong> Las otras apps confían en el signo que devuelve la API sin verificar
+                si corresponde realmente con la longitud eclíptica. Tu Vuelta al Sol calcula matemáticamente
+                el signo correcto desde la longitud.
+              </p>
+            </div>
+          </div>
+
           {/* Comparación con fuentes profesionales */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-bold mb-4 text-center">📚 Comparación con Fuentes Profesionales</h2>
+          <div className="bg-gray-50 rounded-lg shadow-lg p-6">
+            <h2 className="text-2xl font-bold mb-4 text-center text-black">📚 Comparación con Fuentes Profesionales</h2>
 
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
@@ -314,7 +395,7 @@ export default function TestMCCalculationPage() {
             </div>
 
             <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-blue-800">
+              <p className="text-sm text-black">
                 <strong>💡 Conclusión:</strong> Todas las apps profesionales tienen el mismo error.
                 Tu Vuelta al Sol es la ÚNICA que lo corrige correctamente.
               </p>

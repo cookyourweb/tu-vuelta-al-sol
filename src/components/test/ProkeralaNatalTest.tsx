@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { getNatalHoroscope, convertProkeralaToNatalChart, NatalChart } from '@/services/prokeralaService';
+import { getNatalHoroscope, NatalChart } from '@/services/prokeralaService';
 
 export default function TestNatalChartPage() {
   const [loading, setLoading] = useState(false);
@@ -23,17 +23,15 @@ export default function TestNatalChartPage() {
     setNatalChart(null);
 
     try {
-      // Obtener datos de la carta natal
-      const chartData = await getNatalHoroscope(
+      // Obtener datos de la carta natal (ya viene convertida)
+      const chart = await getNatalHoroscope(
         birthDate,
         birthTime,
         latitude,
         longitude,
         timezone
       );
-      
-      // Convertir la respuesta al formato de la aplicación
-      const chart = convertProkeralaToNatalChart(chartData, latitude, longitude, timezone);
+
       setNatalChart(chart);
     } catch (err) {
       setError((err as Error).message);

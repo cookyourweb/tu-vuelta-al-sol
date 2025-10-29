@@ -274,7 +274,7 @@ export class ProkeralaClientV2 {
       // Procesar planetas
       const processedPlanets = planets.map((planet: any) => ({
         name: this.translatePlanetName(planet.name),
-        sign: planet.sign || this.getSignFromLongitude(planet.longitude),
+        sign: this.getSignFromLongitude(planet.longitude),
         degree: this.formatDegree(planet.longitude),
         longitude: planet.longitude,
         houseNumber: planet.house || 1,
@@ -284,7 +284,7 @@ export class ProkeralaClientV2 {
       // Procesar casas
       const processedHouses = houses.map((house: any) => ({
         number: house.number,
-        sign: house.sign || this.getSignFromLongitude(house.longitude),
+        sign: this.getSignFromLongitude(house.longitude),
         degree: this.formatDegree(house.longitude),
         longitude: house.longitude
       }));
@@ -312,16 +312,16 @@ export class ProkeralaClientV2 {
       if (ascendant) {
         processedAngles.push({
           name: 'Ascendente',
-          sign: ascendant.sign || this.getSignFromLongitude(ascendant.longitude),
+          sign: this.getSignFromLongitude(ascendant.longitude),
           degree: this.formatDegree(ascendant.longitude),
           longitude: ascendant.longitude
         });
       }
-      
+
       if (midheaven) {
         processedAngles.push({
           name: 'Medio Cielo',
-          sign: midheaven.sign || this.getSignFromLongitude(midheaven.longitude),
+          sign: this.getSignFromLongitude(midheaven.longitude),
           degree: this.formatDegree(midheaven.longitude),
           longitude: midheaven.longitude
         });

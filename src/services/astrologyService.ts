@@ -332,7 +332,7 @@ export function convertProkeralaToNatalChart(
     // Process planets
     const planets: PlanetPosition[] = (apiResponse.planets || []).map((planet: any) => ({
       name: planet.name,
-      sign: planet.sign || getSignFromLongitude(planet.longitude),
+      sign: getSignFromLongitude(planet.longitude),
       degree: Math.floor(planet.longitude % 30),
       minutes: Math.floor((planet.longitude % 1) * 60),
       retrograde: planet.is_retrograde || false,
@@ -342,7 +342,7 @@ export function convertProkeralaToNatalChart(
     // Process houses
     const houses: House[] = (apiResponse.houses || []).map((house: any) => ({
       number: house.number,
-      sign: house.sign || getSignFromLongitude(house.longitude),
+      sign: getSignFromLongitude(house.longitude),
       degree: Math.floor(house.longitude % 30),
       minutes: Math.floor((house.longitude % 1) * 60)
     }));
@@ -360,7 +360,7 @@ export function convertProkeralaToNatalChart(
     let ascendant;
     if (apiResponse.ascendant) {
       ascendant = {
-        sign: apiResponse.ascendant.sign || getSignFromLongitude(apiResponse.ascendant.longitude),
+        sign: getSignFromLongitude(apiResponse.ascendant.longitude),
         degree: Math.floor(apiResponse.ascendant.longitude % 30),
         minutes: Math.floor((apiResponse.ascendant.longitude % 1) * 60)
       };
@@ -368,8 +368,8 @@ export function convertProkeralaToNatalChart(
 
     let midheaven;
     if (apiResponse.mc) {
-      midheaven = {
-        sign: apiResponse.mc.sign || getSignFromLongitude(apiResponse.mc.longitude),
+    midheaven = {
+        sign: getSignFromLongitude(apiResponse.mc.longitude),
         degree: Math.floor(apiResponse.mc.longitude % 30),
         minutes: Math.floor((apiResponse.mc.longitude % 1) * 60)
       };

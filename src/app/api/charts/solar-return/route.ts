@@ -152,7 +152,8 @@ async function callProkeralaSolarReturn(birthData: any, returnYear: number) {
     const response = await fetch(url.toString(), {
       headers: {
         'Authorization': `Bearer ${access_token}`,
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
       }
     });
 
@@ -198,7 +199,7 @@ function processSolarReturnResponse(apiData: any, solarReturnInfo: any) {
   const processedPlanets = planetsData.map((planet: any) => {
     const name = translatePlanetName(planet.name || 'Unknown');
     const longitude = planet.longitude || 0;
-    const sign = planet.zodiac?.name || getSignFromLongitude(longitude);
+    const sign = getSignFromLongitude(longitude);
     
     return {
       name,
@@ -213,7 +214,7 @@ function processSolarReturnResponse(apiData: any, solarReturnInfo: any) {
   const housesData = data?.houses || [];
   const processedHouses = housesData.map((house: any, index: number) => ({
     number: index + 1,
-    sign: house.zodiac?.name || getSignFromLongitude(house.longitude || 0),
+    sign: getSignFromLongitude(house.longitude || 0),
     degree: parseFloat(((house.longitude || 0) % 30).toFixed(3)),
     longitude: house.longitude || 0
   }));
@@ -444,7 +445,7 @@ function extractAscendant(data: any) {
   const asc = data?.ascendant || data?.houses?.[0];
   if (asc) {
     return {
-      sign: asc.zodiac?.name || getSignFromLongitude(asc.longitude || 0),
+      sign: getSignFromLongitude(asc.longitude || 0),
       degree: parseFloat(((asc.longitude || 0) % 30).toFixed(3)),
       longitude: asc.longitude || 0
     };
@@ -456,7 +457,7 @@ function extractMidheaven(data: any) {
   const mc = data?.midheaven || data?.houses?.[9];
   if (mc) {
     return {
-      sign: mc.zodiac?.name || getSignFromLongitude(mc.longitude || 0),
+      sign: getSignFromLongitude(mc.longitude || 0),
       degree: parseFloat(((mc.longitude || 0) % 30).toFixed(3)),
       longitude: mc.longitude || 0
     };

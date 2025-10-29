@@ -211,6 +211,7 @@ export interface DetailedProgressedChart {
   urano_progresado?: PlanetPosition;
   neptuno_progresado?: PlanetPosition;
   pluton_progresado?: PlanetPosition;
+ 
   
   // Puntos progresados
   ascendente?: PlanetPosition;
@@ -224,6 +225,19 @@ export interface DetailedProgressedChart {
   currentAge?: number;
   houses?: any[];
   aspectos_natales_progresados: any[];
+
+  // ✅ AÑADIR ESTAS LÍNEAS:
+  elementDistribution?: {
+    fire: number;
+    earth: number;
+    air: number;
+    water: number;
+  };
+  modalityDistribution?: {
+    cardinal: number;
+    fixed: number;
+    mutable: number;
+  };
 
   // Metadata
   generatedAt?: string;

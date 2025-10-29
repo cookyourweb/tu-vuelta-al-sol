@@ -226,7 +226,7 @@ function processChartData(apiResponse: unknown, latitude: number, longitude: num
 
     return {
       name: translatePlanetNameToSpanish(p.name),
-      sign: p.sign || getSignNameFromLongitude(p.longitude),
+      sign: getSignNameFromLongitude(p.longitude),
       degree: Math.floor(p.longitude % 30),
       minutes: Math.floor((p.longitude % 1) * 60),
       retrograde: p.is_retrograde || false,
@@ -241,7 +241,7 @@ function processChartData(apiResponse: unknown, latitude: number, longitude: num
     const h = house as any;
     return {
       number: h.number,
-      sign: h.sign || getSignNameFromLongitude(h.longitude),
+      sign: getSignNameFromLongitude(h.longitude),
       degree: Math.floor(h.longitude % 30),
       minutes: Math.floor((h.longitude % 1) * 60)
     };
@@ -262,16 +262,27 @@ function processChartData(apiResponse: unknown, latitude: number, longitude: num
   let ascendant;
   if (data.ascendant) {
     ascendant = {
-      sign: data.ascendant.sign || getSignNameFromLongitude(data.ascendant.longitude),
+      sign: getSignNameFromLongitude(data.ascendant.longitude),
       degree: Math.floor(data.ascendant.longitude % 30),
       minutes: Math.floor((data.ascendant.longitude % 1) * 60)
     };
   }
 
+  // ✅ Extract midheaven - IMPROVED LOGIC: Check data.angles first, then fallback to data.mc
   let midheaven;
-  if (data.mc) {
+  if (data.angles && Array.isArray(data.angles)) {
+    const mcData = data.angles.find((angle: any) => angle.name === 'Medio Cielo');
+    if (mcData) {
+      midheaven = {
+        sign: getSignNameFromLongitude(mcData.longitude),
+        degree: Math.floor(mcData.degree || (mcData.longitude % 30)),
+        minutes: Math.floor(((mcData.degree || mcData.longitude) % 1) * 60)
+      };
+    }
+  } else if (data.mc) {
+    // Fallback to old structure - ALWAYS calculate from longitude
     midheaven = {
-      sign: data.mc.sign || getSignNameFromLongitude(data.mc.longitude),
+      sign: getSignNameFromLongitude(data.mc.longitude),
       degree: Math.floor(data.mc.longitude % 30),
       minutes: Math.floor((data.mc.longitude % 1) * 60)
     };

@@ -3,7 +3,7 @@ import fetch from 'node-fetch'
 // 🔧 CORRECCIÓN: Exports correctos del ProgressedChartService
 // src/services/progressedChartService.tsx
 
-import { DetailedProgressedChart, UserProfile, ElementType, ModeType, getSignElement, getSignMode } from '@/types/astrology/unified-types';
+import { DetailedProgressedChart, UserProfile } from '@/types/astrology/unified-types';
 import { calculateAllAspects } from '@/utils/astrology/aspectCalculations';
 
 // Función para obtener nuevo token de Prokerala usando client credentials
@@ -226,10 +226,7 @@ export function generateMockProgressedChart(birthDate?: string, birthTime?: stri
           planet1: planet1.name,
           planet2: planet2.name,
           angle: aspectAngles[aspectType as keyof typeof aspectAngles],
-          type: aspectType === 'conjunction' ? 'Conjunción' :
-                aspectType === 'opposition' ? 'Oposición' :
-                aspectType === 'trine' ? 'Trígono' :
-                aspectType === 'square' ? 'Cuadratura' : 'Sextil',
+          type: aspectType,
           orb: Math.round(orb * 10) / 10,
           isProgressed: true
         });
@@ -237,256 +234,151 @@ export function generateMockProgressedChart(birthDate?: string, birthTime?: stri
     }
   }
 
-  // Asegurar que haya al menos algunos aspectos
-  if (aspects.length < 2) {
-    for (let i = 0; i < 2 - aspects.length; i++) {
-      const p1 = seededRandom(planets.length, i * 3000);
-      const p2 = seededRandom(planets.length, i * 4000);
-      if (p1 !== p2) {
-        aspects.push({
-          planet1: planets[p1].name,
-          planet2: planets[p2].name,
-          angle: 120,
-          type: 'Trígono',
-          orb: seededRandom(10, i * 6000) / 10,
-          isProgressed: true
-        });
-      }
-    }
-  }
-
-  // Generar casas progresadas
-  const houses = Array.from({ length: 12 }, (_, i) => {
-    const signIndex = seededRandom(12, i * 600 + 10000);
-    return {
-      house: i + 1,
-      longitude: (signIndex * 30) + seededRandom(30, i * 700 + 10000),
-      sign: SIGNS[signIndex]
-    };
-  });
-
   // Calcular edad actual
-  const birthDateTime = birthDate ? new Date(birthDate) : new Date('1990-01-01');
+  const birthDateTime = birthDate ? new Date(birthDate) : new Date();
   const currentDate = new Date();
   const currentAge = Math.floor((currentDate.getTime() - birthDateTime.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
 
-  // Crear objetos de planetas con el formato correcto
-  const createPlanetObject = (planet: any) => ({
-    longitude: planet.longitude,
-    sign: planet.sign,
-    degree: planet.degree + (planet.minutes / 60),
-    house: planet.housePosition,
-    retrograde: planet.retrograde,
-    symbol: getPlanetSymbol(planet.name),
-    meaning: getProgressedPlanetMeaning(planet.name)
-  });
-
-  console.log('📊 Carta progresada de respaldo generada:', {
-    planetsCount: planets.length,
-    housesCount: houses.length,
-    aspectsCount: aspects.length,
-    currentAge,
-    isMockData: true
-  });
-
   return {
-    // Planetas progresados principales
-    sol_progresado: createPlanetObject(planets.find(p => p.name === 'Sol')!),
-    luna_progresada: createPlanetObject(planets.find(p => p.name === 'Luna')!),
-    mercurio_progresado: createPlanetObject(planets.find(p => p.name === 'Mercurio')!),
-    venus_progresada: createPlanetObject(planets.find(p => p.name === 'Venus')!),
-    marte_progresado: createPlanetObject(planets.find(p => p.name === 'Marte')!),
-
-    // Edad actual
-    currentAge,
-
-    // Casas progresadas
-    houses,
-
-    // Aspectos progresados
-    aspectos_natales_progresados: aspects,
-
-    // Metadata
-    generatedAt: new Date().toISOString(),
-    isMockData: true
-  };
-}
-
-/**
- * ✅ Validar datos de carta progresada
- */
-export function validateProgressedChart(chart: any): { valid: boolean; errors: string[] } {
-  const errors: string[] = [];
-  
-  if (!chart) {
-    errors.push('Datos de carta faltantes');
-    return { valid: false, errors };
-  }
-  
-  // Validar planetas principales
-  const requiredPlanets = ['sol_progresado', 'luna_progresada'];
-  requiredPlanets.forEach(planet => {
-    if (!chart[planet]) {
-      errors.push(`Falta planeta: ${planet}`);
-    } else if (!chart[planet].sign || chart[planet].longitude === undefined) {
-      errors.push(`Datos incompletos para: ${planet}`);
-    }
-  });
-  
-  // Validar casas
-  if (!chart.houses || !Array.isArray(chart.houses) || chart.houses.length !== 12) {
-    errors.push('Datos de casas inválidos');
-  }
-  
-  return {
-    valid: errors.length === 0,
-    errors
-  };
-}
-
-/**
- * ✅ Formatear información de planeta para display
- */
-export function formatPlanetInfo(planet: any, planetName: string) {
-  if (!planet) return null;
-  
-  return {
-    name: planetName,
-    sign: planet.sign,
-    house: planet.house,
-    degree: Math.floor(planet.degree || 0),
-    minutes: Math.floor(((planet.degree || 0) % 1) * 60),
-    longitude: planet.longitude,
-    retrograde: planet.retrograde,
-    symbol: getPlanetSymbol(planetName),
-    meaning: getProgressedPlanetMeaning(planetName)
-  };
-}
-
-/**
- * ✅ Obtener lista de planetas formateados
- */
-export function getFormattedPlanets(chart: DetailedProgressedChart) {
-  const planets = [
-    { key: 'sol_progresado', name: 'Sol' },
-    { key: 'luna_progresada', name: 'Luna' },
-    { key: 'mercurio_progresado', name: 'Mercurio' },
-    { key: 'venus_progresada', name: 'Venus' },
-    { key: 'marte_progresado', name: 'Marte' }
-  ];
-
-  return planets.map(({ key, name }) => 
-    formatPlanetInfo(chart[key as keyof DetailedProgressedChart], name)
-  ).filter(Boolean);
-}
-
-/**
- * Función auxiliar para calcular posiciones progresadas
- */
-function calculateProgressedPositions(params: any, daysSinceBirth: number): DetailedProgressedChart {
-  // Implementación simplificada de progresión solar
-  // 1 día = 1 año de vida
-  
-  const progressedLongitudes = {
-    sol: (daysSinceBirth * 0.9856) % 360, // Movimiento solar aprox
-    luna: (daysSinceBirth * 13.176) % 360, // Movimiento lunar aprox
-    mercurio: (daysSinceBirth * 1.38) % 360,
-    venus: (daysSinceBirth * 1.18) % 360,
-    marte: (daysSinceBirth * 0.524) % 360
-  };
-  
-  const getSignFromLongitude = (longitude: number): string => {
-    const signs = ['Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'];
-    return signs[Math.floor(longitude / 30) % 12];
-  };
-  
-  const createPlanetData = (longitude: number, house: number, planetName: string) => ({
-    longitude,
-    sign: getSignFromLongitude(longitude),
-    degree: longitude % 30,
-    house,
-    retrograde: false,
-    symbol: getPlanetSymbol(planetName),
-    meaning: getProgressedPlanetMeaning(planetName)
-  });
-  
-  return {
-    sol_progresado: createPlanetData(progressedLongitudes.sol, 1, 'Sol'),
-    luna_progresada: createPlanetData(progressedLongitudes.luna, 7, 'Luna'),
-    mercurio_progresado: createPlanetData(progressedLongitudes.mercurio, 1, 'Mercurio'),
-    venus_progresada: createPlanetData(progressedLongitudes.venus, 2, 'Venus'),
-    marte_progresado: createPlanetData(progressedLongitudes.marte, 3, 'Marte'),
-    
-    currentAge: Math.floor(daysSinceBirth / 365.25),
+    sol_progresado: {
+      longitude: planets[0].longitude,
+      sign: planets[0].sign,
+      degree: planets[0].degree,
+      house: planets[0].housePosition,
+      retrograde: false,
+      symbol: '☉',
+      meaning: getProgressedPlanetMeaning('Sol')
+    },
+    luna_progresada: {
+      longitude: planets[1].longitude,
+      sign: planets[1].sign,
+      degree: planets[1].degree,
+      house: planets[1].housePosition,
+      retrograde: false,
+      symbol: '☽',
+      meaning: getProgressedPlanetMeaning('Luna')
+    },
+    mercurio_progresado: {
+      longitude: planets[2].longitude,
+      sign: planets[2].sign,
+      degree: planets[2].degree,
+      house: planets[2].housePosition,
+      retrograde: planets[2].retrograde,
+      symbol: '☿',
+      meaning: getProgressedPlanetMeaning('Mercurio')
+    },
+    venus_progresada: {
+      longitude: planets[3].longitude,
+      sign: planets[3].sign,
+      degree: planets[3].degree,
+      house: planets[3].housePosition,
+      retrograde: planets[3].retrograde,
+      symbol: '♀',
+      meaning: getProgressedPlanetMeaning('Venus')
+    },
+    marte_progresado: {
+      longitude: planets[4].longitude,
+      sign: planets[4].sign,
+      degree: planets[4].degree,
+      house: planets[4].housePosition,
+      retrograde: planets[4].retrograde,
+      symbol: '♂',
+      meaning: getProgressedPlanetMeaning('Marte')
+    },
+    currentAge: currentAge,
     houses: Array.from({ length: 12 }, (_, i) => ({
       house: i + 1,
-      longitude: i * 30 + 15,
-      sign: getSignFromLongitude(i * 30 + 15)
+      longitude: i * 30 + seededRandom(30, i * 1000),
+      sign: SIGNS[Math.floor((i * 30 + seededRandom(30, i * 1000)) / 30) % 12]
     })),
-    aspectos_natales_progresados: [],
+    aspectos_natales_progresados: aspects,
     generatedAt: new Date().toISOString(),
-    isMockData: false
+    isMockData: true
   };
 }
 
 /**
- * ✅ FUNCIÓN PRINCIPAL: Generate progressed chart using Prokerala progressed chart API
- * Uses Prokerala API directly for accurate progressed calculations
+ * ✅ Validar que la carta progresada tenga los campos mínimos necesarios
+ */
+export function validateProgressedChart(chart: any): boolean {
+  if (!chart) return false;
+  
+  const requiredFields = [
+    'sol_progresado',
+    'luna_progresada',
+    'currentAge',
+    'houses',
+    'aspectos_natales_progresados'
+  ];
+  
+  return requiredFields.every(field => chart.hasOwnProperty(field));
+}
+
+/**
+ * ✅ Formatear información de planeta progresado
+ */
+export function formatPlanetInfo(planet: any): string {
+  if (!planet) return 'No disponible';
+  
+  const retrograde = planet.retrograde ? ' ℞' : '';
+  return `${planet.sign} ${Math.floor(planet.degree)}°${retrograde}`;
+}
+
+/**
+ * ✅ Obtener planetas progresados formateados
+ */
+export function getFormattedPlanets(chart: DetailedProgressedChart) {
+  return {
+    Sol: formatPlanetInfo(chart.sol_progresado),
+    Luna: formatPlanetInfo(chart.luna_progresada),
+    Mercurio: formatPlanetInfo(chart.mercurio_progresado),
+    Venus: formatPlanetInfo(chart.venus_progresada),
+    Marte: formatPlanetInfo(chart.marte_progresado)
+  };
+}
+
+/**
+ * ✅ FUNCIÓN PRINCIPAL: Generar carta progresada desde Prokerala
  */
 export async function generateProgressedChart(params: {
   birthDate: string;
   birthTime: string;
+  birthPlace: string;
   latitude: number;
   longitude: number;
   timezone: string;
   progressionYear: number;
 }): Promise<DetailedProgressedChart> {
+  
   try {
-    console.log('🔮 Generando carta progresada con parámetros:', params);
+    console.log('🔮 Generando carta progresada con Prokerala API...', params);
 
-    // Validar parámetros requeridos
-    if (!params.birthDate || !params.birthTime || !params.latitude || !params.longitude) {
-      throw new Error('Parámetros de nacimiento incompletos');
-    }
+    // Obtener token
+    const accessToken = await getNewProkeralaToken();
+    console.log('✅ Token obtenido para carta progresada');
 
-    // Construir datetime ISO con zona horaria para Prokerala API
-    const datetimeISO = new Date(`${params.birthDate}T${params.birthTime}${formatTimezoneOffset(params.timezone)}`).toISOString();
+    // Formatear datetime
+    const datetime = `${params.birthDate}T${params.birthTime}`;
+    const timezoneOffset = formatTimezoneOffset(params.timezone);
+    const formattedDatetime = `${datetime}${timezoneOffset}`;
 
-    // Construir coordenadas string
-    const coordinates = `${params.latitude},${params.longitude}`;
-
-    // ✅ USAR PROKERALA PROGRESSION API DIRECTAMENTE
-    const baseUrl = process.env.PROKERALA_BASE_URL || 'https://api.prokerala.com/v2';
-    let accessToken = process.env.PROKERALA_BEARER_TOKEN || '';
-
-    console.log('🔑 Token de acceso inicial:', accessToken ? 'Presente' : 'FALTANTE');
-    console.log('🌐 Base URL:', baseUrl);
-
-    // Si no hay token o está vacío, intentar obtener uno nuevo
-    if (!accessToken || accessToken.trim() === '') {
-      console.log('🔄 Intentando obtener nuevo token de Prokerala...');
-      try {
-        accessToken = await getNewProkeralaToken();
-        console.log('✅ Nuevo token obtenido exitosamente');
-      } catch (tokenError) {
-        console.error('❌ Error obteniendo nuevo token:', tokenError);
-        throw new Error('No se pudo obtener un token válido para Prokerala API');
-      }
-    }
-
-    const url = new URL(`${baseUrl}/astrology/progression-aspect-chart`);
-    url.searchParams.append('datetime', datetimeISO);
-    url.searchParams.append('coordinates', coordinates);
+    // Construir URL
+    const url = new URL('https://api.prokerala.com/v2/astrology/progression-chart');
+    url.searchParams.append('profile[datetime]', formattedDatetime);
+    url.searchParams.append('profile[coordinates]', `${params.latitude},${params.longitude}`);
+    url.searchParams.append('profile[birth_time_unknown]', 'false');
     url.searchParams.append('progression_year', params.progressionYear.toString());
-    url.searchParams.append('ayanamsa', '0'); // ✅ CRÍTICO: Tropical (0) no Sideral (1)
+    url.searchParams.append('current_coordinates', `${params.latitude},${params.longitude}`);
     url.searchParams.append('house_system', 'placidus');
+    url.searchParams.append('orb', 'default');
     url.searchParams.append('birth_time_rectification', 'flat-chart');
     url.searchParams.append('aspect_filter', 'all');
     url.searchParams.append('la', 'es');
+    url.searchParams.append('ayanamsa', '0');
 
-    console.log('🌐 URL de Prokerala API:', url.toString());
+    console.log('🌐 URL Prokerala progressed:', url.toString());
 
-    // Llamar a la API Prokerala
+    // Hacer petición
     const response = await fetch(url.toString(), {
       method: 'GET',
       headers: {
@@ -584,28 +476,41 @@ function processProkeralaProgressedData(apiData: any, params: any): DetailedProg
     // Procesar casas
     const processedHouses = houses.map((house: any, index: number) => ({
       house: index + 1,
-      longitude: house.longitude || (index * 30 + 15),
-      sign: getSignFromLongitude(house.longitude || (index * 30 + 15))
+      longitude: house.longitude || house.start_cusp?.longitude || (index * 30 + 15),
+      sign: getSignFromLongitude(house.longitude || house.start_cusp?.longitude || (index * 30 + 15))
     }));
 
-    // ✅ ADD THIS NEW CODE (after line 589):
-    // Extract Ascendant and Midheaven from Solar Return API
-    const ascendant = apiData?.data?.ascendant ? {
-      longitude: apiData.data.ascendant.longitude || 0,
-      sign: getSignFromLongitude(apiData.data.ascendant.longitude || 0),
-      degree: (apiData.data.ascendant.longitude || 0) % 30,
-      minutes: Math.floor(((apiData.data.ascendant.longitude || 0) % 1) * 60)
-    } : undefined;
+    // ✅ CORRECCIÓN CRÍTICA: Extraer Ascendente y Medio Cielo desde houses
+    let ascendant = undefined;
+    let midheaven = undefined;
 
-    const midheaven = apiData?.data?.mc ? {
-      longitude: apiData.data.mc.longitude || 0,
-      sign: getSignFromLongitude(apiData.data.mc.longitude || 0),
-      degree: (apiData.data.mc.longitude || 0) % 30,
-      minutes: Math.floor(((apiData.data.mc.longitude || 0) % 1) * 60)
-    } : undefined;
+    // Extraer Ascendente desde Casa 1
+    if (houses && houses.length > 0) {
+      const casa1Longitude = houses[0]?.longitude || houses[0]?.start_cusp?.longitude;
+      if (casa1Longitude !== undefined) {
+        ascendant = {
+          longitude: casa1Longitude,
+          sign: getSignFromLongitude(casa1Longitude),
+          degree: casa1Longitude % 30,
+          minutes: Math.floor((casa1Longitude % 1) * 60)
+        };
+        console.log('✅ Ascendente extraído desde Casa 1 (progresada):', ascendant);
+      }
+    }
 
-    console.log('🔍 SOLAR RETURN - Ascendant extracted:', ascendant);
-    console.log('🔍 SOLAR RETURN - MC extracted:', midheaven);
+    // Extraer Medio Cielo desde Casa 10
+    if (houses && houses.length >= 10) {
+      const casa10Longitude = houses[9]?.longitude || houses[9]?.start_cusp?.longitude;
+      if (casa10Longitude !== undefined) {
+        midheaven = {
+          longitude: casa10Longitude,
+          sign: getSignFromLongitude(casa10Longitude),
+          degree: casa10Longitude % 30,
+          minutes: Math.floor((casa10Longitude % 1) * 60)
+        };
+        console.log('✅ Medio Cielo extraído desde Casa 10 (progresada):', midheaven);
+      }
+    }
 
     // Aspectos básicos (se pueden extraer de la API si están disponibles)
     const aspectos = apiData?.data?.aspects || [];
@@ -658,7 +563,7 @@ function processProkeralaProgressedData(apiData: any, params: any): DetailedProg
         meaning: getProgressedPlanetMeaning('Marte')
       },
 
-      // ✅ ADD THESE TWO LINES:
+      // ✅ AGREGAR ASCENDENTE Y MEDIO CIELO
       ascendant: ascendant,
       midheaven: midheaven,
 
