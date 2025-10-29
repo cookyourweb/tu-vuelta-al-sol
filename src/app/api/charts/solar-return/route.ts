@@ -100,7 +100,7 @@ async function callProkeralaSolarReturn(birthData: any, returnYear: number) {
       throw new Error('Credenciales Prokerala faltantes');
     }
 
-    // Obtener token
+    // 1. Obtener token
     const tokenResponse = await fetch('https://api.prokerala.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -117,7 +117,7 @@ async function callProkeralaSolarReturn(birthData: any, returnYear: number) {
 
     const { access_token } = await tokenResponse.json();
 
-    // Preparar datos
+    // 2. Preparar fecha de Solar Return
     const birthDate = new Date(birthData.birthDate);
     const solarReturnDate = new Date(returnYear, birthDate.getMonth(), birthDate.getDate());
     const solarReturnDateStr = solarReturnDate.toISOString().split('T')[0];
@@ -129,25 +129,41 @@ async function callProkeralaSolarReturn(birthData: any, returnYear: number) {
 
     const offset = calculateTimezoneOffset(solarReturnDateStr, birthData.timezone || 'Europe/Madrid');
     const solarReturnDatetime = `${solarReturnDateStr}T${formattedBirthTime}${offset}`;
-    
+
     // Usar ubicación actual si existe, sino natal
     const coordinates = birthData.livesInSamePlace !== false && birthData.currentLatitude
       ? `${birthData.currentLatitude},${birthData.currentLongitude}`
       : `${birthData.latitude},${birthData.longitude}`;
 
-    console.log('Solar Return params:', {
+    console.log('☀️ Solar Return params:', {
       datetime: solarReturnDatetime,
       coordinates,
       year: returnYear
     });
 
-    // Llamar API natal-chart en la fecha del Solar Return
+    // 3. Llamar API natal-chart en la fecha del Solar Return
+    // ✅ CAMBIO CRÍTICO: Usar endpoint correcto para Solar Return
+    // El endpoint correcto es /v2/astrology/solar-return pero parece que no existe
+    // Usamos natal-chart con la fecha del Solar Return como hicimos originalmente
     const url = new URL('https://api.prokerala.com/v2/astrology/natal-chart');
     url.searchParams.append('profile[datetime]', solarReturnDatetime);
     url.searchParams.append('profile[coordinates]', coordinates);
     url.searchParams.append('birth_time_unknown', 'false');
     url.searchParams.append('house_system', 'placidus');
     url.searchParams.append('la', 'es');
+
+    // ✅ Forzar formato JSON explícitamente
+    url.searchParams.append('format', 'json');
+
+    console.log('🔗 URL completa:', url.toString());
+    console.log('📋 Parámetros URL:', {
+      profile_datetime: solarReturnDatetime,
+      profile_coordinates: coordinates,
+      birth_time_unknown: 'false',
+      format: 'json',
+      house_system: 'placidus',
+      la: 'es'
+    });
 
     const response = await fetch(url.toString(), {
       headers: {
@@ -164,7 +180,12 @@ async function callProkeralaSolarReturn(birthData: any, returnYear: number) {
     }
 
     // ✅ VALIDAR QUE SEA JSON ANTES DE PARSEAR
+    const contentType = response.headers.get('content-type');
     const responseText = await response.text();
+
+    console.log('📦 Response Content-Type:', contentType);
+    console.log('📝 Response preview:', responseText.substring(0, 100));
+
     if (responseText.trim().startsWith('<?xml') || responseText.trim().startsWith('<')) {
       console.error('❌ API devolvió XML/HTML, no JSON:', responseText.substring(0, 200));
       throw new Error('API devolvió formato incorrecto - usando fallback');
@@ -173,9 +194,16 @@ async function callProkeralaSolarReturn(birthData: any, returnYear: number) {
     try {
       const data = JSON.parse(responseText);
       console.log('✅ Solar Return calculado correctamente por Prokerala');
+
+      // Validar estructura mínima
+      if (!data.data || !data.data.planets) {
+        console.warn('⚠️ Respuesta válida pero estructura inesperada');
+      }
+
       return { success: true, data };
     } catch (parseError) {
       console.error('❌ Error parseando respuesta:', parseError);
+      console.error('Contenido recibido:', responseText.substring(0, 500));
       throw new Error('Respuesta inválida de API');
     }
 

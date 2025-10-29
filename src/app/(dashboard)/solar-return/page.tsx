@@ -107,9 +107,9 @@ export default function SolarReturnPage() {
 
       const srResult = await srResponse.json();
 
-      if (srResult.success && srResult.solarReturnChart) {
-        setSolarReturnData(srResult.solarReturnChart);
-        setChartData(srResult.solarReturnChart);
+      if (srResult.success && srResult.data?.solarReturnChart) {
+        setSolarReturnData(srResult.data.solarReturnChart);
+        setChartData(srResult.data.solarReturnChart);
       } else {
         setSolarReturnData(null);
         setChartData(null);
