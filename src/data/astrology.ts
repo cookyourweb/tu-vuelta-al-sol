@@ -1,4 +1,4 @@
-// types/astrology.ts
+//src/data/astrology.ts
 
 export type ZodiacSign = 
   'Aries' | 'Tauro' | 'Géminis' | 'Cáncer' | 'Leo' | 'Virgo' | 

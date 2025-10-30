@@ -203,6 +203,7 @@ Estas funcionalidades están planificadas para ser implementadas en los próximo
 
 ### Estructura de Archivos del Proyecto
 
+
 ### Estructura de Archivos Actualizada
 
 El proyecto está organizado de la siguiente manera:
@@ -216,6 +217,7 @@ tu-vuelta-al-sol/
 ├── .vercelignore
 ├── debug-token.js
 ├── eslint.config.mjs
+├── estructura e archios.md
 ├── fix-import-PostmanTest.txt
 ├── jest.config.js
 ├── jest.setup.ts
@@ -246,7 +248,21 @@ tu-vuelta-al-sol/
 ├── .qodo/
 ├── .vscode/
 ├── astrology_books/
-├── node_modules/
+│   ├── chunks.json
+│   ├── pdfcoffee.com_astrology-of-personality-dane-rudhyarpdf-pdf-free.pdf
+│   ├── pdfcoffee.com_117800510-jan-spiller-astrology-for-the-soulpdf-4-pdf-free.pdf
+│   ├── pdfcoffee.com_astrology-of-personality-dane-rudhyarpdf-pdf-free (3).pdf
+│   ├── pdfcoffee.com-dane-rudhyar-las-casas-astrologicaspdf.pdf
+│   ├── pdfcoffee.com_pluto-volume-1-the-evolutionary-journey-of-the-soul-by-green-jeffrey-wolf-z-liborgpdf-pdf-free.pdf
+│   ├── pdfcoffee.com_steven-forrest-inner-sky-pdf-free.pdf
+│   ├── Ptolomeo Claudius - Tetrabiblos.pdf
+│   ├── kupdf.net_william-lilly-christian-astrology-3-books.pdf
+├── documentacion/
+│   └── BUGDEAPIS/
+│       ├── ANALISIS_MATEMATICO_DEFINITIVO.md
+│       ├── ANALISIS_OSCAR_CORRECCIONES.md
+│       ├── PRUEBA_VISUAL_SIMPLE.md
+│       └── ResumenEjecutivoBuyMedioCielo.md
 ├── public/
 │   ├── file.svg
 │   ├── globe.svg
@@ -256,19 +272,28 @@ tu-vuelta-al-sol/
 │   └── window.svg
 ├── scripts/
 │   ├── check-chart-data.js
+│   ├── cleanup-all-interpretations.js
+│   ├── clear-cache.js
+│   ├── compare-birth-data.js
+│   ├── diagnose-collections.js
+│   ├── diagnose-mongodb.js
 │   ├── fix-quotes.sh
+│   ├── insert-test-user-birthdata.js
+│   ├── manage-cache.js
+│   ├── migrate-test-to-astrology.js
 │   ├── parse_and_chunk_pdfs.js
 │   ├── professional-quote-fix.sh
-│   ├── test-agenda-ai/page.tsx
+│   ├── prokerala-diagnostic.js
+│   ├── test-ascendant-mc-calculation.js
 │   ├── test-ascendant-mc-fix.js
 │   ├── test-ascendant-mc-verification-FIXED.js
 │   ├── test-ascendant-wc-verification.js
+│   ├── test-mc-calculation.js
 │   ├── test-mc-direct.js
 │   ├── test-oscar.js
-│   ├── test-progressed/page.tsx
 │   ├── test-vero.js
 │   ├── verification-script.js
-│   └── test-api/page.tsx
+│   └── verify-solar-return.ts
 ├── src/
 │   ├── app/
 │   │   ├── favicon.ico
@@ -277,73 +302,177 @@ tu-vuelta-al-sol/
 │   │   ├── layout.tsx.backup
 │   │   ├── page.tsx
 │   │   ├── (auth)/
+│   │   │   ├── login/
+│   │   │   │   └── page.tsx
+│   │   │   └── register/
+│   │   │   └── page.tsx
 │   │   ├── (dashboard)/
+│   │   │   ├── agenda/
+│   │   │   │   └── page.tsx
+│   │   │   ├── birth-data/
+│   │   │   │   └── page.tsx
+│   │   │   ├── dashboard/
+│   │   │   │   └── page.tsx
+│   │   │   ├── natal-chart/
+│   │   │   │   └── page.tsx
+│   │   │   ├── profile/
+│   │   │   │   └── page.tsx
+│   │   │   └── solar-return/
+│   │   │   └── page.tsx
 │   │   ├── admin/
 │   │   │   └── page.tsx
 │   │   ├── api/
 │   │   │   ├── admin/
 │   │   │   │   ├── delete-user/
+│   │   │   │   │   └── route.ts
 │   │   │   │   ├── update-role/
-│   │   │   │   └── update-role.ts
+│   │   │   │   │   └── route.ts
+│   │   │   │   └── users/
+│   │   │   │   └── route.ts
 │   │   │   ├── astrology/
+│   │   │   │   ├── complete-events/
+│   │   │   │   │   └── route.ts
 │   │   │   │   ├── generate-agenda-ai/
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── get-agenda/
 │   │   │   │   │   └── route.ts
 │   │   │   │   ├── interpret-chunk/
 │   │   │   │   │   └── route.ts
+│   │   │   │   ├── interpret-events/
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── interpret-natal/
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── interpret-natal-clean/
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── interpret-solar/
+│   │   │   │   │   └── route.ts
 │   │   │   │   ├── interpret-solar-return/
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── interpretations/
+│   │   │   │   │   └── save/
 │   │   │   │   │   └── route.ts
 │   │   │   │   ├── natal-chart/
 │   │   │   │   │   └── route.ts
 │   │   │   │   ├── progressed-chart-accurate/
 │   │   │   │   │   └── route.ts
+│   │   │   │   ├── progressed-interpretation/
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── simple-agenda/
+│   │   │   │   │   └── route.ts
 │   │   │   ├── birth-data/
 │   │   │   │   └── route.ts
 │   │   │   ├── cache/
+│   │   │   │   ├── check/
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── invalidate/
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── save/
+│   │   │   │   │   └── route.ts
+│   │   │   │   └── stats/
+│   │   │   │   └── route.ts
 │   │   │   ├── charts/
+│   │   │   │   ├── natal/
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── progressed/
+│   │   │   │   │   └── route.ts
+│   │   │   │   └── solar-return/
+│   │   │   │   └── route.ts
 │   │   │   ├── debug/
+│   │   │   │   ├── assistant/
+│   │   │   │   │   └── route.ts
 │   │   │   │   ├── assistants/
+│   │   │   │   │   └── route.ts
 │   │   │   │   ├── auth/
+│   │   │   │   │   └── route.ts
 │   │   │   │   ├── auth-context/
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── credentials/
+│   │   │   │   │   └── route.ts
 │   │   │   │   ├── firebase/
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── mongodb/
+│   │   │   │   │   └── route.ts
+│   │   │   │   └── route.ts
+│   │   │   ├── debug-auth/
+│   │   │   │   └── route.ts
+│   │   │   ├── debug-auth-context/
+│   │   │   │   └── route.ts
+│   │   │   ├── debug-credentials/
+│   │   │   │   └── route.ts
+│   │   │   ├── debug-firebase/
 │   │   │   │   └── route.ts
 │   │   │   ├── events/
+│   │   │   │   └── astrological/
+│   │   │   │   └── route.ts
 │   │   │   ├── geocode/
+│   │   │   │   └── route.ts
+│   │   │   ├── interpretations/
+│   │   │   │   ├── clear-cache/
+│   │   │   │   │   └── route.ts
+│   │   │   │   └── save/
+│   │   │   │   └── route.ts
 │   │   │   ├── pdf/
 │   │   │   │   └── generate/
+│   │   │   │   └── route.ts
 │   │   │   ├── prokerala/
+│   │   │   │   ├── chart/
+│   │   │   │   │   └── route.ts
 │   │   │   │   ├── client-v2.ts
+│   │   │   │   ├── direct-test/
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── location-search/
+│   │   │   │   │   └── route.ts
 │   │   │   │   ├── natal-chart/
 │   │   │   │   │   └── route.ts
-│   │   │   │   └── test-page/
-│   │   │   │   └── page.tsx
+│   │   │   │   ├── natal-horoscope/
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── progressed-chart/
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── test/
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── test-page/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── token/
+│   │   │   │   └── route.ts
 │   │   │   ├── reverse-geocode/
+│   │   │   │   └── route.ts
 │   │   │   ├── test-mongodb/
-│   │   │   └── users/
+│   │   │   │   └── route.ts
+│   │   │   ├── test-mongodb2/
+│   │   │   │   └── route.ts
+│   │   │   ├── users/
 │   │   │   │   └── route.ts
 │   │   ├── clear-chart-cache/
 │   │   │   └── route.ts
 │   │   ├── debug/
 │   │   │   └── page.tsx
-│   │   ├── postman-test/
-│   │   │   └── page.tsx
-│   │   ├── test-agenda-ai/
-│   │   │   └── page.tsx
-│   │   ├── test-api/
-│   │   │   └── page.tsx
-│   │   ├── test-chart-display/
-│   │   │   └── page.tsx
-│   │   ├── test-mongodb/
-│   │   │   └── page.tsx
-│   │   ├── test-natal-chart/
-│   │   │   ├── page.tsx
-│   │   │   └── page.tsx.backup
-│   │   ├── test-progressed/
-│   │   │   ├── page.test.tsx
-│   │   │   └── page.tsx
-│   │   ├── test-timezone/
+│   │   ├── tests/
+│   │   │   ├── postman-test/
+│   │   │   │   └── page.tsx
+│   │   │   ├── test-agenda-ai/
+│   │   │   │   └── page.tsx
+│   │   │   ├── test-api/
+│   │   │   │   └── page.tsx
+│   │   │   ├── test-chart-display/
+│   │   │   │   └── page.tsx
+│   │   │   ├── test-mc-calculation/
+│   │   │   │   └── page.tsx
+│   │   │   ├── test-mongodb/
+│   │   │   │   └── page.tsx
+│   │   │   ├── test-mongodb2/
+│   │   │   │   └── page.tsx
+│   │   │   ├── test-natal-chart/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── page.tsx.backup
+│   │   │   ├── test-postman/
+│   │   │   │   └── page.tsx
+│   │   │   ├── test-progressed/
+│   │   │   │   ├── page.test.tsx
+│   │   │   │   └── page.tsx
+│   │   │   └── test-timezone/
 │   │   │   └── page.tsx
 │   │   └── types/
-│   │   │   └── astrology.ts
+│   │   └── astrology.ts
 │   ├── components/
 │   │   ├── admin/
 │   │   │   ├── BirthDataAdminTable.tsx
@@ -359,15 +488,17 @@ tu-vuelta-al-sol/
 │   │   │   ├── AstrologicalCalendar.tsx
 │   │   │   ├── BirthDataCard.tsx
 │   │   │   ├── BirthDataForm.tsx
+│   │   │   ├── ChartComparisonComponent.tsx
 │   │   │   ├── ChartDisplay.tsx
-│   │   │   ├── ChartDisplaycompletosinrefactorizar.tsx
-│   │   │   ├── ChartDisplayrefactorizadSinLineasniAspeectos.tsx
 │   │   │   ├── ChartTooltips.tsx
 │   │   │   ├── ChartWheel.tsx
 │   │   │   ├── CombinedAscendantMCCard.tsx
 │   │   │   ├── CosmicFootprint.tsx
 │   │   │   ├── ElementsModalitiesCard.tsx
 │   │   │   ├── HouseGrid.tsx
+│   │   │   ├── InterpretationButton.tsx
+│   │   │   ├── InterpretationDisplay.tsx
+│   │   │   ├── InterpretationDrawer.tsx
 │   │   │   ├── MidheavenCard.tsx
 │   │   │   ├── NatalChartWheel.tsx
 │   │   │   ├── PlanetSymbol.tsx
@@ -377,9 +508,9 @@ tu-vuelta-al-sol/
 │   │   ├── auth/
 │   │   │   ├── LoginForm.tsx
 │   │   │   └── RegisterForm.tsx
-│   │   ├── dashboard/
-│   │   │   ├── BirthDataForm.tsx
-│   │   │   └── NatalChartCard.tsx
+│   │   │   ├── dashboard/
+│   │   │   │   ├── BirthDataForm.tsx
+│   │   │   │   └── NatalChartCard.tsx
 │   │   ├── debug/
 │   │   │   └── ForceRegenerateChart.tsx
 │   │   ├── layout/
@@ -406,10 +537,17 @@ tu-vuelta-al-sol/
 │   ├── context/
 │   │   ├── AuthContext.tsx
 │   │   └── NotificationContext.tsx
+│   ├── data/
+│   │   ├── astrology.ts
+│   │   └── interpretations/
+│   │   │   ├── aspectInterpretations.ts
+│   │   │   ├── lunarInterpretations.ts
+│   │   │   └── solarInterpretations.ts
 │   ├── hooks/
 │   │   ├── useAspects.ts
 │   │   ├── useChart.ts
 │   │   ├── useChartDisplay.ts
+│   │   ├── useInterpretationDrawer.ts
 │   │   ├── usePlanets.ts
 │   │   ├── useProkeralaApi.ts
 │   │   ├── astrology/
@@ -439,19 +577,26 @@ tu-vuelta-al-sol/
 │   │   ├── AIUsage.ts
 │   │   ├── BirthData.ts
 │   │   ├── Chart.ts
+│   │   ├── Interpretation.ts
 │   │   └── User.ts
 │   ├── services/
 │   │   ├── astrologicalEventsService.ts
 │   │   ├── astrologyService.ts
+│   │   ├── batchInterpretations.ts
 │   │   ├── cacheService.ts
 │   │   ├── chartCalculationsService.ts
 │   │   ├── chartInterpretationsService.ts
 │   │   ├── chartRenderingService.tsx
-│   │   ├── progressedChartService.ts
+│   │   ├── educationalInterpretationService.ts
+│   │   ├── educationalInterpretationService.ts.backup
+│   │   ├── progressedChartService.tsx
 │   │   ├── prokeralaService.ts
+│   │   ├── solarReturnInterpretationService.ts
 │   │   ├── trainedAssistantService.ts
+│   │   ├── trainedAssistantService.ts.bak
 │   │   └── userDataService.ts
 │   ├── types/
+│   │   ├── interpretations.ts
 │   │   └── astrology/
 │   │   │   ├── aspects.ts
 │   │   │   ├── basic.ts
@@ -476,6 +621,8 @@ tu-vuelta-al-sol/
 │   │   │   └── planetPositions.ts
 └── TODO.md
 ```
+
+
 
 **Nota**: Esta estructura refleja la organización actual del proyecto con todos los archivos y directorios existentes.
 

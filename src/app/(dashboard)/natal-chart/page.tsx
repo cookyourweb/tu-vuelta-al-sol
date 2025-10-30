@@ -10,6 +10,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import ChartDisplay from '@/components/astrology/ChartDisplay';
 import InterpretationButton from '@/components/astrology/InterpretationButton';
+import { useInterpretationDrawer } from '@/hooks/useInterpretationDrawer';
+import { InterpretationDrawer } from '@/components/astrology/InterpretationDrawer';
 import { Sparkles, Edit, Star, RefreshCw, Brain } from 'lucide-react';
 import Button from '@/components/ui/Button';
 
@@ -40,6 +42,7 @@ interface BirthData {
 export default function NatalChartPage() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
+  const { isOpen: drawerOpen, content: drawerContent, open: openDrawer, close: closeDrawer } = useInterpretationDrawer();
   
   // Estados principales
   const [chartData, setChartData] = useState<NatalChartData | null>(null);
@@ -440,6 +443,8 @@ export default function NatalChartPage() {
             ascendant={chartData.ascendant}
             midheaven={chartData.midheaven}
             birthData={birthData || undefined}
+            onOpenDrawer={openDrawer}
+            drawerOpen={drawerOpen}
           />
         </div>
       )}
@@ -453,6 +458,16 @@ export default function NatalChartPage() {
           animation: progress 60s linear infinite;
         }
       `}</style>
+
+      {/* Drawer global para interpretaciones */}
+      <InterpretationDrawer
+        isOpen={drawerOpen}
+        onClose={() => {
+          closeDrawer();
+          // Reset tooltip when drawer closes - handled by page-level state
+        }}
+        content={drawerContent}
+      />
     </div>
   );
 }

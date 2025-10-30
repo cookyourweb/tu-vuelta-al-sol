@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 // src/lib/prokerala/types.ts
 export interface NatalChartParams {
     birthDate: string;
@@ -17,6 +19,8 @@ export interface NatalChartParams {
   }
   
   export interface Planet {
+    degree: ReactNode;
+    retrograde: any;
     id: number;
     name: string;
     longitude: number;

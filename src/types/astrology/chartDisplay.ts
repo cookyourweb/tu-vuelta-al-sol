@@ -14,7 +14,7 @@ export interface ChartDisplayProps {
   birthData?: BirthData;
   showInterpretation?: boolean;
   onInterpretationGenerated?: (interpretation: any) => void;
-  
+
   // ✅ FIXED: Added "solar-return" as valid value
   chartType?: 'natal' | 'progressed' | 'solar-return';
   showOnlyProgressedAspects?: boolean;
@@ -28,6 +28,11 @@ export interface ChartDisplayProps {
   solarReturnYear?: number;
   solarReturnTheme?: string;
   ascSRInNatalHouse?: number;
+
+  // ✅ ADDED: For drawer functionality
+  onOpenDrawer?: (content: any) => void;
+  onCloseDrawer?: () => void;
+  drawerOpen?: boolean;
 }
 
 // Rest of interfaces remain the same

@@ -2,6 +2,8 @@ import React from 'react';
 import { Planet, Aspect } from '../../types/astrology/chartDisplay';
 import { planetMeanings, signMeanings, houseMeanings, aspectMeanings } from '../../constants/astrology';
 import { getPersonalizedPlanetInterpretation, getPersonalizedAspectInterpretation } from '../../services/chartInterpretationsService';
+import { getExampleInterpretation } from '../../data/interpretations/ExampleInterpretations';
+
 
 interface ChartTooltipsProps {
   hoveredPlanet: string | null;
@@ -15,6 +17,9 @@ interface ChartTooltipsProps {
   setHoveredPlanet: (planet: string | null) => void;
   setHoveredAspect: (aspect: string | null) => void;
   setHoveredHouse: (house: number | null) => void;
+  onOpenDrawer?: (content: any) => void;
+  onCloseDrawer?: () => void;
+  drawerOpen?: boolean;
 }
 
 const ChartTooltips: React.FC<ChartTooltipsProps> = ({
@@ -28,61 +33,130 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
   tooltipPosition,
   setHoveredPlanet,
   setHoveredAspect,
-  setHoveredHouse
+  setHoveredHouse,
+  onOpenDrawer,
+  onCloseDrawer,
+  drawerOpen = false
 }) => {
-  // Tooltip for planet
+
+  // ============================================================================
+  // 🪐 TOOLTIP FOR PLANET
+  // ============================================================================
   if (hoveredPlanet && hoveredPlanet !== 'Ascendente' && hoveredPlanet !== 'Medio Cielo') {
+
+
     const planet = planets.find(p => p.name === hoveredPlanet);
     if (!planet) return null;
 
+    // Obtener interpretación con lenguaje triple fusionado
+    const interpretationKey = `${planet.name}-${planet.sign}-${planet.house}`;
+    const interpretation = getExampleInterpretation(interpretationKey);
+
+    // TODO: Abrir drawer automáticamente al mostrar tooltip - ahora se maneja desde la página
+
     return (
-      <div 
-        className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm pointer-events-none"
-        style={{ 
+      <div
+        className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-md pointer-events-auto z-[150000]"
+        style={{
           left: tooltipPosition.x + 25,
           top: tooltipPosition.y - 50,
-          zIndex: 99999,
-          transform: tooltipPosition.x > window.innerWidth - 300 ? 'translateX(-100%)' : 'none'
+          transform: tooltipPosition.x > window.innerWidth - 400 ? 'translateX(-100%)' : 'none'
+        }}
+        onMouseEnter={() => {
+          // Mantener el tooltip visible cuando el mouse está sobre él
+          setHoveredPlanet(planet.name);
+        }}
+        onMouseLeave={() => {
+          // Solo cerrar tooltip si el drawer no está abierto
+          if (!drawerOpen) {
+            setTimeout(() => {
+              setHoveredPlanet(null);
+            }, 100);
+          }
+        }}
+        onClick={(e) => {
+          // Cerrar tooltip al hacer click fuera
+          if (e.target === e.currentTarget) {
+            setHoveredPlanet(null);
+          }
         }}
       >
-        <div className="flex items-center mb-3">
-          <span className="text-3xl mr-3">
-            {planet.name.charAt(0)}
-          </span>
-          <div>
-            <div className="text-white font-bold text-lg">{planet.name}</div>
-            <div className="text-gray-200 text-sm">
-              {planet.degree}° {planet.sign}
+        {/* Header del tooltip */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center">
+            <span className="text-3xl mr-3">{planet.name.charAt(0)}</span>
+            <div>
+              <div className="text-white font-bold text-lg">
+                {interpretation?.tooltip?.titulo || planet.name}
+              </div>
+              <div className="text-gray-200 text-sm">
+                {planet.degree}° {planet.sign}
+              </div>
             </div>
-            <div className="text-gray-300 text-xs">
-              Casa {planet.house} • {signMeanings[planet.sign as keyof typeof signMeanings]}
-            </div>
+          </div>
+          {/* Botón X para cerrar tooltip */}
+          <button
+            onClick={() => {
+              setHoveredPlanet(null);
+              // Si el drawer está abierto, también cerrarlo
+              if (onCloseDrawer) {
+                onCloseDrawer();
+              }
+            }}
+            className="text-gray-400 hover:text-white transition-colors p-1"
+            aria-label="Cerrar tooltip"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Descripción breve */}
+        <div className="text-gray-300 text-xs mb-3">
+          {interpretation?.tooltip?.descripcionBreve || `${planet.name} en ${planet.sign} en Casa ${planet.house}`}
+        </div>
+
+        {/* Significado con lenguaje triple fusionado */}
+        <div className="mb-3">
+          <div className="text-white text-sm font-semibold mb-2">🎯 Significado:</div>
+          <div className="text-gray-200 text-sm leading-relaxed">
+            {interpretation?.tooltip?.significado || getPersonalizedPlanetInterpretation(planet)}
           </div>
         </div>
-        
-        {planetMeanings[hoveredPlanet as keyof typeof planetMeanings] && (
-          <div className="mb-2">
-            <div className="text-white text-sm font-semibold mb-1">🎯 Significado:</div>
-            <div className="text-gray-200 text-xs mb-2">
-              {planetMeanings[hoveredPlanet as keyof typeof planetMeanings].meaning}
-            </div>
-            <div className="text-gray-300 text-xs mb-2">
-              <strong>Palabras clave:</strong> {planetMeanings[hoveredPlanet as keyof typeof planetMeanings].keywords}
-            </div>
-            
-            <div className="text-white text-sm font-semibold mb-1">⚡ En tu carta:</div>
-            <div className="text-cyan-200 text-xs leading-relaxed">
-              {getPersonalizedPlanetInterpretation(planet)}
-            </div>
+
+        {/* Efecto y Tipo */}
+        <div className="space-y-1 mb-3">
+          <div className="text-cyan-200 text-xs">
+            <strong>Efecto:</strong> {interpretation?.tooltip?.efecto || 'Influencia planetaria significativa'}
           </div>
-        )}
-        
+          <div className="text-purple-200 text-xs">
+            <strong>Tipo:</strong> {interpretation?.tooltip?.tipo || 'Energía transformadora'}
+          </div>
+        </div>
+
+        {/* Retrógrado (si aplica) */}
         {planet.retrograde && (
-          <div className="bg-red-400/20 rounded-lg p-2 mt-2">
+          <div className="bg-red-400/20 rounded-lg p-2 mb-3">
             <div className="text-red-300 text-xs font-semibold">⚠️ Retrógrado</div>
             <div className="text-red-200 text-xs">Energía internalizada, revisión de temas pasados</div>
           </div>
         )}
+
+        {/* Botón para ver interpretación completa */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onOpenDrawer && interpretation?.drawer) {
+              onOpenDrawer(interpretation.drawer);
+              // Mantener tooltip abierto al abrir drawer
+            }
+          }}
+          className="w-full py-2.5 px-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group shadow-lg"
+        >
+          <span>📖 Ver interpretación completa</span>
+          <span className="group-hover:translate-x-1 transition-transform">→</span>
+        </button>
+
+
       </div>
     );
   }
@@ -123,18 +197,18 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
         
         <div className="mb-3 p-3 bg-white/10 rounded-lg border border-white/10">
           <div className="text-blue-300 text-xs mb-1">
-            <strong>Ángulo:</strong> {currentAspect.config.angle}°
+            <strong>Ãngulo:</strong> {currentAspect.config.angle}Â°
           </div>
           <div className="text-blue-300 text-xs mb-1">
-            <strong>Orbe máximo:</strong> ±{currentAspect.config.orb}°
+            <strong>Orbe mÃ¡ximo:</strong> Â±{currentAspect.config.orb}Â°
           </div>
           <div className="text-yellow-300 text-xs font-semibold">
-            {currentAspect.exact ? 'EXACTO' : `Orbe: ${currentAspect.orb.toFixed(2)}°`}
+            {currentAspect.exact ? 'EXACTO' : `Orbe: ${currentAspect.orb.toFixed(2)}Â°`}
           </div>
         </div>
         
         <div className="mb-2">
-          <div className="text-white text-sm font-semibold mb-1">🎯 Significado:</div>
+          <div className="text-white text-sm font-semibold mb-1">ðŸŽ¯ Significado:</div>
           <div className="text-gray-200 text-xs mb-2">
             {getPersonalizedAspectInterpretation(currentAspect)}
           </div>
@@ -148,10 +222,10 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
         
         {currentAspect.exact && (
           <div className="mt-2 p-2 bg-yellow-400/20 border border-yellow-400/40 rounded">
-            <div className="text-yellow-200 text-xs font-bold mb-1">⭐ Aspecto Exacto</div>
+            <div className="text-yellow-200 text-xs font-bold mb-1">â­ Aspecto Exacto</div>
             <div className="text-yellow-100 text-xs leading-relaxed">
-              Este aspecto tiene <strong>máxima potencia energética</strong> (orbe &lt; 1°). 
-              Es una de las influencias <strong>más poderosas</strong> en tu personalidad.
+              Este aspecto tiene <strong>mÃ¡xima potencia energÃ©tica</strong> (orbe &lt; 1Â°). 
+              Es una de las influencias <strong>mÃ¡s poderosas</strong> en tu personalidad.
             </div>
           </div>
         )}
@@ -179,21 +253,21 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           <div>
             <div className="text-white font-bold text-lg">Ascendente</div>
             <div className="text-gray-200 text-sm">
-              {ascendant.degree}° {ascendant.sign}
+              {ascendant.degree}Â° {ascendant.sign}
             </div>
           </div>
         </div>
         
-        <div className="text-white text-sm font-semibold mb-1">🎯 Significado:</div>
+        <div className="text-white text-sm font-semibold mb-1">ðŸŽ¯ Significado:</div>
         <div className="text-gray-200 text-xs mb-2">
-          Tu máscara social, cómo te presentas al mundo y tu apariencia física. 
-          La energía que proyectas en primeras impresiones.
+          Tu mÃ¡scara social, cÃ³mo te presentas al mundo y tu apariencia fÃ­sica. 
+          La energÃ­a que proyectas en primeras impresiones.
         </div>
         <div className="text-gray-300 text-xs mb-2">
           <strong>En {ascendant.sign}:</strong> {signMeanings[ascendant.sign as keyof typeof signMeanings]}
         </div>
         <div className="text-cyan-200 text-xs leading-relaxed">
-          <strong>⚡ En tu carta:</strong> Con Ascendente en {ascendant.sign}, te presentas al mundo con las cualidades de {signMeanings[ascendant.sign as keyof typeof signMeanings]?.toLowerCase()}. Tu personalidad externa refleja estas características de forma natural.
+          <strong>âš¡ En tu carta:</strong> Con Ascendente en {ascendant.sign}, te presentas al mundo con las cualidades de {signMeanings[ascendant.sign as keyof typeof signMeanings]?.toLowerCase()}. Tu personalidad externa refleja estas caracterÃ­sticas de forma natural.
         </div>
         <div className="text-gray-300 text-xs mt-2">
           <strong>Palabras clave:</strong> Personalidad externa, imagen, vitalidad, enfoque de vida
@@ -222,21 +296,21 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           <div>
             <div className="text-white font-bold text-lg">Medio Cielo</div>
             <div className="text-gray-200 text-sm">
-              {midheaven.degree}° {midheaven.sign}
+              {midheaven.degree}Â° {midheaven.sign}
             </div>
           </div>
         </div>
         
-        <div className="text-white text-sm font-semibold mb-1">🎯 Significado:</div>
+        <div className="text-white text-sm font-semibold mb-1">ðŸŽ¯ Significado:</div>
         <div className="text-gray-200 text-xs mb-2">
-          Tu vocación, carrera ideal, reputación pública y lo que quieres lograr 
-          en el mundo. Tu propósito profesional.
+          Tu vocaciÃ³n, carrera ideal, reputaciÃ³n pÃºblica y lo que quieres lograr 
+          en el mundo. Tu propÃ³sito profesional.
         </div>
         <div className="text-gray-300 text-xs mb-2">
           <strong>En {midheaven.sign}:</strong> {signMeanings[midheaven.sign as keyof typeof signMeanings]}
         </div>
         <div className="text-cyan-200 text-xs leading-relaxed">
-          <strong>⚡ En tu carta:</strong> Con Medio Cielo en {midheaven.sign}, tu vocación y carrera se expresan a través de {signMeanings[midheaven.sign as keyof typeof signMeanings]?.toLowerCase()}. Esta es la energía que quieres proyectar profesionalmente.
+          <strong>âš¡ En tu carta:</strong> Con Medio Cielo en {midheaven.sign}, tu vocaciÃ³n y carrera se expresan a travÃ©s de {signMeanings[midheaven.sign as keyof typeof signMeanings]?.toLowerCase()}. Esta es la energÃ­a que quieres proyectar profesionalmente.
         </div>
       </div>
     );
@@ -255,7 +329,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
         }}
       >
         <div className="flex items-start mb-3">
-          <span className="text-3xl mr-3">🏠</span>
+          <span className="text-3xl mr-3">ðŸ </span>
           <div>
             <div className="text-white font-bold text-lg">
               {houseMeanings[hoveredHouse as keyof typeof houseMeanings]?.name}
@@ -272,7 +346,8 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
     );
   }
 
-  return null;
+  // No renderizar drawer aquí - se maneja desde la página
+  return <></>;
 };
 
 export default ChartTooltips;
