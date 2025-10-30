@@ -66,6 +66,7 @@ const ChartDisplay = ({
   const [hoveredNavGuide, setHoveredNavGuide] = useState(false);
   const [activeSection, setActiveSection] = useState('carta-visual');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [clickedPlanet, setClickedPlanet] = useState<string | null>(null);
 
   // ✅ FUNCIONES UTILITARIAS
   const handleMouseMove = (event: React.MouseEvent) => {
@@ -315,6 +316,11 @@ const ChartDisplay = ({
             }}
             onMouseMove={handleMouseMove}
             onMouseLeave={() => setHoveredPlanet(null)}
+            onClick={(e) => {
+              setClickedPlanet(planet.name);
+              setHoveredPlanet(planet.name);
+              handleMouseMove(e);
+            }}
           />
           
           <text
@@ -1745,6 +1751,8 @@ const ChartDisplay = ({
         setHoveredHouse={setHoveredHouse}
         onOpenDrawer={onOpenDrawer}
         drawerOpen={drawerOpen}
+        clickedPlanet={clickedPlanet}
+        setClickedPlanet={setClickedPlanet}
       />
 
 

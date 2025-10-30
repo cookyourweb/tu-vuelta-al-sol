@@ -20,6 +20,8 @@ interface ChartTooltipsProps {
   onOpenDrawer?: (content: any) => void;
   onCloseDrawer?: () => void;
   drawerOpen?: boolean;
+  clickedPlanet?: string | null;
+  setClickedPlanet?: (planet: string | null) => void;
 }
 
 const ChartTooltips: React.FC<ChartTooltipsProps> = ({
@@ -36,16 +38,17 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
   setHoveredHouse,
   onOpenDrawer,
   onCloseDrawer,
-  drawerOpen = false
+  drawerOpen = false,
+  clickedPlanet = null,
+  setClickedPlanet
 }) => {
 
   // ============================================================================
   // 🪐 TOOLTIP FOR PLANET
   // ============================================================================
-  if (hoveredPlanet && hoveredPlanet !== 'Ascendente' && hoveredPlanet !== 'Medio Cielo') {
-
-
-    const planet = planets.find(p => p.name === hoveredPlanet);
+  if ((hoveredPlanet || clickedPlanet) && hoveredPlanet !== 'Ascendente' && hoveredPlanet !== 'Medio Cielo') {
+    const planetName = clickedPlanet || hoveredPlanet;
+    const planet = planets.find(p => p.name === planetName);
     if (!planet) return null;
 
     // Obtener interpretación con lenguaje triple fusionado
@@ -67,17 +70,19 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           setHoveredPlanet(planet.name);
         }}
         onMouseLeave={() => {
-          // Solo cerrar tooltip si el drawer no está abierto
-          if (!drawerOpen) {
+          // Solo cerrar tooltip si el drawer no está abierto y no hay planeta clickeado
+          if (!drawerOpen && !clickedPlanet) {
             setTimeout(() => {
               setHoveredPlanet(null);
             }, 100);
           }
         }}
         onClick={(e) => {
-          // Cerrar tooltip al hacer click fuera
+          // Si se hace click en el tooltip, marcar como clickeado
           if (e.target === e.currentTarget) {
-            setHoveredPlanet(null);
+            if (setClickedPlanet) {
+              setClickedPlanet(planet.name);
+            }
           }
         }}
       >
@@ -98,6 +103,9 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           <button
             onClick={() => {
               setHoveredPlanet(null);
+              if (setClickedPlanet) {
+                setClickedPlanet(null);
+              }
               // Si el drawer está abierto, también cerrarlo
               if (onCloseDrawer) {
                 onCloseDrawer();
