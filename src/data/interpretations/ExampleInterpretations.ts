@@ -1,6 +1,6 @@
 // =============================================================================
 // 📚 INTERPRETACIONES DE EJEMPLO - LENGUAJE TRIPLE FUSIONADO
-// exampleInterpretations.ts
+// src/data/interpretations/exampleInterpretations.ts
 // =============================================================================
 // Interpretaciones pre-escritas para testing del sistema
 // Estas sirven como fallback y como referencia de calidad

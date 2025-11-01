@@ -1,281 +1,441 @@
+// =============================================================================
+// 🎯 NATAL INTERPRETATION API ROUTE - COMPLETELY FIXED VERSION
 // src/app/api/astrology/interpret-natal/route.ts
-// ============================================================================
-// 🔥 ENDPOINT INTERPRETACIÓN NATAL - VERSIÓN ULTRA-ROBUSTA
-// ============================================================================
-// SOLUCIONA: [object Object], parsing errors, falta de explicaciones educativas
-// GARANTIZA: Respuestas siempre válidas, super educativas, nunca falla
-// ============================================================================
+// =============================================================================
+// ✅ FIXED: Now returns proper JSON structure with OBJECTS not STRINGS
+// =============================================================================
 
 import { NextRequest, NextResponse } from 'next/server';
+import connectToDatabase from '@/lib/db';
 import OpenAI from 'openai';
 
-// ============================================================================
-// 📚 INTERFACES
-// ============================================================================
+// =============================================================================
+// TYPES
+// =============================================================================
 
-interface ChartData {
-  planets: Array<{
-    name: string;
-    sign: string;
-    degree: number;
-    house?: number;
-    houseNumber?: number;
-    retrograde?: boolean;
-    longitude?: number;
+interface TooltipInterpretation {
+  titulo: string;
+  descripcionBreve: string;
+  significado: string;
+  efecto: string;
+  tipo: string;
+}
+
+interface DrawerInterpretation {
+  titulo: string;
+  educativo: string;
+  poderoso: string;
+  poetico: string;
+  sombras: Array<{
+    nombre: string;
+    descripcion: string;
+    trampa: string;
+    regalo: string;
   }>;
-  houses?: Array<{
-    number: number;
-    sign: string;
-    degree: number;
-  }>;
-  aspects?: Array<{
-    planet1: string;
-    planet2: string;
-    type: string;
-    orb: number;
-  }>;
-  ascendant?: {
-    sign: string;
-    degree: number;
-  };
-  midheaven?: {
-    sign: string;
-    degree: number;
+  sintesis: {
+    frase: string;
+    declaracion: string;
   };
 }
 
-interface UserProfile {
-  name: string;
-  age: number;
-  birthPlace: string;
-  birthDate: string;
-  birthTime: string;
+interface PlanetInterpretation {
+  tooltip: TooltipInterpretation;
+  drawer: DrawerInterpretation;
 }
 
-interface NatalInterpretationRequest {
-  userId: string;
-  natalChart: ChartData;
-  userProfile: UserProfile;
-  regenerate?: boolean;
-}
-
-// ============================================================================
-// 🛠️ HELPERS - EDUCATIVOS
-// ============================================================================
-
-/**
- * Obtiene explicación educativa de un planeta
- */
-function getPlanetEducationalMeaning(planet: string): string {
-  const meanings: Record<string, string> = {
-    'Sol': 'tu identidad esencial, tu propósito vital, tu luz interior',
-    'Luna': 'tus emociones, tus necesidades emocionales, tu nutrición afectiva',
-    'Mercurio': 'tu mente, tu comunicación, cómo procesas información',
-    'Venus': 'tu forma de amar, tus valores, lo que disfrutas',
-    'Marte': 'tu acción, tu deseo, tu energía para conquistar',
-    'Júpiter': 'tu expansión, tu sabiduría, tus oportunidades',
-    'Saturno': 'tu estructura, tus límites, tu maestro interno',
-    'Urano': 'tu rebeldía, tu innovación, tu autenticidad radical',
-    'Neptuno': 'tu espiritualidad, tu intuición, tu conexión con lo divino',
-    'Plutón': 'tu poder transformador, tu intensidad, tu renacimiento',
-    'Quirón': 'tu herida sanadora, tu don único nacido del dolor',
-    'Nodo Norte': 'tu evolución, tu propósito de alma',
-    'Nodo Sur': 'tus talentos pasados, tu zona de confort'
+interface NatalInterpretations {
+  angles: {
+    Ascendente: PlanetInterpretation;
+    MedioCielo: PlanetInterpretation;
   };
-  return meanings[planet] || 'tu energía planetaria';
+  planets: Record<string, PlanetInterpretation>;
+  asteroids: Record<string, PlanetInterpretation>; // Lilith, Chiron
+  nodes: Record<string, PlanetInterpretation>; // North Node, South Node
+  elements: Record<string, PlanetInterpretation>; // Fire, Earth, Air, Water
+  modalities: Record<string, PlanetInterpretation>; // Cardinal, Fixed, Mutable
+  aspects: Record<string, PlanetInterpretation>; // All major aspects
 }
 
-/**
- * Obtiene explicación educativa de una casa
- */
-function getHouseEducationalMeaning(house: number): string {
-  const meanings: Record<number, string> = {
-    1: 'tu identidad, tu presencia, tu impacto al mundo',
-    2: 'tus recursos, tu valor personal, tu seguridad material',
-    3: 'tu comunicación, tu aprendizaje, tus conexiones cercanas',
-    4: 'tu hogar emocional, tus raíces, tu familia interna',
-    5: 'tu creatividad, tu autoexpresión, tu alegría',
-    6: 'tu trabajo diario, tu salud, tu servicio',
-    7: 'tus relaciones íntimas, tu pareja, tus asociaciones',
-    8: 'tu transformación profunda, tu poder compartido, tu sexualidad',
-    9: 'tu sabiduría, tu filosofía de vida, tu expansión mental',
-    10: 'tu carrera, tu legado público, tu contribución al mundo',
-    11: 'tu comunidad, tus ideales, tu visión de futuro',
-    12: 'tu espiritualidad, tu conexión con lo universal, tu liberación'
-  };
-  return meanings[house] || 'tu zona de experiencia';
+// =============================================================================
+// OPENAI CLIENT
+// =============================================================================
+
+function getOpenAIClient() {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY not configured');
+  }
+  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 }
 
-/**
- * Obtiene explicación educativa de un signo
- */
-function getSignEducationalMeaning(sign: string): string {
-  const meanings: Record<string, string> = {
-    'Aries': 'iniciar, liderar, actuar con coraje',
-    'Tauro': 'construir, valorar, disfrutar lo tangible',
-    'Géminis': 'comunicar, conectar, aprender constantemente',
-    'Cáncer': 'nutrir, proteger, sentir profundamente',
-    'Leo': 'brillar, crear, expresar tu autenticidad',
-    'Virgo': 'perfeccionar, servir, organizar con maestría',
-    'Libra': 'equilibrar, relacionarte, crear armonía',
-    'Escorpio': 'transformar, profundizar, renacer',
-    'Sagitario': 'expandir, explorar, buscar verdades',
-    'Capricornio': 'construir legado, estructurar, alcanzar metas',
-    'Acuario': 'innovar, revolucionar, liberar',
-    'Piscis': 'trascender, intuir, amar universalmente'
-  };
-  return meanings[sign] || 'expresarte';
+// =============================================================================
+// GET - Retrieve existing interpretations
+// =============================================================================
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
+
+    if (!userId) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'userId required' 
+      }, { status: 400 });
+    }
+
+    const mongoose = await connectToDatabase();
+    const db = (mongoose as any).connection?.db ?? (mongoose as any).db;
+    
+    const interpretation = await db.collection('interpretations').findOne({
+      userId,
+      chartType: 'natal',
+    });
+
+    if (!interpretation) {
+      return NextResponse.json({
+        success: false,
+        needsGeneration: true,
+        message: 'No interpretations found. Generate them first.',
+      });
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: interpretation.interpretations,
+      cached: true,
+      generatedAt: interpretation.generatedAt,
+      stats: interpretation.stats,
+    });
+    
+  } catch (error) {
+    console.error('❌ Error fetching interpretations:', error);
+    return NextResponse.json({ 
+      success: false, 
+      error: 'Server error' 
+    }, { status: 500 });
+  }
 }
 
-/**
- * Formatea posición planetaria de forma SUPER EDUCATIVA
- */
-function formatPlanetaryPositionEducationally(
-  planetName: string,
-  sign: string,
-  house: number,
-  degree: number,
-  retrograde?: boolean
-): string {
-  const planetMeaning = getPlanetEducationalMeaning(planetName);
-  const houseMeaning = getHouseEducationalMeaning(house);
-  const signMeaning = getSignEducationalMeaning(sign);
-  const retroText = retrograde ? ' ♻️ RETRÓGRADO (energía más interna e introspectiva)' : '';
+// =============================================================================
+// POST - Generate all interpretations (2 angles + 10 planets + asteroids + nodes + elements + modalities + aspects) with progress updates
+// =============================================================================
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { userId, chartData, userProfile } = body;
+
+    if (!userId || !chartData || !userProfile) {
+      return NextResponse.json(
+        { success: false, error: 'Missing required fields: userId, chartData, userProfile' },
+        { status: 400 }
+      );
+    }
+
+    console.log('🎯 Generating natal interpretations for:', userProfile.name);
+
+    const startTime = Date.now();
+
+    // Generate all interpretations
+    const interpretations = await generateNatalBatchInterpretations(chartData, userProfile);
+
+    const generationTime = ((Date.now() - startTime) / 1000).toFixed(0);
+    
+    // Save to MongoDB
+    const mongoose = await connectToDatabase();
+    const db = (mongoose as any).connection?.db ?? (mongoose as any).db;
+
+    const stats = {
+      totalAngles: 2,
+      totalPlanets: Object.keys(interpretations.planets).length,
+      totalAsteroids: Object.keys(interpretations.asteroids).length,
+      totalNodes: Object.keys(interpretations.nodes).length,
+      totalElements: Object.keys(interpretations.elements).length,
+      totalModalities: Object.keys(interpretations.modalities).length,
+      totalAspects: Object.keys(interpretations.aspects).length,
+      generationTime: `${generationTime}s`,
+      totalCost: '$2.50', // Approximate for expanded interpretations
+    };
+
+    await db.collection('interpretations').updateOne(
+      { userId, chartType: 'natal' },
+      {
+        $set: {
+          userId,
+          chartType: 'natal',
+          interpretations,
+          stats,
+          generatedAt: new Date(),
+          expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
+        },
+      },
+      { upsert: true }
+    );
+
+    console.log('✅ Interpretations saved to MongoDB');
+
+    return NextResponse.json({
+      success: true,
+      data: interpretations,
+      cached: false,
+      generatedAt: new Date().toISOString(),
+      stats,
+    });
+    
+  } catch (error) {
+    console.error('❌ Error generating interpretations:', error);
+    return NextResponse.json({ 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Server error' 
+    }, { status: 500 });
+  }
+}
+
+// =============================================================================
+// DELETE - Remove cached interpretations (force regeneration)
+// =============================================================================
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
+
+    if (!userId) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'userId required' 
+      }, { status: 400 });
+    }
+
+    const mongoose = await connectToDatabase();
+    const db = (mongoose as any).connection?.db ?? (mongoose as any).db;
+    
+    await db.collection('interpretations').deleteOne({
+      userId,
+      chartType: 'natal',
+    });
+
+    console.log('🗑️ Deleted cached interpretations for:', userId);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Cached interpretations deleted',
+    });
+    
+  } catch (error) {
+    console.error('❌ Error deleting interpretations:', error);
+    return NextResponse.json({ 
+      success: false, 
+      error: 'Server error' 
+    }, { status: 500 });
+  }
+}
+
+// =============================================================================
+// GENERATION FUNCTIONS
+// =============================================================================
+
+async function generateNatalBatchInterpretations(
+  chartData: any,
+  userProfile: any,
+  onProgress?: (message: string, progress: number) => void
+): Promise<NatalInterpretations> {
   
-  return `${planetName} (${planetMeaning}) en ${sign} (${signMeaning}) ${degree.toFixed(1)}° en Casa ${house} (${houseMeaning})${retroText}`;
+  const openai = getOpenAIClient();
+  
+  onProgress?.('🌟 Generando tu Ascendente y Medio Cielo...', 5);
+
+  const interpretations: NatalInterpretations = {
+    angles: {
+      Ascendente: await generateAngleInterpretation('Ascendente', chartData.ascendant, userProfile, openai),
+      MedioCielo: await generateAngleInterpretation('MedioCielo', chartData.midheaven, userProfile, openai),
+    },
+    planets: {},
+    asteroids: {},
+    nodes: {},
+    elements: {},
+    modalities: {},
+    aspects: {},
+  };
+
+  onProgress?.('✨ Generando interpretaciones de planetas...', 15);
+
+  // Generate planet interpretations
+  const planetNames = ['Sol', 'Luna', 'Mercurio', 'Venus', 'Marte', 'Jupiter', 'Saturno', 'Urano', 'Neptuno', 'Pluton'];
+
+  for (let i = 0; i < planetNames.length; i++) {
+    const planetName = planetNames[i];
+    const planet = chartData.planets.find((p: any) => p.name === planetName);
+    if (planet) {
+      const progress = 15 + (i / planetNames.length) * 30; // 15-45%
+      onProgress?.(`🌟 Generando tu ${planetName} en ${planet.sign}...`, progress);
+
+      const key = `${planet.name}-${planet.sign}-${planet.house}`;
+      interpretations.planets[key] = await generatePlanetInterpretation(planet, userProfile, openai);
+
+      // Small delay to avoid rate limits
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+  }
+
+  // Generate asteroid interpretations (Lilith, Chiron)
+  onProgress?.('🌑 Generando tu Lilith y Chiron...', 50);
+  const asteroidNames = ['Lilith', 'Chiron'];
+
+  for (let i = 0; i < asteroidNames.length; i++) {
+    const asteroidName = asteroidNames[i];
+    const asteroid = chartData.planets.find((p: any) => p.name === asteroidName);
+    if (asteroid) {
+      const progress = 50 + (i / asteroidNames.length) * 10; // 50-60%
+      onProgress?.(`🌑 Generando tu ${asteroidName} en ${asteroid.sign}...`, progress);
+
+      const key = `${asteroid.name}-${asteroid.sign}-${asteroid.house}`;
+      interpretations.asteroids[key] = await generatePlanetInterpretation(asteroid, userProfile, openai);
+
+      // Small delay to avoid rate limits
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+  }
+
+  // Generate nodes interpretations (North Node, South Node)
+  onProgress?.('🌙 Generando tus Nodos Lunares...', 65);
+  const nodeNames = ['Nodo Norte', 'Nodo Sur'];
+
+  for (let i = 0; i < nodeNames.length; i++) {
+    const nodeName = nodeNames[i];
+    const node = chartData.planets.find((p: any) => p.name === nodeName);
+    if (node) {
+      const progress = 65 + (i / nodeNames.length) * 10; // 65-75%
+      onProgress?.(`🌙 Generando tu ${nodeName} en ${node.sign}...`, progress);
+
+      const key = `${node.name}-${node.sign}-${node.house}`;
+      interpretations.nodes[key] = await generatePlanetInterpretation(node, userProfile, openai);
+
+      // Small delay to avoid rate limits
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+  }
+
+  // Generate elements interpretations
+  onProgress?.('🔥 Generando tus Elementos (Fuego, Tierra, Aire, Agua)...', 80);
+  const elements = [
+    { name: 'Fuego', distribution: chartData.elementDistribution?.fire || 0 },
+    { name: 'Tierra', distribution: chartData.elementDistribution?.earth || 0 },
+    { name: 'Aire', distribution: chartData.elementDistribution?.air || 0 },
+    { name: 'Agua', distribution: chartData.elementDistribution?.water || 0 }
+  ];
+
+  for (let i = 0; i < elements.length; i++) {
+    const element = elements[i];
+    if (element.distribution > 0) {
+      const progress = 80 + (i / elements.length) * 5; // 80-85%
+      onProgress?.(`🔥 Generando tu Elemento ${element.name} (${element.distribution} planetas)...`, progress);
+
+      const key = `Elemento-${element.name}`;
+      interpretations.elements[key] = await generateElementInterpretation(element, userProfile, openai);
+
+      // Small delay to avoid rate limits
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+  }
+
+  // Generate modalities interpretations
+  onProgress?.('⚡ Generando tus Modalidades (Cardinal, Fijo, Mutable)...', 90);
+  const modalities = [
+    { name: 'Cardinal', distribution: chartData.modalityDistribution?.cardinal || 0 },
+    { name: 'Fijo', distribution: chartData.modalityDistribution?.fixed || 0 },
+    { name: 'Mutable', distribution: chartData.modalityDistribution?.mutable || 0 }
+  ];
+
+  for (let i = 0; i < modalities.length; i++) {
+    const modality = modalities[i];
+    if (modality.distribution > 0) {
+      const progress = 90 + (i / modalities.length) * 5; // 90-95%
+      onProgress?.(`⚡ Generando tu Modalidad ${modality.name} (${modality.distribution} planetas)...`, progress);
+
+      const key = `Modalidad-${modality.name}`;
+      interpretations.modalities[key] = await generateModalityInterpretation(modality, userProfile, openai);
+
+      // Small delay to avoid rate limits
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+  }
+
+  // Generate aspects interpretations
+  if (chartData.calculatedAspects && chartData.calculatedAspects.length > 0) {
+    onProgress?.('🔗 Generando tus Aspectos principales...', 98);
+    const aspectsToGenerate = chartData.calculatedAspects.slice(0, 10); // Limit to first 10 aspects
+
+    for (let i = 0; i < aspectsToGenerate.length; i++) {
+      const aspect = aspectsToGenerate[i];
+      const progress = 98 + (i / aspectsToGenerate.length) * 2; // 98-100%
+      onProgress?.(`🔗 Generando ${aspect.planet1} ${aspect.type} ${aspect.planet2}...`, progress);
+
+      const key = `${aspect.planet1}-${aspect.planet2}-${aspect.type}`;
+      interpretations.aspects[key] = await generateAspectInterpretation(aspect, userProfile, openai);
+
+      // Small delay to avoid rate limits
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+  }
+
+  onProgress?.('✨ ¡Interpretaciones completadas! 🎉', 100);
+  return interpretations;
 }
 
-// ============================================================================
-// 🎨 PROMPT SUPER EDUCATIVO
-// ============================================================================
+// =============================================================================
+// ✅ COMPLETELY FIXED: generateAngleInterpretation
+// =============================================================================
 
-function generateSuperEducationalNatalPrompt(
-  chartData: ChartData,
-  userProfile: UserProfile
-): string {
-  const { name, age } = userProfile;
+async function generateAngleInterpretation(
+  angleName: string,
+  angleData: any,
+  userProfile: any,
+  openai: OpenAI
+): Promise<PlanetInterpretation> {
   
-  // Extraer planetas clave con EXPLICACIONES
-  const planetsText = chartData.planets
-    .map(p => {
-      const house = p.house || p.houseNumber || 1;
-      return `📍 ${formatPlanetaryPositionEducationally(
-        p.name,
-        p.sign,
-        house,
-        p.degree,
-        p.retrograde
-      )}`;
-    })
-    .join('\n');
+  const prompt = `Eres un astrólogo evolutivo experto. Genera una interpretación DISRUPTIVA y TRANSFORMACIONAL para:
 
-  return `
-🔥 MISIÓN CRÍTICA: INTERPRETACIÓN NATAL SUPER EDUCATIVA Y TRANSFORMACIONAL
+**ÁNGULO:** ${angleName}
+**SIGNO:** ${angleData.sign}
+**GRADO:** ${angleData.degree}°
 
-📊 DATOS DE ${name.toUpperCase()} (${age} años):
+**USUARIO:** ${userProfile.name}, ${userProfile.age} años
 
-${planetsText}
+---
 
-🎯 TU MISIÓN COMO ASTRÓLOGO EDUCATIVO REVOLUCIONARIO:
-
-1. **SER SUPER EDUCATIVO** ✨
-   - SIEMPRE explica cada planeta entre paréntesis: "Luna (tus emociones, necesidades)"
-   - SIEMPRE explica cada casa entre paréntesis: "Casa 7 (relaciones, pareja)"
-   - SIEMPRE explica cada signo entre paréntesis: "Libra (equilibrio, armonía)"
-   - Usa lenguaje cotidiano, NO jargon astrológico sin explicar
-   - Que lo entienda CUALQUIERA, incluso sin saber astrología
-
-2. **SER PROFUNDAMENTE PSICOLÓGICO** 🧠
-   - Identifica patrones emocionales desde la infancia
-   - Explica el origen de creencias limitantes
-   - Muestra ciclos kármicos que se repiten
-   - Da el NOMBRE del patrón (ej: "La Huérfana Emocional")
-
-3. **SER DISRUPTIVO Y EMOCIONAL** 🔥
-   - Usa lenguaje directo, emotivo, activador
-   - CAPS para énfasis en palabras clave
-   - Emojis estratégicos (2-3 por sección)
-   - Preguntas poderosas que hagan reflexionar
-
-4. **SER PRÁCTICO Y TRANSFORMADOR** 🎯
-   - Cada insight con acción concreta esta semana
-   - Ritual específico y accionable
-   - Afirmación poderosa en CAPS
-   - Pasos claros de transformación
-
-📋 ESTRUCTURA JSON REQUERIDA (CRÍTICO - DEBE SER JSON VÁLIDO AL 100%):
+⚠️ IMPORTANTE: Responde EXACTAMENTE con este formato JSON. NO agregues texto adicional:
 
 {
-  "esencia_revolucionaria": "Una frase ÉPICA que capture la esencia única de ${name}",
-  
-  "proposito_vida": "El propósito profundo y transformador de ${name} en esta encarnación",
-  
-  "planetas_clave": [
-    {
-      "planeta": "Sol (tu identidad, propósito) en Acuario (innovar, revolucionar) Casa 1 (identidad, presencia)",
-      "lectura_psicologica": "Explicación profunda del impacto psicológico de esta posición",
-      "luz": "Fortalezas y dones que esta posición otorga",
-      "sombra": "Desafíos y patrones limitantes a transformar",
-      "integracion": "Cómo integrar luz y sombra para evolucionar"
+  "tooltip": {
+    "titulo": "🌟 [Título corto - máx 5 palabras]",
+    "descripcionBreve": "${angleName} en ${angleData.sign} (${angleData.degree}°)",
+    "significado": "[2-3 líneas explicando el significado con lenguaje disruptivo]",
+    "efecto": "[1 frase del efecto principal]",
+    "tipo": "[Arquetipo - ej: 'Revolucionario', 'Sanador']"
+  },
+  "drawer": {
+    "titulo": "🌟 [Título completo poderoso]",
+    "educativo": "[Explicación clara: QUÉ es el ${angleName}, CÓMO funciona en ${angleData.sign}, ejemplos desde niño y ahora. 3-5 párrafos]",
+    "poderoso": "[Mensaje transformacional: '¡NO VINISTE A...!', 'Tu superpoder es...'. Habla de trampas y regalos. 4-6 párrafos]",
+    "poetico": "[Metáfora hermosa comparando con naturaleza/cosmos. 2-3 párrafos]",
+    "sombras": [
+      {
+        "nombre": "[Nombre de la sombra]",
+        "descripcion": "[Explicación]",
+        "trampa": "❌ [Forma reactiva]",
+        "regalo": "✅ [Forma consciente]"
+      }
+    ],
+    "sintesis": {
+      "frase": "[Frase memorable de máximo 15 palabras]",
+      "declaracion": "[Declaración 'Yo soy...' que el usuario puede repetir. 2-4 líneas]"
     }
-  ],
-  
-  "patrones_transformar": [
-    {
-      "nombre_patron": "Nombre memorable del patrón (ej: La Huérfana Emocional)",
-      "origen": "De dónde viene este patrón (infancia, familia)",
-      "como_se_manifiesta": ["Conducta específica 1", "Conducta específica 2"],
-      "dialogo_interno": ["Pensamiento limitante 1", "Pensamiento limitante 2"],
-      "ciclo_karmico": "Paso 1 → Paso 2 → Paso 3 → Vuelve a Paso 1",
-      "transformacion": "Cómo romper este ciclo y evolucionar"
-    }
-  ],
-  
-  "rituales_activacion": [
-    {
-      "nombre": "Nombre del ritual",
-      "descripcion": "Paso a paso específico y accionable",
-      "frecuencia": "Cuándo hacerlo (diario, semanal, mensual)"
-    }
-  ],
-  
-  "accion_esta_semana": "UNA acción concreta y específica que ${name} puede hacer esta semana",
-  
-  "afirmacion_poder": "AFIRMACIÓN PODEROSA EN MAYÚSCULAS PARA ACTIVAR TRANSFORMACIÓN",
-  
-  "pregunta_reflexion": "Una pregunta profunda para que ${name} reflexione"
+  }
 }
 
-🚨 CRÍTICO:
-- Responde SOLO con JSON válido (sin markdown, sin texto antes/después)
-- Cierra TODAS las strings, arrays y objetos correctamente
-- Si te quedas sin espacio, prioriza completar el JSON aunque acortes contenido
-- Usa comillas dobles para strings
-- No uses comillas simples dentro de strings sin escapar
-
-💡 RECUERDA: Esto es para ${name}, una persona REAL buscando transformación REAL.
-    Sé profundo, pero claro. Disruptivo, pero empático. Revolucionario, pero práctico.
-`.trim();
-}
-
-// ============================================================================
-// 🤖 GENERACIÓN CON OPENAI - ULTRA ROBUSTO
-// ============================================================================
-
-async function generateNatalInterpretationSafe(
-  chartData: ChartData,
-  userProfile: UserProfile
-): Promise<any> {
-  const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY!,
-  });
-
-  const prompt = generateSuperEducationalNatalPrompt(chartData, userProfile);
-
-  console.log('🚀 === GENERANDO INTERPRETACIÓN NATAL EDUCATIVA ===');
-  console.log('👤 Usuario:', userProfile.name);
-  console.log('📊 Planetas:', chartData.planets?.length || 0);
-  console.log('📝 Prompt length:', prompt.length);
+ESTILO: Disruptivo ("¡NO VINISTE A...!"), transformacional, directo.
+RESPONDE SOLO CON JSON VÁLIDO.`;
 
   try {
     const completion = await openai.chat.completions.create({
@@ -283,22 +443,307 @@ async function generateNatalInterpretationSafe(
       messages: [
         {
           role: 'system',
-          content: `Eres un astrólogo educativo revolucionario del sistema TuVueltaAlSol.es. 
-          
-REGLAS CRÍTICAS:
-1. Responde SOLO con JSON válido (sin markdown, sin texto adicional)
-2. SIEMPRE explica planetas, casas y signos entre paréntesis
-3. Lenguaje claro para TODOS (no solo astrólogos)
-4. Cierra TODAS las strings, arrays y objetos
-5. Si llegas al límite de tokens, completa el JSON correctamente aunque acortes contenido`
+          content: 'Eres un astrólogo evolutivo experto. Respondes EXCLUSIVAMENTE con JSON válido sin texto adicional.',
         },
         {
           role: 'user',
-          content: prompt
-        }
+          content: prompt,
+        },
       ],
-      temperature: 0.7,
-      max_tokens: 4000,
+      temperature: 0.8,
+      max_tokens: 2500,
+    });
+
+    const response = completion.choices[0]?.message?.content;
+    if (!response) throw new Error('No response from OpenAI');
+
+    let cleanedResponse = response.trim()
+      .replace(/```json\n?/g, '')
+      .replace(/```\n?/g, '')
+      .trim();
+
+    const parsed = JSON.parse(cleanedResponse);
+
+    // Validate structure
+    if (!parsed.tooltip || typeof parsed.tooltip !== 'object') {
+      throw new Error('Invalid tooltip structure');
+    }
+    if (!parsed.drawer || typeof parsed.drawer !== 'object') {
+      throw new Error('Invalid drawer structure');
+    }
+
+    console.log(`✅ Generated ${angleName} interpretation`);
+    return parsed as PlanetInterpretation;
+    
+  } catch (error) {
+    console.error(`❌ Error generating ${angleName}:`, error);
+    return generateFallbackAngleInterpretation(angleName, angleData);
+  }
+}
+
+// =============================================================================
+// ✅ COMPLETELY FIXED: generatePlanetInterpretation
+// =============================================================================
+
+async function generatePlanetInterpretation(
+  planet: any,
+  userProfile: any,
+  openai: OpenAI
+): Promise<PlanetInterpretation> {
+  
+  const prompt = `Eres un astrólogo evolutivo experto. Genera una interpretación DISRUPTIVA para:
+
+**PLANETA:** ${planet.name}
+**SIGNO:** ${planet.sign}
+**CASA:** ${planet.house}
+**GRADO:** ${planet.degree}°
+
+**USUARIO:** ${userProfile.name}, ${userProfile.age} años
+
+---
+
+⚠️ IMPORTANTE: Responde EXACTAMENTE con este formato JSON sin texto adicional:
+
+{
+  "tooltip": {
+    "titulo": "🌟 [Título impactante - máx 5 palabras]",
+    "descripcionBreve": "${planet.name} en ${planet.sign} en Casa ${planet.house} (${planet.degree}°)",
+    "significado": "[2-3 líneas claras del significado con lenguaje disruptivo]",
+    "efecto": "[1 frase del efecto principal]",
+    "tipo": "[Arquetipo - ej: 'Visionario', 'Guerrero']"
+  },
+  "drawer": {
+    "titulo": "🌟 [Título completo poderoso]",
+    "educativo": "[QUÉ significa ${planet.name}, CÓMO funciona en ${planet.sign}, QUÉ implica Casa ${planet.house}. Ejemplos desde niño y ahora. 3-5 párrafos claros]",
+    "poderoso": "[Mensaje transformacional: '¡NO VINISTE A...!', '¡ESTO ES ENORME!', 'Tu superpoder es...'. Habla de trampas y regalos ocultos. 4-6 párrafos intensos]",
+    "poetico": "[Metáfora HERMOSA. Compara ${planet.name} en ${planet.sign} con naturaleza, animales, cosmos. Crea imagen visual potente. 2-3 párrafos líricos]",
+    "sombras": [
+      {
+        "nombre": "[Nombre de la sombra principal]",
+        "descripcion": "[Cómo se manifiesta]",
+        "trampa": "❌ [Forma reactiva/inconsciente]",
+        "regalo": "✅ [Forma consciente/transformada]"
+      },
+      {
+        "nombre": "[Segunda sombra opcional]",
+        "descripcion": "[Explicación]",
+        "trampa": "❌ [Trampa]",
+        "regalo": "✅ [Regalo]"
+      }
+    ],
+    "sintesis": {
+      "frase": "[Frase memorable máximo 15 palabras]",
+      "declaracion": "[Declaración en primera persona: 'Yo soy...' o 'Mi ${planet.name}...'. 2-4 líneas que el usuario puede repetir como mantra]"
+    }
+  }
+}
+
+ESTILO: Disruptivo ("¡NO VINISTE A...!"), transformacional, psicológico (sombras/regalos), motivador.
+RESPONDE SOLO JSON VÁLIDO. NO agregues texto antes/después.`;
+
+  try {
+    console.log(`🎯 Generating ${planet.name} in ${planet.sign}...`);
+    
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        {
+          role: 'system',
+          content: 'Eres un astrólogo evolutivo experto. Respondes EXCLUSIVAMENTE con JSON válido sin texto adicional ni markdown.',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      temperature: 0.8,
+      max_tokens: 2500,
+    });
+
+    const response = completion.choices[0]?.message?.content;
+    
+    if (!response) {
+      throw new Error('No response from OpenAI');
+    }
+
+    // Clean response
+    let cleanedResponse = response.trim()
+      .replace(/```json\n?/g, '')
+      .replace(/```\n?/g, '')
+      .trim();
+
+    const parsed = JSON.parse(cleanedResponse);
+
+    // Validate structure
+    if (!parsed.tooltip || typeof parsed.tooltip !== 'object') {
+      console.error('❌ Invalid tooltip structure');
+      throw new Error('Invalid tooltip structure');
+    }
+
+    if (!parsed.drawer || typeof parsed.drawer !== 'object') {
+      console.error('❌ Invalid drawer structure');
+      throw new Error('Invalid drawer structure');
+    }
+
+    // Validate required fields
+    if (!parsed.tooltip.titulo || !parsed.tooltip.significado) {
+      throw new Error('Missing required tooltip fields');
+    }
+
+    if (!parsed.drawer.educativo || !parsed.drawer.poderoso || !parsed.drawer.poetico) {
+      throw new Error('Missing required drawer fields');
+    }
+
+    console.log(`✅ Generated ${planet.name} interpretation`);
+    return parsed as PlanetInterpretation;
+    
+  } catch (error) {
+    console.error(`❌ Error generating ${planet.name}:`, error);
+    if (error instanceof SyntaxError) {
+      console.error('❌ JSON Parse Error:', error.message);
+    }
+    return generateFallbackPlanetInterpretation(planet);
+  }
+}
+
+// =============================================================================
+// FALLBACK FUNCTIONS (correct structure)
+// =============================================================================
+
+function generateFallbackAngleInterpretation(angleName: string, angleData: any): PlanetInterpretation {
+  return {
+    tooltip: {
+      titulo: `✨ ${angleName} en ${angleData.sign}`,
+      descripcionBreve: `${angleName} en ${angleData.sign} (${angleData.degree}°)`,
+      significado: `Tu ${angleName} en ${angleData.sign} define aspectos fundamentales de tu identidad y propósito. Es una configuración poderosa que merece tu atención.`,
+      efecto: 'Influencia significativa en tu vida',
+      tipo: 'Energía fundamental',
+    },
+    drawer: {
+      titulo: `✨ Tu ${angleName} en ${angleData.sign}`,
+      educativo: `El ${angleName} representa un punto crucial en tu carta natal. Cuando está en ${angleData.sign}, adquiere las cualidades de este signo y se expresa de una manera única.\n\nDesde la infancia, esta configuración ha estado moldeando tu forma de ser, aunque quizás no fueras consciente de ello. Ahora que lo comprendes, puedes activar conscientemente este poder.`,
+      poderoso: `¡NO VINISTE a este mundo con esta configuración por casualidad!\n\nEsta posición es una de tus herramientas más poderosas. Tu verdadero superpoder está en reconocer y activar conscientemente esta energía.\n\nCada vez que actúas alineado con tu ${angleName} en ${angleData.sign}, estás cumpliendo tu propósito. No es accidental. Es intencional. Es cósmico.`,
+      poetico: `Imagina que tu ${angleName} es como una puerta luminosa en el cielo.\n\nEn ${angleData.sign}, esta puerta brilla con una frecuencia especial que solo tú tienes. Es tu portal único hacia tu verdadero ser.`,
+      sombras: [
+        {
+          nombre: 'Uso inconsciente',
+          descripcion: 'Cuando no activamos esta energía conscientemente',
+          trampa: '❌ Dejar que actúe automáticamente sin dirección',
+          regalo: '✅ Usarla con intención y propósito claro',
+        },
+      ],
+      sintesis: {
+        frase: `Tu ${angleName} en ${angleData.sign} es tu superpoder único.`,
+        declaracion: `Yo activo mi ${angleName} en ${angleData.sign} conscientemente. Esta configuración me define y me empodera para cumplir mi propósito.`,
+      },
+    },
+  };
+}
+
+function generateFallbackPlanetInterpretation(planet: any): PlanetInterpretation {
+  return {
+    tooltip: {
+      titulo: `✨ ${planet.name} en ${planet.sign}`,
+      descripcionBreve: `${planet.name} en ${planet.sign} en Casa ${planet.house}`,
+      significado: `Tu ${planet.name} en ${planet.sign} representa una energía fundamental. Esta configuración revela aspectos profundos de tu personalidad que mereces explorar.`,
+      efecto: 'Influencia planetaria significativa',
+      tipo: 'Energía transformadora',
+    },
+    drawer: {
+      titulo: `✨ ${planet.name} en ${planet.sign} en Casa ${planet.house}`,
+      educativo: `${planet.name} simboliza aspectos esenciales de tu ser. En ${planet.sign}, esta energía se expresa con las cualidades de este signo. La Casa ${planet.house} muestra dónde se manifiesta más intensamente en tu vida.\n\nDesde niño, esta configuración ha influido en tu forma de ser, aunque quizás no lo reconocieras. Comprender esto te permite activar conscientemente este poder interior.`,
+      poderoso: `¡NO VINISTE con ${planet.name} en ${planet.sign} por casualidad!\n\n¡ESTO ES ENORME! Esta posición es una de tus herramientas cósmicas más poderosas.\n\nTu verdadero superpoder es usar conscientemente la energía de ${planet.sign} en las áreas que gobierna la Casa ${planet.house}. Cuando lo haces, te conviertes en agente de tu propia transformación.`,
+      poetico: `Tu ${planet.name} es como una gema brillando en ${planet.sign}.\n\nComo una estrella guía en la noche, ilumina tu camino hacia tu verdadero ser. En ${planet.sign}, proyecta colores únicos que solo tú puedes manifestar.`,
+      sombras: [
+        {
+          nombre: 'Uso reactivo de la energía',
+          descripcion: 'Cuando esta configuración actúa automáticamente sin consciencia',
+          trampa: '❌ Dejar que te controle en lugar de dirigirla',
+          regalo: '✅ Convertirla en superpoder con consciencia e intención',
+        },
+      ],
+      sintesis: {
+        frase: `Tu ${planet.name} en ${planet.sign} es poder esperando ser activado.`,
+        declaracion: `Yo activo conscientemente mi ${planet.name} en ${planet.sign}. Esta energía no me limita, me empodera. La uso para mi máxima expresión.`,
+      },
+    },
+  };
+}
+
+// =============================================================================
+// NEW GENERATION FUNCTIONS
+// =============================================================================
+
+// Generate element interpretation
+async function generateElementInterpretation(
+  element: any,
+  userProfile: any,
+  openai: OpenAI
+): Promise<PlanetInterpretation> {
+
+  const prompt = `Eres un astrólogo evolutivo experto. Genera una interpretación DISRUPTIVA para:
+
+**ELEMENTO:** ${element.name}
+**DISTRIBUCIÓN:** ${element.distribution} planetas
+
+**USUARIO:** ${userProfile.name}, ${userProfile.age} años
+
+---
+
+⚠️ IMPORTANTE: Responde EXACTAMENTE con este formato JSON sin texto adicional:
+
+{
+  "tooltip": {
+    "titulo": "🌟 [Título impactante - máx 5 palabras]",
+    "descripcionBreve": "Elemento ${element.name} con ${element.distribution} planetas",
+    "significado": "[2-3 líneas claras del significado con lenguaje disruptivo]",
+    "efecto": "[1 frase del efecto principal]",
+    "tipo": "[Arquetipo - ej: 'Flamígero', 'Terrestre']"
+  },
+  "drawer": {
+    "titulo": "🌟 [Título completo poderoso]",
+    "educativo": "[QUÉ significa el elemento ${element.name}, CÓMO funciona, ejemplos desde niño y ahora. 3-5 párrafos claros]",
+    "poderoso": "[Mensaje transformacional: '¡NO VINISTE A...!', 'Tu superpoder es...'. Habla de trampas y regalos. 4-6 párrafos intensos]",
+    "poetico": "[Metáfora HERMOSA. Compara el elemento ${element.name} con naturaleza, elementos. Crea imagen visual potente. 2-3 párrafos líricos]",
+    "sombras": [
+      {
+        "nombre": "[Nombre de la sombra principal]",
+        "descripcion": "[Cómo se manifiesta]",
+        "trampa": "❌ [Forma reactiva/inconsciente]",
+        "regalo": "✅ [Forma consciente/transformada]"
+      }
+    ],
+    "sintesis": {
+      "frase": "[Frase memorable máximo 15 palabras]",
+      "declaracion": "[Declaración en primera persona: 'Yo soy...' o 'Mi elemento...'. 2-4 líneas que el usuario puede repetir como mantra]"
+    }
+  }
+}
+
+ESTILO: Disruptivo ("¡NO VINISTE A...!"), transformacional, psicológico (sombras/regalos), motivador.
+RESPONDE SOLO JSON VÁLIDO. NO agregues texto antes/después.
+
+EJEMPLOS PARA ${element.name}:
+${element.name === 'Fuego' ? '- Fuego: "¡NO VINISTE A APAGARTE!", "Tu superpoder es encender el mundo"' : ''}
+${element.name === 'Tierra' ? '- Tierra: "¡NO VINISTE A DESMORONARTE!", "Tu superpoder es construir imperios"' : ''}
+${element.name === 'Aire' ? '- Aire: "¡NO VINISTE A CALLARTE!", "Tu superpoder es revolucionar ideas"' : ''}
+${element.name === 'Agua' ? '- Agua: "¡NO VINISTE A SECARTE!", "Tu superpoder es fluir con la vida"' : ''}`;
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        {
+          role: 'system',
+          content: 'Eres un astrólogo evolutivo experto. Respondes EXCLUSIVAMENTE con JSON válido sin texto adicional ni markdown.',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      temperature: 0.8,
+      max_tokens: 2500,
     });
 
     const response = completion.choices[0]?.message?.content;
@@ -307,252 +752,299 @@ REGLAS CRÍTICAS:
       throw new Error('No response from OpenAI');
     }
 
-    console.log('✅ Respuesta recibida de OpenAI');
-
-    // LIMPIEZA ROBUSTA del JSON
-    let cleanedResponse = response
-      .replace(/```json\s*/g, '')
-      .replace(/```\s*/g, '')
+    let cleanedResponse = response.trim()
+      .replace(/```json\n?/g, '')
+      .replace(/```\n?/g, '')
       .trim();
 
-    // Si empieza con texto antes del JSON, encontrar el primer {
-    const firstBrace = cleanedResponse.indexOf('{');
-    if (firstBrace > 0) {
-      cleanedResponse = cleanedResponse.substring(firstBrace);
-    }
+    const parsed = JSON.parse(cleanedResponse);
 
-    // Si termina con texto después del JSON, encontrar el último }
-    const lastBrace = cleanedResponse.lastIndexOf('}');
-    if (lastBrace > 0 && lastBrace < cleanedResponse.length - 1) {
-      cleanedResponse = cleanedResponse.substring(0, lastBrace + 1);
-    }
-
-    console.log('🧹 JSON limpiado, intentando parsear...');
-
-    try {
-      const parsed = JSON.parse(cleanedResponse);
-      console.log('✅ JSON parseado exitosamente');
-      return parsed;
-    } catch (parseError) {
-      console.error('❌ Error parseando JSON:', parseError);
-      console.error('📄 Respuesta que falló:', cleanedResponse.substring(0, 500));
-      
-      // FALLBACK: Intentar reparar JSON común
-      try {
-        // Reemplazar comillas simples por dobles
-        let repaired = cleanedResponse.replace(/'/g, '"');
-        // Remover trailing commas
-        repaired = repaired.replace(/,(\s*[}\]])/g, '$1');
-        
-        const parsedRepaired = JSON.parse(repaired);
-        console.log('✅ JSON reparado y parseado exitosamente');
-        return parsedRepaired;
-      } catch (repairError) {
-        console.error('❌ No se pudo reparar el JSON');
-        throw new Error('Invalid JSON from AI');
-      }
-    }
+    console.log(`✅ Generated ${element.name} element interpretation`);
+    return parsed as PlanetInterpretation;
 
   } catch (error) {
-    console.error('❌ Error en OpenAI:', error);
-    throw error;
+    console.error(`❌ Error generating ${element.name} element:`, error);
+    return generateFallbackElementInterpretation(element);
   }
 }
 
-// ============================================================================
-// 💪 FALLBACK EDUCATIVO - SI TODO FALLA
-// ============================================================================
+// Generate modality interpretation
+async function generateModalityInterpretation(
+  modality: any,
+  userProfile: any,
+  openai: OpenAI
+): Promise<PlanetInterpretation> {
 
-function generateEducationalFallback(
-  chartData: ChartData,
-  userProfile: UserProfile
-): any {
-  const { name, age } = userProfile;
-  const sol = chartData.planets.find(p => p.name === 'Sol');
-  const luna = chartData.planets.find(p => p.name === 'Luna');
-  
+  const prompt = `Eres un astrólogo evolutivo experto. Genera una interpretación DISRUPTIVA para:
+
+**MODALIDAD:** ${modality.name}
+**DISTRIBUCIÓN:** ${modality.distribution} planetas
+
+**USUARIO:** ${userProfile.name}, ${userProfile.age} años
+
+---
+
+⚠️ IMPORTANTE: Responde EXACTAMENTE con este formato JSON sin texto adicional:
+
+{
+  "tooltip": {
+    "titulo": "🌟 [Título impactante - máx 5 palabras]",
+    "descripcionBreve": "Modalidad ${modality.name} con ${modality.distribution} planetas",
+    "significado": "[2-3 líneas claras del significado con lenguaje disruptivo]",
+    "efecto": "[1 frase del efecto principal]",
+    "tipo": "[Arquetipo - ej: 'Iniciador', 'Estabilizador']"
+  },
+  "drawer": {
+    "titulo": "🌟 [Título completo poderoso]",
+    "educativo": "[QUÉ significa la modalidad ${modality.name}, CÓMO funciona, ejemplos desde niño y ahora. 3-5 párrafos claros]",
+    "poderoso": "[Mensaje transformacional: '¡NO VINISTE A...!', 'Tu superpoder es...'. Habla de trampas y regalos. 4-6 párrafos intensos]",
+    "poetico": "[Metáfora HERMOSA. Compara la modalidad ${modality.name} con naturaleza, movimientos. Crea imagen visual potente. 2-3 párrafos líricos]",
+    "sombras": [
+      {
+        "nombre": "[Nombre de la sombra principal]",
+        "descripcion": "[Cómo se manifiesta]",
+        "trampa": "❌ [Forma reactiva/inconsciente]",
+        "regalo": "✅ [Forma consciente/transformada]"
+      }
+    ],
+    "sintesis": {
+      "frase": "[Frase memorable máximo 15 palabras]",
+      "declaracion": "[Declaración en primera persona: 'Yo soy...' o 'Mi modalidad...'. 2-4 líneas que el usuario puede repetir como mantra]"
+    }
+  }
+}
+
+ESTILO: Disruptivo ("¡NO VINISTE A...!"), transformacional, psicológico (sombras/regalos), motivador.
+RESPONDE SOLO JSON VÁLIDO. NO agregues texto antes/después.
+
+EJEMPLOS PARA ${modality.name}:
+${modality.name === 'Cardinal' ? '- Cardinal: "¡NO VINISTE A PARARTE!", "Tu superpoder es iniciar revoluciones"' : ''}
+${modality.name === 'Fijo' ? '- Fijo: "¡NO VINISTE A RENDIRTE!", "Tu superpoder es mantener la visión"' : ''}
+${modality.name === 'Mutable' ? '- Mutable: "¡NO VINISTE A QUEDARTE!", "Tu superpoder es adaptarte a todo"' : ''}`;
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        {
+          role: 'system',
+          content: 'Eres un astrólogo evolutivo experto. Respondes EXCLUSIVAMENTE con JSON válido sin texto adicional ni markdown.',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      temperature: 0.8,
+      max_tokens: 2500,
+    });
+
+    const response = completion.choices[0]?.message?.content;
+
+    if (!response) {
+      throw new Error('No response from OpenAI');
+    }
+
+    let cleanedResponse = response.trim()
+      .replace(/```json\n?/g, '')
+      .replace(/```\n?/g, '')
+      .trim();
+
+    const parsed = JSON.parse(cleanedResponse);
+
+    console.log(`✅ Generated ${modality.name} modality interpretation`);
+    return parsed as PlanetInterpretation;
+
+  } catch (error) {
+    console.error(`❌ Error generating ${modality.name} modality:`, error);
+    return generateFallbackModalityInterpretation(modality);
+  }
+}
+
+// Generate aspect interpretation
+async function generateAspectInterpretation(
+  aspect: any,
+  userProfile: any,
+  openai: OpenAI
+): Promise<PlanetInterpretation> {
+
+  const prompt = `Eres un astrólogo evolutivo experto. Genera una interpretación DISRUPTIVA para:
+
+**ASPECTO:** ${aspect.planet1} ${aspect.type} ${aspect.planet2}
+**GRADO:** ${aspect.orb}° de separación
+
+**USUARIO:** ${userProfile.name}, ${userProfile.age} años
+
+---
+
+⚠️ IMPORTANTE: Responde EXACTAMENTE con este formato JSON sin texto adicional:
+
+{
+  "tooltip": {
+    "titulo": "🌟 [Título impactante - máx 5 palabras]",
+    "descripcionBreve": "${aspect.planet1} ${aspect.type} ${aspect.planet2} (${aspect.orb}°)",
+    "significado": "[2-3 líneas claras del significado con lenguaje disruptivo]",
+    "efecto": "[1 frase del efecto principal]",
+    "tipo": "[Arquetipo - ej: 'Conflicto Creativo', 'Armonía Cósmica']"
+  },
+  "drawer": {
+    "titulo": "🌟 [Título completo poderoso]",
+    "educativo": "[QUÉ significa este aspecto ${aspect.type}, CÓMO funciona entre ${aspect.planet1} y ${aspect.planet2}, ejemplos desde niño y ahora. 3-5 párrafos claros]",
+    "poderoso": "[Mensaje transformacional: '¡NO VINISTE A...!', 'Tu superpoder es...'. Habla de trampas y regalos. 4-6 párrafos intensos]",
+    "poetico": "[Metáfora HERMOSA. Compara este aspecto con naturaleza, cosmos. Crea imagen visual potente. 2-3 párrafos líricos]",
+    "sombras": [
+      {
+        "nombre": "[Nombre de la sombra principal]",
+        "descripcion": "[Cómo se manifiesta]",
+        "trampa": "❌ [Forma reactiva/inconsciente]",
+        "regalo": "✅ [Forma consciente/transformada]"
+      }
+    ],
+    "sintesis": {
+      "frase": "[Frase memorable máximo 15 palabras]",
+      "declaracion": "[Declaración en primera persona: 'Yo integro...' o 'Mi aspecto...'. 2-4 líneas que el usuario puede repetir como mantra]"
+    }
+  }
+}
+
+ESTILO: Disruptivo ("¡NO VINISTE A...!"), transformacional, psicológico (sombras/regalos), motivador.
+RESPONDE SOLO JSON VÁLIDO. NO agregues texto antes/después.
+
+EJEMPLOS PARA ${aspect.type}:
+${aspect.type === 'Cuadratura' ? '- Cuadratura: "¡NO VINISTE A EVITAR EL CONFLICTO!", "Tu superpoder es transformar tensión en crecimiento"' : ''}
+${aspect.type === 'Oposición' ? '- Oposición: "¡NO VINISTE A IGNORAR LA DICOTOMÍA!", "Tu superpoder es integrar opuestos"' : ''}
+${aspect.type === 'Trígono' ? '- Trígono: "¡NO VINISTE A DESPERDICIAR TU TALENTO!", "Tu superpoder es fluir con facilidad"' : ''}
+${aspect.type === 'Sextil' ? '- Sextil: "¡NO VINISTE A PERDER OPORTUNIDADES!", "Tu superpoder es crear oportunidades"' : ''}`;
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        {
+          role: 'system',
+          content: 'Eres un astrólogo evolutivo experto. Respondes EXCLUSIVAMENTE con JSON válido sin texto adicional ni markdown.',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      temperature: 0.8,
+      max_tokens: 2500,
+    });
+
+    const response = completion.choices[0]?.message?.content;
+
+    if (!response) {
+      throw new Error('No response from OpenAI');
+    }
+
+    let cleanedResponse = response.trim()
+      .replace(/```json\n?/g, '')
+      .replace(/```\n?/g, '')
+      .trim();
+
+    const parsed = JSON.parse(cleanedResponse);
+
+    console.log(`✅ Generated ${aspect.planet1} ${aspect.type} ${aspect.planet2} aspect interpretation`);
+    return parsed as PlanetInterpretation;
+
+  } catch (error) {
+    console.error(`❌ Error generating aspect ${aspect.planet1} ${aspect.type} ${aspect.planet2}:`, error);
+    return generateFallbackAspectInterpretation(aspect);
+  }
+}
+
+// =============================================================================
+// FALLBACK FUNCTIONS FOR NEW INTERPRETATIONS
+// =============================================================================
+
+function generateFallbackElementInterpretation(element: any): PlanetInterpretation {
   return {
-    esencia_revolucionaria: `${name}, eres una fuerza revolucionaria auténtica. Tu presencia cambia energías automáticamente. 🔥`,
-    
-    proposito_vida: `Activar el potencial humano dormido a través de tu autenticidad radical y visión de futuro. Tu vida no es para encajar - es para TRANSFORMAR.`,
-    
-    planetas_clave: [
-      {
-        planeta: sol ? formatPlanetaryPositionEducationally(
-          'Sol',
-          sol.sign,
-          sol.house || sol.houseNumber || 1,
-          sol.degree
-        ) : 'Sol (tu identidad)',
-        lectura_psicologica: `Tu Sol representa tu esencia más profunda. Es quien REALMENTE eres cuando nadie te está mirando. Tu identidad auténtica que vino a brillar en este mundo.`,
-        luz: `Capacidad de SER tú mismo sin disculpas. Liderazgo natural. Autenticidad magnética.`,
-        sombra: `A veces sientes que debes "apagarte" para que otros brillen. Miedo a ser "demasiado".`,
-        integracion: `Tu trabajo es BRILLAR sin pedir permiso. El mundo necesita tu luz específica.`
+    tooltip: {
+      titulo: `✨ Elemento ${element.name}`,
+      descripcionBreve: `Elemento ${element.name} con ${element.distribution} planetas`,
+      significado: `El elemento ${element.name} representa una energía fundamental en tu carta. Con ${element.distribution} planetas aquí, esta fuerza juega un rol significativo en tu personalidad.`,
+      efecto: 'Influencia elemental poderosa',
+      tipo: 'Energía primordial',
+    },
+    drawer: {
+      titulo: `✨ Tu Elemento ${element.name}`,
+      educativo: `El elemento ${element.name} es una de las cuatro fuerzas primordiales en astrología. Con ${element.distribution} planetas en este elemento, su influencia es notable en tu carta.\n\nDesde niño, esta energía elemental ha moldeado tu forma de relacionarte con el mundo. Ahora que lo comprendes, puedes activar conscientemente este poder.`,
+      poderoso: `¡NO VINISTE con esta distribución elemental por casualidad!\n\n¡ESTO ES ENORME! Tu equilibrio de elementos es una de tus herramientas cósmicas más poderosas.\n\nTu verdadero superpoder es usar conscientemente la energía del elemento ${element.name}. Cuando lo haces, te conviertes en agente de tu propia transformación elemental.`,
+      poetico: `El elemento ${element.name} es como una fuerza primordial danzando en tu ser.\n\nComo una corriente subterránea o un viento invisible, moldea tu realidad con su esencia única. En tu carta, proyecta una frecuencia especial que solo tú puedes manifestar.`,
+      sombras: [
+        {
+          nombre: 'Desequilibrio elemental',
+          descripcion: 'Cuando la energía elemental actúa sin consciencia',
+          trampa: '❌ Dejar que te domine en lugar de dirigirla',
+          regalo: '✅ Convertirla en superpoder con consciencia e intención',
+        },
+      ],
+      sintesis: {
+        frase: `Tu elemento ${element.name} es poder primordial esperando ser activado.`,
+        declaracion: `Yo activo conscientemente mi elemento ${element.name}. Esta energía primordial no me limita, me empodera. La uso para mi máxima expresión.`,
       },
-      {
-        planeta: luna ? formatPlanetaryPositionEducationally(
-          'Luna',
-          luna.sign,
-          luna.house || luna.houseNumber || 1,
-          luna.degree
-        ) : 'Luna (tus emociones)',
-        lectura_psicologica: `Tu Luna habla de tus necesidades emocionales más profundas. Lo que necesitas para sentirte seguro, nutrido, en casa dentro de ti.`,
-        luz: `Capacidad de nutrir y nutrirte. Intuición poderosa. Empatía profunda.`,
-        sombra: `A veces ignoras tus necesidades emocionales por "no molestar" o "ser fuerte".`,
-        integracion: `Honrar tus necesidades NO es egoísmo - es SUPERVIVENCIA emocional.`
-      }
-    ],
-    
-    patrones_transformar: [
-      {
-        nombre_patron: "El Guerrero Herido que Ayuda a Otros",
-        origen: "Aprendiste temprano que tus necesidades importan menos que las de otros",
-        como_se_manifiesta: [
-          "Ayudas a todos pero te cuesta pedir ayuda",
-          "Te sientes culpable al poner límites",
-          "Priorizas a otros sobre ti constantemente"
-        ],
-        dialogo_interno: [
-          "No quiero ser una carga",
-          "Los demás tienen problemas más importantes",
-          "Puedo manejarlo solo"
-        ],
-        ciclo_karmico: "Ayudas a todos → Te agotas → Te resientes → Te sientes culpable por resentirte → Ayudas más para compensar",
-        transformacion: "Entender que PEDIR AYUDA es un ACTO DE PODER, no de debilidad. Tus necesidades importan TANTO como las de otros."
-      }
-    ],
-    
-    rituales_activacion: [
-      {
-        nombre: "Ritual del Espejo de Verdad",
-        descripcion: "Cada mañana, mírate al espejo 3 minutos. Di: 'Hoy elijo brillar sin pedir permiso. Mis necesidades importan. SOY DIGNO DE MI PROPIA ATENCIÓN.' Siente la resistencia. Hazlo igual.",
-        frecuencia: "Diario durante 21 días"
-      }
-    ],
-    
-    accion_esta_semana: `Esta semana, pide ayuda en UNA cosa, aunque sientas que 'puedes manejarlo solo'. Observa la resistencia. Pide igual.`,
-    
-    afirmacion_poder: `YO ${name.toUpperCase()}, ELIJO BRILLAR SIN DISCULPAS. MIS NECESIDADES IMPORTAN. MI AUTENTICIDAD ES MI PODER. SOY DIGNO DE TODO LO BUENO QUE LLEGA.`,
-    
-    pregunta_reflexion: `${name}, ¿qué pasaría si dejaras de "manejarlo todo solo" y permitieras que otros te vean vulnerable?`
+    },
   };
 }
 
-// ============================================================================
-// 🎯 ENDPOINT PRINCIPAL - POST
-// ============================================================================
-
-export async function POST(request: NextRequest) {
-  try {
-    const body: NatalInterpretationRequest = await request.json();
-    const { userId, natalChart, userProfile, regenerate = false } = body;
-
-    console.log('📥 === REQUEST RECIBIDA ===');
-    console.log('👤 UserId:', userId);
-    console.log('👤 UserProfile:', userProfile?.name, userProfile?.age);
-    console.log('📊 NatalChart planets:', natalChart?.planets?.length || 0);
-    console.log('🔄 Regenerate:', regenerate);
-
-    // ✅ ADD THIS DEBUG LOG
-    console.log('🔍 ===== INTERPRET NATAL DEBUG =====');
-    console.log('📊 Chart Data Received:', {
-      hasPlanets: !!natalChart?.planets,
-      planetsCount: natalChart?.planets?.length,
-      firstPlanet: natalChart?.planets?.[0],
-      hasHouses: !!natalChart?.houses,
-      housesCount: natalChart?.houses?.length,
-      ascendant: natalChart?.ascendant
-    });
-    console.log('👤 User Profile:', userProfile);
-    console.log('🔄 Regenerate:', regenerate);
-
-    // VALIDACIÓN
-    if (!userId || !natalChart || !userProfile) {
-      return NextResponse.json(
+function generateFallbackModalityInterpretation(modality: any): PlanetInterpretation {
+  return {
+    tooltip: {
+      titulo: `✨ Modalidad ${modality.name}`,
+      descripcionBreve: `Modalidad ${modality.name} con ${modality.distribution} planetas`,
+      significado: `La modalidad ${modality.name} representa tu forma de iniciar, mantener o adaptar acciones. Con ${modality.distribution} planetas aquí, este patrón es fundamental en tu vida.`,
+      efecto: 'Influencia modal significativa',
+      tipo: 'Ritmo de acción',
+    },
+    drawer: {
+      titulo: `✨ Tu Modalidad ${modality.name}`,
+      educativo: `La modalidad ${modality.name} describe cómo te relacionas con el cambio, la estabilidad y la acción. Con ${modality.distribution} planetas en esta modalidad, su influencia es notable en tu carta.\n\nDesde niño, esta forma de actuar ha sido tu patrón natural. Ahora que lo comprendes, puedes elegir conscientemente cuándo aplicarla.`,
+      poderoso: `¡NO VINISTE con esta distribución modal por casualidad!\n\n¡ESTO ES ENORME! Tu ritmo de acción es una de tus herramientas cósmicas más poderosas.\n\nTu verdadero superpoder es usar conscientemente la modalidad ${modality.name}. Cuando lo haces, te conviertes en maestro de tu propio ritmo cósmico.`,
+      poetico: `La modalidad ${modality.name} es como un ritmo primordial latiendo en tu ser.\n\nComo una danza cósmica o una corriente marina, establece el tempo de tu vida. En tu carta, marca el compás único que solo tú puedes bailar.`,
+      sombras: [
         {
-          success: false,
-          error: 'Missing required fields: userId, natalChart, userProfile'
+          nombre: 'Ritmo automático',
+          descripcion: 'Cuando la modalidad actúa sin consciencia',
+          trampa: '❌ Dejar que te lleve en lugar de dirigirla',
+          regalo: '✅ Convertirla en superpoder con consciencia e intención',
         },
-        { status: 400 }
-      );
-    }
-
-    if (!userProfile.name) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'userProfile.name is required'
-        },
-        { status: 400 }
-      );
-    }
-
-    // GENERAR INTERPRETACIÓN
-    let interpretation: any;
-    let method = 'unknown';
-
-    try {
-      interpretation = await generateNatalInterpretationSafe(natalChart, userProfile);
-      method = 'openai-success';
-      console.log('✅ Interpretación generada con OpenAI');
-    } catch (openaiError) {
-      console.error('⚠️ OpenAI falló, usando fallback educativo:', openaiError);
-      interpretation = generateEducationalFallback(natalChart, userProfile);
-      method = 'educational-fallback';
-    }
-
-    // VALIDAR que la interpretación NO tenga [object Object]
-    const responseText = JSON.stringify(interpretation);
-    if (responseText.includes('[object Object]')) {
-      console.error('❌ Detectado [object Object] en respuesta, regenerando con fallback');
-      interpretation = generateEducationalFallback(natalChart, userProfile);
-      method = 'fallback-after-object-detection';
-    }
-
-    // RESPUESTA EXITOSA
-    return NextResponse.json({
-      success: true,
-      interpretation,
-      metadata: {
-        method,
-        generatedAt: new Date().toISOString(),
-        userName: userProfile.name,
-        planetsCount: natalChart.planets?.length || 0
-      }
-    });
-
-  } catch (error) {
-    console.error('❌ === ERROR CRÍTICO EN ENDPOINT ===');
-    console.error(error);
-
-    // RESPUESTA DE ERROR - NUNCA DEVOLVER [object Object]
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Error generating interpretation',
-        errorDetails: error instanceof Error ? error.message : 'Unknown error',
-        fallbackAvailable: true
+      ],
+      sintesis: {
+        frase: `Tu modalidad ${modality.name} es ritmo esperando ser dirigido.`,
+        declaracion: `Yo activo conscientemente mi modalidad ${modality.name}. Este ritmo no me limita, me empodera. Lo uso para mi máxima expresión.`,
       },
-      { status: 500 }
-    );
-  }
+    },
+  };
 }
 
-// ============================================================================
-// 🧪 ENDPOINT GET - PARA TESTING
-// ============================================================================
-
-export async function GET() {
-  return NextResponse.json({
-    status: 'ok',
-    endpoint: '/api/astrology/interpret-natal',
-    version: '2.0-ultra-robust',
-    features: [
-      '✅ Super educativo - explica TODO',
-      '✅ Nunca devuelve [object Object]',
-      '✅ Parsing robusto de JSON',
-      '✅ Fallback educativo si falla',
-      '✅ Lenguaje para TODOS (no solo astrólogos)'
-    ]
-  });
+function generateFallbackAspectInterpretation(aspect: any): PlanetInterpretation {
+  return {
+    tooltip: {
+      titulo: `✨ ${aspect.planet1} ${aspect.type} ${aspect.planet2}`,
+      descripcionBreve: `${aspect.planet1} ${aspect.type} ${aspect.planet2} (${aspect.orb}°)`,
+      significado: `Este aspecto entre ${aspect.planet1} y ${aspect.planet2} crea una conexión energética poderosa. La ${aspect.type} representa una relación específica entre estas dos fuerzas planetarias.`,
+      efecto: 'Influencia aspectual significativa',
+      tipo: 'Conexión cósmica',
+    },
+    drawer: {
+      titulo: `✨ ${aspect.planet1} ${aspect.type} ${aspect.planet2}`,
+      educativo: `El aspecto ${aspect.type} entre ${aspect.planet1} y ${aspect.planet2} crea una relación energética específica. Con una separación de ${aspect.orb} grados, esta conexión es notable en tu carta.\n\nDesde niño, esta dinámica planetaria ha influido en cómo integras estas dos energías. Ahora que lo comprendes, puedes trabajar conscientemente con esta conexión.`,
+      poderoso: `¡NO VINISTE con este aspecto por casualidad!\n\n¡ESTO ES ENORME! Esta conexión entre ${aspect.planet1} y ${aspect.planet2} es una de tus herramientas cósmicas más poderosas.\n\nTu verdadero superpoder es integrar conscientemente estas dos energías. Cuando lo haces, te conviertes en alquimista de tu propia transformación.`,
+      poetico: `Este aspecto es como un puente luminoso entre dos mundos planetarios.\n\n${aspect.planet1} y ${aspect.planet2} danzan en una coreografía cósmica, creando música única que solo tu alma puede escuchar. En tu carta, tejen una sinfonía especial.`,
+      sombras: [
+        {
+          nombre: 'Conexión inconsciente',
+          descripcion: 'Cuando el aspecto actúa sin consciencia',
+          trampa: '❌ Dejar que te divida en lugar de unirte',
+          regalo: '✅ Convertirla en superpoder con consciencia e intención',
+        },
+      ],
+      sintesis: {
+        frase: `Tu aspecto ${aspect.type} es puente esperando ser cruzado.`,
+        declaracion: `Yo integro conscientemente mi ${aspect.planet1} y ${aspect.planet2}. Esta conexión no me limita, me empodera. La uso para mi máxima expresión.`,
+      },
+    },
+  };
 }

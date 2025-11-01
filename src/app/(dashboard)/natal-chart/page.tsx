@@ -1,5 +1,5 @@
 // =============================================================================
-// 🌟 PÁGINA CARTA NATAL - ✅ FIXED VERSION (NO CONSOLE.LOGS IN JSX)
+// 🌟 PÁGINA CARTA NATAL - ✅ WITH AI INTERPRETATION AUTO-GENERATION
 // src/app/(dashboard)/natal-chart/page.tsx
 // =============================================================================
 
@@ -53,7 +53,10 @@ export default function NatalChartPage() {
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('🌌 Conectando con el cosmos...');
 
-
+  // ✅ NEW: Estados para interpretaciones AI
+  const [hasInterpretations, setHasInterpretations] = useState(false);
+  const [generatingInterpretations, setGeneratingInterpretations] = useState(false);
+  const [interpretationProgress, setInterpretationProgress] = useState('');
 
   // ✅ FUNCIÓN: Procesar datos de carta
   const processChartData = (rawData: any): NatalChartData => {
@@ -76,40 +79,107 @@ export default function NatalChartPage() {
   };
 
   // ✅ FUNCIÓN: Cargar datos de nacimiento
- const loadBirthDataInfo = async () => {
-  try {
-    const response = await fetch(`/api/birth-data?userId=${user?.uid}`);
+  const loadBirthDataInfo = async () => {
+    try {
+      const response = await fetch(`/api/birth-data?userId=${user?.uid}`);
+      
+      if (response.ok) {
+        const result = await response.json();
+        
+        console.log('🔍 API Response completa:', result.data);
+        
+        if (result.success && result.data) {
+          setBirthData({
+            birthDate: result.data.date || result.data.birthDate,
+            birthTime: result.data.time || result.data.birthTime,
+            birthPlace: result.data.location || result.data.birthPlace,
+            latitude: result.data.latitude,
+            longitude: result.data.longitude,
+            timezone: result.data.timezone,
+            fullName: result.data.fullName
+          });
+        }
+      }
+    } catch (error) {
+      console.log('⚠️ Error loading birth data:', error);
+    }
+  };
+
+  // ✅ NEW: Check if AI interpretations exist
+  const checkInterpretations = async (): Promise<boolean> => {
+    if (!user?.uid) return false;
     
-    if (response.ok) {
+    try {
+      console.log('🔍 Checking if interpretations exist...');
+      const response = await fetch(`/api/astrology/interpret-natal?userId=${user.uid}`);
       const result = await response.json();
       
-      // ✅ LOG PARA VER QUÉ LLEGA (OUTSIDE JSX - OK!)
-      console.log('🔍 API Response completa:', result.data);
-      console.log('📅 Campos específicos:', {
-        date: result.data.date,
-        birthDate: result.data.birthDate,
-        time: result.data.time,
-        birthTime: result.data.birthTime,
-        location: result.data.location,
-        birthPlace: result.data.birthPlace
-      });
-      
       if (result.success && result.data) {
-        setBirthData({
-          birthDate: result.data.date || result.data.birthDate,
-          birthTime: result.data.time || result.data.birthTime,
-          birthPlace: result.data.location || result.data.birthPlace,
-          latitude: result.data.latitude,
-          longitude: result.data.longitude,
-          timezone: result.data.timezone,
-          fullName: result.data.fullName
-        });
+        console.log('✅ Interpretations already exist');
+        setHasInterpretations(true);
+        return true;
+      } else {
+        console.log('⚠️ No interpretations found');
+        setHasInterpretations(false);
+        return false;
       }
+    } catch (error) {
+      console.error('❌ Error checking interpretations:', error);
+      return false;
     }
-  } catch (error) {
-    console.log('⚠️ Error:', error);
-  }
-};
+  };
+
+  // ✅ NEW: Generate AI interpretations
+  const generateInterpretations = async () => {
+    if (!user?.uid || !birthData) {
+      console.log('⚠️ Cannot generate - missing user or birth data');
+      return;
+    }
+    
+    setGeneratingInterpretations(true);
+    setInterpretationProgress('🔮 Iniciando generación de interpretaciones AI...');
+    
+    try {
+      console.log('🚀 Starting AI interpretation generation...');
+      
+      const response = await fetch('/api/astrology/interpret-natal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.uid,
+          chartData: chartData,
+          userProfile: {
+            name: birthData.fullName || 'Usuario',
+            age: new Date().getFullYear() - new Date(birthData.birthDate).getFullYear(),
+            birthPlace: birthData.birthPlace,
+            birthDate: birthData.birthDate,
+            birthTime: birthData.birthTime
+          }
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log('✅ AI Interpretations generated successfully!');
+        setHasInterpretations(true);
+        setInterpretationProgress('✨ ¡Interpretaciones listas!');
+        
+        // Clear progress message after 3 seconds
+        setTimeout(() => {
+          setInterpretationProgress('');
+        }, 3000);
+      } else {
+        console.error('❌ Error generating interpretations:', result.error);
+        setInterpretationProgress('⚠️ Error generando interpretaciones');
+      }
+    } catch (error) {
+      console.error('❌ Error in generation request:', error);
+      setInterpretationProgress('❌ Error en la solicitud');
+    } finally {
+      setGeneratingInterpretations(false);
+    }
+  };
 
   // ✅ FUNCIÓN: Cargar carta natal
   const loadChartData = async () => {
@@ -136,8 +206,12 @@ export default function NatalChartPage() {
           
           const processedData = processChartData(result.natalChart);
           setChartData(processedData);
-          
-          // Cargar datos de nacimiento para mostrar información
+
+          // 🔍 DIAGNOSE: Check planets count
+          console.log('📊 Planets in chartData:', processedData?.planets.length);
+          console.log('🪐 Names:', processedData?.planets.map(p => p.name));
+
+          // Cargar datos de nacimiento
           await loadBirthDataInfo();
           return;
         }
@@ -201,11 +275,11 @@ export default function NatalChartPage() {
       });
       console.log('🗑️ Carta borrada:', deleteResponse.ok);
 
-      // 2. Borrar interpretación cacheada
-      const deleteInterpResponse = await fetch(`/api/interpretations/save?userId=${user.uid}&chartType=natal`, {
+      // 2. ✅ Borrar interpretaciones cacheadas
+      const deleteInterpResponse = await fetch(`/api/astrology/interpret-natal?userId=${user.uid}`, {
         method: 'DELETE'
       });
-      console.log('🗑️ Interpretación borrada:', deleteInterpResponse.ok);
+      console.log('🗑️ Interpretaciones borradas:', deleteInterpResponse.ok);
 
       // 3. Generar nueva carta
       const response = await fetch('/api/charts/natal', {
@@ -227,6 +301,12 @@ export default function NatalChartPage() {
           const processedData = processChartData(data.natalChart);
           setChartData(processedData);
           await loadBirthDataInfo();
+          
+          // 4. ✅ Auto-generate NEW interpretations after regeneration
+          console.log('🔮 Generating new interpretations after chart regeneration...');
+          setHasInterpretations(false);
+          await generateInterpretations();
+          
           console.log('✅ Regeneración completada');
         }
       } else {
@@ -248,6 +328,28 @@ export default function NatalChartPage() {
     }
   }, [user?.uid, authLoading]);
 
+  // ✅ NEW: Auto-generate interpretations when chart + birth data are ready
+  useEffect(() => {
+    async function autoGenerateIfNeeded() {
+      if (!chartData || !birthData || !user?.uid) {
+        console.log('⏸️ Waiting for chart and birth data...');
+        return;
+      }
+      
+      console.log('🔍 Chart and birth data ready, checking interpretations...');
+      const exists = await checkInterpretations();
+      
+      if (!exists) {
+        console.log('🚀 No interpretations found - auto-generating...');
+        await generateInterpretations();
+      } else {
+        console.log('✅ Interpretations already exist, skipping generation');
+      }
+    }
+    
+    autoGenerateIfNeeded();
+  }, [chartData, birthData, user?.uid]);
+
   // ✅ ANIMACIÓN DE MENSAJES DE CARGA
   useEffect(() => {
     if (loading) {
@@ -265,7 +367,7 @@ export default function NatalChartPage() {
       const interval = setInterval(() => {
         index = (index + 1) % messages.length;
         setLoadingMessage(messages[index]);
-      }, 2000); // Cambia cada 2 segundos
+      }, 2000);
 
       return () => clearInterval(interval);
     }
@@ -276,15 +378,12 @@ export default function NatalChartPage() {
     router.push('/birth-data');
   };
 
-
-
   // ✅ PANTALLA DE CARGA
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900/20 to-gray-900 flex items-center justify-center p-4">
         <div className="text-center max-w-md">
           <div className="relative mb-8">
-            {/* Círculo pulsante */}
             <div className="w-24 h-24 mx-auto relative">
               <div className="absolute inset-0 bg-purple-500 rounded-full animate-ping opacity-20"></div>
               <div className="absolute inset-0 bg-purple-600 rounded-full animate-pulse"></div>
@@ -305,7 +404,6 @@ export default function NatalChartPage() {
             </p>
           </div>
 
-          {/* Barra de progreso simulada */}
           <div className="mt-6 w-full bg-gray-700 rounded-full h-2 overflow-hidden">
             <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500 animate-progress"></div>
           </div>
@@ -358,7 +456,7 @@ export default function NatalChartPage() {
     );
   }
 
-  // ✅ PANTALLA PRINCIPAL - CARTA NATAL (Sin header propio)
+  // ✅ PANTALLA PRINCIPAL
   if (!chartData) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -398,6 +496,27 @@ export default function NatalChartPage() {
           Descubre los secretos que los astros revelaron en el momento exacto de tu nacimiento
         </p>
 
+        {/* ✅ NEW: Show AI interpretation status */}
+        {generatingInterpretations && (
+          <div className="bg-purple-900/30 backdrop-blur-sm border border-purple-400/30 rounded-xl p-4 max-w-md mx-auto">
+            <div className="flex items-center justify-center gap-3">
+              <Brain className="w-5 h-5 text-purple-400 animate-pulse" />
+              <p className="text-purple-200 text-sm font-medium">
+                {interpretationProgress}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {hasInterpretations && !generatingInterpretations && (
+          <div className="bg-green-900/30 backdrop-blur-sm border border-green-400/30 rounded-xl p-3 max-w-md mx-auto">
+            <p className="text-green-200 text-xs flex items-center justify-center gap-2">
+              <span>✅</span>
+              <span>Interpretaciones AI disponibles - Haz hover en los planetas</span>
+            </p>
+          </div>
+        )}
+
         {/* Botones de acción */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           {/* BOTÓN DE REGENERAR */}
@@ -410,7 +529,7 @@ export default function NatalChartPage() {
             {isRegenerating ? 'Regenerando...' : 'Regenerar Carta'}
           </button>
 
-          {/* ✅ BOTÓN DE INTERPRETACIÓN - FIXED: NO CONSOLE.LOGS IN JSX */}
+          {/* BOTÓN DE INTERPRETACIÓN */}
           {chartData && birthData && (
             <InterpretationButton
               type="natal"
@@ -427,11 +546,9 @@ export default function NatalChartPage() {
             />
           )}
         </div>
-
-
       </div>
 
-      {/* Carta natal */}
+      {/* ✅ Carta natal with AI integration */}
       {chartData && (
         <div className="flex justify-center">
           <ChartDisplay
@@ -443,8 +560,10 @@ export default function NatalChartPage() {
             ascendant={chartData.ascendant}
             midheaven={chartData.midheaven}
             birthData={birthData || undefined}
-            onOpenDrawer={openDrawer}
-            drawerOpen={drawerOpen}
+            userId={user?.uid}           // ✅ Pass userId for AI fetch
+            onOpenDrawer={openDrawer}    // ✅ Pass drawer opener
+            onCloseDrawer={closeDrawer}  // ✅ Pass drawer closer
+            drawerOpen={drawerOpen}      // ✅ Pass drawer state
           />
         </div>
       )}
@@ -464,7 +583,6 @@ export default function NatalChartPage() {
         isOpen={drawerOpen}
         onClose={() => {
           closeDrawer();
-          // Reset tooltip when drawer closes - handled by page-level state
         }}
         content={drawerContent}
       />

@@ -47,7 +47,8 @@ const ChartDisplay = ({
   onCloseDrawer,
   // ✅ ADDED: For drawer functionality
   onOpenDrawer,
-  drawerOpen = false
+  drawerOpen = false,
+  userId
 }: ChartDisplayProps) => {
 
   // ✅ ESTADOS
@@ -1750,9 +1751,13 @@ const ChartDisplay = ({
         setHoveredAspect={setHoveredAspect}
         setHoveredHouse={setHoveredHouse}
         onOpenDrawer={onOpenDrawer}
+        onCloseDrawer={onCloseDrawer}
         drawerOpen={drawerOpen}
         clickedPlanet={clickedPlanet}
         setClickedPlanet={setClickedPlanet}
+        // ✅ NEW: Props for AI integration
+        userId={userId}
+        chartType={chartType}
       />
 
 

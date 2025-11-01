@@ -33,6 +33,7 @@ export interface ChartDisplayProps {
   onOpenDrawer?: (content: any) => void;
   onCloseDrawer?: () => void;
   drawerOpen?: boolean;
+  userId?: string;                         // ID del usuario
 }
 
 // Rest of interfaces remain the same

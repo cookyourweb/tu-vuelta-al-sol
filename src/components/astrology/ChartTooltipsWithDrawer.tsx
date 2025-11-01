@@ -93,9 +93,9 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
   const [isLoadingInterpretation, setIsLoadingInterpretation] = useState(false);
 
   // =========================================================================
-  // 🤖 FUNCIÓN PARA GENERAR Y ABRIR INTERPRETACIÓN CON IA
+  // 🤖 FUNCIÓN PARA OBTENER INTERPRETACIÓN DEL CACHE O GENERAR NUEVA
   // =========================================================================
-  const openInterpretationDrawer = async (type: 'planet' | 'ascendant' | 'midheaven' | 'aspect', data: any) => {
+  const openInterpretationDrawer = async (type: 'planet' | 'ascendant' | 'midheaven' | 'aspect' | 'asteroid' | 'node' | 'element' | 'modality', data: any) => {
     if (!userProfile) {
       console.warn('No hay perfil de usuario disponible para generar interpretación');
       return;
@@ -104,6 +104,51 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
     setIsLoadingInterpretation(true);
 
     try {
+      // Primero intentar obtener del cache
+      const cacheResponse = await fetch(`/api/astrology/interpret-natal?userId=${userProfile.name}`);
+      if (cacheResponse.ok) {
+        const cacheData = await cacheResponse.json();
+        if (cacheData.success && cacheData.data) {
+          let cachedInterpretation = null;
+
+          // Buscar en el cache según el tipo
+          switch (type) {
+            case 'planet':
+              cachedInterpretation = cacheData.data.planets[`${data.name}-${data.sign}-${data.house}`];
+              break;
+            case 'ascendant':
+              cachedInterpretation = cacheData.data.angles.Ascendente;
+              break;
+            case 'midheaven':
+              cachedInterpretation = cacheData.data.angles.MedioCielo;
+              break;
+            case 'aspect':
+              cachedInterpretation = cacheData.data.aspects[`${data.planet1}-${data.planet2}-${data.type}`];
+              break;
+            case 'asteroid':
+              cachedInterpretation = cacheData.data.asteroids[`${data.name}-${data.sign}-${data.house}`];
+              break;
+            case 'node':
+              cachedInterpretation = cacheData.data.nodes[`${data.name}-${data.sign}-${data.house}`];
+              break;
+            case 'element':
+              cachedInterpretation = cacheData.data.elements[`Elemento-${data.name}`];
+              break;
+            case 'modality':
+              cachedInterpretation = cacheData.data.modalities[`Modalidad-${data.name}`];
+              break;
+          }
+
+          if (cachedInterpretation) {
+            setDrawerContent(cachedInterpretation.drawer);
+            setDrawerOpen(true);
+            setIsLoadingInterpretation(false);
+            return;
+          }
+        }
+      }
+
+      // Si no está en cache, generar nueva interpretación
       let interpretation;
 
       switch (type) {
@@ -152,7 +197,7 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
       setDrawerOpen(true);
 
     } catch (error) {
-      console.error('Error generando interpretación:', error);
+      console.error('Error obteniendo interpretación:', error);
       // TODO: Mostrar mensaje de error al usuario
     } finally {
       setIsLoadingInterpretation(false);

@@ -280,9 +280,10 @@ Cada persona que amas recibe el regalo de ser vista, aceptada y celebrada en su 
 // ═══════════════════════════════════════════════════════════
 
 export function getSolarInterpretation(
-  sign: string, 
-  house: number
+  sign: string,
+  house: number | undefined
 ): FullInterpretation | null {
+  if (!house) return null;
   const key = `Sol-${sign}-Casa${house}`;
   return solarInterpretations[key] || null;
 }
