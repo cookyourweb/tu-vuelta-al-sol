@@ -12,6 +12,9 @@ import ChartDisplay from '@/components/astrology/ChartDisplay';
 import InterpretationButton from '@/components/astrology/InterpretationButton';
 import { useInterpretationDrawer } from '@/hooks/useInterpretationDrawer';
 import { InterpretationDrawer } from '@/components/astrology/InterpretationDrawer';
+import InterpretationProgressModal from '@/components/astrology/InterpretationProgressModal';
+import ChartProgressModal from '@/components/astrology/ChartProgressModal';
+import EnergyProfileTooltip from '@/components/astrology/EnergyProfileTooltip';
 import { Sparkles, Edit, Star, RefreshCw, Brain } from 'lucide-react';
 import Button from '@/components/ui/Button';
 
@@ -264,7 +267,7 @@ export default function NatalChartPage() {
     if (!user?.uid) return;
 
     setIsRegenerating(true);
-    setLoadingMessage('🔄 Regenerando tu carta natal...');
+    setLoadingMessage('🌌 Conectando con el cosmos...');
 
     try {
       console.log('🔄 Iniciando regeneración...');
@@ -281,7 +284,23 @@ export default function NatalChartPage() {
       });
       console.log('🗑️ Interpretaciones borradas:', deleteInterpResponse.ok);
 
-      // 3. Generar nueva carta
+      // 3. Generar nueva carta con mensajes de progreso
+      const progressMessages = [
+        '🌌 Conectando con el cosmos...',
+        '⚡ Calculando posiciones planetarias exactas...',
+        '🔮 Descifrando tu mapa cósmico...',
+        '✨ Interpretando las energías astrales...',
+        '🪐 Analizando aspectos planetarios...',
+        '🌟 Revelando tu configuración única...',
+        '💫 Casi listo... preparando tu revolución personal...'
+      ];
+
+      let messageIndex = 0;
+      const messageInterval = setInterval(() => {
+        messageIndex = (messageIndex + 1) % progressMessages.length;
+        setLoadingMessage(progressMessages[messageIndex]);
+      }, 2000);
+
       const response = await fetch('/api/charts/natal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -291,6 +310,7 @@ export default function NatalChartPage() {
         })
       });
 
+      clearInterval(messageInterval);
       console.log('📡 Response status:', response.status);
 
       if (response.ok) {
@@ -298,15 +318,16 @@ export default function NatalChartPage() {
         console.log('📦 Data recibida:', data);
 
         if (data.success && data.natalChart) {
+          setLoadingMessage('✨ ¡Carta completada! 🎉');
           const processedData = processChartData(data.natalChart);
           setChartData(processedData);
           await loadBirthDataInfo();
-          
+
           // 4. ✅ Auto-generate NEW interpretations after regeneration
           console.log('🔮 Generating new interpretations after chart regeneration...');
           setHasInterpretations(false);
           await generateInterpretations();
-          
+
           console.log('✅ Regeneración completada');
         }
       } else {
@@ -496,17 +517,18 @@ export default function NatalChartPage() {
           Descubre los secretos que los astros revelaron en el momento exacto de tu nacimiento
         </p>
 
-        {/* ✅ NEW: Show AI interpretation status */}
-        {generatingInterpretations && (
-          <div className="bg-purple-900/30 backdrop-blur-sm border border-purple-400/30 rounded-xl p-4 max-w-md mx-auto">
-            <div className="flex items-center justify-center gap-3">
-              <Brain className="w-5 h-5 text-purple-400 animate-pulse" />
-              <p className="text-purple-200 text-sm font-medium">
-                {interpretationProgress}
-              </p>
-            </div>
-          </div>
-        )}
+        {/* ✅ NEW: Progress Modals */}
+        <ChartProgressModal
+          isOpen={loading && !isRegenerating}
+          progress={loadingMessage}
+          onClose={() => setLoading(false)}
+        />
+
+        <InterpretationProgressModal
+          isOpen={generatingInterpretations}
+          progress={interpretationProgress}
+          onClose={() => setGeneratingInterpretations(false)}
+        />
 
         {hasInterpretations && !generatingInterpretations && (
           <div className="bg-green-900/30 backdrop-blur-sm border border-green-400/30 rounded-xl p-3 max-w-md mx-auto">
@@ -547,6 +569,17 @@ export default function NatalChartPage() {
           )}
         </div>
       </div>
+
+      {/* ✅ Energy Profile Tooltip - Initial Section */}
+      {chartData && (
+        <EnergyProfileTooltip
+          ascendant={chartData.ascendant}
+          midheaven={chartData.midheaven}
+          elementDistribution={chartData.elementDistribution}
+          modalityDistribution={chartData.modalityDistribution}
+          userId={user?.uid}
+        />
+      )}
 
       {/* ✅ Carta natal with AI integration */}
       {chartData && (

@@ -63,11 +63,19 @@ const ChartDisplay = ({
   const [calculatedAspects, setCalculatedAspects] = useState<any[]>([]);
   const [hoveredPlanet, setHoveredPlanet] = useState<string | null>(null);
   const [hoveredHouse, setHoveredHouse] = useState<number | null>(null);
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+  const [clickedCard, setClickedCard] = useState<string | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [hoveredNavGuide, setHoveredNavGuide] = useState(false);
   const [activeSection, setActiveSection] = useState('carta-visual');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [clickedPlanet, setClickedPlanet] = useState<string | null>(null);
+  const [clickedAspect, setClickedAspect] = useState<string | null>(null);
+
+  // ✅ NEW: Hover delay timers
+  const [aspectHoverTimer, setAspectHoverTimer] = useState<NodeJS.Timeout | null>(null);
+  const [planetHoverTimer, setPlanetHoverTimer] = useState<NodeJS.Timeout | null>(null);
+  const [cardHoverTimer, setCardHoverTimer] = useState<NodeJS.Timeout | null>(null);
 
   // ✅ FUNCIONES UTILITARIAS
   const handleMouseMove = (event: React.MouseEvent) => {
@@ -281,11 +289,32 @@ const ChartDisplay = ({
             strokeDasharray={isMinor ? "3,3" : "none"}
             className="transition-all duration-200 cursor-pointer"
             onMouseEnter={(e) => {
+              // ✅ DELAY: Clear any existing timer and set new one
+              if (aspectHoverTimer) clearTimeout(aspectHoverTimer);
+              const timer = setTimeout(() => {
+                setHoveredAspect(aspectKey);
+                handleMouseMove(e);
+              }, 300); // 300ms delay
+              setAspectHoverTimer(timer);
+            }}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={() => {
+              // ✅ DELAY: Clear timer on mouse leave
+              if (aspectHoverTimer) {
+                clearTimeout(aspectHoverTimer);
+                setAspectHoverTimer(null);
+              }
+              setHoveredAspect(null);
+            }}
+            onClick={(e) => {
+              // ✅ IMMEDIATE: Clear timer and show immediately on click
+              if (aspectHoverTimer) {
+                clearTimeout(aspectHoverTimer);
+                setAspectHoverTimer(null);
+              }
               setHoveredAspect(aspectKey);
               handleMouseMove(e);
             }}
-            onMouseMove={handleMouseMove}
-            onMouseLeave={() => setHoveredAspect(null)}
           />
         </g>
       );
@@ -727,24 +756,7 @@ const ChartDisplay = ({
           Planetas
         </button>
 
-        {/* ✅ NEW: LÍNEA DE TIEMPO TAB - ONLY FOR SOLAR RETURN */}
-        {chartType === 'solar-return' && (
-          <button
-            onClick={() => {
-              const timelineSection = document.getElementById('linea-tiempo-solar');
-              if (timelineSection) {
-                timelineSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }
-            }}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 bg-slate-800/50 border border-slate-600/30 text-slate-400 hover:border-rose-500/50 hover:text-rose-300"
-          >
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10"/>
-              <polyline points="12,6 12,12 16,14"/>
-            </svg>
-            Línea de Tiempo
-          </button>
-        )}
+
       </div>
 
 {/* 🎯 SECCIÓN: TRES CARDS PRINCIPALES - ADAPTATIVO SEGÚN TIPO DE CARTA */}
@@ -752,7 +764,37 @@ const ChartDisplay = ({
   <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
 
     {/* ✅ CARD 1: BIRTH DATA - SAME EXACT STYLES FOR BOTH */}
-    <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-xl p-4 relative group hover:scale-[1.02] transition-all duration-300 overflow-hidden">
+    <div
+      className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-xl p-4 relative group hover:scale-[1.05] transition-all duration-300 overflow-hidden cursor-pointer"
+      onMouseEnter={(e) => {
+        // ✅ DELAY: Clear any existing timer and set new one
+        if (cardHoverTimer) clearTimeout(cardHoverTimer);
+        const timer = setTimeout(() => {
+          setHoveredCard('birth-data');
+          handleMouseMove(e);
+        }, 300); // 300ms delay
+        setCardHoverTimer(timer);
+      }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => {
+        // ✅ DELAY: Clear timer on mouse leave
+        if (cardHoverTimer) {
+          clearTimeout(cardHoverTimer);
+          setCardHoverTimer(null);
+        }
+        setHoveredCard(null);
+      }}
+      onClick={(e) => {
+        // ✅ IMMEDIATE: Clear timer and show immediately on click
+        if (cardHoverTimer) {
+          clearTimeout(cardHoverTimer);
+          setCardHoverTimer(null);
+        }
+        setClickedCard(clickedCard === 'birth-data' ? null : 'birth-data');
+        setHoveredCard('birth-data');
+        handleMouseMove(e);
+      }}
+    >
       <div className="absolute top-3 right-3 w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
 
       <div className="flex items-center mb-4">
@@ -858,7 +900,37 @@ const ChartDisplay = ({
     </div>
 
     {/* ✅ CARD 2: ANGLES - CONDITIONAL DISTRIBUTIONS */}
-    <div className="bg-gradient-to-br from-indigo-900/40 to-purple-900/40 rounded-xl p-6 border border-indigo-400/30">
+    <div
+      className="bg-gradient-to-br from-indigo-900/40 to-purple-900/40 rounded-xl p-6 border border-indigo-400/30 hover:scale-[1.05] transition-all duration-300 cursor-pointer"
+      onMouseEnter={(e) => {
+        // ✅ DELAY: Clear any existing timer and set new one
+        if (cardHoverTimer) clearTimeout(cardHoverTimer);
+        const timer = setTimeout(() => {
+          setHoveredCard('angles');
+          handleMouseMove(e);
+        }, 300); // 300ms delay
+        setCardHoverTimer(timer);
+      }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => {
+        // ✅ DELAY: Clear timer on mouse leave
+        if (cardHoverTimer) {
+          clearTimeout(cardHoverTimer);
+          setCardHoverTimer(null);
+        }
+        setHoveredCard(null);
+      }}
+      onClick={(e) => {
+        // ✅ IMMEDIATE: Clear timer and show immediately on click
+        if (cardHoverTimer) {
+          clearTimeout(cardHoverTimer);
+          setCardHoverTimer(null);
+        }
+        setClickedCard(clickedCard === 'angles' ? null : 'angles');
+        setHoveredCard('angles');
+        handleMouseMove(e);
+      }}
+    >
       <h3 className="text-xl font-bold text-indigo-100 mb-4 flex items-center gap-2">
         <span className="text-2xl">⚡</span>
         Ángulos Principales
@@ -1052,13 +1124,75 @@ const ChartDisplay = ({
     {/* ✅ CARD 3: CONDITIONAL - NATAL vs SOLAR RETURN */}
     {chartType === 'natal' ? (
       // NATAL: Full distributions card on the right
-      <ElementsModalitiesCard
-        elementDistribution={elementDistribution}
-        modalityDistribution={modalityDistribution}
-      />
+      <div
+        className="hover:scale-[1.05] transition-all duration-300 cursor-pointer"
+      onMouseEnter={(e) => {
+        // ✅ DELAY: Clear any existing timer and set new one
+        if (cardHoverTimer) clearTimeout(cardHoverTimer);
+        const timer = setTimeout(() => {
+          setHoveredCard('distributions');
+          handleMouseMove(e);
+        }, 300); // 300ms delay
+        setCardHoverTimer(timer);
+      }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => {
+        // ✅ DELAY: Clear timer on mouse leave
+        if (cardHoverTimer) {
+          clearTimeout(cardHoverTimer);
+          setCardHoverTimer(null);
+        }
+        setHoveredCard(null);
+      }}
+      onClick={(e) => {
+        // ✅ IMMEDIATE: Clear timer and show immediately on click
+        if (cardHoverTimer) {
+          clearTimeout(cardHoverTimer);
+          setCardHoverTimer(null);
+        }
+        setClickedCard(clickedCard === 'distributions' ? null : 'distributions');
+        setHoveredCard('distributions');
+        handleMouseMove(e);
+      }}
+      >
+        <ElementsModalitiesCard
+          elementDistribution={elementDistribution}
+          modalityDistribution={modalityDistribution}
+        />
+      </div>
     ) : (
       // SOLAR RETURN: Cycle info
-      <div className="bg-gradient-to-br from-rose-900/40 to-pink-900/40 rounded-xl p-6 border border-rose-400/30">
+      <div
+        className="bg-gradient-to-br from-rose-900/40 to-pink-900/40 rounded-xl p-6 border border-rose-400/30 hover:scale-[1.05] transition-all duration-300 cursor-pointer"
+      onMouseEnter={(e) => {
+        // ✅ DELAY: Clear any existing timer and set new one
+        if (cardHoverTimer) clearTimeout(cardHoverTimer);
+        const timer = setTimeout(() => {
+          setHoveredCard('solar-return');
+          handleMouseMove(e);
+        }, 300); // 300ms delay
+        setCardHoverTimer(timer);
+      }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => {
+        // ✅ DELAY: Clear timer on mouse leave
+        if (cardHoverTimer) {
+          clearTimeout(cardHoverTimer);
+          setCardHoverTimer(null);
+        }
+        setHoveredCard(null);
+      }}
+      onClick={(e) => {
+        // ✅ IMMEDIATE: Clear timer and show immediately on click
+        if (cardHoverTimer) {
+          clearTimeout(cardHoverTimer);
+          setCardHoverTimer(null);
+        }
+        setClickedCard(clickedCard === 'solar-return' ? null : 'solar-return');
+        setHoveredCard('solar-return');
+        handleMouseMove(e);
+      }}
+      >
         <h3 className="text-xl font-bold text-rose-100 mb-4 flex items-center gap-2">
           <span className="text-2xl">✨</span>
           Solar Return {solarReturnYear}
@@ -1116,6 +1250,8 @@ const ChartDisplay = ({
 
   </div>
 )}
+
+
 
       {/* 🎯 SECCIÓN 1: CARTA VISUAL */}
       <div id="carta-visual" className="space-y-8">
@@ -1365,15 +1501,26 @@ const ChartDisplay = ({
               const nature = getAspectNature(aspect);
               
               return (
-                <div 
+                <div
                   key={index}
-                  className="bg-black/30 rounded-xl p-4 backdrop-blur-sm border border-white/10 cursor-pointer hover:border-white/20 transition-all duration-200 group relative"
+                  className="bg-black/30 rounded-xl p-4 backdrop-blur-sm border border-white/10 cursor-pointer hover:border-white/20 transition-all duration-200 group relative pointer-events-auto"
                   onMouseEnter={(e) => {
                     setHoveredAspect(`${aspect.planet1}-${aspect.planet2}-${aspect.type}`);
                     handleMouseMove(e);
                   }}
                   onMouseMove={handleMouseMove}
                   onMouseLeave={() => setHoveredAspect(null)}
+                  onClick={(e) => {
+                    console.log(`🎯 Clicked aspect card: ${aspect.planet1} - ${aspect.planet2} (${aspect.type})`);
+                    // ✅ IMMEDIATE: Clear timer and show immediately on click
+                    if (aspectHoverTimer) {
+                      clearTimeout(aspectHoverTimer);
+                      setAspectHoverTimer(null);
+                    }
+                    setClickedAspect(`${aspect.planet1}-${aspect.planet2}-${aspect.type}`);
+                    setHoveredAspect(`${aspect.planet1}-${aspect.planet2}-${aspect.type}`);
+                    handleMouseMove(e);
+                  }}
                   style={{ position: 'relative', zIndex: 1 }}
                 >
                   <div className="flex items-center justify-between mb-2">
@@ -1519,15 +1666,26 @@ const ChartDisplay = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {normalizedPlanets.map((planet, index) => (
             planet ? (
-              <div 
-                key={index} 
-                className="bg-black/30 rounded-xl p-4 backdrop-blur-sm border border-white/10 cursor-pointer hover:border-white/20 transition-all duration-200"
+              <div
+                key={index}
+                className="bg-black/30 rounded-xl p-4 backdrop-blur-sm border border-white/10 cursor-pointer hover:border-white/20 transition-all duration-200 pointer-events-auto"
                 onMouseEnter={(e) => {
                   setHoveredPlanet(planet.name);
                   handleMouseMove(e);
                 }}
                 onMouseMove={handleMouseMove}
                 onMouseLeave={() => setHoveredPlanet(null)}
+                onClick={(e) => {
+                  console.log(`🌟 Clicked planet card: ${planet.name}`);
+                  // ✅ IMMEDIATE: Clear timer and show immediately on click
+                  if (planetHoverTimer) {
+                    clearTimeout(planetHoverTimer);
+                    setPlanetHoverTimer(null);
+                  }
+                  setClickedPlanet(planet.name);
+                  setHoveredPlanet(planet.name);
+                  handleMouseMove(e);
+                }}
               >
                 <div className="flex items-center mb-3">
                   <span className="text-2xl mr-3" style={{ color: PLANET_COLORS[planet.name] || '#ffffff' }}>
@@ -1742,6 +1900,7 @@ const ChartDisplay = ({
         hoveredPlanet={hoveredPlanet}
         hoveredAspect={hoveredAspect}
         hoveredHouse={hoveredHouse}
+        hoveredCard={hoveredCard}
         ascendant={ascendant ?? undefined}
         midheaven={midheaven ?? undefined}
         planets={normalizedPlanets}
@@ -1755,9 +1914,17 @@ const ChartDisplay = ({
         drawerOpen={drawerOpen}
         clickedPlanet={clickedPlanet}
         setClickedPlanet={setClickedPlanet}
+        clickedAspect={clickedAspect}
+        setClickedAspect={setClickedAspect}
         // ✅ NEW: Props for AI integration
         userId={userId}
         chartType={chartType}
+        birthData={birthData}
+        elementDistribution={elementDistribution}
+        modalityDistribution={modalityDistribution}
+        solarReturnYear={solarReturnYear}
+        solarReturnTheme={solarReturnTheme}
+        ascSRInNatalHouse={ascSRInNatalHouse}
       />
 
 

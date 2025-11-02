@@ -109,6 +109,7 @@ export async function GET(request: NextRequest) {
     
   } catch (error) {
     console.error('❌ Error fetching interpretations:', error);
+    console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack');
     return NextResponse.json({ 
       success: false, 
       error: 'Server error' 
@@ -125,23 +126,36 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { userId, chartData, userProfile } = body;
 
+    console.log('🎯 [DEBUG] POST request received');
+    console.log('🎯 [DEBUG] userId:', userId);
+    console.log('🎯 [DEBUG] userProfile:', userProfile);
+    console.log('🎯 [DEBUG] chartData keys:', Object.keys(chartData || {}));
+
     if (!userId || !chartData || !userProfile) {
+      console.log('❌ [DEBUG] Missing required fields:', { userId: !!userId, chartData: !!chartData, userProfile: !!userProfile });
       return NextResponse.json(
         { success: false, error: 'Missing required fields: userId, chartData, userProfile' },
         { status: 400 }
       );
     }
 
-    console.log('🎯 Generating natal interpretations for:', userProfile.name);
+    console.log('🎯 [DEBUG] Starting natal interpretations generation for:', userProfile.name);
 
     const startTime = Date.now();
 
     // Generate all interpretations
+    console.log('🎯 [DEBUG] Calling generateNatalBatchInterpretations...');
     const interpretations = await generateNatalBatchInterpretations(chartData, userProfile);
 
+    console.log('🎯 [DEBUG] Interpretations generated successfully');
+    console.log('🎯 [DEBUG] Interpretation keys:', Object.keys(interpretations));
+    console.log('🎯 [DEBUG] Planets count:', Object.keys(interpretations.planets || {}).length);
+    console.log('🎯 [DEBUG] Angles count:', Object.keys(interpretations.angles || {}).length);
+
     const generationTime = ((Date.now() - startTime) / 1000).toFixed(0);
-    
+
     // Save to MongoDB
+    console.log('🎯 [DEBUG] Connecting to database...');
     const mongoose = await connectToDatabase();
     const db = (mongoose as any).connection?.db ?? (mongoose as any).db;
 
@@ -156,6 +170,8 @@ export async function POST(request: NextRequest) {
       generationTime: `${generationTime}s`,
       totalCost: '$2.50', // Approximate for expanded interpretations
     };
+
+    console.log('🎯 [DEBUG] Saving to MongoDB with stats:', stats);
 
     await db.collection('interpretations').updateOne(
       { userId, chartType: 'natal' },
@@ -172,8 +188,7 @@ export async function POST(request: NextRequest) {
       { upsert: true }
     );
 
-    console.log('✅ Interpretations saved to MongoDB');
-
+    console.log('✅ [DEBUG] Interpretations saved to MongoDB successfully');
     return NextResponse.json({
       success: true,
       data: interpretations,
@@ -181,12 +196,105 @@ export async function POST(request: NextRequest) {
       generatedAt: new Date().toISOString(),
       stats,
     });
-    
   } catch (error) {
-    console.error('❌ Error generating interpretations:', error);
-    return NextResponse.json({ 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Server error' 
+    console.error('❌ Error in POST:', error);
+    console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack');
+    return NextResponse.json({
+      success: false,
+      error: 'Server error'
+    }, { status: 500 });
+  }
+}
+
+// =============================================================================
+// PUT - Generate specific aspect interpretation
+// =============================================================================
+
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { userId, planet1, planet2, aspectType, orb } = body;
+
+    if (!userId || !planet1 || !planet2 || !aspectType) {
+      return NextResponse.json(
+        { success: false, error: 'Missing required fields: userId, planet1, planet2, aspectType' },
+        { status: 400 }
+      );
+    }
+
+    console.log('🎯 [PUT] Generating aspect interpretation:', { userId, planet1, planet2, aspectType, orb });
+
+    const mongoose = await connectToDatabase();
+    const db = (mongoose as any).connection?.db ?? (mongoose as any).db;
+
+    // Check if interpretation already exists
+    const existing = await db.collection('interpretations').findOne({
+      userId,
+      chartType: 'natal',
+    });
+
+    if (!existing) {
+      return NextResponse.json(
+        { success: false, error: 'No natal interpretations found. Generate them first.' },
+        { status: 404 }
+      );
+    }
+
+    const aspectKey = `${planet1}-${planet2}-${aspectType}`;
+
+    // Check if aspect interpretation already exists
+    if (existing.interpretations.aspects?.[aspectKey]) {
+      console.log('✅ [PUT] Aspect interpretation already exists');
+      return NextResponse.json({
+        success: true,
+        data: existing.interpretations.aspects[aspectKey],
+        cached: true,
+      });
+    }
+
+    // Generate new aspect interpretation
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const aspectInterpretation = await generateAspectInterpretation(
+      { planet1, planet2, type: aspectType, orb },
+      { name: 'User', age: 30 }, // Default user profile
+      openai
+    );
+
+    // Update the interpretations with the new aspect
+    const updatedInterpretations = {
+      ...existing.interpretations,
+      aspects: {
+        ...existing.interpretations.aspects,
+        [aspectKey]: aspectInterpretation,
+      },
+    };
+
+    // Save back to database
+    await db.collection('interpretations').updateOne(
+      { userId, chartType: 'natal' },
+      {
+        $set: {
+          interpretations: updatedInterpretations,
+          updatedAt: new Date(),
+        },
+      }
+    );
+
+    console.log('✅ [PUT] Aspect interpretation generated and saved');
+
+    return NextResponse.json({
+      success: true,
+      data: aspectInterpretation,
+      cached: false,
+    });
+
+  } catch (error) {
+    console.error('❌ Error in PUT:', error);
+    console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack');
+    return NextResponse.json({
+      success: false,
+      error: 'Server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }
@@ -216,7 +324,6 @@ export async function DELETE(request: NextRequest) {
     });
 
     console.log('🗑️ Deleted cached interpretations for:', userId);
-
     return NextResponse.json({
       success: true,
       message: 'Cached interpretations deleted',
@@ -224,6 +331,7 @@ export async function DELETE(request: NextRequest) {
     
   } catch (error) {
     console.error('❌ Error deleting interpretations:', error);
+    console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack');
     return NextResponse.json({ 
       success: false, 
       error: 'Server error' 
@@ -240,9 +348,21 @@ async function generateNatalBatchInterpretations(
   userProfile: any,
   onProgress?: (message: string, progress: number) => void
 ): Promise<NatalInterpretations> {
-  
+
+  console.log('🎯 [DEBUG] generateNatalBatchInterpretations called');
+  console.log('🎯 [DEBUG] chartData structure:', {
+    hasAscendant: !!chartData.ascendant,
+    hasMidheaven: !!chartData.midheaven,
+    planetsCount: chartData.planets?.length || 0,
+    hasElementDistribution: !!chartData.elementDistribution,
+    hasModalityDistribution: !!chartData.modalityDistribution,
+    aspectsCount: chartData.calculatedAspects?.length || 0
+  });
+
   const openai = getOpenAIClient();
-  
+
+  console.log('🎯 [DEBUG] OpenAI client initialized');
+
   onProgress?.('🌟 Generando tu Ascendente y Medio Cielo...', 5);
 
   const interpretations: NatalInterpretations = {
@@ -258,25 +378,41 @@ async function generateNatalBatchInterpretations(
     aspects: {},
   };
 
+  console.log('🎯 [DEBUG] Angles generated successfully');
+
   onProgress?.('✨ Generando interpretaciones de planetas...', 15);
 
   // Generate planet interpretations
   const planetNames = ['Sol', 'Luna', 'Mercurio', 'Venus', 'Marte', 'Jupiter', 'Saturno', 'Urano', 'Neptuno', 'Pluton'];
 
+  console.log('🎯 [DEBUG] Starting planet generation loop');
+
   for (let i = 0; i < planetNames.length; i++) {
     const planetName = planetNames[i];
+    console.log(`🎯 [DEBUG] Looking for planet: ${planetName}`);
+
     const planet = chartData.planets.find((p: any) => p.name === planetName);
     if (planet) {
+      console.log(`🎯 [DEBUG] Found planet ${planetName}:`, { sign: planet.sign, house: planet.house, degree: planet.degree });
+
       const progress = 15 + (i / planetNames.length) * 30; // 15-45%
       onProgress?.(`🌟 Generando tu ${planetName} en ${planet.sign}...`, progress);
 
       const key = `${planet.name}-${planet.sign}-${planet.house}`;
+      console.log(`🎯 [DEBUG] Generating interpretation for key: ${key}`);
+
       interpretations.planets[key] = await generatePlanetInterpretation(planet, userProfile, openai);
+
+      console.log(`🎯 [DEBUG] Successfully generated interpretation for ${planetName}`);
 
       // Small delay to avoid rate limits
       await new Promise(resolve => setTimeout(resolve, 500));
+    } else {
+      console.log(`❌ [DEBUG] Planet ${planetName} not found in chartData.planets`);
     }
   }
+
+  console.log('🎯 [DEBUG] Planet generation completed');
 
   // Generate asteroid interpretations (Lilith, Chiron)
   onProgress?.('🌑 Generando tu Lilith y Chiron...', 50);
@@ -362,9 +498,9 @@ async function generateNatalBatchInterpretations(
   }
 
   // Generate aspects interpretations
-  if (chartData.calculatedAspects && chartData.calculatedAspects.length > 0) {
+  if (chartData.aspects && chartData.aspects.length > 0) {
     onProgress?.('🔗 Generando tus Aspectos principales...', 98);
-    const aspectsToGenerate = chartData.calculatedAspects.slice(0, 10); // Limit to first 10 aspects
+    const aspectsToGenerate = chartData.aspects.slice(0, 10); // Limit to first 10 aspects
 
     for (let i = 0; i < aspectsToGenerate.length; i++) {
       const aspect = aspectsToGenerate[i];
@@ -380,6 +516,18 @@ async function generateNatalBatchInterpretations(
   }
 
   onProgress?.('✨ ¡Interpretaciones completadas! 🎉', 100);
+
+  console.log('🎯 [DEBUG] All interpretations completed successfully');
+  console.log('🎯 [DEBUG] Final interpretation counts:', {
+    angles: Object.keys(interpretations.angles).length,
+    planets: Object.keys(interpretations.planets).length,
+    asteroids: Object.keys(interpretations.asteroids).length,
+    nodes: Object.keys(interpretations.nodes).length,
+    elements: Object.keys(interpretations.elements).length,
+    modalities: Object.keys(interpretations.modalities).length,
+    aspects: Object.keys(interpretations.aspects).length,
+  });
+
   return interpretations;
 }
 
@@ -477,6 +625,7 @@ RESPONDE SOLO CON JSON VÁLIDO.`;
     
   } catch (error) {
     console.error(`❌ Error generating ${angleName}:`, error);
+    console.error(`❌ Error stack:`, error instanceof Error ? error.stack : 'No stack');
     return generateFallbackAngleInterpretation(angleName, angleData);
   }
 }
@@ -490,7 +639,9 @@ async function generatePlanetInterpretation(
   userProfile: any,
   openai: OpenAI
 ): Promise<PlanetInterpretation> {
-  
+
+  console.log(`🎯 [DEBUG] generatePlanetInterpretation called for ${planet.name}`);
+
   const prompt = `Eres un astrólogo evolutivo experto. Genera una interpretación DISRUPTIVA para:
 
 **PLANETA:** ${planet.name}
@@ -542,8 +693,8 @@ ESTILO: Disruptivo ("¡NO VINISTE A...!"), transformacional, psicológico (sombr
 RESPONDE SOLO JSON VÁLIDO. NO agregues texto antes/después.`;
 
   try {
-    console.log(`🎯 Generating ${planet.name} in ${planet.sign}...`);
-    
+    console.log(`🎯 [DEBUG] Calling OpenAI for ${planet.name} interpretation`);
+
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
@@ -561,8 +712,11 @@ RESPONDE SOLO JSON VÁLIDO. NO agregues texto antes/después.`;
     });
 
     const response = completion.choices[0]?.message?.content;
-    
+
+    console.log(`🎯 [DEBUG] OpenAI response received for ${planet.name}, length: ${response?.length || 0}`);
+
     if (!response) {
+      console.log(`❌ [DEBUG] No response from OpenAI for ${planet.name}`);
       throw new Error('No response from OpenAI');
     }
 
@@ -572,36 +726,44 @@ RESPONDE SOLO JSON VÁLIDO. NO agregues texto antes/después.`;
       .replace(/```\n?/g, '')
       .trim();
 
+    console.log(`🎯 [DEBUG] Cleaned response for ${planet.name}, first 200 chars:`, cleanedResponse.substring(0, 200));
+
     const parsed = JSON.parse(cleanedResponse);
+
+    console.log(`🎯 [DEBUG] JSON parsed successfully for ${planet.name}`);
 
     // Validate structure
     if (!parsed.tooltip || typeof parsed.tooltip !== 'object') {
-      console.error('❌ Invalid tooltip structure');
+      console.error('❌ [DEBUG] Invalid tooltip structure for', planet.name);
       throw new Error('Invalid tooltip structure');
     }
 
     if (!parsed.drawer || typeof parsed.drawer !== 'object') {
-      console.error('❌ Invalid drawer structure');
+      console.error('❌ [DEBUG] Invalid drawer structure for', planet.name);
       throw new Error('Invalid drawer structure');
     }
 
     // Validate required fields
     if (!parsed.tooltip.titulo || !parsed.tooltip.significado) {
+      console.error('❌ [DEBUG] Missing required tooltip fields for', planet.name);
       throw new Error('Missing required tooltip fields');
     }
 
     if (!parsed.drawer.educativo || !parsed.drawer.poderoso || !parsed.drawer.poetico) {
+      console.error('❌ [DEBUG] Missing required drawer fields for', planet.name);
       throw new Error('Missing required drawer fields');
     }
 
-    console.log(`✅ Generated ${planet.name} interpretation`);
+    console.log(`✅ [DEBUG] Generated ${planet.name} interpretation successfully`);
     return parsed as PlanetInterpretation;
-    
   } catch (error) {
     console.error(`❌ Error generating ${planet.name}:`, error);
+    console.error(`❌ Error stack:`, error instanceof Error ? error.stack : 'No stack');
     if (error instanceof SyntaxError) {
       console.error('❌ JSON Parse Error:', error.message);
+      console.error('❌ Raw response:', error);
     }
+    console.log(`🎯 Falling back to static interpretation for ${planet.name}`);
     return generateFallbackPlanetInterpretation(planet);
   }
 }
@@ -761,9 +923,9 @@ ${element.name === 'Agua' ? '- Agua: "¡NO VINISTE A SECARTE!", "Tu superpoder e
 
     console.log(`✅ Generated ${element.name} element interpretation`);
     return parsed as PlanetInterpretation;
-
   } catch (error) {
     console.error(`❌ Error generating ${element.name} element:`, error);
+    console.error(`❌ Error stack:`, error instanceof Error ? error.stack : 'No stack');
     return generateFallbackElementInterpretation(element);
   }
 }
@@ -854,9 +1016,9 @@ ${modality.name === 'Mutable' ? '- Mutable: "¡NO VINISTE A QUEDARTE!", "Tu supe
 
     console.log(`✅ Generated ${modality.name} modality interpretation`);
     return parsed as PlanetInterpretation;
-
   } catch (error) {
     console.error(`❌ Error generating ${modality.name} modality:`, error);
+    console.error(`❌ Error stack:`, error instanceof Error ? error.stack : 'No stack');
     return generateFallbackModalityInterpretation(modality);
   }
 }
@@ -948,9 +1110,9 @@ ${aspect.type === 'Sextil' ? '- Sextil: "¡NO VINISTE A PERDER OPORTUNIDADES!", 
 
     console.log(`✅ Generated ${aspect.planet1} ${aspect.type} ${aspect.planet2} aspect interpretation`);
     return parsed as PlanetInterpretation;
-
   } catch (error) {
     console.error(`❌ Error generating aspect ${aspect.planet1} ${aspect.type} ${aspect.planet2}:`, error);
+    console.error(`❌ Error stack:`, error instanceof Error ? error.stack : 'No stack');
     return generateFallbackAspectInterpretation(aspect);
   }
 }
