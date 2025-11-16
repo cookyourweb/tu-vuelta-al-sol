@@ -151,11 +151,41 @@ export default function NatalChartPage() {
 
     console.log('🔥🔥🔥 [GENERATE] Setting generatingInterpretations = TRUE (OPENING MODAL)');
     setGeneratingInterpretations(true);
-    setInterpretationProgress('🔮 Iniciando generación de interpretaciones AI...');
-    
+
+    // ✅ Mensajes rotativos para el modal
+    const progressMessages = [
+      '🔮 Conectando con la inteligencia cósmica...',
+      '✨ Analizando tu Ascendente y Medio Cielo...',
+      '🌟 Interpretando posiciones planetarias...',
+      '💫 Generando interpretación del Sol...',
+      '🌙 Descifrando la energía de la Luna...',
+      '💬 Procesando Mercurio y tu forma de comunicar...',
+      '💖 Revelando los secretos de Venus...',
+      '⚔️ Analizando la fuerza de Marte...',
+      '🎯 Explorando la sabiduría de Júpiter...',
+      '⏳ Comprendiendo las lecciones de Saturno...',
+      '⚡ Descubriendo tu Urano revolucionario...',
+      '🌊 Navegando las profundidades de Neptuno...',
+      '🔥 Transformando con el poder de Plutón...',
+      '🌈 Sintetizando tu distribución elemental...',
+      '⚖️ Equilibrando tus modalidades...',
+      '🎨 Dando los toques finales a tu interpretación...',
+      '✨ Casi listo... preparando tu mapa personal...'
+    ];
+
+    let messageIndex = 0;
+    setInterpretationProgress(progressMessages[0]);
+
+    // Rotar mensajes cada 4 segundos
+    const messageInterval = setInterval(() => {
+      messageIndex = (messageIndex + 1) % progressMessages.length;
+      setInterpretationProgress(progressMessages[messageIndex]);
+      console.log('📝 [MODAL] Mensaje actualizado:', progressMessages[messageIndex]);
+    }, 4000);
+
     try {
       console.log('🚀 Starting AI interpretation generation...');
-      
+
       const response = await fetch('/api/astrology/interpret-natal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -174,24 +204,33 @@ export default function NatalChartPage() {
 
       const result = await response.json();
 
+      // Limpiar intervalo
+      clearInterval(messageInterval);
+
       if (result.success) {
         console.log('✅ AI Interpretations generated successfully!');
         setHasInterpretations(true);
         setInterpretationProgress('✨ ¡Interpretaciones listas!');
-        
+
         // Clear progress message after 3 seconds
         setTimeout(() => {
           setInterpretationProgress('');
+          setGeneratingInterpretations(false);
         }, 3000);
       } else {
         console.error('❌ Error generating interpretations:', result.error);
         setInterpretationProgress('⚠️ Error generando interpretaciones');
+        setTimeout(() => {
+          setGeneratingInterpretations(false);
+        }, 3000);
       }
     } catch (error) {
       console.error('❌ Error in generation request:', error);
+      clearInterval(messageInterval);
       setInterpretationProgress('❌ Error en la solicitud');
-    } finally {
-      setGeneratingInterpretations(false);
+      setTimeout(() => {
+        setGeneratingInterpretations(false);
+      }, 3000);
     }
   };
 
