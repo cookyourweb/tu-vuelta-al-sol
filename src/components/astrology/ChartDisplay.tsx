@@ -1,4 +1,4 @@
-// src/components/astrology/ChartDisplay.tsx
+// src/components/astrology/ChartDisplay.tsx  en local
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -72,9 +72,7 @@ const ChartDisplay = ({
   const [clickedPlanet, setClickedPlanet] = useState<string | null>(null);
   const [clickedAspect, setClickedAspect] = useState<string | null>(null);
 
-  // ✅ NEW: Hover delay timers
-  const [aspectHoverTimer, setAspectHoverTimer] = useState<NodeJS.Timeout | null>(null);
-  const [planetHoverTimer, setPlanetHoverTimer] = useState<NodeJS.Timeout | null>(null);
+  // ✅ Hover delay timers
   const [cardHoverTimer, setCardHoverTimer] = useState<NodeJS.Timeout | null>(null);
 
   // ✅ FUNCIONES UTILITARIAS
@@ -289,29 +287,12 @@ const ChartDisplay = ({
             strokeDasharray={isMinor ? "3,3" : "none"}
             className="transition-all duration-200 cursor-pointer"
             onMouseEnter={(e) => {
-              // ✅ DELAY: Clear any existing timer and set new one
-              if (aspectHoverTimer) clearTimeout(aspectHoverTimer);
-              const timer = setTimeout(() => {
-                setHoveredAspect(aspectKey);
-                handleMouseMove(e);
-              }, 300); // 300ms delay
-              setAspectHoverTimer(timer);
+              setHoveredAspect(aspectKey);
+              handleMouseMove(e);
             }}
             onMouseMove={handleMouseMove}
-            onMouseLeave={() => {
-              // ✅ DELAY: Clear timer on mouse leave
-              if (aspectHoverTimer) {
-                clearTimeout(aspectHoverTimer);
-                setAspectHoverTimer(null);
-              }
-              setHoveredAspect(null);
-            }}
+            onMouseLeave={() => setHoveredAspect(null)}
             onClick={(e) => {
-              // ✅ IMMEDIATE: Clear timer and show immediately on click
-              if (aspectHoverTimer) {
-                clearTimeout(aspectHoverTimer);
-                setAspectHoverTimer(null);
-              }
               setHoveredAspect(aspectKey);
               handleMouseMove(e);
             }}
@@ -1512,11 +1493,6 @@ const ChartDisplay = ({
                   onMouseLeave={() => setHoveredAspect(null)}
                   onClick={(e) => {
                     console.log(`🎯 Clicked aspect card: ${aspect.planet1} - ${aspect.planet2} (${aspect.type})`);
-                    // ✅ IMMEDIATE: Clear timer and show immediately on click
-                    if (aspectHoverTimer) {
-                      clearTimeout(aspectHoverTimer);
-                      setAspectHoverTimer(null);
-                    }
                     setClickedAspect(`${aspect.planet1}-${aspect.planet2}-${aspect.type}`);
                     setHoveredAspect(`${aspect.planet1}-${aspect.planet2}-${aspect.type}`);
                     handleMouseMove(e);
@@ -1677,11 +1653,6 @@ const ChartDisplay = ({
                 onMouseLeave={() => setHoveredPlanet(null)}
                 onClick={(e) => {
                   console.log(`🌟 Clicked planet card: ${planet.name}`);
-                  // ✅ IMMEDIATE: Clear timer and show immediately on click
-                  if (planetHoverTimer) {
-                    clearTimeout(planetHoverTimer);
-                    setPlanetHoverTimer(null);
-                  }
                   setClickedPlanet(planet.name);
                   setHoveredPlanet(planet.name);
                   handleMouseMove(e);

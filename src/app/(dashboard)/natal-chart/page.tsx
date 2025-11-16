@@ -553,19 +553,21 @@ export default function NatalChartPage() {
 
           {/* BOTÓN DE INTERPRETACIÓN */}
           {chartData && birthData && (
-            <InterpretationButton
-              type="natal"
-              userId={user?.uid || ''}
-              chartData={chartData}
-              userProfile={{
-                name: birthData.fullName || 'Usuario',
-                age: new Date().getFullYear() - new Date(birthData.birthDate).getFullYear(),
-                birthPlace: birthData.birthPlace,
-                birthDate: birthData.birthDate,
-                birthTime: birthData.birthTime
-              }}
-              className="w-full sm:w-auto"
-            />
+            <div data-interpret-button>
+              <InterpretationButton
+                type="natal"
+                userId={user?.uid || ''}
+                chartData={chartData}
+                userProfile={{
+                  name: birthData.fullName || 'Usuario',
+                  age: new Date().getFullYear() - new Date(birthData.birthDate).getFullYear(),
+                  birthPlace: birthData.birthPlace,
+                  birthDate: birthData.birthDate,
+                  birthTime: birthData.birthTime
+                }}
+                className="w-full sm:w-auto"
+              />
+            </div>
           )}
         </div>
       </div>

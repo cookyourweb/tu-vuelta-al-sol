@@ -8,6 +8,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
 import OpenAI from 'openai';
+import {
+  findPlanetByName,
+  debugListPlanets,
+  verifyExpectedPlanets,
+} from '@/utils/planetNameUtils';
 
 // =============================================================================
 // TYPES
@@ -359,6 +364,10 @@ async function generateNatalBatchInterpretations(
     aspectsCount: chartData.calculatedAspects?.length || 0
   });
 
+  // Debug planet names
+  console.log('🎯 [DEBUG] Planet names in chartData:');
+  debugListPlanets(chartData.planets);
+
   const openai = getOpenAIClient();
 
   console.log('🎯 [DEBUG] OpenAI client initialized');
@@ -391,7 +400,7 @@ async function generateNatalBatchInterpretations(
     const planetName = planetNames[i];
     console.log(`🎯 [DEBUG] Looking for planet: ${planetName}`);
 
-    const planet = chartData.planets.find((p: any) => p.name === planetName);
+    const planet = findPlanetByName(chartData.planets, planetName);
     if (planet) {
       console.log(`🎯 [DEBUG] Found planet ${planetName}:`, { sign: planet.sign, house: planet.house, degree: planet.degree });
 
@@ -420,7 +429,7 @@ async function generateNatalBatchInterpretations(
 
   for (let i = 0; i < asteroidNames.length; i++) {
     const asteroidName = asteroidNames[i];
-    const asteroid = chartData.planets.find((p: any) => p.name === asteroidName);
+    const asteroid = findPlanetByName(chartData.planets, asteroidName);
     if (asteroid) {
       const progress = 50 + (i / asteroidNames.length) * 10; // 50-60%
       onProgress?.(`🌑 Generando tu ${asteroidName} en ${asteroid.sign}...`, progress);
@@ -439,7 +448,7 @@ async function generateNatalBatchInterpretations(
 
   for (let i = 0; i < nodeNames.length; i++) {
     const nodeName = nodeNames[i];
-    const node = chartData.planets.find((p: any) => p.name === nodeName);
+    const node = findPlanetByName(chartData.planets, nodeName);
     if (node) {
       const progress = 65 + (i / nodeNames.length) * 10; // 65-75%
       onProgress?.(`🌙 Generando tu ${nodeName} en ${node.sign}...`, progress);

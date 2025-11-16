@@ -53,6 +53,18 @@ export interface NatalInterpretations {
   planets: {
     [key: string]: InterpretacionCompleta; // e.g., "Sol-Sagitario-3"
   };
+  asteroids?: {
+    [key: string]: InterpretacionCompleta; // e.g., "Lilith-Sagitario-3"
+  };
+  nodes?: {
+    [key: string]: InterpretacionCompleta; // e.g., "Nodo Norte-Sagitario-3"
+  };
+  elements?: {
+    [key: string]: InterpretacionCompleta; // e.g., "Elemento-Fuego"
+  };
+  modalities?: {
+    [key: string]: InterpretacionCompleta; // e.g., "Modalidad-Cardinal"
+  };
   aspects: {
     [key: string]: InterpretacionCompleta; // e.g., "Sol-Luna-Trigono" (filled on-demand)
   };
@@ -232,6 +244,10 @@ export async function generateNatalBatchInterpretations(
   const result: NatalInterpretations = {
     angles: {} as any,
     planets: {},
+    asteroids: {},
+    nodes: {},
+    elements: {},
+    modalities: {},
     aspects: {},
   };
 
@@ -309,6 +325,17 @@ export async function generateNatalBatchInterpretations(
     }
 
     console.log('✅ Batch generation complete!');
+
+    console.log('\n📊 === REPORTE FINAL DE GENERACIÓN ===');
+    console.log('Ángulos:', Object.keys(result.angles).length);
+    console.log('Planetas:', Object.keys(result.planets).length);
+    console.log('Asteroides:', Object.keys(result.asteroids || {}).length);
+    console.log('Nodos:', Object.keys(result.nodes || {}).length);
+    console.log('Elementos:', Object.keys(result.elements || {}).length);
+    console.log('Modalidades:', Object.keys(result.modalities || {}).length);
+    console.log('Aspectos:', Object.keys(result.aspects).length);
+    console.log('=====================================\n');
+
     return result;
   } catch (error) {
     console.error('❌ Error in batch generation:', error);

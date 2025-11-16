@@ -8,6 +8,7 @@
 // =============================================================================
 
 import React, { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
 import { Planet, Aspect } from '../../types/astrology/chartDisplay';
 import { planetMeanings, signMeanings, houseMeanings, aspectMeanings, PLANET_SYMBOLS, PLANET_COLORS } from '../../constants/astrology';
 import { getPersonalizedPlanetInterpretation, getPersonalizedAspectInterpretation } from '../../services/chartInterpretationsService';
@@ -27,6 +28,7 @@ interface ChartTooltipsProps {
   setHoveredPlanet: (planet: string | null) => void;
   setHoveredAspect: (aspect: string | null) => void;
   setHoveredHouse: (house: number | null) => void;
+  setHoveredCard?: (card: string | null) => void;
   onOpenDrawer?: (content: any) => void;
   onCloseDrawer?: () => void;
   drawerOpen?: boolean;
@@ -57,6 +59,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
   setHoveredPlanet,
   setHoveredAspect,
   setHoveredHouse,
+  setHoveredCard,
   onOpenDrawer,
   onCloseDrawer,
   drawerOpen = false,
@@ -88,6 +91,30 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
   const [planetTooltipTimer, setPlanetTooltipTimer] = useState<NodeJS.Timeout | null>(null);
   const [aspectTooltipTimer, setAspectTooltipTimer] = useState<NodeJS.Timeout | null>(null);
   const [clickedTooltipTimer, setClickedTooltipTimer] = useState<NodeJS.Timeout | null>(null);
+
+  // ✅ NUEVO: Hook para detectar clic fuera
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as HTMLElement;
+
+      // Verificar si el clic fue fuera de los tooltips
+      const isTooltip = target.closest('.chart-tooltip');
+      const isChart = target.closest('.chart-container');
+
+      if (!isTooltip && !isChart) {
+        // Cerrar todos los tooltips
+        setHoveredPlanet(null);
+        setHoveredAspect(null);
+        setHoveredHouse(null);
+        setHoveredCard?.(null);
+        setClickedPlanet?.(null);
+        setClickedAspect?.(null);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // =============================================================================
   // FETCH AI INTERPRETATIONS
@@ -129,18 +156,35 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
   // TOOLTIP HOVER DELAY (CONFIGURABLE PER TYPE)
   // =============================================================================
 
-  const handleMouseLeaveTooltip = (callback: () => void, delay: number = 1000) => {
+  const handleMouseLeaveTooltip = (callback: () => void, delay: number = 1000, unlockAspect: boolean = false) => {
     if (tooltipTimer) {
       clearTimeout(tooltipTimer);
     }
 
     const timer = setTimeout(() => {
       callback();
-      setAspectTooltipLocked(false);
+      if (unlockAspect) {
+        setAspectTooltipLocked(false);
+      }
     }, delay);
 
     setTooltipTimer(timer);
   };
+
+  // ✅ NEW: Cancel tooltip close timer
+  const cancelTooltipClose = () => {
+    if (tooltipTimer) {
+      clearTimeout(tooltipTimer);
+      setTooltipTimer(null);
+    }
+    if (tooltipCloseTimeout) {
+      clearTimeout(tooltipCloseTimeout);
+      setTooltipCloseTimeout(null);
+    }
+  };
+
+  // ✅ NEW: State for tooltip close timeout
+  const [tooltipCloseTimeout, setTooltipCloseTimeout] = useState<NodeJS.Timeout | null>(null);
 
   const handleMouseEnterTooltip = () => {
     if (tooltipTimer) {
@@ -177,6 +221,40 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
     }
   };
 
+  // ✅ NEW: Handle tooltip mouse enter/leave with type-specific behavior
+  const handleTooltipMouseEnter = () => {
+    handleMouseEnterTooltip();
+  };
+
+  const handleTooltipMouseLeave = (type: 'planet' | 'aspect' | 'angle' | 'house') => {
+    switch (type) {
+      case 'angle':
+        handleMouseLeaveTooltip(() => {
+          setHoveredPlanet(null);
+        }, 2000); // 2 seconds for angles
+        break;
+      case 'planet':
+        handleMouseLeaveTooltip(() => {
+          if (!drawerOpen) {
+            setHoveredPlanet(null);
+          }
+        }, 1000); // 1 second for planets
+        break;
+      case 'aspect':
+        handleMouseLeaveTooltip(() => {
+          setHoveredAspect(null);
+        }, 2000, true); // 2 seconds for aspects, unlock aspect tooltip
+        break;
+      case 'house':
+        handleMouseLeaveTooltip(() => {
+          setHoveredHouse(null);
+        }, 1000); // 1 second for houses
+        break;
+      default:
+        handleMouseLeaveTooltip(() => {}, 1000);
+    }
+  };
+
   // ✅ NEW: Handle aspect tooltip with delay
   const handleAspectMouseEnter = () => {
     if (aspectTooltipTimer) clearTimeout(aspectTooltipTimer);
@@ -191,7 +269,14 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
       clearTimeout(aspectTooltipTimer);
       setAspectTooltipTimer(null);
     }
-    // Tooltip is hidden by the parent component's state
+    // Hide tooltip after delay if not locked
+    if (!aspectTooltipLocked && !generatingAspect) {
+      const hideTimer = setTimeout(() => {
+        setHoveredAspect(null);
+        setClickedAspect?.(null);
+      }, 2000); // 2 seconds delay for aspects
+      setTooltipTimer(hideTimer);
+    }
   };
 
   // =============================================================================
@@ -262,6 +347,9 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
     } else {
       interpretation = getExampleInterpretation(interpretationKey);
       console.log('⚠️ Using fallback for', interpretationKey);
+      console.log('   - Interpretation:', interpretation);
+      console.log('   - Has drawer?', !!interpretation?.drawer);
+      console.log('   - onOpenDrawer exists?', !!onOpenDrawer);
     }
 
     return (
@@ -272,11 +360,23 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           top: tooltipPosition.y - 50,
           transform: tooltipPosition.x > window.innerWidth - 400 ? 'translateX(-100%)' : 'none'
         }}
-        onMouseEnter={handlePlanetMouseEnter}
-        onMouseLeave={() => {
-          if (!drawerOpen) {
-            handlePlanetMouseLeave();
+        onMouseEnter={(e) => {
+          console.log('🎯 MOUSE ENTERED TOOLTIP - PLANET');
+          e.stopPropagation();
+          handleTooltipMouseEnter();
+        }}
+        onMouseLeave={(e) => {
+          console.log('🎯 MOUSE LEFT TOOLTIP - PLANET');
+          // Don't close tooltip immediately if mouse is over a button
+          const target = e.relatedTarget as HTMLElement;
+          const isButton = target?.closest('button');
+          if (!isButton && !clickedPlanet && !drawerOpen) {
+            setHoveredPlanet(null);
           }
+        }}
+        onClick={(e) => {
+          console.log('🎯 TOOLTIP CLICKED (parent) - PLANET');
+          e.stopPropagation();
         }}
       >
         <div className="flex items-center justify-between mb-3">
@@ -347,17 +447,51 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
         {interpretation?.drawer && (
           <button
-            onClick={(e) => {
+            onMouseDown={(e) => {
+              console.log('═══════════════════════════════════');
+              console.log('🎯 ABRIENDO DRAWER CON MOUSEDOWN - PLANET');
+              console.log('1. onOpenDrawer exists?', !!onOpenDrawer);
+              console.log('2. interpretation.drawer:', interpretation.drawer);
+              console.log('3. interpretation.drawer.titulo:', interpretation?.drawer?.titulo);
+              console.log('═══════════════════════════════════');
+
               e.stopPropagation();
-              if (onOpenDrawer) {
-                onOpenDrawer(interpretation.drawer);
+              e.preventDefault();
+
+              if (!onOpenDrawer) {
+                console.error('❌ onOpenDrawer is undefined');
+                return;
               }
+
+              if (!interpretation?.drawer) {
+                console.error('❌ interpretation.drawer is undefined');
+                return;
+              }
+
+              try {
+                console.log('✅ Calling onOpenDrawer...');
+                onOpenDrawer(interpretation.drawer);
+                console.log('✅ onOpenDrawer called successfully');
+              } catch (error) {
+                console.error('❌ Error calling onOpenDrawer:', error);
+              }
+            }}
+            style={{
+              pointerEvents: 'auto',
+              zIndex: 9999999,
+              cursor: 'pointer'
             }}
             className="w-full py-2.5 px-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group shadow-lg"
           >
             <span>📖 Ver interpretación completa</span>
             <span className="group-hover:translate-x-1 transition-transform">→</span>
           </button>
+        )}
+
+        {!interpretation?.drawer && (
+          <div className="text-center text-xs text-gray-400 py-2">
+            💡 Haz hover más tiempo para ver la interpretación
+          </div>
         )}
 
         {!interpretation?.drawer && (
@@ -388,8 +522,24 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           top: tooltipPosition.y - 50,
           transform: tooltipPosition.x > window.innerWidth - 300 ? 'translateX(-100%)' : 'none'
         }}
-        onMouseEnter={handlePlanetMouseEnter}
-        onMouseLeave={() => handlePlanetMouseLeave()}
+        onMouseEnter={(e) => {
+          console.log('🎯 MOUSE ENTERED TOOLTIP - ASCENDANT');
+          e.stopPropagation();
+          handleTooltipMouseEnter();
+        }}
+        onMouseLeave={(e) => {
+          console.log('🎯 MOUSE LEFT TOOLTIP - ASCENDANT');
+          // Don't close tooltip immediately if mouse is over a button
+          const target = e.relatedTarget as HTMLElement;
+          const isButton = target?.closest('button');
+          if (!isButton && !drawerOpen) {
+            setHoveredPlanet(null);
+          }
+        }}
+        onClick={(e) => {
+          console.log('🎯 TOOLTIP CLICKED (parent) - ASCENDANT');
+          e.stopPropagation();
+        }}
       >
         <div className="flex items-center mb-3">
           <svg className="w-8 h-8 text-white mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -423,11 +573,39 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
         {interpretation?.drawer && (
           <button
-            onClick={(e) => {
+            onMouseDown={(e) => {
+              console.log('═══════════════════════════════════');
+              console.log('🎯 ABRIENDO DRAWER CON MOUSEDOWN - ASCENDANT');
+              console.log('1. onOpenDrawer exists?', !!onOpenDrawer);
+              console.log('2. interpretation.drawer:', interpretation.drawer);
+              console.log('3. interpretation.drawer.titulo:', interpretation?.drawer?.titulo);
+              console.log('═══════════════════════════════════');
+
               e.stopPropagation();
-              if (onOpenDrawer) {
-                onOpenDrawer(interpretation.drawer);
+              e.preventDefault();
+
+              if (!onOpenDrawer) {
+                console.error('❌ onOpenDrawer is undefined');
+                return;
               }
+
+              if (!interpretation?.drawer) {
+                console.error('❌ interpretation.drawer is undefined');
+                return;
+              }
+
+              try {
+                console.log('✅ Calling onOpenDrawer...');
+                onOpenDrawer(interpretation.drawer);
+                console.log('✅ onOpenDrawer called successfully');
+              } catch (error) {
+                console.error('❌ Error calling onOpenDrawer:', error);
+              }
+            }}
+            style={{
+              pointerEvents: 'auto',
+              zIndex: 9999999,
+              cursor: 'pointer'
             }}
             className="w-full py-2 px-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg text-sm font-semibold transition-all"
           >
@@ -457,8 +635,24 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           top: tooltipPosition.y - 50,
           transform: tooltipPosition.x > window.innerWidth - 300 ? 'translateX(-100%)' : 'none'
         }}
-        onMouseEnter={handlePlanetMouseEnter}
-        onMouseLeave={() => handlePlanetMouseLeave()}
+        onMouseEnter={(e) => {
+          console.log('🎯 MOUSE ENTERED TOOLTIP - MIDHEAVEN');
+          e.stopPropagation();
+          handleTooltipMouseEnter();
+        }}
+        onMouseLeave={(e) => {
+          console.log('🎯 MOUSE LEFT TOOLTIP - MIDHEAVEN');
+          // Don't close tooltip immediately if mouse is over a button
+          const target = e.relatedTarget as HTMLElement;
+          const isButton = target?.closest('button');
+          if (!isButton && !drawerOpen) {
+            setHoveredPlanet(null);
+          }
+        }}
+        onClick={(e) => {
+          console.log('🎯 TOOLTIP CLICKED (parent) - MIDHEAVEN');
+          e.stopPropagation();
+        }}
       >
         <div className="flex items-center mb-3">
           <svg className="w-8 h-8 text-white mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -492,11 +686,39 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
         {interpretation?.drawer && (
           <button
-            onClick={(e) => {
+            onMouseDown={(e) => {
+              console.log('═══════════════════════════════════');
+              console.log('🎯 ABRIENDO DRAWER CON MOUSEDOWN - MIDHEAVEN');
+              console.log('1. onOpenDrawer exists?', !!onOpenDrawer);
+              console.log('2. interpretation.drawer:', interpretation.drawer);
+              console.log('3. interpretation.drawer.titulo:', interpretation?.drawer?.titulo);
+              console.log('═══════════════════════════════════');
+
               e.stopPropagation();
-              if (onOpenDrawer) {
-                onOpenDrawer(interpretation.drawer);
+              e.preventDefault();
+
+              if (!onOpenDrawer) {
+                console.error('❌ onOpenDrawer is undefined');
+                return;
               }
+
+              if (!interpretation?.drawer) {
+                console.error('❌ interpretation.drawer is undefined');
+                return;
+              }
+
+              try {
+                console.log('✅ Calling onOpenDrawer...');
+                onOpenDrawer(interpretation.drawer);
+                console.log('✅ onOpenDrawer called successfully');
+              } catch (error) {
+                console.error('❌ Error calling onOpenDrawer:', error);
+              }
+            }}
+            style={{
+              pointerEvents: 'auto',
+              zIndex: 9999999,
+              cursor: 'pointer'
             }}
             className="w-full py-2 px-4 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white rounded-lg text-sm font-semibold transition-all"
           >
@@ -533,20 +755,52 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           top: tooltipPosition.y,
           transform: tooltipPosition.x > window.innerWidth - 350 ? 'translateX(-100%)' : 'none'
         }}
-        onMouseEnter={() => {
+        onMouseEnter={(e) => {
+          console.log('🎯 MOUSE ENTERED TOOLTIP - ASPECT');
+          e.stopPropagation();
           handleAspectMouseEnter();
           setAspectTooltipLocked(true);
         }}
-        onMouseLeave={() => {
-          if (!aspectTooltipLocked && !generatingAspect) {
-            handleAspectMouseLeave();
+        onMouseLeave={(e) => {
+          console.log('🎯 MOUSE LEFT TOOLTIP - ASPECT');
+          // Don't close tooltip immediately if mouse is over a button
+          const target = e.relatedTarget as HTMLElement;
+          const isButton = target?.closest('button');
+          if (!isButton) {
+            if (!aspectTooltipLocked && !generatingAspect) {
+              handleAspectMouseLeave();
+            } else {
+              // If locked or generating, still allow mouse leave to clear timers
+              if (aspectTooltipTimer) {
+                clearTimeout(aspectTooltipTimer);
+                setAspectTooltipTimer(null);
+              }
+            }
           }
         }}
+        onClick={(e) => {
+          console.log('🎯 TOOLTIP CLICKED (parent) - ASPECT');
+          e.stopPropagation();
+        }}
       >
+        {/* ✅ NUEVO: Botón de cierre */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setHoveredAspect(null);
+            setClickedAspect?.(null);
+            setAspectTooltipLocked(false);
+          }}
+          className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
+          aria-label="Cerrar"
+        >
+          <X className="w-4 h-4 text-white" />
+        </button>
+
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center flex-1">
-            <div 
-              className="w-6 h-6 rounded-full mr-3 flex-shrink-0" 
+            <div
+              className="w-6 h-6 rounded-full mr-3 flex-shrink-0"
               style={{ backgroundColor: currentAspect.config.color }}
             ></div>
             <div>
@@ -556,15 +810,6 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
               </div>
             </div>
           </div>
-          <button
-            onClick={() => {
-              setHoveredAspect(null);
-              setAspectTooltipLocked(false);
-            }}
-            className="text-gray-400 hover:text-white transition-colors p-1 ml-2"
-          >
-            ✕
-          </button>
         </div>
         
         <div className="mb-3 p-3 bg-white/10 rounded-lg border border-white/10">
@@ -634,11 +879,45 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
         {/* Show full interpretation if available */}
         {hasAIInterpretation && (
           <button
-            onClick={(e) => {
+            onMouseDown={(e) => {
+              console.log('═══════════════════════════════════');
+              console.log('🎯 ABRIENDO DRAWER CON MOUSEDOWN - ASPECT');
+              console.log('1. onOpenDrawer exists?', !!onOpenDrawer);
+              console.log('2. aspectKeyFull:', aspectKeyFull);
+              console.log('3. drawer content:', natalInterpretations?.aspects?.[aspectKeyFull]?.drawer);
+              console.log('═══════════════════════════════════');
+
               e.stopPropagation();
-              if (onOpenDrawer && natalInterpretations?.aspects?.[aspectKeyFull]) {
-                onOpenDrawer(natalInterpretations.aspects[aspectKeyFull].drawer);
+              e.preventDefault();
+
+              if (!onOpenDrawer) {
+                console.error('❌ onOpenDrawer is undefined');
+                return;
               }
+
+              const aspectInterpretation = natalInterpretations?.aspects?.[aspectKeyFull];
+              if (!aspectInterpretation) {
+                console.error('❌ aspectInterpretation is undefined');
+                return;
+              }
+
+              if (!aspectInterpretation.drawer) {
+                console.error('❌ aspectInterpretation.drawer is undefined');
+                return;
+              }
+
+              try {
+                console.log('✅ Calling onOpenDrawer...');
+                onOpenDrawer(aspectInterpretation.drawer);
+                console.log('✅ onOpenDrawer called successfully');
+              } catch (error) {
+                console.error('❌ Error calling onOpenDrawer:', error);
+              }
+            }}
+            style={{
+              pointerEvents: 'auto',
+              zIndex: 9999999,
+              cursor: 'pointer'
             }}
             className="w-full py-2.5 px-4 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 group"
           >
@@ -663,7 +942,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
   if (hoveredHouse) {
     return (
       <div
-        className="fixed bg-gradient-to-r from-blue-500/95 to-cyan-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm pointer-events-none z-[150000]"
+        className="chart-tooltip fixed bg-gradient-to-r from-blue-500/95 to-cyan-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm pointer-events-auto z-[150000]"
         style={{
           left: tooltipPosition.x + 25,
           top: tooltipPosition.y - 50,
@@ -702,6 +981,8 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
             top: tooltipPosition.y - 50,
             transform: tooltipPosition.x > window.innerWidth - 400 ? 'translateX(-100%)' : 'none'
           }}
+        onMouseEnter={handleTooltipMouseEnter}
+        onMouseLeave={() => handleMouseLeaveTooltip(() => { setHoveredCard?.(null); }, 2000)}
         >
           <div className="flex items-center mb-3">
             <svg className="w-8 h-8 text-white mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -769,6 +1050,8 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
             top: tooltipPosition.y - 50,
             transform: tooltipPosition.x > window.innerWidth - 450 ? 'translateX(-100%)' : 'none'
           }}
+        onMouseEnter={handleTooltipMouseEnter}
+        onMouseLeave={() => handleMouseLeaveTooltip(() => setHoveredCard?.(null), 2000)}
         >
           <div className="flex items-center mb-3">
             <span className="text-3xl mr-3">⚡</span>
@@ -867,6 +1150,8 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
             top: tooltipPosition.y - 50,
             transform: tooltipPosition.x > window.innerWidth - 450 ? 'translateX(-100%)' : 'none'
           }}
+          onMouseEnter={handleTooltipMouseEnter}
+          onMouseLeave={() => handleTooltipMouseLeave('house')} // Use house delay for distributions
         >
           <div className="flex items-center mb-3">
             <span className="text-3xl mr-3">🔥</span>
@@ -930,6 +1215,8 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
             top: tooltipPosition.y - 50,
             transform: tooltipPosition.x > window.innerWidth - 400 ? 'translateX(-100%)' : 'none'
           }}
+          onMouseEnter={handleTooltipMouseEnter}
+          onMouseLeave={() => handleMouseLeaveTooltip(() => setHoveredCard?.(null), 2000)}
         >
           <div className="flex items-center mb-3">
             <span className="text-3xl mr-3">✨</span>
@@ -961,6 +1248,10 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
             <div className="text-rose-200 text-xs text-center">
               🎂 <strong>Año de oportunidades</strong> - Tu ciclo personal de crecimiento
             </div>
+          </div>
+
+          <div className="absolute bottom-2 right-2 bg-black/30 text-white text-xs px-2 py-1 rounded">
+            ⏱️ 2s delay
           </div>
         </div>
       );

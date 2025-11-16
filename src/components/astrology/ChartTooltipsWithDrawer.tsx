@@ -13,7 +13,7 @@
 'use client';
 
 import React, { useState } from 'react';
-
+import { useInterpretationDrawer } from '@/hooks/useInterpretationDrawer';
 
 import { InterpretationDrawer } from './InterpretationDrawer';
 
@@ -88,8 +88,7 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
   // =========================================================================
   // 🔄 ESTADO DEL DRAWER
   // =========================================================================
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [drawerContent, setDrawerContent] = useState<DrawerContent | null>(null);
+  const drawer = useInterpretationDrawer();
   const [isLoadingInterpretation, setIsLoadingInterpretation] = useState(false);
 
   // =========================================================================
@@ -140,66 +139,53 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
           }
 
           if (cachedInterpretation) {
-            setDrawerContent(cachedInterpretation.drawer);
-            setDrawerOpen(true);
+            console.log(`✅ ===== INTERPRETACIÓN ENCONTRADA EN CACHE =====`);
+            console.log(`✅ Tipo: ${type}, Data:`, data);
+            console.log(`✅ Interpretación:`, cachedInterpretation.drawer?.titulo || 'Sin título');
+
+            drawer.open(cachedInterpretation.drawer);
             setIsLoadingInterpretation(false);
             return;
+          } else {
+            console.log(`⚠️ ===== INTERPRETACIÓN NO ENCONTRADA EN CACHE =====`);
+            console.log(`⚠️ Tipo: ${type}, Data:`, data);
+            console.log(`⚠️ Cache disponible:`, Object.keys(cacheData.data.planets || {}));
           }
+        } else {
+          console.log(`⚠️ ===== NO HAY CACHE DISPONIBLE =====`);
+          console.log(`⚠️ Response:`, cacheData);
         }
+      } else {
+        console.log(`❌ ===== ERROR EN CACHE RESPONSE =====`);
+        console.log(`❌ Status: ${cacheResponse.status}`);
       }
 
-      // Si no está en cache, generar nueva interpretación
-      let interpretation;
+      // Si no está en cache, mostrar mensaje y redirigir al botón principal
+      console.log(`🎯 ===== REDIRIGIENDO AL BOTÓN PRINCIPAL =====`);
+      console.log(`🎯 Usuario debe generar interpretaciones completas`);
 
-      switch (type) {
-        case 'planet':
-          interpretation = await generatePlanetInterpretation(
-            data.name,
-            data.sign,
-            data.house,
-            data.degree,
-            userProfile
-          );
-          break;
+      // Cerrar tooltip
+      setHoveredPlanet(null);
+      setHoveredAspect(null);
 
-        case 'ascendant':
-          interpretation = await generateAscendantInterpretation(
-            data.sign,
-            data.degree,
-            userProfile
-          );
-          break;
+      // Scroll al botón de interpretar
+      const interpretButton = document.querySelector('[data-interpret-button]');
+      if (interpretButton) {
+        interpretButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-        case 'midheaven':
-          interpretation = await generateMidheavenInterpretation(
-            data.sign,
-            data.degree,
-            userProfile
-          );
-          break;
-
-        case 'aspect':
-          interpretation = await generateAspectInterpretation(
-            data.planet1,
-            data.planet2,
-            data.type,
-            data.orb,
-            userProfile
-          );
-          break;
-
-        default:
-          throw new Error('Tipo de interpretación no válido');
+        // Parpadear el botón para llamar la atención
+        interpretButton.classList.add('animate-pulse');
+        setTimeout(() => {
+          interpretButton.classList.remove('animate-pulse');
+        }, 3000);
       }
 
-      // Abrir drawer con la interpretación
-      setDrawerContent(interpretation.drawer);
-      setDrawerOpen(true);
+      setIsLoadingInterpretation(false);
+      return;
 
     } catch (error) {
       console.error('Error obteniendo interpretación:', error);
       // TODO: Mostrar mensaje de error al usuario
-    } finally {
       setIsLoadingInterpretation(false);
     }
   };
@@ -288,22 +274,72 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
           )}
 
           {/* NUEVO: Botón para abrir drawer */}
-          <InterpretationButton
-            onClick={() => openInterpretationDrawer('planet', {
-              name: planet.name,
-              sign: planet.sign,
-              house: planet.house,
-              degree: planet.degree
-            })}
-            disabled={isLoadingInterpretation}
-          />
+          {(() => {
+            // Verificar si hay interpretación real guardada
+            const interpretationKey = `${planet.name}-${planet.sign}-${planet.house}`;
+            const hasRealInterpretation = false; // TODO: Implementar verificación real
+
+            if (hasRealInterpretation) {
+              return (
+                <InterpretationButton
+                  onClick={() => {
+                    console.log('🎯 CLICK: Ver interpretación completa para planeta', planet.name);
+                    openInterpretationDrawer('planet', {
+                      name: planet.name,
+                      sign: planet.sign,
+                      house: planet.house,
+                      degree: planet.degree
+                    });
+                  }}
+                  disabled={isLoadingInterpretation}
+                />
+              );
+            } else {
+              return (
+                <div className="space-y-2">
+                  <div className="text-center text-xs text-yellow-300 bg-yellow-900/20 rounded-lg p-2 border border-yellow-500/30">
+                    ⚠️ Esta interpretación es un ejemplo. Para ver tu interpretación personalizada completa, genera las interpretaciones usando el botón grande "INTERPRETAR" en la parte superior.
+                  </div>
+
+                  <button
+                    onClick={(e) => {
+                      console.log('🎯 CLICK: Ir a generar interpretaciones');
+                      e.stopPropagation();
+                      e.preventDefault();
+
+                      // Cerrar tooltip
+                      setHoveredPlanet(null);
+
+                      // Scroll al botón de interpretar
+                      const interpretButton = document.querySelector('[data-interpret-button]');
+                      console.log('🎯 Buscando botón interpretar:', interpretButton);
+                      if (interpretButton) {
+                        interpretButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                        // Parpadear el botón para llamar la atención
+                        interpretButton.classList.add('animate-pulse');
+                        setTimeout(() => {
+                          interpretButton.classList.remove('animate-pulse');
+                        }, 3000);
+                      } else {
+                        console.log('❌ No se encontró el botón interpretar');
+                      }
+                    }}
+                    className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                  >
+                    🎯 Ir a generar interpretaciones
+                  </button>
+                </div>
+              );
+            }
+          })()}
         </div>
 
         {/* DRAWER */}
         <InterpretationDrawer
-          isOpen={drawerOpen}
-          onClose={() => setDrawerOpen(false)}
-          content={drawerContent}
+          isOpen={drawer.isOpen}
+          onClose={drawer.close}
+          content={drawer.content}
         />
       </>
     );
@@ -382,22 +418,69 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
           )}
 
           {/* NUEVO: Botón para abrir drawer */}
-          <InterpretationButton
-            onClick={() => openInterpretationDrawer('aspect', {
-              planet1: currentAspect.planet1,
-              planet2: currentAspect.planet2,
-              type: currentAspect.type,
-              orb: currentAspect.orb
-            })}
-            disabled={isLoadingInterpretation}
-          />
+          {(() => {
+            // Verificar si hay interpretación real guardada
+            const aspectKey = `${currentAspect.planet1}-${currentAspect.planet2}-${currentAspect.type}`;
+            const hasRealInterpretation = false; // TODO: Implementar verificación real
+
+            if (hasRealInterpretation) {
+              return (
+                <InterpretationButton
+                  onClick={() => openInterpretationDrawer('aspect', {
+                    planet1: currentAspect.planet1,
+                    planet2: currentAspect.planet2,
+                    type: currentAspect.type,
+                    orb: currentAspect.orb
+                  })}
+                  disabled={isLoadingInterpretation}
+                />
+              );
+            } else {
+              return (
+                <div className="space-y-2">
+                  <div className="text-center text-xs text-yellow-300 bg-yellow-900/20 rounded-lg p-2 border border-yellow-500/30">
+                    ⚠️ Esta interpretación es un ejemplo. Para ver tu interpretación personalizada completa, genera las interpretaciones usando el botón grande "INTERPRETAR" en la parte superior.
+                  </div>
+
+                  <button
+                    onClick={(e) => {
+                      console.log('🎯 CLICK: Ir a generar interpretaciones (aspecto)');
+                      e.stopPropagation();
+                      e.preventDefault();
+
+                      // Cerrar tooltip
+                      setHoveredAspect(null);
+
+                      // Scroll al botón de interpretar
+                      const interpretButton = document.querySelector('[data-interpret-button]');
+                      console.log('🎯 Buscando botón interpretar:', interpretButton);
+                      if (interpretButton) {
+                        interpretButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                        // Parpadear el botón para llamar la atención
+                        interpretButton.classList.add('animate-pulse');
+                        setTimeout(() => {
+                          interpretButton.classList.remove('animate-pulse');
+                        }, 3000);
+                      } else {
+                        console.log('❌ No se encontró el botón interpretar');
+                      }
+                    }}
+                    className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                  >
+                    🎯 Ir a generar interpretaciones
+                  </button>
+                </div>
+              );
+            }
+          })()}
         </div>
 
         {/* DRAWER */}
         <InterpretationDrawer
-          isOpen={drawerOpen}
-          onClose={() => setDrawerOpen(false)}
-          content={drawerContent}
+          isOpen={drawer.isOpen}
+          onClose={drawer.close}
+          content={drawer.content}
         />
       </>
     );
@@ -447,20 +530,66 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
           </div>
 
           {/* NUEVO: Botón para abrir drawer */}
-          <InterpretationButton
-            onClick={() => openInterpretationDrawer('ascendant', {
-              sign: ascendant.sign,
-              degree: ascendant.degree
-            })}
-            disabled={isLoadingInterpretation}
-          />
+          {(() => {
+            // Verificar si hay interpretación real guardada
+            const hasRealInterpretation = false; // TODO: Implementar verificación real
+
+            if (hasRealInterpretation) {
+              return (
+                <InterpretationButton
+                  onClick={() => openInterpretationDrawer('ascendant', {
+                    sign: ascendant.sign,
+                    degree: ascendant.degree
+                  })}
+                  disabled={isLoadingInterpretation}
+                />
+              );
+            } else {
+              return (
+                <div className="space-y-2">
+                  <div className="text-center text-xs text-yellow-300 bg-yellow-900/20 rounded-lg p-2 border border-yellow-500/30">
+                    ⚠️ Esta interpretación es un ejemplo. Para ver tu interpretación personalizada completa, genera las interpretaciones usando el botón grande "INTERPRETAR" en la parte superior.
+                  </div>
+
+                  <button
+                    onClick={(e) => {
+                      console.log('🎯 CLICK: Ir a generar interpretaciones (ascendente)');
+                      e.stopPropagation();
+                      e.preventDefault();
+
+                      // Cerrar tooltip
+                      setHoveredPlanet(null);
+
+                      // Scroll al botón de interpretar
+                      const interpretButton = document.querySelector('[data-interpret-button]');
+                      console.log('🎯 Buscando botón interpretar:', interpretButton);
+                      if (interpretButton) {
+                        interpretButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                        // Parpadear el botón para llamar la atención
+                        interpretButton.classList.add('animate-pulse');
+                        setTimeout(() => {
+                          interpretButton.classList.remove('animate-pulse');
+                        }, 3000);
+                      } else {
+                        console.log('❌ No se encontró el botón interpretar');
+                      }
+                    }}
+                    className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                  >
+                    🎯 Ir a generar interpretaciones
+                  </button>
+                </div>
+              );
+            }
+          })()}
         </div>
 
         {/* DRAWER */}
         <InterpretationDrawer
-          isOpen={drawerOpen}
-          onClose={() => setDrawerOpen(false)}
-          content={drawerContent}
+          isOpen={drawer.isOpen}
+          onClose={drawer.close}
+          content={drawer.content}
         />
       </>
     );
@@ -507,20 +636,66 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
           </div>
 
           {/* NUEVO: Botón para abrir drawer */}
-          <InterpretationButton
-            onClick={() => openInterpretationDrawer('midheaven', {
-              sign: midheaven.sign,
-              degree: midheaven.degree
-            })}
-            disabled={isLoadingInterpretation}
-          />
+          {(() => {
+            // Verificar si hay interpretación real guardada
+            const hasRealInterpretation = false; // TODO: Implementar verificación real
+
+            if (hasRealInterpretation) {
+              return (
+                <InterpretationButton
+                  onClick={() => openInterpretationDrawer('midheaven', {
+                    sign: midheaven.sign,
+                    degree: midheaven.degree
+                  })}
+                  disabled={isLoadingInterpretation}
+                />
+              );
+            } else {
+              return (
+                <div className="space-y-2">
+                  <div className="text-center text-xs text-yellow-300 bg-yellow-900/20 rounded-lg p-2 border border-yellow-500/30">
+                    ⚠️ Esta interpretación es un ejemplo. Para ver tu interpretación personalizada completa, genera las interpretaciones usando el botón grande "INTERPRETAR" en la parte superior.
+                  </div>
+
+                  <button
+                    onClick={(e) => {
+                      console.log('🎯 CLICK: Ir a generar interpretaciones (medio cielo)');
+                      e.stopPropagation();
+                      e.preventDefault();
+
+                      // Cerrar tooltip
+                      setHoveredPlanet(null);
+
+                      // Scroll al botón de interpretar
+                      const interpretButton = document.querySelector('[data-interpret-button]');
+                      console.log('🎯 Buscando botón interpretar:', interpretButton);
+                      if (interpretButton) {
+                        interpretButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                        // Parpadear el botón para llamar la atención
+                        interpretButton.classList.add('animate-pulse');
+                        setTimeout(() => {
+                          interpretButton.classList.remove('animate-pulse');
+                        }, 3000);
+                      } else {
+                        console.log('❌ No se encontró el botón interpretar');
+                      }
+                    }}
+                    className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                  >
+                    🎯 Ir a generar interpretaciones
+                  </button>
+                </div>
+              );
+            }
+          })()}
         </div>
 
         {/* DRAWER */}
         <InterpretationDrawer
-          isOpen={drawerOpen}
-          onClose={() => setDrawerOpen(false)}
-          content={drawerContent}
+          isOpen={drawer.isOpen}
+          onClose={drawer.close}
+          content={drawer.content}
         />
       </>
     );

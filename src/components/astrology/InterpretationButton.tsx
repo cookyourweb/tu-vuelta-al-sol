@@ -1,4 +1,4 @@
-// src/components/astrology/InterpretationButton.tsx
+// src/components/astrology/InterpretationButton.tsx en local
 // COMPONENTE REUTILIZABLE PARA INTERPRETACIONES - CON CACHÉ INTELIGENTE Y PROMPT DISRUPTIVO
 
 'use client';
@@ -354,6 +354,29 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           hasNatalChart: !!(requestBody as any).natalChart
         });
 
+        // ✅ Procesar respuesta con progreso simulado
+        let progressPercentage = 0;
+        const progressInterval = setInterval(() => {
+          if (progressPercentage < 95) {
+            progressPercentage += 1;
+
+            // Actualizar mensaje según progreso
+            if (progressPercentage < 10) {
+              setGenerationProgress('🌟 Iniciando generación de interpretaciones...');
+            } else if (progressPercentage < 20) {
+              setGenerationProgress('✨ Generando Ascendente y Medio Cielo...');
+            } else if (progressPercentage < 50) {
+              setGenerationProgress('🪐 Interpretando planetas principales...');
+            } else if (progressPercentage < 70) {
+              setGenerationProgress('🌙 Generando nodos lunares y asteroides...');
+            } else if (progressPercentage < 90) {
+              setGenerationProgress('🔥 Analizando elementos y modalidades...');
+            } else {
+              setGenerationProgress('🔗 Procesando aspectos planetarios...');
+            }
+          }
+        }, 5000); // Cada 5 segundos
+
         const response = await fetch(endpoint, {
           method: 'POST',
           headers: {
@@ -365,12 +388,17 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         console.log(`📡 Response status: ${response.status}`);
 
         if (!response.ok) {
+          clearInterval(progressInterval);
           const errorText = await response.text();
           console.error(`❌ API Error Response:`, errorText);
           throw new Error(`Error ${response.status}: ${errorText}`);
         }
 
         const result = await response.json();
+
+        // Completar al 100%
+        clearInterval(progressInterval);
+        setGenerationProgress('✨ ¡Interpretaciones completadas! 🎉');
 
         if (result.success) {
           console.log('📺 ===== PROCESANDO RESPUESTA DE INTERPRETACIÓN =====');
@@ -1296,6 +1324,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                 ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'
                 : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
               }`}
+              data-interpret-button
             >
               {loading ? (
                 <>
