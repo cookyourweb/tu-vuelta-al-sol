@@ -118,7 +118,11 @@ export default function NatalChartPage() {
       const response = await fetch(`/api/astrology/interpret-natal?userId=${user.uid}`);
       console.log('🔥🔥🔥 [CHECK] Response status:', response.status);
       const result = await response.json();
-      console.log('🔥🔥🔥 [CHECK] Response data:', result);
+      console.log('🔥🔥🔥 [CHECK] Response data (stringified):', JSON.stringify(result, null, 2));
+      console.log('🔥🔥🔥 [CHECK] result.success:', result.success);
+      console.log('🔥🔥🔥 [CHECK] result.data:', result.data);
+      console.log('🔥🔥🔥 [CHECK] typeof result.data:', typeof result.data);
+      console.log('🔥🔥🔥 [CHECK] result.data keys:', result.data ? Object.keys(result.data) : 'null/undefined');
 
       if (result.success && result.data) {
         console.log('🔥🔥🔥 [CHECK] ✅ Interpretations already exist - NOT generating');
@@ -126,6 +130,7 @@ export default function NatalChartPage() {
         return true;
       } else {
         console.log('🔥🔥🔥 [CHECK] ⚠️ No interpretations found - WILL auto-generate');
+        console.log('🔥🔥🔥 [CHECK] Reason: success =', result.success, ', data =', result.data);
         setHasInterpretations(false);
         return false;
       }
