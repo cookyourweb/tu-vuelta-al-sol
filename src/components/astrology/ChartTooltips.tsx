@@ -265,17 +265,25 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
   };
 
   const handleAspectMouseLeave = () => {
+    console.log('🔵 handleAspectMouseLeave CALLED');
+    console.log('   aspectTooltipLocked:', aspectTooltipLocked);
+    console.log('   generatingAspect:', generatingAspect);
+
     if (aspectTooltipTimer) {
       clearTimeout(aspectTooltipTimer);
       setAspectTooltipTimer(null);
     }
     // Hide tooltip after delay if not locked
     if (!aspectTooltipLocked && !generatingAspect) {
+      console.log('   ⚠️ Tooltip will hide in 8 seconds (not locked)');
       const hideTimer = setTimeout(() => {
+        console.log('   ❌ Hiding tooltip now');
         setHoveredAspect(null);
         setClickedAspect?.(null);
-      }, 2000); // 2 seconds delay for aspects
+      }, 8000); // ✅ 8 seconds delay for aspects (increased from 2s)
       setTooltipTimer(hideTimer);
+    } else {
+      console.log('   ✅ Tooltip stays open (locked or generating)');
     }
   };
 
@@ -788,20 +796,32 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           setAspectTooltipLocked(true);
         }}
         onMouseLeave={(e) => {
-          console.log('🎯 MOUSE LEFT TOOLTIP - ASPECT');
+          console.log('🔴 MOUSE LEFT TOOLTIP - ASPECT');
+          console.log('   relatedTarget:', e.relatedTarget);
+
           // Don't close tooltip immediately if mouse is over a button
           const target = e.relatedTarget as HTMLElement;
           const isButton = target?.closest('button');
+
+          console.log('   isButton:', isButton);
+          console.log('   aspectTooltipLocked:', aspectTooltipLocked);
+          console.log('   generatingAspect:', generatingAspect);
+
           if (!isButton) {
+            console.log('   → Not moving to button');
             if (!aspectTooltipLocked && !generatingAspect) {
+              console.log('   → Calling handleAspectMouseLeave (will hide)');
               handleAspectMouseLeave();
             } else {
+              console.log('   → Tooltip is locked or generating, just clearing timers');
               // If locked or generating, still allow mouse leave to clear timers
               if (aspectTooltipTimer) {
                 clearTimeout(aspectTooltipTimer);
                 setAspectTooltipTimer(null);
               }
             }
+          } else {
+            console.log('   → Moving to button, keeping tooltip open');
           }
         }}
         onClick={(e) => {
@@ -876,19 +896,53 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
         {!hasAIInterpretation && userId && (
           <div className="space-y-2">
             <button
+              onMouseDown={(e) => {
+                console.log('🟢 BUTTON MOUSEDOWN - Aspect interpretation');
+                console.log('   Current state BEFORE:');
+                console.log('     aspectTooltipLocked:', aspectTooltipLocked);
+                console.log('     generatingAspect:', generatingAspect);
+              }}
+              onMouseUp={(e) => {
+                console.log('🟡 BUTTON MOUSEUP - Aspect interpretation');
+              }}
               onClick={async (e) => {
-                console.log('🎯 Button clicked - Starting aspect interpretation generation');
+                console.log('═══════════════════════════════════════════════════');
+                console.log('🎯 BUTTON ONCLICK FIRED - Aspect interpretation');
+                console.log('═══════════════════════════════════════════════════');
+                console.log('1️⃣ Event object:', e.type, e.target);
+                console.log('2️⃣ State BEFORE any changes:');
+                console.log('     aspectTooltipLocked:', aspectTooltipLocked);
+                console.log('     generatingAspect:', generatingAspect);
+                console.log('     hasAIInterpretation:', hasAIInterpretation);
+
+                console.log('3️⃣ Calling e.stopPropagation()...');
                 e.stopPropagation();
+
+                console.log('4️⃣ Calling e.preventDefault()...');
+                e.preventDefault();
+
+                console.log('5️⃣ Setting aspectTooltipLocked to TRUE...');
                 setAspectTooltipLocked(true);
+
+                console.log('6️⃣ About to call generateAspectInterpretation with:');
+                console.log('     planet1:', currentAspect.planet1);
+                console.log('     planet2:', currentAspect.planet2);
+                console.log('     type:', currentAspect.type);
+                console.log('     orb:', currentAspect.orb);
+                console.log('═══════════════════════════════════════════════════');
+
                 await generateAspectInterpretation(
                   currentAspect.planet1,
                   currentAspect.planet2,
                   currentAspect.type,
                   currentAspect.orb
                 );
+
+                console.log('7️⃣ generateAspectInterpretation COMPLETED');
+                console.log('═══════════════════════════════════════════════════');
               }}
               disabled={generatingAspect}
-              className="w-full py-2.5 px-4 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white rounded-lg text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
+              className="w-full py-2.5 px-4 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white rounded-lg text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg relative z-50"
             >
               {generatingAspect ? (
                 <>
