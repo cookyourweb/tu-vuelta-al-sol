@@ -767,6 +767,12 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
     const aspectKeyFull = `${currentAspect.planet1}-${currentAspect.planet2}-${currentAspect.type}`;
     const hasAIInterpretation = natalInterpretations?.aspects && natalInterpretations.aspects[aspectKeyFull] ? true : false;
 
+    console.log('🔍 ASPECT TOOLTIP DEBUG:');
+    console.log('   - Aspect Key:', aspectKeyFull);
+    console.log('   - Has AI Interpretation:', hasAIInterpretation);
+    console.log('   - User ID:', userId);
+    console.log('   - Total aspects in cache:', Object.keys(natalInterpretations?.aspects || {}).length);
+
     return (
       <div
         className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-lg pointer-events-auto z-[150000]"

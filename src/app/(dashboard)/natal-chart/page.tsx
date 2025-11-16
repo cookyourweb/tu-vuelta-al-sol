@@ -382,40 +382,6 @@ export default function NatalChartPage() {
     router.push('/birth-data');
   };
 
-  // ✅ PANTALLA DE CARGA
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900/20 to-gray-900 flex items-center justify-center p-4">
-        <div className="text-center max-w-md">
-          <div className="relative mb-8">
-            <div className="w-24 h-24 mx-auto relative">
-              <div className="absolute inset-0 bg-purple-500 rounded-full animate-ping opacity-20"></div>
-              <div className="absolute inset-0 bg-purple-600 rounded-full animate-pulse"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Sparkles className="w-12 h-12 text-white animate-spin" />
-              </div>
-            </div>
-          </div>
-
-          <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-300 mb-4 animate-pulse">
-            {loadingMessage}
-          </h2>
-
-          <div className="bg-purple-900/30 backdrop-blur-sm border border-purple-400/30 rounded-xl p-4">
-            <p className="text-purple-200 text-sm">
-              Estamos calculando tu carta natal con precisión astronómica.
-              Este proceso puede tomar hasta 60 segundos...
-            </p>
-          </div>
-
-          <div className="mt-6 w-full bg-gray-700 rounded-full h-2 overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500 animate-progress"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // ✅ PANTALLA DE ERROR
   if (error) {
     return (
