@@ -55,6 +55,7 @@ export default function NatalChartPage() {
   const [debugInfo, setDebugInfo] = useState<string>('');
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('🌌 Conectando con el cosmos...');
+  const [showProgressModal, setShowProgressModal] = useState(false);
 
   // ✅ NEW: Estados para interpretaciones AI
   const [hasInterpretations, setHasInterpretations] = useState(false);
@@ -190,23 +191,23 @@ export default function NatalChartPage() {
       setLoading(true);
       setError(null);
       setDebugInfo('🔍 Cargando carta natal...');
-      
+
       console.log('🔍 Cargando carta natal para usuario:', user?.uid);
-      
+
       // Intentar cargar carta existente
       const response = await fetch(`/api/charts/natal?userId=${user?.uid}`, {
         method: 'GET'
       });
-      
+
       console.log('📡 Respuesta carta natal:', response.status);
-      
+
       if (response.ok) {
         const result = await response.json();
-        
+
         if (result.success && result.natalChart) {
-          console.log('✅ Carta natal cargada correctamente');
+          console.log('✅ Carta natal cargada correctamente (existe en BD)');
           setDebugInfo('✅ Carta natal cargada');
-          
+
           const processedData = processChartData(result.natalChart);
           setChartData(processedData);
 
@@ -216,14 +217,16 @@ export default function NatalChartPage() {
 
           // Cargar datos de nacimiento
           await loadBirthDataInfo();
+          setLoading(false);
           return;
         }
       }
-      
-      // Si no existe, generar automáticamente
+
+      // Si no existe, generar automáticamente CON MODAL
+      console.log('📝 No existe carta natal, generando con modal...');
+      setShowProgressModal(true); // ✅ Mostrar modal
       setDebugInfo('📝 Generando carta natal automáticamente...');
-      console.log('📝 No existe carta natal, generando...');
-      
+
       const generateResponse = await fetch('/api/charts/natal', {
         method: 'POST',
         headers: {
@@ -234,29 +237,31 @@ export default function NatalChartPage() {
           regenerate: false
         })
       });
-      
+
       if (generateResponse.ok) {
         const generateResult = await generateResponse.json();
-        
+
         if (generateResult.success) {
           console.log('✅ Carta natal generada correctamente');
           setDebugInfo('✅ Carta natal generada');
-          
+
           const processedData = processChartData(generateResult.natalChart);
           setChartData(processedData);
-          
+
           await loadBirthDataInfo();
+          setShowProgressModal(false); // ✅ Ocultar modal
         } else {
           throw new Error(generateResult.error || 'Error generando carta');
         }
       } else {
         throw new Error('Error en respuesta del servidor');
       }
-      
+
     } catch (error) {
       console.error('❌ Error cargando carta natal:', error);
       setError(error instanceof Error ? error.message : 'Error cargando carta');
       setDebugInfo(`❌ Error: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+      setShowProgressModal(false);
     } finally {
       setLoading(false);
     }
@@ -267,6 +272,7 @@ export default function NatalChartPage() {
     if (!user?.uid) return;
 
     setIsRegenerating(true);
+    setShowProgressModal(true); // ✅ Mostrar modal
     setLoadingMessage('🌌 Conectando con el cosmos...');
 
     try {
@@ -322,6 +328,7 @@ export default function NatalChartPage() {
       setError(error instanceof Error ? error.message : 'Error regenerando');
     } finally {
       setIsRegenerating(false);
+      setShowProgressModal(false); // ✅ Ocultar modal
     }
   };
 
@@ -354,9 +361,9 @@ export default function NatalChartPage() {
     autoGenerateIfNeeded();
   }, [chartData, birthData, user?.uid]);
 
-  // ✅ ANIMACIÓN DE MENSAJES DE CARGA (para loading e isRegenerating)
+  // ✅ ANIMACIÓN DE MENSAJES DE CARGA (solo cuando showProgressModal está activo)
   useEffect(() => {
-    if (loading || isRegenerating) {
+    if (showProgressModal) {
       const messages = [
         '🌌 Conectando con el cosmos...',
         '⚡ Calculando posiciones planetarias exactas...',
@@ -368,30 +375,29 @@ export default function NatalChartPage() {
       ];
 
       let index = 0;
+      setLoadingMessage(messages[0]);
+
       const interval = setInterval(() => {
         index = (index + 1) % messages.length;
         setLoadingMessage(messages[index]);
-      }, 2000);
+        console.log('📝 Mensaje actualizado:', messages[index]);
+      }, 3000); // Cambiar cada 3 segundos
 
       return () => clearInterval(interval);
     }
-  }, [loading, isRegenerating]);
+  }, [showProgressModal]);
 
   // ✅ FUNCIONES DE NAVEGACIÓN
   const navigateToBirthData = () => {
     router.push('/birth-data');
   };
 
-  // ✅ PANTALLA DE CARGA INICIAL - Solo muestra el modal
-  if (loading && !chartData) {
+  // ✅ PANTALLA DE CARGA INICIAL - Pantalla vacía mientras verifica si existe la carta
+  if (loading && !chartData && !showProgressModal) {
     return (
-      <>
-        <ChartProgressModal
-          isOpen={true}
-          progress={loadingMessage}
-          onClose={() => setLoading(false)}
-        />
-      </>
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900/20 to-gray-900 flex items-center justify-center">
+        <div className="text-white text-xl">Cargando...</div>
+      </div>
     );
   }
 
@@ -479,11 +485,12 @@ export default function NatalChartPage() {
           Descubre los secretos que los astros revelaron en el momento exacto de tu nacimiento
         </p>
 
-        {/* ✅ NEW: Progress Modals */}
+        {/* ✅ Modal de Progreso - Solo se muestra durante generación/regeneración */}
         <ChartProgressModal
-          isOpen={loading || isRegenerating}
+          isOpen={showProgressModal}
           progress={loadingMessage}
           onClose={() => {
+            setShowProgressModal(false);
             setLoading(false);
             setIsRegenerating(false);
           }}
