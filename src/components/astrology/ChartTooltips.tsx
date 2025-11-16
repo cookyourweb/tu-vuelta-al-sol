@@ -282,7 +282,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
   // =============================================================================
   // GENERATE ASPECT INTERPRETATION
   // =============================================================================
-  
+
   const generateAspectInterpretation = async (planet1: string, planet2: string, aspectType: string, orb: number) => {
     if (!userId) {
       alert('Usuario no encontrado');
@@ -294,7 +294,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
     try {
       console.log(`🎯 Generating aspect: ${planet1} ${aspectType} ${planet2}`);
-      
+
       const response = await fetch('/api/astrology/interpret-natal', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -311,14 +311,23 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
       if (result.success) {
         console.log('✅ Aspect interpretation generated');
-        
+
         // Refresh interpretations
         const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`);
         const refreshResult = await refreshResponse.json();
-        
+
         if (refreshResult.success) {
           setNatalInterpretations(refreshResult.data);
           console.log('✅ Interpretations refreshed');
+
+          // Open drawer immediately after generation
+          const aspectKeyFull = `${planet1}-${planet2}-${aspectType}`;
+          const aspectInterpretation = refreshResult.data?.aspects?.[aspectKeyFull];
+
+          if (aspectInterpretation?.drawer && onOpenDrawer) {
+            console.log('🎯 Opening drawer after generation for aspect:', aspectKeyFull);
+            onOpenDrawer(aspectInterpretation.drawer);
+          }
         }
       }
     } catch (error) {
@@ -870,7 +879,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
             ) : (
               <>
                 <span>✨</span>
-                <span>Generar Interpretación AI</span>
+                <span>Generar Interpretación IA</span>
               </>
             )}
           </button>

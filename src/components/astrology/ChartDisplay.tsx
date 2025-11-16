@@ -5,16 +5,23 @@ import React, { useState, useEffect } from 'react';
 
 // ✅ IMPORTACIONES MODULARIZADAS
 import type { ChartDisplayProps } from '../../types/astrology/chartDisplay';
-import { 
-  ASPECTS, 
-  PLANET_SYMBOLS, 
-  PLANET_COLORS, 
+import {
+  ASPECTS,
+  PLANET_SYMBOLS,
+  PLANET_COLORS,
   SIGN_SYMBOLS,
   aspectMeanings,
   planetMeanings,
   signMeanings,
-  houseMeanings 
+  houseMeanings
 } from '../../constants/astrology/chartConstants';
+
+// ✅ IMPORTACIONES DE FUNCIONES COMPARTIDAS
+import {
+  convertAstrologicalDegreeToPosition,
+  calculateAspects,
+  getCirclePosition
+} from '../../services/chartCalculationsService';
 
 // ✅ COMPONENTES EXTRAÍDOS
 import SectionMenu from './SectionMenu';
@@ -620,7 +627,7 @@ const ChartDisplay = ({
   };
 
   return (
-    <div className="space-y-8 relative">
+    <div className="space-y-8 relative custom-scrollbar overflow-y-auto">
       {/* 🧭 HEADER ESTILO DASHBOARD */}
       <div className="space-y-8">
         <div className="text-center space-y-4">
