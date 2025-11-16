@@ -382,6 +382,19 @@ export default function NatalChartPage() {
     router.push('/birth-data');
   };
 
+  // ✅ PANTALLA DE CARGA INICIAL - Solo muestra el modal
+  if (loading && !chartData) {
+    return (
+      <>
+        <ChartProgressModal
+          isOpen={true}
+          progress={loadingMessage}
+          onClose={() => setLoading(false)}
+        />
+      </>
+    );
+  }
+
   // ✅ PANTALLA DE ERROR
   if (error) {
     return (
