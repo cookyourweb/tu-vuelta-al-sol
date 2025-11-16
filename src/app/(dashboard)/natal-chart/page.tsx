@@ -224,6 +224,7 @@ export default function NatalChartPage() {
 
       // Si no existe, generar automáticamente CON MODAL
       console.log('📝 No existe carta natal, generando con modal...');
+      console.log('🔥🔥🔥 [PAGE] Setting showProgressModal = TRUE (first time generation)');
       setShowProgressModal(true); // ✅ Mostrar modal
       setDebugInfo('📝 Generando carta natal automáticamente...');
 
@@ -272,6 +273,7 @@ export default function NatalChartPage() {
     if (!user?.uid) return;
 
     setIsRegenerating(true);
+    console.log('🔥🔥🔥 [PAGE] Setting showProgressModal = TRUE (regenerating)');
     setShowProgressModal(true); // ✅ Mostrar modal
     setLoadingMessage('🌌 Conectando con el cosmos...');
 
@@ -361,9 +363,23 @@ export default function NatalChartPage() {
     autoGenerateIfNeeded();
   }, [chartData, birthData, user?.uid]);
 
+  // ✅ DEBUG: Track showProgressModal changes
+  useEffect(() => {
+    console.log('🔥🔥🔥 [PAGE] showProgressModal changed to:', showProgressModal);
+  }, [showProgressModal]);
+
+  // ✅ DEBUG: Track loadingMessage changes
+  useEffect(() => {
+    console.log('🔥🔥🔥 [PAGE] loadingMessage changed to:', loadingMessage);
+  }, [loadingMessage]);
+
   // ✅ ANIMACIÓN DE MENSAJES DE CARGA (solo cuando showProgressModal está activo)
   useEffect(() => {
+    console.log('🔥🔥🔥 [PAGE] useEffect MENSAJES triggered. showProgressModal =', showProgressModal);
+
     if (showProgressModal) {
+      console.log('🔥🔥🔥 [PAGE] Starting message interval...');
+
       const messages = [
         '🌌 Conectando con el cosmos...',
         '⚡ Calculando posiciones planetarias exactas...',
@@ -376,14 +392,20 @@ export default function NatalChartPage() {
 
       let index = 0;
       setLoadingMessage(messages[0]);
+      console.log('🔥🔥🔥 [PAGE] Initial message set:', messages[0]);
 
       const interval = setInterval(() => {
         index = (index + 1) % messages.length;
         setLoadingMessage(messages[index]);
-        console.log('📝 Mensaje actualizado:', messages[index]);
+        console.log('🔥🔥🔥 [PAGE] 📝 Mensaje actualizado:', messages[index]);
       }, 3000); // Cambiar cada 3 segundos
 
-      return () => clearInterval(interval);
+      return () => {
+        console.log('🔥🔥🔥 [PAGE] Clearing message interval');
+        clearInterval(interval);
+      };
+    } else {
+      console.log('🔥🔥🔥 [PAGE] showProgressModal is FALSE, not starting messages');
     }
   }, [showProgressModal]);
 
@@ -462,6 +484,13 @@ export default function NatalChartPage() {
     );
   }
 
+  // ✅ DEBUG: Log modal props before render
+  console.log('🔥🔥🔥 [PAGE] RENDERING with props:', {
+    showProgressModal,
+    loadingMessage,
+    chartData: chartData ? 'exists' : 'null'
+  });
+
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       {/* Header principal */}
@@ -486,6 +515,7 @@ export default function NatalChartPage() {
         </p>
 
         {/* ✅ Modal de Progreso - Solo se muestra durante generación/regeneración */}
+        {console.log('🔥🔥🔥 [PAGE] Rendering ChartProgressModal with isOpen=', showProgressModal, 'progress=', loadingMessage)}
         <ChartProgressModal
           isOpen={showProgressModal}
           progress={loadingMessage}
