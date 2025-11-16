@@ -23,7 +23,7 @@ import AscendantCard from './AscendantCard';
 import MidheavenCard from './MidheavenCard';
 import CombinedAscendantMCCard from './CombinedAscendantMCCard';
 import ElementsModalitiesCard from './ElementsModalitiesCard';
-import ChartTooltips from './ChartTooltips';
+import ChartTooltipsWithDrawer from './ChartTooltipsWithDrawer';
 
 const ChartDisplay = ({
   houses = [],
@@ -1867,11 +1867,10 @@ const ChartDisplay = ({
       </div>
 
       {/* 🎯 TOOLTIPS DINÁMICOS CON DRAWER */}
-      <ChartTooltips
+      <ChartTooltipsWithDrawer
         hoveredPlanet={hoveredPlanet}
         hoveredAspect={hoveredAspect}
         hoveredHouse={hoveredHouse}
-        hoveredCard={hoveredCard}
         ascendant={ascendant ?? undefined}
         midheaven={midheaven ?? undefined}
         planets={normalizedPlanets}
@@ -1880,22 +1879,7 @@ const ChartDisplay = ({
         setHoveredPlanet={setHoveredPlanet}
         setHoveredAspect={setHoveredAspect}
         setHoveredHouse={setHoveredHouse}
-        onOpenDrawer={onOpenDrawer}
-        onCloseDrawer={onCloseDrawer}
-        drawerOpen={drawerOpen}
-        clickedPlanet={clickedPlanet}
-        setClickedPlanet={setClickedPlanet}
-        clickedAspect={clickedAspect}
-        setClickedAspect={setClickedAspect}
-        // ✅ NEW: Props for AI integration
         userId={userId}
-        chartType={chartType}
-        birthData={birthData}
-        elementDistribution={elementDistribution}
-        modalityDistribution={modalityDistribution}
-        solarReturnYear={solarReturnYear}
-        solarReturnTheme={solarReturnTheme}
-        ascSRInNatalHouse={ascSRInNatalHouse}
       />
 
 

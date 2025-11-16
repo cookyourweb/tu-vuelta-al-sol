@@ -12,7 +12,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useInterpretationDrawer } from '@/hooks/useInterpretationDrawer';
 
 import { InterpretationDrawer } from './InterpretationDrawer';
@@ -47,6 +47,14 @@ interface ChartTooltipsWithDrawerProps {
     birthTime: string;
     birthPlace: string;
   };
+  // Props para generación de interpretaciones de aspectos
+  userId?: string;
+  natalInterpretations?: any;
+  setNatalInterpretations?: (interpretations: any) => void;
+  generatingAspect?: boolean;
+  setGeneratingAspect?: (generating: boolean) => void;
+  aspectTooltipLocked?: boolean;
+  setAspectTooltipLocked?: (locked: boolean) => void;
 }
 
 interface DrawerContent {
@@ -82,7 +90,14 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
   setHoveredPlanet,
   setHoveredAspect,
   setHoveredHouse,
-  userProfile
+  userProfile,
+  userId,
+  natalInterpretations,
+  setNatalInterpretations,
+  generatingAspect,
+  setGeneratingAspect,
+  aspectTooltipLocked,
+  setAspectTooltipLocked
 }) => {
 
   // =========================================================================
@@ -90,6 +105,115 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
   // =========================================================================
   const drawer = useInterpretationDrawer();
   const [isLoadingInterpretation, setIsLoadingInterpretation] = useState(false);
+
+  // =========================================================================
+  // 🎯 ESTADOS INTERNOS PARA ASPECTOS
+  // =========================================================================
+  const [internalNatalInterpretations, setInternalNatalInterpretations] = useState<any>(null);
+  const [internalGeneratingAspect, setInternalGeneratingAspect] = useState(false);
+  const [internalAspectTooltipLocked, setInternalAspectTooltipLocked] = useState(false);
+  const [loadingInterpretations, setLoadingInterpretations] = useState(true);
+
+  // Usar props o estados internos
+  const actualNatalInterpretations = natalInterpretations ?? internalNatalInterpretations;
+  const actualSetNatalInterpretations = setNatalInterpretations ?? setInternalNatalInterpretations;
+  const actualGeneratingAspect = generatingAspect ?? internalGeneratingAspect;
+  const actualSetGeneratingAspect = setGeneratingAspect ?? setInternalGeneratingAspect;
+  const actualAspectTooltipLocked = aspectTooltipLocked ?? internalAspectTooltipLocked;
+  const actualSetAspectTooltipLocked = setAspectTooltipLocked ?? setInternalAspectTooltipLocked;
+
+  // =========================================================================
+  // 🎯 GENERAR INTERPRETACIÓN DE ASPECTO
+  // =========================================================================
+  const generateAspectInterpretation = async (planet1: string, planet2: string, aspectType: string, orb: number) => {
+    if (!userId) {
+      console.error('❌ No userId provided for aspect interpretation');
+      alert('⚠️ No se pudo identificar el usuario. Por favor recarga la página.');
+      return;
+    }
+
+    console.log('═══════════════════════════════════════════════════');
+    console.log('🎯 GENERATING ASPECT INTERPRETATION');
+    console.log('   Planet 1:', planet1);
+    console.log('   Planet 2:', planet2);
+    console.log('   Aspect Type:', aspectType);
+    console.log('   Orb:', orb);
+    console.log('   User ID:', userId);
+    console.log('═══════════════════════════════════════════════════');
+
+    actualSetGeneratingAspect(true);
+    actualSetAspectTooltipLocked(true);
+
+    try {
+      const response = await fetch('/api/astrology/interpret-natal', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          planet1,
+          planet2,
+          aspectType,
+          orb
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log('✅ Aspect interpretation generated successfully!');
+
+        // Refresh interpretations
+        const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`);
+        const refreshResult = await refreshResponse.json();
+
+        if (refreshResult.success) {
+          actualSetNatalInterpretations(refreshResult.data);
+          console.log('✅ Interpretations refreshed successfully');
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error generating aspect:', error);
+      alert('❌ Error generando interpretación. Por favor intenta de nuevo.');
+    } finally {
+      actualSetGeneratingAspect(false);
+    }
+  };
+
+  // =========================================================================
+  // 🔄 CARGAR INTERPRETACIONES AL MONTAR
+  // =========================================================================
+  useEffect(() => {
+    const fetchInterpretations = async () => {
+      if (!userId) {
+        console.log('⚠️ No userId, skipping interpretation fetch');
+        setLoadingInterpretations(false);
+        return;
+      }
+
+      console.log('🔍 [ChartTooltipsWithDrawer] Fetching interpretations for user:', userId);
+      setLoadingInterpretations(true);
+
+      try {
+        const response = await fetch(`/api/astrology/interpret-natal?userId=${userId}`);
+        const result = await response.json();
+
+        console.log('📦 [ChartTooltipsWithDrawer] Interpretations response:', result);
+
+        if (result.success && result.data) {
+          actualSetNatalInterpretations(result.data);
+          console.log('✅ [ChartTooltipsWithDrawer] Interpretations loaded successfully');
+        } else {
+          console.log('⚠️ [ChartTooltipsWithDrawer] No interpretations found');
+        }
+      } catch (error) {
+        console.error('❌ [ChartTooltipsWithDrawer] Error fetching interpretations:', error);
+      } finally {
+        setLoadingInterpretations(false);
+      }
+    };
+
+    fetchInterpretations();
+  }, [userId]);
 
   // =========================================================================
   // 🤖 FUNCIÓN PARA OBTENER INTERPRETACIÓN DEL CACHE O GENERAR NUEVA
@@ -417,62 +541,86 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
             </div>
           )}
 
-          {/* NUEVO: Botón para abrir drawer */}
+          {/* NUEVO: Botón para generar interpretación AI del aspecto */}
           {(() => {
-            // Verificar si hay interpretación real guardada
-            const aspectKey = `${currentAspect.planet1}-${currentAspect.planet2}-${currentAspect.type}`;
-            const hasRealInterpretation = false; // TODO: Implementar verificación real
+            // Verificar si hay interpretación AI guardada
+            const aspectKeyFull = `${currentAspect.planet1}-${currentAspect.planet2}-${currentAspect.type}`;
+            const hasAIInterpretation = actualNatalInterpretations?.aspects?.[aspectKeyFull]?.ai ? true : false;
 
-            if (hasRealInterpretation) {
+            if (!hasAIInterpretation && userId) {
               return (
-                <InterpretationButton
-                  onClick={() => openInterpretationDrawer('aspect', {
-                    planet1: currentAspect.planet1,
-                    planet2: currentAspect.planet2,
-                    type: currentAspect.type,
-                    orb: currentAspect.orb
-                  })}
-                  disabled={isLoadingInterpretation}
-                />
-              );
-            } else {
-              return (
-                <div className="space-y-2">
-                  <div className="text-center text-xs text-yellow-300 bg-yellow-900/20 rounded-lg p-2 border border-yellow-500/30">
-                    ⚠️ Esta interpretación es un ejemplo. Para ver tu interpretación personalizada completa, genera las interpretaciones usando el botón grande "INTERPRETAR" en la parte superior.
-                  </div>
-
+                <div className="space-y-2 mt-3">
                   <button
-                    onClick={(e) => {
-                      console.log('🎯 CLICK: Ir a generar interpretaciones (aspecto)');
+                    onMouseDown={(e) => {
+                      console.log('🟢 BUTTON MOUSEDOWN - Aspect interpretation');
+                      console.log('   Current state BEFORE:');
+                      console.log('     aspectTooltipLocked:', actualAspectTooltipLocked);
+                      console.log('     generatingAspect:', actualGeneratingAspect);
+                    }}
+                    onMouseUp={(e) => {
+                      console.log('🟡 BUTTON MOUSEUP - Aspect interpretation');
+                    }}
+                    onClick={async (e) => {
+                      console.log('═══════════════════════════════════════════════════');
+                      console.log('🎯 BUTTON ONCLICK FIRED - Aspect interpretation');
+                      console.log('═══════════════════════════════════════════════════');
+                      console.log('1️⃣ Event object:', e.type, e.target);
+                      console.log('2️⃣ State BEFORE any changes:');
+                      console.log('     aspectTooltipLocked:', actualAspectTooltipLocked);
+                      console.log('     generatingAspect:', actualGeneratingAspect);
+                      console.log('     hasAIInterpretation:', hasAIInterpretation);
+
+                      console.log('3️⃣ Calling e.stopPropagation()...');
                       e.stopPropagation();
+
+                      console.log('4️⃣ Calling e.preventDefault()...');
                       e.preventDefault();
 
-                      // Cerrar tooltip
-                      setHoveredAspect(null);
+                      console.log('5️⃣ Setting aspectTooltipLocked to TRUE...');
+                      actualSetAspectTooltipLocked(true);
 
-                      // Scroll al botón de interpretar
-                      const interpretButton = document.querySelector('[data-interpret-button]');
-                      console.log('🎯 Buscando botón interpretar:', interpretButton);
-                      if (interpretButton) {
-                        interpretButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      console.log('6️⃣ About to call generateAspectInterpretation with:');
+                      console.log('     planet1:', currentAspect.planet1);
+                      console.log('     planet2:', currentAspect.planet2);
+                      console.log('     type:', currentAspect.type);
+                      console.log('     orb:', currentAspect.orb);
+                      console.log('═══════════════════════════════════════════════════');
 
-                        // Parpadear el botón para llamar la atención
-                        interpretButton.classList.add('animate-pulse');
-                        setTimeout(() => {
-                          interpretButton.classList.remove('animate-pulse');
-                        }, 3000);
-                      } else {
-                        console.log('❌ No se encontró el botón interpretar');
-                      }
+                      await generateAspectInterpretation(
+                        currentAspect.planet1,
+                        currentAspect.planet2,
+                        currentAspect.type,
+                        currentAspect.orb
+                      );
+
+                      console.log('7️⃣ generateAspectInterpretation COMPLETED');
+                      console.log('═══════════════════════════════════════════════════');
                     }}
-                    className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                    disabled={actualGeneratingAspect}
+                    className="w-full py-2.5 px-4 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white rounded-lg text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg relative z-50"
                   >
-                    🎯 Ir a generar interpretaciones
+                    {actualGeneratingAspect ? (
+                      <>
+                        <div className="animate-spin">⏳</div>
+                        <span>Generando interpretación AI...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>✨</span>
+                        <span>Generar Interpretación AI</span>
+                      </>
+                    )}
                   </button>
+                  {actualGeneratingAspect && (
+                    <div className="text-center text-xs text-yellow-200 animate-pulse">
+                      🔮 Esto puede tardar 10-30 segundos...
+                    </div>
+                  )}
                 </div>
               );
             }
+
+            return null;
           })()}
         </div>
 
