@@ -282,19 +282,27 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
   // =============================================================================
   // GENERATE ASPECT INTERPRETATION
   // =============================================================================
-  
+
   const generateAspectInterpretation = async (planet1: string, planet2: string, aspectType: string, orb: number) => {
     if (!userId) {
-      alert('Usuario no encontrado');
+      console.error('❌ No userId provided for aspect interpretation');
+      alert('⚠️ No se pudo identificar el usuario. Por favor recarga la página.');
       return;
     }
+
+    console.log('═══════════════════════════════════════════════════');
+    console.log('🎯 GENERATING ASPECT INTERPRETATION');
+    console.log('   Planet 1:', planet1);
+    console.log('   Planet 2:', planet2);
+    console.log('   Aspect Type:', aspectType);
+    console.log('   Orb:', orb);
+    console.log('   User ID:', userId);
+    console.log('═══════════════════════════════════════════════════');
 
     setGeneratingAspect(true);
     setAspectTooltipLocked(true); // Lock tooltip while generating
 
     try {
-      console.log(`🎯 Generating aspect: ${planet1} ${aspectType} ${planet2}`);
-      
       const response = await fetch('/api/astrology/interpret-natal', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -307,25 +315,37 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
         })
       });
 
+      console.log('📡 Response status:', response.status);
+
       const result = await response.json();
+      console.log('📦 Response data:', result);
 
       if (result.success) {
-        console.log('✅ Aspect interpretation generated');
-        
+        console.log('✅ Aspect interpretation generated successfully!');
+
         // Refresh interpretations
+        console.log('🔄 Refreshing interpretations...');
         const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`);
         const refreshResult = await refreshResponse.json();
-        
+
         if (refreshResult.success) {
           setNatalInterpretations(refreshResult.data);
-          console.log('✅ Interpretations refreshed');
+          console.log('✅ Interpretations refreshed successfully');
+          console.log('📊 Total aspects now:', Object.keys(refreshResult.data.aspects || {}).length);
+        } else {
+          console.error('⚠️ Failed to refresh interpretations:', refreshResult.error);
         }
+      } else {
+        console.error('❌ Failed to generate aspect interpretation:', result.error);
+        alert(`⚠️ Error: ${result.error || 'No se pudo generar la interpretación'}`);
       }
     } catch (error) {
       console.error('❌ Error generating aspect:', error);
-      alert('❌ Error generando interpretación');
+      console.error('❌ Error details:', error instanceof Error ? error.message : 'Unknown error');
+      alert('❌ Error generando interpretación. Por favor intenta de nuevo.');
     } finally {
       setGeneratingAspect(false);
+      console.log('✅ Aspect generation process completed');
     }
   };
 
@@ -848,32 +868,40 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
         {/* Generate AI interpretation button */}
         {!hasAIInterpretation && userId && (
-          <button
-            onClick={async (e) => {
-              e.stopPropagation();
-              setAspectTooltipLocked(true);
-              await generateAspectInterpretation(
-                currentAspect.planet1,
-                currentAspect.planet2,
-                currentAspect.type,
-                currentAspect.orb
-              );
-            }}
-            disabled={generatingAspect}
-            className="w-full py-2.5 px-4 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white rounded-lg text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {generatingAspect ? (
-              <>
-                <div className="animate-spin">⏳</div>
-                <span>Generando interpretación...</span>
-              </>
-            ) : (
-              <>
-                <span>✨</span>
-                <span>Generar Interpretación AI</span>
-              </>
+          <div className="space-y-2">
+            <button
+              onClick={async (e) => {
+                console.log('🎯 Button clicked - Starting aspect interpretation generation');
+                e.stopPropagation();
+                setAspectTooltipLocked(true);
+                await generateAspectInterpretation(
+                  currentAspect.planet1,
+                  currentAspect.planet2,
+                  currentAspect.type,
+                  currentAspect.orb
+                );
+              }}
+              disabled={generatingAspect}
+              className="w-full py-2.5 px-4 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white rounded-lg text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
+            >
+              {generatingAspect ? (
+                <>
+                  <div className="animate-spin">⏳</div>
+                  <span>Generando interpretación AI...</span>
+                </>
+              ) : (
+                <>
+                  <span>✨</span>
+                  <span>Generar Interpretación AI</span>
+                </>
+              )}
+            </button>
+            {generatingAspect && (
+              <div className="text-center text-xs text-yellow-200 animate-pulse">
+                🔮 Esto puede tardar 10-30 segundos...
+              </div>
             )}
-          </button>
+          </div>
         )}
 
         {/* Show full interpretation if available */}
