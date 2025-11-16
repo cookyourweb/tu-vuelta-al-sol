@@ -123,6 +123,15 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
   const actualSetAspectTooltipLocked = setAspectTooltipLocked ?? setInternalAspectTooltipLocked;
 
   // =========================================================================
+  // 🎨 CERRAR DRAWER Y TOOLTIP
+  // =========================================================================
+  const handleCloseDrawer = () => {
+    console.log('🎨 Closing drawer and tooltip');
+    drawer.close();
+    setHoveredAspect(null);
+  };
+
+  // =========================================================================
   // 🎯 GENERAR INTERPRETACIÓN DE ASPECTO
   // =========================================================================
   const generateAspectInterpretation = async (planet1: string, planet2: string, aspectType: string, orb: number) => {
@@ -169,6 +178,22 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
         if (refreshResult.success) {
           actualSetNatalInterpretations(refreshResult.data);
           console.log('✅ Interpretations refreshed successfully');
+
+          // Abrir el drawer con la interpretación generada
+          const aspectKey = `${planet1}-${planet2}-${aspectType}`;
+          const aspectInterpretation = refreshResult.data?.aspects?.[aspectKey];
+
+          console.log('🔍 Looking for aspect interpretation with key:', aspectKey);
+          console.log('🔍 Available aspects:', Object.keys(refreshResult.data?.aspects || {}));
+          console.log('🔍 Aspect data:', aspectInterpretation);
+
+          if (aspectInterpretation?.drawer) {
+            console.log('🎨 Opening drawer with aspect interpretation');
+            drawer.open(aspectInterpretation.drawer);
+          } else {
+            console.warn('⚠️ No drawer content found for aspect:', aspectKey);
+            console.warn('⚠️ Full interpretation data:', aspectInterpretation);
+          }
         }
       }
     } catch (error) {
@@ -498,7 +523,16 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
             setHoveredAspect(aspectKey);
           }}
           onMouseLeave={() => {
-            console.log('🔴 Mouse LEFT aspect tooltip - Will close in 5 seconds');
+            console.log('🔴 Mouse LEFT aspect tooltip');
+            console.log('   Drawer is open?', drawer.isOpen);
+
+            if (drawer.isOpen) {
+              console.log('   ✅ Drawer is open - Keeping tooltip visible');
+              const aspectKey = `${currentAspect.planet1}-${currentAspect.planet2}-${currentAspect.type}`;
+              setHoveredAspect(aspectKey);
+            } else {
+              console.log('   ⚠️ Drawer is closed - Will hide in 5 seconds');
+            }
           }}
         >
           <div className="flex items-center mb-3">
@@ -635,7 +669,7 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
         {/* DRAWER */}
         <InterpretationDrawer
           isOpen={drawer.isOpen}
-          onClose={drawer.close}
+          onClose={handleCloseDrawer}
           content={drawer.content}
         />
       </>
