@@ -112,34 +112,39 @@ export default function NatalChartPage() {
   // ✅ NEW: Check if AI interpretations exist
   const checkInterpretations = async (): Promise<boolean> => {
     if (!user?.uid) return false;
-    
+
     try {
-      console.log('🔍 Checking if interpretations exist...');
+      console.log('🔥🔥🔥 [CHECK] Checking if interpretations exist for user:', user.uid);
       const response = await fetch(`/api/astrology/interpret-natal?userId=${user.uid}`);
+      console.log('🔥🔥🔥 [CHECK] Response status:', response.status);
       const result = await response.json();
-      
+      console.log('🔥🔥🔥 [CHECK] Response data:', result);
+
       if (result.success && result.data) {
-        console.log('✅ Interpretations already exist');
+        console.log('🔥🔥🔥 [CHECK] ✅ Interpretations already exist - NOT generating');
         setHasInterpretations(true);
         return true;
       } else {
-        console.log('⚠️ No interpretations found');
+        console.log('🔥🔥🔥 [CHECK] ⚠️ No interpretations found - WILL auto-generate');
         setHasInterpretations(false);
         return false;
       }
     } catch (error) {
-      console.error('❌ Error checking interpretations:', error);
+      console.error('🔥🔥🔥 [CHECK] ❌ Error checking interpretations:', error);
       return false;
     }
   };
 
   // ✅ NEW: Generate AI interpretations
   const generateInterpretations = async () => {
+    console.log('🔥🔥🔥 [GENERATE] generateInterpretations() CALLED');
+
     if (!user?.uid || !birthData) {
-      console.log('⚠️ Cannot generate - missing user or birth data');
+      console.log('🔥🔥🔥 [GENERATE] ⚠️ Cannot generate - missing user or birth data');
       return;
     }
-    
+
+    console.log('🔥🔥🔥 [GENERATE] Setting generatingInterpretations = TRUE (OPENING MODAL)');
     setGeneratingInterpretations(true);
     setInterpretationProgress('🔮 Iniciando generación de interpretaciones AI...');
     
@@ -343,23 +348,27 @@ export default function NatalChartPage() {
 
   // ✅ NEW: Auto-generate interpretations when chart + birth data are ready
   useEffect(() => {
+    console.log('🔥🔥🔥 [AUTO-GEN] useEffect triggered. chartData:', !!chartData, 'birthData:', !!birthData, 'user:', !!user?.uid);
+
     async function autoGenerateIfNeeded() {
       if (!chartData || !birthData || !user?.uid) {
-        console.log('⏸️ Waiting for chart and birth data...');
+        console.log('🔥🔥🔥 [AUTO-GEN] ⏸️ Waiting for chart and birth data...');
         return;
       }
-      
-      console.log('🔍 Chart and birth data ready, checking interpretations...');
+
+      console.log('🔥🔥🔥 [AUTO-GEN] 🔍 Chart and birth data ready, checking interpretations...');
       const exists = await checkInterpretations();
-      
+
+      console.log('🔥🔥🔥 [AUTO-GEN] Check result - exists:', exists);
+
       if (!exists) {
-        console.log('🚀 No interpretations found - auto-generating...');
+        console.log('🔥🔥🔥 [AUTO-GEN] 🚀 No interpretations found - CALLING generateInterpretations()...');
         await generateInterpretations();
       } else {
-        console.log('✅ Interpretations already exist, skipping generation');
+        console.log('🔥🔥🔥 [AUTO-GEN] ✅ Interpretations already exist, skipping generation');
       }
     }
-    
+
     autoGenerateIfNeeded();
   }, [chartData, birthData, user?.uid]);
 
