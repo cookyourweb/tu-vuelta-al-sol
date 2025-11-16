@@ -74,13 +74,45 @@ const ChartDisplay = ({
 
   // ✅ Hover delay timers
   const [cardHoverTimer, setCardHoverTimer] = useState<NodeJS.Timeout | null>(null);
+  const [aspectHoverTimer, setAspectHoverTimer] = useState<NodeJS.Timeout | null>(null);
 
   // ✅ FUNCIONES UTILITARIAS
   const handleMouseMove = (event: React.MouseEvent) => {
-    setTooltipPosition({ 
+    setTooltipPosition({
       x: event?.clientX ?? 0,
       y: event?.clientY ?? 0
     });
+  };
+
+  // ✅ FUNCIONES PARA MANEJAR HOVER DE ASPECTOS CON DELAY
+  const handleAspectMouseEnter = (aspectKey: string, event: React.MouseEvent) => {
+    console.log('🟢 Aspect mouse ENTER:', aspectKey);
+
+    // Limpiar timer existente si hay uno
+    if (aspectHoverTimer) {
+      clearTimeout(aspectHoverTimer);
+      setAspectHoverTimer(null);
+    }
+
+    setHoveredAspect(aspectKey);
+    handleMouseMove(event);
+  };
+
+  const handleAspectMouseLeave = () => {
+    console.log('🔴 Aspect mouse LEAVE - Setting timer for 5 seconds');
+
+    // Limpiar timer existente
+    if (aspectHoverTimer) {
+      clearTimeout(aspectHoverTimer);
+    }
+
+    // Delay de 5 segundos antes de ocultar tooltip
+    const timer = setTimeout(() => {
+      console.log('⏰ 5 seconds passed - Hiding aspect tooltip');
+      setHoveredAspect(null);
+    }, 5000); // 5 segundos
+
+    setAspectHoverTimer(timer);
   };
 
   const scrollToSection = (sectionId: string) => {
@@ -286,16 +318,10 @@ const ChartDisplay = ({
             opacity={isHovered ? 1 : opacity}
             strokeDasharray={isMinor ? "3,3" : "none"}
             className="transition-all duration-200 cursor-pointer"
-            onMouseEnter={(e) => {
-              setHoveredAspect(aspectKey);
-              handleMouseMove(e);
-            }}
+            onMouseEnter={(e) => handleAspectMouseEnter(aspectKey, e)}
             onMouseMove={handleMouseMove}
-            onMouseLeave={() => setHoveredAspect(null)}
-            onClick={(e) => {
-              setHoveredAspect(aspectKey);
-              handleMouseMove(e);
-            }}
+            onMouseLeave={handleAspectMouseLeave}
+            onClick={(e) => handleAspectMouseEnter(aspectKey, e)}
           />
         </g>
       );
@@ -1485,17 +1511,13 @@ const ChartDisplay = ({
                 <div
                   key={index}
                   className="bg-black/30 rounded-xl p-4 backdrop-blur-sm border border-white/10 cursor-pointer hover:border-white/20 transition-all duration-200 group relative pointer-events-auto"
-                  onMouseEnter={(e) => {
-                    setHoveredAspect(`${aspect.planet1}-${aspect.planet2}-${aspect.type}`);
-                    handleMouseMove(e);
-                  }}
+                  onMouseEnter={(e) => handleAspectMouseEnter(`${aspect.planet1}-${aspect.planet2}-${aspect.type}`, e)}
                   onMouseMove={handleMouseMove}
-                  onMouseLeave={() => setHoveredAspect(null)}
+                  onMouseLeave={handleAspectMouseLeave}
                   onClick={(e) => {
                     console.log(`🎯 Clicked aspect card: ${aspect.planet1} - ${aspect.planet2} (${aspect.type})`);
                     setClickedAspect(`${aspect.planet1}-${aspect.planet2}-${aspect.type}`);
-                    setHoveredAspect(`${aspect.planet1}-${aspect.planet2}-${aspect.type}`);
-                    handleMouseMove(e);
+                    handleAspectMouseEnter(`${aspect.planet1}-${aspect.planet2}-${aspect.type}`, e);
                   }}
                   style={{ position: 'relative', zIndex: 1 }}
                 >

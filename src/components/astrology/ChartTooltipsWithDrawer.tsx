@@ -484,13 +484,21 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
 
     return (
       <>
-        <div 
+        <div
           className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-lg z-[99998]"
-          style={{ 
-            left: tooltipPosition.x, 
+          style={{
+            left: tooltipPosition.x,
             top: tooltipPosition.y,
             transform: tooltipPosition.x > window.innerWidth - 350 ? 'translateX(-100%)' : 'none',
             pointerEvents: 'auto'
+          }}
+          onMouseEnter={() => {
+            console.log('🟢 Mouse ENTERED aspect tooltip - Keeping it open');
+            const aspectKey = `${currentAspect.planet1}-${currentAspect.planet2}-${currentAspect.type}`;
+            setHoveredAspect(aspectKey);
+          }}
+          onMouseLeave={() => {
+            console.log('🔴 Mouse LEFT aspect tooltip - Will close in 5 seconds');
           }}
         >
           <div className="flex items-center mb-3">
