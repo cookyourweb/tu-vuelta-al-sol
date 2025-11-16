@@ -29,6 +29,8 @@ export default function ChartProgressModal({
 
   useEffect(() => {
     if (isOpen) {
+      console.log('🎯 [MODAL] Modal abierto');
+      console.log('🎯 [MODAL] Progress recibido:', progress);
       const interval = setInterval(() => {
         setCurrentIconIndex((prev) => (prev + 1) % progressIcons.length);
       }, 1000);
@@ -36,9 +38,20 @@ export default function ChartProgressModal({
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (isOpen && progress) {
+      console.log('🎯 [MODAL] Progress actualizado:', progress);
+    }
+  }, [progress, isOpen]);
+
   if (!isOpen) return null;
 
   const getProgressPercentage = (message: string): number => {
+    if (!message) {
+      console.log('⚠️ [MODAL] No hay mensaje');
+      return 0;
+    }
+
     if (message.includes('Conectando con el cosmos')) return 5;
     if (message.includes('Calculando posiciones planetarias')) return 15;
     if (message.includes('Descifrando tu mapa cósmico')) return 30;
@@ -47,10 +60,18 @@ export default function ChartProgressModal({
     if (message.includes('Revelando tu configuración única')) return 85;
     if (message.includes('Casi listo')) return 95;
     if (message.includes('¡Carta completada!')) return 100;
+
+    console.log('⚠️ [MODAL] Mensaje no reconocido:', message);
     return 0;
   };
 
   const progressPercentage = getProgressPercentage(progress);
+
+  console.log('🎯 [MODAL] Renderizando con:', {
+    isOpen,
+    progress,
+    progressPercentage
+  });
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
