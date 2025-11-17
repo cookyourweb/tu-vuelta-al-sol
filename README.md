@@ -413,6 +413,222 @@ Imagina que naciste con GAFAS DE VER FUTUROS...
 - **Valor Educativo:** Usuarios aprenden astrología mientras se conocen
 - **Retención Mejorada:** Interpretaciones memorables y transformadoras
 
+## 🎯 **Sistema de Tooltips y Drawers Inteligente**
+
+### **Visión General**
+Sistema avanzado de interacción para mostrar interpretaciones astrológicas con una UX fluida e intuitiva. Los tooltips y drawers trabajan juntos para proporcionar información rápida y profunda según el contexto.
+
+### **🔧 Arquitectura Técnica**
+
+#### **Componente Principal**
+**Ubicación:** `src/components/astrology/ChartTooltipsWithDrawer.tsx`
+
+**Características:**
+- Tooltips contextuales para aspectos, planetas y casas
+- Drawer lateral con interpretaciones completas
+- Sistema de bloqueo inteligente para evitar cierres accidentales
+- Integración con generación de interpretaciones AI
+- Detección de clics fuera para cerrar automáticamente
+
+### **📱 Lógica de Comportamiento del Tooltip de Aspectos**
+
+#### **Fase 1: Activación del Tooltip**
+```
+Usuario pasa mouse o hace clic en aspecto (línea o tarjeta)
+    ↓
+Tooltip aparece
+    ↓
+Timer de 5 segundos para mover mouse al tooltip
+```
+
+#### **Fase 2: Tooltip Bloqueado (Mouse Inside)**
+```
+Mouse entra al tooltip
+    ↓
+✅ Tooltip se BLOQUEA (aspectTooltipLocked = true)
+    ↓
+✅ Aparece botón X en esquina superior derecha
+    ↓
+✅ NO se cierra automáticamente
+    ↓
+Solo se cierra con:
+  • Clic en botón X
+  • Clic fuera del tooltip (cuando drawer cerrado)
+```
+
+#### **Fase 3: Generación de Interpretación**
+```
+Usuario hace clic en "Generar Interpretación AI"
+    ↓
+✅ Se genera interpretación (10-30 segundos)
+    ↓
+✅ Drawer se abre automáticamente
+    ↓
+✅ Tooltip permanece abierto
+```
+
+#### **Fase 4: Tooltip + Drawer Abiertos**
+```
+Ambos permanecen visibles
+    ↓
+✅ Clic fuera NO cierra nada (mientras drawer abierto)
+    ↓
+Solo se cierran con:
+  • Botón X del tooltip → cierra solo tooltip
+  • Botón X del drawer → cierra AMBOS (drawer + tooltip)
+```
+
+### **🎨 Componentes Involucrados**
+
+#### **ChartTooltipsWithDrawer**
+```typescript
+// Estados internos para gestión
+const [internalNatalInterpretations, setInternalNatalInterpretations] = useState<any>(null);
+const [internalGeneratingAspect, setInternalGeneratingAspect] = useState(false);
+const [internalAspectTooltipLocked, setInternalAspectTooltipLocked] = useState(false);
+
+// Función de generación de interpretación
+const generateAspectInterpretation = async (planet1, planet2, aspectType, orb) => {
+  // 1. Genera interpretación via API
+  // 2. Refresca interpretaciones
+  // 3. Abre drawer automáticamente
+  drawer.open(aspectInterpretation.drawer);
+}
+
+// Función para cerrar drawer y tooltip juntos
+const handleCloseDrawer = () => {
+  drawer.close();
+  setHoveredAspect(null);
+}
+```
+
+#### **ChartDisplay**
+```typescript
+// Timer para delay de tooltip
+const [aspectHoverTimer, setAspectHoverTimer] = useState<NodeJS.Timeout | null>(null);
+
+// Manejo de entrada de mouse
+const handleAspectMouseEnter = (aspectKey, event) => {
+  if (aspectHoverTimer) clearTimeout(aspectHoverTimer);
+  setHoveredAspect(aspectKey);
+  handleMouseMove(event);
+}
+
+// Manejo de salida de mouse con delay
+const handleAspectMouseLeave = () => {
+  const timer = setTimeout(() => {
+    setHoveredAspect(null);
+  }, 5000); // 5 segundos
+  setAspectHoverTimer(timer);
+}
+```
+
+### **🔐 Sistema de Bloqueo**
+
+#### **Detección de Clic Fuera**
+```typescript
+useEffect(() => {
+  const handleClickOutside = (event: MouseEvent) => {
+    // Si drawer abierto, ignorar
+    if (drawer.isOpen) return;
+
+    // Si tooltip no bloqueado, ignorar
+    if (!actualAspectTooltipLocked) return;
+
+    // Verificar si clic fue fuera del tooltip
+    const target = event.target as HTMLElement;
+    const tooltipElement = target.closest('.aspect-tooltip');
+
+    if (!tooltipElement && hoveredAspect) {
+      setHoveredAspect(null);
+      actualSetAspectTooltipLocked(false);
+    }
+  };
+
+  document.addEventListener('click', handleClickOutside);
+  return () => document.removeEventListener('click', handleClickOutside);
+}, [hoveredAspect, actualAspectTooltipLocked, drawer.isOpen]);
+```
+
+### **📊 Flujo de Estados**
+
+```
+TOOLTIP_STATES:
+  hoveredAspect: null | string           // Aspecto actualmente visible
+  aspectTooltipLocked: boolean           // Si tooltip está bloqueado
+  generatingAspect: boolean              // Si está generando interpretación
+
+DRAWER_STATES:
+  drawer.isOpen: boolean                 // Si drawer está visible
+  drawer.content: InterpretationContent  // Contenido a mostrar
+
+TRANSITIONS:
+  Hover → Show tooltip (5s to enter)
+  Enter → Lock tooltip (stay open)
+  Click button → Generate + Open drawer
+  Click X tooltip → Close tooltip only
+  Click X drawer → Close both
+  Click outside → Close if drawer closed
+```
+
+### **🎯 Beneficios UX**
+
+#### **Para el Usuario**
+- **Tiempo Suficiente:** 5 segundos para mover mouse al tooltip
+- **Control Total:** Botón X visible para cerrar cuando quiera
+- **Sin Interrupciones:** Drawer y tooltip permanecen abiertos juntos
+- **Feedback Visual:** Estados claros (generando, cargando, listo)
+- **Navegación Fluida:** Puede explorar sin perder contexto
+
+#### **Para el Desarrollo**
+- **Código Modular:** Estados independientes pero coordinados
+- **Fácil Debugging:** Logs exhaustivos en cada acción
+- **Mantenible:** Lógica clara y bien separada
+- **Extensible:** Fácil agregar nuevas funcionalidades
+
+### **🔍 Logs de Debugging**
+
+**Eventos del Tooltip:**
+- 🟢 **Mouse ENTERED** - Mouse entra al tooltip (bloqueo)
+- 🔴 **Mouse LEFT** - Mouse sale del tooltip
+- ❌ **Close button clicked** - Usuario cierra tooltip
+- 🖱️ **Click outside** - Clic detectado fuera
+
+**Eventos del Drawer:**
+- 🎨 **Opening drawer** - Drawer se abre con interpretación
+- 🎨 **Closing drawer** - Drawer se cierra (y tooltip también)
+
+**Eventos de Generación:**
+- 🎯 **BUTTON ONCLICK FIRED** - Click en botón detectado
+- 🟢 **BUTTON MOUSEDOWN** - Mouse presionado
+- 🟡 **BUTTON MOUSEUP** - Mouse soltado
+- 1️⃣-7️⃣ **Pasos del onClick** - Cada acción del handler
+
+### **📁 Archivos Modificados**
+
+```
+src/components/astrology/
+├── ChartTooltipsWithDrawer.tsx    ✏️ Sistema completo de tooltips + drawer
+└── ChartDisplay.tsx               ✏️ Manejo de timers y eventos
+
+Funcionalidades Clave:
+✅ Tooltips con delay de 5 segundos
+✅ Bloqueo al entrar con mouse
+✅ Botón X para cerrar manualmente
+✅ Generación de interpretaciones AI
+✅ Drawer automático post-generación
+✅ Detección de clic fuera
+✅ Cierre coordinado de tooltip + drawer
+```
+
+### **🚀 Próximas Mejoras**
+
+- [ ] **Animaciones de transición** - Fade in/out suaves
+- [ ] **Gestos táctiles** - Soporte para móviles
+- [ ] **Tooltips para planetas** - Misma lógica para otros elementos
+- [ ] **Historial de interpretaciones** - Ver anteriores sin regenerar
+- [ ] **Compartir interpretaciones** - Exportar como imagen o PDF
+
 ## 🚀 Funcionalidades Futuras Planeadas
 
 - **Carta Progresada Mejorada:** Corrección y optimización de la carta progresada para mayor precisión.
