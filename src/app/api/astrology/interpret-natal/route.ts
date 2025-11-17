@@ -218,16 +218,14 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userId, planet1, planet2, aspectType, orb } = body;
+    const { userId, planet1, planet2, aspectType, orb, planetName, sign, house, degree } = body;
 
-    if (!userId || !planet1 || !planet2 || !aspectType) {
+    if (!userId) {
       return NextResponse.json(
-        { success: false, error: 'Missing required fields: userId, planet1, planet2, aspectType' },
+        { success: false, error: 'Missing required field: userId' },
         { status: 400 }
       );
     }
-
-    console.log('🎯 [PUT] Generating aspect interpretation:', { userId, planet1, planet2, aspectType, orb });
 
     const mongoose = await connectToDatabase();
     const db = (mongoose as any).connection?.db ?? (mongoose as any).db;
@@ -240,58 +238,131 @@ export async function PUT(request: NextRequest) {
 
     if (!existing) {
       return NextResponse.json(
-        { success: false, error: 'No natal interpretations found. Generate them first.' },
+        { success: false, error: 'No natal interpretations found. Generate them first with POST.' },
         { status: 404 }
       );
     }
 
-    const aspectKey = `${planet1}-${planet2}-${aspectType}`;
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-    // Check if aspect interpretation already exists
-    if (existing.interpretations.aspects?.[aspectKey]) {
-      console.log('✅ [PUT] Aspect interpretation already exists');
+    // =========================================================================
+    // 🪐 PLANET INTERPRETATION
+    // =========================================================================
+    if (planetName && sign && house) {
+      console.log('🪐 [PUT] Generating planet interpretation:', { userId, planetName, sign, house, degree });
+
+      const planetKey = `${planetName}-${sign}-${house}`;
+
+      // Check if planet interpretation already exists
+      if (existing.interpretations.planets?.[planetKey]) {
+        console.log('✅ [PUT] Planet interpretation already exists');
+        return NextResponse.json({
+          success: true,
+          data: existing.interpretations.planets[planetKey],
+          cached: true,
+        });
+      }
+
+      // Generate new planet interpretation
+      const planetInterpretation = await generatePlanetInterpretation(
+        { name: planetName, sign, house, degree },
+        { name: 'User', age: 30 }, // Default user profile
+        openai
+      );
+
+      // Update the interpretations with the new planet
+      const updatedInterpretations = {
+        ...existing.interpretations,
+        planets: {
+          ...existing.interpretations.planets,
+          [planetKey]: planetInterpretation,
+        },
+      };
+
+      // Save back to database
+      await db.collection('interpretations').updateOne(
+        { userId, chartType: 'natal' },
+        {
+          $set: {
+            interpretations: updatedInterpretations,
+            updatedAt: new Date(),
+          },
+        }
+      );
+
+      console.log('✅ [PUT] Planet interpretation generated and saved');
+
       return NextResponse.json({
         success: true,
-        data: existing.interpretations.aspects[aspectKey],
-        cached: true,
+        data: planetInterpretation,
+        cached: false,
       });
     }
 
-    // Generate new aspect interpretation
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    const aspectInterpretation = await generateAspectInterpretation(
-      { planet1, planet2, type: aspectType, orb },
-      { name: 'User', age: 30 }, // Default user profile
-      openai
-    );
+    // =========================================================================
+    // 🎯 ASPECT INTERPRETATION
+    // =========================================================================
+    if (planet1 && planet2 && aspectType) {
+      console.log('🎯 [PUT] Generating aspect interpretation:', { userId, planet1, planet2, aspectType, orb });
 
-    // Update the interpretations with the new aspect
-    const updatedInterpretations = {
-      ...existing.interpretations,
-      aspects: {
-        ...existing.interpretations.aspects,
-        [aspectKey]: aspectInterpretation,
-      },
-    };
+      const aspectKey = `${planet1}-${planet2}-${aspectType}`;
 
-    // Save back to database
-    await db.collection('interpretations').updateOne(
-      { userId, chartType: 'natal' },
-      {
-        $set: {
-          interpretations: updatedInterpretations,
-          updatedAt: new Date(),
-        },
+      // Check if aspect interpretation already exists
+      if (existing.interpretations.aspects?.[aspectKey]) {
+        console.log('✅ [PUT] Aspect interpretation already exists');
+        return NextResponse.json({
+          success: true,
+          data: existing.interpretations.aspects[aspectKey],
+          cached: true,
+        });
       }
+
+      // Generate new aspect interpretation
+      const aspectInterpretation = await generateAspectInterpretation(
+        { planet1, planet2, type: aspectType, orb },
+        { name: 'User', age: 30 }, // Default user profile
+        openai
+      );
+
+      // Update the interpretations with the new aspect
+      const updatedInterpretations = {
+        ...existing.interpretations,
+        aspects: {
+          ...existing.interpretations.aspects,
+          [aspectKey]: aspectInterpretation,
+        },
+      };
+
+      // Save back to database
+      await db.collection('interpretations').updateOne(
+        { userId, chartType: 'natal' },
+        {
+          $set: {
+            interpretations: updatedInterpretations,
+            updatedAt: new Date(),
+          },
+        }
+      );
+
+      console.log('✅ [PUT] Aspect interpretation generated and saved');
+
+      return NextResponse.json({
+        success: true,
+        data: aspectInterpretation,
+        cached: false,
+      });
+    }
+
+    // =========================================================================
+    // ❌ INVALID REQUEST
+    // =========================================================================
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Invalid request: must provide either (planetName, sign, house) for planet OR (planet1, planet2, aspectType) for aspect'
+      },
+      { status: 400 }
     );
-
-    console.log('✅ [PUT] Aspect interpretation generated and saved');
-
-    return NextResponse.json({
-      success: true,
-      data: aspectInterpretation,
-      cached: false,
-    });
 
   } catch (error) {
     console.error('❌ Error in PUT:', error);
