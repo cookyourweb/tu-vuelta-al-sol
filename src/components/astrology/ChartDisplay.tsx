@@ -84,11 +84,12 @@ const ChartDisplay = ({
     });
   };
 
-  // ✅ FUNCIONES PARA MANEJAR HOVER DE ASPECTOS CON DELAY
+  // ✅ FUNCIONES PARA MANEJAR HOVER DE ASPECTOS
+  // NOTA: El tooltip maneja su propio cierre una vez que el mouse está dentro
   const handleAspectMouseEnter = (aspectKey: string, event: React.MouseEvent) => {
-    console.log('🟢 Aspect mouse ENTER:', aspectKey);
+    console.log('🟢 Aspect/Planet mouse ENTER:', aspectKey);
 
-    // Limpiar timer existente si hay uno
+    // Limpiar cualquier timer existente
     if (aspectHoverTimer) {
       clearTimeout(aspectHoverTimer);
       setAspectHoverTimer(null);
@@ -99,20 +100,16 @@ const ChartDisplay = ({
   };
 
   const handleAspectMouseLeave = () => {
-    console.log('🔴 Aspect mouse LEAVE - Setting timer for 5 seconds');
+    console.log('🔴 Aspect/Planet mouse LEAVE - NO timer, tooltip handles its own close');
 
-    // Limpiar timer existente
+    // Limpiar timer si existe
     if (aspectHoverTimer) {
       clearTimeout(aspectHoverTimer);
+      setAspectHoverTimer(null);
     }
 
-    // Delay de 5 segundos antes de ocultar tooltip
-    const timer = setTimeout(() => {
-      console.log('⏰ 5 seconds passed - Hiding aspect tooltip');
-      setHoveredAspect(null);
-    }, 5000); // 5 segundos
-
-    setAspectHoverTimer(timer);
+    // NO cerramos aquí - el tooltip se encarga de su propio cierre
+    // cuando el usuario sale del tooltip o hace clic fuera
   };
 
   const scrollToSection = (sectionId: string) => {

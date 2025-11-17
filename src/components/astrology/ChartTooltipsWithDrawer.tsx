@@ -113,6 +113,7 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
   const [internalGeneratingAspect, setInternalGeneratingAspect] = useState(false);
   const [internalAspectTooltipLocked, setInternalAspectTooltipLocked] = useState(false);
   const [loadingInterpretations, setLoadingInterpretations] = useState(true);
+  const [tooltipCloseTimer, setTooltipCloseTimer] = useState<NodeJS.Timeout | null>(null);
 
   // Usar props o estados internos
   const actualNatalInterpretations = natalInterpretations ?? internalNatalInterpretations;
@@ -129,6 +130,57 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
     console.log('🎨 Closing drawer and tooltip');
     drawer.close();
     setHoveredAspect(null);
+    setHoveredPlanet(null);
+    actualSetAspectTooltipLocked(false);
+    if (tooltipCloseTimer) {
+      clearTimeout(tooltipCloseTimer);
+      setTooltipCloseTimer(null);
+    }
+  };
+
+  const handleTooltipMouseLeave = () => {
+    console.log('🔴 Mouse LEFT tooltip');
+    console.log('   Drawer open:', drawer.isOpen);
+    console.log('   Generating:', actualGeneratingAspect);
+    console.log('   Locked:', actualAspectTooltipLocked);
+
+    // Limpiar timer existente
+    if (tooltipCloseTimer) {
+      clearTimeout(tooltipCloseTimer);
+      setTooltipCloseTimer(null);
+    }
+
+    // Si está generando, NO cerrar
+    if (actualGeneratingAspect) {
+      console.log('   ✅ Generating - tooltip stays open');
+      return;
+    }
+
+    // Si drawer está abierto, NO cerrar
+    if (drawer.isOpen) {
+      console.log('   ✅ Drawer open - tooltip stays open');
+      return;
+    }
+
+    // Si no está locked, cerrar después de delay
+    if (!actualAspectTooltipLocked) {
+      console.log('   ⚠️ Not locked - will close in 3 seconds');
+      const timer = setTimeout(() => {
+        console.log('   ⏰ 3 seconds passed - closing tooltip');
+        setHoveredAspect(null);
+        setHoveredPlanet(null);
+      }, 3000);
+      setTooltipCloseTimer(timer);
+    } else {
+      console.log('   ⚠️ Locked - will close in 5 seconds');
+      const timer = setTimeout(() => {
+        console.log('   ⏰ 5 seconds passed - closing tooltip');
+        setHoveredAspect(null);
+        setHoveredPlanet(null);
+        actualSetAspectTooltipLocked(false);
+      }, 5000);
+      setTooltipCloseTimer(timer);
+    }
   };
 
   // =========================================================================
@@ -251,19 +303,30 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
         return;
       }
 
+      // Si está generando, no cerrar
+      if (actualGeneratingAspect) {
+        console.log('🖱️ Click detected but generating - ignoring');
+        return;
+      }
+
       // Si el tooltip no está bloqueado, ignorar
       if (!actualAspectTooltipLocked) {
         return;
       }
 
-      // Verificar si el clic fue fuera del tooltip
+      // Verificar si el clic fue fuera de cualquier tooltip
       const target = event.target as HTMLElement;
-      const tooltipElement = target.closest('.aspect-tooltip');
+      const tooltipElement = target.closest('.aspect-tooltip, .planet-tooltip, .ascendant-tooltip, .midheaven-tooltip');
 
-      if (!tooltipElement && hoveredAspect) {
+      if (!tooltipElement && (hoveredAspect || hoveredPlanet)) {
         console.log('🖱️ Click outside tooltip - Closing');
         setHoveredAspect(null);
+        setHoveredPlanet(null);
         actualSetAspectTooltipLocked(false);
+        if (tooltipCloseTimer) {
+          clearTimeout(tooltipCloseTimer);
+          setTooltipCloseTimer(null);
+        }
       }
     };
 
@@ -271,7 +334,7 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
-  }, [hoveredAspect, actualAspectTooltipLocked, drawer.isOpen]);
+  }, [hoveredAspect, hoveredPlanet, actualAspectTooltipLocked, actualGeneratingAspect, drawer.isOpen, tooltipCloseTimer]);
 
   // =========================================================================
   // 🤖 FUNCIÓN PARA OBTENER INTERPRETACIÓN DEL CACHE O GENERAR NUEVA
@@ -407,15 +470,41 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
 
     return (
       <>
-        <div 
-          className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm z-[99998]"
-          style={{ 
+        <div
+          className="planet-tooltip fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm z-[99998]"
+          style={{
             left: tooltipPosition.x + 25,
             top: tooltipPosition.y - 50,
             transform: tooltipPosition.x > window.innerWidth - 300 ? 'translateX(-100%)' : 'none',
             pointerEvents: 'auto'
           }}
+          onMouseEnter={() => {
+            console.log('🟢 Mouse ENTERED planet tooltip - Locking it open');
+            setHoveredPlanet(hoveredPlanet);
+            actualSetAspectTooltipLocked(true);
+            if (tooltipCloseTimer) {
+              clearTimeout(tooltipCloseTimer);
+              setTooltipCloseTimer(null);
+            }
+          }}
+          onMouseLeave={handleTooltipMouseLeave}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
         >
+          {/* ✅ BOTÓN CERRAR */}
+          <button
+            onClick={() => {
+              console.log('❌ Close button clicked - Closing planet tooltip');
+              setHoveredPlanet(null);
+              actualSetAspectTooltipLocked(false);
+            }}
+            className="absolute top-2 right-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full w-6 h-6 flex items-center justify-center transition-all z-10"
+            aria-label="Cerrar tooltip"
+          >
+            ✕
+          </button>
+
           <div className="flex items-center mb-3">
             <span className="text-3xl mr-3">
               {planet.name.charAt(0)}
@@ -555,7 +644,13 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
             const aspectKey = `${currentAspect.planet1}-${currentAspect.planet2}-${currentAspect.type}`;
             setHoveredAspect(aspectKey);
             actualSetAspectTooltipLocked(true);
+            // Limpiar timer si existe
+            if (tooltipCloseTimer) {
+              clearTimeout(tooltipCloseTimer);
+              setTooltipCloseTimer(null);
+            }
           }}
+          onMouseLeave={handleTooltipMouseLeave}
           onClick={(e) => {
             // Evitar que clics dentro del tooltip lo cierren
             e.stopPropagation();
@@ -721,15 +816,41 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
   if (hoveredPlanet === 'Ascendente' && ascendant) {
     return (
       <>
-        <div 
-          className="fixed bg-gradient-to-r from-green-500/95 to-emerald-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm z-[99998]"
-          style={{ 
+        <div
+          className="ascendant-tooltip fixed bg-gradient-to-r from-green-500/95 to-emerald-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm z-[99998]"
+          style={{
             left: tooltipPosition.x + 25,
             top: tooltipPosition.y - 50,
             transform: tooltipPosition.x > window.innerWidth - 300 ? 'translateX(-100%)' : 'none',
             pointerEvents: 'auto'
           }}
+          onMouseEnter={() => {
+            console.log('🟢 Mouse ENTERED ascendant tooltip - Locking it open');
+            setHoveredPlanet('Ascendente');
+            actualSetAspectTooltipLocked(true);
+            if (tooltipCloseTimer) {
+              clearTimeout(tooltipCloseTimer);
+              setTooltipCloseTimer(null);
+            }
+          }}
+          onMouseLeave={handleTooltipMouseLeave}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
         >
+          {/* ✅ BOTÓN CERRAR */}
+          <button
+            onClick={() => {
+              console.log('❌ Close button clicked - Closing ascendant tooltip');
+              setHoveredPlanet(null);
+              actualSetAspectTooltipLocked(false);
+            }}
+            className="absolute top-2 right-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full w-6 h-6 flex items-center justify-center transition-all z-10"
+            aria-label="Cerrar tooltip"
+          >
+            ✕
+          </button>
+
           <div className="flex items-center mb-3">
             <svg className="w-8 h-8 text-white mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="12" y1="19" x2="12" y2="5"/>
@@ -830,15 +951,41 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
   if (hoveredPlanet === 'Medio Cielo' && midheaven) {
     return (
       <>
-        <div 
-          className="fixed bg-gradient-to-r from-purple-500/95 to-violet-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm z-[99998]"
-          style={{ 
+        <div
+          className="midheaven-tooltip fixed bg-gradient-to-r from-purple-500/95 to-violet-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm z-[99998]"
+          style={{
             left: tooltipPosition.x + 25,
             top: tooltipPosition.y - 50,
             transform: tooltipPosition.x > window.innerWidth - 300 ? 'translateX(-100%)' : 'none',
             pointerEvents: 'auto'
           }}
+          onMouseEnter={() => {
+            console.log('🟢 Mouse ENTERED midheaven tooltip - Locking it open');
+            setHoveredPlanet('Medio Cielo');
+            actualSetAspectTooltipLocked(true);
+            if (tooltipCloseTimer) {
+              clearTimeout(tooltipCloseTimer);
+              setTooltipCloseTimer(null);
+            }
+          }}
+          onMouseLeave={handleTooltipMouseLeave}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
         >
+          {/* ✅ BOTÓN CERRAR */}
+          <button
+            onClick={() => {
+              console.log('❌ Close button clicked - Closing midheaven tooltip');
+              setHoveredPlanet(null);
+              actualSetAspectTooltipLocked(false);
+            }}
+            className="absolute top-2 right-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full w-6 h-6 flex items-center justify-center transition-all z-10"
+            aria-label="Cerrar tooltip"
+          >
+            ✕
+          </button>
+
           <div className="flex items-center mb-3">
             <svg className="w-8 h-8 text-white mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="22,7 13.5,15.5 8.5,10.5 2,17"/>
