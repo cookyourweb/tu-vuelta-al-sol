@@ -495,15 +495,28 @@ Opciones de cierre:
 1. Botón X del tooltip:
    → Cierra SOLO el tooltip
    → Drawer permanece abierto
+   → Desbloquea tooltip (aspectTooltipLocked = false)
 
-2. Botón X del drawer:
-   → Cierra AMBOS (drawer + tooltip)
-   → Limpia todos los estados
+2. Botón X del drawer (ACTUALIZADO):
+   → ✅ Cierra AMBOS (drawer + tooltip) de forma coordinada
+   → ✅ Ejecuta handleCloseDrawer() en TODOS los tooltips:
+      • Planetas
+      • Aspectos
+      • Ascendente
+      • Medio Cielo
+   → ✅ Limpia todos los estados:
+      • drawer.close()
+      • setHoveredAspect(null)
+      • setHoveredPlanet(null)
+      • aspectTooltipLocked = false
+      • Limpia tooltipCloseTimer
+   → ✅ Previene tooltips huérfanos (sin drawer)
 
 3. Clic fuera del tooltip:
    → Solo cierra si NO está generando
    → Solo cierra si drawer está cerrado
    → Respeta el estado de bloqueo
+   → Limpia todos los estados
 
 4. Timer automático (onMouseLeave):
    → 3 segundos si no está locked
@@ -728,6 +741,36 @@ TRANSITIONS:
 ```
 
 ### **🔄 Cambios Recientes (Última Actualización)**
+
+#### **🔧 FIX: Cierre Coordinado de Drawer y Tooltip**
+
+**Problema:**
+- Al cerrar drawer con X, el tooltip relacionado permanecía abierto
+- Solo el tooltip de aspectos cerraba correctamente
+- Planetas, Ascendente y Medio Cielo dejaban tooltips "huérfanos"
+
+**Solución:**
+- ✅ Todos los drawers ahora usan `handleCloseDrawer()` en lugar de `drawer.close()`
+- ✅ `handleCloseDrawer()` cierra AMBOS: drawer Y tooltip relacionado
+- ✅ Limpia todos los estados (locked, timers, hoveredAspect/Planet)
+- ✅ Comportamiento consistente en los 4 tipos de tooltips
+
+**Cambios técnicos:**
+```typescript
+// ANTES (solo aspectos funcionaba bien):
+<InterpretationDrawer
+  isOpen={drawer.isOpen}
+  onClose={drawer.close}  // ❌ Solo cerraba drawer
+  content={drawer.content}
+/>
+
+// AHORA (todos funcionan igual):
+<InterpretationDrawer
+  isOpen={drawer.isOpen}
+  onClose={handleCloseDrawer}  // ✅ Cierra drawer + tooltip
+  content={drawer.content}
+/>
+```
 
 #### **✨ NUEVA FUNCIONALIDAD: Generación Individual de Interpretaciones**
 
