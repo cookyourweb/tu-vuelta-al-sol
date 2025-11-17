@@ -1599,6 +1599,108 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         </div>
       )}
 
+      {/* ✅ MODAL DE PROGRESO (estilo aerolínea) */}
+      {loading && !showModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl max-w-2xl w-full shadow-2xl border border-purple-500/30 p-8">
+            <div className="text-center space-y-6">
+              {/* Header */}
+              <div className="flex items-center justify-center gap-3 mb-6">
+                <div className="relative">
+                  <div className="w-16 h-16 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin"></div>
+                  <Sparkles className="w-8 h-8 text-purple-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                </div>
+              </div>
+
+              <h3 className="text-2xl font-bold text-white">
+                🔮 Generando tu Interpretación Natal
+              </h3>
+
+              {/* Barra de progreso */}
+              <div className="w-full bg-slate-700/50 rounded-full h-3 overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-1000 ease-out relative"
+                  style={{ width: `${chunkProgress || 0}%` }}
+                >
+                  <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                </div>
+              </div>
+
+              {/* Porcentaje */}
+              <p className="text-purple-300 font-semibold text-lg">
+                {Math.round(chunkProgress || 0)}%
+              </p>
+
+              {/* Mensaje de progreso */}
+              <div className="bg-purple-900/30 rounded-lg p-4 border border-purple-500/20">
+                <p className="text-purple-100 font-medium text-lg">
+                  {generationProgress || '🔍 Iniciando...'}
+                </p>
+              </div>
+
+              {/* Información adicional */}
+              <div className="space-y-2 text-sm text-gray-400">
+                <p className="flex items-center justify-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  Esto puede tardar 3-5 minutos
+                </p>
+                <p className="flex items-center justify-center gap-2">
+                  <Star className="w-4 h-4" />
+                  Generando interpretaciones personalizadas con IA
+                </p>
+                <p className="flex items-center justify-center gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  No cierres esta ventana
+                </p>
+              </div>
+
+              {/* Timeline de progreso (estilo aerolínea) */}
+              <div className="mt-6 space-y-2 text-left bg-slate-800/50 rounded-lg p-4">
+                <p className="text-gray-400 text-xs font-semibold mb-3">PROGRESO:</p>
+                <div className="space-y-2">
+                  {chunkProgress > 0 && (
+                    <div className="flex items-center gap-2 text-green-400 text-sm">
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                      ✅ Conexión establecida con IA
+                    </div>
+                  )}
+                  {chunkProgress > 10 && (
+                    <div className="flex items-center gap-2 text-green-400 text-sm">
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                      ✅ Analizando carta natal
+                    </div>
+                  )}
+                  {chunkProgress > 30 && (
+                    <div className="flex items-center gap-2 text-green-400 text-sm">
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                      ✅ Generando ángulos (Ascendente, Medio Cielo)
+                    </div>
+                  )}
+                  {chunkProgress > 50 && (
+                    <div className="flex items-center gap-2 text-green-400 text-sm">
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                      ✅ Interpretando planetas principales
+                    </div>
+                  )}
+                  {chunkProgress > 80 && (
+                    <div className="flex items-center gap-2 text-green-400 text-sm">
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                      ✅ Procesando aspectos planetarios
+                    </div>
+                  )}
+                  {chunkProgress > 95 && (
+                    <div className="flex items-center gap-2 text-yellow-400 text-sm">
+                      <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                      🔄 Finalizando y guardando...
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showModal && interpretation && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl max-w-6xl w-full max-h-[95vh] flex flex-col shadow-2xl border border-purple-500/30">
