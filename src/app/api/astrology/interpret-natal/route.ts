@@ -129,11 +129,12 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userId, chartData, userProfile } = body;
+    const { userId, chartData, userProfile, regenerate = false } = body;
 
     console.log('🎯 [DEBUG] POST request received');
     console.log('🎯 [DEBUG] userId:', userId);
     console.log('🎯 [DEBUG] userProfile:', userProfile);
+    console.log('🎯 [DEBUG] regenerate:', regenerate);
     console.log('🎯 [DEBUG] chartData keys:', Object.keys(chartData || {}));
 
     if (!userId || !chartData || !userProfile) {
@@ -148,9 +149,41 @@ export async function POST(request: NextRequest) {
 
     const startTime = Date.now();
 
-    // Generate all interpretations
+    // ✅ CACHÉ INTELIGENTE: Buscar primero en MongoDB
+    const mongoose = await connectToDatabase();
+    const db = (mongoose as any).connection?.db ?? (mongoose as any).db;
+
+    let existingInterpretations: any = null;
+    let fromCache = false;
+
+    if (!regenerate) {
+      console.log('💾 [CACHE] Buscando interpretaciones existentes...');
+      const existing = await db.collection('interpretations').findOne({
+        userId,
+        chartType: 'natal',
+      });
+
+      if (existing && existing.interpretations) {
+        existingInterpretations = existing.interpretations;
+        fromCache = true;
+        console.log('✅ [CACHE] Encontradas interpretaciones existentes');
+        console.log('📊 [CACHE] Planetas existentes:', Object.keys(existingInterpretations.planets || {}).length);
+        console.log('📊 [CACHE] Aspectos existentes:', Object.keys(existingInterpretations.aspects || {}).length);
+      } else {
+        console.log('ℹ️ [CACHE] No hay interpretaciones previas, generando desde cero');
+      }
+    } else {
+      console.log('🔄 [REGENERATE] Regeneración forzada, ignorando caché');
+    }
+
+    // ✅ GENERAR (reutiliza existente si hay)
     console.log('🎯 [DEBUG] Calling generateNatalBatchInterpretations...');
-    const interpretations = await generateNatalBatchInterpretations(chartData, userProfile);
+    const interpretations = await generateNatalBatchInterpretations(
+      chartData,
+      userProfile,
+      undefined, // onProgress callback
+      existingInterpretations // ← PASA EXISTENTE PARA REUTILIZAR
+    );
 
     console.log('🎯 [DEBUG] Interpretations generated successfully');
     console.log('🎯 [DEBUG] Interpretation keys:', Object.keys(interpretations));
@@ -159,10 +192,29 @@ export async function POST(request: NextRequest) {
 
     const generationTime = ((Date.now() - startTime) / 1000).toFixed(0);
 
-    // Save to MongoDB
-    console.log('🎯 [DEBUG] Connecting to database...');
-    const mongoose = await connectToDatabase();
-    const db = (mongoose as any).connection?.db ?? (mongoose as any).db;
+    // ✅ CALCULAR AHORRO
+    let newlyGenerated = 0;
+    let reused = 0;
+
+    if (fromCache && existingInterpretations) {
+      // Contar cuántos se reutilizaron vs generaron
+      const existingPlanets = Object.keys(existingInterpretations.planets || {}).length;
+      const existingAspects = Object.keys(existingInterpretations.aspects || {}).length;
+      const totalExisting = existingPlanets + existingAspects;
+
+      const totalNow = Object.keys(interpretations.planets || {}).length + Object.keys(interpretations.aspects || {}).length;
+
+      reused = Math.min(totalExisting, totalNow);
+      newlyGenerated = Math.max(0, totalNow - totalExisting);
+
+      console.log(`💰 [AHORRO] Reutilizados: ${reused}, Nuevos: ${newlyGenerated}`);
+    } else {
+      newlyGenerated = Object.keys(interpretations.planets || {}).length + Object.keys(interpretations.aspects || {}).length;
+      console.log(`🆕 [NUEVO] Todo generado desde cero: ${newlyGenerated} items`);
+    }
+
+    const estimatedCost = (newlyGenerated * 0.15).toFixed(2); // $0.15 por interpretación
+    const savedCost = (reused * 0.15).toFixed(2);
 
     const stats = {
       totalAngles: 2,
@@ -173,7 +225,11 @@ export async function POST(request: NextRequest) {
       totalModalities: Object.keys(interpretations.modalities).length,
       totalAspects: Object.keys(interpretations.aspects).length,
       generationTime: `${generationTime}s`,
-      totalCost: '$2.50', // Approximate for expanded interpretations
+      newlyGenerated,
+      reusedFromCache: reused,
+      estimatedCost: `$${estimatedCost}`,
+      savedCost: `$${savedCost}`,
+      cacheHit: fromCache,
     };
 
     console.log('🎯 [DEBUG] Saving to MongoDB with stats:', stats);
@@ -197,7 +253,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: interpretations,
-      cached: false,
+      cached: fromCache,
       generatedAt: new Date().toISOString(),
       stats,
     });
@@ -422,7 +478,8 @@ export async function DELETE(request: NextRequest) {
 async function generateNatalBatchInterpretations(
   chartData: any,
   userProfile: any,
-  onProgress?: (message: string, progress: number) => void
+  onProgress?: (message: string, progress: number) => void,
+  existingInterpretations?: NatalInterpretations | null
 ): Promise<NatalInterpretations> {
 
   console.log('🎯 [DEBUG] generateNatalBatchInterpretations called');
@@ -443,26 +500,31 @@ async function generateNatalBatchInterpretations(
 
   console.log('🎯 [DEBUG] OpenAI client initialized');
 
-  onProgress?.('🌟 Generando tu Ascendente y Medio Cielo...', 5);
+  // ✅ REUTILIZAR O GENERAR ANGLES
+  onProgress?.('🌟 Verificando Ascendente y Medio Cielo...', 5);
 
   const interpretations: NatalInterpretations = {
-    angles: {
+    angles: existingInterpretations?.angles || {
       Ascendente: await generateAngleInterpretation('Ascendente', chartData.ascendant, userProfile, openai),
       MedioCielo: await generateAngleInterpretation('MedioCielo', chartData.midheaven, userProfile, openai),
     },
-    planets: {},
-    asteroids: {},
-    nodes: {},
-    elements: {},
-    modalities: {},
-    aspects: {},
+    planets: existingInterpretations?.planets || {},
+    asteroids: existingInterpretations?.asteroids || {},
+    nodes: existingInterpretations?.nodes || {},
+    elements: existingInterpretations?.elements || {},
+    modalities: existingInterpretations?.modalities || {},
+    aspects: existingInterpretations?.aspects || {},
   };
 
-  console.log('🎯 [DEBUG] Angles generated successfully');
+  if (existingInterpretations?.angles) {
+    console.log('💾 [CACHE] Reutilizando ángulos existentes');
+  } else {
+    console.log('🆕 [NEW] Ángulos generados');
+  }
 
-  onProgress?.('✨ Generando interpretaciones de planetas...', 15);
+  onProgress?.('✨ Verificando interpretaciones de planetas...', 15);
 
-  // Generate planet interpretations
+  // Generate planet interpretations (SOLO SI NO EXISTEN)
   const planetNames = ['Sol', 'Luna', 'Mercurio', 'Venus', 'Marte', 'Jupiter', 'Saturno', 'Urano', 'Neptuno', 'Pluton'];
 
   console.log('🎯 [DEBUG] Starting planet generation loop');
@@ -473,12 +535,20 @@ async function generateNatalBatchInterpretations(
 
     const planet = findPlanetByName(chartData.planets, planetName);
     if (planet) {
-      console.log(`🎯 [DEBUG] Found planet ${planetName}:`, { sign: planet.sign, house: planet.house, degree: planet.degree });
+      const key = `${planet.name}-${planet.sign}-${planet.house}`;
+
+      // ✅ VERIFICAR SI YA EXISTE
+      if (existingInterpretations?.planets?.[key]) {
+        console.log(`💾 [CACHE] Reutilizando interpretación existente para ${planetName}`);
+        interpretations.planets[key] = existingInterpretations.planets[key];
+        continue; // ← SALTAR generación, ya existe
+      }
+
+      console.log(`🆕 [NEW] Generando ${planetName} (no existe en caché)`);
 
       const progress = 15 + (i / planetNames.length) * 30; // 15-45%
       onProgress?.(`🌟 Generando tu ${planetName} en ${planet.sign}...`, progress);
 
-      const key = `${planet.name}-${planet.sign}-${planet.house}`;
       console.log(`🎯 [DEBUG] Generating interpretation for key: ${key}`);
 
       interpretations.planets[key] = await generatePlanetInterpretation(planet, userProfile, openai);
@@ -494,46 +564,60 @@ async function generateNatalBatchInterpretations(
 
   console.log('🎯 [DEBUG] Planet generation completed');
 
-  // Generate asteroid interpretations (Lilith, Chiron)
-  onProgress?.('🌑 Generando tu Lilith y Chiron...', 50);
+  // Generate asteroid interpretations (Lilith, Chiron) - REUTILIZAR SI EXISTE
+  onProgress?.('🌑 Verificando Lilith y Chiron...', 50);
   const asteroidNames = ['Lilith', 'Chiron'];
 
   for (let i = 0; i < asteroidNames.length; i++) {
     const asteroidName = asteroidNames[i];
     const asteroid = findPlanetByName(chartData.planets, asteroidName);
     if (asteroid) {
+      const key = `${asteroid.name}-${asteroid.sign}-${asteroid.house}`;
+
+      // ✅ REUTILIZAR SI EXISTE
+      if (existingInterpretations?.asteroids?.[key]) {
+        console.log(`💾 [CACHE] Reutilizando ${asteroidName}`);
+        interpretations.asteroids[key] = existingInterpretations.asteroids[key];
+        continue;
+      }
+
+      console.log(`🆕 [NEW] Generando ${asteroidName}`);
       const progress = 50 + (i / asteroidNames.length) * 10; // 50-60%
       onProgress?.(`🌑 Generando tu ${asteroidName} en ${asteroid.sign}...`, progress);
 
-      const key = `${asteroid.name}-${asteroid.sign}-${asteroid.house}`;
       interpretations.asteroids[key] = await generatePlanetInterpretation(asteroid, userProfile, openai);
-
-      // Small delay to avoid rate limits
       await new Promise(resolve => setTimeout(resolve, 500));
     }
   }
 
-  // Generate nodes interpretations (North Node, South Node)
-  onProgress?.('🌙 Generando tus Nodos Lunares...', 65);
+  // Generate nodes interpretations - REUTILIZAR SI EXISTE
+  onProgress?.('🌙 Verificando Nodos Lunares...', 65);
   const nodeNames = ['Nodo Norte', 'Nodo Sur'];
 
   for (let i = 0; i < nodeNames.length; i++) {
     const nodeName = nodeNames[i];
     const node = findPlanetByName(chartData.planets, nodeName);
     if (node) {
+      const key = `${node.name}-${node.sign}-${node.house}`;
+
+      // ✅ REUTILIZAR SI EXISTE
+      if (existingInterpretations?.nodes?.[key]) {
+        console.log(`💾 [CACHE] Reutilizando ${nodeName}`);
+        interpretations.nodes[key] = existingInterpretations.nodes[key];
+        continue;
+      }
+
+      console.log(`🆕 [NEW] Generando ${nodeName}`);
       const progress = 65 + (i / nodeNames.length) * 10; // 65-75%
       onProgress?.(`🌙 Generando tu ${nodeName} en ${node.sign}...`, progress);
 
-      const key = `${node.name}-${node.sign}-${node.house}`;
       interpretations.nodes[key] = await generatePlanetInterpretation(node, userProfile, openai);
-
-      // Small delay to avoid rate limits
       await new Promise(resolve => setTimeout(resolve, 500));
     }
   }
 
-  // Generate elements interpretations
-  onProgress?.('🔥 Generando tus Elementos (Fuego, Tierra, Aire, Agua)...', 80);
+  // Generate elements - REUTILIZAR SI EXISTE
+  onProgress?.('🔥 Verificando Elementos...', 80);
   const elements = [
     { name: 'Fuego', distribution: chartData.elementDistribution?.fire || 0 },
     { name: 'Tierra', distribution: chartData.elementDistribution?.earth || 0 },
@@ -544,19 +628,26 @@ async function generateNatalBatchInterpretations(
   for (let i = 0; i < elements.length; i++) {
     const element = elements[i];
     if (element.distribution > 0) {
+      const key = `Elemento-${element.name}`;
+
+      // ✅ REUTILIZAR SI EXISTE
+      if (existingInterpretations?.elements?.[key]) {
+        console.log(`💾 [CACHE] Reutilizando Elemento ${element.name}`);
+        interpretations.elements[key] = existingInterpretations.elements[key];
+        continue;
+      }
+
+      console.log(`🆕 [NEW] Generando Elemento ${element.name}`);
       const progress = 80 + (i / elements.length) * 5; // 80-85%
       onProgress?.(`🔥 Generando tu Elemento ${element.name} (${element.distribution} planetas)...`, progress);
 
-      const key = `Elemento-${element.name}`;
       interpretations.elements[key] = await generateElementInterpretation(element, userProfile, openai);
-
-      // Small delay to avoid rate limits
       await new Promise(resolve => setTimeout(resolve, 500));
     }
   }
 
-  // Generate modalities interpretations
-  onProgress?.('⚡ Generando tus Modalidades (Cardinal, Fijo, Mutable)...', 90);
+  // Generate modalities - REUTILIZAR SI EXISTE
+  onProgress?.('⚡ Verificando Modalidades...', 90);
   const modalities = [
     { name: 'Cardinal', distribution: chartData.modalityDistribution?.cardinal || 0 },
     { name: 'Fijo', distribution: chartData.modalityDistribution?.fixed || 0 },
@@ -566,31 +657,45 @@ async function generateNatalBatchInterpretations(
   for (let i = 0; i < modalities.length; i++) {
     const modality = modalities[i];
     if (modality.distribution > 0) {
+      const key = `Modalidad-${modality.name}`;
+
+      // ✅ REUTILIZAR SI EXISTE
+      if (existingInterpretations?.modalities?.[key]) {
+        console.log(`💾 [CACHE] Reutilizando Modalidad ${modality.name}`);
+        interpretations.modalities[key] = existingInterpretations.modalities[key];
+        continue;
+      }
+
+      console.log(`🆕 [NEW] Generando Modalidad ${modality.name}`);
       const progress = 90 + (i / modalities.length) * 5; // 90-95%
       onProgress?.(`⚡ Generando tu Modalidad ${modality.name} (${modality.distribution} planetas)...`, progress);
 
-      const key = `Modalidad-${modality.name}`;
       interpretations.modalities[key] = await generateModalityInterpretation(modality, userProfile, openai);
-
-      // Small delay to avoid rate limits
       await new Promise(resolve => setTimeout(resolve, 500));
     }
   }
 
-  // Generate aspects interpretations
+  // Generate aspects - REUTILIZAR SI EXISTE
   if (chartData.aspects && chartData.aspects.length > 0) {
-    onProgress?.('🔗 Generando tus Aspectos principales...', 98);
+    onProgress?.('🔗 Verificando Aspectos...', 98);
     const aspectsToGenerate = chartData.aspects.slice(0, 10); // Limit to first 10 aspects
 
     for (let i = 0; i < aspectsToGenerate.length; i++) {
       const aspect = aspectsToGenerate[i];
+      const key = `${aspect.planet1}-${aspect.planet2}-${aspect.type}`;
+
+      // ✅ REUTILIZAR SI EXISTE
+      if (existingInterpretations?.aspects?.[key]) {
+        console.log(`💾 [CACHE] Reutilizando aspecto ${aspect.planet1} ${aspect.type} ${aspect.planet2}`);
+        interpretations.aspects[key] = existingInterpretations.aspects[key];
+        continue;
+      }
+
+      console.log(`🆕 [NEW] Generando aspecto ${aspect.planet1} ${aspect.type} ${aspect.planet2}`);
       const progress = 98 + (i / aspectsToGenerate.length) * 2; // 98-100%
       onProgress?.(`🔗 Generando ${aspect.planet1} ${aspect.type} ${aspect.planet2}...`, progress);
 
-      const key = `${aspect.planet1}-${aspect.planet2}-${aspect.type}`;
       interpretations.aspects[key] = await generateAspectInterpretation(aspect, userProfile, openai);
-
-      // Small delay to avoid rate limits
       await new Promise(resolve => setTimeout(resolve, 500));
     }
   }
