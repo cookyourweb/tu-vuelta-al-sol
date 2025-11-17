@@ -257,6 +257,79 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
   };
 
   // =========================================================================
+  // 🪐 GENERAR INTERPRETACIÓN DE PLANETA
+  // =========================================================================
+  const generatePlanetInterpretation = async (planetName: string, sign: string, house: number, degree: string) => {
+    if (!userId) {
+      console.error('❌ No userId provided for planet interpretation');
+      alert('⚠️ No se pudo identificar el usuario. Por favor recarga la página.');
+      return;
+    }
+
+    console.log('═══════════════════════════════════════════════════');
+    console.log('🪐 GENERATING PLANET INTERPRETATION');
+    console.log('   Planet:', planetName);
+    console.log('   Sign:', sign);
+    console.log('   House:', house);
+    console.log('   Degree:', degree);
+    console.log('   User ID:', userId);
+    console.log('═══════════════════════════════════════════════════');
+
+    actualSetGeneratingAspect(true);
+    actualSetAspectTooltipLocked(true);
+
+    try {
+      const response = await fetch('/api/astrology/interpret-natal', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          planetName,
+          sign,
+          house,
+          degree
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log('✅ Planet interpretation generated successfully!');
+
+        // Refresh interpretations
+        const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`);
+        const refreshResult = await refreshResponse.json();
+
+        if (refreshResult.success) {
+          actualSetNatalInterpretations(refreshResult.data);
+          console.log('✅ Interpretations refreshed successfully');
+
+          // Abrir el drawer con la interpretación generada
+          const planetKey = `${planetName}-${sign}-${house}`;
+          const planetInterpretation = refreshResult.data?.planets?.[planetKey];
+
+          console.log('🔍 Looking for planet interpretation with key:', planetKey);
+          console.log('🔍 Available planets:', Object.keys(refreshResult.data?.planets || {}));
+          console.log('🔍 Planet data:', planetInterpretation);
+
+          if (planetInterpretation?.drawer) {
+            console.log('🎨 Opening drawer with planet interpretation');
+            drawer.open(planetInterpretation.drawer);
+          } else {
+            console.warn('⚠️ No drawer content found for planet:', planetKey);
+            console.warn('⚠️ Full interpretation data:', planetInterpretation);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error generating planet:', error);
+      alert('❌ Error generando interpretación. Por favor intenta de nuevo.');
+    } finally {
+      actualSetGeneratingAspect(false);
+    }
+  };
+
+  // =========================================================================
   // 🔄 CARGAR INTERPRETACIONES AL MONTAR
   // =========================================================================
   useEffect(() => {
@@ -544,62 +617,97 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
             </div>
           )}
 
-          {/* NUEVO: Botón para abrir drawer */}
-          {(() => {
-            // Verificar si hay interpretación real guardada
-            const interpretationKey = `${planet.name}-${planet.sign}-${planet.house}`;
-            const hasRealInterpretation = false; // TODO: Implementar verificación real
+          {/* ✨ BOTÓN PARA GENERAR/VER INTERPRETACIÓN DEL PLANETA */}
+          {userId && (() => {
+            // Verificar si hay interpretación AI guardada para este planeta
+            const planetKey = `${planet.name}-${planet.sign}-${planet.house}`;
+            const hasAIInterpretation = actualNatalInterpretations?.planets?.[planetKey]?.ai ? true : false;
 
-            if (hasRealInterpretation) {
+            if (hasAIInterpretation) {
+              // Si existe → Mostrar "Ver interpretación"
               return (
-                <InterpretationButton
-                  onClick={() => {
-                    console.log('🎯 CLICK: Ver interpretación completa para planeta', planet.name);
-                    openInterpretationDrawer('planet', {
-                      name: planet.name,
-                      sign: planet.sign,
-                      house: planet.house,
-                      degree: planet.degree
-                    });
-                  }}
-                  disabled={isLoadingInterpretation}
-                />
-              );
-            } else {
-              return (
-                <div className="space-y-2">
-                  <div className="text-center text-xs text-yellow-300 bg-yellow-900/20 rounded-lg p-2 border border-yellow-500/30">
-                    ⚠️ Esta interpretación es un ejemplo. Para ver tu interpretación personalizada completa, genera las interpretaciones usando el botón grande "INTERPRETAR" en la parte superior.
-                  </div>
-
+                <div className="space-y-2 mt-3">
                   <button
                     onClick={(e) => {
-                      console.log('🎯 CLICK: Ir a generar interpretaciones');
+                      console.log('🎯 CLICK: Ver interpretación de', planet.name);
                       e.stopPropagation();
-                      e.preventDefault();
-
-                      // Cerrar tooltip
-                      setHoveredPlanet(null);
-
-                      // Scroll al botón de interpretar
-                      const interpretButton = document.querySelector('[data-interpret-button]');
-                      console.log('🎯 Buscando botón interpretar:', interpretButton);
-                      if (interpretButton) {
-                        interpretButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-                        // Parpadear el botón para llamar la atención
-                        interpretButton.classList.add('animate-pulse');
-                        setTimeout(() => {
-                          interpretButton.classList.remove('animate-pulse');
-                        }, 3000);
-                      } else {
-                        console.log('❌ No se encontró el botón interpretar');
+                      const planetInterpretation = actualNatalInterpretations.planets[planetKey];
+                      if (planetInterpretation?.drawer) {
+                        drawer.open(planetInterpretation.drawer);
                       }
                     }}
-                    className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                    className="w-full py-2.5 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-lg"
                   >
-                    🎯 Ir a generar interpretaciones
+                    <span>📖</span>
+                    <span>Ver Interpretación Completa</span>
                   </button>
+                </div>
+              );
+            } else {
+              // Si NO existe → Mostrar "Generar interpretación"
+              return (
+                <div className="space-y-2 mt-3">
+                  <button
+                    onMouseDown={(e) => {
+                      console.log('🟢 BUTTON MOUSEDOWN - Planet interpretation');
+                      console.log('   Planet:', planet.name);
+                    }}
+                    onMouseUp={(e) => {
+                      console.log('🟡 BUTTON MOUSEUP - Planet interpretation');
+                    }}
+                    onClick={async (e) => {
+                      console.log('═══════════════════════════════════════════════════');
+                      console.log('🎯 BUTTON ONCLICK FIRED - Planet interpretation');
+                      console.log('═══════════════════════════════════════════════════');
+                      console.log('1️⃣ Event object:', e.type);
+                      console.log('2️⃣ Planet data:');
+                      console.log('     name:', planet.name);
+                      console.log('     sign:', planet.sign);
+                      console.log('     house:', planet.house);
+                      console.log('     degree:', planet.degree);
+
+                      console.log('3️⃣ Calling e.stopPropagation()...');
+                      e.stopPropagation();
+
+                      console.log('4️⃣ Calling e.preventDefault()...');
+                      e.preventDefault();
+
+                      console.log('5️⃣ Setting aspectTooltipLocked to TRUE...');
+                      actualSetAspectTooltipLocked(true);
+
+                      console.log('6️⃣ About to call generatePlanetInterpretation...');
+                      console.log('═══════════════════════════════════════════════════');
+
+                      await generatePlanetInterpretation(
+                        planet.name,
+                        planet.sign,
+                        planet.house,
+                        planet.degree
+                      );
+
+                      console.log('7️⃣ generatePlanetInterpretation COMPLETED');
+                      console.log('═══════════════════════════════════════════════════');
+                    }}
+                    disabled={actualGeneratingAspect}
+                    className="w-full py-2.5 px-4 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white rounded-lg text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg relative z-50"
+                  >
+                    {actualGeneratingAspect ? (
+                      <>
+                        <div className="animate-spin">⏳</div>
+                        <span>Generando interpretación AI...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>✨</span>
+                        <span>Generar Interpretación AI</span>
+                      </>
+                    )}
+                  </button>
+                  {actualGeneratingAspect && (
+                    <div className="text-center text-xs text-yellow-200 animate-pulse">
+                      🔮 Esto puede tardar 10-30 segundos...
+                    </div>
+                  )}
                 </div>
               );
             }
