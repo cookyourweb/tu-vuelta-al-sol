@@ -717,7 +717,7 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
         {/* DRAWER */}
         <InterpretationDrawer
           isOpen={drawer.isOpen}
-          onClose={drawer.close}
+          onClose={handleCloseDrawer}
           content={drawer.content}
         />
       </>
@@ -1046,7 +1046,7 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
         {/* DRAWER */}
         <InterpretationDrawer
           isOpen={drawer.isOpen}
-          onClose={drawer.close}
+          onClose={handleCloseDrawer}
           content={drawer.content}
         />
       </>
@@ -1178,7 +1178,7 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
         {/* DRAWER */}
         <InterpretationDrawer
           isOpen={drawer.isOpen}
-          onClose={drawer.close}
+          onClose={handleCloseDrawer}
           content={drawer.content}
         />
       </>
