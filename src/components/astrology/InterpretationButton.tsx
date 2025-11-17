@@ -51,6 +51,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
   isAdmin = false
 }) => {
   const [interpretation, setInterpretation] = useState<InterpretationData | null>(null);
+  const [revolutionaryInterpretation, setRevolutionaryInterpretation] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [checkingCache, setCheckingCache] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -460,6 +461,15 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
             console.log('📊 STATS:', result.stats);
           }
 
+          // ✅ CAPTURAR INTERPRETACIÓN REVOLUCIONARIA
+          if (result.revolutionaryInterpretation) {
+            console.log('🔥 ===== INTERPRETACIÓN REVOLUCIONARIA DETECTADA =====');
+            console.log('🔥 Claves:', Object.keys(result.revolutionaryInterpretation));
+            setRevolutionaryInterpretation(result.revolutionaryInterpretation);
+          } else {
+            console.log('⚠️ No se recibió interpretación revolucionaria en esta respuesta');
+          }
+
           setInterpretation(newInterpretation);
           setHasRecentInterpretation(true);
 
@@ -614,6 +624,267 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
     return `hace ${diffMinutes}m`;
   };
 
+  // ✅ NUEVO: Renderizado para Interpretación Revolucionaria
+  const renderRevolutionaryContent = () => {
+    if (!revolutionaryInterpretation) {
+      return null;
+    }
+
+    const data = revolutionaryInterpretation;
+
+    return (
+      <div className="space-y-8">
+        {/* ESENCIA REVOLUCIONARIA */}
+        {data.esencia_revolucionaria && (
+          <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 rounded-2xl p-8 border border-purple-400/30">
+            <h4 className="text-purple-100 font-bold text-2xl mb-4 flex items-center gap-3">
+              <Star className="w-8 h-8 text-purple-300" />
+              🔥 Tu Esencia Revolucionaria
+            </h4>
+            <p className="text-purple-50 text-lg leading-relaxed whitespace-pre-wrap">{data.esencia_revolucionaria}</p>
+          </div>
+        )}
+
+        {/* PROPÓSITO DE VIDA */}
+        {data.proposito_vida && (
+          <div className="bg-gradient-to-br from-blue-900/40 to-indigo-900/40 rounded-2xl p-8 border border-blue-400/30">
+            <h4 className="text-blue-100 font-bold text-2xl mb-4 flex items-center gap-3">
+              <Target className="w-8 h-8 text-blue-300" />
+              🎯 Tu Propósito de Vida
+            </h4>
+            <p className="text-blue-50 text-lg leading-relaxed whitespace-pre-wrap">{data.proposito_vida}</p>
+          </div>
+        )}
+
+        {/* ÁNGULOS VITALES */}
+        {data.angulos_vitales && (
+          <div className="bg-gradient-to-br from-yellow-900/40 to-orange-900/40 rounded-2xl p-8 border border-yellow-400/30">
+            <h4 className="text-yellow-100 font-bold text-2xl mb-6 flex items-center gap-3">
+              <Zap className="w-8 h-8 text-yellow-300" />
+              ⚡ Ángulos Vitales
+            </h4>
+
+            {/* ASCENDENTE */}
+            {data.angulos_vitales.ascendente && (
+              <div className="mb-6 bg-yellow-800/30 rounded-lg p-6">
+                <h5 className="text-yellow-200 font-bold text-xl mb-3">🌅 Ascendente ({data.angulos_vitales.ascendente.posicion})</h5>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-yellow-100 font-semibold mb-1">💫 Máscara Social:</p>
+                    <p className="text-yellow-50 text-sm whitespace-pre-wrap">{data.angulos_vitales.ascendente.mascara_social}</p>
+                  </div>
+                  <div>
+                    <p className="text-yellow-100 font-semibold mb-1">🏃 Cuerpo Físico:</p>
+                    <p className="text-yellow-50 text-sm whitespace-pre-wrap">{data.angulos_vitales.ascendente.cuerpo_fisico}</p>
+                  </div>
+                  <div>
+                    <p className="text-yellow-100 font-semibold mb-1">👁️ Enfoque de Vida:</p>
+                    <p className="text-yellow-50 text-sm whitespace-pre-wrap">{data.angulos_vitales.ascendente.enfoque_vida}</p>
+                  </div>
+                  <div>
+                    <p className="text-yellow-100 font-semibold mb-1">🚀 Superpoder:</p>
+                    <p className="text-yellow-50 text-sm whitespace-pre-wrap">{data.angulos_vitales.ascendente.superpoder}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* MEDIO CIELO */}
+            {data.angulos_vitales.medio_cielo && (
+              <div className="bg-yellow-800/30 rounded-lg p-6">
+                <h5 className="text-yellow-200 font-bold text-xl mb-3">👑 Medio Cielo ({data.angulos_vitales.medio_cielo.posicion})</h5>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-yellow-100 font-semibold mb-1">✨ Vocación del Alma:</p>
+                    <p className="text-yellow-50 text-sm whitespace-pre-wrap">{data.angulos_vitales.medio_cielo.vocacion_soul}</p>
+                  </div>
+                  <div>
+                    <p className="text-yellow-100 font-semibold mb-1">🏆 Carrera Ideal:</p>
+                    <p className="text-yellow-50 text-sm whitespace-pre-wrap">{data.angulos_vitales.medio_cielo.carrera_ideal}</p>
+                  </div>
+                  <div>
+                    <p className="text-yellow-100 font-semibold mb-1">🌟 Legado:</p>
+                    <p className="text-yellow-50 text-sm whitespace-pre-wrap">{data.angulos_vitales.medio_cielo.legado}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* FORMACIÓN TEMPRANA */}
+        {data.formacion_temprana && (
+          <div className="bg-gradient-to-br from-cyan-900/40 to-teal-900/40 rounded-2xl p-8 border border-cyan-400/30">
+            <h4 className="text-cyan-100 font-bold text-2xl mb-6 flex items-center gap-3">
+              <Star className="w-8 h-8 text-cyan-300" />
+              👶 Formación Temprana
+            </h4>
+            <div className="space-y-4">
+              {data.formacion_temprana.casa_lunar && (
+                <div className="bg-cyan-800/30 rounded-lg p-4">
+                  <h5 className="text-cyan-200 font-semibold mb-2">🌙 Casa Lunar</h5>
+                  <p className="text-cyan-100 text-sm mb-1"><strong>Planeta:</strong> {data.formacion_temprana.casa_lunar.planeta}</p>
+                  <p className="text-cyan-50 text-sm mb-2"><strong>Infancia Emocional:</strong> {data.formacion_temprana.casa_lunar.infancia_emocional}</p>
+                  <p className="text-cyan-50 text-sm mb-2"><strong>Patrón Formado:</strong> {data.formacion_temprana.casa_lunar.patron_formado}</p>
+                  <p className="text-cyan-50 text-sm"><strong>Impacto Adulto:</strong> {data.formacion_temprana.casa_lunar.impacto_adulto}</p>
+                </div>
+              )}
+              {data.formacion_temprana.casa_saturnina && (
+                <div className="bg-cyan-800/30 rounded-lg p-4">
+                  <h5 className="text-cyan-200 font-semibold mb-2">🪐 Casa Saturnina</h5>
+                  <p className="text-cyan-100 text-sm mb-1"><strong>Planeta:</strong> {data.formacion_temprana.casa_saturnina.planeta}</p>
+                  <p className="text-cyan-50 text-sm mb-2"><strong>Límites Internalizados:</strong> {data.formacion_temprana.casa_saturnina.limites_internalizados}</p>
+                  <p className="text-cyan-50 text-sm mb-2"><strong>Mensaje Recibido:</strong> {data.formacion_temprana.casa_saturnina.mensaje_recibido}</p>
+                  <p className="text-cyan-50 text-sm"><strong>Impacto Adulto:</strong> {data.formacion_temprana.casa_saturnina.impacto_adulto}</p>
+                </div>
+              )}
+              {data.formacion_temprana.casa_venusina && (
+                <div className="bg-cyan-800/30 rounded-lg p-4">
+                  <h5 className="text-cyan-200 font-semibold mb-2">💖 Casa Venusina</h5>
+                  <p className="text-cyan-100 text-sm mb-1"><strong>Planeta:</strong> {data.formacion_temprana.casa_venusina.planeta}</p>
+                  <p className="text-cyan-50 text-sm mb-2"><strong>Amor Aprendido:</strong> {data.formacion_temprana.casa_venusina.amor_aprendido}</p>
+                  <p className="text-cyan-50 text-sm mb-2"><strong>Modelo Relacional:</strong> {data.formacion_temprana.casa_venusina.modelo_relacional}</p>
+                  <p className="text-cyan-50 text-sm"><strong>Impacto Adulto:</strong> {data.formacion_temprana.casa_venusina.impacto_adulto}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* PATRONES PSICOLÓGICOS */}
+        {data.patrones_psicologicos && data.patrones_psicologicos.length > 0 && (
+          <div className="bg-gradient-to-br from-rose-900/40 to-red-900/40 rounded-2xl p-8 border border-rose-400/30">
+            <h4 className="text-rose-100 font-bold text-2xl mb-6 flex items-center gap-3">
+              <Brain className="w-8 h-8 text-rose-300" />
+              🧠 Patrones Psicológicos
+            </h4>
+            <div className="space-y-6">
+              {data.patrones_psicologicos.map((patron: any, idx: number) => (
+                <div key={idx} className="bg-rose-800/30 rounded-lg p-6">
+                  <h5 className="text-rose-200 font-bold text-xl mb-3">{patron.nombre_patron}</h5>
+                  <p className="text-rose-100 text-sm mb-3"><strong>Origen:</strong> {patron.planeta_origen}</p>
+
+                  <div className="mb-3">
+                    <p className="text-rose-200 font-semibold mb-1">Cómo se manifiesta:</p>
+                    <ul className="list-disc list-inside text-rose-50 text-sm space-y-1">
+                      {patron.como_se_manifiesta?.map((item: string, i: number) => (
+                        <li key={i}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <p className="text-rose-50 text-sm mb-3"><strong>Origen en Infancia:</strong> {patron.origen_infancia}</p>
+
+                  <div className="mb-3">
+                    <p className="text-rose-200 font-semibold mb-1">Diálogo Interno:</p>
+                    <ul className="list-disc list-inside text-rose-50 text-sm space-y-1">
+                      {patron.dialogo_interno?.map((item: string, i: number) => (
+                        <li key={i}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <p className="text-rose-50 text-sm mb-3"><strong>Sombra Junguiana:</strong> {patron.sombra_junguiana}</p>
+                  <p className="text-rose-50 text-sm mb-3"><strong>✨ Superpoder Integrado:</strong> {patron.superpoder_integrado}</p>
+                  <p className="text-rose-100 text-sm italic"><strong>❓ Reflexión:</strong> {patron.pregunta_reflexion}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* NODOS LUNARES */}
+        {data.nodos_lunares && (
+          <div className="bg-gradient-to-br from-indigo-900/40 to-violet-900/40 rounded-2xl p-8 border border-indigo-400/30">
+            <h4 className="text-indigo-100 font-bold text-2xl mb-6 flex items-center gap-3">
+              <Target className="w-8 h-8 text-indigo-300" />
+              🌙 Nodos Lunares
+            </h4>
+            <div className="space-y-4">
+              {data.nodos_lunares.nodo_sur && (
+                <div className="bg-indigo-800/30 rounded-lg p-4">
+                  <h5 className="text-indigo-200 font-semibold mb-2">⬅️ Nodo Sur ({data.nodos_lunares.nodo_sur.signo_casa})</h5>
+                  <p className="text-indigo-50 text-sm mb-2"><strong>Zona de Confort:</strong> {data.nodos_lunares.nodo_sur.zona_comfort}</p>
+                  <p className="text-indigo-50 text-sm"><strong>Patrón Repetitivo:</strong> {data.nodos_lunares.nodo_sur.patron_repetitivo}</p>
+                </div>
+              )}
+              {data.nodos_lunares.nodo_norte && (
+                <div className="bg-indigo-800/30 rounded-lg p-4">
+                  <h5 className="text-indigo-200 font-semibold mb-2">➡️ Nodo Norte ({data.nodos_lunares.nodo_norte.signo_casa})</h5>
+                  <p className="text-indigo-50 text-sm mb-2"><strong>Dirección Evolutiva:</strong> {data.nodos_lunares.nodo_norte.direccion_evolutiva}</p>
+                  <p className="text-indigo-50 text-sm"><strong>Desafío:</strong> {data.nodos_lunares.nodo_norte.desafio}</p>
+                </div>
+              )}
+              {data.nodos_lunares.eje_completo && (
+                <div className="bg-indigo-800/30 rounded-lg p-4">
+                  <p className="text-indigo-50 text-sm"><strong>📍 Eje Completo:</strong> {data.nodos_lunares.eje_completo}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* DECLARACIÓN DE PODER */}
+        {data.declaracion_poder && (
+          <div className="bg-gradient-to-br from-orange-900/40 to-amber-900/40 rounded-2xl p-8 border border-orange-400/30">
+            <h4 className="text-orange-100 font-bold text-2xl mb-4 flex items-center gap-3">
+              <Zap className="w-8 h-8 text-orange-300" />
+              💪 Tu Declaración de Poder
+            </h4>
+            <p className="text-orange-50 text-xl font-bold leading-relaxed whitespace-pre-wrap">{data.declaracion_poder}</p>
+          </div>
+        )}
+
+        {/* INSIGHTS TRANSFORMACIONALES */}
+        {data.insights_transformacionales && data.insights_transformacionales.length > 0 && (
+          <div className="bg-gradient-to-br from-green-900/40 to-emerald-900/40 rounded-2xl p-8 border border-green-400/30">
+            <h4 className="text-green-100 font-bold text-2xl mb-6 flex items-center gap-3">
+              <Sparkles className="w-8 h-8 text-green-300" />
+              ✨ Insights Transformacionales
+            </h4>
+            <ul className="space-y-3">
+              {data.insights_transformacionales.map((insight: string, idx: number) => (
+                <li key={idx} className="text-green-50 text-sm flex items-start gap-2">
+                  <span className="text-green-300 font-bold">•</span>
+                  <span>{insight}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* ADVERTENCIAS */}
+        {data.advertencias && data.advertencias.length > 0 && (
+          <div className="bg-gradient-to-br from-red-900/40 to-pink-900/40 rounded-2xl p-8 border border-red-400/30">
+            <h4 className="text-red-100 font-bold text-2xl mb-6 flex items-center gap-3">
+              <Zap className="w-8 h-8 text-red-300" />
+              ⚠️ Advertencias Importantes
+            </h4>
+            <ul className="space-y-3">
+              {data.advertencias.map((advertencia: string, idx: number) => (
+                <li key={idx} className="text-red-50 text-sm flex items-start gap-2">
+                  <span className="text-red-300 font-bold">⚠️</span>
+                  <span>{advertencia}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* PREGUNTA FINAL */}
+        {data.pregunta_final_reflexion && (
+          <div className="bg-gradient-to-br from-violet-900/40 to-purple-900/40 rounded-2xl p-8 border border-violet-400/30">
+            <h4 className="text-violet-100 font-bold text-2xl mb-4 flex items-center gap-3">
+              <Brain className="w-8 h-8 text-violet-300" />
+              🤔 Pregunta Para Tu Reflexión
+            </h4>
+            <p className="text-violet-50 text-lg italic leading-relaxed">{data.pregunta_final_reflexion}</p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // ✅ NUEVO: Renderizado para estructura Triple Fusionado
   const renderTripleFusionadoContent = () => {
     if (!interpretation?.interpretation) {
@@ -741,18 +1012,23 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
   };
 
   const renderInterpretationContent = () => {
+    // ✅ PRIORIDAD 1: Mostrar Interpretación Revolucionaria si existe
+    if (revolutionaryInterpretation && type === 'natal') {
+      return renderRevolutionaryContent();
+    }
+
     if (!interpretation?.interpretation) {
       return null;
     }
 
     const data = interpretation.interpretation;
 
-    // ✅ Si tiene estructura Triple Fusionado, usar nuevo renderizado
+    // ✅ PRIORIDAD 2: Si tiene estructura Triple Fusionado, usar nuevo renderizado
     if (data.angles || data.planets || data.aspects) {
       return renderTripleFusionadoContent();
     }
 
-    // ✅ Sino, usar renderizado viejo (para Solar Return, etc.)
+    // ✅ PRIORIDAD 3: Sino, usar renderizado viejo (para Solar Return, etc.)
     return (
       <div className="space-y-8">
         {data.esencia_revolucionaria && (

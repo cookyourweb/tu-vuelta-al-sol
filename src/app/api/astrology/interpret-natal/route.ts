@@ -13,6 +13,12 @@ import {
   debugListPlanets,
   verifyExpectedPlanets,
 } from '@/utils/planetNameUtils';
+import {
+  generateRevolutionaryInterpretation,
+  hasRevolutionaryInterpretation,
+  getRevolutionaryInterpretationStats,
+  RevolutionaryInterpretation
+} from '@/services/revolutionaryInterpretationService';
 
 // =============================================================================
 // TYPES
@@ -106,7 +112,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: interpretation.interpretations,
+      data: interpretation.interpretations, // Triple Fusionado
+      revolutionaryInterpretation: interpretation.revolutionaryInterpretation, // Revolutionary Interpretation
       cached: true,
       generatedAt: interpretation.generatedAt,
       stats: interpretation.stats,
@@ -213,6 +220,40 @@ export async function POST(request: NextRequest) {
       console.log(`🆕 [NUEVO] Todo generado desde cero: ${newlyGenerated} items`);
     }
 
+    // =============================================================================
+    // 🔥 GENERAR INTERPRETACIÓN REVOLUCIONARIA
+    // =============================================================================
+    console.log('🔥 [REVOLUTIONARY] Generando interpretación revolucionaria...');
+
+    let revolutionaryInterpretation: RevolutionaryInterpretation | null = null;
+
+    // Verificar si ya existe interpretación revolucionaria
+    const existingRevolutionary = await db.collection('interpretations').findOne({
+      userId,
+      chartType: 'natal',
+    });
+
+    if (existingRevolutionary?.revolutionaryInterpretation && !regenerate) {
+      console.log('💾 [CACHE] Reutilizando interpretación revolucionaria existente');
+      revolutionaryInterpretation = existingRevolutionary.revolutionaryInterpretation;
+    } else {
+      console.log('🆕 [NEW] Generando nueva interpretación revolucionaria');
+      try {
+        revolutionaryInterpretation = await generateRevolutionaryInterpretation(
+          chartData,
+          userProfile
+        );
+        console.log('✅ [REVOLUTIONARY] Interpretación revolucionaria generada exitosamente');
+
+        // Estadísticas
+        const revolutionaryStats = getRevolutionaryInterpretationStats(revolutionaryInterpretation);
+        console.log('📊 [REVOLUTIONARY] Stats:', revolutionaryStats);
+      } catch (error) {
+        console.error('❌ [REVOLUTIONARY] Error generando interpretación revolucionaria:', error);
+        // No bloqueamos el flujo si falla la interpretación revolucionaria
+      }
+    }
+
     const estimatedCost = (newlyGenerated * 0.15).toFixed(2); // $0.15 por interpretación
     const savedCost = (reused * 0.15).toFixed(2);
 
@@ -234,13 +275,15 @@ export async function POST(request: NextRequest) {
 
     console.log('🎯 [DEBUG] Saving to MongoDB with stats:', stats);
 
+    // ✅ GUARDAR TODO EN MONGODB (Triple Fusionado + Revolutionary)
     await db.collection('interpretations').updateOne(
       { userId, chartType: 'natal' },
       {
         $set: {
           userId,
           chartType: 'natal',
-          interpretations,
+          interpretations, // Triple Fusionado
+          revolutionaryInterpretation, // Revolutionary Interpretation
           stats,
           generatedAt: new Date(),
           expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
@@ -250,9 +293,12 @@ export async function POST(request: NextRequest) {
     );
 
     console.log('✅ [DEBUG] Interpretations saved to MongoDB successfully');
+    console.log('✅ [DEBUG] Revolutionary interpretation:', revolutionaryInterpretation ? 'INCLUDED' : 'NOT GENERATED');
+
     return NextResponse.json({
       success: true,
-      data: interpretations,
+      data: interpretations, // Triple Fusionado
+      revolutionaryInterpretation, // Revolutionary Interpretation
       cached: fromCache,
       generatedAt: new Date().toISOString(),
       stats,
