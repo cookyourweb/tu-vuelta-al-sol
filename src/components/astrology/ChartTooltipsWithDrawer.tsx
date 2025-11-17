@@ -241,6 +241,39 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
   }, [userId]);
 
   // =========================================================================
+  // 🖱️ DETECTAR CLIC FUERA DEL TOOLTIP Y DRAWER PARA CERRAR
+  // =========================================================================
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      // Si el drawer está abierto, no cerrar nada
+      if (drawer.isOpen) {
+        console.log('🖱️ Click detected but drawer is open - ignoring');
+        return;
+      }
+
+      // Si el tooltip no está bloqueado, ignorar
+      if (!actualAspectTooltipLocked) {
+        return;
+      }
+
+      // Verificar si el clic fue fuera del tooltip
+      const target = event.target as HTMLElement;
+      const tooltipElement = target.closest('.aspect-tooltip');
+
+      if (!tooltipElement && hoveredAspect) {
+        console.log('🖱️ Click outside tooltip - Closing');
+        setHoveredAspect(null);
+        actualSetAspectTooltipLocked(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [hoveredAspect, actualAspectTooltipLocked, drawer.isOpen]);
+
+  // =========================================================================
   // 🤖 FUNCIÓN PARA OBTENER INTERPRETACIÓN DEL CACHE O GENERAR NUEVA
   // =========================================================================
   const openInterpretationDrawer = async (type: 'planet' | 'ascendant' | 'midheaven' | 'aspect' | 'asteroid' | 'node' | 'element' | 'modality', data: any) => {
@@ -510,7 +543,7 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
     return (
       <>
         <div
-          className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-lg z-[99998]"
+          className="aspect-tooltip fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-lg z-[99998]"
           style={{
             left: tooltipPosition.x,
             top: tooltipPosition.y,
@@ -518,26 +551,32 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
             pointerEvents: 'auto'
           }}
           onMouseEnter={() => {
-            console.log('🟢 Mouse ENTERED aspect tooltip - Keeping it open');
+            console.log('🟢 Mouse ENTERED aspect tooltip - Locking it open');
             const aspectKey = `${currentAspect.planet1}-${currentAspect.planet2}-${currentAspect.type}`;
             setHoveredAspect(aspectKey);
+            actualSetAspectTooltipLocked(true);
           }}
-          onMouseLeave={() => {
-            console.log('🔴 Mouse LEFT aspect tooltip');
-            console.log('   Drawer is open?', drawer.isOpen);
-
-            if (drawer.isOpen) {
-              console.log('   ✅ Drawer is open - Keeping tooltip visible');
-              const aspectKey = `${currentAspect.planet1}-${currentAspect.planet2}-${currentAspect.type}`;
-              setHoveredAspect(aspectKey);
-            } else {
-              console.log('   ⚠️ Drawer is closed - Will hide in 5 seconds');
-            }
+          onClick={(e) => {
+            // Evitar que clics dentro del tooltip lo cierren
+            e.stopPropagation();
           }}
         >
+          {/* ✅ BOTÓN CERRAR */}
+          <button
+            onClick={() => {
+              console.log('❌ Close button clicked - Closing tooltip');
+              setHoveredAspect(null);
+              actualSetAspectTooltipLocked(false);
+            }}
+            className="absolute top-2 right-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full w-6 h-6 flex items-center justify-center transition-all"
+            aria-label="Cerrar tooltip"
+          >
+            ✕
+          </button>
+
           <div className="flex items-center mb-3">
-            <div 
-              className="w-6 h-6 rounded-full mr-3" 
+            <div
+              className="w-6 h-6 rounded-full mr-3"
               style={{ backgroundColor: currentAspect.config.color }}
             ></div>
             <div>
