@@ -451,10 +451,14 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
             interpretation: interpretationData,
             cached: result.cached || result.data?.cached || false,
             generatedAt: result.generatedAt || result.data?.generatedAt || new Date().toISOString(),
-            method: result.method || result.data?.method || 'api'
+            method: result.method || result.data?.method || 'api',
+            stats: result.stats || null // ← AGREGAR STATS
           };
 
           console.log('✅ ===== INTERPRETACIÓN PROCESADA EXITOSAMENTE =====');
+          if (result.stats) {
+            console.log('📊 STATS:', result.stats);
+          }
 
           setInterpretation(newInterpretation);
           setHasRecentInterpretation(true);
@@ -1791,10 +1795,28 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
             </div>
 
             <div className="p-4 border-t border-purple-500/30 bg-gray-900/50 rounded-b-2xl">
-              <p className="text-purple-300 text-sm text-center">
-                Interpretación personalizada revolucionaria • Generada el {new Date(interpretation.generatedAt).toLocaleDateString('es-ES')}
-                {interpretation.cached && ' • Desde caché para ahorrar créditos'}
-              </p>
+              <div className="space-y-2">
+                <p className="text-purple-300 text-sm text-center">
+                  Interpretación personalizada revolucionaria • Generada el {new Date(interpretation.generatedAt).toLocaleDateString('es-ES')}
+                  {interpretation.cached && ' • Desde caché para ahorrar créditos'}
+                </p>
+                {/* ✅ MOSTRAR AHORRO */}
+                {(interpretation as any).stats && (interpretation as any).stats.cacheHit && (
+                  <div className="bg-green-900/30 border border-green-500/30 rounded-lg p-3 text-center">
+                    <p className="text-green-300 font-semibold text-sm">
+                      💰 Ahorro de Créditos
+                    </p>
+                    <p className="text-green-100 text-xs mt-1">
+                      ✅ Reutilizados: {(interpretation as any).stats.reusedFromCache} items •
+                      🆕 Nuevos: {(interpretation as any).stats.newlyGenerated} items
+                    </p>
+                    <p className="text-green-200 text-xs mt-1">
+                      💵 Ahorraste: {(interpretation as any).stats.savedCost} •
+                      Costo actual: {(interpretation as any).stats.estimatedCost}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
