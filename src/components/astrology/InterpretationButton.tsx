@@ -323,7 +323,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         const requestBody = isNatal
           ? {
               userId,
-              natalChart: chartData,
+              chartData: chartData,
               userProfile,
               regenerate: forceRegenerate,
               disruptiveMode: true
