@@ -588,10 +588,25 @@ const generateAspectInterpretation = async (planet1, planet2, aspectType, orb) =
   actualSetGeneratingAspect(true);  // ✅ Bloquea el tooltip
   actualSetAspectTooltipLocked(true);
 
-  // 1. Genera interpretación via API
+  // 1. Genera interpretación via API (PUT /api/astrology/interpret-natal)
   // 2. Refresca interpretaciones
   // 3. Abre drawer automáticamente
   drawer.open(aspectInterpretation.drawer);
+
+  actualSetGeneratingAspect(false); // ✅ Desbloquea después de generar
+}
+
+// =========================================================================
+// 🪐 GENERAR INTERPRETACIÓN DE PLANETA
+// =========================================================================
+const generatePlanetInterpretation = async (planetName, sign, house, degree) => {
+  actualSetGeneratingAspect(true);  // ✅ Bloquea el tooltip
+  actualSetAspectTooltipLocked(true);
+
+  // 1. Genera interpretación via API (PUT /api/astrology/interpret-natal)
+  // 2. Refresca interpretaciones
+  // 3. Abre drawer automáticamente
+  drawer.open(planetInterpretation.drawer);
 
   actualSetGeneratingAspect(false); // ✅ Desbloquea después de generar
 }
@@ -714,7 +729,44 @@ TRANSITIONS:
 
 ### **🔄 Cambios Recientes (Última Actualización)**
 
-#### **Problema Anterior:**
+#### **✨ NUEVA FUNCIONALIDAD: Generación Individual de Interpretaciones**
+
+**Problema que resuelve:**
+- Usuarios tenían que generar TODAS las interpretaciones de una vez
+- Alto costo de API para generar interpretaciones que quizás no verán
+- No había forma de generar solo la interpretación que interesa
+
+**Solución:**
+- ✅ Botones "Generar Interpretación AI" en tooltips de **planetas**
+- ✅ Botones "Generar Interpretación AI" en tooltips de **aspectos**
+- ✅ Generación **individual** (solo del elemento específico)
+- ✅ Ahorro de costos de API (solo genera lo que el usuario necesita)
+
+**Cómo funciona:**
+1. **Usuario pasa mouse sobre planeta o aspecto** → Tooltip aparece
+2. **Tooltip verifica si existe interpretación AI**:
+   - ✅ **Si existe** → Botón azul "Ver Interpretación Completa" (abre drawer)
+   - ❌ **Si NO existe** → Botón rosa "Generar Interpretación AI" (genera + abre drawer)
+3. **Al hacer clic en "Generar Interpretación AI":**
+   - Tooltip se bloquea (no se cierra)
+   - Llama a API PUT con datos específicos del elemento
+   - Genera SOLO esa interpretación (10-30 segundos)
+   - Guarda en base de datos
+   - Drawer se abre automáticamente
+   - Tooltip y drawer permanecen abiertos juntos
+
+**API Endpoint actualizado:**
+```typescript
+PUT /api/astrology/interpret-natal
+
+// Para planetas:
+Body: { userId, planetName, sign, house, degree }
+
+// Para aspectos:
+Body: { userId, planet1, planet2, aspectType, orb }
+```
+
+#### **Problema Anterior (Tooltips):**
 - ChartDisplay cerraba tooltip con timer de 5 segundos sin verificar estado
 - Tooltip se cerraba durante la generación de interpretaciones
 - Planetas no tenían la misma lógica que aspectos
@@ -737,6 +789,7 @@ TRANSITIONS:
    - Botón X en todos los tooltips
    - Mismos eventos onMouseEnter/onMouseLeave
    - Mismo sistema de bloqueo
+   - **NUEVO:** Botones de generación individual
 
 4. **Detección de clic fuera mejorada:**
    - Detecta todos los tipos de tooltip
@@ -797,6 +850,9 @@ Funcionalidades Clave (ACTUALIZADAS):
 ✅ Tooltips SIN timer de cierre desde ChartDisplay
 ✅ Bloqueo automático al entrar con mouse
 ✅ Botón X en TODOS los tooltips (aspectos, planetas, ascendente, MC)
+✅ **NUEVO:** Generación INDIVIDUAL de planetas (ahorra costos API)
+✅ **NUEVO:** Generación INDIVIDUAL de aspectos (ahorra costos API)
+✅ **NUEVO:** Botones inteligentes (Ver vs Generar según exista)
 ✅ Generación de interpretaciones AI con bloqueo
 ✅ Drawer automático post-generación
 ✅ Tooltip NO se cierra durante generación
@@ -805,6 +861,7 @@ Funcionalidades Clave (ACTUALIZADAS):
 ✅ Timer adaptativo (3s o 5s según lock state)
 ✅ Cierre coordinado de tooltip + drawer
 ✅ Logs exhaustivos para debugging
+✅ API PUT actualizada para planetas Y aspectos
 ```
 
 ### **🚀 Próximas Mejoras**
