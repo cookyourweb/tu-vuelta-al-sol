@@ -430,146 +430,319 @@ Sistema avanzado de interacción para mostrar interpretaciones astrológicas con
 - Integración con generación de interpretaciones AI
 - Detección de clics fuera para cerrar automáticamente
 
-### **📱 Lógica de Comportamiento del Tooltip de Aspectos**
+### **📱 Lógica de Comportamiento del Tooltip (ACTUALIZADA)**
 
 #### **Fase 1: Activación del Tooltip**
 ```
-Usuario pasa mouse o hace clic en aspecto (línea o tarjeta)
+Usuario pasa mouse o hace clic en elemento (aspecto, planeta, ascendente, MC)
     ↓
-Tooltip aparece
+Tooltip aparece inmediatamente
     ↓
-Timer de 5 segundos para mover mouse al tooltip
+NO hay timer de cierre automático desde ChartDisplay
+    ↓
+Tooltip maneja su propio cierre completamente
 ```
 
 #### **Fase 2: Tooltip Bloqueado (Mouse Inside)**
 ```
 Mouse entra al tooltip
     ↓
-✅ Tooltip se BLOQUEA (aspectTooltipLocked = true)
+✅ Tooltip se BLOQUEA automáticamente (aspectTooltipLocked = true)
     ↓
 ✅ Aparece botón X en esquina superior derecha
     ↓
-✅ NO se cierra automáticamente
+✅ Se limpia cualquier timer de cierre existente
     ↓
-Solo se cierra con:
-  • Clic en botón X
-  • Clic fuera del tooltip (cuando drawer cerrado)
+✅ Tooltip permanece abierto indefinidamente
 ```
 
-#### **Fase 3: Generación de Interpretación**
+#### **Fase 3: Mouse Sale del Tooltip**
+```
+Mouse sale del tooltip
+    ↓
+¿Está generando interpretación?
+  SÍ → ✅ Tooltip permanece abierto
+  NO → Continúa verificando...
+    ↓
+¿Drawer está abierto?
+  SÍ → ✅ Tooltip permanece abierto
+  NO → Continúa verificando...
+    ↓
+¿Tooltip está locked (usuario ya entró antes)?
+  SÍ → ⏱️ Timer de 5 segundos para cerrar
+  NO → ⏱️ Timer de 3 segundos para cerrar
+```
+
+#### **Fase 4: Generación de Interpretación**
 ```
 Usuario hace clic en "Generar Interpretación AI"
     ↓
-✅ Se genera interpretación (10-30 segundos)
+✅ Tooltip BLOQUEADO (no se puede cerrar)
     ↓
-✅ Drawer se abre automáticamente
+🔄 Generando interpretación (10-30 segundos)
     ↓
-✅ Tooltip permanece abierto
+✅ Drawer se abre automáticamente con la interpretación
+    ↓
+✅ Tooltip permanece visible junto al drawer
+    ↓
+✅ Clic fuera NO cierra nada (mientras esté generando o drawer abierto)
 ```
 
-#### **Fase 4: Tooltip + Drawer Abiertos**
+#### **Fase 5: Cierre del Tooltip y Drawer**
 ```
-Ambos permanecen visibles
-    ↓
-✅ Clic fuera NO cierra nada (mientras drawer abierto)
-    ↓
-Solo se cierran con:
-  • Botón X del tooltip → cierra solo tooltip
-  • Botón X del drawer → cierra AMBOS (drawer + tooltip)
+Opciones de cierre:
+
+1. Botón X del tooltip:
+   → Cierra SOLO el tooltip
+   → Drawer permanece abierto
+
+2. Botón X del drawer:
+   → Cierra AMBOS (drawer + tooltip)
+   → Limpia todos los estados
+
+3. Clic fuera del tooltip:
+   → Solo cierra si NO está generando
+   → Solo cierra si drawer está cerrado
+   → Respeta el estado de bloqueo
+
+4. Timer automático (onMouseLeave):
+   → 3 segundos si no está locked
+   → 5 segundos si está locked
+   → NO ejecuta si está generando o drawer abierto
 ```
 
 ### **🎨 Componentes Involucrados**
 
 #### **ChartTooltipsWithDrawer**
 ```typescript
-// Estados internos para gestión
+// =========================================================================
+// 🎯 ESTADOS INTERNOS
+// =========================================================================
 const [internalNatalInterpretations, setInternalNatalInterpretations] = useState<any>(null);
 const [internalGeneratingAspect, setInternalGeneratingAspect] = useState(false);
 const [internalAspectTooltipLocked, setInternalAspectTooltipLocked] = useState(false);
+const [tooltipCloseTimer, setTooltipCloseTimer] = useState<NodeJS.Timeout | null>(null);
 
-// Función de generación de interpretación
+// =========================================================================
+// 🎨 FUNCIÓN PARA CERRAR DRAWER Y TOOLTIP JUNTOS
+// =========================================================================
+const handleCloseDrawer = () => {
+  console.log('🎨 Closing drawer and tooltip');
+  drawer.close();
+  setHoveredAspect(null);
+  setHoveredPlanet(null);
+  actualSetAspectTooltipLocked(false);
+  if (tooltipCloseTimer) {
+    clearTimeout(tooltipCloseTimer);
+    setTooltipCloseTimer(null);
+  }
+};
+
+// =========================================================================
+// 🔴 MANEJO INTELIGENTE DE MOUSE LEAVE
+// =========================================================================
+const handleTooltipMouseLeave = () => {
+  console.log('🔴 Mouse LEFT tooltip');
+
+  // Limpiar timer existente
+  if (tooltipCloseTimer) {
+    clearTimeout(tooltipCloseTimer);
+    setTooltipCloseTimer(null);
+  }
+
+  // ✅ Si está generando, NO cerrar
+  if (actualGeneratingAspect) {
+    console.log('   ✅ Generating - tooltip stays open');
+    return;
+  }
+
+  // ✅ Si drawer está abierto, NO cerrar
+  if (drawer.isOpen) {
+    console.log('   ✅ Drawer open - tooltip stays open');
+    return;
+  }
+
+  // ⏱️ Configurar timer según estado de bloqueo
+  if (!actualAspectTooltipLocked) {
+    console.log('   ⚠️ Not locked - will close in 3 seconds');
+    const timer = setTimeout(() => {
+      setHoveredAspect(null);
+      setHoveredPlanet(null);
+    }, 3000);
+    setTooltipCloseTimer(timer);
+  } else {
+    console.log('   ⚠️ Locked - will close in 5 seconds');
+    const timer = setTimeout(() => {
+      setHoveredAspect(null);
+      setHoveredPlanet(null);
+      actualSetAspectTooltipLocked(false);
+    }, 5000);
+    setTooltipCloseTimer(timer);
+  }
+};
+
+// =========================================================================
+// 🎯 GENERAR INTERPRETACIÓN DE ASPECTO
+// =========================================================================
 const generateAspectInterpretation = async (planet1, planet2, aspectType, orb) => {
+  actualSetGeneratingAspect(true);  // ✅ Bloquea el tooltip
+  actualSetAspectTooltipLocked(true);
+
   // 1. Genera interpretación via API
   // 2. Refresca interpretaciones
   // 3. Abre drawer automáticamente
   drawer.open(aspectInterpretation.drawer);
-}
 
-// Función para cerrar drawer y tooltip juntos
-const handleCloseDrawer = () => {
-  drawer.close();
-  setHoveredAspect(null);
+  actualSetGeneratingAspect(false); // ✅ Desbloquea después de generar
 }
 ```
 
 #### **ChartDisplay**
 ```typescript
-// Timer para delay de tooltip
-const [aspectHoverTimer, setAspectHoverTimer] = useState<NodeJS.Timeout | null>(null);
+// =========================================================================
+// ✅ FUNCIONES PARA MANEJAR HOVER DE ASPECTOS Y PLANETAS
+// =========================================================================
+// NOTA: El tooltip maneja su propio cierre una vez que el mouse está dentro
 
-// Manejo de entrada de mouse
 const handleAspectMouseEnter = (aspectKey, event) => {
-  if (aspectHoverTimer) clearTimeout(aspectHoverTimer);
+  console.log('🟢 Aspect/Planet mouse ENTER:', aspectKey);
+
+  // Limpiar cualquier timer existente
+  if (aspectHoverTimer) {
+    clearTimeout(aspectHoverTimer);
+    setAspectHoverTimer(null);
+  }
+
   setHoveredAspect(aspectKey);
   handleMouseMove(event);
-}
+};
 
-// Manejo de salida de mouse con delay
 const handleAspectMouseLeave = () => {
-  const timer = setTimeout(() => {
-    setHoveredAspect(null);
-  }, 5000); // 5 segundos
-  setAspectHoverTimer(timer);
-}
+  console.log('🔴 Aspect/Planet mouse LEAVE - NO timer, tooltip handles its own close');
+
+  // Limpiar timer si existe
+  if (aspectHoverTimer) {
+    clearTimeout(aspectHoverTimer);
+    setAspectHoverTimer(null);
+  }
+
+  // ✅ NO cerramos aquí - el tooltip se encarga de su propio cierre
+  // cuando el usuario sale del tooltip o hace clic fuera
+};
 ```
 
-### **🔐 Sistema de Bloqueo**
+### **🔐 Sistema de Bloqueo Inteligente**
 
-#### **Detección de Clic Fuera**
+#### **Detección de Clic Fuera (ACTUALIZADA)**
 ```typescript
 useEffect(() => {
   const handleClickOutside = (event: MouseEvent) => {
-    // Si drawer abierto, ignorar
-    if (drawer.isOpen) return;
+    // ✅ Si el drawer está abierto, NO cerrar nada
+    if (drawer.isOpen) {
+      console.log('🖱️ Click detected but drawer is open - ignoring');
+      return;
+    }
 
-    // Si tooltip no bloqueado, ignorar
-    if (!actualAspectTooltipLocked) return;
+    // ✅ Si está generando, NO cerrar
+    if (actualGeneratingAspect) {
+      console.log('🖱️ Click detected but generating - ignoring');
+      return;
+    }
 
-    // Verificar si clic fue fuera del tooltip
+    // ✅ Si el tooltip no está bloqueado, ignorar
+    if (!actualAspectTooltipLocked) {
+      return;
+    }
+
+    // ✅ Verificar si el clic fue fuera de CUALQUIER tooltip
     const target = event.target as HTMLElement;
-    const tooltipElement = target.closest('.aspect-tooltip');
+    const tooltipElement = target.closest(
+      '.aspect-tooltip, .planet-tooltip, .ascendant-tooltip, .midheaven-tooltip'
+    );
 
-    if (!tooltipElement && hoveredAspect) {
+    if (!tooltipElement && (hoveredAspect || hoveredPlanet)) {
+      console.log('🖱️ Click outside tooltip - Closing');
       setHoveredAspect(null);
+      setHoveredPlanet(null);
       actualSetAspectTooltipLocked(false);
+      if (tooltipCloseTimer) {
+        clearTimeout(tooltipCloseTimer);
+        setTooltipCloseTimer(null);
+      }
     }
   };
 
   document.addEventListener('click', handleClickOutside);
   return () => document.removeEventListener('click', handleClickOutside);
-}, [hoveredAspect, actualAspectTooltipLocked, drawer.isOpen]);
+}, [hoveredAspect, hoveredPlanet, actualAspectTooltipLocked, actualGeneratingAspect, drawer.isOpen, tooltipCloseTimer]);
 ```
 
-### **📊 Flujo de Estados**
+#### **Tooltips Soportados**
+Todos los tooltips tienen la misma lógica de bloqueo:
+- `.aspect-tooltip` - Tooltips de aspectos entre planetas
+- `.planet-tooltip` - Tooltips de planetas individuales
+- `.ascendant-tooltip` - Tooltip del Ascendente
+- `.midheaven-tooltip` - Tooltip del Medio Cielo
+
+### **📊 Flujo de Estados (ACTUALIZADO)**
 
 ```
 TOOLTIP_STATES:
   hoveredAspect: null | string           // Aspecto actualmente visible
+  hoveredPlanet: null | string           // Planeta actualmente visible
   aspectTooltipLocked: boolean           // Si tooltip está bloqueado
   generatingAspect: boolean              // Si está generando interpretación
+  tooltipCloseTimer: NodeJS.Timeout | null  // Timer de cierre automático
 
 DRAWER_STATES:
   drawer.isOpen: boolean                 // Si drawer está visible
   drawer.content: InterpretationContent  // Contenido a mostrar
 
 TRANSITIONS:
-  Hover → Show tooltip (5s to enter)
-  Enter → Lock tooltip (stay open)
-  Click button → Generate + Open drawer
-  Click X tooltip → Close tooltip only
-  Click X drawer → Close both
-  Click outside → Close if drawer closed
+  Hover elemento → Show tooltip (inmediato, sin timer externo)
+  Enter tooltip → Lock automático + limpia timers
+  Leave tooltip → Verifica estado (generando/drawer/locked)
+    ├─ Si generando → Permanece abierto
+    ├─ Si drawer abierto → Permanece abierto
+    ├─ Si locked → Timer 5 segundos
+    └─ Si not locked → Timer 3 segundos
+  Click "Generar" → Bloquea + Genera + Abre drawer
+  Click X tooltip → Cierra solo tooltip
+  Click X drawer → Cierra ambos + limpia estados
+  Click outside → Cierra (si NO generando y NO drawer abierto)
 ```
+
+### **🔄 Cambios Recientes (Última Actualización)**
+
+#### **Problema Anterior:**
+- ChartDisplay cerraba tooltip con timer de 5 segundos sin verificar estado
+- Tooltip se cerraba durante la generación de interpretaciones
+- Planetas no tenían la misma lógica que aspectos
+- Timer interferente causaba cierres prematuros
+
+#### **Solución Implementada:**
+1. **ChartDisplay ya NO cierra tooltips:**
+   - `handleAspectMouseLeave()` solo limpia timers
+   - NO establece timer de cierre
+   - Tooltip maneja 100% su propio cierre
+
+2. **Tooltip con lógica inteligente:**
+   - `handleTooltipMouseLeave()` verifica múltiples condiciones
+   - NO cierra si está generando
+   - NO cierra si drawer está abierto
+   - Timer adaptativo (3s o 5s según lock state)
+
+3. **Todos los tooltips unificados:**
+   - Aspectos, planetas, ascendente y MC tienen la MISMA lógica
+   - Botón X en todos los tooltips
+   - Mismos eventos onMouseEnter/onMouseLeave
+   - Mismo sistema de bloqueo
+
+4. **Detección de clic fuera mejorada:**
+   - Detecta todos los tipos de tooltip
+   - Respeta estado de generación
+   - Respeta estado de drawer
+   - Limpia todos los timers al cerrar
 
 ### **🎯 Beneficios UX**
 
@@ -604,21 +777,34 @@ TRANSITIONS:
 - 🟡 **BUTTON MOUSEUP** - Mouse soltado
 - 1️⃣-7️⃣ **Pasos del onClick** - Cada acción del handler
 
-### **📁 Archivos Modificados**
+### **📁 Archivos Modificados (ACTUALIZADO)**
 
 ```
 src/components/astrology/
 ├── ChartTooltipsWithDrawer.tsx    ✏️ Sistema completo de tooltips + drawer
-└── ChartDisplay.tsx               ✏️ Manejo de timers y eventos
+│   ├── Nuevo: tooltipCloseTimer state
+│   ├── Nuevo: handleTooltipMouseLeave() con lógica inteligente
+│   ├── Actualizado: handleCloseDrawer() limpia todos los estados
+│   ├── Actualizado: useEffect de clic fuera detecta todos los tooltips
+│   ├── Actualizado: Todos los tooltips con onMouseEnter/onMouseLeave
+│   └── Actualizado: Botón X agregado a planetas, ascendente y MC
+│
+└── ChartDisplay.tsx               ✏️ Manejo de eventos (SIN timers de cierre)
+    ├── Actualizado: handleAspectMouseEnter() solo muestra tooltip
+    └── Actualizado: handleAspectMouseLeave() NO cierra, solo limpia
 
-Funcionalidades Clave:
-✅ Tooltips con delay de 5 segundos
-✅ Bloqueo al entrar con mouse
-✅ Botón X para cerrar manualmente
-✅ Generación de interpretaciones AI
+Funcionalidades Clave (ACTUALIZADAS):
+✅ Tooltips SIN timer de cierre desde ChartDisplay
+✅ Bloqueo automático al entrar con mouse
+✅ Botón X en TODOS los tooltips (aspectos, planetas, ascendente, MC)
+✅ Generación de interpretaciones AI con bloqueo
 ✅ Drawer automático post-generación
-✅ Detección de clic fuera
+✅ Tooltip NO se cierra durante generación
+✅ Tooltip NO se cierra si drawer está abierto
+✅ Detección de clic fuera inteligente
+✅ Timer adaptativo (3s o 5s según lock state)
 ✅ Cierre coordinado de tooltip + drawer
+✅ Logs exhaustivos para debugging
 ```
 
 ### **🚀 Próximas Mejoras**
