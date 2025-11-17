@@ -403,7 +403,8 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         if (result.success) {
           console.log('📺 ===== PROCESANDO RESPUESTA DE INTERPRETACIÓN =====');
 
-          const rawInterpretation = result.data?.interpretation || result.interpretation;
+          // ✅ FIX: result.data YA ES la interpretación completa (estructura Triple Fusionado)
+          const rawInterpretation = result.data;
 
           if (!rawInterpretation) {
             console.log('❌ No se encontró interpretación en la respuesta');
@@ -413,36 +414,20 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           console.log('🔍 ===== DATOS RECIBIDOS =====');
           console.log('🔍 Claves en rawInterpretation:', Object.keys(rawInterpretation));
 
-          // ✅ AÑADIR LOGS PARA VERIFICAR DATOS COMPLETOS
-          console.log('🔍 ===== VERIFICANDO DATOS COMPLETOS =====');
-          console.log('🔍 formacion_temprana:', rawInterpretation.formacion_temprana ? 'SÍ' : 'NO');
-          console.log('🔍 patrones_psicologicos:', rawInterpretation.patrones_psicologicos ? 'SÍ' : 'NO');
-          console.log('🔍 planetas_profundos:', rawInterpretation.planetas_profundos ? 'SÍ' : 'NO');
-          console.log('🔍 nodos_lunares:', rawInterpretation.nodos_lunares ? 'SÍ' : 'NO');
-
-          // Si están, mostrar un preview
-          if (rawInterpretation.formacion_temprana) {
-            console.log('📖 formacion_temprana completa:', rawInterpretation.formacion_temprana);
-          }
+          // ✅ VERIFICAR ESTRUCTURA TRIPLE FUSIONADO
+          console.log('🔍 ===== VERIFICANDO ESTRUCTURA TRIPLE FUSIONADO =====');
+          console.log('🔍 angles:', rawInterpretation.angles ? Object.keys(rawInterpretation.angles) : 'NO');
+          console.log('🔍 planets:', rawInterpretation.planets ? Object.keys(rawInterpretation.planets).length + ' planetas' : 'NO');
+          console.log('🔍 asteroids:', rawInterpretation.asteroids ? Object.keys(rawInterpretation.asteroids).length + ' asteroides' : 'NO');
+          console.log('🔍 elements:', rawInterpretation.elements ? Object.keys(rawInterpretation.elements).length + ' elementos' : 'NO');
+          console.log('🔍 modalities:', rawInterpretation.modalities ? Object.keys(rawInterpretation.modalities).length + ' modalidades' : 'NO');
+          console.log('🔍 aspects:', rawInterpretation.aspects ? Object.keys(rawInterpretation.aspects).length + ' aspectos' : 'NO');
 
           let interpretationData;
 
           if (type === 'natal') {
-            interpretationData = {
-              esencia_revolucionaria: rawInterpretation.esencia_revolucionaria,
-              proposito_vida: rawInterpretation.proposito_vida,
-              formacion_temprana: rawInterpretation.formacion_temprana,
-              patrones_psicologicos: rawInterpretation.patrones_psicologicos,
-              planetas_profundos: rawInterpretation.planetas_profundos,
-              nodos_lunares: rawInterpretation.nodos_lunares,
-              planetas: rawInterpretation.planetas,
-              plan_accion: rawInterpretation.plan_accion,
-              declaracion_poder: rawInterpretation.declaracion_poder,
-              advertencias: rawInterpretation.advertencias,
-              insights_transformacionales: rawInterpretation.insights_transformacionales,
-              rituales_recomendados: rawInterpretation.rituales_recomendados,
-              integracion_carta: rawInterpretation.integracion_carta
-            };
+            // ✅ ESTRUCTURA TRIPLE FUSIONADO (nueva)
+            interpretationData = rawInterpretation;
           } else if (type === 'solar-return') {
             interpretationData = {
               esencia_revolucionaria: rawInterpretation.esencia_revolucionaria_anual,
@@ -625,6 +610,132 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
     return `hace ${diffMinutes}m`;
   };
 
+  // ✅ NUEVO: Renderizado para estructura Triple Fusionado
+  const renderTripleFusionadoContent = () => {
+    if (!interpretation?.interpretation) {
+      return null;
+    }
+
+    const data = interpretation.interpretation;
+
+    return (
+      <div className="space-y-8">
+        {/* ANGLES */}
+        {data.angles && (
+          <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 rounded-2xl p-8 border border-purple-400/30">
+            <h4 className="text-purple-100 font-bold text-2xl mb-6 flex items-center gap-3">
+              <Star className="w-8 h-8 text-purple-300" />
+              Ángulos Fundamentales
+            </h4>
+            <div className="space-y-4">
+              {Object.entries(data.angles).map(([key, angle]: [string, any]) => (
+                <div key={key} className="bg-purple-800/30 rounded-lg p-6">
+                  <h5 className="text-purple-200 font-semibold text-lg mb-2">{angle.tooltip?.titulo || key}</h5>
+                  <p className="text-purple-100 text-sm mb-4">{angle.tooltip?.descripcionBreve}</p>
+                  <details className="mt-4">
+                    <summary className="cursor-pointer text-purple-300 font-semibold hover:text-purple-200">
+                      Ver interpretación completa →
+                    </summary>
+                    <div className="mt-4 space-y-4 bg-purple-900/40 p-4 rounded-lg">
+                      <div>
+                        <h6 className="text-purple-200 font-semibold mb-2">📚 Educativo:</h6>
+                        <p className="text-purple-50 text-sm">{angle.drawer?.educativo}</p>
+                      </div>
+                      <div>
+                        <h6 className="text-purple-200 font-semibold mb-2">🔥 Poderoso:</h6>
+                        <p className="text-purple-50 text-sm">{angle.drawer?.poderoso}</p>
+                      </div>
+                      <div>
+                        <h6 className="text-purple-200 font-semibold mb-2">🌙 Poético:</h6>
+                        <p className="text-purple-50 text-sm">{angle.drawer?.poetico}</p>
+                      </div>
+                    </div>
+                  </details>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* PLANETS */}
+        {data.planets && Object.keys(data.planets).length > 0 && (
+          <div className="bg-gradient-to-br from-blue-900/40 to-indigo-900/40 rounded-2xl p-8 border border-blue-400/30">
+            <h4 className="text-blue-100 font-bold text-2xl mb-6 flex items-center gap-3">
+              <Target className="w-8 h-8 text-blue-300" />
+              Planetas ({Object.keys(data.planets).length})
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Object.entries(data.planets).map(([key, planet]: [string, any]) => (
+                <div key={key} className="bg-blue-800/30 rounded-lg p-4">
+                  <h5 className="text-blue-200 font-semibold mb-2">{planet.tooltip?.titulo || key}</h5>
+                  <p className="text-blue-100 text-xs mb-2">{planet.tooltip?.descripcionBreve}</p>
+                  <p className="text-blue-50 text-sm">{planet.tooltip?.significado}</p>
+                  <details className="mt-3">
+                    <summary className="cursor-pointer text-blue-300 text-sm font-semibold hover:text-blue-200">
+                      Ver completo →
+                    </summary>
+                    <div className="mt-3 space-y-3 bg-blue-900/40 p-3 rounded-lg text-xs">
+                      <div>
+                        <h6 className="text-blue-200 font-semibold mb-1">📚 Educativo:</h6>
+                        <p className="text-blue-50">{planet.drawer?.educativo}</p>
+                      </div>
+                      <div>
+                        <h6 className="text-blue-200 font-semibold mb-1">🔥 Poderoso:</h6>
+                        <p className="text-blue-50">{planet.drawer?.poderoso}</p>
+                      </div>
+                      <div>
+                        <h6 className="text-blue-200 font-semibold mb-1">🌙 Poético:</h6>
+                        <p className="text-blue-50">{planet.drawer?.poetico}</p>
+                      </div>
+                    </div>
+                  </details>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ASPECTS */}
+        {data.aspects && Object.keys(data.aspects).length > 0 && (
+          <div className="bg-gradient-to-br from-green-900/40 to-emerald-900/40 rounded-2xl p-8 border border-green-400/30">
+            <h4 className="text-green-100 font-bold text-2xl mb-6 flex items-center gap-3">
+              <Sparkles className="w-8 h-8 text-green-300" />
+              Aspectos ({Object.keys(data.aspects).length})
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Object.entries(data.aspects).map(([key, aspect]: [string, any]) => (
+                <div key={key} className="bg-green-800/30 rounded-lg p-4">
+                  <h5 className="text-green-200 font-semibold mb-2">{aspect.tooltip?.titulo || key}</h5>
+                  <p className="text-green-100 text-xs mb-2">{aspect.tooltip?.descripcionBreve}</p>
+                  <p className="text-green-50 text-sm">{aspect.tooltip?.significado}</p>
+                  <details className="mt-3">
+                    <summary className="cursor-pointer text-green-300 text-sm font-semibold hover:text-green-200">
+                      Ver completo →
+                    </summary>
+                    <div className="mt-3 space-y-3 bg-green-900/40 p-3 rounded-lg text-xs">
+                      <div>
+                        <h6 className="text-green-200 font-semibold mb-1">📚 Educativo:</h6>
+                        <p className="text-green-50">{aspect.drawer?.educativo}</p>
+                      </div>
+                      <div>
+                        <h6 className="text-green-200 font-semibold mb-1">🔥 Poderoso:</h6>
+                        <p className="text-green-50">{aspect.drawer?.poderoso}</p>
+                      </div>
+                      <div>
+                        <h6 className="text-green-200 font-semibold mb-1">🌙 Poético:</h6>
+                        <p className="text-green-50">{aspect.drawer?.poetico}</p>
+                      </div>
+                    </div>
+                  </details>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderInterpretationContent = () => {
     if (!interpretation?.interpretation) {
       return null;
@@ -632,6 +743,12 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
 
     const data = interpretation.interpretation;
 
+    // ✅ Si tiene estructura Triple Fusionado, usar nuevo renderizado
+    if (data.angles || data.planets || data.aspects) {
+      return renderTripleFusionadoContent();
+    }
+
+    // ✅ Sino, usar renderizado viejo (para Solar Return, etc.)
     return (
       <div className="space-y-8">
         {data.esencia_revolucionaria && (
