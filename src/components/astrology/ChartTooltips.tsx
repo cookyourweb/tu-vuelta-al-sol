@@ -497,7 +497,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
             }}
             className="w-full py-2.5 px-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group shadow-lg"
           >
-            <span>📖 Ver interpretación completa</span>
+            <span>✨ Ver interpretación IA</span>
             <span className="group-hover:translate-x-1 transition-transform">→</span>
           </button>
         ) : (
@@ -540,7 +540,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
               }}
               className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
             >
-              🎯 Ir a generar interpretaciones
+              🤖 Generar interpretación con IA
             </button>
           </div>
         )}
@@ -657,7 +657,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
             }}
             className="w-full py-2 px-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg text-sm font-semibold transition-all"
           >
-            📖 Ver interpretación completa
+            ✨ Ver interpretación IA
           </button>
         ) : (
           <div className="space-y-2">
@@ -687,7 +687,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
               }}
               className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
             >
-              🎯 Ir a generar interpretaciones
+              🤖 Generar interpretación con IA
             </button>
           </div>
         )}
@@ -804,7 +804,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
             }}
             className="w-full py-2 px-4 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white rounded-lg text-sm font-semibold transition-all"
           >
-            📖 Ver interpretación completa
+            ✨ Ver interpretación IA
           </button>
         ) : (
           <div className="space-y-2">
@@ -834,7 +834,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
               }}
               className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
             >
-              🎯 Ir a generar interpretaciones
+              🤖 Generar interpretación con IA
             </button>
           </div>
         )}
@@ -990,7 +990,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
               }}
               className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
             >
-              🎯 Ir a generar interpretaciones
+              🤖 Generar interpretación con IA
             </button>
           </div>
         )}
@@ -1040,8 +1040,8 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
             }}
             className="w-full py-2.5 px-4 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 group"
           >
-            <span>📖</span>
-            <span>Ver interpretación completa</span>
+            <span>✨</span>
+            <span>Ver interpretación IA</span>
             <span className="group-hover:translate-x-1 transition-transform">→</span>
           </button>
         )}
