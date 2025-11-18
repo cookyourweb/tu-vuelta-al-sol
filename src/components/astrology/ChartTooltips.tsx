@@ -209,14 +209,14 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
     }
     // Tooltip is hidden by the parent component's state, unless clicked
     if (clickedPlanet) {
-      // If clicked, keep tooltip open for longer (5 seconds)
+      // If clicked, keep tooltip open for much longer (30 seconds)
       if (clickedTooltipTimer) clearTimeout(clickedTooltipTimer);
       const timer = setTimeout(() => {
         setHoveredPlanet(null);
         if (setClickedPlanet) setClickedPlanet(null);
         if (onCloseDrawer) onCloseDrawer();
         setClickedTooltipTimer(null);
-      }, 5000); // 5 seconds delay when clicked
+      }, 30000); // 30 seconds delay when clicked
       setClickedTooltipTimer(timer);
     }
   };

@@ -6,6 +6,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import ChartDisplay from '@/components/astrology/ChartDisplay';
 import InterpretationButton from '@/components/astrology/InterpretationButton';
+import { useInterpretationDrawer } from '@/hooks/useInterpretationDrawer';
+import { InterpretationDrawer } from '@/components/astrology/InterpretationDrawer';
 import {
   Sun, RefreshCw, Sparkles, AlertTriangle
 } from 'lucide-react';
@@ -13,7 +15,8 @@ import {
 export default function SolarReturnPage() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
-  
+  const { isOpen: drawerOpen, content: drawerContent, open: openDrawer, close: closeDrawer } = useInterpretationDrawer();
+
   const [chartData, setChartData] = useState<any>(null);
   const [natalChart, setNatalChart] = useState<any>(null);
   const [birthData, setBirthData] = useState<any>(null);
@@ -348,6 +351,11 @@ export default function SolarReturnPage() {
                   solarReturnYear={new Date().getFullYear()}
                   solarReturnTheme="Revolución de Identidad y Empoderamiento Profesional"
                   ascSRInNatalHouse={10}
+                  // ✅ DRAWER INTEGRATION
+                  userId={user?.uid}
+                  onOpenDrawer={openDrawer}
+                  onCloseDrawer={closeDrawer}
+                  drawerOpen={drawerOpen}
                 />
               </div>
             </div>
@@ -478,6 +486,13 @@ export default function SolarReturnPage() {
         </div>
 
       </div>
+
+      {/* ✅ DRAWER GLOBAL PARA INTERPRETACIONES */}
+      <InterpretationDrawer
+        isOpen={drawerOpen}
+        onClose={closeDrawer}
+        content={drawerContent}
+      />
     </div>
   );
 }
