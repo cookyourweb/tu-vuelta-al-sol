@@ -102,7 +102,8 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       console.log(`🔍 ===== CARGANDO INTERPRETACIONES GUARDADAS =====`);
       console.log(`🔍 userId: ${userId}, type: ${type}`);
 
-      const response = await fetch(`/api/interpretations/save?userId=${userId}&chartType=${type}`);
+      // ✅ Usar el endpoint correcto según el tipo de carta
+      const response = await fetch(`${endpoint}?userId=${userId}`);
 
       console.log(`📡 Respuesta API: ${response.status}`);
 
@@ -112,33 +113,47 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           console.log('ℹ️ No hay interpretación guardada aún (primera vez)');
           setSavedInterpretations([]);
           setHasRecentInterpretation(false);
+          setRevolutionaryInterpretation(null);
           return;
         }
 
         console.error(`❌ Error en respuesta API: ${response.status}`);
         setSavedInterpretations([]);
         setHasRecentInterpretation(false);
+        setRevolutionaryInterpretation(null);
         return;
       }
 
       const data = await response.json();
       console.log(`📦 Datos completos recibidos:`, data);
 
+      // ✅ CAPTURAR REVOLUTIONARY INTERPRETATION
+      if (data.revolutionaryInterpretation) {
+        console.log('🔥 Revolutionary Interpretation encontrada en caché');
+        setRevolutionaryInterpretation(data.revolutionaryInterpretation);
+      } else {
+        console.log('⚠️ No hay Revolutionary Interpretation en caché');
+        setRevolutionaryInterpretation(null);
+      }
+
       // ✅ HANDLE SINGLE INTERPRETATION RESPONSE (not array!)
-      if (data.success && data.interpretation) {
+      // El GET endpoint retorna data.data, no data.interpretation
+      const interpretationData = data.data || data.interpretation;
+
+      if (data.success && interpretationData) {
         const generatedTime = new Date(data.generatedAt).getTime();
         const now = new Date().getTime();
         const hoursDiff = (now - generatedTime) / (1000 * 60 * 60);
 
         console.log(`⏰ Interpretación encontrada: ${hoursDiff.toFixed(1)}h atrás`);
 
-        const isRecent = hoursDiff < 24;
-        setHasRecentInterpretation(isRecent);
+        // ✅ SIEMPRE MARCAR COMO hasRecentInterpretation si existe
+        setHasRecentInterpretation(true);
 
         // ✅ Convert single interpretation to array format for compatibility
         const singleInterpretation = {
           _id: 'current',
-          interpretation: data.interpretation,
+          interpretation: interpretationData,
           generatedAt: data.generatedAt,
           chartType: type,
           userProfile: userProfile,
@@ -147,46 +162,45 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
 
         setSavedInterpretations([singleInterpretation]);
 
-        if (isRecent) {
-          // ✅ LOAD INTERPRETATION FROM CACHE
-          const cachedInterpretation = {
-            interpretation: data.interpretation,
-            cached: true,
-            generatedAt: data.generatedAt,
-            method: data.method || 'cached'
-          };
+        // ✅ LOAD INTERPRETATION FROM CACHE
+        const cachedInterpretation = {
+          interpretation: interpretationData,
+          cached: true,
+          generatedAt: data.generatedAt,
+          method: data.method || 'cached',
+          stats: data.stats || null
+        };
 
-          console.log(`✅ ===== CARGANDO DESDE CACHÉ =====`);
-          console.log(`✅ Interpretación ${type} encontrada (${hoursDiff.toFixed(1)}h ago)`);
+        console.log(`✅ ===== CARGANDO DESDE CACHÉ =====`);
+        console.log(`✅ Interpretación ${type} encontrada (${hoursDiff.toFixed(1)}h ago)`);
 
-          // ✅ FIX: Check correct field names based on type
-          if (type === 'solar-return') {
-            console.log(`✅ Esencia revolucionaria anual:`,
-              data.interpretation.esencia_revolucionaria_anual?.substring(0, 100) || 'NOT FOUND');
-            console.log(`✅ Propósito de vida anual:`,
-              data.interpretation.proposito_vida_anual?.substring(0, 100) || 'NOT FOUND');
+        // ✅ FIX: Check correct field names based on type
+        if (type === 'solar-return') {
+          console.log(`✅ Esencia revolucionaria anual:`,
+            interpretationData.esencia_revolucionaria_anual?.substring(0, 100) || 'NOT FOUND');
+          console.log(`✅ Propósito de vida anual:`,
+            interpretationData.proposito_vida_anual?.substring(0, 100) || 'NOT FOUND');
 
-            // ✅ VALIDATE: If fields are undefined, don't use cache
-            if (!data.interpretation.esencia_revolucionaria_anual ||
-                !data.interpretation.proposito_vida_anual) {
-              console.warn('⚠️ Cached interpretation has incorrect structure, will regenerate');
-              setHasRecentInterpretation(false);
-              setSavedInterpretations([]);
-              return; // Don't load broken cache
-            }
-          } else {
-            console.log(`✅ Esencia revolucionaria:`,
-              data.interpretation.esencia_revolucionaria?.substring(0, 100) || 'NOT FOUND');
-            console.log(`✅ Propósito de vida:`,
-              data.interpretation.proposito_vida?.substring(0, 100) || 'NOT FOUND');
+          // ✅ VALIDATE: If fields are undefined, don't use cache
+          if (!interpretationData.esencia_revolucionaria_anual ||
+              !interpretationData.proposito_vida_anual) {
+            console.warn('⚠️ Cached interpretation has incorrect structure, will regenerate');
+            setHasRecentInterpretation(false);
+            setSavedInterpretations([]);
+            return; // Don't load broken cache
           }
-
-          setInterpretation(cachedInterpretation);
-          console.log(`✅ Interpretación ${type} cargada desde caché exitosamente`);
         } else {
-          console.log(`⚠️ ===== INTERPRETACIÓN EXPIRADA =====`);
-          console.log(`⚠️ Interpretación ${type} expirada (${hoursDiff.toFixed(1)}h ago) - se generará nueva`);
+          // Para Natal, puede tener Triple Fusionado o Revolutionary
+          if (interpretationData.angles || interpretationData.planets) {
+            console.log(`✅ Triple Fusionado detectado:`, {
+              angles: Object.keys(interpretationData.angles || {}).length,
+              planets: Object.keys(interpretationData.planets || {}).length
+            });
+          }
         }
+
+        setInterpretation(cachedInterpretation);
+        console.log(`✅ Interpretación ${type} cargada desde caché exitosamente`);
       } else {
         console.log(`ℹ️ No hay interpretaciones guardadas para ${type}`);
         setSavedInterpretations([]);
