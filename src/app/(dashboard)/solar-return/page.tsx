@@ -362,19 +362,19 @@ export default function SolarReturnPage() {
           </div>
         )}
 
-        {/* ✅ SECCIÓN 5: LÍNEA DE TIEMPO SOLAR RETURN */}
+        {/* ✅ SECCIÓN 5: LÍNEA DE TIEMPO SOLAR RETURN CON EVENTOS ASTROLÓGICOS */}
         <div id="linea-tiempo-solar" className="max-w-6xl mx-auto mb-12">
           <div className="bg-gradient-to-br from-rose-900/40 to-pink-900/40 rounded-xl p-8 border border-rose-400/30">
             <h3 className="text-2xl font-bold text-rose-100 mb-6 text-center flex items-center justify-center gap-3">
               <span className="text-3xl">📅</span>
-              Línea de Tiempo Solar Return {new Date().getFullYear()}-{new Date().getFullYear() + 1}
+              Calendario Astrológico Completo {new Date().getFullYear()}-{new Date().getFullYear() + 1}
             </h3>
 
             <div className="relative">
               <div className="absolute left-8 top-0 bottom-0 w-1 bg-gradient-to-b from-rose-500 via-pink-500 to-rose-500"></div>
 
               <div className="space-y-6">
-                {/* Mes 1 */}
+                {/* Mes 1 - Activación */}
                 <div className="flex items-start gap-4 relative">
                   <div className="w-16 h-16 rounded-full bg-rose-600 flex items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
                     <span className="text-white font-bold text-sm">MES 1</span>
@@ -390,7 +390,28 @@ export default function SolarReturnPage() {
                   </div>
                 </div>
 
-                {/* Mes 3 */}
+                {/* MARZO - Eclipse Solar */}
+                <div className="flex items-start gap-4 relative">
+                  <div className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
+                    <span className="text-white font-bold text-2xl">🌑</span>
+                  </div>
+                  <div className="flex-1 bg-purple-800/30 rounded-lg p-4 border-2 border-purple-400/40">
+                    <h4 className="text-purple-100 font-bold mb-2">🌑 Eclipse Solar en Aries</h4>
+                    <p className="text-purple-200 text-sm mb-2">📅 29 Marzo 2025 • Portal de Nuevos Comienzos</p>
+                    <p className="text-purple-50 text-sm mb-2">
+                      <strong>⚡ PORTAL CÓSMICO ABIERTO:</strong> Los eclipses son ventanas de cambio acelerado.
+                      Nuevos comienzos llegan sin previo aviso. Prepárate para giros inesperados.
+                    </p>
+                    <div className="bg-purple-900/30 rounded p-2 mt-2">
+                      <p className="text-purple-200 text-xs">
+                        ✅ Ideal para: Iniciar proyectos valientes, tomar decisiones audaces<br/>
+                        ⚠️ Evita: Resistirte al cambio, aferrarte al pasado
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mes 3 - Primera Cuadratura */}
                 <div className="flex items-start gap-4 relative">
                   <div className="w-16 h-16 rounded-full bg-orange-600 flex items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
                     <span className="text-white font-bold text-sm">MES 3</span>
@@ -404,7 +425,28 @@ export default function SolarReturnPage() {
                   </div>
                 </div>
 
-                {/* Mes 6 */}
+                {/* MAYO - Mercurio Retrógrado */}
+                <div className="flex items-start gap-4 relative">
+                  <div className="w-16 h-16 rounded-full bg-cyan-600 flex items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
+                    <span className="text-white font-bold text-2xl">☿Ⓡ</span>
+                  </div>
+                  <div className="flex-1 bg-cyan-800/30 rounded-lg p-4 border-2 border-cyan-400/40">
+                    <h4 className="text-cyan-100 font-bold mb-2">☿ Mercurio Retrógrado en Géminis</h4>
+                    <p className="text-cyan-200 text-sm mb-2">📅 10 Mayo - 3 Junio 2025 • Fase de Revisión</p>
+                    <p className="text-cyan-50 text-sm mb-2">
+                      <strong>⚠️ PRECAUCIÓN CÓSMICA:</strong> Comunicaciones, tecnología y contratos bajo tensión.
+                      Es tiempo de RE-visar, RE-pensar, RE-conectar (no de iniciar).
+                    </p>
+                    <div className="bg-cyan-900/30 rounded p-2 mt-2">
+                      <p className="text-cyan-200 text-xs">
+                        ✅ Ideal para: Revisar proyectos, reconectar con el pasado, reorganizar<br/>
+                        ⚠️ Evita: Firmar contratos, comprar tecnología, iniciar negocios nuevos
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mes 6 - Trígono Solar */}
                 <div className="flex items-start gap-4 relative">
                   <div className="w-16 h-16 rounded-full bg-green-600 flex items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
                     <span className="text-white font-bold text-sm">MES 6</span>
@@ -418,7 +460,7 @@ export default function SolarReturnPage() {
                   </div>
                 </div>
 
-                {/* Mes 7 */}
+                {/* Mes 7 - Oposición Solar */}
                 <div className="flex items-start gap-4 relative">
                   <div className="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
                     <span className="text-white font-bold text-sm">MES 7</span>
@@ -432,7 +474,48 @@ export default function SolarReturnPage() {
                   </div>
                 </div>
 
-                {/* Mes 9 */}
+                {/* AGOSTO - Mercurio Retrógrado #2 */}
+                <div className="flex items-start gap-4 relative">
+                  <div className="w-16 h-16 rounded-full bg-cyan-600 flex items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
+                    <span className="text-white font-bold text-2xl">☿Ⓡ</span>
+                  </div>
+                  <div className="flex-1 bg-cyan-800/30 rounded-lg p-4 border-2 border-cyan-400/40">
+                    <h4 className="text-cyan-100 font-bold mb-2">☿ Mercurio Retrógrado en Virgo</h4>
+                    <p className="text-cyan-200 text-sm mb-2">📅 5 - 28 Agosto 2025 • Re-evaluación de Procesos</p>
+                    <p className="text-cyan-50 text-sm mb-2">
+                      Segunda retrogradación del año. Perfecciona sistemas, limpia lo que no funciona.
+                    </p>
+                    <div className="bg-cyan-900/30 rounded p-2 mt-2">
+                      <p className="text-cyan-200 text-xs">
+                        ✅ Optimiza procesos, depura errores, mejora eficiencia<br/>
+                        ⚠️ No inicies, sino PERFECCIONA lo existente
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* SEPTIEMBRE - Eclipse Lunar */}
+                <div className="flex items-start gap-4 relative">
+                  <div className="w-16 h-16 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
+                    <span className="text-white font-bold text-2xl">🌕</span>
+                  </div>
+                  <div className="flex-1 bg-indigo-800/30 rounded-lg p-4 border-2 border-indigo-400/40">
+                    <h4 className="text-indigo-100 font-bold mb-2">🌕 Eclipse Lunar en Piscis</h4>
+                    <p className="text-indigo-200 text-sm mb-2">📅 7 Septiembre 2025 • Cierre Emocional Profundo</p>
+                    <p className="text-indigo-50 text-sm mb-2">
+                      <strong>🌊 LIBERACIÓN EMOCIONAL:</strong> Los eclipses lunares revelan y liberan lo oculto.
+                      Llora, suelta, perdona. Es tiempo de soltar peso emocional acumulado.
+                    </p>
+                    <div className="bg-indigo-900/30 rounded p-2 mt-2">
+                      <p className="text-indigo-200 text-xs">
+                        ✅ Ritual de cierre, terapia emocional, perdón consciente<br/>
+                        ⚠️ Emociones intensas - date espacio para procesar
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mes 9 - Cosecha */}
                 <div className="flex items-start gap-4 relative">
                   <div className="w-16 h-16 rounded-full bg-yellow-600 flex items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
                     <span className="text-white font-bold text-sm">MES 9</span>
@@ -446,7 +529,27 @@ export default function SolarReturnPage() {
                   </div>
                 </div>
 
-                {/* Mes 12 */}
+                {/* NOVIEMBRE - Mercurio Retrógrado #3 */}
+                <div className="flex items-start gap-4 relative">
+                  <div className="w-16 h-16 rounded-full bg-cyan-600 flex items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
+                    <span className="text-white font-bold text-2xl">☿Ⓡ</span>
+                  </div>
+                  <div className="flex-1 bg-cyan-800/30 rounded-lg p-4 border-2 border-cyan-400/40">
+                    <h4 className="text-cyan-100 font-bold mb-2">☿ Mercurio Retrógrado en Sagitario</h4>
+                    <p className="text-cyan-200 text-sm mb-2">📅 25 Nov - 15 Dic 2025 • Revisión de Creencias</p>
+                    <p className="text-cyan-50 text-sm mb-2">
+                      Última retrogradación del año. Cuestiona tus verdades, re-evalúa tu filosofía de vida.
+                    </p>
+                    <div className="bg-cyan-900/30 rounded p-2 mt-2">
+                      <p className="text-cyan-200 text-xs">
+                        ✅ Reflexiona sobre tu dirección, revisa metas de largo plazo<br/>
+                        ⚠️ Viajes y estudios pueden retrasarse - paciencia cósmica
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mes 12 - Cierre */}
                 <div className="flex items-start gap-4 relative">
                   <div className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
                     <span className="text-white font-bold text-sm">MES 12</span>
@@ -464,10 +567,32 @@ export default function SolarReturnPage() {
               </div>
             </div>
 
+            {/* Leyenda */}
+            <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-rose-900/40 rounded-lg p-3 border border-rose-400/20">
+                <h5 className="text-rose-200 font-semibold text-sm mb-2">🌞 Aspectos Solares</h5>
+                <p className="text-rose-300 text-xs">
+                  Momentos clave de tu ciclo anual basados en la posición del Sol
+                </p>
+              </div>
+              <div className="bg-cyan-900/40 rounded-lg p-3 border border-cyan-400/20">
+                <h5 className="text-cyan-200 font-semibold text-sm mb-2">☿Ⓡ Retrogradaciones</h5>
+                <p className="text-cyan-300 text-xs">
+                  Periodos de revisión - NO inicies, sino PERFECCIONA lo existente
+                </p>
+              </div>
+              <div className="bg-purple-900/40 rounded-lg p-3 border border-purple-400/20">
+                <h5 className="text-purple-200 font-semibold text-sm mb-2">🌑🌕 Eclipses</h5>
+                <p className="text-purple-300 text-xs">
+                  Portales de cambio acelerado - transformaciones profundas e inesperadas
+                </p>
+              </div>
+            </div>
+
             <div className="mt-6 p-4 bg-rose-900/40 rounded-lg border border-rose-400/20">
               <p className="text-rose-200 text-sm text-center">
-                💡 <strong>Nota Importante:</strong> Estos momentos clave se activan automáticamente cuando el Sol transita
-                las posiciones críticas respecto a tu Solar Return. Úsalos para evaluar tu progreso anual.
+                💡 <strong>Usa este calendario para:</strong> Planificar proyectos importantes, evitar decisiones críticas
+                durante retrogradaciones, y aprovechar eclipses como catalizadores de transformación consciente.
               </p>
             </div>
           </div>
