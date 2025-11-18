@@ -349,12 +349,15 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
     const interpretationKey = `${planet.name}-${planet.sign}-${planet.house}`;
     let interpretation = null;
+    let isRealInterpretation = false; // ✅ NEW: Flag para detectar si es interpretación real
 
     if (natalInterpretations?.planets?.[interpretationKey]) {
       interpretation = natalInterpretations.planets[interpretationKey];
+      isRealInterpretation = true; // ✅ Es interpretación real de AI
       console.log('✅ Using AI interpretation for', interpretationKey);
     } else {
       interpretation = getExampleInterpretation(interpretationKey);
+      isRealInterpretation = false; // ✅ Es interpretación de ejemplo/fallback
       console.log('⚠️ Using fallback for', interpretationKey);
       console.log('   - Interpretation:', interpretation);
       console.log('   - Has drawer?', !!interpretation?.drawer);
@@ -454,11 +457,13 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           </div>
         )}
 
-        {interpretation?.drawer && (
+        {/* ✅ BOTÓN CONDICIONAL: Real vs Ejemplo */}
+        {isRealInterpretation && interpretation?.drawer ? (
+          // ✅ SI HAY INTERPRETACIÓN REAL → Mostrar "Ver interpretación completa"
           <button
             onMouseDown={(e) => {
               console.log('═══════════════════════════════════');
-              console.log('🎯 ABRIENDO DRAWER CON MOUSEDOWN - PLANET');
+              console.log('🎯 ABRIENDO DRAWER CON MOUSEDOWN - PLANET (REAL)');
               console.log('1. onOpenDrawer exists?', !!onOpenDrawer);
               console.log('2. interpretation.drawer:', interpretation.drawer);
               console.log('3. interpretation.drawer.titulo:', interpretation?.drawer?.titulo);
@@ -495,17 +500,48 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
             <span>📖 Ver interpretación completa</span>
             <span className="group-hover:translate-x-1 transition-transform">→</span>
           </button>
-        )}
+        ) : (
+          // ❌ SI NO HAY INTERPRETACIÓN REAL → Mostrar advertencia y botón de generar
+          <div className="space-y-2">
+            <div className="text-center text-xs text-yellow-300 bg-yellow-900/20 rounded-lg p-2 border border-yellow-500/30">
+              ⚠️ Esta interpretación es un ejemplo. Para ver tu interpretación personalizada completa, genera las interpretaciones usando el botón "INTERPRETAR" en la parte superior.
+            </div>
 
-        {!interpretation?.drawer && (
-          <div className="text-center text-xs text-gray-400 py-2">
-            💡 Haz hover más tiempo para ver la interpretación
-          </div>
-        )}
+            <button
+              onClick={(e) => {
+                console.log('🎯 CLICK: Ir a generar interpretaciones desde tooltip planeta');
+                e.stopPropagation();
+                e.preventDefault();
 
-        {!interpretation?.drawer && (
-          <div className="text-center text-xs text-gray-400 py-2">
-            💡 Haz hover más tiempo para ver la interpretación
+                // Cerrar tooltip
+                setHoveredPlanet(null);
+                if (setClickedPlanet) setClickedPlanet(null);
+
+                // Scroll al botón de interpretar con el atributo data-interpret-button
+                const interpretButton = document.querySelector('[data-interpret-button]');
+                console.log('🎯 Buscando botón interpretar:', interpretButton);
+
+                if (interpretButton) {
+                  interpretButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                  // Parpadear el botón para llamar la atención
+                  interpretButton.classList.add('animate-pulse');
+                  setTimeout(() => {
+                    interpretButton.classList.remove('animate-pulse');
+                  }, 3000);
+                } else {
+                  console.log('❌ No se encontró el botón interpretar con [data-interpret-button]');
+                }
+              }}
+              style={{
+                pointerEvents: 'auto',
+                zIndex: 9999999,
+                cursor: 'pointer'
+              }}
+              className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
+            >
+              🎯 Ir a generar interpretaciones
+            </button>
           </div>
         )}
       </div>
@@ -518,9 +554,11 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
   if (hoveredPlanet === 'Ascendente' && ascendant) {
     let interpretation = null;
+    let isRealInterpretation = false; // ✅ NEW: Flag para detectar si es interpretación real
 
     if (natalInterpretations?.angles?.Ascendente) {
       interpretation = natalInterpretations.angles.Ascendente;
+      isRealInterpretation = true; // ✅ Es interpretación real de AI
     }
 
     return (
@@ -580,11 +618,12 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           </div>
         </div>
 
-        {interpretation?.drawer && (
+        {/* ✅ BOTÓN CONDICIONAL: Real vs Ejemplo - ASCENDENTE */}
+        {isRealInterpretation && interpretation?.drawer ? (
           <button
             onMouseDown={(e) => {
               console.log('═══════════════════════════════════');
-              console.log('🎯 ABRIENDO DRAWER CON MOUSEDOWN - ASCENDANT');
+              console.log('🎯 ABRIENDO DRAWER CON MOUSEDOWN - ASCENDANT (REAL)');
               console.log('1. onOpenDrawer exists?', !!onOpenDrawer);
               console.log('2. interpretation.drawer:', interpretation.drawer);
               console.log('3. interpretation.drawer.titulo:', interpretation?.drawer?.titulo);
@@ -620,6 +659,37 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           >
             📖 Ver interpretación completa
           </button>
+        ) : (
+          <div className="space-y-2">
+            <div className="text-center text-xs text-yellow-300 bg-yellow-900/20 rounded-lg p-2 border border-yellow-500/30">
+              ⚠️ Para ver tu interpretación personalizada del Ascendente, genera las interpretaciones usando el botón "INTERPRETAR" en la parte superior.
+            </div>
+
+            <button
+              onClick={(e) => {
+                console.log('🎯 CLICK: Ir a generar interpretaciones desde tooltip Ascendente');
+                e.stopPropagation();
+                e.preventDefault();
+
+                setHoveredPlanet(null);
+
+                const interpretButton = document.querySelector('[data-interpret-button]');
+                if (interpretButton) {
+                  interpretButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  interpretButton.classList.add('animate-pulse');
+                  setTimeout(() => interpretButton.classList.remove('animate-pulse'), 3000);
+                }
+              }}
+              style={{
+                pointerEvents: 'auto',
+                zIndex: 9999999,
+                cursor: 'pointer'
+              }}
+              className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
+            >
+              🎯 Ir a generar interpretaciones
+            </button>
+          </div>
         )}
       </div>
     );
@@ -631,9 +701,11 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
   if (hoveredPlanet === 'Medio Cielo' && midheaven) {
     let interpretation = null;
+    let isRealInterpretation = false; // ✅ NEW: Flag para detectar si es interpretación real
 
     if (natalInterpretations?.angles?.MedioCielo) {
       interpretation = natalInterpretations.angles.MedioCielo;
+      isRealInterpretation = true; // ✅ Es interpretación real de AI
     }
 
     return (
@@ -693,11 +765,12 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           </div>
         </div>
 
-        {interpretation?.drawer && (
+        {/* ✅ BOTÓN CONDICIONAL: Real vs Ejemplo - MEDIO CIELO */}
+        {isRealInterpretation && interpretation?.drawer ? (
           <button
             onMouseDown={(e) => {
               console.log('═══════════════════════════════════');
-              console.log('🎯 ABRIENDO DRAWER CON MOUSEDOWN - MIDHEAVEN');
+              console.log('🎯 ABRIENDO DRAWER CON MOUSEDOWN - MIDHEAVEN (REAL)');
               console.log('1. onOpenDrawer exists?', !!onOpenDrawer);
               console.log('2. interpretation.drawer:', interpretation.drawer);
               console.log('3. interpretation.drawer.titulo:', interpretation?.drawer?.titulo);
@@ -733,6 +806,37 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           >
             📖 Ver interpretación completa
           </button>
+        ) : (
+          <div className="space-y-2">
+            <div className="text-center text-xs text-yellow-300 bg-yellow-900/20 rounded-lg p-2 border border-yellow-500/30">
+              ⚠️ Para ver tu interpretación personalizada del Medio Cielo, genera las interpretaciones usando el botón "INTERPRETAR" en la parte superior.
+            </div>
+
+            <button
+              onClick={(e) => {
+                console.log('🎯 CLICK: Ir a generar interpretaciones desde tooltip Medio Cielo');
+                e.stopPropagation();
+                e.preventDefault();
+
+                setHoveredPlanet(null);
+
+                const interpretButton = document.querySelector('[data-interpret-button]');
+                if (interpretButton) {
+                  interpretButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  interpretButton.classList.add('animate-pulse');
+                  setTimeout(() => interpretButton.classList.remove('animate-pulse'), 3000);
+                }
+              }}
+              style={{
+                pointerEvents: 'auto',
+                zIndex: 9999999,
+                cursor: 'pointer'
+              }}
+              className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
+            >
+              🎯 Ir a generar interpretaciones
+            </button>
+          </div>
         )}
       </div>
     );
@@ -855,34 +959,40 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           </div>
         )}
 
-        {/* Generate AI interpretation button */}
-        {!hasAIInterpretation && userId && (
-          <button
-            onClick={async (e) => {
-              e.stopPropagation();
-              setAspectTooltipLocked(true);
-              await generateAspectInterpretation(
-                currentAspect.planet1,
-                currentAspect.planet2,
-                currentAspect.type,
-                currentAspect.orb
-              );
-            }}
-            disabled={generatingAspect}
-            className="w-full py-2.5 px-4 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white rounded-lg text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {generatingAspect ? (
-              <>
-                <div className="animate-spin">⏳</div>
-                <span>Generando interpretación...</span>
-              </>
-            ) : (
-              <>
-                <span>✨</span>
-                <span>Generar Interpretación IA</span>
-              </>
-            )}
-          </button>
+        {/* ✅ BOTÓN CONDICIONAL: Generar o redirigir - ASPECTOS */}
+        {!hasAIInterpretation && (
+          <div className="space-y-2">
+            <div className="text-center text-xs text-yellow-300 bg-yellow-900/20 rounded-lg p-2 border border-yellow-500/30">
+              ⚠️ Para ver interpretaciones personalizadas de aspectos, genera las interpretaciones usando el botón "INTERPRETAR" en la parte superior.
+            </div>
+
+            <button
+              onClick={(e) => {
+                console.log('🎯 CLICK: Ir a generar interpretaciones desde tooltip aspecto');
+                e.stopPropagation();
+                e.preventDefault();
+
+                setHoveredAspect(null);
+                setClickedAspect?.(null);
+                setAspectTooltipLocked(false);
+
+                const interpretButton = document.querySelector('[data-interpret-button]');
+                if (interpretButton) {
+                  interpretButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  interpretButton.classList.add('animate-pulse');
+                  setTimeout(() => interpretButton.classList.remove('animate-pulse'), 3000);
+                }
+              }}
+              style={{
+                pointerEvents: 'auto',
+                zIndex: 9999999,
+                cursor: 'pointer'
+              }}
+              className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
+            >
+              🎯 Ir a generar interpretaciones
+            </button>
+          </div>
         )}
 
         {/* Show full interpretation if available */}
