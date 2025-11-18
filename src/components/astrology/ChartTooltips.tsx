@@ -457,54 +457,63 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           </div>
         )}
 
-        {/* ✅ BOTÓN CONDICIONAL: Real vs Ejemplo */}
-        {isRealInterpretation && interpretation?.drawer ? (
-          // ✅ SI HAY INTERPRETACIÓN REAL → Mostrar "Ver interpretación completa"
-          <button
-            onMouseDown={(e) => {
-              console.log('═══════════════════════════════════');
-              console.log('🎯 ABRIENDO DRAWER CON MOUSEDOWN - PLANET (REAL)');
-              console.log('1. onOpenDrawer exists?', !!onOpenDrawer);
-              console.log('2. interpretation.drawer:', interpretation.drawer);
-              console.log('3. interpretation.drawer.titulo:', interpretation?.drawer?.titulo);
-              console.log('═══════════════════════════════════');
+        {/* ✅ BOTÓN CONDICIONAL: Drawer disponible vs No disponible */}
+        {interpretation?.drawer ? (
+          // ✅ SI HAY DRAWER (real o ejemplo) → Mostrar botón para verlo
+          <div className="space-y-2">
+            {!isRealInterpretation && (
+              <div className="text-center text-xs text-yellow-300 bg-yellow-900/20 rounded-lg p-2 border border-yellow-500/30">
+                ⚠️ Esta interpretación es un ejemplo. Para ver tu interpretación personalizada completa, genera las interpretaciones usando el botón "INTERPRETAR" en la parte superior.
+              </div>
+            )}
 
-              e.stopPropagation();
-              e.preventDefault();
+            <button
+              onMouseDown={(e) => {
+                console.log('═══════════════════════════════════');
+                console.log('🎯 ABRIENDO DRAWER CON MOUSEDOWN - PLANET');
+                console.log('1. onOpenDrawer exists?', !!onOpenDrawer);
+                console.log('2. interpretation.drawer:', interpretation.drawer);
+                console.log('3. interpretation.drawer.titulo:', interpretation?.drawer?.titulo);
+                console.log('4. isRealInterpretation:', isRealInterpretation);
+                console.log('═══════════════════════════════════');
 
-              if (!onOpenDrawer) {
-                console.error('❌ onOpenDrawer is undefined');
-                return;
-              }
+                e.stopPropagation();
+                e.preventDefault();
 
-              if (!interpretation?.drawer) {
-                console.error('❌ interpretation.drawer is undefined');
-                return;
-              }
+                if (!onOpenDrawer) {
+                  console.error('❌ onOpenDrawer is undefined');
+                  return;
+                }
 
-              try {
-                console.log('✅ Calling onOpenDrawer...');
-                onOpenDrawer(interpretation.drawer);
-                console.log('✅ onOpenDrawer called successfully');
-              } catch (error) {
-                console.error('❌ Error calling onOpenDrawer:', error);
-              }
-            }}
-            style={{
-              pointerEvents: 'auto',
-              zIndex: 9999999,
-              cursor: 'pointer'
-            }}
-            className="w-full py-2.5 px-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group shadow-lg"
-          >
-            <span>✨ Ver interpretación IA</span>
-            <span className="group-hover:translate-x-1 transition-transform">→</span>
-          </button>
+                if (!interpretation?.drawer) {
+                  console.error('❌ interpretation.drawer is undefined');
+                  return;
+                }
+
+                try {
+                  console.log('✅ Calling onOpenDrawer...');
+                  onOpenDrawer(interpretation.drawer);
+                  console.log('✅ onOpenDrawer called successfully');
+                } catch (error) {
+                  console.error('❌ Error calling onOpenDrawer:', error);
+                }
+              }}
+              style={{
+                pointerEvents: 'auto',
+                zIndex: 9999999,
+                cursor: 'pointer'
+              }}
+              className="w-full py-2.5 px-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group shadow-lg"
+            >
+              <span>✨ Ver interpretación IA</span>
+              <span className="group-hover:translate-x-1 transition-transform">→</span>
+            </button>
+          </div>
         ) : (
-          // ❌ SI NO HAY INTERPRETACIÓN REAL → Mostrar advertencia y botón de generar
+          // ❌ SI NO HAY DRAWER → Mostrar advertencia y botón de generar
           <div className="space-y-2">
             <div className="text-center text-xs text-yellow-300 bg-yellow-900/20 rounded-lg p-2 border border-yellow-500/30">
-              ⚠️ Esta interpretación es un ejemplo. Para ver tu interpretación personalizada completa, genera las interpretaciones usando el botón "INTERPRETAR" en la parte superior.
+              ⚠️ Para ver una interpretación completa de este planeta, genera las interpretaciones usando el botón "INTERPRETAR" en la parte superior.
             </div>
 
             <button
@@ -618,51 +627,60 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           </div>
         </div>
 
-        {/* ✅ BOTÓN CONDICIONAL: Real vs Ejemplo - ASCENDENTE */}
-        {isRealInterpretation && interpretation?.drawer ? (
-          <button
-            onMouseDown={(e) => {
-              console.log('═══════════════════════════════════');
-              console.log('🎯 ABRIENDO DRAWER CON MOUSEDOWN - ASCENDANT (REAL)');
-              console.log('1. onOpenDrawer exists?', !!onOpenDrawer);
-              console.log('2. interpretation.drawer:', interpretation.drawer);
-              console.log('3. interpretation.drawer.titulo:', interpretation?.drawer?.titulo);
-              console.log('═══════════════════════════════════');
+        {/* ✅ BOTÓN CONDICIONAL: Drawer disponible vs No disponible - ASCENDENTE */}
+        {interpretation?.drawer ? (
+          <div className="space-y-2">
+            {!isRealInterpretation && (
+              <div className="text-center text-xs text-yellow-300 bg-yellow-900/20 rounded-lg p-2 border border-yellow-500/30">
+                ⚠️ Para ver tu interpretación personalizada del Ascendente, genera las interpretaciones usando el botón "INTERPRETAR" en la parte superior.
+              </div>
+            )}
 
-              e.stopPropagation();
-              e.preventDefault();
+            <button
+              onMouseDown={(e) => {
+                console.log('═══════════════════════════════════');
+                console.log('🎯 ABRIENDO DRAWER CON MOUSEDOWN - ASCENDANT');
+                console.log('1. onOpenDrawer exists?', !!onOpenDrawer);
+                console.log('2. interpretation.drawer:', interpretation.drawer);
+                console.log('3. interpretation.drawer.titulo:', interpretation?.drawer?.titulo);
+                console.log('4. isRealInterpretation:', isRealInterpretation);
+                console.log('═══════════════════════════════════');
 
-              if (!onOpenDrawer) {
-                console.error('❌ onOpenDrawer is undefined');
-                return;
-              }
+                e.stopPropagation();
+                e.preventDefault();
 
-              if (!interpretation?.drawer) {
-                console.error('❌ interpretation.drawer is undefined');
-                return;
-              }
+                if (!onOpenDrawer) {
+                  console.error('❌ onOpenDrawer is undefined');
+                  return;
+                }
 
-              try {
-                console.log('✅ Calling onOpenDrawer...');
-                onOpenDrawer(interpretation.drawer);
-                console.log('✅ onOpenDrawer called successfully');
-              } catch (error) {
-                console.error('❌ Error calling onOpenDrawer:', error);
-              }
-            }}
-            style={{
-              pointerEvents: 'auto',
-              zIndex: 9999999,
-              cursor: 'pointer'
-            }}
-            className="w-full py-2 px-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg text-sm font-semibold transition-all"
-          >
-            ✨ Ver interpretación IA
-          </button>
+                if (!interpretation?.drawer) {
+                  console.error('❌ interpretation.drawer is undefined');
+                  return;
+                }
+
+                try {
+                  console.log('✅ Calling onOpenDrawer...');
+                  onOpenDrawer(interpretation.drawer);
+                  console.log('✅ onOpenDrawer called successfully');
+                } catch (error) {
+                  console.error('❌ Error calling onOpenDrawer:', error);
+                }
+              }}
+              style={{
+                pointerEvents: 'auto',
+                zIndex: 9999999,
+                cursor: 'pointer'
+              }}
+              className="w-full py-2 px-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg text-sm font-semibold transition-all"
+            >
+              ✨ Ver interpretación IA
+            </button>
+          </div>
         ) : (
           <div className="space-y-2">
             <div className="text-center text-xs text-yellow-300 bg-yellow-900/20 rounded-lg p-2 border border-yellow-500/30">
-              ⚠️ Para ver tu interpretación personalizada del Ascendente, genera las interpretaciones usando el botón "INTERPRETAR" en la parte superior.
+              ⚠️ Para ver una interpretación completa del Ascendente, genera las interpretaciones usando el botón "INTERPRETAR" en la parte superior.
             </div>
 
             <button
@@ -765,51 +783,60 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           </div>
         </div>
 
-        {/* ✅ BOTÓN CONDICIONAL: Real vs Ejemplo - MEDIO CIELO */}
-        {isRealInterpretation && interpretation?.drawer ? (
-          <button
-            onMouseDown={(e) => {
-              console.log('═══════════════════════════════════');
-              console.log('🎯 ABRIENDO DRAWER CON MOUSEDOWN - MIDHEAVEN (REAL)');
-              console.log('1. onOpenDrawer exists?', !!onOpenDrawer);
-              console.log('2. interpretation.drawer:', interpretation.drawer);
-              console.log('3. interpretation.drawer.titulo:', interpretation?.drawer?.titulo);
-              console.log('═══════════════════════════════════');
+        {/* ✅ BOTÓN CONDICIONAL: Drawer disponible vs No disponible - MEDIO CIELO */}
+        {interpretation?.drawer ? (
+          <div className="space-y-2">
+            {!isRealInterpretation && (
+              <div className="text-center text-xs text-yellow-300 bg-yellow-900/20 rounded-lg p-2 border border-yellow-500/30">
+                ⚠️ Para ver tu interpretación personalizada del Medio Cielo, genera las interpretaciones usando el botón "INTERPRETAR" en la parte superior.
+              </div>
+            )}
 
-              e.stopPropagation();
-              e.preventDefault();
+            <button
+              onMouseDown={(e) => {
+                console.log('═══════════════════════════════════');
+                console.log('🎯 ABRIENDO DRAWER CON MOUSEDOWN - MIDHEAVEN');
+                console.log('1. onOpenDrawer exists?', !!onOpenDrawer);
+                console.log('2. interpretation.drawer:', interpretation.drawer);
+                console.log('3. interpretation.drawer.titulo:', interpretation?.drawer?.titulo);
+                console.log('4. isRealInterpretation:', isRealInterpretation);
+                console.log('═══════════════════════════════════');
 
-              if (!onOpenDrawer) {
-                console.error('❌ onOpenDrawer is undefined');
-                return;
-              }
+                e.stopPropagation();
+                e.preventDefault();
 
-              if (!interpretation?.drawer) {
-                console.error('❌ interpretation.drawer is undefined');
-                return;
-              }
+                if (!onOpenDrawer) {
+                  console.error('❌ onOpenDrawer is undefined');
+                  return;
+                }
 
-              try {
-                console.log('✅ Calling onOpenDrawer...');
-                onOpenDrawer(interpretation.drawer);
-                console.log('✅ onOpenDrawer called successfully');
-              } catch (error) {
-                console.error('❌ Error calling onOpenDrawer:', error);
-              }
-            }}
-            style={{
-              pointerEvents: 'auto',
-              zIndex: 9999999,
-              cursor: 'pointer'
-            }}
-            className="w-full py-2 px-4 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white rounded-lg text-sm font-semibold transition-all"
-          >
-            ✨ Ver interpretación IA
-          </button>
+                if (!interpretation?.drawer) {
+                  console.error('❌ interpretation.drawer is undefined');
+                  return;
+                }
+
+                try {
+                  console.log('✅ Calling onOpenDrawer...');
+                  onOpenDrawer(interpretation.drawer);
+                  console.log('✅ onOpenDrawer called successfully');
+                } catch (error) {
+                  console.error('❌ Error calling onOpenDrawer:', error);
+                }
+              }}
+              style={{
+                pointerEvents: 'auto',
+                zIndex: 9999999,
+                cursor: 'pointer'
+              }}
+              className="w-full py-2 px-4 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white rounded-lg text-sm font-semibold transition-all"
+            >
+              ✨ Ver interpretación IA
+            </button>
+          </div>
         ) : (
           <div className="space-y-2">
             <div className="text-center text-xs text-yellow-300 bg-yellow-900/20 rounded-lg p-2 border border-yellow-500/30">
-              ⚠️ Para ver tu interpretación personalizada del Medio Cielo, genera las interpretaciones usando el botón "INTERPRETAR" en la parte superior.
+              ⚠️ Para ver una interpretación completa del Medio Cielo, genera las interpretaciones usando el botón "INTERPRETAR" en la parte superior.
             </div>
 
             <button
