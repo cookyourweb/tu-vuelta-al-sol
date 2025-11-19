@@ -308,24 +308,111 @@ export default function SolarReturnPage() {
             </h2>
             <div className="space-y-4 text-purple-50">
               <p className="leading-relaxed">
-                La <strong>Revolución Solar</strong> es la carta astral levantada para el momento exacto 
-                en que el Sol regresa a la posición que tenía cuando naciste. Este evento ocurre cerca 
+                La <strong>Revolución Solar</strong> es la carta astral levantada para el momento exacto
+                en que el Sol regresa a la posición que tenía cuando naciste. Este evento ocurre cerca
                 de tu cumpleaños cada año y marca el inicio de un nuevo ciclo anual.
               </p>
               <div className="bg-purple-800/30 rounded-lg p-4">
                 <p className="text-sm text-purple-200">
-                  <strong>💡 Dato clave:</strong> El Sol siempre está en la misma posición zodiacal 
-                  que en tu carta natal, pero los otros planetas cambian, creando un mapa único de 
+                  <strong>💡 Dato clave:</strong> El Sol siempre está en la misma posición zodiacal
+                  que en tu carta natal, pero los otros planetas cambian, creando un mapa único de
                   energías disponibles para los próximos 12 meses.
                 </p>
               </div>
               <p className="leading-relaxed">
-                Esta técnica predictiva te permite conocer las áreas de vida que se activarán, 
+                Esta técnica predictiva te permite conocer las áreas de vida que se activarán,
                 los desafíos que enfrentarás y las oportunidades que surgirán durante tu año personal.
               </p>
             </div>
           </div>
         </div>
+
+        {/* ✅ SECCIÓN 3.5: DATOS DE UBICACIÓN SOLAR RETURN */}
+        {birthData && (
+          <div className="max-w-4xl mx-auto mb-12">
+            <div className="bg-gradient-to-br from-orange-900/40 to-amber-900/40 rounded-2xl p-6 border border-orange-400/30">
+              <h3 className="text-xl font-bold text-orange-100 mb-4 flex items-center gap-2">
+                <Sun className="w-5 h-5 text-orange-300" />
+                Datos de tu Solar Return {new Date().getFullYear()}
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Datos de Nacimiento */}
+                <div className="bg-orange-800/20 rounded-lg p-4 border border-orange-400/20">
+                  <h4 className="text-orange-200 font-semibold text-sm mb-3">📍 Datos de Nacimiento</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-orange-300">Lugar:</span>
+                      <span className="text-orange-50 font-medium">{birthData.birthPlace || 'No disponible'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-orange-300">Fecha:</span>
+                      <span className="text-orange-50 font-medium">
+                        {new Date(birthData.date || birthData.birthDate).toLocaleDateString('es-ES', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric'
+                        })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-orange-300">Hora:</span>
+                      <span className="text-orange-50 font-medium">{birthData.time || birthData.birthTime || 'No disponible'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Ubicación del Solar Return */}
+                <div className={`rounded-lg p-4 border ${
+                  birthData.currentLocation && birthData.currentLocation !== birthData.birthPlace
+                    ? 'bg-green-800/20 border-green-400/30'
+                    : 'bg-orange-800/20 border-orange-400/20'
+                }`}>
+                  <h4 className={`font-semibold text-sm mb-3 ${
+                    birthData.currentLocation && birthData.currentLocation !== birthData.birthPlace
+                      ? 'text-green-200'
+                      : 'text-orange-200'
+                  }`}>
+                    {birthData.currentLocation && birthData.currentLocation !== birthData.birthPlace
+                      ? '🌍 Ubicación Actual (Solar Return)'
+                      : '📍 Ubicación Solar Return'
+                    }
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className={birthData.currentLocation && birthData.currentLocation !== birthData.birthPlace ? 'text-green-300' : 'text-orange-300'}>
+                        Lugar:
+                      </span>
+                      <span className={`font-medium ${
+                        birthData.currentLocation && birthData.currentLocation !== birthData.birthPlace
+                          ? 'text-green-50'
+                          : 'text-orange-50'
+                      }`}>
+                        {birthData.currentLocation || birthData.birthPlace || 'No disponible'}
+                      </span>
+                    </div>
+                    {birthData.currentLocation && birthData.currentLocation !== birthData.birthPlace && (
+                      <div className="mt-3 p-2 bg-green-900/30 rounded border border-green-400/20">
+                        <p className="text-green-200 text-xs">
+                          ✨ <strong>Importante:</strong> Tu Solar Return se calcula para tu ubicación actual,
+                          no tu lugar de nacimiento. Esto puede cambiar significativamente tu carta anual.
+                        </p>
+                      </div>
+                    )}
+                    {(!birthData.currentLocation || birthData.currentLocation === birthData.birthPlace) && (
+                      <div className="mt-3 p-2 bg-orange-900/30 rounded border border-orange-400/20">
+                        <p className="text-orange-200 text-xs">
+                          📍 Se usa tu lugar de nacimiento por defecto. Si vives en otra ciudad,
+                          considera actualizar tu ubicación actual para un cálculo más preciso.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ✅ SECCIÓN 4: RUEDA ASTROLÓGICA CON 3 CARDS */}
         {chartData && (
