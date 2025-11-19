@@ -346,13 +346,42 @@ Responde ÚNICAMENTE con un objeto JSON válido en español (sin markdown, sin b
   ],
   
   "eventos_clave_del_anio": [
+    // ⚠️ IMPORTANTE: Genera eventos basados en aspectos REALES cruzados SR-Natal
+    // Ejemplo: Si hay Marte SR cuadratura Saturno Natal, crea un evento específico
     {
-      "periodo": "Marzo-Mayo ${returnYear}",
-      "evento": "Nombre del evento/energía",
+      "periodo": "[MES específico basado en tránsitos] ${returnYear}",
+      "evento": "Nombre del evento técnico (Ej: 'Marte SR cuadratura Saturno Natal se activa')",
       "tipo": "Personal/Profesional/Relacional/Espiritual",
-      "descripcion": "100 palabras sobre qué esperar",
-      "planetas_involucrados": ["Planeta1", "Planeta2"],
-      "accion_recomendada": "Qué hacer específicamente"
+      "descripcion": "150 palabras TÉCNICAS: Qué aspecto se activa, qué casas involucra, cómo se manifiesta en la VIDA REAL del usuario",
+      "aspecto_tecnico": "Ejemplo: 'Marte SR en Casa 10 cuadratura Saturno natal en Casa 1'",
+      "planetas_involucrados": ["Planeta SR específico", "Planeta Natal específico"],
+      "fecha_aproximada": "${returnYear}-[MM] (mes cuando el aspecto se intensifica)",
+      "accion_recomendada": "Acción MUY específica basada en el aspecto. Si es un aspecto difícil (cuadratura/oposición), decir EXACTAMENTE qué bloqueo trabajar y cómo",
+      "ritual_o_practica": "Ritual concreto para trabajar este aspecto específico"
+    }
+  ],
+
+  "bloqueos_y_fechas_trabajo": [
+    // ⚠️ NUEVO: Sección dedicada a bloqueos detectados en aspectos difíciles
+    // Genera SOLO si hay cuadraturas/oposiciones importantes SR-Natal
+    {
+      "bloqueo": "Descripción del patrón limitante detectado en el aspecto (Ej: 'Conflicto entre ambición profesional y necesidad de reconocimiento personal')",
+      "aspecto_tecnico": "Marte SR Casa 10 cuadratura Sol Natal Casa 7",
+      "cuando_trabajarlo": {
+        "mes_principal": "Mayo ${returnYear}",
+        "periodo_intenso": "Mayo 10-30 ${returnYear}",
+        "explicacion": "Por qué este mes: [razón técnica basada en tránsitos/aspectos]"
+      },
+      "como_trabajarlo": [
+        "Paso 1: Acción concreta específica",
+        "Paso 2: Otra acción específica",
+        "Paso 3: Ritual o práctica para integrar"
+      ],
+      "señales_de_que_esta_activo": [
+        "Señal 1 en tu vida cotidiana",
+        "Señal 2 emocional/mental",
+        "Señal 3 en relaciones/trabajo"
+      ]
     }
   ],
   
