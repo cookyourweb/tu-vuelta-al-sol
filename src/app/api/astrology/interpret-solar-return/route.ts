@@ -293,19 +293,23 @@ function completeMissingKeys(
   userProfile: any,
   returnYear: number
 ): CompleteSolarReturnInterpretation {
-  
+
   const userName = userProfile.name || 'Usuario';
   const locationContext = userProfile.locationContext;
   const relocated = locationContext?.relocated || false;
   const currentLocation = locationContext?.currentPlace || userProfile.birthPlace || 'tu ubicación actual';
-  
+
   // ✅ RELOCATION MESSAGE (critical for Solar Return accuracy)
-  const relocationNote = relocated 
+  const relocationNote = relocated
     ? `⚠️ IMPORTANTE: Tu Solar Return está calculado para ${currentLocation}, NO para tu lugar de nacimiento (${locationContext.birthPlace}). La ubicación CAMBIA completamente la interpretación del año.`
     : '';
-  
-  const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
-                 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+  // ✅ OBTENER MES DE NACIMIENTO (Solar Return va de cumpleaños a cumpleaños)
+  const birthDate = userProfile.birthDate ? new Date(userProfile.birthDate) : null;
+  const birthMonth = birthDate ? birthDate.getMonth() : 0; // 0 = Enero, 11 = Diciembre
+
+  const mesesNombres = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
   
   return {
     esencia_revolucionaria_anual: partial.esencia_revolucionaria_anual || 
@@ -369,123 +373,114 @@ function completeMissingKeys(
       ]
     },
     
-    calendario_lunar_anual: partial.calendario_lunar_anual || [
-      // Febrero 2025
-      {
-        mes: `Febrero ${returnYear}`,
-        luna_nueva: { fecha: `${returnYear}-02-23`, signo: 'Piscis', mensaje: 'Momento de plantar intenciones y nuevos comienzos' },
-        luna_llena: { fecha: `${returnYear}-02-10`, signo: 'Leo', mensaje: 'Momento de culminación y liberación' }
-      },
-      // Marzo 2025 - ECLIPSE SOLAR
-      {
-        mes: `Marzo ${returnYear}`,
-        luna_nueva: { fecha: `${returnYear}-03-24`, signo: 'Aries', mensaje: 'Momento de plantar intenciones y nuevos comienzos' },
-        luna_llena: { fecha: `${returnYear}-03-11`, signo: 'Virgo', mensaje: 'Momento de culminación y liberación' },
-        evento_especial: {
+    calendario_lunar_anual: partial.calendario_lunar_anual || (() => {
+      // ✅ GENERAR 12 MESES DESDE CUMPLEAÑOS
+      const calendar = [];
+
+      // Datos de lunas para cada mes del año (0=Enero, 11=Diciembre)
+      const lunasPorMes = [
+        { luna_nueva: { fecha: '01-13', signo: 'Acuario' }, luna_llena: { fecha: '01-27', signo: 'Cáncer' } },    // Enero
+        { luna_nueva: { fecha: '02-23', signo: 'Piscis' }, luna_llena: { fecha: '02-10', signo: 'Leo' } },       // Febrero
+        { luna_nueva: { fecha: '03-24', signo: 'Aries' }, luna_llena: { fecha: '03-11', signo: 'Virgo' } },      // Marzo
+        { luna_nueva: { fecha: '04-22', signo: 'Tauro' }, luna_llena: { fecha: '04-08', signo: 'Libra' } },      // Abril
+        { luna_nueva: { fecha: '05-21', signo: 'Géminis' }, luna_llena: { fecha: '05-07', signo: 'Escorpio' } }, // Mayo
+        { luna_nueva: { fecha: '06-20', signo: 'Cáncer' }, luna_llena: { fecha: '06-05', signo: 'Sagitario' } }, // Junio
+        { luna_nueva: { fecha: '07-19', signo: 'Leo' }, luna_llena: { fecha: '07-04', signo: 'Capricornio' } },  // Julio
+        { luna_nueva: { fecha: '08-18', signo: 'Virgo' }, luna_llena: { fecha: '08-02', signo: 'Acuario' } },    // Agosto
+        { luna_nueva: { fecha: '09-17', signo: 'Libra' }, luna_llena: { fecha: '09-01', signo: 'Piscis' } },     // Septiembre
+        { luna_nueva: { fecha: '10-16', signo: 'Escorpio' }, luna_llena: { fecha: '10-31', signo: 'Aries' } },   // Octubre
+        { luna_nueva: { fecha: '11-15', signo: 'Sagitario' }, luna_llena: { fecha: '11-29', signo: 'Tauro' } },  // Noviembre
+        { luna_nueva: { fecha: '12-14', signo: 'Capricornio' }, luna_llena: { fecha: '12-28', signo: 'Géminis' } } // Diciembre
+      ];
+
+      // Eventos especiales con mes (0-11)
+      const eventosEspeciales: { [key: number]: any } = {
+        2: { // Marzo (mes 2)
           tipo: 'Eclipse Solar',
-          fecha: `${returnYear}-03-29`,
+          fecha: '03-29',
           signo: 'Aries',
           descripcion: 'PORTAL CÓSMICO: Eclipse Solar en Aries. Nuevos comienzos llegan sin aviso.',
           que_hacer: 'Iniciar proyectos valientes, tomar decisiones audaces',
           que_evitar: 'Resistirse al cambio, aferrarse al pasado'
-        }
-      },
-      // Abril 2025
-      {
-        mes: `Abril ${returnYear}`,
-        luna_nueva: { fecha: `${returnYear}-04-22`, signo: 'Tauro', mensaje: 'Momento de plantar intenciones y nuevos comienzos' },
-        luna_llena: { fecha: `${returnYear}-04-08`, signo: 'Libra', mensaje: 'Momento de culminación y liberación' }
-      },
-      // Mayo 2025 - MERCURIO RETRÓGRADO #1
-      {
-        mes: `Mayo ${returnYear}`,
-        luna_nueva: { fecha: `${returnYear}-05-21`, signo: 'Géminis', mensaje: 'Momento de plantar intenciones y nuevos comienzos' },
-        luna_llena: { fecha: `${returnYear}-05-07`, signo: 'Escorpio', mensaje: 'Momento de culminación y liberación' },
-        evento_especial: {
+        },
+        4: { // Mayo (mes 4)
           tipo: 'Mercurio Retrógrado',
-          fecha_inicio: `${returnYear}-05-10`,
-          fecha_fin: `${returnYear}-06-03`,
+          fecha_inicio: '05-10',
+          fecha_fin: '06-03',
           signo: 'Géminis',
           descripcion: 'PRECAUCIÓN CÓSMICA: Comunicaciones y tecnología bajo tensión. Tiempo de RE-visar.',
           que_hacer: 'Revisar proyectos, reconectar con el pasado, reorganizar',
           que_evitar: 'Firmar contratos, comprar tecnología, iniciar negocios nuevos'
-        }
-      },
-      // Junio 2025
-      {
-        mes: `Junio ${returnYear}`,
-        luna_nueva: { fecha: `${returnYear}-06-20`, signo: 'Cáncer', mensaje: 'Momento de plantar intenciones y nuevos comienzos' },
-        luna_llena: { fecha: `${returnYear}-06-05`, signo: 'Sagitario', mensaje: 'Momento de culminación y liberación' }
-      },
-      // Julio 2025
-      {
-        mes: `Julio ${returnYear}`,
-        luna_nueva: { fecha: `${returnYear}-07-19`, signo: 'Leo', mensaje: 'Momento de plantar intenciones y nuevos comienzos' },
-        luna_llena: { fecha: `${returnYear}-07-04`, signo: 'Capricornio', mensaje: 'Momento de culminación y liberación' }
-      },
-      // Agosto 2025 - MERCURIO RETRÓGRADO #2
-      {
-        mes: `Agosto ${returnYear}`,
-        luna_nueva: { fecha: `${returnYear}-08-18`, signo: 'Virgo', mensaje: 'Momento de plantar intenciones y nuevos comienzos' },
-        luna_llena: { fecha: `${returnYear}-08-02`, signo: 'Acuario', mensaje: 'Momento de culminación y liberación' },
-        evento_especial: {
+        },
+        7: { // Agosto (mes 7)
           tipo: 'Mercurio Retrógrado',
-          fecha_inicio: `${returnYear}-08-05`,
-          fecha_fin: `${returnYear}-08-28`,
+          fecha_inicio: '08-05',
+          fecha_fin: '08-28',
           signo: 'Virgo',
           descripcion: 'Segunda retrogradación del año. Perfecciona sistemas, limpia lo que no funciona.',
           que_hacer: 'Optimizar procesos, depurar errores, mejorar eficiencia',
           que_evitar: 'No inicies, sino PERFECCIONA lo existente'
-        }
-      },
-      // Septiembre 2025 - ECLIPSE LUNAR
-      {
-        mes: `Septiembre ${returnYear}`,
-        luna_nueva: { fecha: `${returnYear}-09-17`, signo: 'Libra', mensaje: 'Momento de plantar intenciones y nuevos comienzos' },
-        luna_llena: { fecha: `${returnYear}-09-01`, signo: 'Piscis', mensaje: 'Momento de culminación y liberación' },
-        evento_especial: {
+        },
+        8: { // Septiembre (mes 8)
           tipo: 'Eclipse Lunar',
-          fecha: `${returnYear}-09-07`,
+          fecha: '09-07',
           signo: 'Piscis',
           descripcion: 'LIBERACIÓN EMOCIONAL: Eclipse Lunar en Piscis. Los eclipses lunares revelan y liberan lo oculto.',
           que_hacer: 'Ritual de cierre, terapia emocional, perdón consciente',
           que_evitar: 'Emociones intensas - date espacio para procesar'
-        }
-      },
-      // Octubre 2025
-      {
-        mes: `Octubre ${returnYear}`,
-        luna_nueva: { fecha: `${returnYear}-10-16`, signo: 'Escorpio', mensaje: 'Momento de plantar intenciones y nuevos comienzos' },
-        luna_llena: { fecha: `${returnYear}-10-31`, signo: 'Aries', mensaje: 'Momento de culminación y liberación' }
-      },
-      // Noviembre 2025 - MERCURIO RETRÓGRADO #3
-      {
-        mes: `Noviembre ${returnYear}`,
-        luna_nueva: { fecha: `${returnYear}-11-15`, signo: 'Sagitario', mensaje: 'Momento de plantar intenciones y nuevos comienzos' },
-        luna_llena: { fecha: `${returnYear}-11-29`, signo: 'Tauro', mensaje: 'Momento de culminación y liberación' },
-        evento_especial: {
+        },
+        10: { // Noviembre (mes 10)
           tipo: 'Mercurio Retrógrado',
-          fecha_inicio: `${returnYear}-11-25`,
-          fecha_fin: `${returnYear}-12-15`,
+          fecha_inicio: '11-25',
+          fecha_fin: '12-15',
           signo: 'Sagitario',
           descripcion: 'Última retrogradación del año. Cuestiona tus verdades, re-evalúa tu filosofía de vida.',
           que_hacer: 'Reflexionar sobre tu dirección, revisar metas de largo plazo',
           que_evitar: 'Viajes y estudios pueden retrasarse - paciencia cósmica'
         }
-      },
-      // Diciembre 2025
-      {
-        mes: `Diciembre ${returnYear}`,
-        luna_nueva: { fecha: `${returnYear}-12-14`, signo: 'Capricornio', mensaje: 'Momento de plantar intenciones y nuevos comienzos' },
-        luna_llena: { fecha: `${returnYear}-12-28`, signo: 'Géminis', mensaje: 'Momento de culminación y liberación' }
-      },
-      // Enero 2026
-      {
-        mes: `Enero ${returnYear + 1}`,
-        luna_nueva: { fecha: `${returnYear + 1}-01-13`, signo: 'Acuario', mensaje: 'Momento de plantar intenciones y nuevos comienzos' },
-        luna_llena: { fecha: `${returnYear + 1}-01-27`, signo: 'Cáncer', mensaje: 'Momento de culminación y liberación' }
+      };
+
+      // Generar 12 meses empezando desde el mes de cumpleaños
+      for (let i = 0; i < 12; i++) {
+        const mesIndex = (birthMonth + i) % 12; // 0-11
+        const year = birthMonth + i < 12 ? returnYear : returnYear + 1;
+        const mesNombre = mesesNombres[mesIndex];
+
+        const lunas = lunasPorMes[mesIndex];
+        const mesEntry: any = {
+          mes: `${mesNombre} ${year}`,
+          luna_nueva: {
+            fecha: `${year}-${lunas.luna_nueva.fecha}`,
+            signo: lunas.luna_nueva.signo,
+            mensaje: 'Momento de plantar intenciones y nuevos comienzos'
+          },
+          luna_llena: {
+            fecha: `${year}-${lunas.luna_llena.fecha}`,
+            signo: lunas.luna_llena.signo,
+            mensaje: 'Momento de culminación y liberación'
+          }
+        };
+
+        // Añadir evento especial si existe para este mes
+        if (eventosEspeciales[mesIndex]) {
+          const evento = eventosEspeciales[mesIndex];
+          mesEntry.evento_especial = {
+            tipo: evento.tipo,
+            ...(evento.fecha && { fecha: `${year}-${evento.fecha}` }),
+            ...(evento.fecha_inicio && { fecha_inicio: `${year}-${evento.fecha_inicio}` }),
+            ...(evento.fecha_fin && { fecha_fin: `${year}-${evento.fecha_fin}` }),
+            signo: evento.signo,
+            descripcion: evento.descripcion,
+            que_hacer: evento.que_hacer,
+            que_evitar: evento.que_evitar
+          };
+        }
+
+        calendar.push(mesEntry);
       }
-    ],
+
+      return calendar;
+    })(),
     
     declaracion_poder_anual: partial.declaracion_poder_anual ||
       `YO, ${userName.toUpperCase()}, RECLAMO MI PODER SOBERANO. ESTE AÑO ${returnYear}-${returnYear + 1} SOY EL ARQUITECTO CONSCIENTE DE MI REALIDAD. MANIFIESTO MI AUTENTICIDAD SIN DISCULPAS, AVANZO CON VALENTÍA DISRUPTIVA, Y ABRAZO MI TRANSFORMACIÓN EVOLUTIVA. ASÍ ES, ASÍ SERÁ.`,
