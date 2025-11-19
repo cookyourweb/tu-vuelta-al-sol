@@ -1,5 +1,11 @@
 # Tu Vuelta al Sol
 
+## 📚 Documentación
+
+- **[Sistema de Interpretaciones Astrológicas](./docs/INTERPRETACIONES-ASTROLOGICAS.md)** - Arquitectura, metodología y prompts del sistema híbrido de interpretaciones (Carta Natal y Solar Return)
+
+---
+
 ## Sincronización de Datos de Usuario
 
 ### Actualización Automática de Nombres
