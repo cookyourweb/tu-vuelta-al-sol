@@ -1010,7 +1010,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                   <h4 className="text-slate-100 font-bold text-lg mb-3">{mes.mes}</h4>
 
                   {mes.luna_nueva && (
-                    <div className="mb-3 p-3 bg-blue-900/30 rounded-lg">
+                    <div className="mb-3 p-3 bg-blue-900/30 rounded-lg border border-blue-400/20">
                       <p className="text-blue-200 font-semibold text-sm">🌑 Luna Nueva</p>
                       <p className="text-blue-100 text-xs">{mes.luna_nueva.fecha}</p>
                       <p className="text-blue-100 text-sm">{mes.luna_nueva.signo}</p>
@@ -1019,11 +1019,60 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                   )}
 
                   {mes.luna_llena && (
-                    <div className="p-3 bg-yellow-900/30 rounded-lg">
+                    <div className="mb-3 p-3 bg-yellow-900/30 rounded-lg border border-yellow-400/20">
                       <p className="text-yellow-200 font-semibold text-sm">🌕 Luna Llena</p>
                       <p className="text-yellow-100 text-xs">{mes.luna_llena.fecha}</p>
                       <p className="text-yellow-100 text-sm">{mes.luna_llena.signo}</p>
                       <p className="text-yellow-50 text-xs mt-2">{mes.luna_llena.mensaje}</p>
+                    </div>
+                  )}
+
+                  {/* ✅ EVENTO ESPECIAL: Retrogradaciones y Eclipses */}
+                  {mes.evento_especial && (
+                    <div className={`p-3 rounded-lg border-2 ${
+                      mes.evento_especial.tipo?.includes('Eclipse')
+                        ? 'bg-purple-900/40 border-purple-400/50'
+                        : 'bg-cyan-900/40 border-cyan-400/50'
+                    }`}>
+                      <p className={`font-bold text-sm mb-1 ${
+                        mes.evento_especial.tipo?.includes('Eclipse')
+                          ? 'text-purple-200'
+                          : 'text-cyan-200'
+                      }`}>
+                        {mes.evento_especial.tipo?.includes('Eclipse') ? '🌑' : '☿Ⓡ'} {mes.evento_especial.tipo}
+                      </p>
+                      <p className={`text-xs mb-1 ${
+                        mes.evento_especial.tipo?.includes('Eclipse')
+                          ? 'text-purple-100'
+                          : 'text-cyan-100'
+                      }`}>
+                        {mes.evento_especial.fecha_inicio
+                          ? `${mes.evento_especial.fecha_inicio} - ${mes.evento_especial.fecha_fin}`
+                          : mes.evento_especial.fecha
+                        }
+                      </p>
+                      <p className={`text-xs font-semibold mb-2 ${
+                        mes.evento_especial.tipo?.includes('Eclipse')
+                          ? 'text-purple-100'
+                          : 'text-cyan-100'
+                      }`}>
+                        {mes.evento_especial.signo}
+                      </p>
+                      <p className={`text-xs mb-2 ${
+                        mes.evento_especial.tipo?.includes('Eclipse')
+                          ? 'text-purple-50'
+                          : 'text-cyan-50'
+                      }`}>
+                        {mes.evento_especial.descripcion}
+                      </p>
+                      <div className="space-y-1">
+                        <p className="text-green-300 text-xs">
+                          <span className="font-semibold">✅ Hacer:</span> {mes.evento_especial.que_hacer}
+                        </p>
+                        <p className="text-red-300 text-xs">
+                          <span className="font-semibold">❌ Evitar:</span> {mes.evento_especial.que_evitar}
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1401,8 +1450,8 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         )}
       </div>
 
-      {/* ✅ REGENERATION LOADING MODAL */}
-      {regenerating && (
+      {/* ✅ GENERATION/REGENERATION LOADING MODAL */}
+      {(regenerating || loading) && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-center justify-center p-4">
           <div className="bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900 rounded-3xl max-w-md w-full p-8 shadow-2xl border-2 border-purple-400/50 animate-pulse-slow">
             <div className="text-center space-y-6">
@@ -1416,7 +1465,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
 
               {/* Title */}
               <h3 className="text-2xl font-bold text-white">
-                🔮 Regenerando tu Revolución Cósmica
+                🔮 {regenerating ? 'Regenerando' : 'Generando'} tu Revolución Cósmica
               </h3>
 
               {/* Progress Message */}
