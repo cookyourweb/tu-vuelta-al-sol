@@ -178,7 +178,7 @@ export default function SolarReturnPage() {
           birthDate: birthData.date,
           birthTime: birthData.time,
           birthPlace: birthData.birthPlace,
-          currentLocation: birthData.currentLocation || birthData.birthPlace,
+          currentLocation: birthData.currentPlace || birthData.birthPlace,
           regenerate: true
         })
       });
@@ -428,34 +428,34 @@ export default function SolarReturnPage() {
 
                 {/* Ubicación del Solar Return */}
                 <div className={`rounded-lg p-4 border ${
-                  birthData.currentLocation && birthData.currentLocation !== birthData.birthPlace
+                  birthData.currentPlace && birthData.currentPlace !== birthData.birthPlace
                     ? 'bg-green-800/20 border-green-400/30'
                     : 'bg-orange-800/20 border-orange-400/20'
                 }`}>
                   <h4 className={`font-semibold text-sm mb-3 ${
-                    birthData.currentLocation && birthData.currentLocation !== birthData.birthPlace
+                    birthData.currentPlace && birthData.currentPlace !== birthData.birthPlace
                       ? 'text-green-200'
                       : 'text-orange-200'
                   }`}>
-                    {birthData.currentLocation && birthData.currentLocation !== birthData.birthPlace
+                    {birthData.currentPlace && birthData.currentPlace !== birthData.birthPlace
                       ? '🌍 Ubicación Actual (Solar Return)'
                       : '📍 Ubicación Solar Return'
                     }
                   </h4>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className={birthData.currentLocation && birthData.currentLocation !== birthData.birthPlace ? 'text-green-300' : 'text-orange-300'}>
+                      <span className={birthData.currentPlace && birthData.currentPlace !== birthData.birthPlace ? 'text-green-300' : 'text-orange-300'}>
                         Lugar:
                       </span>
                       <span className={`font-medium ${
-                        birthData.currentLocation && birthData.currentLocation !== birthData.birthPlace
+                        birthData.currentPlace && birthData.currentPlace !== birthData.birthPlace
                           ? 'text-green-50'
                           : 'text-orange-50'
                       }`}>
-                        {birthData.currentLocation || birthData.birthPlace || 'No disponible'}
+                        {birthData.currentPlace || birthData.birthPlace || 'No disponible'}
                       </span>
                     </div>
-                    {birthData.currentLocation && birthData.currentLocation !== birthData.birthPlace && (
+                    {birthData.currentPlace && birthData.currentPlace !== birthData.birthPlace && (
                       <div className="mt-3 p-2 bg-green-900/30 rounded border border-green-400/20">
                         <p className="text-green-200 text-xs">
                           ✨ <strong>Importante:</strong> Tu Solar Return se calcula para tu ubicación actual,
@@ -463,7 +463,7 @@ export default function SolarReturnPage() {
                         </p>
                       </div>
                     )}
-                    {(!birthData.currentLocation || birthData.currentLocation === birthData.birthPlace) && (
+                    {(!birthData.currentPlace || birthData.currentPlace === birthData.birthPlace) && (
                       <div className="mt-3 p-2 bg-orange-900/30 rounded border border-orange-400/20">
                         <p className="text-orange-200 text-xs">
                           📍 Se usa tu lugar de nacimiento por defecto. Si vives en otra ciudad,
