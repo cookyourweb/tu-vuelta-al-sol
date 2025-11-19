@@ -221,9 +221,9 @@ Responde ÚNICAMENTE con un objeto JSON válido en español (sin markdown, sin b
 
 \`\`\`json
 {
-  "esencia_revolucionaria_anual": "Máximo 200 palabras. Tono DISRUPTIVO y EMOCIONAL. Explica el tema central del año basándote en ASC SR en Casa Natal + Sol en Casa SR + planetas angulares. Usa el nombre de la persona. Lenguaje directo, sin eufemismos.",
-  
-  "proposito_vida_anual": "Máximo 150 palabras. ¿Cuál es la MISIÓN específica de este año? ¿Qué debe lograr/aprender/transformar? Basado en metodología profesional.",
+  "esencia_revolucionaria_anual": "MÍNIMO 150-200 palabras. Tono DISRUPTIVO y EMOCIONAL. Explica el tema central del año basándote ESPECÍFICAMENTE en: 1) ASC SR ${srAsc?.sign} en Casa ${ascSRenCasaNatal} Natal, 2) Sol en Casa ${srSol?.house} SR, 3) Planetas angulares concretos (${planetasAngularesSR.map(p => p.planeta).join(', ')}). USA el nombre ${userProfile?.name || 'de la persona'}. Menciona DATOS TÉCNICOS REALES de su carta. Lenguaje directo, sin eufemismos.",
+
+  "proposito_vida_anual": "MÍNIMO 120-150 palabras. ¿Cuál es la MISIÓN ESPECÍFICA de este año según los datos técnicos? Analiza: 1) Qué debe lograr/aprender/transformar basándote en Casa ${ascSRenCasaNatal} natal (tema central), 2) Cómo los planetas angulares (${planetasAngularesSR.map(p => p.planeta).join(', ')}) le ayudarán o desafiarán, 3) Qué aspectos cruzados SR-Natal son clave. Basado en metodología profesional Shea/Teal/Louis.",
   
   "tema_central_del_anio": "Una frase de 10-15 palabras que resuma el año. Ejemplo: 'Revolución de identidad y espiritualidad profunda'",
   
@@ -231,16 +231,18 @@ Responde ÚNICAMENTE con un objeto JSON válido en español (sin markdown, sin b
     "asc_sr_en_casa_natal": {
       "casa_natal": ${ascSRenCasaNatal},
       "signo_asc_sr": "${srAsc?.sign}",
-      "interpretacion": "150 palabras. METODOLOGÍA SHEA. Explica por qué esta casa marca el tema del año y cómo se manifestará.",
-      "palabras_clave": ["keyword1", "keyword2", "keyword3"]
+      "interpretacion": "MÍNIMO 150-180 palabras. METODOLOGÍA SHEA. Explica DETALLADAMENTE por qué Casa ${ascSRenCasaNatal} natal marca el tema del año. ¿Qué área de vida dominará? ¿Cómo se manifestará ${srAsc?.sign} en esta casa? ¿Qué eventos o situaciones concretas pueden esperarse? USA datos técnicos REALES.",
+      "palabras_clave": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"],
+      "area_vida_dominante": "Descripción específica de qué área vital se activa (40-60 palabras)"
     },
-    
+
     "sol_en_casa_sr": {
       "casa_sr": ${srSol?.house},
       "casa_natal_sol": ${natalSol?.house},
       "cambio_de_casa": ${natalSol?.house !== srSol?.house},
-      "interpretacion": "100 palabras. METODOLOGÍA TEAL. Centro vital del año.",
-      "energia_disponible": "¿Qué puede lograr en esta área?"
+      "interpretacion": "MÍNIMO 120-150 palabras. METODOLOGÍA TEAL. Centro vital del año. ¿Por qué Casa ${srSol?.house} SR es clave? ¿Cómo difiere de su posición natal en Casa ${natalSol?.house}? ¿Qué nueva energía disponible? Menciona CÓMO trabajar con esta energía.",
+      "energia_disponible": "80-100 palabras sobre qué puede lograr ESPECÍFICAMENTE en esta área usando esta energía solar. Ejemplos concretos.",
+      "desafios_potenciales": "Si Casa ${srSol?.house} SR es diferente de Casa ${natalSol?.house} natal, ¿qué ajustes necesita hacer?"
     },
     
     "planetas_angulares_sr": [

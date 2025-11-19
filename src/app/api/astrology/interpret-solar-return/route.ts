@@ -201,7 +201,7 @@ Required JSON structure:
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,
-        max_tokens: 6000,
+        max_tokens: 14000, // ✅ Increased for complete, detailed interpretations
         response_format: { type: "json_object" }
       });
 
