@@ -481,79 +481,69 @@ export default function SolarReturnPage() {
                 Datos de tu Solar Return {new Date().getFullYear()}
               </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Datos de Nacimiento */}
+              <div className="space-y-4">
+                {/* Datos unificados */}
                 <div className="bg-orange-800/20 rounded-lg p-4 border border-orange-400/20">
-                  <h4 className="text-orange-200 font-semibold text-sm mb-3">📍 Datos de Nacimiento</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-orange-300">Lugar:</span>
-                      <span className="text-orange-50 font-medium">{birthData.birthPlace || 'No disponible'}</span>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    {/* Columna izquierda */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-orange-300">📍 Lugar de nacimiento:</span>
+                        <span className="text-orange-50 font-medium">{birthData.birthPlace || 'No disponible'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-orange-300">📅 Fecha:</span>
+                        <span className="text-orange-50 font-medium">
+                          {new Date(birthData.date || birthData.birthDate).toLocaleDateString('es-ES', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric'
+                          })}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-orange-300">Fecha:</span>
-                      <span className="text-orange-50 font-medium">
-                        {new Date(birthData.date || birthData.birthDate).toLocaleDateString('es-ES', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric'
-                        })}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-orange-300">Hora:</span>
-                      <span className="text-orange-50 font-medium">{birthData.time || birthData.birthTime || 'No disponible'}</span>
+
+                    {/* Columna derecha */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-orange-300">🕐 Hora:</span>
+                        <span className="text-orange-50 font-medium">{birthData.time || birthData.birthTime || 'No disponible'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className={birthData.currentPlace && birthData.currentPlace !== birthData.birthPlace ? 'text-green-300' : 'text-orange-300'}>
+                          {birthData.currentPlace && birthData.currentPlace !== birthData.birthPlace ? '🌍 Ubicación Solar Return:' : '📍 Ubicación Solar Return:'}
+                        </span>
+                        <span className={`font-medium ${
+                          birthData.currentPlace && birthData.currentPlace !== birthData.birthPlace
+                            ? 'text-green-50'
+                            : 'text-orange-50'
+                        }`}>
+                          {birthData.currentPlace || birthData.birthPlace || 'No disponible'}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Ubicación del Solar Return */}
-                <div className={`rounded-lg p-4 border ${
-                  birthData.currentPlace && birthData.currentPlace !== birthData.birthPlace
-                    ? 'bg-green-800/20 border-green-400/30'
-                    : 'bg-orange-800/20 border-orange-400/20'
-                }`}>
-                  <h4 className={`font-semibold text-sm mb-3 ${
-                    birthData.currentPlace && birthData.currentPlace !== birthData.birthPlace
-                      ? 'text-green-200'
-                      : 'text-orange-200'
-                  }`}>
-                    {birthData.currentPlace && birthData.currentPlace !== birthData.birthPlace
-                      ? '🌍 Ubicación Actual (Solar Return)'
-                      : '📍 Ubicación Solar Return'
-                    }
-                  </h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className={birthData.currentPlace && birthData.currentPlace !== birthData.birthPlace ? 'text-green-300' : 'text-orange-300'}>
-                        Lugar:
-                      </span>
-                      <span className={`font-medium ${
-                        birthData.currentPlace && birthData.currentPlace !== birthData.birthPlace
-                          ? 'text-green-50'
-                          : 'text-orange-50'
-                      }`}>
-                        {birthData.currentPlace || birthData.birthPlace || 'No disponible'}
-                      </span>
-                    </div>
-                    {birthData.currentPlace && birthData.currentPlace !== birthData.birthPlace && (
-                      <div className="mt-3 p-2 bg-green-900/30 rounded border border-green-400/20">
-                        <p className="text-green-200 text-xs">
-                          ✨ <strong>Importante:</strong> Tu Solar Return se calcula para tu ubicación actual,
-                          no tu lugar de nacimiento. Esto puede cambiar significativamente tu carta anual.
-                        </p>
-                      </div>
-                    )}
-                    {(!birthData.currentPlace || birthData.currentPlace === birthData.birthPlace) && (
-                      <div className="mt-3 p-2 bg-orange-900/30 rounded border border-orange-400/20">
-                        <p className="text-orange-200 text-xs">
-                          📍 Se usa tu lugar de nacimiento por defecto. Si vives en otra ciudad,
-                          considera actualizar tu ubicación actual para un cálculo más preciso.
-                        </p>
-                      </div>
-                    )}
+                {/* Aviso importante solo si hay ubicación diferente */}
+                {birthData.currentPlace && birthData.currentPlace !== birthData.birthPlace && (
+                  <div className="p-4 bg-green-900/30 rounded-lg border border-green-400/30">
+                    <p className="text-green-200 text-sm">
+                      ✨ <strong>Importante:</strong> Tu Solar Return se calcula para <strong>{birthData.currentPlace}</strong>,
+                      no para tu lugar de nacimiento. Esto puede cambiar significativamente tu carta anual.
+                    </p>
                   </div>
-                </div>
+                )}
+
+                {/* Aviso por defecto si NO hay ubicación diferente */}
+                {(!birthData.currentPlace || birthData.currentPlace === birthData.birthPlace) && (
+                  <div className="p-4 bg-orange-900/30 rounded-lg border border-orange-400/30">
+                    <p className="text-orange-200 text-sm">
+                      📍 Se usa tu lugar de nacimiento por defecto. Si vives en otra ciudad,
+                      actualiza tu ubicación actual en tu perfil para un cálculo más preciso.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
