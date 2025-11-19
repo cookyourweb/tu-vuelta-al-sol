@@ -296,24 +296,261 @@ Responde ÚNICAMENTE con un objeto JSON válido en español (sin markdown, sin b
       "mes": "Febrero ${returnYear}",
       "energia_dominante": "Descripción 50 palabras",
       "luna_nueva": {
-        "fecha": "YYYY-MM-DD",
-        "signo": "Signo zodiacal",
+        "fecha": "${returnYear}-02-23",
+        "signo": "Piscis",
         "casa_natal": X,
+        "mensaje": "Mensaje inspirador",
         "ritual": "Ritual específico para esta luna"
       },
       "luna_llena": {
-        "fecha": "YYYY-MM-DD",
-        "signo": "Signo zodiacal",
+        "fecha": "${returnYear}-02-10",
+        "signo": "Leo",
         "casa_natal": X,
+        "mensaje": "Mensaje inspirador",
+        "ritual": "Ritual específico"
+      }
+    },
+    {
+      "mes": "Marzo ${returnYear}",
+      "energia_dominante": "Descripción 50 palabras",
+      "luna_nueva": {
+        "fecha": "${returnYear}-03-24",
+        "signo": "Aries",
+        "casa_natal": X,
+        "mensaje": "Mensaje inspirador",
         "ritual": "Ritual específico"
       },
-      "transitos_clave": [
-        "Tránsito 1 con fecha",
-        "Tránsito 2 con fecha"
-      ],
-      "accion_del_mes": "Acción específica más importante"
+      "luna_llena": {
+        "fecha": "${returnYear}-03-11",
+        "signo": "Virgo",
+        "casa_natal": X,
+        "mensaje": "Mensaje inspirador",
+        "ritual": "Ritual específico"
+      },
+      "evento_especial": {
+        "tipo": "Eclipse Solar",
+        "fecha": "${returnYear}-03-29",
+        "signo": "Aries",
+        "descripcion": "PORTAL CÓSMICO: Eclipse Solar en Aries. Nuevos comienzos llegan sin aviso.",
+        "que_hacer": "Iniciar proyectos valientes, tomar decisiones audaces",
+        "que_evitar": "Resistirse al cambio, aferrarse al pasado"
+      }
+    },
+    {
+      "mes": "Abril ${returnYear}",
+      "energia_dominante": "Descripción 50 palabras",
+      "luna_nueva": {
+        "fecha": "${returnYear}-04-22",
+        "signo": "Tauro",
+        "casa_natal": X,
+        "mensaje": "Mensaje inspirador",
+        "ritual": "Ritual específico"
+      },
+      "luna_llena": {
+        "fecha": "${returnYear}-04-08",
+        "signo": "Libra",
+        "casa_natal": X,
+        "mensaje": "Mensaje inspirador",
+        "ritual": "Ritual específico"
+      }
+    },
+    {
+      "mes": "Mayo ${returnYear}",
+      "energia_dominante": "Descripción 50 palabras",
+      "luna_nueva": {
+        "fecha": "${returnYear}-05-21",
+        "signo": "Géminis",
+        "casa_natal": X,
+        "mensaje": "Mensaje inspirador",
+        "ritual": "Ritual específico"
+      },
+      "luna_llena": {
+        "fecha": "${returnYear}-05-07",
+        "signo": "Escorpio",
+        "casa_natal": X,
+        "mensaje": "Mensaje inspirador",
+        "ritual": "Ritual específico"
+      },
+      "evento_especial": {
+        "tipo": "Mercurio Retrógrado",
+        "fecha_inicio": "${returnYear}-05-10",
+        "fecha_fin": "${returnYear}-06-03",
+        "signo": "Géminis",
+        "descripcion": "PRECAUCIÓN CÓSMICA: Comunicaciones y tecnología bajo tensión. Tiempo de RE-visar.",
+        "que_hacer": "Revisar proyectos, reconectar con el pasado, reorganizar",
+        "que_evitar": "Firmar contratos, comprar tecnología, iniciar negocios nuevos"
+      }
+    },
+    {
+      "mes": "Junio ${returnYear}",
+      "energia_dominante": "Descripción 50 palabras",
+      "luna_nueva": {
+        "fecha": "${returnYear}-06-20",
+        "signo": "Cáncer",
+        "casa_natal": X,
+        "mensaje": "Mensaje inspirador",
+        "ritual": "Ritual específico"
+      },
+      "luna_llena": {
+        "fecha": "${returnYear}-06-05",
+        "signo": "Sagitario",
+        "casa_natal": X,
+        "mensaje": "Mensaje inspirador",
+        "ritual": "Ritual específico"
+      }
+    },
+    {
+      "mes": "Julio ${returnYear}",
+      "energia_dominante": "Descripción 50 palabras",
+      "luna_nueva": {
+        "fecha": "${returnYear}-07-19",
+        "signo": "Leo",
+        "casa_natal": X,
+        "mensaje": "Mensaje inspirador",
+        "ritual": "Ritual específico"
+      },
+      "luna_llena": {
+        "fecha": "${returnYear}-07-04",
+        "signo": "Capricornio",
+        "casa_natal": X,
+        "mensaje": "Mensaje inspirador",
+        "ritual": "Ritual específico"
+      }
+    },
+    {
+      "mes": "Agosto ${returnYear}",
+      "energia_dominante": "Descripción 50 palabras",
+      "luna_nueva": {
+        "fecha": "${returnYear}-08-18",
+        "signo": "Virgo",
+        "casa_natal": X,
+        "mensaje": "Mensaje inspirador",
+        "ritual": "Ritual específico"
+      },
+      "luna_llena": {
+        "fecha": "${returnYear}-08-02",
+        "signo": "Acuario",
+        "casa_natal": X,
+        "mensaje": "Mensaje inspirador",
+        "ritual": "Ritual específico"
+      },
+      "evento_especial": {
+        "tipo": "Mercurio Retrógrado",
+        "fecha_inicio": "${returnYear}-08-05",
+        "fecha_fin": "${returnYear}-08-28",
+        "signo": "Virgo",
+        "descripcion": "Segunda retrogradación del año. Perfecciona sistemas, limpia lo que no funciona.",
+        "que_hacer": "Optimizar procesos, depurar errores, mejorar eficiencia",
+        "que_evitar": "No inicies, sino PERFECCIONA lo existente"
+      }
+    },
+    {
+      "mes": "Septiembre ${returnYear}",
+      "energia_dominante": "Descripción 50 palabras",
+      "luna_nueva": {
+        "fecha": "${returnYear}-09-17",
+        "signo": "Libra",
+        "casa_natal": X,
+        "mensaje": "Mensaje inspirador",
+        "ritual": "Ritual específico"
+      },
+      "luna_llena": {
+        "fecha": "${returnYear}-09-01",
+        "signo": "Piscis",
+        "casa_natal": X,
+        "mensaje": "Mensaje inspirador",
+        "ritual": "Ritual específico"
+      },
+      "evento_especial": {
+        "tipo": "Eclipse Lunar",
+        "fecha": "${returnYear}-09-07",
+        "signo": "Piscis",
+        "descripcion": "LIBERACIÓN EMOCIONAL: Eclipse Lunar en Piscis. Los eclipses lunares revelan y liberan lo oculto.",
+        "que_hacer": "Ritual de cierre, terapia emocional, perdón consciente",
+        "que_evitar": "Emociones intensas - date espacio para procesar"
+      }
+    },
+    {
+      "mes": "Octubre ${returnYear}",
+      "energia_dominante": "Descripción 50 palabras",
+      "luna_nueva": {
+        "fecha": "${returnYear}-10-16",
+        "signo": "Escorpio",
+        "casa_natal": X,
+        "mensaje": "Mensaje inspirador",
+        "ritual": "Ritual específico"
+      },
+      "luna_llena": {
+        "fecha": "${returnYear}-10-31",
+        "signo": "Aries",
+        "casa_natal": X,
+        "mensaje": "Mensaje inspirador",
+        "ritual": "Ritual específico"
+      }
+    },
+    {
+      "mes": "Noviembre ${returnYear}",
+      "energia_dominante": "Descripción 50 palabras",
+      "luna_nueva": {
+        "fecha": "${returnYear}-11-15",
+        "signo": "Sagitario",
+        "casa_natal": X,
+        "mensaje": "Mensaje inspirador",
+        "ritual": "Ritual específico"
+      },
+      "luna_llena": {
+        "fecha": "${returnYear}-11-29",
+        "signo": "Tauro",
+        "casa_natal": X,
+        "mensaje": "Mensaje inspirador",
+        "ritual": "Ritual específico"
+      },
+      "evento_especial": {
+        "tipo": "Mercurio Retrógrado",
+        "fecha_inicio": "${returnYear}-11-25",
+        "fecha_fin": "${returnYear}-12-15",
+        "signo": "Sagitario",
+        "descripcion": "Última retrogradación del año. Cuestiona tus verdades, re-evalúa tu filosofía de vida.",
+        "que_hacer": "Reflexionar sobre tu dirección, revisar metas de largo plazo",
+        "que_evitar": "Viajes y estudios pueden retrasarse - paciencia cósmica"
+      }
+    },
+    {
+      "mes": "Diciembre ${returnYear}",
+      "energia_dominante": "Descripción 50 palabras",
+      "luna_nueva": {
+        "fecha": "${returnYear}-12-14",
+        "signo": "Capricornio",
+        "casa_natal": X,
+        "mensaje": "Mensaje inspirador",
+        "ritual": "Ritual específico"
+      },
+      "luna_llena": {
+        "fecha": "${returnYear}-12-28",
+        "signo": "Géminis",
+        "casa_natal": X,
+        "mensaje": "Mensaje inspirador",
+        "ritual": "Ritual específico"
+      }
+    },
+    {
+      "mes": "Enero ${returnYear + 1}",
+      "energia_dominante": "Descripción 50 palabras",
+      "luna_nueva": {
+        "fecha": "${returnYear + 1}-01-13",
+        "signo": "Acuario",
+        "casa_natal": X,
+        "mensaje": "Mensaje inspirador",
+        "ritual": "Ritual específico"
+      },
+      "luna_llena": {
+        "fecha": "${returnYear + 1}-01-27",
+        "signo": "Cáncer",
+        "casa_natal": X,
+        "mensaje": "Mensaje inspirador",
+        "ritual": "Ritual específico"
+      }
     }
-    // Repetir para los 12 meses
   ],
   
   "declaracion_poder_anual": "Una declaración poderosa en primera persona, 30-50 palabras. Ejemplo: 'YO, [NOMBRE], abrazo mi revolución interior. Este año manifiesto mi autenticidad sin disculpas...'",
