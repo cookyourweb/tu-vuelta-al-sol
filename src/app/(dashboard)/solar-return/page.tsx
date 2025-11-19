@@ -25,6 +25,8 @@ export default function SolarReturnPage() {
   const [error, setError] = useState<string | null>(null);
   const [regenerating, setRegenerating] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('☀️ Iniciando tu Vuelta al Sol...');
+  const [generatingInterpretations, setGeneratingInterpretations] = useState(false);
+  const [interpretationProgress, setInterpretationProgress] = useState('');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -128,6 +130,73 @@ export default function SolarReturnPage() {
     }
   };
 
+  // ✅ GENERAR INTERPRETACIONES (similar a natal-chart)
+  const generateInterpretations = async (srData?: any, natalData?: any) => {
+    // Usar datos pasados por parámetro o del estado
+    const solarReturn = srData || solarReturnData;
+    const natal = natalData || natalChart;
+
+    if (!user?.uid || !birthData || !solarReturn || !natal) {
+      console.log('⚠️ Cannot generate - missing data');
+      return;
+    }
+
+    setGeneratingInterpretations(true);
+    setInterpretationProgress('🔮 Generando interpretación Solar Return con OpenAI...');
+
+    try {
+      console.log('🚀 Starting Solar Return AI interpretation generation...');
+
+      const response = await fetch('/api/astrology/interpret-solar-return', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.uid,
+          solarReturnChart: solarReturn,
+          natalChart: natal,
+          userProfile: {
+            name: birthData.fullName || 'Usuario',
+            age: new Date().getFullYear() - new Date(birthData.birthDate || birthData.date).getFullYear(),
+            birthPlace: birthData.birthPlace,
+            birthDate: birthData.birthDate || birthData.date,
+            birthTime: birthData.birthTime || birthData.time,
+            locationContext: {
+              birthPlace: birthData.birthPlace,
+              currentPlace: birthData.currentPlace,
+              relocated: birthData.currentPlace && birthData.currentPlace !== birthData.birthPlace
+            }
+          }
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log('✅ Solar Return interpretations generated successfully!');
+        setInterpretationProgress('✨ ¡Interpretación Solar Return lista!');
+
+        setTimeout(() => {
+          setInterpretationProgress('');
+        }, 3000);
+      } else {
+        console.error('❌ Error generating interpretations:', result.error);
+        setInterpretationProgress('⚠️ Error generando interpretación');
+        setTimeout(() => {
+          setInterpretationProgress('');
+        }, 3000);
+      }
+
+    } catch (error) {
+      console.error('❌ Exception generating interpretations:', error);
+      setInterpretationProgress('❌ Error en la generación');
+      setTimeout(() => {
+        setInterpretationProgress('');
+      }, 3000);
+    } finally {
+      setGeneratingInterpretations(false);
+    }
+  };
+
   const handleRegenerateChart = async () => {
     if (!user?.uid || !birthData) {
       setError('Faltan datos necesarios');
@@ -195,13 +264,18 @@ export default function SolarReturnPage() {
 
       if (data.success && data.data?.solarReturnChart) {
         setLoadingMessage('✨ ¡Solar Return completado! 🎉');
-        setSolarReturnData(data.data.solarReturnChart);
-        setChartData(data.data.solarReturnChart);
+        const newSolarReturn = data.data.solarReturnChart;
+        setSolarReturnData(newSolarReturn);
+        setChartData(newSolarReturn);
 
-        setTimeout(() => {
-          setRegenerating(false);
-          setLoadingMessage('☀️ Iniciando tu Vuelta al Sol...');
-        }, 1000);
+        setRegenerating(false);
+        setLoadingMessage('☀️ Iniciando tu Vuelta al Sol...');
+
+        // 4. ✅ Auto-generate NEW interpretations after regeneration (como en natal-chart)
+        console.log('🔮 Generating new Solar Return interpretations after chart regeneration...');
+        await generateInterpretations(newSolarReturn, natalChart);
+
+        console.log('✅ Regeneración completada con nuevas interpretaciones');
       } else {
         throw new Error('Solar Return incompleto');
       }
@@ -359,6 +433,15 @@ export default function SolarReturnPage() {
                   />
                 </div>
               </div>
+
+              {/* ✅ MENSAJE DE PROGRESO DE INTERPRETACIONES */}
+              {interpretationProgress && (
+                <div className="mt-4 p-4 bg-purple-900/40 border border-purple-400/30 rounded-lg text-center">
+                  <p className="text-purple-200 font-medium animate-pulse">
+                    {interpretationProgress}
+                  </p>
+                </div>
+              )}
             </div>
           );
         })()}
