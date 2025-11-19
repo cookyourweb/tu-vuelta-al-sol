@@ -266,7 +266,7 @@ export default function SolarReturnPage() {
           </p>
         </div>
 
-        {/* ✅ SECCIÓN 2: BOTÓN DE INTERPRETACIÓN */}
+        {/* ✅ SECCIÓN 2: BOTONES DE ACCIÓN (Regenerar + Interpretación) */}
         {solarReturnData && natalChart && birthData && (() => {
           const userProfile = {
             name: birthData.fullName || 'Usuario',
@@ -275,6 +275,8 @@ export default function SolarReturnPage() {
             birthDate: new Date(birthData.birthDate || birthData.date).toLocaleDateString('es-ES'),
             birthTime: birthData.birthTime || birthData.time || ''
           };
+
+          const isAdmin = user?.email?.includes('admin') || false;
 
           if (!userProfile.name || userProfile.name === 'Usuario') {
             return (
@@ -286,15 +288,33 @@ export default function SolarReturnPage() {
 
           return (
             <div className="mb-8">
-              <InterpretationButton
-                type="solar-return"
-                userId={user?.uid || ''}
-                chartData={solarReturnData}
-                natalChart={natalChart}
-                userProfile={userProfile}
-                isAdmin={user?.email?.includes('admin') || false}
-                className="max-w-2xl mx-auto"
-              />
+              {/* Botones de acción */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-4xl mx-auto mb-8">
+                {/* BOTÓN REGENERAR CARTA (Solo Admin) */}
+                {isAdmin && (
+                  <button
+                    onClick={handleRegenerateChart}
+                    disabled={loading || regenerating}
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all flex items-center text-sm disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-4 h-4 mr-2 ${(loading || regenerating) ? 'animate-spin' : ''}`} />
+                    {(loading || regenerating) ? 'Regenerando...' : 'Regenerar Carta'}
+                  </button>
+                )}
+
+                {/* BOTÓN INTERPRETACIÓN */}
+                <div data-interpret-button>
+                  <InterpretationButton
+                    type="solar-return"
+                    userId={user?.uid || ''}
+                    chartData={solarReturnData}
+                    natalChart={natalChart}
+                    userProfile={userProfile}
+                    isAdmin={isAdmin}
+                    className="w-full sm:w-auto"
+                  />
+                </div>
+              </div>
             </div>
           );
         })()}
@@ -683,18 +703,6 @@ export default function SolarReturnPage() {
               </p>
             </div>
           </div>
-        </div>
-
-        {/* ✅ SECCIÓN 6: BOTÓN REGENERAR */}
-        <div className="max-w-2xl mx-auto mb-8">
-          <button
-            onClick={handleRegenerateChart}
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all flex items-center justify-center text-sm disabled:opacity-50"
-          >
-            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            {loading ? 'Regenerando...' : 'Regenerar Carta'}
-          </button>
         </div>
 
       </div>
