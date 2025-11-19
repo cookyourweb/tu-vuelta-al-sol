@@ -117,39 +117,44 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
   }, []);
 
   // =============================================================================
-  // FETCH AI INTERPRETATIONS
+  // FETCH AI INTERPRETATIONS (NATAL or SOLAR RETURN)
   // =============================================================================
-  
+
   useEffect(() => {
-    async function fetchNatalInterpretations() {
-      if (!userId || chartType !== 'natal') {
+    async function fetchInterpretations() {
+      if (!userId || (chartType !== 'natal' && chartType !== 'solar-return')) {
         setLoadingInterpretations(false);
         return;
       }
-      
+
       setLoadingInterpretations(true);
-      
+
       try {
-        console.log('🔍 Fetching interpretations for userId:', userId);
-        const response = await fetch(`/api/astrology/interpret-natal?userId=${userId}`);
+        // ✅ Use correct endpoint based on chart type
+        const endpoint = chartType === 'natal'
+          ? `/api/astrology/interpret-natal?userId=${userId}`
+          : `/api/astrology/interpret-solar-return?userId=${userId}`;
+
+        console.log(`🔍 Fetching ${chartType} interpretations for userId:`, userId);
+        const response = await fetch(endpoint);
         const result = await response.json();
-        
+
         if (result.success && result.data) {
-          console.log('✅ AI Interpretations loaded:', Object.keys(result.data.planets || {}).length, 'planets');
+          console.log(`✅ ${chartType} AI Interpretations loaded:`, Object.keys(result.data.planets || {}).length, 'planets');
           setNatalInterpretations(result.data);
         } else if (result.needsGeneration) {
-          console.log('⚠️ No interpretations found - needs generation');
+          console.log(`⚠️ No ${chartType} interpretations found - needs generation`);
           setNatalInterpretations(null);
         }
       } catch (error) {
-        console.error('❌ Error fetching interpretations:', error);
+        console.error(`❌ Error fetching ${chartType} interpretations:`, error);
         setNatalInterpretations(null);
       } finally {
         setLoadingInterpretations(false);
       }
     }
-    
-    fetchNatalInterpretations();
+
+    fetchInterpretations();
   }, [userId, chartType]);
 
   // =============================================================================
@@ -293,9 +298,14 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
     setAspectTooltipLocked(true); // Lock tooltip while generating
 
     try {
-      console.log(`🎯 Generating aspect: ${planet1} ${aspectType} ${planet2}`);
+      console.log(`🎯 Generating ${chartType} aspect: ${planet1} ${aspectType} ${planet2}`);
 
-      const response = await fetch('/api/astrology/interpret-natal', {
+      // ✅ Use correct endpoint based on chart type
+      const endpoint = chartType === 'natal'
+        ? '/api/astrology/interpret-natal'
+        : '/api/astrology/interpret-solar-return';
+
+      const response = await fetch(endpoint, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -312,13 +322,20 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
       if (result.success) {
         console.log('✅ Aspect interpretation generated');
 
-        // Refresh interpretations
-        const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`);
+        // Refresh interpretations from correct endpoint
+        const refreshEndpoint = chartType === 'natal'
+          ? `/api/astrology/interpret-natal?userId=${userId}`
+          : `/api/astrology/interpret-solar-return?userId=${userId}`;
+
+        const refreshResponse = await fetch(refreshEndpoint);
         const refreshResult = await refreshResponse.json();
 
         if (refreshResult.success) {
           setNatalInterpretations(refreshResult.data);
           console.log('✅ Interpretations refreshed');
+
+          // ✅ Keep tooltip locked briefly before opening drawer
+          await new Promise(resolve => setTimeout(resolve, 300));
 
           // Open drawer immediately after generation
           const aspectKeyFull = `${planet1}-${planet2}-${aspectType}`;
@@ -335,6 +352,10 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
       alert('❌ Error generando interpretación');
     } finally {
       setGeneratingAspect(false);
+      // ✅ Unlock tooltip after drawer opens
+      setTimeout(() => {
+        setAspectTooltipLocked(false);
+      }, 500);
     }
   };
 
@@ -1297,7 +1318,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
             transform: tooltipPosition.x > window.innerWidth - 450 ? 'translateX(-100%)' : 'none'
           }}
           onMouseEnter={handleTooltipMouseEnter}
-          onMouseLeave={() => handleTooltipMouseLeave('house')} // Use house delay for distributions
+          onMouseLeave={() => handleTooltipMouseLeave('angle')} // Use angle delay (2s) for distributions
         >
           <div className="flex items-center mb-3">
             <span className="text-3xl mr-3">🔥</span>
