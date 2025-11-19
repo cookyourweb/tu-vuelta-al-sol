@@ -134,10 +134,42 @@ export default function SolarReturnPage() {
       return;
     }
 
-    setLoading(true);
+    setRegenerating(true);
+    setLoadingMessage('☀️ Iniciando regeneración de Solar Return...');
     setError(null);
 
     try {
+      console.log('🔄 Iniciando regeneración de Solar Return...');
+
+      // 1. ✅ Borrar Solar Return existente
+      const deleteSRResponse = await fetch(`/api/charts/solar-return?userId=${user.uid}`, {
+        method: 'DELETE'
+      });
+      console.log('🗑️ Solar Return borrado:', deleteSRResponse.ok);
+
+      // 2. ✅ Borrar interpretaciones cacheadas de Solar Return
+      const deleteInterpResponse = await fetch(`/api/astrology/interpret-solar-return?userId=${user.uid}`, {
+        method: 'DELETE'
+      });
+      console.log('🗑️ Interpretaciones borradas:', deleteInterpResponse.ok);
+
+      // 3. Generar nueva Solar Return con mensajes de progreso
+      const progressMessages = [
+        '☀️ Calculando tu retorno solar exacto...',
+        '⚡ Posicionando planetas para tu cumpleaños solar...',
+        '🔮 Comparando carta natal vs solar return...',
+        '✨ Identificando energías del nuevo ciclo anual...',
+        '🪐 Analizando casas y aspectos anuales...',
+        '🌟 Revelando oportunidades del próximo año...',
+        '💫 Casi listo... preparando tu revolución anual...'
+      ];
+
+      let messageIndex = 0;
+      const messageInterval = setInterval(() => {
+        messageIndex = (messageIndex + 1) % progressMessages.length;
+        setLoadingMessage(progressMessages[messageIndex]);
+      }, 2000);
+
       const response = await fetch('/api/charts/solar-return', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -151,21 +183,33 @@ export default function SolarReturnPage() {
         })
       });
 
+      clearInterval(messageInterval);
+      console.log('📡 Response status:', response.status);
+
       if (!response.ok) {
-        throw new Error('Error regenerando carta');
+        throw new Error('Error regenerando Solar Return');
       }
 
       const data = await response.json();
+      console.log('📦 Data recibida:', data);
 
-      if (data.solarReturnChart) {
-        setChartData(data.solarReturnChart);
-        setSolarReturnData(data.solarReturnChart);
+      if (data.success && data.data?.solarReturnChart) {
+        setLoadingMessage('✨ ¡Solar Return completado! 🎉');
+        setSolarReturnData(data.data.solarReturnChart);
+        setChartData(data.data.solarReturnChart);
+
+        setTimeout(() => {
+          setRegenerating(false);
+          setLoadingMessage('☀️ Iniciando tu Vuelta al Sol...');
+        }, 1000);
+      } else {
+        throw new Error('Solar Return incompleto');
       }
 
     } catch (err) {
+      console.error('❌ Error regenerando Solar Return:', err);
       setError(err instanceof Error ? err.message : 'Error desconocido');
-    } finally {
-      setLoading(false);
+      setRegenerating(false);
     }
   };
 

@@ -851,3 +851,45 @@ export async function GET(request: NextRequest) {
     }, { status: 500 });
   }
 }
+
+// ==========================================
+// 🗑️ DELETE: REMOVE CACHED INTERPRETATIONS
+// ==========================================
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'userId is required' },
+        { status: 400 }
+      );
+    }
+
+    console.log('🗑️ Deleting Solar Return interpretations for user:', userId);
+
+    await connectDB();
+
+    const result = await Interpretation.deleteMany({
+      userId,
+      chartType: 'solar-return'
+    });
+
+    console.log('✅ Deleted interpretations:', result.deletedCount);
+
+    return NextResponse.json({
+      success: true,
+      deletedCount: result.deletedCount,
+      message: `Deleted ${result.deletedCount} Solar Return interpretation(s)`
+    });
+
+  } catch (error) {
+    console.error('❌ Error deleting Solar Return interpretations:', error);
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to delete interpretations'
+    }, { status: 500 });
+  }
+}
