@@ -226,7 +226,54 @@ Responde ÚNICAMENTE con un objeto JSON válido en español (sin markdown, sin b
   "proposito_vida_anual": "MÍNIMO 120-150 palabras. ¿Cuál es la MISIÓN ESPECÍFICA de este año según los datos técnicos? Analiza: 1) Qué debe lograr/aprender/transformar basándote en Casa ${ascSRenCasaNatal} natal (tema central), 2) Cómo los planetas angulares (${planetasAngularesSR.map(p => p.planeta).join(', ')}) le ayudarán o desafiarán, 3) Qué aspectos cruzados SR-Natal son clave. Basado en metodología profesional Shea/Teal/Louis.",
   
   "tema_central_del_anio": "Una frase de 10-15 palabras que resuma el año. Ejemplo: 'Revolución de identidad y espiritualidad profunda'",
-  
+
+  "amor_revolucionario_anual": {
+    "texto": "MÍNIMO 250-300 palabras. TONO DISRUPTIVO. Amor y relaciones ESTE AÑO ESPECÍFICO basado en Venus SR + Casa 7 SR + aspectos cruzados. Analiza: 1) Cómo Venus SR ${solarReturnChart.planets?.find((p: any) => p.name === 'Venus')?.sign || 'Venus'} en Casa ${solarReturnChart.planets?.find((p: any) => p.name === 'Venus')?.house || 'X'} SR cambiará tu forma de amar/atraer este año (comparado con Venus natal), 2) Casa 7 SR ${solarReturnChart.houses?.find((h: any) => h.number === 7)?.sign || ''} sobre qué casa natal → qué tipo de personas entrarán en tu vida, 3) Aspectos cruzados Venus SR con planetas natales. USA el nombre ${userProfile.name}. Lenguaje directo.",
+    "venus_sr": {
+      "signo": "${solarReturnChart.planets?.find((p: any) => p.name === 'Venus')?.sign || 'Venus'}",
+      "casa_sr": ${solarReturnChart.planets?.find((p: any) => p.name === 'Venus')?.house || 'null'},
+      "casa_natal": "Calcula en qué casa natal cae Venus SR (usa longitud Venus SR + casas natales)",
+      "energia_amor": "80-100 palabras ESPECÍFICAS: ¿Cómo amarás/atraerás DIFERENTE este año vs tu patrón natal? Compara Venus SR con Venus natal. Ejemplos concretos.",
+      "tipo_relaciones": "60-80 palabras: Qué TIPO específico de personas/conexiones atraerás basándote en signo Venus SR + casa que ocupa"
+    },
+    "casa_7_sr": {
+      "signo": "${solarReturnChart.houses?.find((h: any) => h.number === 7)?.sign || ''}",
+      "planetas": "Lista planetas en Casa 7 SR si hay. Si no hay, di 'Casa 7 vacía - enfoque en otros aspectos'",
+      "relaciones_clave": "Describe QUÉ tipo de personas entrarán según el signo de Casa 7 SR"
+    },
+    "love_blocks_soltar": [
+      "Bloqueo específico #1 a soltar ESTE año (basado en aspecto difícil Venus SR o Casa 7 SR)",
+      "Bloqueo específico #2 a soltar ESTE año (basado en Saturno SR aspectando Venus/Casa 7)"
+    ],
+    "accion_amor_inmediata": "UNA acción CONCRETA y ESPECÍFICA para manifestar amor alineado ESTE año (basada en Venus SR + Casa 7 SR). Ejemplo: 'Si Venus SR está en Géminis Casa 5: Inscríbete en clase de improvisación/teatro antes del [fecha]'",
+    "mensaje_amor": "Mensaje DISRUPTIVO sobre amor para este año. 50-80 palabras. Tono BRUTAL pero amoroso. Ejemplo: '${userProfile.name}, este año el amor NO llegará pidiendo permiso. Llegará cuando dejes de necesitarlo para validarte...'"
+  },
+
+  "abundancia_antiFragil_anual": {
+    "texto": "MÍNIMO 250-300 palabras. TONO ANTI-FRÁGIL (Nassim Taleb). Dinero y abundancia ESTE AÑO basado en Júpiter SR + Saturno SR + Casa 2 SR + Casa 8 SR. Analiza: 1) Júpiter SR ${solarReturnChart.planets?.find((p: any) => p.name === 'Júpiter' || p.name === 'Jupiter')?.sign || 'Júpiter'} en Casa ${solarReturnChart.planets?.find((p: any) => p.name === 'Júpiter' || p.name === 'Jupiter')?.house || 'X'} SR → dónde expandir riqueza, 2) Saturno SR ${solarReturnChart.planets?.find((p: any) => p.name === 'Saturno' || p.name === 'Saturn')?.sign || 'Saturno'} en Casa ${solarReturnChart.planets?.find((p: any) => p.name === 'Saturno' || p.name === 'Saturn')?.house || 'X'} SR → qué estructura construir, 3) Casa 2 SR sobre qué casa natal → cómo generar dinero ESTE año. USA el nombre ${userProfile.name}.",
+    "venus_sr_dinero": {
+      "casa_2_sr": "Signo + planetas en Casa 2 SR si hay",
+      "energia_financiera": "80-100 palabras ESPECÍFICAS: Cómo fluye el dinero ESTE año (diferente de tu patrón natal). Menciona si Casa 2 SR cae sobre una casa natal diferente."
+    },
+    "jupiter_sr": {
+      "signo": "${solarReturnChart.planets?.find((p: any) => p.name === 'Júpiter' || p.name === 'Jupiter')?.sign || 'Júpiter'}",
+      "casa": ${solarReturnChart.planets?.find((p: any) => p.name === 'Júpiter' || p.name === 'Jupiter')?.house || 'null'},
+      "expansion_financiera": "80-100 palabras: Dónde expandir tu riqueza ESPECÍFICAMENTE este año según casa Júpiter SR. Ejemplos CONCRETOS de qué hacer."
+    },
+    "saturno_sr": {
+      "signo": "${solarReturnChart.planets?.find((p: any) => p.name === 'Saturno' || p.name === 'Saturn')?.sign || 'Saturno'}",
+      "casa": ${solarReturnChart.planets?.find((p: any) => p.name === 'Saturno' || p.name === 'Saturn')?.house || 'null'},
+      "estructura_necesaria": "80-100 palabras: Qué ESTRUCTURA/DISCIPLINA construir para sostener abundancia según Saturno SR. Pasos concretos."
+    },
+    "modelo_negocio_alineado": "100-120 palabras: Qué tipo de negocio/modelo de abundancia está ALINEADO con tu Solar Return ESTE año. Basado en MC SR + Júpiter SR + Casa 10 SR. Ejemplos específicos del tipo de oferta/servicio/producto.",
+    "bloqueos_financieros_año": [
+      "Bloqueo financiero #1 a transformar ESTE año (basado en aspecto difícil Saturno SR/Plutón SR con Casa 2/8 natal)",
+      "Bloqueo financiero #2 a transformar (basado en creencias limitantes visibles en la carta SR)"
+    ],
+    "accion_dinero_inmediata": "UNA acción CONCRETA de dinero para hacer ESTE año (antes de [fecha específica]). Ejemplo: 'Sube tus precios 30% antes de [mes] sin justificar'",
+    "mensaje_abundancia": "Mensaje ANTI-FRÁGIL sobre dinero para este año. 80-100 palabras. Tono BRUTAL. Ejemplo: '${userProfile.name}, este año Saturno en Casa ${solarReturnChart.planets?.find((p: any) => p.name === 'Saturno' || p.name === 'Saturn')?.house || 'X'} no te dejará escapar de construir ESTRUCTURA REAL...'"
+  },
+
   "analisis_tecnico_profesional": {
     "asc_sr_en_casa_natal": {
       "casa_natal": ${ascSRenCasaNatal},
@@ -271,26 +318,53 @@ Responde ÚNICAMENTE con un objeto JSON válido en español (sin markdown, sin b
     ]
   },
   
-  "plan_accion": {
+  "plan_accion_disruptivo": {
     "hoy_mismo": [
-      "Acción concreta 1 basada en el análisis",
-      "Acción concreta 2",
-      "Acción concreta 3"
+      "Acción concreta 1 HOY basada en el análisis SR (ESPECÍFICA con plazo/hora)",
+      "Acción concreta 2 HOY (debe poder hacerse en próximas 24h)",
+      "Acción concreta 3 HOY (algo pequeño pero poderoso)"
     ],
     "esta_semana": [
-      "Acción semanal 1",
-      "Acción semanal 2",
-      "Acción semanal 3"
+      "Acción semanal 1 (próximos 7 días, basada en ASC SR/Sol SR)",
+      "Acción semanal 2 (relacionada con amor/dinero según Venus/Júpiter SR)",
+      "Acción semanal 3 (relacionada con planetas angulares SR)"
     ],
     "este_mes": [
-      "Acción mensual 1",
-      "Acción mensual 2",
-      "Acción mensual 3"
+      "Acción mensual 1 (próximos 30 días, basada en tema central del año)",
+      "Acción mensual 2 (relacionada con Casa ${ascSRenCasaNatal} natal - tema del año)"
     ],
-    "primer_trimestre": [
-      "Enfoque trimestral 1 (con meses específicos)",
-      "Enfoque trimestral 2"
-    ]
+    "proximos_3_meses": [
+      "Enfoque trimestral 1 (primer trimestre del año solar, con meses específicos desde cumpleaños)",
+      "Enfoque trimestral 2 (basado en eventos clave detectados en aspectos SR-Natal)"
+    ],
+
+    "plan_antiFragil": {
+      "titulo": "🔥 CUANDO TODO FALLE (Plan Anti-Frágil)",
+      "texto": "MÍNIMO 200-250 palabras. TONO ANTI-FRÁGIL (Nassim Taleb - crecer más fuerte del caos). Plan B basado en Saturno SR ${solarReturnChart.planets?.find((p: any) => p.name === 'Saturno' || p.name === 'Saturn')?.sign || 'Saturno'} en Casa ${solarReturnChart.planets?.find((p: any) => p.name === 'Saturno' || p.name === 'Saturn')?.house || 'X'} SR + Plutón SR ${solarReturnChart.planets?.find((p: any) => p.name === 'Plutón' || p.name === 'Pluto')?.sign || 'Plutón'} en Casa ${solarReturnChart.planets?.find((p: any) => p.name === 'Plutón' || p.name === 'Pluto')?.house || 'X'} SR. Analiza: 1) Qué crisis/caída es MÁS PROBABLE según aspectos difíciles SR (cuadraturas/oposiciones), 2) Cómo Saturno SR te enseñará a través de limitaciones, 3) Cómo Plutón SR transformará lo que muere en algo más poderoso. USA el nombre ${userProfile.name}. Mensaje: 'La caída no es el final. Es el inicio de tu verdadero poder.'",
+      "señales_alerta": [
+        "Señal concreta #1 de que estás en crisis este año (basada en aspectos difíciles SR-Natal)",
+        "Señal concreta #2 de que estás en crisis (basada en Saturno SR o Plutón SR)",
+        "Señal concreta #3 física/emocional (sistema nervioso desregulado)"
+      ],
+      "que_hacer": [
+        "Paso 1 INMEDIATO cuando sientas que nada funciona (técnica regulación sistema nervioso - Levine/van der Kolk)",
+        "Paso 2 para detener la espiral (acción física/corporal concreta en próximas 2 horas)",
+        "Paso 3 para reconectar con tu propósito (basado en Nodo Norte natal + ASC SR en Casa ${ascSRenCasaNatal})",
+        "Paso 4 para dar UN paso microscópico hacia adelante (acción TAN pequeña que es imposible fallar)",
+        "Paso 5 ritual de transformación (basado en Plutón SR - convertir veneno en medicina)"
+      ],
+      "mensaje_reframe": "Mensaje poderoso de REFRAME (80-120 palabras). Ejemplo: 'La caída no es el final, ${userProfile.name}. Es Plutón en Casa ${solarReturnChart.planets?.find((p: any) => p.name === 'Plutón' || p.name === 'Pluto')?.house || 'X'} matando lo que ya no sirve para que nazca tu verdadero poder. Cada crisis este año es una INVITACIÓN a anti-fragilidad...'",
+      "saturno_enseñanza": "80-100 palabras: Qué te está enseñando ESPECÍFICAMENTE Saturno SR ${solarReturnChart.planets?.find((p: any) => p.name === 'Saturno' || p.name === 'Saturn')?.sign || 'Saturno'} en Casa ${solarReturnChart.planets?.find((p: any) => p.name === 'Saturno' || p.name === 'Saturn')?.house || 'X'} SR con esta crisis. Basado en casa que ocupa.",
+      "pluton_transformacion": "80-100 palabras: Qué versión tuya está muriendo (según Plutón SR) para que nazca UNA NUEVA. Describe la transformación ESPECÍFICA según casa Plutón SR. Ejemplo: 'Plutón en Casa 10 SR: Tu identidad profesional vieja está muriendo. La nueva será...'"
+    }
+  },
+
+  "mensaje_poder_anual": {
+    "texto": "MÍNIMO 200-250 palabras. TONO EMOCIONAL Y PODEROSO. Mensaje de tu yo del PRÓXIMO CUMPLEAÑOS (1 año en el futuro) dirigido a ti HOY. Escrito en primera persona como si fuera ${userProfile.name} del futuro escribiéndole a ${userProfile.name} del presente. Basado en: 1) Logros probables según ASC SR en Casa ${ascSRenCasaNatal} + planetas angulares SR, 2) Transformación según Plutón SR + Saturno SR, 3) Qué habrás aprendido sobre amor (Venus SR) y dinero (Júpiter SR) este año. IMPORTANTE: Debe ser ESPECÍFICO a esta carta SR, no genérico. Ejemplo inicio: 'Querida ${userProfile.name} de hoy, soy tu yo del ${returnYear + 1}. Han pasado 12 meses intensos desde que el Sol regresó a ${natalSol?.sign}...'",
+    "logros_año": "Lista 5-7 logros ESPECÍFICOS que habrás conseguido al final de este año solar (basados en ASC SR Casa ${ascSRenCasaNatal} + Sol SR Casa ${srSol?.house} + planetas angulares). Cada logro debe ser concreto y medible.",
+    "transformacion": "150-180 palabras: EN QUIÉN te habrás convertido al final de este año (vs quien eres hoy). Describe la IDENTIDAD nueva según ASC SR ${srAsc?.sign} en Casa ${ascSRenCasaNatal}. Compara con identidad actual (ASC natal ${natalAsc?.sign}). Qué habrás soltado, qué habrás integrado.",
+    "agradecimientos": "100-120 palabras: Por qué tu yo futuro AGRADECE a tu yo actual (aunque imperfecto) por haber iniciado este camino. Validación + compasión + reconocimiento de que CADA paso cuenta. Tono: amor duro pero profundamente compasivo.",
+    "declaracion_poder": "Una declaración de poder en PRIMERA PERSONA para recitar DIARIAMENTE este año. 40-60 palabras. Formato: 'YO, [NOMBRE], ...' Debe incluir: tema central del año + compromiso específico + resultado deseado. Ejemplo: 'YO, ${userProfile.name}, abrazo mi año de [tema] con total confianza. Me comprometo a [acción específica] sin disculpas. Al final de este ciclo solar habré [resultado concreto]. Así es y así será.'"
   },
   
   "calendario_lunar_anual": [
@@ -338,9 +412,7 @@ Responde ÚNICAMENTE con un objeto JSON válido en español (sin markdown, sin b
     // - Mercurio Retrógrado: 25 Nov - 15 Dic 2025 en Sagitario
     // Incluye estos eventos SOLO si caen dentro del rango del Solar Return del usuario
   ],
-  
-  "declaracion_poder_anual": "Una declaración poderosa en primera persona, 30-50 palabras. Ejemplo: 'YO, [NOMBRE], abrazo mi revolución interior. Este año manifiesto mi autenticidad sin disculpas...'",
-  
+
   "advertencias": [
     "Advertencia 1: Sombra o desafío potencial basado en aspectos difíciles",
     "Advertencia 2: Otra trampa a evitar",
