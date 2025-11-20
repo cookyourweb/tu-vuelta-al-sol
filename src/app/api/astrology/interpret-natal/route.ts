@@ -13,6 +13,7 @@ import {
   debugListPlanets,
   verifyExpectedPlanets,
 } from '@/utils/planetNameUtils';
+import { getSpecializedElementPrompt } from '@/utils/prompts/natalElementPrompts';
 
 // =============================================================================
 // TYPES
@@ -550,8 +551,17 @@ async function generateAngleInterpretation(
   userProfile: any,
   openai: OpenAI
 ): Promise<PlanetInterpretation> {
-  
-  const prompt = `Eres un astrólogo evolutivo experto. Genera una interpretación DISRUPTIVA y TRANSFORMACIONAL para:
+
+  // ✅ USAR PROMPT ESPECIALIZADO si existe (Ascendente, MC)
+  const prompt = getSpecializedElementPrompt(
+    'angle',
+    angleName,
+    angleData,
+    userProfile
+  );
+
+  // Si no hay prompt especializado, usar el genérico original
+  const finalPrompt = prompt || `Eres un astrólogo evolutivo experto. Genera una interpretación DISRUPTIVA y TRANSFORMACIONAL para:
 
 **ÁNGULO:** ${angleName}
 **SIGNO:** ${angleData.sign}
@@ -600,15 +610,15 @@ RESPONDE SOLO CON JSON VÁLIDO.`;
       messages: [
         {
           role: 'system',
-          content: 'Eres un astrólogo evolutivo experto. Respondes EXCLUSIVAMENTE con JSON válido sin texto adicional.',
+          content: 'Eres un astrólogo evolutivo experto especializado en psicología profunda. Respondes EXCLUSIVAMENTE con JSON válido sin texto adicional.',
         },
         {
           role: 'user',
-          content: prompt,
+          content: finalPrompt,
         },
       ],
       temperature: 0.8,
-      max_tokens: 2500,
+      max_tokens: 3500, // ✅ Aumentado para prompts psicológicos profundos
     });
 
     const response = completion.choices[0]?.message?.content;
@@ -651,7 +661,23 @@ async function generatePlanetInterpretation(
 
   console.log(`🎯 [DEBUG] generatePlanetInterpretation called for ${planet.name}`);
 
-  const prompt = `Eres un astrólogo evolutivo experto. Genera una interpretación DISRUPTIVA para:
+  // ✅ DETERMINAR TIPO DE ELEMENTO (planet, asteroid, node)
+  const elementType = planet.name.includes('Node') || planet.name.includes('Nodo')
+    ? 'node'
+    : (planet.name === 'Chiron' || planet.name === 'Quirón' || planet.name === 'Lilith')
+      ? 'asteroid'
+      : 'planet';
+
+  // ✅ USAR PROMPT ESPECIALIZADO si existe (Sol, Luna, Marte, Venus, Quirón, etc.)
+  const prompt = getSpecializedElementPrompt(
+    elementType,
+    planet.name,
+    planet,
+    userProfile
+  );
+
+  // Si no hay prompt especializado, usar el genérico original
+  const finalPrompt = prompt || `Eres un astrólogo evolutivo experto. Genera una interpretación DISRUPTIVA para:
 
 **PLANETA:** ${planet.name}
 **SIGNO:** ${planet.sign}
@@ -703,21 +729,22 @@ RESPONDE SOLO JSON VÁLIDO. NO agregues texto antes/después.`;
 
   try {
     console.log(`🎯 [DEBUG] Calling OpenAI for ${planet.name} interpretation`);
+    console.log(`🎯 [DEBUG] Using specialized prompt: ${!!prompt}`);
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
         {
           role: 'system',
-          content: 'Eres un astrólogo evolutivo experto. Respondes EXCLUSIVAMENTE con JSON válido sin texto adicional ni markdown.',
+          content: 'Eres un astrólogo evolutivo experto especializado en psicología profunda. Respondes EXCLUSIVAMENTE con JSON válido sin texto adicional ni markdown.',
         },
         {
           role: 'user',
-          content: prompt,
+          content: finalPrompt,
         },
       ],
       temperature: 0.8,
-      max_tokens: 2500,
+      max_tokens: 3500, // ✅ Aumentado para prompts psicológicos profundos
     });
 
     const response = completion.choices[0]?.message?.content;
@@ -914,7 +941,7 @@ ${element.name === 'Agua' ? '- Agua: "¡NO VINISTE A SECARTE!", "Tu superpoder e
         },
       ],
       temperature: 0.8,
-      max_tokens: 2500,
+      max_tokens: 3500, // ✅ Aumentado para prompts psicológicos profundos
     });
 
     const response = completion.choices[0]?.message?.content;
@@ -1007,7 +1034,7 @@ ${modality.name === 'Mutable' ? '- Mutable: "¡NO VINISTE A QUEDARTE!", "Tu supe
         },
       ],
       temperature: 0.8,
-      max_tokens: 2500,
+      max_tokens: 3500, // ✅ Aumentado para prompts psicológicos profundos
     });
 
     const response = completion.choices[0]?.message?.content;
@@ -1101,7 +1128,7 @@ ${aspect.type === 'Sextil' ? '- Sextil: "¡NO VINISTE A PERDER OPORTUNIDADES!", 
         },
       ],
       temperature: 0.8,
-      max_tokens: 2500,
+      max_tokens: 3500, // ✅ Aumentado para prompts psicológicos profundos
     });
 
     const response = completion.choices[0]?.message?.content;
