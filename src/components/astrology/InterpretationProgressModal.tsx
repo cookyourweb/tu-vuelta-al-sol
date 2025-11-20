@@ -26,13 +26,26 @@ export default function InterpretationProgressModal({
   onClose
 }: InterpretationProgressModalProps) {
   const [currentIconIndex, setCurrentIconIndex] = useState(0);
+  const [elapsedTime, setElapsedTime] = useState(0);
 
+  // Animación de íconos
   useEffect(() => {
     if (isOpen) {
       const interval = setInterval(() => {
         setCurrentIconIndex((prev) => (prev + 1) % progressIcons.length);
       }, 800);
       return () => clearInterval(interval);
+    }
+  }, [isOpen]);
+
+  // ⏱️ Contador de tiempo transcurrido
+  useEffect(() => {
+    if (isOpen) {
+      setElapsedTime(0);
+      const timer = setInterval(() => {
+        setElapsedTime((prev) => prev + 1);
+      }, 1000);
+      return () => clearInterval(timer);
     }
   }, [isOpen]);
 
@@ -71,8 +84,11 @@ export default function InterpretationProgressModal({
 
   const progressPercentage = getProgressPercentage(progress);
 
+  // Detectar si es el mensaje inicial de advertencia
+  const isWarningMessage = progress.includes('IMPORTANTE') || progress.includes('NO cierres');
+
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
       <div className="bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 border border-purple-400/30 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
         {/* Header */}
         <div className="text-center mb-6">
@@ -93,6 +109,23 @@ export default function InterpretationProgressModal({
             Tu mapa cósmico está siendo revelado...
           </p>
         </div>
+
+        {/* ⚠️ ADVERTENCIA PROMINENTE (si aplica) */}
+        {isWarningMessage && (
+          <div className="bg-gradient-to-r from-yellow-900/50 to-orange-900/50 border-2 border-yellow-400/50 rounded-xl p-4 mb-6 animate-pulse">
+            <div className="flex items-start gap-3">
+              <div className="text-2xl flex-shrink-0">⚠️</div>
+              <div>
+                <p className="text-yellow-200 font-bold text-sm mb-1">
+                  IMPORTANTE - NO CERRAR
+                </p>
+                <p className="text-yellow-100 text-xs leading-relaxed">
+                  Este análisis profundo tarda 2-3 minutos. Por favor mantén esta ventana abierta.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Progress Message */}
         <div className="bg-black/30 rounded-xl p-4 mb-6 border border-purple-400/20">
@@ -115,6 +148,16 @@ export default function InterpretationProgressModal({
             >
               <div className="h-full bg-white/20 animate-pulse rounded-full"></div>
             </div>
+          </div>
+
+          {/* ⏱️ TIEMPO TRANSCURRIDO Y ESTIMADO */}
+          <div className="flex justify-between text-xs text-gray-400 mt-2">
+            <span>⏱️ Tiempo: {Math.floor(elapsedTime / 60)}:{(elapsedTime % 60).toString().padStart(2, '0')}</span>
+            <span>
+              {elapsedTime < 180
+                ? `⏳ Estimado: ~${Math.max(0, Math.ceil((180 - elapsedTime) / 60))} min restantes`
+                : '⚡ Finalizando...'}
+            </span>
           </div>
         </div>
 
