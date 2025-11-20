@@ -132,19 +132,55 @@ export default function NatalChartPage() {
     }
   };
 
-  // ✅ NEW: Generate AI interpretations
+  // ✅ NEW: Generate AI interpretations with detailed progress
   const generateInterpretations = async () => {
     if (!user?.uid || !birthData) {
       console.log('⚠️ Cannot generate - missing user or birth data');
       return;
     }
-    
+
     setGeneratingInterpretations(true);
-    setInterpretationProgress('🔮 Iniciando generación de interpretaciones AI...');
-    
+
+    // ⚠️ MENSAJE INICIAL DE ADVERTENCIA
+    setInterpretationProgress('⚠️ IMPORTANTE: Este es un análisis muy detallado que tomará 2-3 minutos. Por favor NO cierres esta pantalla.');
+
+    // Esperar 3 segundos para que lean la advertencia
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
     try {
       console.log('🚀 Starting AI interpretation generation...');
-      
+
+      // 📊 MENSAJES DE PROGRESO SIMULADOS (actualizados mientras el backend trabaja)
+      const progressMessages = [
+        { message: '🔮 Conectando con GPT-4o para análisis profundo...', delay: 500 },
+        { message: '🌅 Generando Ascendente y Medio Cielo...', delay: 8000 },
+        { message: '🪐 Iniciando interpretaciones de planetas...', delay: 5000 },
+        { message: '☀️ Generando Sol en ' + (chartData?.planets.find(p => p.name === 'Sun' || p.name === 'Sol')?.sign || 'tu signo') + '...', delay: 10000 },
+        { message: '🌙 Generando Luna en ' + (chartData?.planets.find(p => p.name === 'Moon' || p.name === 'Luna')?.sign || 'tu signo') + '...', delay: 10000 },
+        { message: '☿️ Generando Mercurio en ' + (chartData?.planets.find(p => p.name === 'Mercury' || p.name === 'Mercurio')?.sign || 'tu signo') + '...', delay: 10000 },
+        { message: '💎 Generando Venus en ' + (chartData?.planets.find(p => p.name === 'Venus')?.sign || 'tu signo') + '...', delay: 10000 },
+        { message: '⚔️ Generando Marte en ' + (chartData?.planets.find(p => p.name === 'Mars' || p.name === 'Marte')?.sign || 'tu signo') + '...', delay: 10000 },
+        { message: '🎯 Generando Jupiter en ' + (chartData?.planets.find(p => p.name === 'Jupiter' || p.name === 'Júpiter')?.sign || 'tu signo') + '...', delay: 10000 },
+        { message: '⏳ Generando Saturno en ' + (chartData?.planets.find(p => p.name === 'Saturn' || p.name === 'Saturno')?.sign || 'tu signo') + '...', delay: 10000 },
+        { message: '🌑 Procesando Lilith y Chiron...', delay: 8000 },
+        { message: '🔄 Generando Nodos Lunares (evolución kármica)...', delay: 10000 },
+        { message: '🔥 Analizando Elemento Fuego...', delay: 5000 },
+        { message: '🌍 Analizando Elemento Tierra...', delay: 5000 },
+        { message: '💨 Analizando Elemento Aire...', delay: 5000 },
+        { message: '💧 Analizando Elemento Agua...', delay: 5000 },
+        { message: '⚡ Procesando Modalidades astrológicas...', delay: 5000 },
+        { message: '✨ Finalizando interpretaciones...', delay: 3000 },
+      ];
+
+      let messageIndex = 0;
+      const messageInterval = setInterval(() => {
+        if (messageIndex < progressMessages.length) {
+          setInterpretationProgress(progressMessages[messageIndex].message);
+          messageIndex++;
+        }
+      }, 7000); // Cambiar mensaje cada 7 segundos
+
+      // 🚀 LLAMADA AL BACKEND (mientras mostramos progreso)
       const response = await fetch('/api/astrology/interpret-natal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -161,26 +197,32 @@ export default function NatalChartPage() {
         })
       });
 
+      clearInterval(messageInterval);
       const result = await response.json();
 
       if (result.success) {
         console.log('✅ AI Interpretations generated successfully!');
         setHasInterpretations(true);
-        setInterpretationProgress('✨ ¡Interpretaciones listas!');
-        
-        // Clear progress message after 3 seconds
+        setInterpretationProgress('🎉 ¡Interpretaciones completadas! Tu análisis profundo está listo.');
+
+        // Clear progress message after 5 seconds
         setTimeout(() => {
           setInterpretationProgress('');
-        }, 3000);
+          setGeneratingInterpretations(false);
+        }, 5000);
       } else {
         console.error('❌ Error generating interpretations:', result.error);
-        setInterpretationProgress('⚠️ Error generando interpretaciones');
+        setInterpretationProgress('⚠️ Error generando interpretaciones: ' + (result.error || 'Error desconocido'));
+        setTimeout(() => {
+          setGeneratingInterpretations(false);
+        }, 5000);
       }
     } catch (error) {
       console.error('❌ Error in generation request:', error);
-      setInterpretationProgress('❌ Error en la solicitud');
-    } finally {
-      setGeneratingInterpretations(false);
+      setInterpretationProgress('❌ Error en la solicitud. Por favor intenta de nuevo.');
+      setTimeout(() => {
+        setGeneratingInterpretations(false);
+      }, 5000);
     }
   };
 
