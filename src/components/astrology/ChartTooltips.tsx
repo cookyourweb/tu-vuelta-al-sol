@@ -1160,7 +1160,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
             transform: tooltipPosition.x > window.innerWidth - 450 ? 'translateX(-100%)' : 'none'
           }}
           onMouseEnter={handleTooltipMouseEnter}
-          onMouseLeave={() => handleTooltipMouseLeave('house')} // Use house delay for distributions
+          onMouseLeave={() => handleMouseLeaveTooltip(() => setHoveredCard?.(null), 2000)} // ✅ FIX: 2 seconds delay for distributions
         >
           <div className="flex items-center mb-3">
             <span className="text-3xl mr-3">🔥</span>

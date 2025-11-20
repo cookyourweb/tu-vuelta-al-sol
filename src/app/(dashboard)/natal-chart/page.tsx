@@ -393,15 +393,27 @@ export default function NatalChartPage() {
 
   // ✅ NEW: Auto-generate interpretations when chart + birth data are ready
   useEffect(() => {
+    let isMounted = true;
+    let alreadyChecked = false;
+
     async function autoGenerateIfNeeded() {
-      if (!chartData || !birthData || !user?.uid) {
-        console.log('⏸️ Waiting for chart and birth data...');
+      if (!chartData || !birthData || !user?.uid || alreadyChecked) {
+        if (!chartData) console.log('⏸️ Waiting for chartData...');
+        if (!birthData) console.log('⏸️ Waiting for birthData...');
+        if (!user?.uid) console.log('⏸️ Waiting for user...');
         return;
       }
-      
+
+      alreadyChecked = true;
+
       console.log('🔍 Chart and birth data ready, checking interpretations...');
+      console.log('🔍 chartData planets:', chartData.planets?.length);
+      console.log('🔍 birthData:', birthData.fullName);
+
       const exists = await checkInterpretations();
-      
+
+      if (!isMounted) return;
+
       if (!exists) {
         console.log('🚀 No interpretations found - auto-generating...');
         await generateInterpretations();
@@ -409,8 +421,12 @@ export default function NatalChartPage() {
         console.log('✅ Interpretations already exist, skipping generation');
       }
     }
-    
+
     autoGenerateIfNeeded();
+
+    return () => {
+      isMounted = false;
+    };
   }, [chartData, birthData, user?.uid]);
 
   // ✅ ANIMACIÓN DE MENSAJES DE CARGA

@@ -323,7 +323,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         const requestBody = isNatal
           ? {
               userId,
-              natalChart: chartData,
+              chartData: chartData,  // ✅ FIX: API expects 'chartData' not 'natalChart'
               userProfile,
               regenerate: forceRegenerate,
               disruptiveMode: true
