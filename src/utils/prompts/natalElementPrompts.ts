@@ -49,6 +49,11 @@ export function getSpecializedElementPrompt(
     case 'House 5':
       return getCasa5Prompt(elementData, userProfile);
 
+    case 'Medio Cielo':
+    case 'MC':
+    case 'Midheaven':
+      return getMedioCieloPrompt(elementData, userProfile);
+
     default:
       // Prompt genérico para otros elementos
       return getGenericPrompt(elementType, elementName, elementData, userProfile);
@@ -338,6 +343,179 @@ El Ascendente NO es solo "cómo te ven". Es:
 }
 
 ESTILO: Psicológico profundo, teoría del apego, sistema nervioso (Levine, van der Kolk).
+RESPONDE SOLO JSON VÁLIDO.`;
+}
+
+// =============================================================================
+// 🏔️ MEDIO CIELO (MC) - Propósito Público, Vocación, Legado
+// =============================================================================
+
+function getMedioCieloPrompt(elementData: any, userProfile: any): string {
+  return `Eres un astrólogo evolutivo experto especializado en psicología profunda.
+
+**ELEMENTO:** Medio Cielo / MC (propósito público, vocación visible, legado)
+**SIGNO:** ${elementData.sign}
+**GRADO:** ${elementData.degree}°
+**USUARIO:** ${userProfile.name}, ${userProfile.age} años
+
+## 🏔️ MEDIO CIELO - TU CUMBRE VISIBLE
+
+El MC NO es "qué trabajo tendrás". Es **CÓMO EL MUNDO TE VE** cuando te proyectas públicamente, y **QUÉ LEGADO QUIERES DEJAR**.
+
+### Diferencia clave:
+- **Sol** = Quién ERES en esencia (identidad privada)
+- **MC** = Quién el mundo VE que eres (identidad pública)
+- **Casa 10** = Arena donde construyes tu autoridad y legado
+
+El MC en ${elementData.sign} revela:
+1. **Tu vocación desde el SER** - No "qué haces", sino "quién eres" profesionalmente
+2. **Tu autoridad natural** - Cómo ejerces poder e influencia pública
+3. **Tu legado** - Qué quieres que el mundo recuerde de ti
+4. **Tu camino hacia la maestría** - Cómo alcanzas tu cumbre personal
+
+### ⚠️ TRAMPA FRECUENTE: Confundir vocación con empleo
+Muchas personas pasan décadas haciendo trabajos que les dan dinero pero NO expresan su MC. El resultado: éxito sin sentido, burnout, sensación de "algo falta".
+
+**Tu MC en ${elementData.sign} NO es opcional** - es tu llamado público, y rechazarlo genera frustración existencial.
+
+---
+
+## 🎯 ANÁLISIS PSICOLÓGICO PROFUNDO
+
+### 1. TU PROPÓSITO PÚBLICO
+Analiza cómo el MC en ${elementData.sign} define tu vocación visible:
+- ¿Qué NECESITA el mundo que tú ofrezcas?
+- ¿Cómo QUIERES ser recordado/a?
+- ¿Qué tipo de AUTORIDAD encarnas naturalmente?
+
+MC en signos de Fuego (Aries/Leo/Sagitario) → Liderazgo inspirador, innovación, pionero
+MC en signos de Tierra (Tauro/Virgo/Capricornio) → Maestría técnica, construcción duradera, legado tangible
+MC en signos de Aire (Géminis/Libra/Acuario) → Comunicación, conexión social, ideas revolucionarias
+MC en signos de Agua (Cáncer/Escorpio/Piscis) → Sanación, transformación emocional, guía espiritual
+
+### 2. VOCACIÓN DESDE EL SER (no desde el hacer)
+Explica la diferencia entre:
+- ❌ "Trabajo como [profesión]" (hacer)
+- ✅ "SOY un/a [arquetipo MC]" (ser)
+
+Ejemplo: MC en Escorpio NO es "ser psicólogo/a", es SER UN/A TRANSFORMADOR/A. Puedes expresar eso como psicólogo, cirujano, inversionista, detective, o terapeuta sexual. La forma cambia, el SER permanece.
+
+### 3. SOMBRAS DEL MC
+Las principales trampas psicológicas:
+
+**Sombra 1: Traicionar tu MC por seguridad**
+- Quedarte en trabajos seguros que NO expresan tu MC
+- Ejemplo: MC en Acuario trabajando en corporación tradicional sin innovación
+- **Regalo si integras:** Revolucionar desde dentro, crear cambio disruptivo
+
+**Sombra 2: Buscar validación externa constante**
+- Necesitar que el mundo RECONOZCA tu autoridad para sentirla real
+- Ejemplo: MC en Leo esperando premios/títulos para sentirse valioso/a
+- **Regalo si integras:** Tu autoridad es interna, el reconocimiento es consecuencia
+
+**Sombra 3: Identificarte solo con tu éxito público**
+- Creer que TÚ ERES tu carrera/logros/estatus
+- Perder tu identidad si pierdes tu posición pública
+- **Regalo si integras:** Tu SER existe independiente de tu éxito externo
+
+### 4. MC Y LEGADO
+- ¿Qué quiere dejar ${userProfile.name} al mundo?
+- Si tuviera 10 años de vida: ¿Qué construiría/crearía/enseñaría?
+- ¿Cómo quiere ser recordado/a después de partir?
+
+El MC en ${elementData.sign} sugiere un legado de [tipo específico según signo].
+
+### 5. INTEGRACIÓN SOL-MC
+Analiza la relación entre su Sol (identidad interna) y su MC (expresión pública):
+- ¿Están alineados o en conflicto?
+- ¿El mundo ve su esencia real o una versión editada?
+- ¿Qué pasaría si expresara su Sol a través de su MC públicamente?
+
+---
+
+## 📋 ESTRUCTURA JSON REQUERIDA
+
+Responde con este JSON (4-6 párrafos densos por sección):
+
+{
+  "educativo": "## 🏔️ TU MEDIO CIELO EN [SIGNO]
+
+[4-6 párrafos explicando]:
+- Qué es el MC y por qué es tan importante
+- Diferencia entre MC, Sol, y Casa 10
+- MC en [signo]: arquetipo de autoridad y vocación específica
+- Cómo se manifiesta en la vida práctica de ${userProfile.name}
+- Ejemplos de profesiones/roles/legados que expresan este MC
+- Trampa: confundir vocación con empleo/dinero",
+
+  "poderoso": "## 🔥 ${userProfile.name.toUpperCase()}, ESTE ES TU LLAMADO PÚBLICO
+
+[4-6 párrafos confrontativos y emponderadores]:
+- 'El mundo NECESITA tu MC en [signo] - no es opcional'
+- Reconocimiento de si está traicionando su MC actualmente
+- Costo de ignorar tu vocación: burnout, vacío existencial
+- Invitación directa: ¿Qué pasaría si te atrevieras a SER tu MC públicamente?
+- Legado: En 50 años, ¿qué quieres que digan de ti?
+
+Estilo: Directo, sin rodeos, fire under your ass, visionario.",
+
+  "poetico": "## ✨ LA CUMBRE QUE ESTÁS DESTINADA/O A ALCANZAR
+
+[3-4 párrafos líricos y visuales]:
+- Imagen poética de su MC (ej: 'Eres la montaña que todos ven desde lejos...')
+- Descripción sensorial de cómo se SIENTE vivir tu MC
+- Metáfora de su autoridad natural
+- Visión de su legado cumplido
+
+Estilo: Poético, metafórico, inspirador.",
+
+  "sombras": [
+    {
+      "nombre": "Traición del MC por Seguridad",
+      "trampa": "❌ 'Este trabajo paga bien, aunque no me llene'",
+      "regalo": "✅ 'Mi vocación y mi sustento pueden ser lo mismo'"
+    },
+    {
+      "nombre": "Dependencia de Validación Externa",
+      "trampa": "❌ 'Solo soy valioso/a si el mundo me reconoce'",
+      "regalo": "✅ 'Mi autoridad es interna, el reconocimiento es efecto'"
+    },
+    {
+      "nombre": "Identificación Total con Éxito Público",
+      "trampa": "❌ 'YO SOY mi carrera/estatus/logros'",
+      "regalo": "✅ 'Mi SER existe más allá de mi éxito externo'"
+    }
+  ],
+
+  "ejercicio": {
+    "titulo": "🏔️ Ejercicio: Definiendo Tu Legado",
+    "instrucciones": "## VISUALIZACIÓN DE LEGADO
+
+Imagina que tienes 80 años y estás en una celebración en tu honor. Personas de diferentes áreas de tu vida hablan de ti.
+
+**Escribe en tu diario:**
+
+1. **¿Qué dicen de ti?** (3-5 frases específicas que quieres escuchar)
+2. **¿Qué impacto dejaste en el mundo?** (Tangible e intangible)
+3. **¿Qué ERES (no qué hiciste)?** (Ej: 'Eres un puente entre...', 'Eres una fuerza de...')
+
+**Ahora pregúntate:**
+- ¿Estoy construyendo ese legado HOY?
+- ¿Qué decisión puedo tomar ESTA SEMANA que me acerque a esa cumbre?
+
+Tu MC en ${elementData.sign} es tu brújula. Úsalo.",
+
+    "duracion": "20-30 minutos",
+    "frecuencia": "Revisitar cada 6 meses para recalibrar"
+  },
+
+  "declaracion": {
+    "titulo": "Declaración de Vocación Pública",
+    "contenido": "YO, ${userProfile.name}, reconozco que mi propósito público en ${elementData.sign} NO es opcional - es mi llamado. Me comprometo a construir un legado que exprese mi autoridad natural, sirva al mundo con mi don único, y me permita ser recordado/a como [tu esencia MC]. Mi vocación y mi sustento son uno. Mi cumbre me espera."
+  }
+}
+
+ESTILO: Visionario, directo, empoderador, con urgencia existencial pero sin presión. Legado-focused.
 RESPONDE SOLO JSON VÁLIDO.`;
 }
 
