@@ -25,7 +25,13 @@ interface CompleteSolarReturnInterpretation {
   esencia_revolucionaria_anual: string;
   proposito_vida_anual: string;
   tema_central_del_anio: string;
-  
+
+  // LOVE & RELATIONSHIPS (annual)
+  amor_revolucionario_anual: any; // Venus SR + Casa 7 SR analysis
+
+  // MONEY & ABUNDANCE (annual)
+  abundancia_antiFragil_anual: any; // Jupiter SR + Saturn SR + Casa 2 SR analysis
+
   // TECHNICAL ANALYSIS (professional methodology)
   analisis_tecnico_profesional: {
     asc_sr_en_casa_natal: {
@@ -52,25 +58,26 @@ interface CompleteSolarReturnInterpretation {
     }>;
     configuraciones_especiales: string[];
   };
-  
-  // ACTION PLAN (quarterly breakdown)
-  plan_accion: {
-    trimestre_1: { foco: string; acciones: string[] };
-    trimestre_2: { foco: string; acciones: string[] };
-    trimestre_3: { foco: string; acciones: string[] };
-    trimestre_4: { foco: string; acciones: string[] };
+
+  // ACTION PLAN (disruptive with anti-fragile component)
+  plan_accion_disruptivo: {
+    hoy_mismo: string[];
+    esta_semana: string[];
+    este_mes: string[];
+    proximos_3_meses: string[];
+    plan_antiFragil: any; // Plan B when everything fails
   };
-  
+
+  // POWER MESSAGE (from future self)
+  mensaje_poder_anual: any; // Message from next birthday self
+
   // LUNAR CALENDAR (12 months)
   calendario_lunar_anual: Array<{
     mes: string;
     luna_nueva: { fecha: string; signo: string; mensaje: string };
     luna_llena: { fecha: string; signo: string; mensaje: string };
   }>;
-  
-  // POWER DECLARATION
-  declaracion_poder_anual: string;
-  
+
   // WARNINGS
   advertencias: string[];
   
@@ -134,22 +141,40 @@ async function generateCompleteWithOpenAI(
   });
 
   // ✅ SYSTEM PROMPT WITH STRICT REQUIREMENTS
-  let systemPrompt = `You are a PROFESSIONAL astrologer specializing in Solar Return (Annual Revolution) following Shea, Teal, and Louis methodology.
+  let systemPrompt = `You are a PROFESSIONAL astrologer specializing in Solar Return (Annual Revolution) following Shea, Teal, and Louis methodology + Anti-fragile approach (Nassim Taleb).
 
 ⚠️ CRITICAL REQUIREMENTS:
-1. You MUST respond with VALID JSON containing ALL 12 required sections
+1. You MUST respond with VALID JSON containing ALL 14 required sections
 2. Use the REAL astronomical data provided (planets, houses, signs, degrees)
 3. Use the REAL user data: ${userProfile.name}, age ${userProfile.age}, from ${userProfile.birthPlace}
 4. Reference SPECIFIC positions like "Sol en ${solarReturnChart?.planets?.find((p: any) => p.name === 'Sol')?.sign} Casa ${solarReturnChart?.planets?.find((p: any) => p.name === 'Sol')?.house}"
 5. Calculate ASC SR position in NATAL houses using the comparison data provided
 6. Use disruptive Spanish language but BE SPECIFIC with astronomical data
 7. NO generic placeholders like "Libra" or "Casa 1" - use REAL data
+8. Include ANTI-FRAGILE plan (what to do when everything fails)
+9. Include power message from future self (next birthday)
 
 Required JSON structure:
 {
   "esencia_revolucionaria_anual": "string with SPECIFIC references to ${userProfile.name}'s chart",
   "proposito_vida_anual": "string",
   "tema_central_del_anio": "string",
+  "amor_revolucionario_anual": {
+    "texto": "250-300 words about love THIS year",
+    "venus_sr": {...},
+    "casa_7_sr": {...},
+    "love_blocks_soltar": [...],
+    "accion_amor_inmediata": "string",
+    "mensaje_amor": "disruptive message"
+  },
+  "abundancia_antiFragil_anual": {
+    "texto": "250-300 words about money THIS year",
+    "jupiter_sr": {...},
+    "saturno_sr": {...},
+    "bloqueos_financieros_año": [...],
+    "accion_dinero_inmediata": "string",
+    "mensaje_abundancia": "anti-fragile message"
+  },
   "analisis_tecnico_profesional": {
     "asc_sr_en_casa_natal": {
       "casa": number (from comparison data),
@@ -157,22 +182,34 @@ Required JSON structure:
       "significado": "string with REAL data",
       "area_vida_dominante": "string"
     },
-    "sol_en_casa_sr": {
-      "casa": number,
-      "significado": "string"
-    },
-    "planetas_angulares_sr": [],
-    "aspectos_cruzados_natal_sr": [],
-    "configuraciones_especiales": []
+    "sol_en_casa_sr": {...},
+    "planetas_angulares_sr": [...],
+    "aspectos_cruzados_natal_sr": [...],
+    "configuraciones_especiales": [...]
   },
-  "plan_accion": {
-    "trimestre_1": {"foco": "string", "acciones": []},
-    "trimestre_2": {"foco": "string", "acciones": []},
-    "trimestre_3": {"foco": "string", "acciones": []},
-    "trimestre_4": {"foco": "string", "acciones": []}
+  "plan_accion_disruptivo": {
+    "hoy_mismo": [...],
+    "esta_semana": [...],
+    "este_mes": [...],
+    "proximos_3_meses": [...],
+    "plan_antiFragil": {
+      "titulo": "🔥 CUANDO TODO FALLE",
+      "texto": "200-250 words",
+      "señales_alerta": [...],
+      "que_hacer": [...],
+      "mensaje_reframe": "string",
+      "saturno_enseñanza": "string",
+      "pluton_transformacion": "string"
+    }
+  },
+  "mensaje_poder_anual": {
+    "texto": "200-250 words from future self",
+    "logros_año": [...],
+    "transformacion": "string",
+    "agradecimientos": "string",
+    "declaracion_poder": "YO, ${userProfile.name.toUpperCase()}, ..."
   },
   "calendario_lunar_anual": [...12 months with REAL 2025-2026 dates...],
-  "declaracion_poder_anual": "string with ${userProfile.name.toUpperCase()}",
   "advertencias": [...],
   "eventos_clave_del_anio": [...],
   "insights_transformacionales": [...],
@@ -219,15 +256,17 @@ Required JSON structure:
       // ✅ PARSE & VALIDATE
       parsedResponse = JSON.parse(rawResponse);
 
-      // Required sections
+      // Required sections (expanded to include new love/money/anti-fragile sections)
       const requiredSections = [
         'esencia_revolucionaria_anual',
         'proposito_vida_anual',
         'tema_central_del_anio',
+        'amor_revolucionario_anual',
+        'abundancia_antiFragil_anual',
         'analisis_tecnico_profesional',
-        'plan_accion',
+        'plan_accion_disruptivo',
+        'mensaje_poder_anual',
         'calendario_lunar_anual',
-        'declaracion_poder_anual',
         'advertencias',
         'eventos_clave_del_anio',
         'insights_transformacionales',
@@ -242,7 +281,8 @@ Required JSON structure:
       if (missingSections.length === 0) {
         // ✅ VALIDATE CONTENT QUALITY
         const hasUserName = parsedResponse.esencia_revolucionaria_anual.includes(userProfile.name) ||
-                           parsedResponse.declaracion_poder_anual.includes(userProfile.name.toUpperCase());
+                           (parsedResponse.mensaje_poder_anual?.declaracion_poder?.includes(userProfile.name.toUpperCase()) ||
+                            parsedResponse.mensaje_poder_anual?.texto?.includes(userProfile.name));
 
         const hasRealData = parsedResponse.esencia_revolucionaria_anual !== "Usuario, este año 2025-2026 marca tu REVOLUCIÓN PERSONAL";
 
@@ -320,7 +360,54 @@ function completeMissingKeys(
     
     tema_central_del_anio: partial.tema_central_del_anio ||
       `Reinvención Consciente y Empoderamiento Personal`,
-    
+
+    amor_revolucionario_anual: partial.amor_revolucionario_anual || {
+      texto: `${userName}, este año el amor se presenta de manera diferente. Venus en tu Solar Return te invita a redefinir cómo das y recibes amor. No más patrones viejos - este año amas desde la autenticidad total.`,
+      venus_sr: {
+        signo: 'Venus SR',
+        casa_sr: 1,
+        casa_natal: 1,
+        energia_amor: 'Amor desde la autoestima fortalecida',
+        tipo_relaciones: 'Conexiones auténticas que honran tu verdad'
+      },
+      casa_7_sr: {
+        signo: 'Libra',
+        planetas: 'Casa 7 vacía - enfoque en otros aspectos',
+        relaciones_clave: 'Personas que reflejan tu nueva autenticidad'
+      },
+      love_blocks_soltar: [
+        'Necesidad de validación externa para sentirte amado/a',
+        'Patrón de minimizar tus necesidades en relaciones'
+      ],
+      accion_amor_inmediata: 'Escribe una lista de 10 cualidades que MERECES en una relación (y no negocies ninguna)',
+      mensaje_amor: `${userName}, este año el amor NO llegará pidiendo permiso. Llegará cuando dejes de necesitarlo para validarte. Ámate primero - todo lo demás seguirá.`
+    },
+
+    abundancia_antiFragil_anual: partial.abundancia_antiFragil_anual || {
+      texto: `${userName}, este año tu relación con el dinero debe transformarse. Júpiter y Saturno en tu Solar Return te piden ESTRUCTURA + EXPANSIÓN simultáneas. No más jugando pequeño/a con tu valor.`,
+      venus_sr_dinero: {
+        casa_2_sr: 'Casa 2 SR',
+        energia_financiera: 'Dinero fluye cuando honras tu valor real'
+      },
+      jupiter_sr: {
+        signo: 'Júpiter SR',
+        casa: 1,
+        expansion_financiera: 'Expansión a través de visibilidad personal y liderazgo auténtico'
+      },
+      saturno_sr: {
+        signo: 'Saturno SR',
+        casa: 1,
+        estructura_necesaria: 'Disciplina financiera: sistemas, límites claros, precios que reflejan tu maestría'
+      },
+      modelo_negocio_alineado: 'Modelo basado en tu autenticidad y expertise único - no copies a nadie, CREA desde tu singularidad',
+      bloqueos_financieros_año: [
+        'Creencia "cobrar mucho es egoísta" → MENTIRA',
+        'Miedo a ser visible con precios altos → LIMITANTE'
+      ],
+      accion_dinero_inmediata: 'Sube tus precios/tarifas 30% ESTA SEMANA sin justificar',
+      mensaje_abundancia: `${userName}, Saturno SR no te dejará escapar de construir ESTRUCTURA REAL este año. La abundancia no llega a quienes la necesitan - llega a quienes se PREPARAN para recibirla. Construye los sistemas.`
+    },
+
     analisis_tecnico_profesional: partial.analisis_tecnico_profesional || {
       asc_sr_en_casa_natal: {
         casa: 1,
@@ -354,8 +441,8 @@ function completeMissingKeys(
         'Énfasis en eje relacional Casa 1-7'
       ]
     },
-    
-    plan_accion: partial.plan_accion || {
+
+    plan_accion_disruptivo: partial.plan_accion_disruptivo || {
       hoy_mismo: [
         'Reflexiona sobre tus intenciones para este nuevo ciclo solar',
         'Escribe 3 metas concretas para el año que comienza',
@@ -368,11 +455,33 @@ function completeMissingKeys(
       ],
       este_mes: [
         'Participa en un taller o curso de crecimiento personal',
-        'Reorganiza tu entorno para alinearlo con tus intenciones anuales',
+        'Reorganiza tu entorno para alinearlo con tus intenciones anuales'
+      ],
+      proximos_3_meses: [
+        'Primer trimestre del año solar: establece fundamentos sólidos',
         'Conecta con un mentor o guía espiritual'
-      ]
+      ],
+      plan_antiFragil: {
+        titulo: '🔥 CUANDO TODO FALLE (Plan Anti-Frágil)',
+        texto: `Cuando sientas que todo se desmorona este año, recuerda: la crisis no es el final, es el portal hacia tu transformación. Cada caída te hace más fuerte, más sabio/a, más auténtico/a.`,
+        señales_alerta: [
+          'Te sientes abrumado/a y sin dirección',
+          'Vuelven patrones autodestructivos del pasado',
+          'Sistema nervioso desregulado (ansiedad/insomnio)'
+        ],
+        que_hacer: [
+          'PASO 1: PAUSA - Respiración 4-7-8 por 5 minutos',
+          'PASO 2: Contacto físico con tierra/naturaleza por 10 min',
+          'PASO 3: Reconecta con tu propósito anual (reler intenciones)',
+          'PASO 4: UNA acción microscópica hacia adelante (tan pequeña que no puedes fallar)',
+          'PASO 5: Ritual de transformación: escribe qué está muriendo y qué está naciendo'
+        ],
+        mensaje_reframe: `La caída no es el final, ${userName}. Es el inicio de tu verdadero poder. Cada crisis este año es una INVITACIÓN a crecer más fuerte del caos.`,
+        saturno_enseñanza: `Saturno te enseña que los límites son maestros, no enemigos.`,
+        pluton_transformacion: `Plutón está matando tu versión pequeña para que nazca tu grandeza auténtica.`
+      }
     },
-    
+
     calendario_lunar_anual: partial.calendario_lunar_anual || (() => {
       // ✅ GENERAR 12 MESES DESDE CUMPLEAÑOS
       const calendar = [];
@@ -481,10 +590,15 @@ function completeMissingKeys(
 
       return calendar;
     })(),
-    
-    declaracion_poder_anual: partial.declaracion_poder_anual ||
-      `YO, ${userName.toUpperCase()}, RECLAMO MI PODER SOBERANO. ESTE AÑO ${returnYear}-${returnYear + 1} SOY EL ARQUITECTO CONSCIENTE DE MI REALIDAD. MANIFIESTO MI AUTENTICIDAD SIN DISCULPAS, AVANZO CON VALENTÍA DISRUPTIVA, Y ABRAZO MI TRANSFORMACIÓN EVOLUTIVA. ASÍ ES, ASÍ SERÁ.`,
-    
+
+    mensaje_poder_anual: partial.mensaje_poder_anual || {
+      texto: `Querido/a ${userName}, soy tu yo del ${returnYear + 1}. Han pasado 12 meses intensos y transformadores. Lo que hoy ves como imposible, yo ya lo viví. Lo que hoy temes, yo ya lo superé. Este año te pedirá valentía, autenticidad y compromiso inquebrantable con tu evolución. Confía en el proceso.`,
+      logros_año: ['Logro 1 del año', 'Logro 2 del año', 'Logro 3 del año'],
+      transformacion: `Te habrás convertido en una versión más auténtica y poderosa de ti mismo/a.`,
+      agradecimientos: `Agradezco tu valentía de iniciar este camino, incluso con miedo.`,
+      declaracion_poder: `YO, ${userName.toUpperCase()}, RECLAMO MI PODER SOBERANO. ESTE AÑO ${returnYear}-${returnYear + 1} SOY EL ARQUITECTO CONSCIENTE DE MI REALIDAD. MANIFIESTO MI AUTENTICIDAD SIN DISCULPAS, AVANZO CON VALENTÍA DISRUPTIVA, Y ABRAZO MI TRANSFORMACIÓN EVOLUTIVA. ASÍ ES, ASÍ SERÁ.`
+    },
+
     advertencias: partial.advertencias || [
       '⚠️ No repitas patrones autodestructivos de años anteriores - rompe el ciclo AHORA',
       '⚠️ Evita la auto-sabotaje cuando el éxito se acerque - mereces brillar',
