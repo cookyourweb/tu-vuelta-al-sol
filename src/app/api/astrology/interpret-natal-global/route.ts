@@ -2,11 +2,13 @@
 // 🧠 NATAL GLOBAL INTERPRETATION API - SECCIONES PSICOLÓGICAS PROFUNDAS
 // src/app/api/astrology/interpret-natal-global/route.ts
 // =============================================================================
-// Genera 4 secciones psicológicas que requieren análisis integral de la carta:
+// Genera 6 secciones psicológicas que requieren análisis integral de la carta:
 // 1. formacion_temprana - Luna, IC, Saturno → raíces psicológicas
-// 2. patrones_psicologicos - Luna, Mercurio, Plutón → patrones actuales
+// 2. patrones_psicologicos - Luna, Mercurio, Plutón → patrones actuales + autosabotaje + triggers
 // 3. planetas_profundos - Plutón, Urano, Neptuno → transformación
 // 4. nodos_lunares - Nodo Norte/Sur → evolución kármica
+// 5. amor_y_poder - Venus, Luna, Casa 7/8 → Love Blocks + Soulmate Self
+// 6. dinero_y_abundancia - Júpiter, Saturno, Casa 2/8 → Money Blocks + Billionaire Self
 // =============================================================================
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -26,6 +28,8 @@ interface NatalGlobalInterpretation {
   patrones_psicologicos: string;
   planetas_profundos: string;
   nodos_lunares: string;
+  amor_y_poder: string;
+  dinero_y_abundancia: string;
 }
 
 // =============================================================================
@@ -130,7 +134,7 @@ export async function POST(request: NextRequest) {
         },
       ],
       temperature: 0.8,
-      max_tokens: 8000, // 4 secciones x ~2000 tokens c/u
+      max_tokens: 8000, // 6 secciones x ~1300 tokens c/u
       response_format: { type: 'json_object' },
     });
 
@@ -157,6 +161,8 @@ export async function POST(request: NextRequest) {
       'patrones_psicologicos',
       'planetas_profundos',
       'nodos_lunares',
+      'amor_y_poder',
+      'dinero_y_abundancia',
     ];
 
     const missingSections = requiredSections.filter(
@@ -168,14 +174,22 @@ export async function POST(request: NextRequest) {
       throw new Error(`Missing sections: ${missingSections.join(', ')}`);
     }
 
-    console.log('✅ [GLOBAL] All 4 sections present');
+    console.log('✅ [GLOBAL] All 6 sections present');
 
-    // Validate minimum lengths (approx 250-300 words = 1500-1800 chars)
+    // Validate minimum lengths
+    // formacion_temprana: 300-350 words ≈ 1800 chars
+    // patrones_psicologicos: 350-400 words ≈ 2100 chars (includes exercises)
+    // planetas_profundos: 350-400 words ≈ 2100 chars
+    // nodos_lunares: 300-350 words ≈ 1800 chars
+    // amor_y_poder: 350-400 words ≈ 2100 chars (includes Love Blocks + messages)
+    // dinero_y_abundancia: 350-400 words ≈ 2100 chars (includes Money Blocks + messages)
     const minLengths = {
-      formacion_temprana: 1500,
-      patrones_psicologicos: 1500,
-      planetas_profundos: 1800,
-      nodos_lunares: 1500,
+      formacion_temprana: 1800,
+      patrones_psicologicos: 2100,
+      planetas_profundos: 2100,
+      nodos_lunares: 1800,
+      amor_y_poder: 2100,
+      dinero_y_abundancia: 2100,
     };
 
     for (const [section, minLength] of Object.entries(minLengths)) {
@@ -211,6 +225,8 @@ export async function POST(request: NextRequest) {
         patrones_psicologicos_length: parsed.patrones_psicologicos.length,
         planetas_profundos_length: parsed.planetas_profundos.length,
         nodos_lunares_length: parsed.nodos_lunares.length,
+        amor_y_poder_length: parsed.amor_y_poder.length,
+        dinero_y_abundancia_length: parsed.dinero_y_abundancia.length,
         total_length: Object.values(parsed).join('').length,
         generation_time_ms: Date.now() - startTime,
       },
