@@ -1130,7 +1130,10 @@ const ChartDisplay = ({
           clearTimeout(cardHoverTimer);
           setCardHoverTimer(null);
         }
-        setHoveredCard(null);
+        // ✅ FIX: Add 2 second delay before closing tooltip (matches ChartTooltips delay)
+        setTimeout(() => {
+          setHoveredCard((current) => current === 'distributions' ? null : current);
+        }, 2000);
       }}
       onClick={(e) => {
         // ✅ IMMEDIATE: Clear timer and show immediately on click

@@ -403,10 +403,13 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         if (result.success) {
           console.log('📺 ===== PROCESANDO RESPUESTA DE INTERPRETACIÓN =====');
 
-          const rawInterpretation = result.data?.interpretation || result.interpretation;
+          // ✅ FIX: API returns data directly, not data.interpretation
+          const rawInterpretation = result.data?.interpretation || result.interpretation || result.data;
 
           if (!rawInterpretation) {
             console.log('❌ No se encontró interpretación en la respuesta');
+            console.log('❌ result keys:', Object.keys(result));
+            console.log('❌ result.data keys:', result.data ? Object.keys(result.data) : 'undefined');
             throw new Error('No se encontró interpretación en la respuesta');
           }
 

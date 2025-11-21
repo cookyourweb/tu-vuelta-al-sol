@@ -294,6 +294,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
     try {
       console.log(`🎯 Generating aspect: ${planet1} ${aspectType} ${planet2}`);
+      console.log('🎯 userId:', userId);
 
       const response = await fetch('/api/astrology/interpret-natal', {
         method: 'PUT',
@@ -307,28 +308,53 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
         })
       });
 
+      console.log('📡 PUT Response status:', response.status);
       const result = await response.json();
+      console.log('📡 PUT Result:', result);
+
+      if (!response.ok) {
+        console.error('❌ PUT failed:', result);
+        alert(`Error: ${result.error || 'Error desconocido'}`);
+        return;
+      }
 
       if (result.success) {
         console.log('✅ Aspect interpretation generated');
+        console.log('✅ Generated aspect data:', result.data);
 
         // Refresh interpretations
         const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`);
         const refreshResult = await refreshResponse.json();
 
+        console.log('🔄 Refresh result success:', refreshResult.success);
+        console.log('🔄 Refresh data keys:', refreshResult.data ? Object.keys(refreshResult.data) : 'no data');
+
         if (refreshResult.success) {
           setNatalInterpretations(refreshResult.data);
           console.log('✅ Interpretations refreshed');
+          console.log('✅ Available aspects:', refreshResult.data?.aspects ? Object.keys(refreshResult.data.aspects) : 'none');
 
           // Open drawer immediately after generation
           const aspectKeyFull = `${planet1}-${planet2}-${aspectType}`;
+          console.log('🔍 Looking for aspect key:', aspectKeyFull);
+
           const aspectInterpretation = refreshResult.data?.aspects?.[aspectKeyFull];
+          console.log('🔍 Found aspect interpretation:', !!aspectInterpretation);
+          console.log('🔍 Has drawer:', !!aspectInterpretation?.drawer);
+          console.log('🔍 onOpenDrawer exists:', !!onOpenDrawer);
 
           if (aspectInterpretation?.drawer && onOpenDrawer) {
             console.log('🎯 Opening drawer after generation for aspect:', aspectKeyFull);
             onOpenDrawer(aspectInterpretation.drawer);
+          } else {
+            console.warn('⚠️ Could not open drawer - missing interpretation or drawer');
           }
+        } else {
+          console.error('❌ Refresh failed:', refreshResult);
         }
+      } else {
+        console.error('❌ PUT result not successful:', result);
+        alert(`Error: ${result.error || 'Error desconocido'}`);
       }
     } catch (error) {
       console.error('❌ Error generating aspect:', error);
