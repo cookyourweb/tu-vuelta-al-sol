@@ -85,7 +85,9 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
 
   const isNatal = type === 'natal';
   const isSolarReturn = type === 'solar-return';
-  const endpoint = isNatal ? '/api/astrology/interpret-natal' :
+  // ✅ FIX: Usar interpret-natal-clean para la interpretación revolucionaria completa
+  // interpret-natal-clean usa el prompt disruptivo con advertencias, insights, rituales, etc.
+  const endpoint = isNatal ? '/api/astrology/interpret-natal-clean' :
                 isSolarReturn ? '/api/astrology/interpret-solar-return' :
                 '/api/astrology/interpret-progressed';
 
@@ -338,10 +340,10 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         const requestBody = isNatal
           ? {
               userId,
-              chartData: chartData,  // ✅ FIX: API expects 'chartData' not 'natalChart'
+              natalChart: chartData,  // ✅ FIX: interpret-natal-clean expects 'natalChart'
               userProfile,
               regenerate: forceRegenerate,
-              disruptiveMode: true
+              disruptiveMode: true  // ✅ Activar modo disruptivo para usar el prompt completo
             }
           : isSolarReturn
           ? {
@@ -453,6 +455,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               formacion_temprana: rawInterpretation.formacion_temprana,
               patrones_psicologicos: rawInterpretation.patrones_psicologicos,
               planetas_profundos: rawInterpretation.planetas_profundos,
+              angulos_vitales: rawInterpretation.angulos_vitales, // ✅ NUEVO: Ascendente y MC
               nodos_lunares: rawInterpretation.nodos_lunares,
               planetas: rawInterpretation.planetas,
               plan_accion: rawInterpretation.plan_accion,
@@ -460,6 +463,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               advertencias: rawInterpretation.advertencias,
               insights_transformacionales: rawInterpretation.insights_transformacionales,
               rituales_recomendados: rawInterpretation.rituales_recomendados,
+              pregunta_final_reflexion: rawInterpretation.pregunta_final_reflexion, // ✅ NUEVO
               integracion_carta: rawInterpretation.integracion_carta
             };
           } else if (type === 'solar-return') {
@@ -1245,7 +1249,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         {data.rituales_recomendados && (
           <div className="bg-violet-900/30 rounded-xl p-6">
             <h4 className="text-violet-200 font-semibold mb-3">
-              Rituales Recomendados
+              🕯️ Rituales Recomendados
             </h4>
             <ul className="space-y-2">
               {data.rituales_recomendados.map((ritual: string, index: number) => (
@@ -1255,6 +1259,77 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                 </li>
               ))}
             </ul>
+          </div>
+        )}
+
+        {/* ✅ NUEVA SECCIÓN: ÁNGULOS VITALES */}
+        {data.angulos_vitales && (
+          <div className="bg-gradient-to-br from-amber-900/40 to-yellow-900/40 rounded-2xl p-8 border border-amber-400/30">
+            <h4 className="text-amber-100 font-bold text-xl mb-6 flex items-center gap-3">
+              <Target className="w-8 h-8 text-amber-300" />
+              Ángulos Vitales (Ascendente y Medio Cielo)
+            </h4>
+            <div className="space-y-6">
+              {data.angulos_vitales.ascendente && (
+                <div className="bg-amber-800/30 rounded-lg p-6">
+                  <h5 className="text-amber-200 font-semibold text-lg mb-4">⬆️ Tu Ascendente</h5>
+                  <div className="space-y-3">
+                    {data.angulos_vitales.ascendente.posicion && (
+                      <p className="text-amber-200 text-sm font-semibold">📍 {data.angulos_vitales.ascendente.posicion}</p>
+                    )}
+                    {data.angulos_vitales.ascendente.mascara_social && (
+                      <div className="bg-amber-700/30 rounded-lg p-3">
+                        <p className="text-amber-200 font-semibold text-sm mb-1">🎭 Máscara Social:</p>
+                        <p className="text-amber-50 text-sm">{data.angulos_vitales.ascendente.mascara_social}</p>
+                      </div>
+                    )}
+                    {data.angulos_vitales.ascendente.superpoder && (
+                      <div className="bg-amber-700/30 rounded-lg p-3">
+                        <p className="text-amber-200 font-semibold text-sm mb-1">⚡ Superpoder:</p>
+                        <p className="text-amber-50 text-sm">{data.angulos_vitales.ascendente.superpoder}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+              {data.angulos_vitales.medio_cielo && (
+                <div className="bg-amber-800/30 rounded-lg p-6">
+                  <h5 className="text-amber-200 font-semibold text-lg mb-4">🏔️ Tu Medio Cielo</h5>
+                  <div className="space-y-3">
+                    {data.angulos_vitales.medio_cielo.posicion && (
+                      <p className="text-amber-200 text-sm font-semibold">📍 {data.angulos_vitales.medio_cielo.posicion}</p>
+                    )}
+                    {data.angulos_vitales.medio_cielo.vocacion_soul && (
+                      <div className="bg-amber-700/30 rounded-lg p-3">
+                        <p className="text-amber-200 font-semibold text-sm mb-1">✨ Vocación del Alma:</p>
+                        <p className="text-amber-50 text-sm">{data.angulos_vitales.medio_cielo.vocacion_soul}</p>
+                      </div>
+                    )}
+                    {data.angulos_vitales.medio_cielo.legado && (
+                      <div className="bg-amber-700/30 rounded-lg p-3">
+                        <p className="text-amber-200 font-semibold text-sm mb-1">🌟 Legado:</p>
+                        <p className="text-amber-50 text-sm">{data.angulos_vitales.medio_cielo.legado}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ✅ NUEVA SECCIÓN: PREGUNTA FINAL DE REFLEXIÓN */}
+        {data.pregunta_final_reflexion && (
+          <div className="bg-gradient-to-br from-pink-900/40 to-rose-900/40 rounded-2xl p-8 border border-pink-400/30">
+            <h4 className="text-pink-100 font-bold text-xl mb-4 flex items-center gap-3">
+              <Sparkles className="w-8 h-8 text-pink-300" />
+              Pregunta Final para tu Reflexión
+            </h4>
+            <div className="bg-pink-800/30 rounded-xl p-6 border border-pink-400/20">
+              <p className="text-pink-50 text-xl leading-relaxed font-medium italic text-center">
+                "{data.pregunta_final_reflexion}"
+              </p>
+            </div>
           </div>
         )}
 
