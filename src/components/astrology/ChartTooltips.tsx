@@ -91,6 +91,8 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
   const [tooltipTimer, setTooltipTimer] = useState<NodeJS.Timeout | null>(null);
   const [generatingAspect, setGeneratingAspect] = useState(false);
   const [aspectTooltipLocked, setAspectTooltipLocked] = useState(false);
+  // ✅ NEW: Modal de progreso para generación de aspecto
+  const [aspectGenerationProgress, setAspectGenerationProgress] = useState('');
 
   // ✅ NEW: Hover delay timers (matching ChartDisplay.tsx)
   const [planetTooltipTimer, setPlanetTooltipTimer] = useState<NodeJS.Timeout | null>(null);
@@ -274,11 +276,14 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
       clearTimeout(aspectTooltipTimer);
       setAspectTooltipTimer(null);
     }
-    // Hide tooltip after delay if not locked
-    if (!aspectTooltipLocked && !generatingAspect) {
+    // ✅ FIX: Don't hide tooltip if drawer is open
+    if (!aspectTooltipLocked && !generatingAspect && !drawerOpen) {
       const hideTimer = setTimeout(() => {
-        setHoveredAspect(null);
-        setClickedAspect?.(null);
+        // ✅ Double-check drawerOpen before hiding
+        if (!drawerOpen) {
+          setHoveredAspect(null);
+          setClickedAspect?.(null);
+        }
       }, 2000); // 2 seconds delay for aspects
       setTooltipTimer(hideTimer);
     }
@@ -296,10 +301,15 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
     setGeneratingAspect(true);
     setAspectTooltipLocked(true); // Lock tooltip while generating
+    setAspectGenerationProgress(`✨ Analizando ${aspectType} entre ${planet1} y ${planet2}...`);
 
     try {
       console.log(`🎯 Generating aspect: ${planet1} ${aspectType} ${planet2}`);
       console.log('🎯 userId:', userId);
+
+      // Simular progreso
+      setTimeout(() => setAspectGenerationProgress(`🔮 Consultando el cosmos sobre este ${aspectType}...`), 2000);
+      setTimeout(() => setAspectGenerationProgress(`🌟 Generando interpretación revolucionaria...`), 5000);
 
       const response = await fetch('/api/astrology/interpret-natal', {
         method: 'PUT',
@@ -368,6 +378,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
       alert('❌ Error generando interpretación');
     } finally {
       setGeneratingAspect(false);
+      setAspectGenerationProgress('');
     }
   };
 
@@ -525,15 +536,9 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
             }}
             className="w-full py-2.5 px-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group shadow-lg"
           >
-            <span>📖 Ver interpretación completa</span>
+            <span>📖 Ver interpretación de {planet.name}</span>
             <span className="group-hover:translate-x-1 transition-transform">→</span>
           </button>
-        )}
-
-        {!interpretation?.drawer && (
-          <div className="text-center text-xs text-gray-400 py-2">
-            💡 Haz hover más tiempo para ver la interpretación
-          </div>
         )}
 
         {!interpretation?.drawer && (
@@ -841,10 +846,12 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
         }}
         onMouseLeave={(e) => {
           console.log('🎯 MOUSE LEFT TOOLTIP - ASPECT');
+          console.log('🎯 drawerOpen:', drawerOpen, 'aspectTooltipLocked:', aspectTooltipLocked);
           // Don't close tooltip immediately if mouse is over a button
           const target = e.relatedTarget as HTMLElement;
           const isButton = target?.closest('button');
-          if (!isButton) {
+          // ✅ FIX: Don't close tooltip if drawer is open
+          if (!isButton && !drawerOpen) {
             if (!aspectTooltipLocked && !generatingAspect) {
               handleAspectMouseLeave();
             } else {
@@ -1016,7 +1023,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
             className="w-full py-2.5 px-4 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 group"
           >
             <span>📖</span>
-            <span>Ver interpretación completa</span>
+            <span>Ver {currentAspect.config.name} {currentAspect.planet1}-{currentAspect.planet2}</span>
             <span className="group-hover:translate-x-1 transition-transform">→</span>
           </button>
         )}
@@ -1357,6 +1364,42 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
         </div>
       );
     }
+  }
+
+  // ✅ MODAL DE PROGRESO PARA GENERACIÓN DE ASPECTO
+  if (generatingAspect) {
+    return (
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[200000] flex items-center justify-center p-4">
+        <div className="bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-purple-400/50">
+          <div className="text-center space-y-4">
+            {/* Icono animado */}
+            <div className="relative mx-auto w-16 h-16">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-spin" style={{ animationDuration: '2s' }}></div>
+              <div className="absolute inset-2 bg-purple-900 rounded-full flex items-center justify-center">
+                <span className="text-2xl animate-pulse">🔮</span>
+              </div>
+            </div>
+
+            {/* Título */}
+            <h3 className="text-xl font-bold text-white">
+              Generando Interpretación
+            </h3>
+
+            {/* Mensaje de progreso */}
+            <div className="bg-purple-800/50 rounded-lg p-3 border border-purple-400/30">
+              <p className="text-purple-100 text-sm font-medium animate-pulse">
+                {aspectGenerationProgress || '✨ Iniciando...'}
+              </p>
+            </div>
+
+            {/* Nota */}
+            <p className="text-purple-300 text-xs">
+              Esto puede tardar unos segundos...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return null;
