@@ -551,8 +551,10 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         generatedAt: saveData.generatedAt
       });
 
+      // ✅ FIX: Use PUT method to REPLACE existing interpretation (upsert)
+      // POST creates duplicates, PUT replaces the existing one
       const response = await fetch('/api/interpretations/save', {
-        method: 'POST',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
