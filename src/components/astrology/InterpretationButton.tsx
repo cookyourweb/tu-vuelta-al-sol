@@ -69,10 +69,10 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
 
   const modalContentRef = useRef<HTMLDivElement>(null);
 
-  // ✅ ADD WAIT TIME COUNTER EFFECT
+  // ✅ ADD WAIT TIME COUNTER EFFECT - Works for BOTH loading AND regenerating
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (regenerating && generationStartTime) {
+    if ((loading || regenerating) && generationStartTime) {
       interval = setInterval(() => {
         const elapsed = Math.floor((Date.now() - generationStartTime) / 1000);
         setWaitTime(elapsed);
@@ -81,7 +81,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [regenerating, generationStartTime]);
+  }, [loading, regenerating, generationStartTime]);
 
   const isNatal = type === 'natal';
   const isSolarReturn = type === 'solar-return';
@@ -122,6 +122,9 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
 
       const data = await response.json();
       console.log(`📦 Datos completos recibidos:`, data);
+      console.log(`📦 data.success:`, data.success);
+      console.log(`📦 data.interpretation exists:`, !!data.interpretation);
+      console.log(`📦 data.generatedAt:`, data.generatedAt);
 
       // ✅ HANDLE SINGLE INTERPRETATION RESPONSE (not array!)
       if (data.success && data.interpretation) {
@@ -182,6 +185,8 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
 
           setInterpretation(cachedInterpretation);
           console.log(`✅ Interpretación ${type} cargada desde caché exitosamente`);
+          console.log(`✅ hasRecentInterpretation set to: true`);
+          console.log(`✅ interpretation set to:`, cachedInterpretation ? 'object' : 'null');
         } else {
           console.log(`⚠️ ===== INTERPRETACIÓN EXPIRADA =====`);
           console.log(`⚠️ Interpretación ${type} expirada (${hoursDiff.toFixed(1)}h ago) - se generará nueva`);
@@ -197,10 +202,17 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       setHasRecentInterpretation(false);
     } finally {
       setCheckingCache(false);
+      console.log(`🏁 ===== CARGA FINALIZADA =====`);
+      console.log(`🏁 checkingCache: false`);
     }
   };
 
   const generateInterpretation = async (forceRegenerate = false) => {
+    console.log('🎯 ===== GENERATE INTERPRETATION CALLED =====');
+    console.log('🎯 forceRegenerate:', forceRegenerate);
+    console.log('🎯 hasRecentInterpretation:', hasRecentInterpretation);
+    console.log('🎯 interpretation:', interpretation ? 'exists' : 'null');
+
     // ✅ If has recent interpretation and NOT force regenerating, just show modal
     if (hasRecentInterpretation && interpretation && !forceRegenerate) {
       console.log('🔄 ===== USANDO INTERPRETACIÓN EXISTENTE =====');
@@ -217,16 +229,19 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       return;
     }
 
-    // ✅ Use regenerating state for force regenerate
+    // ✅ Initialize loading states for BOTH first generation AND force regenerate
     if (forceRegenerate) {
       setRegenerating(true);
       setGenerationProgress('Iniciando regeneración revolucionaria...');
-      setGenerationStartTime(Date.now());
-      setChunkProgress(0);
-      setCurrentChunk('');
     } else {
       setLoading(true);
+      setGenerationProgress('Iniciando interpretación revolucionaria...');
     }
+
+    // ✅ Always initialize timing and progress tracking
+    setGenerationStartTime(Date.now());
+    setChunkProgress(0);
+    setCurrentChunk('');
 
     setError(null);
 
@@ -1404,8 +1419,8 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         )}
       </div>
 
-      {/* ✅ REGENERATION LOADING MODAL */}
-      {regenerating && (
+      {/* ✅ LOADING MODAL - Shows for BOTH first generation AND regeneration */}
+      {(loading || regenerating) && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-center justify-center p-4">
           <div className="bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900 rounded-3xl max-w-md w-full p-8 shadow-2xl border-2 border-purple-400/50 animate-pulse-slow">
             <div className="text-center space-y-6">
@@ -1419,7 +1434,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
 
               {/* Title */}
               <h3 className="text-2xl font-bold text-white">
-                🔮 Regenerando tu Revolución Cósmica
+                🔮 {regenerating ? 'Regenerando tu Revolución Cósmica' : 'Generando tu Revolución Cósmica'}
               </h3>
 
               {/* Progress Message */}

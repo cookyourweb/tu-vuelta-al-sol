@@ -805,16 +805,16 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
     const tooltipStyle: React.CSSProperties = isMobile
       ? {
-          // En móvil: como un drawer fijo en la parte inferior, centrado
+          // En móvil: ARRIBA y centrado para que se vea el botón
           position: 'fixed',
           left: '16px',
           right: '16px',
-          bottom: '16px',
-          top: 'auto',
+          top: '80px',  // Arriba de la pantalla (debajo del header)
+          bottom: 'auto',
           transform: 'none',
           maxWidth: 'none',
           width: 'auto',
-          maxHeight: '70vh',
+          maxHeight: '60vh',
           overflowY: 'auto'
         }
       : {
