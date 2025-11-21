@@ -373,7 +373,8 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         let progressPercentage = 0;
         const progressInterval = setInterval(() => {
           if (progressPercentage < 95) {
-            progressPercentage += 1;
+            progressPercentage += 2; // Incremento más rápido para mejor UX
+            setChunkProgress(progressPercentage); // ✅ FIX: Actualizar la barra de progreso
 
             // Actualizar mensaje según progreso
             if (progressPercentage < 10) {
@@ -390,7 +391,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               setGenerationProgress('🔗 Procesando aspectos planetarios...');
             }
           }
-        }, 5000); // Cada 5 segundos
+        }, 1000); // ✅ FIX: Cada 1 segundo para actualización más fluida
 
         const response = await fetch(endpoint, {
           method: 'POST',

@@ -1125,15 +1125,16 @@ const ChartDisplay = ({
       }}
       onMouseMove={handleMouseMove}
       onMouseLeave={() => {
-        // ✅ DELAY: Clear timer on mouse leave
+        // ✅ DELAY: Clear existing timer on mouse leave
         if (cardHoverTimer) {
           clearTimeout(cardHoverTimer);
-          setCardHoverTimer(null);
         }
-        // ✅ FIX: Add 2 second delay before closing tooltip (matches ChartTooltips delay)
-        setTimeout(() => {
+        // ✅ FIX: Store close timer in cardHoverTimer so it can be cancelled
+        const closeTimer = setTimeout(() => {
           setHoveredCard((current) => current === 'distributions' ? null : current);
+          setCardHoverTimer(null);
         }, 2000);
+        setCardHoverTimer(closeTimer);
       }}
       onClick={(e) => {
         // ✅ IMMEDIATE: Clear timer and show immediately on click
@@ -1882,6 +1883,7 @@ const ChartDisplay = ({
         hoveredAspect={hoveredAspect}
         hoveredHouse={hoveredHouse}
         hoveredCard={hoveredCard}
+        setHoveredCard={setHoveredCard}
         ascendant={ascendant ?? undefined}
         midheaven={midheaven ?? undefined}
         planets={normalizedPlanets}
@@ -1906,6 +1908,9 @@ const ChartDisplay = ({
         solarReturnYear={solarReturnYear}
         solarReturnTheme={solarReturnTheme}
         ascSRInNatalHouse={ascSRInNatalHouse}
+        // ✅ FIX: Pass card timer props for tooltip to cancel close timer
+        cardHoverTimer={cardHoverTimer}
+        setCardHoverTimer={setCardHoverTimer}
       />
 
 

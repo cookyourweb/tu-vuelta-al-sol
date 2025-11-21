@@ -44,6 +44,9 @@ interface ChartTooltipsProps {
   solarReturnYear?: number;
   solarReturnTheme?: string;
   ascSRInNatalHouse?: number;
+  // ✅ FIX: Card timer props to cancel close timer when entering tooltip
+  cardHoverTimer?: NodeJS.Timeout | null;
+  setCardHoverTimer?: (timer: NodeJS.Timeout | null) => void;
 }
 
 const ChartTooltips: React.FC<ChartTooltipsProps> = ({
@@ -74,7 +77,9 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
   modalityDistribution,
   solarReturnYear,
   solarReturnTheme,
-  ascSRInNatalHouse
+  ascSRInNatalHouse,
+  cardHoverTimer,
+  setCardHoverTimer
 }) => {
 
   // =============================================================================
@@ -922,8 +927,18 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
         {/* Generate AI interpretation button */}
         {!hasAIInterpretation && userId && (
           <button
-            onClick={async (e) => {
+            onMouseDown={async (e) => {
+              console.log('═══════════════════════════════════');
+              console.log('🎯 GENERAR INTERPRETACIÓN ASPECTO - MOUSEDOWN');
+              console.log('1. userId:', userId);
+              console.log('2. planet1:', currentAspect.planet1);
+              console.log('3. planet2:', currentAspect.planet2);
+              console.log('4. aspectType (config.name):', currentAspect.config.name);
+              console.log('5. orb:', currentAspect.orb);
+              console.log('═══════════════════════════════════');
+
               e.stopPropagation();
+              e.preventDefault();
               setAspectTooltipLocked(true);
               // ✅ FIX: Usar config.name (español) para que coincida con MongoDB
               await generateAspectInterpretation(
@@ -934,6 +949,11 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
               );
             }}
             disabled={generatingAspect}
+            style={{
+              pointerEvents: 'auto',
+              zIndex: 9999999,
+              cursor: 'pointer'
+            }}
             className="w-full py-2.5 px-4 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white rounded-lg text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {generatingAspect ? (
@@ -1224,7 +1244,14 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
             top: tooltipPosition.y - 50,
             transform: tooltipPosition.x > window.innerWidth - 450 ? 'translateX(-100%)' : 'none'
           }}
-          onMouseEnter={handleTooltipMouseEnter}
+          onMouseEnter={() => {
+            handleTooltipMouseEnter();
+            // ✅ FIX: Cancel card close timer when mouse enters tooltip
+            if (cardHoverTimer && setCardHoverTimer) {
+              clearTimeout(cardHoverTimer);
+              setCardHoverTimer(null);
+            }
+          }}
           onMouseLeave={() => handleMouseLeaveTooltip(() => setHoveredCard?.(null), 2000)} // ✅ FIX: 2 seconds delay for distributions
         >
           <div className="flex items-center mb-3">
