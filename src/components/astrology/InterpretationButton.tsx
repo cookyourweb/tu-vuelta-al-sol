@@ -645,11 +645,22 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
   };
 
   const renderInterpretationContent = () => {
+    console.log('🎨 ===== RENDER INTERPRETATION CONTENT =====');
+    console.log('🎨 interpretation:', interpretation);
+    console.log('🎨 interpretation?.interpretation:', interpretation?.interpretation);
+
     if (!interpretation?.interpretation) {
+      console.log('🎨 ❌ No hay interpretation.interpretation - return null');
       return null;
     }
 
     const data = interpretation.interpretation;
+
+    console.log('🎨 data keys:', Object.keys(data));
+    console.log('🎨 data.esencia_revolucionaria:', data.esencia_revolucionaria ? 'EXISTS' : 'NOT FOUND');
+    console.log('🎨 data.proposito_vida:', data.proposito_vida ? 'EXISTS' : 'NOT FOUND');
+    console.log('🎨 data.planets:', data.planets ? 'EXISTS' : 'NOT FOUND');
+    console.log('🎨 Full data:', data);
 
     return (
       <div className="space-y-8">
