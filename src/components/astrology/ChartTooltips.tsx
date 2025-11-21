@@ -335,8 +335,10 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           console.log('✅ Available aspects:', refreshResult.data?.aspects ? Object.keys(refreshResult.data.aspects) : 'none');
 
           // Open drawer immediately after generation
+          // ✅ FIX: aspectType ya viene en español desde la llamada
           const aspectKeyFull = `${planet1}-${planet2}-${aspectType}`;
           console.log('🔍 Looking for aspect key:', aspectKeyFull);
+          console.log('🔍 Available aspects after refresh:', refreshResult.data?.aspects ? Object.keys(refreshResult.data.aspects) : 'none');
 
           const aspectInterpretation = refreshResult.data?.aspects?.[aspectKeyFull];
           console.log('🔍 Found aspect interpretation:', !!aspectInterpretation);
@@ -779,17 +781,38 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
     const planet1Desc = planetMeanings[currentAspect.planet1 as keyof typeof planetMeanings]?.keywords.split(',')[0]?.trim() || 'planeta';
     const planet2Desc = planetMeanings[currentAspect.planet2 as keyof typeof planetMeanings]?.keywords.split(',')[0]?.trim() || 'planeta';
 
-    const aspectKeyFull = `${currentAspect.planet1}-${currentAspect.planet2}-${currentAspect.type}`;
+    // ✅ FIX: Usar config.name (español: "Trígono") en lugar de type (inglés: "trine")
+    // El servidor guarda aspectos con nombres en español
+    const aspectKeyFull = `${currentAspect.planet1}-${currentAspect.planet2}-${currentAspect.config.name}`;
     const hasAIInterpretation = natalInterpretations?.aspects && natalInterpretations.aspects[aspectKeyFull] ? true : false;
+
+    console.log('🔍 Aspect key for lookup:', aspectKeyFull);
+    console.log('🔍 Has AI interpretation:', hasAIInterpretation);
+    console.log('🔍 Available aspects:', natalInterpretations?.aspects ? Object.keys(natalInterpretations.aspects) : 'none');
+
+    // ✅ FIX: Calcular posición adaptativa para móvil
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const tooltipStyle = isMobile
+      ? {
+          // En móvil: centrar horizontalmente, posicionar en la parte inferior
+          left: '50%',
+          top: 'auto',
+          bottom: '20px',
+          transform: 'translateX(-50%)',
+          maxWidth: 'calc(100vw - 32px)',
+          width: '100%'
+        }
+      : {
+          // En desktop: comportamiento original
+          left: tooltipPosition.x,
+          top: tooltipPosition.y,
+          transform: tooltipPosition.x > window.innerWidth - 350 ? 'translateX(-100%)' : 'none'
+        };
 
     return (
       <div
         className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-lg pointer-events-auto z-[150000]"
-        style={{
-          left: tooltipPosition.x,
-          top: tooltipPosition.y,
-          transform: tooltipPosition.x > window.innerWidth - 350 ? 'translateX(-100%)' : 'none'
-        }}
+        style={tooltipStyle}
         onMouseEnter={(e) => {
           console.log('🎯 MOUSE ENTERED TOOLTIP - ASPECT');
           e.stopPropagation();
@@ -887,10 +910,11 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
             onClick={async (e) => {
               e.stopPropagation();
               setAspectTooltipLocked(true);
+              // ✅ FIX: Usar config.name (español) para que coincida con MongoDB
               await generateAspectInterpretation(
                 currentAspect.planet1,
                 currentAspect.planet2,
-                currentAspect.type,
+                currentAspect.config.name,  // "Trígono" en lugar de "trine"
                 currentAspect.orb
               );
             }}
