@@ -792,15 +792,19 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
     // ✅ FIX: Calcular posición adaptativa para móvil
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-    const tooltipStyle = isMobile
+    const tooltipStyle: React.CSSProperties = isMobile
       ? {
-          // En móvil: centrar horizontalmente, posicionar en la parte inferior
-          left: '50%',
+          // En móvil: como un drawer fijo en la parte inferior, centrado
+          position: 'fixed',
+          left: '16px',
+          right: '16px',
+          bottom: '16px',
           top: 'auto',
-          bottom: '20px',
-          transform: 'translateX(-50%)',
-          maxWidth: 'calc(100vw - 32px)',
-          width: '100%'
+          transform: 'none',
+          maxWidth: 'none',
+          width: 'auto',
+          maxHeight: '70vh',
+          overflowY: 'auto'
         }
       : {
           // En desktop: comportamiento original
