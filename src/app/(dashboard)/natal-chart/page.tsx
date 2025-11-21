@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import ChartDisplay from '@/components/astrology/ChartDisplay';
@@ -60,6 +60,9 @@ export default function NatalChartPage() {
   const [hasInterpretations, setHasInterpretations] = useState(false);
   const [generatingInterpretations, setGeneratingInterpretations] = useState(false);
   const [interpretationProgress, setInterpretationProgress] = useState('');
+
+  // ✅ FIX: useRef para evitar doble generación de interpretaciones
+  const interpretationCheckDone = useRef(false);
 
   // ✅ FUNCIÓN: Procesar datos de carta
   const processChartData = (rawData: any): NatalChartData => {
@@ -394,17 +397,23 @@ export default function NatalChartPage() {
   // ✅ NEW: Auto-generate interpretations when chart + birth data are ready
   useEffect(() => {
     let isMounted = true;
-    let alreadyChecked = false;
 
     async function autoGenerateIfNeeded() {
-      if (!chartData || !birthData || !user?.uid || alreadyChecked) {
+      // ✅ FIX: Usar useRef para evitar múltiples llamadas
+      if (interpretationCheckDone.current) {
+        console.log('⏸️ Interpretation check already done, skipping...');
+        return;
+      }
+
+      if (!chartData || !birthData || !user?.uid) {
         if (!chartData) console.log('⏸️ Waiting for chartData...');
         if (!birthData) console.log('⏸️ Waiting for birthData...');
         if (!user?.uid) console.log('⏸️ Waiting for user...');
         return;
       }
 
-      alreadyChecked = true;
+      // ✅ FIX: Marcar como hecho ANTES de cualquier operación async
+      interpretationCheckDone.current = true;
 
       console.log('🔍 Chart and birth data ready, checking interpretations...');
       console.log('🔍 chartData planets:', chartData.planets?.length);
