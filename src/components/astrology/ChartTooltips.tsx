@@ -770,13 +770,24 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
   // ⚡ TOOLTIP FOR ASPECT (WITH LONGER DELAY - 2 SECONDS!)
   // =============================================================================
 
+  // 🔍 DEBUG: Verificar estado de aspectos
+  console.log('🔍 [ASPECT DEBUG] hoveredAspect:', hoveredAspect);
+  console.log('🔍 [ASPECT DEBUG] clickedAspect:', clickedAspect);
+  console.log('🔍 [ASPECT DEBUG] calculatedAspects.length:', calculatedAspects?.length || 0);
+
   if ((hoveredAspect || clickedAspect) && calculatedAspects.length > 0) {
     const aspectKey = clickedAspect || hoveredAspect;
+    console.log('🔍 [ASPECT DEBUG] aspectKey:', aspectKey);
+
     const currentAspect = calculatedAspects.find(aspect =>
       `${aspect.planet1}-${aspect.planet2}-${aspect.type}` === aspectKey
     );
 
-    if (!currentAspect) return null;
+    console.log('🔍 [ASPECT DEBUG] currentAspect found:', !!currentAspect);
+    if (!currentAspect) {
+      console.log('🔍 [ASPECT DEBUG] Available aspect keys:', calculatedAspects.map(a => `${a.planet1}-${a.planet2}-${a.type}`));
+      return null;
+    }
 
     const planet1Desc = planetMeanings[currentAspect.planet1 as keyof typeof planetMeanings]?.keywords.split(',')[0]?.trim() || 'planeta';
     const planet2Desc = planetMeanings[currentAspect.planet2 as keyof typeof planetMeanings]?.keywords.split(',')[0]?.trim() || 'planeta';
