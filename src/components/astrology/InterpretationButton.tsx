@@ -178,6 +178,39 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               setSavedInterpretations([]);
               return; // Don't load broken cache
             }
+          } else if (type === 'natal') {
+            // ✅ VALIDATE NATAL: Check for DISRUPTIVE PROMPT sections
+            console.log(`✅ Esencia revolucionaria:`,
+              data.interpretation.esencia_revolucionaria?.substring(0, 100) || 'NOT FOUND');
+            console.log(`✅ Propósito de vida:`,
+              data.interpretation.proposito_vida?.substring(0, 100) || 'NOT FOUND');
+            console.log(`✅ Advertencias:`,
+              data.interpretation.advertencias ? `SÍ (${data.interpretation.advertencias.length} items)` : 'NO');
+            console.log(`✅ Insights transformacionales:`,
+              data.interpretation.insights_transformacionales ? `SÍ (${data.interpretation.insights_transformacionales.length} items)` : 'NO');
+            console.log(`✅ Rituales recomendados:`,
+              data.interpretation.rituales_recomendados ? `SÍ (${data.interpretation.rituales_recomendados.length} items)` : 'NO');
+
+            // ✅ CRITICAL: Check if this is an OLD interpretation without disruptive sections
+            // NOTE: The disruptive prompt generates: advertencias, insights_transformacionales
+            // rituales_recomendados is optional (only in fallback, not in AI prompt)
+            const hasDisruptiveSections =
+              data.interpretation.advertencias &&
+              data.interpretation.advertencias.length > 0 &&
+              data.interpretation.insights_transformacionales &&
+              data.interpretation.insights_transformacionales.length > 0;
+
+            if (!hasDisruptiveSections) {
+              console.warn('⚠️ ===== INTERPRETACIÓN ANTIGUA DETECTADA =====');
+              console.warn('⚠️ La interpretación no tiene secciones del prompt disruptivo');
+              console.warn('⚠️ Falta: advertencias, insights_transformacionales, rituales_recomendados');
+              console.warn('⚠️ Se forzará regeneración para obtener versión disruptiva completa');
+              setHasRecentInterpretation(false);
+              setSavedInterpretations([]);
+              return; // Don't load old/broken cache - will force regeneration
+            }
+
+            console.log('✅ Interpretación natal tiene todas las secciones disruptivas');
           } else {
             console.log(`✅ Esencia revolucionaria:`,
               data.interpretation.esencia_revolucionaria?.substring(0, 100) || 'NOT FOUND');

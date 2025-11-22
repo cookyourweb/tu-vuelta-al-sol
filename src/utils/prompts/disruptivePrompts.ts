@@ -394,7 +394,7 @@ Debes responder SOLO con JSON válido en este formato exacto:
     "String: Advertencia honesta 2",
     "String: Advertencia honesta 3"
   ],
-  
+
   "insights_transformacionales": [
     "String: Insight profundo 1",
     "String: Insight profundo 2",
@@ -402,7 +402,14 @@ Debes responder SOLO con JSON válido en este formato exacto:
     "String: Insight profundo 4",
     "String: Insight profundo 5"
   ],
-  
+
+  "rituales_recomendados": [
+    "String: Ritual 1 - práctico y específico para activar su energía planetaria",
+    "String: Ritual 2 - relacionado con su Luna para sanar patrones emocionales",
+    "String: Ritual 3 - para integrar luz y sombra de sus aspectos principales",
+    "String: Ritual 4 - para conectar con su Nodo Norte y evolución"
+  ],
+
   "pregunta_final_reflexion": "String: Pregunta profunda para que ${userName} reflexione sobre su carta completa"
 }
 
