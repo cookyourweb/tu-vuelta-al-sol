@@ -448,20 +448,26 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               esencia_revolucionaria: rawInterpretation.esencia_revolucionaria,
               proposito_vida: rawInterpretation.proposito_vida,
               declaracion_poder: rawInterpretation.declaracion_poder,
+              declaracion_poder_final: rawInterpretation.declaracion_poder_final,
+              mantra_personal: rawInterpretation.mantra_personal,
 
               // New complete sections
               puntos_fundamentales: rawInterpretation.puntos_fundamentales,
               sintesis_elemental: rawInterpretation.sintesis_elemental,
               modalidades: rawInterpretation.modalidades,
-              interpretaciones: rawInterpretation.interpretaciones,
+              interpretaciones_planetarias: rawInterpretation.interpretaciones_planetarias, // NEW structure
+              aspectos_destacados: rawInterpretation.aspectos_destacados, // NEW
+              integracion_carta: rawInterpretation.integracion_carta, // NEW
               fortalezas_educativas: rawInterpretation.fortalezas_educativas,
               areas_especializacion: rawInterpretation.areas_especializacion,
               patrones_sanacion: rawInterpretation.patrones_sanacion,
               manifestacion_amor: rawInterpretation.manifestacion_amor,
               visualizacion: rawInterpretation.visualizacion,
+              visualizacion_guiada: rawInterpretation.visualizacion_guiada, // Alternative field name
               datos_para_agenda: rawInterpretation.datos_para_agenda,
 
               // Backwards compatibility with old structure
+              interpretaciones: rawInterpretation.interpretaciones, // OLD structure (for backwards compat)
               formacion_temprana: rawInterpretation.formacion_temprana,
               patrones_psicologicos: rawInterpretation.patrones_psicologicos,
               planetas_profundos: rawInterpretation.planetas_profundos,
@@ -471,7 +477,6 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               advertencias: rawInterpretation.advertencias,
               insights_transformacionales: rawInterpretation.insights_transformacionales,
               rituales_recomendados: rawInterpretation.rituales_recomendados,
-              integracion_carta: rawInterpretation.integracion_carta
             };
           } else if (type === 'solar-return') {
             interpretationData = {
@@ -835,10 +840,378 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         )}
 
         {/* ✅ NUEVA SECCIÓN: INTERPRETACIONES PLANETARIAS COMPLETAS */}
-        {data.interpretaciones && (
+        {data.interpretaciones_planetarias && (
           <div className="space-y-6">
             <h3 className="text-3xl font-bold text-white text-center mb-8">
               🪐 Interpretaciones Planetarias Completas
+            </h3>
+
+            {/* SOL */}
+            {data.interpretaciones_planetarias.sol && (
+              <div className="bg-gradient-to-br from-yellow-900/30 to-orange-900/30 rounded-xl p-6 border border-yellow-400/20">
+                <div className="mb-4">
+                  <h4 className="text-yellow-100 font-bold text-2xl mb-2">☀️ Sol</h4>
+                  <p className="text-yellow-300 text-sm mb-3">{data.interpretaciones_planetarias.sol.posicion}</p>
+                  {data.interpretaciones_planetarias.sol.titulo_arquetipo && (
+                    <p className="text-yellow-50 text-xl font-bold italic">✨ {data.interpretaciones_planetarias.sol.titulo_arquetipo}</p>
+                  )}
+                </div>
+                {data.interpretaciones_planetarias.sol.proposito_vida && (
+                  <div className="bg-yellow-800/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-yellow-200 font-semibold mb-2">🎯 Propósito de Vida</h5>
+                    <p className="text-yellow-50 leading-relaxed whitespace-pre-line">{data.interpretaciones_planetarias.sol.proposito_vida}</p>
+                  </div>
+                )}
+                {data.interpretaciones_planetarias.sol.trampa && (
+                  <div className="bg-red-900/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-red-200 font-semibold mb-2">⚠️ Trampa</h5>
+                    <p className="text-red-50">{data.interpretaciones_planetarias.sol.trampa}</p>
+                  </div>
+                )}
+                {data.interpretaciones_planetarias.sol.superpoder && (
+                  <div className="bg-green-900/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-green-200 font-semibold mb-2">⚡ Superpoder</h5>
+                    <p className="text-green-50">{data.interpretaciones_planetarias.sol.superpoder}</p>
+                  </div>
+                )}
+                {data.interpretaciones_planetarias.sol.afirmacion && (
+                  <div className="bg-gradient-to-r from-yellow-800/40 to-orange-800/40 rounded-lg p-4 border border-yellow-400/30">
+                    <p className="text-yellow-50 text-lg font-bold italic text-center">"{data.interpretaciones_planetarias.sol.afirmacion}"</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* LUNA */}
+            {data.interpretaciones_planetarias.luna && (
+              <div className="bg-gradient-to-br from-blue-900/30 to-purple-900/30 rounded-xl p-6 border border-blue-400/20">
+                <div className="mb-4">
+                  <h4 className="text-blue-100 font-bold text-2xl mb-2">🌙 Luna</h4>
+                  <p className="text-blue-300 text-sm mb-3">{data.interpretaciones_planetarias.luna.posicion}</p>
+                  {data.interpretaciones_planetarias.luna.titulo_arquetipo && (
+                    <p className="text-blue-50 text-xl font-bold italic">✨ {data.interpretaciones_planetarias.luna.titulo_arquetipo}</p>
+                  )}
+                </div>
+                {data.interpretaciones_planetarias.luna.mundo_emocional && (
+                  <div className="bg-blue-800/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-blue-200 font-semibold mb-2">💙 Mundo Emocional</h5>
+                    <p className="text-blue-50 leading-relaxed whitespace-pre-line">{data.interpretaciones_planetarias.luna.mundo_emocional}</p>
+                  </div>
+                )}
+                {data.interpretaciones_planetarias.luna.como_se_nutre && (
+                  <div className="bg-blue-800/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-blue-200 font-semibold mb-2">🍃 Cómo Se Nutre</h5>
+                    <p className="text-blue-50 leading-relaxed">{data.interpretaciones_planetarias.luna.como_se_nutre}</p>
+                  </div>
+                )}
+                {data.interpretaciones_planetarias.luna.patron_infancia && (
+                  <div className="bg-purple-900/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-purple-200 font-semibold mb-2">🧒 Patrón de Infancia</h5>
+                    <p className="text-purple-50">{data.interpretaciones_planetarias.luna.patron_infancia}</p>
+                  </div>
+                )}
+                {data.interpretaciones_planetarias.luna.sanacion_emocional && (
+                  <div className="bg-green-900/30 rounded-lg p-4">
+                    <h5 className="text-green-200 font-semibold mb-2">💚 Sanación Emocional</h5>
+                    <p className="text-green-50">{data.interpretaciones_planetarias.luna.sanacion_emocional}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ASCENDENTE */}
+            {data.interpretaciones_planetarias.ascendente && (
+              <div className="bg-gradient-to-br from-pink-900/30 to-rose-900/30 rounded-xl p-6 border border-pink-400/20">
+                <div className="mb-4">
+                  <h4 className="text-pink-100 font-bold text-2xl mb-2">⬆️ Ascendente</h4>
+                  <p className="text-pink-300 text-sm mb-3">{data.interpretaciones_planetarias.ascendente.posicion}</p>
+                  {data.interpretaciones_planetarias.ascendente.titulo_arquetipo && (
+                    <p className="text-pink-50 text-xl font-bold italic">✨ {data.interpretaciones_planetarias.ascendente.titulo_arquetipo}</p>
+                  )}
+                </div>
+                {data.interpretaciones_planetarias.ascendente.personalidad_visible && (
+                  <div className="bg-pink-800/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-pink-200 font-semibold mb-2">👤 Personalidad Visible</h5>
+                    <p className="text-pink-50 leading-relaxed whitespace-pre-line">{data.interpretaciones_planetarias.ascendente.personalidad_visible}</p>
+                  </div>
+                )}
+                {data.interpretaciones_planetarias.ascendente.presencia && (
+                  <div className="bg-pink-800/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-pink-200 font-semibold mb-2">✨ Presencia</h5>
+                    <p className="text-pink-50">{data.interpretaciones_planetarias.ascendente.presencia}</p>
+                  </div>
+                )}
+                {data.interpretaciones_planetarias.ascendente.mascara_vs_esencia && (
+                  <div className="bg-rose-900/30 rounded-lg p-4">
+                    <h5 className="text-rose-200 font-semibold mb-2">🎭 Máscara vs Esencia</h5>
+                    <p className="text-rose-50">{data.interpretaciones_planetarias.ascendente.mascara_vs_esencia}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* MERCURIO */}
+            {data.interpretaciones_planetarias.mercurio && (
+              <div className="bg-gradient-to-br from-cyan-900/30 to-teal-900/30 rounded-xl p-6 border border-cyan-400/20">
+                <div className="mb-4">
+                  <h4 className="text-cyan-100 font-bold text-2xl mb-2">💬 Mercurio</h4>
+                  <p className="text-cyan-300 text-sm mb-3">{data.interpretaciones_planetarias.mercurio.posicion}</p>
+                  {data.interpretaciones_planetarias.mercurio.titulo_arquetipo && (
+                    <p className="text-cyan-50 text-xl font-bold italic">✨ {data.interpretaciones_planetarias.mercurio.titulo_arquetipo}</p>
+                  )}
+                </div>
+                {data.interpretaciones_planetarias.mercurio.como_piensa && (
+                  <div className="bg-cyan-800/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-cyan-200 font-semibold mb-2">🧠 Cómo Piensa</h5>
+                    <p className="text-cyan-50 leading-relaxed whitespace-pre-line">{data.interpretaciones_planetarias.mercurio.como_piensa}</p>
+                  </div>
+                )}
+                {data.interpretaciones_planetarias.mercurio.fortalezas_mentales && (
+                  <div className="bg-cyan-800/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-cyan-200 font-semibold mb-2">⚡ Fortalezas Mentales</h5>
+                    <p className="text-cyan-50">{data.interpretaciones_planetarias.mercurio.fortalezas_mentales}</p>
+                  </div>
+                )}
+                {data.interpretaciones_planetarias.mercurio.desafio && (
+                  <div className="bg-orange-900/30 rounded-lg p-4">
+                    <h5 className="text-orange-200 font-semibold mb-2">🎯 Desafío</h5>
+                    <p className="text-orange-50">{data.interpretaciones_planetarias.mercurio.desafio}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* VENUS */}
+            {data.interpretaciones_planetarias.venus && (
+              <div className="bg-gradient-to-br from-rose-900/30 to-pink-900/30 rounded-xl p-6 border border-rose-400/20">
+                <div className="mb-4">
+                  <h4 className="text-rose-100 font-bold text-2xl mb-2">💕 Venus</h4>
+                  <p className="text-rose-300 text-sm mb-3">{data.interpretaciones_planetarias.venus.posicion}</p>
+                  {data.interpretaciones_planetarias.venus.titulo_arquetipo && (
+                    <p className="text-rose-50 text-xl font-bold italic">✨ {data.interpretaciones_planetarias.venus.titulo_arquetipo}</p>
+                  )}
+                </div>
+                {data.interpretaciones_planetarias.venus.como_ama && (
+                  <div className="bg-rose-800/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-rose-200 font-semibold mb-2">❤️ Cómo Ama</h5>
+                    <p className="text-rose-50 leading-relaxed whitespace-pre-line">{data.interpretaciones_planetarias.venus.como_ama}</p>
+                  </div>
+                )}
+                {data.interpretaciones_planetarias.venus.que_necesita_en_pareja && (
+                  <div className="bg-rose-800/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-rose-200 font-semibold mb-2">💝 Qué Necesita en Pareja</h5>
+                    <p className="text-rose-50">{data.interpretaciones_planetarias.venus.que_necesita_en_pareja}</p>
+                  </div>
+                )}
+                {data.interpretaciones_planetarias.venus.trampa_amorosa && (
+                  <div className="bg-red-900/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-red-200 font-semibold mb-2">⚠️ Trampa Amorosa</h5>
+                    <p className="text-red-50">{data.interpretaciones_planetarias.venus.trampa_amorosa}</p>
+                  </div>
+                )}
+                {data.interpretaciones_planetarias.venus.valores && (
+                  <div className="bg-pink-800/30 rounded-lg p-4">
+                    <h5 className="text-pink-200 font-semibold mb-2">💎 Valores</h5>
+                    <p className="text-pink-50">{data.interpretaciones_planetarias.venus.valores}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* MARTE */}
+            {data.interpretaciones_planetarias.marte && (
+              <div className="bg-gradient-to-br from-red-900/30 to-orange-900/30 rounded-xl p-6 border border-red-400/20">
+                <div className="mb-4">
+                  <h4 className="text-red-100 font-bold text-2xl mb-2">⚔️ Marte</h4>
+                  <p className="text-red-300 text-sm mb-3">{data.interpretaciones_planetarias.marte.posicion}</p>
+                  {data.interpretaciones_planetarias.marte.titulo_arquetipo && (
+                    <p className="text-red-50 text-xl font-bold italic">✨ {data.interpretaciones_planetarias.marte.titulo_arquetipo}</p>
+                  )}
+                </div>
+                {data.interpretaciones_planetarias.marte.como_actua && (
+                  <div className="bg-red-800/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-red-200 font-semibold mb-2">🎯 Cómo Actúa</h5>
+                    <p className="text-red-50 leading-relaxed whitespace-pre-line">{data.interpretaciones_planetarias.marte.como_actua}</p>
+                  </div>
+                )}
+                {data.interpretaciones_planetarias.marte.energia_vital && (
+                  <div className="bg-red-800/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-red-200 font-semibold mb-2">⚡ Energía Vital</h5>
+                    <p className="text-red-50">{data.interpretaciones_planetarias.marte.energia_vital}</p>
+                  </div>
+                )}
+                {data.interpretaciones_planetarias.marte.ira && (
+                  <div className="bg-orange-900/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-orange-200 font-semibold mb-2">🔥 Ira</h5>
+                    <p className="text-orange-50">{data.interpretaciones_planetarias.marte.ira}</p>
+                  </div>
+                )}
+                {data.interpretaciones_planetarias.marte.desafio && (
+                  <div className="bg-yellow-900/30 rounded-lg p-4">
+                    <h5 className="text-yellow-200 font-semibold mb-2">🎯 Desafío</h5>
+                    <p className="text-yellow-50">{data.interpretaciones_planetarias.marte.desafio}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* JÚPITER */}
+            {data.interpretaciones_planetarias.jupiter && (
+              <div className="bg-gradient-to-br from-purple-900/30 to-indigo-900/30 rounded-xl p-6 border border-purple-400/20">
+                <div className="mb-4">
+                  <h4 className="text-purple-100 font-bold text-2xl mb-2">🍀 Júpiter</h4>
+                  <p className="text-purple-300 text-sm mb-3">{data.interpretaciones_planetarias.jupiter.posicion}</p>
+                  {data.interpretaciones_planetarias.jupiter.titulo_arquetipo && (
+                    <p className="text-purple-50 text-xl font-bold italic">✨ {data.interpretaciones_planetarias.jupiter.titulo_arquetipo}</p>
+                  )}
+                </div>
+                {data.interpretaciones_planetarias.jupiter.donde_viene_suerte && (
+                  <div className="bg-purple-800/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-purple-200 font-semibold mb-2">🎲 De Dónde Viene Tu Suerte</h5>
+                    <p className="text-purple-50">{data.interpretaciones_planetarias.jupiter.donde_viene_suerte}</p>
+                  </div>
+                )}
+                {data.interpretaciones_planetarias.jupiter.expansion && (
+                  <div className="bg-purple-800/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-purple-200 font-semibold mb-2">🚀 Expansión</h5>
+                    <p className="text-purple-50">{data.interpretaciones_planetarias.jupiter.expansion}</p>
+                  </div>
+                )}
+                {data.interpretaciones_planetarias.jupiter.consejo && (
+                  <div className="bg-indigo-900/30 rounded-lg p-4">
+                    <h5 className="text-indigo-200 font-semibold mb-2">💡 Consejo</h5>
+                    <p className="text-indigo-50">{data.interpretaciones_planetarias.jupiter.consejo}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SATURNO */}
+            {data.interpretaciones_planetarias.saturno && (
+              <div className="bg-gradient-to-br from-gray-900/30 to-slate-900/30 rounded-xl p-6 border border-gray-400/20">
+                <div className="mb-4">
+                  <h4 className="text-gray-100 font-bold text-2xl mb-2">🪐 Saturno</h4>
+                  <p className="text-gray-300 text-sm mb-3">{data.interpretaciones_planetarias.saturno.posicion}</p>
+                  {data.interpretaciones_planetarias.saturno.titulo_arquetipo && (
+                    <p className="text-gray-50 text-xl font-bold italic">✨ {data.interpretaciones_planetarias.saturno.titulo_arquetipo}</p>
+                  )}
+                </div>
+                {data.interpretaciones_planetarias.saturno.karma_lecciones && (
+                  <div className="bg-gray-800/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-gray-200 font-semibold mb-2">🔄 Karma y Lecciones</h5>
+                    <p className="text-gray-50 leading-relaxed whitespace-pre-line">{data.interpretaciones_planetarias.saturno.karma_lecciones}</p>
+                  </div>
+                )}
+                {data.interpretaciones_planetarias.saturno.responsabilidad && (
+                  <div className="bg-gray-800/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-gray-200 font-semibold mb-2">⚖️ Responsabilidad</h5>
+                    <p className="text-gray-50">{data.interpretaciones_planetarias.saturno.responsabilidad}</p>
+                  </div>
+                )}
+                {data.interpretaciones_planetarias.saturno.recompensa && (
+                  <div className="bg-green-900/30 rounded-lg p-4">
+                    <h5 className="text-green-200 font-semibold mb-2">🏆 Recompensa (después de los 29-30)</h5>
+                    <p className="text-green-50">{data.interpretaciones_planetarias.saturno.recompensa}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* URANO */}
+            {data.interpretaciones_planetarias.urano && (
+              <div className="bg-gradient-to-br from-cyan-900/30 to-blue-900/30 rounded-xl p-6 border border-cyan-400/20">
+                <div className="mb-4">
+                  <h4 className="text-cyan-100 font-bold text-2xl mb-2">⚡ Urano</h4>
+                  <p className="text-cyan-300 text-sm mb-3">{data.interpretaciones_planetarias.urano.posicion}</p>
+                </div>
+                {data.interpretaciones_planetarias.urano.donde_revoluciona && (
+                  <div className="bg-cyan-800/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-cyan-200 font-semibold mb-2">🔥 Dónde Revolucionas</h5>
+                    <p className="text-cyan-50">{data.interpretaciones_planetarias.urano.donde_revoluciona}</p>
+                  </div>
+                )}
+                {data.interpretaciones_planetarias.urano.genialidad && (
+                  <div className="bg-cyan-800/30 rounded-lg p-4">
+                    <h5 className="text-cyan-200 font-semibold mb-2">💡 Genialidad</h5>
+                    <p className="text-cyan-50">{data.interpretaciones_planetarias.urano.genialidad}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* NEPTUNO */}
+            {data.interpretaciones_planetarias.neptuno && (
+              <div className="bg-gradient-to-br from-indigo-900/30 to-purple-900/30 rounded-xl p-6 border border-indigo-400/20">
+                <div className="mb-4">
+                  <h4 className="text-indigo-100 font-bold text-2xl mb-2">🌊 Neptuno</h4>
+                  <p className="text-indigo-300 text-sm mb-3">{data.interpretaciones_planetarias.neptuno.posicion}</p>
+                </div>
+                {data.interpretaciones_planetarias.neptuno.espiritualidad && (
+                  <div className="bg-indigo-800/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-indigo-200 font-semibold mb-2">✨ Espiritualidad</h5>
+                    <p className="text-indigo-50">{data.interpretaciones_planetarias.neptuno.espiritualidad}</p>
+                  </div>
+                )}
+                {data.interpretaciones_planetarias.neptuno.ilusion_vs_inspiracion && (
+                  <div className="bg-indigo-800/30 rounded-lg p-4">
+                    <h5 className="text-indigo-200 font-semibold mb-2">🎭 Ilusión vs Inspiración</h5>
+                    <p className="text-indigo-50">{data.interpretaciones_planetarias.neptuno.ilusion_vs_inspiracion}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* PLUTÓN */}
+            {data.interpretaciones_planetarias.pluton && (
+              <div className="bg-gradient-to-br from-purple-900/30 to-black/30 rounded-xl p-6 border border-purple-400/20">
+                <div className="mb-4">
+                  <h4 className="text-purple-100 font-bold text-2xl mb-2">🕳️ Plutón</h4>
+                  <p className="text-purple-300 text-sm mb-3">{data.interpretaciones_planetarias.pluton.posicion}</p>
+                </div>
+                {data.interpretaciones_planetarias.pluton.transformacion && (
+                  <div className="bg-purple-800/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-purple-200 font-semibold mb-2">🔄 Transformación</h5>
+                    <p className="text-purple-50">{data.interpretaciones_planetarias.pluton.transformacion}</p>
+                  </div>
+                )}
+                {data.interpretaciones_planetarias.pluton.sombra_y_poder && (
+                  <div className="bg-purple-800/30 rounded-lg p-4">
+                    <h5 className="text-purple-200 font-semibold mb-2">🌑 Sombra y Poder</h5>
+                    <p className="text-purple-50">{data.interpretaciones_planetarias.pluton.sombra_y_poder}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* QUIRÓN */}
+            {data.interpretaciones_planetarias.quiron && (
+              <div className="bg-gradient-to-br from-teal-900/30 to-emerald-900/30 rounded-xl p-6 border border-teal-400/20">
+                <div className="mb-4">
+                  <h4 className="text-teal-100 font-bold text-2xl mb-2">🏥 Quirón</h4>
+                  <p className="text-teal-300 text-sm mb-3">{data.interpretaciones_planetarias.quiron.posicion}</p>
+                </div>
+                {data.interpretaciones_planetarias.quiron.herida_principal && (
+                  <div className="bg-teal-800/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-teal-200 font-semibold mb-2">💔 Herida Principal</h5>
+                    <p className="text-teal-50">{data.interpretaciones_planetarias.quiron.herida_principal}</p>
+                  </div>
+                )}
+                {data.interpretaciones_planetarias.quiron.don_sanador && (
+                  <div className="bg-green-900/30 rounded-lg p-4">
+                    <h5 className="text-green-200 font-semibold mb-2">💚 Don Sanador</h5>
+                    <p className="text-green-50">{data.interpretaciones_planetarias.quiron.don_sanador}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ✅ BACKWARDS COMPATIBILITY: Old interpretaciones structure */}
+        {data.interpretaciones && !data.interpretaciones_planetarias && (
+          <div className="space-y-6">
+            <h3 className="text-3xl font-bold text-white text-center mb-8">
+              🪐 Interpretaciones Planetarias
             </h3>
 
             {Object.entries(data.interpretaciones).map(([planetKey, planetData]: [string, any]) => (
@@ -898,6 +1271,90 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                 )}
               </div>
             ))}
+          </div>
+        )}
+
+        {/* ✅ NUEVA SECCIÓN: ASPECTOS DESTACADOS */}
+        {data.aspectos_destacados && (
+          <div className="bg-gradient-to-br from-purple-900/40 to-fuchsia-900/40 rounded-2xl p-8 border border-purple-400/30">
+            <h3 className="text-3xl font-bold text-white text-center mb-8">
+              ✨ Aspectos Destacados de Tu Carta
+            </h3>
+
+            {data.aspectos_destacados.stelliums && (
+              <div className="bg-purple-800/30 rounded-lg p-4 mb-4">
+                <h4 className="text-purple-200 font-bold text-lg mb-2">🌟 Stelliums (Concentraciones Planetarias)</h4>
+                <p className="text-purple-50 leading-relaxed">{data.aspectos_destacados.stelliums}</p>
+              </div>
+            )}
+
+            {data.aspectos_destacados.aspectos_tensos && (
+              <div className="bg-red-900/30 rounded-lg p-4 mb-4">
+                <h4 className="text-red-200 font-bold text-lg mb-2">⚡ Aspectos Tensos (Cuadraturas y Oposiciones)</h4>
+                <p className="text-red-50 leading-relaxed">{data.aspectos_destacados.aspectos_tensos}</p>
+              </div>
+            )}
+
+            {data.aspectos_destacados.aspectos_armoniosos && (
+              <div className="bg-green-900/30 rounded-lg p-4 mb-4">
+                <h4 className="text-green-200 font-bold text-lg mb-2">🌈 Aspectos Armoniosos (Trígonos y Sextiles)</h4>
+                <p className="text-green-50 leading-relaxed">{data.aspectos_destacados.aspectos_armoniosos}</p>
+              </div>
+            )}
+
+            {data.aspectos_destacados.patron_dominante && (
+              <div className="bg-gradient-to-r from-fuchsia-800/40 to-purple-800/40 rounded-lg p-4 border border-fuchsia-400/30">
+                <h4 className="text-fuchsia-200 font-bold text-lg mb-2">🔮 Patrón Dominante</h4>
+                <p className="text-fuchsia-50 text-lg leading-relaxed">{data.aspectos_destacados.patron_dominante}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ✅ NUEVA SECCIÓN: INTEGRACIÓN DE TU CARTA NATAL */}
+        {data.integracion_carta && (
+          <div className="bg-gradient-to-br from-amber-900/40 to-yellow-900/40 rounded-2xl p-8 border border-amber-400/30">
+            <h3 className="text-3xl font-bold text-white text-center mb-8">
+              🌟 Integración de Tu Carta Natal - El Hilo de Oro
+            </h3>
+
+            {data.integracion_carta.hilo_de_oro && (
+              <div className="bg-amber-800/30 rounded-lg p-6 mb-6 border border-amber-400/20">
+                <h4 className="text-amber-200 font-bold text-xl mb-4">✨ El Hilo de Oro que Une Tu Carta</h4>
+                <p className="text-amber-50 text-lg leading-relaxed whitespace-pre-line">{data.integracion_carta.hilo_de_oro}</p>
+              </div>
+            )}
+
+            {data.integracion_carta.sintesis && (
+              <div className="bg-gradient-to-r from-yellow-800/40 to-amber-800/40 rounded-lg p-4 mb-6 border border-yellow-400/30">
+                <h4 className="text-yellow-200 font-bold text-lg mb-2">💫 Síntesis</h4>
+                <p className="text-yellow-50 text-xl font-bold italic text-center">"{data.integracion_carta.sintesis}"</p>
+              </div>
+            )}
+
+            {data.integracion_carta.polaridades && data.integracion_carta.polaridades.length > 0 && (
+              <div className="space-y-4">
+                <h4 className="text-amber-200 font-bold text-lg mb-4">⚖️ Polaridades a Integrar</h4>
+                {data.integracion_carta.polaridades.map((polaridad: any, i: number) => (
+                  <div key={i} className="bg-amber-800/30 rounded-lg p-4 border border-amber-400/20">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-red-900/30 rounded p-3">
+                        <p className="text-red-200 font-semibold text-sm mb-1">Polo A</p>
+                        <p className="text-red-50">{polaridad.polo_a}</p>
+                      </div>
+                      <div className="bg-blue-900/30 rounded p-3">
+                        <p className="text-blue-200 font-semibold text-sm mb-1">Polo B</p>
+                        <p className="text-blue-50">{polaridad.polo_b}</p>
+                      </div>
+                      <div className="bg-green-900/30 rounded p-3">
+                        <p className="text-green-200 font-semibold text-sm mb-1">Integración</p>
+                        <p className="text-green-50">{polaridad.integracion}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -1061,6 +1518,33 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               </div>
             )}
 
+            {data.manifestacion_amor.ritual_luna_nueva_venus && (
+              <div className="bg-gradient-to-br from-rose-800/40 to-purple-800/40 rounded-lg p-6 mb-4 border border-rose-400/30">
+                <h5 className="text-rose-100 font-bold text-lg mb-4">🌙 Ritual de Luna Nueva para Venus</h5>
+
+                {data.manifestacion_amor.ritual_luna_nueva_venus.preparacion && (
+                  <div className="bg-rose-900/30 rounded-lg p-4 mb-3">
+                    <h6 className="text-rose-200 font-semibold mb-2">✨ Preparación</h6>
+                    <p className="text-rose-50 leading-relaxed">{data.manifestacion_amor.ritual_luna_nueva_venus.preparacion}</p>
+                  </div>
+                )}
+
+                {data.manifestacion_amor.ritual_luna_nueva_venus.activacion_28_dias && (
+                  <div className="bg-purple-900/30 rounded-lg p-4 mb-3">
+                    <h6 className="text-purple-200 font-semibold mb-2">🔄 Activación 28 Días</h6>
+                    <p className="text-purple-50 leading-relaxed">{data.manifestacion_amor.ritual_luna_nueva_venus.activacion_28_dias}</p>
+                  </div>
+                )}
+
+                {data.manifestacion_amor.ritual_luna_nueva_venus.entrega_luna_llena && (
+                  <div className="bg-pink-900/30 rounded-lg p-4">
+                    <h6 className="text-pink-200 font-semibold mb-2">🌕 Entrega en Luna Llena</h6>
+                    <p className="text-pink-50 leading-relaxed">{data.manifestacion_amor.ritual_luna_nueva_venus.entrega_luna_llena}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
             {data.manifestacion_amor.declaracion_amor && (
               <div className="bg-gradient-to-r from-pink-800/40 to-red-800/40 rounded-lg p-4 border border-pink-400/30">
                 <p className="text-pink-50 text-lg font-bold italic text-center">
@@ -1109,6 +1593,146 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                 <p className="text-indigo-50 leading-relaxed italic whitespace-pre-line">
                   {data.visualizacion.texto_visualizacion}
                 </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ✅ NUEVA SECCIÓN: DATOS PARA AGENDA (LUNARES) */}
+        {data.datos_para_agenda && (
+          <div className="bg-gradient-to-br from-slate-900/60 to-indigo-900/60 rounded-2xl p-8 border border-slate-400/30">
+            <h3 className="text-3xl font-bold text-white text-center mb-8">
+              🌙 Datos para Tu Agenda Lunar
+            </h3>
+
+            {/* Eventos Lunares Personalizados */}
+            {data.datos_para_agenda.eventos_lunares_personalizados && data.datos_para_agenda.eventos_lunares_personalizados.length > 0 && (
+              <div className="mb-6">
+                <h4 className="text-slate-100 font-bold text-xl mb-4">✨ Eventos Lunares Personalizados</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {data.datos_para_agenda.eventos_lunares_personalizados.map((evento: any, i: number) => (
+                    <div key={i} className="bg-slate-800/50 rounded-lg p-4 border border-slate-500/20">
+                      <h5 className="text-slate-100 font-bold mb-2">{evento.evento}</h5>
+                      <p className="text-slate-200 text-sm mb-2">{evento.significado}</p>
+                      {evento.ritual && (
+                        <div className="bg-indigo-900/30 rounded p-3 mb-2">
+                          <p className="text-indigo-200 text-xs font-semibold mb-1">Ritual:</p>
+                          <p className="text-indigo-100 text-xs">{evento.ritual}</p>
+                        </div>
+                      )}
+                      {evento.intencion && (
+                        <div className="bg-purple-900/30 rounded p-3">
+                          <p className="text-purple-200 text-xs font-semibold mb-1">Intención:</p>
+                          <p className="text-purple-100 text-xs">{evento.intencion}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Prácticas por Fase Lunar */}
+            {data.datos_para_agenda.practicas_por_fase && (
+              <div className="mb-6">
+                <h4 className="text-slate-100 font-bold text-xl mb-4">🌓 Prácticas por Fase Lunar</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {data.datos_para_agenda.practicas_por_fase.luna_nueva && (
+                    <div className="bg-black/40 rounded-lg p-4 border border-blue-500/20">
+                      <h5 className="text-blue-200 font-bold mb-3">🌑 Luna Nueva</h5>
+                      <ul className="space-y-2">
+                        {data.datos_para_agenda.practicas_por_fase.luna_nueva.map((practica: string, i: number) => (
+                          <li key={i} className="text-blue-100 text-sm flex items-start gap-2">
+                            <span className="text-blue-400 mt-1">•</span>
+                            <span>{practica}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {data.datos_para_agenda.practicas_por_fase.cuarto_creciente && (
+                    <div className="bg-green-900/30 rounded-lg p-4 border border-green-500/20">
+                      <h5 className="text-green-200 font-bold mb-3">🌓 Cuarto Creciente</h5>
+                      <ul className="space-y-2">
+                        {data.datos_para_agenda.practicas_por_fase.cuarto_creciente.map((practica: string, i: number) => (
+                          <li key={i} className="text-green-100 text-sm flex items-start gap-2">
+                            <span className="text-green-400 mt-1">•</span>
+                            <span>{practica}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {data.datos_para_agenda.practicas_por_fase.luna_llena && (
+                    <div className="bg-yellow-900/30 rounded-lg p-4 border border-yellow-500/20">
+                      <h5 className="text-yellow-200 font-bold mb-3">🌕 Luna Llena</h5>
+                      <ul className="space-y-2">
+                        {data.datos_para_agenda.practicas_por_fase.luna_llena.map((practica: string, i: number) => (
+                          <li key={i} className="text-yellow-100 text-sm flex items-start gap-2">
+                            <span className="text-yellow-400 mt-1">•</span>
+                            <span>{practica}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {data.datos_para_agenda.practicas_por_fase.cuarto_menguante && (
+                    <div className="bg-red-900/30 rounded-lg p-4 border border-red-500/20">
+                      <h5 className="text-red-200 font-bold mb-3">🌗 Cuarto Menguante</h5>
+                      <ul className="space-y-2">
+                        {data.datos_para_agenda.practicas_por_fase.cuarto_menguante.map((practica: string, i: number) => (
+                          <li key={i} className="text-red-100 text-sm flex items-start gap-2">
+                            <span className="text-red-400 mt-1">•</span>
+                            <span>{practica}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Días de Poder */}
+            {data.datos_para_agenda.dias_poder && data.datos_para_agenda.dias_poder.length > 0 && (
+              <div className="mb-6">
+                <h4 className="text-slate-100 font-bold text-xl mb-4">⚡ Días de Poder Personal</h4>
+                <div className="space-y-3">
+                  {data.datos_para_agenda.dias_poder.map((dia: any, i: number) => (
+                    <div key={i} className="bg-amber-900/30 rounded-lg p-4 border border-amber-500/20">
+                      <h5 className="text-amber-200 font-bold mb-2">{dia.cuando}</h5>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <p className="text-green-200 text-xs font-semibold mb-1">✅ Qué Hacer:</p>
+                          <p className="text-green-100 text-sm">{dia.que_hacer}</p>
+                        </div>
+                        <div>
+                          <p className="text-red-200 text-xs font-semibold mb-1">⚠️ Qué Evitar:</p>
+                          <p className="text-red-100 text-sm">{dia.que_evitar}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Advertencias Cósmicas */}
+            {data.datos_para_agenda.advertencias_cosmicas && data.datos_para_agenda.advertencias_cosmicas.length > 0 && (
+              <div>
+                <h4 className="text-slate-100 font-bold text-xl mb-4">🔮 Advertencias Cósmicas</h4>
+                <div className="space-y-3">
+                  {data.datos_para_agenda.advertencias_cosmicas.map((advertencia: any, i: number) => (
+                    <div key={i} className="bg-red-900/30 rounded-lg p-4 border border-red-500/20">
+                      <h5 className="text-red-200 font-bold mb-2">⚠️ {advertencia.situacion}</h5>
+                      <p className="text-red-100 text-sm mb-2">{advertencia.como_afecta}</p>
+                      <div className="bg-orange-900/30 rounded p-3">
+                        <p className="text-orange-200 text-xs font-semibold mb-1">Precauciones:</p>
+                        <p className="text-orange-100 text-xs">{advertencia.precauciones}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
