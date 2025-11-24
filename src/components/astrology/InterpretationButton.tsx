@@ -2332,25 +2332,31 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                   )}
                 </Button>
 
-                {isNatal && (
+                {(isNatal || isSolarReturn) && (
                   <Button
                     onClick={async (e) => {
                       e.stopPropagation();
-                      if (!confirm('⚠️ Esto borrará el cache y regenerará con la estructura completa nueva. ¿Continuar?')) {
+                      const chartTypeName = isNatal ? 'Carta Natal' : 'Solar Return';
+                      if (!confirm(`⚠️ Esto borrará el cache del ${chartTypeName} y regenerará con la estructura completa nueva. ¿Continuar?`)) {
                         return;
                       }
 
                       try {
-                        // Delete cache first
-                        const deleteRes = await fetch(
-                          `/api/astrology/interpret-natal-complete?userId=${userId}`,
-                          { method: 'DELETE' }
-                        );
+                        // Delete cache first - use correct endpoint based on type
+                        const endpoint = isNatal
+                          ? `/api/astrology/interpret-natal-complete?userId=${userId}`
+                          : `/api/astrology/interpret-solar-return?userId=${userId}`;
+
+                        const deleteRes = await fetch(endpoint, { method: 'DELETE' });
 
                         if (deleteRes.ok) {
-                          console.log('✅ Cache borrado exitosamente');
+                          console.log(`✅ Cache de ${chartTypeName} borrado exitosamente`);
                           // Force regeneration
                           generateInterpretation(true);
+                        } else {
+                          const error = await deleteRes.json();
+                          console.error('❌ Error en respuesta:', error);
+                          alert(`Error borrando cache: ${error.error || 'Unknown error'}`);
                         }
                       } catch (error) {
                         console.error('❌ Error borrando cache:', error);

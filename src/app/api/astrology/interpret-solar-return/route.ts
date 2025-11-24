@@ -775,3 +775,43 @@ export async function GET(request: NextRequest) {
     }, { status: 500 });
   }
 }
+
+// ==========================================
+// 🗑️ DELETE: CLEAR CACHED INTERPRETATION
+// ==========================================
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'userId is required' },
+        { status: 400 }
+      );
+    }
+
+    await connectDB();
+
+    const result = await Interpretation.deleteOne({
+      userId,
+      chartType: 'solar-return',
+    });
+
+    console.log(`🗑️ Deleted ${result.deletedCount} Solar Return interpretation(s) for user ${userId}`);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Solar Return cache cleared successfully',
+      deletedCount: result.deletedCount
+    });
+
+  } catch (error) {
+    console.error('❌ Error deleting Solar Return cache:', error);
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to clear cache'
+    }, { status: 500 });
+  }
+}
