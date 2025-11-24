@@ -85,9 +85,14 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
 
   const isNatal = type === 'natal';
   const isSolarReturn = type === 'solar-return';
-  const endpoint = isNatal ? '/api/astrology/interpret-natal' :
+
+  // ✅ NEW: Use complete interpretation endpoint for natal charts
+  const endpoint = isNatal ? '/api/astrology/interpret-natal-complete' :
                 isSolarReturn ? '/api/astrology/interpret-solar-return' :
                 '/api/astrology/interpret-progressed';
+
+  // ✅ Keep old endpoint for backwards compatibility
+  const legacyEndpoint = '/api/astrology/interpret-natal';
 
   useEffect(() => {
     if (userId) {
@@ -101,7 +106,14 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       console.log(`🔍 ===== CARGANDO INTERPRETACIONES GUARDADAS =====`);
       console.log(`🔍 userId: ${userId}, type: ${type}`);
 
-      const response = await fetch(`/api/interpretations/save?userId=${userId}&chartType=${type}`);
+      // ✅ NEW: Use complete endpoint for natal type
+      const fetchUrl = isNatal
+        ? `${endpoint}?userId=${userId}`
+        : `/api/interpretations/save?userId=${userId}&chartType=${type}`;
+
+      console.log(`🔍 Fetching from: ${fetchUrl}`);
+
+      const response = await fetch(fetchUrl);
 
       console.log(`📡 Respuesta API: ${response.status}`);
 
@@ -320,13 +332,14 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           setTimeout(() => setGenerationProgress('Casi listo... Creando tu revolución personal...'), 10000);
         }
 
+        // ✅ NEW: Different request body structure for complete natal interpretation
         const requestBody = isNatal
           ? {
               userId,
-              natalChart: chartData,
+              chartData: chartData, // ✅ Changed from natalChart to chartData
               userProfile,
               regenerate: forceRegenerate,
-              disruptiveMode: true
+              useChunked: false, // ✅ Use single-call generation (faster)
             }
           : isSolarReturn
           ? {
@@ -403,7 +416,8 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         if (result.success) {
           console.log('📺 ===== PROCESANDO RESPUESTA DE INTERPRETACIÓN =====');
 
-          const rawInterpretation = result.data?.interpretation || result.interpretation;
+          // ✅ NEW: Handle both old and new response structures
+          const rawInterpretation = result.interpretation || result.data?.interpretation;
 
           if (!rawInterpretation) {
             console.log('❌ No se encontró interpretación en la respuesta');
@@ -415,29 +429,45 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
 
           // ✅ AÑADIR LOGS PARA VERIFICAR DATOS COMPLETOS
           console.log('🔍 ===== VERIFICANDO DATOS COMPLETOS =====');
-          console.log('🔍 formacion_temprana:', rawInterpretation.formacion_temprana ? 'SÍ' : 'NO');
-          console.log('🔍 patrones_psicologicos:', rawInterpretation.patrones_psicologicos ? 'SÍ' : 'NO');
-          console.log('🔍 planetas_profundos:', rawInterpretation.planetas_profundos ? 'SÍ' : 'NO');
-          console.log('🔍 nodos_lunares:', rawInterpretation.nodos_lunares ? 'SÍ' : 'NO');
+          console.log('🔍 esencia_revolucionaria:', rawInterpretation.esencia_revolucionaria ? 'SÍ' : 'NO');
+          console.log('🔍 proposito_vida:', rawInterpretation.proposito_vida ? 'SÍ' : 'NO');
+          console.log('🔍 interpretaciones:', rawInterpretation.interpretaciones ? 'SÍ' : 'NO');
+          console.log('🔍 sintesis_elemental:', rawInterpretation.sintesis_elemental ? 'SÍ' : 'NO');
 
           // Si están, mostrar un preview
-          if (rawInterpretation.formacion_temprana) {
-            console.log('📖 formacion_temprana completa:', rawInterpretation.formacion_temprana);
+          if (rawInterpretation.esencia_revolucionaria) {
+            console.log('📖 esencia_revolucionaria preview:', rawInterpretation.esencia_revolucionaria.substring(0, 100));
           }
 
           let interpretationData;
 
           if (type === 'natal') {
+            // ✅ NEW: Map new complete interpretation structure
             interpretationData = {
+              // Core sections
               esencia_revolucionaria: rawInterpretation.esencia_revolucionaria,
               proposito_vida: rawInterpretation.proposito_vida,
+              declaracion_poder: rawInterpretation.declaracion_poder,
+
+              // New complete sections
+              puntos_fundamentales: rawInterpretation.puntos_fundamentales,
+              sintesis_elemental: rawInterpretation.sintesis_elemental,
+              modalidades: rawInterpretation.modalidades,
+              interpretaciones: rawInterpretation.interpretaciones,
+              fortalezas_educativas: rawInterpretation.fortalezas_educativas,
+              areas_especializacion: rawInterpretation.areas_especializacion,
+              patrones_sanacion: rawInterpretation.patrones_sanacion,
+              manifestacion_amor: rawInterpretation.manifestacion_amor,
+              visualizacion: rawInterpretation.visualizacion,
+              datos_para_agenda: rawInterpretation.datos_para_agenda,
+
+              // Backwards compatibility with old structure
               formacion_temprana: rawInterpretation.formacion_temprana,
               patrones_psicologicos: rawInterpretation.patrones_psicologicos,
               planetas_profundos: rawInterpretation.planetas_profundos,
               nodos_lunares: rawInterpretation.nodos_lunares,
               planetas: rawInterpretation.planetas,
               plan_accion: rawInterpretation.plan_accion,
-              declaracion_poder: rawInterpretation.declaracion_poder,
               advertencias: rawInterpretation.advertencias,
               insights_transformacionales: rawInterpretation.insights_transformacionales,
               rituales_recomendados: rawInterpretation.rituales_recomendados,
@@ -650,7 +680,430 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               <Target className="w-8 h-8 text-blue-300" />
               Tu Propósito de Vida
             </h4>
-      <p className="text-blue-50 text-lg leading-relaxed font-medium">{data.proposito_vida}</p>
+            {typeof data.proposito_vida === 'string' ? (
+              <p className="text-blue-50 text-lg leading-relaxed font-medium">{data.proposito_vida}</p>
+            ) : (
+              <div className="space-y-4">
+                {data.proposito_vida.nodo_norte && (
+                  <div className="bg-blue-800/30 rounded-lg p-4">
+                    <h5 className="text-blue-200 font-semibold mb-2">⬆️ Nodo Norte: {data.proposito_vida.nodo_norte.signo} Casa {data.proposito_vida.nodo_norte.casa}</h5>
+                    <p className="text-blue-50">{data.proposito_vida.nodo_norte.mision}</p>
+                    {data.proposito_vida.nodo_norte.habilidades_activar && (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {data.proposito_vida.nodo_norte.habilidades_activar.map((h: string, i: number) => (
+                          <span key={i} className="bg-blue-600/40 text-blue-100 px-2 py-1 rounded-full text-xs">{h}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {data.proposito_vida.nodo_sur && (
+                  <div className="bg-orange-800/30 rounded-lg p-4">
+                    <h5 className="text-orange-200 font-semibold mb-2">⬇️ Nodo Sur: {data.proposito_vida.nodo_sur.signo} Casa {data.proposito_vida.nodo_sur.casa}</h5>
+                    <p className="text-orange-50">{data.proposito_vida.nodo_sur.zona_confort}</p>
+                    {data.proposito_vida.nodo_sur.patrones_soltar && (
+                      <div className="mt-2">
+                        <p className="text-orange-200 text-sm font-semibold mb-1">Patrones a soltar:</p>
+                        <ul className="list-disc list-inside text-orange-50 text-sm">
+                          {data.proposito_vida.nodo_sur.patrones_soltar.map((p: string, i: number) => (
+                            <li key={i}>{p}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {data.proposito_vida.salto_evolutivo && (
+                  <div className="bg-gradient-to-r from-purple-800/40 to-pink-800/40 rounded-lg p-4">
+                    <h5 className="text-purple-200 font-semibold mb-2">🚀 Salto Evolutivo</h5>
+                    <p className="text-purple-50">
+                      <span className="text-red-300">DE:</span> {data.proposito_vida.salto_evolutivo.de}
+                    </p>
+                    <p className="text-purple-50">
+                      <span className="text-green-300">A:</span> {data.proposito_vida.salto_evolutivo.a}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ✅ NUEVA SECCIÓN: SÍNTESIS ELEMENTAL */}
+        {data.sintesis_elemental && (
+          <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 rounded-2xl p-8 border border-amber-400/30">
+            <h4 className="text-amber-100 font-bold text-xl mb-6 flex items-center gap-3">
+              <Sparkles className="w-8 h-8 text-amber-300" />
+              Síntesis Elemental - Tu Alquimia Interior
+            </h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              {data.sintesis_elemental.fuego && (
+                <div className="bg-red-900/40 rounded-lg p-4 text-center">
+                  <div className="text-3xl mb-2">🔥</div>
+                  <div className="text-red-200 font-bold text-lg">{data.sintesis_elemental.fuego.porcentaje}%</div>
+                  <div className="text-red-300 text-sm">Fuego</div>
+                  {data.sintesis_elemental.fuego.planetas && (
+                    <div className="text-red-400 text-xs mt-1">{data.sintesis_elemental.fuego.planetas.join(', ')}</div>
+                  )}
+                </div>
+              )}
+              {data.sintesis_elemental.tierra && (
+                <div className="bg-green-900/40 rounded-lg p-4 text-center">
+                  <div className="text-3xl mb-2">🌍</div>
+                  <div className="text-green-200 font-bold text-lg">{data.sintesis_elemental.tierra.porcentaje}%</div>
+                  <div className="text-green-300 text-sm">Tierra</div>
+                  {data.sintesis_elemental.tierra.planetas && (
+                    <div className="text-green-400 text-xs mt-1">{data.sintesis_elemental.tierra.planetas.join(', ')}</div>
+                  )}
+                </div>
+              )}
+              {data.sintesis_elemental.aire && (
+                <div className="bg-cyan-900/40 rounded-lg p-4 text-center">
+                  <div className="text-3xl mb-2">💨</div>
+                  <div className="text-cyan-200 font-bold text-lg">{data.sintesis_elemental.aire.porcentaje}%</div>
+                  <div className="text-cyan-300 text-sm">Aire</div>
+                  {data.sintesis_elemental.aire.planetas && (
+                    <div className="text-cyan-400 text-xs mt-1">{data.sintesis_elemental.aire.planetas.join(', ')}</div>
+                  )}
+                </div>
+              )}
+              {data.sintesis_elemental.agua && (
+                <div className="bg-blue-900/40 rounded-lg p-4 text-center">
+                  <div className="text-3xl mb-2">💧</div>
+                  <div className="text-blue-200 font-bold text-lg">{data.sintesis_elemental.agua.porcentaje}%</div>
+                  <div className="text-blue-300 text-sm">Agua</div>
+                  {data.sintesis_elemental.agua.planetas && (
+                    <div className="text-blue-400 text-xs mt-1">{data.sintesis_elemental.agua.planetas.join(', ')}</div>
+                  )}
+                </div>
+              )}
+            </div>
+            {data.sintesis_elemental.configuracion_alquimica && (
+              <div className="bg-amber-800/30 rounded-lg p-4">
+                <p className="text-amber-50 leading-relaxed">{data.sintesis_elemental.configuracion_alquimica}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ✅ NUEVA SECCIÓN: MODALIDADES */}
+        {data.modalidades && (
+          <div className="bg-gradient-to-br from-violet-900/40 to-indigo-900/40 rounded-2xl p-8 border border-violet-400/30">
+            <h4 className="text-violet-100 font-bold text-xl mb-6 flex items-center gap-3">
+              <Zap className="w-8 h-8 text-violet-300" />
+              Tu Ritmo de Acción - Modalidades
+            </h4>
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              {data.modalidades.cardinal && (
+                <div className="bg-red-900/30 rounded-lg p-4 text-center">
+                  <div className="text-2xl mb-2">🚀</div>
+                  <div className="text-red-200 font-bold text-lg">{data.modalidades.cardinal.porcentaje}%</div>
+                  <div className="text-red-300 text-sm">Cardinal</div>
+                  <p className="text-red-400 text-xs mt-2">{data.modalidades.cardinal.significado}</p>
+                </div>
+              )}
+              {data.modalidades.fijo && (
+                <div className="bg-amber-900/30 rounded-lg p-4 text-center">
+                  <div className="text-2xl mb-2">🗿</div>
+                  <div className="text-amber-200 font-bold text-lg">{data.modalidades.fijo.porcentaje}%</div>
+                  <div className="text-amber-300 text-sm">Fijo</div>
+                  <p className="text-amber-400 text-xs mt-2">{data.modalidades.fijo.significado}</p>
+                </div>
+              )}
+              {data.modalidades.mutable && (
+                <div className="bg-cyan-900/30 rounded-lg p-4 text-center">
+                  <div className="text-2xl mb-2">🌊</div>
+                  <div className="text-cyan-200 font-bold text-lg">{data.modalidades.mutable.porcentaje}%</div>
+                  <div className="text-cyan-300 text-sm">Mutable</div>
+                  <p className="text-cyan-400 text-xs mt-2">{data.modalidades.mutable.significado}</p>
+                </div>
+              )}
+            </div>
+            {data.modalidades.ritmo_accion && (
+              <div className="bg-violet-800/30 rounded-lg p-4">
+                <p className="text-violet-50 leading-relaxed">{data.modalidades.ritmo_accion}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ✅ NUEVA SECCIÓN: INTERPRETACIONES PLANETARIAS COMPLETAS */}
+        {data.interpretaciones && (
+          <div className="space-y-6">
+            <h3 className="text-3xl font-bold text-white text-center mb-8">
+              🪐 Interpretaciones Planetarias Completas
+            </h3>
+
+            {Object.entries(data.interpretaciones).map(([planetKey, planetData]: [string, any]) => (
+              <div
+                key={planetKey}
+                className="bg-gradient-to-br from-indigo-900/30 to-purple-900/30 rounded-xl p-6 border border-indigo-400/20"
+              >
+                <h4 className="text-indigo-100 font-bold text-xl mb-4 capitalize">
+                  {planetKey === 'medio_cielo' ? 'Medio Cielo' : planetKey === 'nodo_norte' ? 'Nodo Norte' : planetKey}
+                  {planetData.posicion && (
+                    <span className="text-indigo-300 text-sm ml-2 font-normal">
+                      ({planetData.posicion.signo} Casa {planetData.posicion.casa})
+                    </span>
+                  )}
+                </h4>
+
+                {planetData.educativo && (
+                  <div className="bg-blue-900/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-blue-200 font-semibold text-sm mb-2">📚 Educativo</h5>
+                    <p className="text-blue-50 text-sm leading-relaxed">{planetData.educativo}</p>
+                  </div>
+                )}
+
+                {planetData.poderoso && (
+                  <div className="bg-red-900/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-red-200 font-semibold text-sm mb-2">🔥 Poderoso</h5>
+                    <p className="text-red-50 text-sm leading-relaxed">{planetData.poderoso}</p>
+                  </div>
+                )}
+
+                {planetData.poetico && (
+                  <div className="bg-purple-900/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-purple-200 font-semibold text-sm mb-2">🌙 Poético</h5>
+                    <p className="text-purple-50 text-sm leading-relaxed italic">{planetData.poetico}</p>
+                  </div>
+                )}
+
+                {planetData.sombras && planetData.sombras.length > 0 && (
+                  <div className="bg-gray-900/30 rounded-lg p-4 mb-3">
+                    <h5 className="text-gray-200 font-semibold text-sm mb-2">🌑 Sombras</h5>
+                    {planetData.sombras.map((sombra: any, i: number) => (
+                      <div key={i} className="mb-2 last:mb-0">
+                        <p className="text-gray-100 font-semibold text-sm">{sombra.nombre}</p>
+                        <p className="text-gray-300 text-xs">{sombra.patron}</p>
+                        <p className="text-red-400 text-xs">{sombra.trampa}</p>
+                        <p className="text-green-400 text-xs">{sombra.regalo}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {planetData.sintesis && (
+                  <div className="bg-gradient-to-r from-emerald-900/30 to-teal-900/30 rounded-lg p-4">
+                    <p className="text-emerald-200 font-bold text-sm mb-1">{planetData.sintesis.frase}</p>
+                    <p className="text-emerald-50 text-sm italic">{planetData.sintesis.declaracion}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ✅ NUEVA SECCIÓN: FORTALEZAS EDUCATIVAS */}
+        {data.fortalezas_educativas && (
+          <div className="bg-gradient-to-br from-emerald-900/40 to-green-900/40 rounded-2xl p-8 border border-emerald-400/30">
+            <h4 className="text-emerald-100 font-bold text-xl mb-6 flex items-center gap-3">
+              <Brain className="w-8 h-8 text-emerald-300" />
+              Fortalezas Educativas - Cómo Aprendes Mejor
+            </h4>
+
+            {data.fortalezas_educativas.como_aprendes_mejor && (
+              <div className="bg-emerald-800/30 rounded-lg p-4 mb-4">
+                <h5 className="text-emerald-200 font-semibold mb-2">📖 Cómo Aprendes Mejor</h5>
+                <ul className="space-y-2">
+                  {data.fortalezas_educativas.como_aprendes_mejor.map((item: string, i: number) => (
+                    <li key={i} className="text-emerald-50 flex items-start gap-2">
+                      <span className="text-emerald-400">✓</span> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {data.fortalezas_educativas.inteligencias_dominantes && (
+              <div className="bg-emerald-800/30 rounded-lg p-4 mb-4">
+                <h5 className="text-emerald-200 font-semibold mb-2">🧠 Inteligencias Dominantes</h5>
+                <div className="space-y-3">
+                  {data.fortalezas_educativas.inteligencias_dominantes.map((intel: any, i: number) => (
+                    <div key={i} className="bg-emerald-700/30 rounded p-3">
+                      <p className="text-emerald-100 font-semibold">{intel.tipo}</p>
+                      <p className="text-emerald-200 text-sm">{intel.descripcion}</p>
+                      <p className="text-emerald-400 text-xs mt-1">Origen: {intel.planeta_origen}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {data.fortalezas_educativas.modalidades_estudio && (
+              <div className="bg-emerald-800/30 rounded-lg p-4">
+                <h5 className="text-emerald-200 font-semibold mb-2">📚 Modalidades de Estudio Recomendadas</h5>
+                <ul className="space-y-1">
+                  {data.fortalezas_educativas.modalidades_estudio.map((mod: string, i: number) => (
+                    <li key={i} className="text-emerald-50 text-sm">• {mod}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ✅ NUEVA SECCIÓN: ÁREAS DE ESPECIALIZACIÓN */}
+        {data.areas_especializacion && data.areas_especializacion.length > 0 && (
+          <div className="bg-gradient-to-br from-yellow-900/40 to-amber-900/40 rounded-2xl p-8 border border-yellow-400/30">
+            <h4 className="text-yellow-100 font-bold text-xl mb-6 flex items-center gap-3">
+              <Target className="w-8 h-8 text-yellow-300" />
+              Áreas de Especialización Profesional
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {data.areas_especializacion.map((area: any, i: number) => (
+                <div key={i} className="bg-yellow-800/30 rounded-lg p-4">
+                  <h5 className="text-yellow-200 font-bold mb-2">{area.area}</h5>
+                  <p className="text-yellow-400 text-xs mb-2">Origen: {area.planetas_origen}</p>
+                  <div className="flex flex-wrap gap-1">
+                    {area.profesiones_sugeridas?.map((prof: string, j: number) => (
+                      <span key={j} className="bg-yellow-600/40 text-yellow-100 px-2 py-1 rounded text-xs">{prof}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ✅ NUEVA SECCIÓN: PATRONES DE SANACIÓN */}
+        {data.patrones_sanacion && data.patrones_sanacion.heridas && (
+          <div className="bg-gradient-to-br from-rose-900/40 to-pink-900/40 rounded-2xl p-8 border border-rose-400/30">
+            <h4 className="text-rose-100 font-bold text-xl mb-6 flex items-center gap-3">
+              <Star className="w-8 h-8 text-rose-300" />
+              Patrones de Sanación - Tus Heridas y Regalos
+            </h4>
+            <div className="space-y-6">
+              {data.patrones_sanacion.heridas.map((herida: any, i: number) => (
+                <div key={i} className="bg-rose-800/30 rounded-lg p-4">
+                  <h5 className="text-rose-200 font-bold text-lg mb-2">{herida.nombre}</h5>
+                  <p className="text-rose-400 text-xs mb-2">Origen: {herida.planeta_origen}</p>
+                  <p className="text-rose-50 mb-3">{herida.patron}</p>
+
+                  {herida.origen_infancia && (
+                    <div className="bg-rose-700/30 rounded p-3 mb-2">
+                      <p className="text-rose-200 text-sm font-semibold">🧒 Origen en la Infancia:</p>
+                      <p className="text-rose-50 text-sm">{herida.origen_infancia}</p>
+                    </div>
+                  )}
+
+                  {herida.como_se_manifiesta && (
+                    <div className="mb-2">
+                      <p className="text-rose-200 text-sm font-semibold mb-1">📋 Cómo se Manifiesta:</p>
+                      <ul className="list-disc list-inside text-rose-50 text-sm">
+                        {herida.como_se_manifiesta.map((m: string, j: number) => (
+                          <li key={j}>{m}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {herida.sanacion && (
+                    <div className="bg-green-900/30 rounded p-3">
+                      <p className="text-green-200 text-sm font-semibold">💚 Sanación:</p>
+                      <p className="text-green-50 text-sm">{herida.sanacion}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ✅ NUEVA SECCIÓN: MANIFESTACIÓN DEL AMOR */}
+        {data.manifestacion_amor && (
+          <div className="bg-gradient-to-br from-pink-900/40 to-red-900/40 rounded-2xl p-8 border border-pink-400/30">
+            <h4 className="text-pink-100 font-bold text-xl mb-6 flex items-center gap-3">
+              <Star className="w-8 h-8 text-pink-300" />
+              💕 Manifestación del Amor
+            </h4>
+
+            {data.manifestacion_amor.patron_amoroso && (
+              <div className="bg-pink-800/30 rounded-lg p-4 mb-4">
+                <h5 className="text-pink-200 font-semibold mb-2">Tu Patrón Amoroso</h5>
+                <p className="text-pink-50">{data.manifestacion_amor.patron_amoroso}</p>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              {data.manifestacion_amor.que_atraes && (
+                <div className="bg-pink-800/30 rounded-lg p-4">
+                  <h5 className="text-pink-200 font-semibold mb-2">🧲 Qué Atraes</h5>
+                  <p className="text-pink-50 text-sm">{data.manifestacion_amor.que_atraes}</p>
+                </div>
+              )}
+              {data.manifestacion_amor.que_necesitas && (
+                <div className="bg-pink-800/30 rounded-lg p-4">
+                  <h5 className="text-pink-200 font-semibold mb-2">💝 Qué Necesitas</h5>
+                  <p className="text-pink-50 text-sm">{data.manifestacion_amor.que_necesitas}</p>
+                </div>
+              )}
+            </div>
+
+            {data.manifestacion_amor.trampa_amorosa && (
+              <div className="bg-red-900/30 rounded-lg p-4 mb-4">
+                <h5 className="text-red-200 font-semibold mb-2">⚠️ Tu Trampa Amorosa</h5>
+                <p className="text-red-50 text-sm">{data.manifestacion_amor.trampa_amorosa}</p>
+              </div>
+            )}
+
+            {data.manifestacion_amor.leccion_amorosa && (
+              <div className="bg-purple-900/30 rounded-lg p-4 mb-4">
+                <h5 className="text-purple-200 font-semibold mb-2">📚 Tu Lección Amorosa</h5>
+                <p className="text-purple-50 text-sm">{data.manifestacion_amor.leccion_amorosa}</p>
+              </div>
+            )}
+
+            {data.manifestacion_amor.declaracion_amor && (
+              <div className="bg-gradient-to-r from-pink-800/40 to-red-800/40 rounded-lg p-4 border border-pink-400/30">
+                <p className="text-pink-50 text-lg font-bold italic text-center">
+                  "{data.manifestacion_amor.declaracion_amor}"
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ✅ NUEVA SECCIÓN: VISUALIZACIÓN */}
+        {data.visualizacion && (
+          <div className="bg-gradient-to-br from-indigo-900/40 to-blue-900/40 rounded-2xl p-8 border border-indigo-400/30">
+            <h4 className="text-indigo-100 font-bold text-xl mb-6 flex items-center gap-3">
+              <Eye className="w-8 h-8 text-indigo-300" />
+              🔮 Visualización Guiada Personalizada
+            </h4>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              {data.visualizacion.duracion && (
+                <div className="bg-indigo-800/30 rounded-lg p-3">
+                  <p className="text-indigo-200 font-semibold text-sm">⏱️ Duración: {data.visualizacion.duracion}</p>
+                </div>
+              )}
+              {data.visualizacion.mejor_momento && (
+                <div className="bg-indigo-800/30 rounded-lg p-3">
+                  <p className="text-indigo-200 font-semibold text-sm">🌙 Mejor Momento: {data.visualizacion.mejor_momento}</p>
+                </div>
+              )}
+            </div>
+
+            {data.visualizacion.preparacion && (
+              <div className="bg-indigo-800/30 rounded-lg p-4 mb-4">
+                <h5 className="text-indigo-200 font-semibold mb-2">🧘 Preparación</h5>
+                <ul className="space-y-1">
+                  {data.visualizacion.preparacion.map((prep: string, i: number) => (
+                    <li key={i} className="text-indigo-50 text-sm">• {prep}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {data.visualizacion.texto_visualizacion && (
+              <div className="bg-gradient-to-b from-indigo-800/40 to-purple-800/40 rounded-lg p-6 border border-indigo-400/20">
+                <h5 className="text-indigo-200 font-semibold mb-3">✨ Texto de Visualización</h5>
+                <p className="text-indigo-50 leading-relaxed italic whitespace-pre-line">
+                  {data.visualizacion.texto_visualizacion}
+                </p>
+              </div>
+            )}
           </div>
         )}
 
