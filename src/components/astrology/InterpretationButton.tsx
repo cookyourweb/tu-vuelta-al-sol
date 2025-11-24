@@ -86,6 +86,18 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
   const isNatal = type === 'natal';
   const isSolarReturn = type === 'solar-return';
 
+  // 🐛 DEBUG: Log button visibility conditions
+  console.log('🔍 InterpretationButton Debug:', {
+    type,
+    isNatal,
+    isSolarReturn,
+    isAdmin,
+    hasRecentInterpretation,
+    hasInterpretation: !!interpretation,
+    chartDataType: chartData?.type,
+    userId
+  });
+
   // ✅ NEW: Use complete interpretation endpoint for natal charts
   const endpoint = isNatal ? '/api/astrology/interpret-natal-complete' :
                 isSolarReturn ? '/api/astrology/interpret-solar-return' :
@@ -2332,6 +2344,12 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                   )}
                 </Button>
 
+                {/* 🐛 DEBUG: Check if cache clear button should render */}
+                {console.log('🔍 Cache clear button check:', {
+                  isNatal,
+                  isSolarReturn,
+                  shouldShow: isNatal || isSolarReturn
+                })}
                 {(isNatal || isSolarReturn) && (
                   <Button
                     onClick={async (e) => {
