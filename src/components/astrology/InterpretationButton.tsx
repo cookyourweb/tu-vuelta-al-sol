@@ -248,81 +248,8 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       console.log(`🤖 userId: ${userId}`);
       console.log(`🤖 userProfile:`, userProfile);
 
-      // ✅ CHUNKED GENERATION FOR FASTER RESULTS
-      if (forceRegenerate && type === 'natal') {
-        console.log('🔄 ===== GENERANDO EN CHUNKS =====');
-
-        const chunks: Record<string, any> = {};
-        const sections = [
-          { key: 'esencia', section: 'esencia_revolucionaria', label: 'Esencia Revolucionaria', progress: 20 },
-          { key: 'proposito', section: 'proposito_vida', label: 'Propósito de Vida', progress: 40 },
-          { key: 'formacion', section: 'formacion_temprana', label: 'Formación Temprana', progress: 60 },
-          { key: 'nodos', section: 'nodos_lunares', label: 'Nodos Lunares', progress: 80 },
-          { key: 'declaracion', section: 'declaracion_poder', label: 'Declaración de Poder', progress: 100 }
-        ];
-
-        for (const { key, section, label, progress } of sections) {
-          setCurrentChunk(`Generando ${label}...`);
-          setGenerationProgress(`Consultando los astros para ${label.toLowerCase()}...`);
-
-          const chunkResponse = await fetch('/api/astrology/interpret-chunk', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              userId,
-              chartData,
-              section,
-              userProfile,
-              type,
-              natalChart
-            })
-          });
-
-          if (!chunkResponse.ok) {
-            throw new Error(`Error generando ${label}`);
-          }
-
-          const chunkData = await chunkResponse.json();
-          chunks[key] = chunkData.data;
-          setChunkProgress(progress);
-
-          console.log(`✅ Chunk ${label} completado`);
-        }
-
-        // Combine chunks
-        const interpretationData = {
-          esencia_revolucionaria: chunks['esencia'],
-          proposito_vida: chunks['proposito'],
-          formacion_temprana: chunks['formacion'],
-          nodos_lunares: chunks['nodos'],
-          declaracion_poder: chunks['declaracion'],
-          planetas: [],
-          plan_accion: [],
-          advertencias: [],
-          insights_transformacionales: [],
-          rituales_recomendados: [],
-          integracion_carta: ''
-        };
-
-        const newInterpretation = {
-          interpretation: interpretationData,
-          cached: false,
-          generatedAt: new Date().toISOString(),
-          method: 'chunked'
-        };
-
-        console.log('✅ ===== INTERPRETACIÓN EN CHUNKS COMPLETADA =====');
-
-        setInterpretation(newInterpretation);
-        setHasRecentInterpretation(true);
-        setGenerationProgress('¡Revolución completada! 🎉');
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setShowModal(true);
-
-        await autoSaveInterpretation(newInterpretation);
-
-      } else {
-        // ✅ ORIGINAL SINGLE REQUEST FOR NON-NATAL OR NON-FORCE REGENERATE
+      // ✅ SINGLE REQUEST - Use new complete endpoint for natal
+      {
         // ✅ Simulate progress messages
         if (forceRegenerate) {
           setTimeout(() => setGenerationProgress('Conectando con los astros...'), 500);
@@ -2379,30 +2306,65 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
             </Button>
             
             {isAdmin && (
-              <Button
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevenir que se cierre un tooltip padre
-                  generateInterpretation(true);
-                }}
-                disabled={loading}
-                variant="outline"
-                className={`w-full ${isNatal
-                  ? 'border-blue-400 text-blue-300 hover:bg-blue-400/20'
-                  : 'border-purple-400 text-purple-300 hover:bg-purple-400/20'
-                }`}
-              >
-                {loading ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                    Regenerando...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    🔑 Regenerar Nueva (Admin)
-                  </>
+              <>
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevenir que se cierre un tooltip padre
+                    generateInterpretation(true);
+                  }}
+                  disabled={loading}
+                  variant="outline"
+                  className={`w-full ${isNatal
+                    ? 'border-blue-400 text-blue-300 hover:bg-blue-400/20'
+                    : 'border-purple-400 text-purple-300 hover:bg-purple-400/20'
+                  }`}
+                >
+                  {loading ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      Regenerando...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      🔑 Regenerar Nueva (Admin)
+                    </>
+                  )}
+                </Button>
+
+                {isNatal && (
+                  <Button
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      if (!confirm('⚠️ Esto borrará el cache y regenerará con la estructura completa nueva. ¿Continuar?')) {
+                        return;
+                      }
+
+                      try {
+                        // Delete cache first
+                        const deleteRes = await fetch(
+                          `/api/astrology/interpret-natal-complete?userId=${userId}`,
+                          { method: 'DELETE' }
+                        );
+
+                        if (deleteRes.ok) {
+                          console.log('✅ Cache borrado exitosamente');
+                          // Force regeneration
+                          generateInterpretation(true);
+                        }
+                      } catch (error) {
+                        console.error('❌ Error borrando cache:', error);
+                        alert('Error borrando cache');
+                      }
+                    }}
+                    disabled={loading}
+                    variant="outline"
+                    className="w-full border-red-400 text-red-300 hover:bg-red-400/20"
+                  >
+                    🗑️ Limpiar Cache + Regenerar
+                  </Button>
                 )}
-              </Button>
+              </>
             )}
           </>
         ) : (
