@@ -339,7 +339,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               chartData: chartData, // ✅ Changed from natalChart to chartData
               userProfile,
               regenerate: forceRegenerate,
-              useChunked: false, // ✅ Use single-call generation (faster)
+              useChunked: true, // ✅ Use chunked generation for more reliable results
             }
           : isSolarReturn
           ? {
@@ -538,6 +538,13 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
 
   const autoSaveInterpretation = async (interpretationData: InterpretationData) => {
     try {
+      // ✅ NEW: Skip saving for natal type - the complete endpoint already saves to MongoDB
+      if (isNatal) {
+        console.log('💾 ===== NATAL: Ya guardado por endpoint completo =====');
+        console.log('💾 Skipping duplicate save for natal type');
+        return;
+      }
+
       console.log('💾 ===== GUARDANDO INTERPRETACIÓN EN MONGODB =====');
       console.log('💾 userId:', userId);
       console.log('💾 chartType:', type);
