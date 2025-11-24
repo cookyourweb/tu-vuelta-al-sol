@@ -143,7 +143,7 @@ export default function SolarReturnPage() {
           birthDate: birthData.date,
           birthTime: birthData.time,
           birthPlace: birthData.birthPlace,
-          currentLocation: birthData.currentLocation || birthData.birthPlace,
+          currentLocation: birthData.currentPlace || birthData.currentLocation || birthData.birthPlace,
           regenerate: true
         })
       });
@@ -269,6 +269,7 @@ export default function SolarReturnPage() {
             name: birthData.fullName || 'Usuario',
             age: calculateAge(birthData.birthDate || birthData.date),
             birthPlace: birthData.birthPlace || '',
+            currentLocation: birthData.currentPlace || birthData.currentLocation || birthData.birthPlace || '', // ✅ Add current location for SR
             birthDate: new Date(birthData.birthDate || birthData.date).toLocaleDateString('es-ES'),
             birthTime: birthData.birthTime || birthData.time || ''
           };
@@ -345,7 +346,7 @@ export default function SolarReturnPage() {
                   birthDate={birthData?.date || birthData?.birthDate}
                   birthTime={birthData?.time || birthData?.birthTime}
                   birthPlace={birthData?.birthPlace}
-                  currentLocation={birthData?.currentLocation || birthData?.birthPlace} // ✅ Use current location for SR
+                  currentLocation={birthData?.currentPlace || birthData?.currentLocation || birthData?.birthPlace} // ✅ Use current location for SR
                   solarReturnYear={new Date().getFullYear()}
                   solarReturnTheme="Revolución de Identidad y Empoderamiento Profesional"
                   ascSRInNatalHouse={10}

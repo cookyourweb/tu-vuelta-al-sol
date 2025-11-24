@@ -143,6 +143,7 @@ ${aspectosCruzados.length > 0 ? aspectosCruzados.map(a => `
 **Edad:** ${userProfile.age} años
 **Nacimiento:** ${userProfile.birthDate} a las ${userProfile.birthTime}
 **Lugar natal:** ${userProfile.birthPlace}
+**Ubicación actual (donde se activa el Solar Return):** ${(userProfile as any).currentLocation || userProfile.birthPlace}
 **Año Solar Return:** ${returnYear}-${returnYear + 1}
 
 ---
