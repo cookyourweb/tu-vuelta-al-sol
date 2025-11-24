@@ -1,7 +1,7 @@
 // =============================================================================
 // 🎯 COMPLETE NATAL INTERPRETATION SERVICE
 // src/services/completeNatalInterpretationService.ts
-// Genera interpretación completa con todas las secciones
+// Genera interpretación completa con estructura detallada
 // =============================================================================
 
 import OpenAI from 'openai';
@@ -14,38 +14,16 @@ import {
 } from '@/utils/prompts/completeNatalChartPrompt';
 
 // =============================================================================
-// TYPES
+// TYPES - Estructura flexible que coincide con el nuevo prompt
 // =============================================================================
-
-export interface InterpretacionPlaneta {
-  posicion: {
-    signo: string;
-    casa: number;
-    grado: number;
-  };
-  educativo: string;
-  poderoso: string;
-  poetico: string;
-  sombras: Array<{
-    nombre: string;
-    patron: string;
-    trampa: string;
-    regalo: string;
-  }>;
-  sintesis: {
-    frase: string;
-    declaracion: string;
-  };
-}
 
 export interface CartaNatalCompleta {
   puntos_fundamentales: {
-    sol: { signo: string; grado: number; casa: number; superpoder: string };
-    luna: { signo: string; grado: number; casa: number; superpoder: string };
-    ascendente: { signo: string; grado: number; superpoder: string };
-    medio_cielo: { signo: string; grado: number; superpoder: string };
-    nodo_norte: { signo: string; grado: number; casa: number; superpoder: string };
-    nodo_sur: { signo: string; grado: number; casa: number; superpoder: string };
+    sol: { signo: string; grado: number; casa: number; poder: string };
+    luna: { signo: string; grado: number; casa: number; poder: string };
+    ascendente: { signo: string; grado: number; casa: number; poder: string };
+    medio_cielo: { signo: string; grado: number; casa: number; poder: string };
+    nodo_norte: { signo: string; grado: number; casa: number; poder: string };
   };
 
   sintesis_elemental: {
@@ -53,9 +31,8 @@ export interface CartaNatalCompleta {
     tierra: { porcentaje: number; planetas: string[]; significado: string };
     aire: { porcentaje: number; planetas: string[]; significado: string };
     agua: { porcentaje: number; planetas: string[]; significado: string };
-    elemento_dominante: string;
-    elemento_escaso: string;
     configuracion_alquimica: string;
+    elemento_escaso: string;
   };
 
   modalidades: {
@@ -67,93 +44,202 @@ export interface CartaNatalCompleta {
 
   esencia_revolucionaria: string;
 
-  proposito_vida: {
-    nodo_norte: {
-      signo: string;
-      casa: number;
-      mision: string;
-      habilidades_activar: string[];
-    };
-    nodo_sur: {
-      signo: string;
-      casa: number;
-      zona_confort: string;
-      patrones_soltar: string[];
-    };
-    salto_evolutivo: {
-      de: string;
-      a: string;
-    };
+  interpretaciones_planetarias: {
+    sol: InterpretacionSol;
+    luna: InterpretacionLuna;
+    ascendente: InterpretacionAscendente;
+    mercurio: InterpretacionMercurio;
+    venus: InterpretacionVenus;
+    marte: InterpretacionMarte;
+    jupiter: InterpretacionJupiter;
+    saturno: InterpretacionSaturno;
+    urano: InterpretacionTranspersonal;
+    neptuno: InterpretacionTranspersonal;
+    pluton: InterpretacionTranspersonal;
+    quiron: InterpretacionQuiron;
   };
 
-  interpretaciones: {
-    sol: InterpretacionPlaneta;
-    luna: InterpretacionPlaneta;
-    ascendente: InterpretacionPlaneta;
-    medio_cielo: InterpretacionPlaneta;
-    mercurio: InterpretacionPlaneta;
-    venus: InterpretacionPlaneta;
-    marte: InterpretacionPlaneta;
-    jupiter: InterpretacionPlaneta;
-    saturno: InterpretacionPlaneta;
-    urano: InterpretacionPlaneta;
-    neptuno: InterpretacionPlaneta;
-    pluton: InterpretacionPlaneta;
-    quiron: InterpretacionPlaneta;
-    lilith: InterpretacionPlaneta;
-    nodo_norte: InterpretacionPlaneta;
+  aspectos_destacados: {
+    stelliums: string;
+    aspectos_tensos: string;
+    aspectos_armoniosos: string;
+    patron_dominante: string;
+  };
+
+  integracion_carta: {
+    hilo_de_oro: string;
+    sintesis: string;
+    polaridades: Array<{ polo_a: string; polo_b: string; integracion: string }>;
   };
 
   fortalezas_educativas: {
-    como_aprendes_mejor: string[];
-    inteligencias_dominantes: Array<{
-      tipo: string;
-      descripcion: string;
-      planeta_origen: string;
-    }>;
+    como_aprende_mejor: string[];
+    inteligencias_dominantes: Array<{ tipo: string; descripcion: string; planeta_origen: string }>;
     modalidades_estudio: string[];
   };
 
   areas_especializacion: Array<{
     area: string;
-    planetas_origen: string;
-    profesiones_sugeridas: string[];
+    origen_astrologico: string;
+    profesiones: string[];
+    descripcion: string;
   }>;
 
   patrones_sanacion: {
     heridas: Array<{
       nombre: string;
-      planeta_origen: string;
+      origen_astrologico: string;
       patron: string;
       origen_infancia: string;
-      como_se_manifiesta: string[];
       sanacion: string;
+    }>;
+    ciclos_sanacion_lunar: {
+      luna_nueva: string;
+      luna_creciente: string;
+      luna_llena: string;
+      luna_menguante: string;
+    };
+    practicas_integracion: Array<{
+      practica: string;
+      duracion: string;
+      beneficio: string;
+      fase_lunar: string;
     }>;
   };
 
   manifestacion_amor: {
     patron_amoroso: string;
-    que_atraes: string;
-    que_necesitas: string;
+    que_atrae: string;
+    que_necesita: string;
     trampa_amorosa: string;
-    leccion_amorosa: string;
+    ritual_luna_nueva_venus: {
+      preparacion: string;
+      activacion_28_dias: string;
+      entrega_luna_llena: string;
+    };
     declaracion_amor: string;
   };
 
-  visualizacion: {
+  visualizacion_guiada: {
+    titulo: string;
     duracion: string;
     mejor_momento: string;
     preparacion: string[];
-    texto_visualizacion: string;
+    texto: string;
   };
-
-  declaracion_poder: string;
 
   datos_para_agenda: {
-    heridas_para_ciclos_lunares: string[];
-    ritual_amor_luna_optima: string;
-    temas_principales: string[];
+    eventos_lunares_personalizados: Array<{
+      evento: string;
+      significado: string;
+      ritual: string;
+      intencion: string;
+    }>;
+    practicas_por_fase: {
+      luna_nueva: string[];
+      cuarto_creciente: string[];
+      luna_llena: string[];
+      cuarto_menguante: string[];
+    };
+    dias_poder: Array<{
+      cuando: string;
+      que_hacer: string;
+      que_evitar: string;
+    }>;
+    advertencias_cosmicas: Array<{
+      situacion: string;
+      como_afecta: string;
+      precauciones: string;
+    }>;
   };
+
+  declaracion_poder_final: string;
+  mantra_personal: string;
+}
+
+// Tipos específicos para interpretaciones planetarias
+interface InterpretacionSol {
+  posicion: string;
+  titulo_arquetipo: string;
+  proposito_vida: string;
+  trampa: string;
+  superpoder: string;
+  afirmacion: string;
+}
+
+interface InterpretacionLuna {
+  posicion: string;
+  titulo_arquetipo: string;
+  mundo_emocional: string;
+  como_se_nutre: string;
+  patron_infancia: string;
+  sanacion_emocional: string;
+}
+
+interface InterpretacionAscendente {
+  posicion: string;
+  titulo_arquetipo: string;
+  personalidad_visible: string;
+  presencia: string;
+  mascara_vs_esencia: string;
+}
+
+interface InterpretacionMercurio {
+  posicion: string;
+  titulo_arquetipo: string;
+  como_piensa: string;
+  fortalezas_mentales: string;
+  desafio: string;
+}
+
+interface InterpretacionVenus {
+  posicion: string;
+  titulo_arquetipo: string;
+  como_ama: string;
+  que_necesita_en_pareja: string;
+  trampa_amorosa: string;
+  valores: string;
+}
+
+interface InterpretacionMarte {
+  posicion: string;
+  titulo_arquetipo: string;
+  como_actua: string;
+  energia_vital: string;
+  ira: string;
+  desafio: string;
+}
+
+interface InterpretacionJupiter {
+  posicion: string;
+  titulo_arquetipo: string;
+  donde_viene_suerte: string;
+  expansion: string;
+  consejo: string;
+}
+
+interface InterpretacionSaturno {
+  posicion: string;
+  titulo_arquetipo: string;
+  karma_lecciones: string;
+  responsabilidad: string;
+  recompensa: string;
+}
+
+interface InterpretacionTranspersonal {
+  posicion: string;
+  donde_revoluciona?: string;
+  genialidad?: string;
+  espiritualidad?: string;
+  ilusion_vs_inspiracion?: string;
+  transformacion?: string;
+  sombra_y_poder?: string;
+}
+
+interface InterpretacionQuiron {
+  posicion: string;
+  herida_principal: string;
+  don_sanador: string;
 }
 
 // =============================================================================
@@ -161,10 +247,11 @@ export interface CartaNatalCompleta {
 // =============================================================================
 
 function getOpenAIClient(): OpenAI {
-  if (!process.env.OPENAI_API_KEY) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
     throw new Error('OPENAI_API_KEY not configured');
   }
-  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  return new OpenAI({ apiKey });
 }
 
 // =============================================================================
@@ -173,92 +260,56 @@ function getOpenAIClient(): OpenAI {
 
 export async function generateCompleteNatalInterpretation(
   chartData: ChartData,
-  userProfile: UserProfile,
-  onProgress?: (message: string, percentage: number) => void
+  userProfile: UserProfile
 ): Promise<CartaNatalCompleta> {
   console.log('🎯 [COMPLETE NATAL] Starting generation for:', userProfile.name);
 
   const openai = getOpenAIClient();
-
-  onProgress?.('🌟 Preparando tu interpretación completa...', 5);
-
-  // Generate the complete prompt
   const prompt = generateCompleteNatalChartPrompt(chartData, userProfile);
 
-  console.log('🎯 [COMPLETE NATAL] Prompt length:', prompt.length);
+  console.log('🎯 [COMPLETE NATAL] Prompt length:', prompt.length, 'characters');
 
-  onProgress?.('✨ Consultando los astros para tu carta completa...', 15);
+  const startTime = Date.now();
+
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4o',
+    messages: [
+      {
+        role: 'system',
+        content: 'Eres un astrólogo experto que genera interpretaciones en JSON válido. SIEMPRE responde SOLO con JSON, sin texto adicional.'
+      },
+      {
+        role: 'user',
+        content: prompt
+      }
+    ],
+    temperature: 0.8,
+    max_tokens: 16000,
+    response_format: { type: 'json_object' }
+  });
+
+  const generationTime = ((Date.now() - startTime) / 1000).toFixed(1);
+  console.log('🎯 [COMPLETE NATAL] Generation completed in', generationTime, 'seconds');
+
+  const content = response.choices[0]?.message?.content;
+  if (!content) {
+    throw new Error('No content in OpenAI response');
+  }
+
+  console.log('🎯 [COMPLETE NATAL] Response length:', content.length, 'characters');
 
   try {
-    // Call OpenAI with the complete prompt
-    // Using GPT-4o for best JSON generation
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: `Eres un astrólogo evolutivo DISRUPTIVO experto.
-Generas interpretaciones TRANSFORMACIONALES con lenguaje que EMPODERA.
-Respondes ÚNICAMENTE con JSON válido sin texto adicional.
-Usas el nombre del usuario en los textos.
-Tu estilo mezcla: EDUCATIVO (claro) + PODEROSO (transformacional) + POÉTICO (metáforas).`,
-        },
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-      temperature: 0.85,
-      max_tokens: 16000, // Maximum for complete interpretation
-      response_format: { type: 'json_object' },
-    });
-
-    onProgress?.('🔮 Procesando tu mapa cósmico...', 70);
-
-    const response = completion.choices[0]?.message?.content;
-
-    if (!response) {
-      throw new Error('No response from OpenAI');
-    }
-
-    console.log('🎯 [COMPLETE NATAL] Response received, length:', response.length);
-
-    // Parse JSON response
-    let parsedResponse: CartaNatalCompleta;
-
-    try {
-      // Clean response if needed
-      let cleanedResponse = response.trim();
-
-      // Remove markdown code blocks if present
-      if (cleanedResponse.startsWith('```json')) {
-        cleanedResponse = cleanedResponse.replace(/```json\n?/, '').replace(/\n?```$/, '');
-      } else if (cleanedResponse.startsWith('```')) {
-        cleanedResponse = cleanedResponse.replace(/```\n?/, '').replace(/\n?```$/, '');
-      }
-
-      parsedResponse = JSON.parse(cleanedResponse);
-    } catch (parseError) {
-      console.error('🎯 [COMPLETE NATAL] JSON parse error:', parseError);
-      console.error('🎯 [COMPLETE NATAL] Raw response (first 500 chars):', response.substring(0, 500));
-      throw new Error('Failed to parse OpenAI response as JSON');
-    }
-
-    onProgress?.('✨ ¡Interpretación completa generada!', 100);
-
-    console.log('🎯 [COMPLETE NATAL] Successfully generated complete interpretation');
-    console.log('🎯 [COMPLETE NATAL] Sections:', Object.keys(parsedResponse));
-
-    return parsedResponse;
-
-  } catch (error) {
-    console.error('🎯 [COMPLETE NATAL] Error:', error);
-    throw error;
+    const interpretation = JSON.parse(content) as CartaNatalCompleta;
+    console.log('🎯 [COMPLETE NATAL] Parsed successfully. Sections:', Object.keys(interpretation).length);
+    return interpretation;
+  } catch (parseError) {
+    console.error('🎯 [COMPLETE NATAL] JSON parse error:', parseError);
+    throw new Error('Failed to parse OpenAI response as JSON');
   }
 }
 
 // =============================================================================
-// CHUNKED GENERATION (Alternative for very long responses)
+// CHUNKED GENERATION (for reliability)
 // =============================================================================
 
 export async function generateCompleteNatalInterpretationChunked(
@@ -269,373 +320,255 @@ export async function generateCompleteNatalInterpretationChunked(
   console.log('🎯 [CHUNKED NATAL] Starting chunked generation for:', userProfile.name);
 
   const openai = getOpenAIClient();
-
-  // Calculate elements and modalities first (local calculation)
   const elementos = calculateElementDistribution(chartData.planets);
   const modalidades = calculateModalityDistribution(chartData.planets);
 
-  // Initialize result object
+  // Helper to find planets
+  const findPlanet = (names: string[]) =>
+    chartData.planets.find(p => names.some(n => p.name.toLowerCase().includes(n.toLowerCase())));
+
+  const sun = findPlanet(['sol', 'sun']);
+  const moon = findPlanet(['luna', 'moon']);
+  const mercury = findPlanet(['mercurio', 'mercury']);
+  const venus = findPlanet(['venus']);
+  const mars = findPlanet(['marte', 'mars']);
+  const jupiter = findPlanet(['júpiter', 'jupiter']);
+  const saturn = findPlanet(['saturno', 'saturn']);
+
   const result: Partial<CartaNatalCompleta> = {};
 
-  // CHUNK 1: Core sections (puntos_fundamentales, sintesis, modalidades, esencia)
-  onProgress?.('🌟 Generando tu síntesis elemental...', 10);
-  const chunk1 = await generateChunk1(openai, chartData, userProfile, elementos, modalidades);
+  // CHUNK 1: Core data + Esencia + Síntesis elemental + Modalidades
+  onProgress?.('🌟 Generando tu síntesis elemental y esencia...', 15);
+  const chunk1 = await generateChunk(openai, `
+Genera JSON con estas secciones para ${userProfile.name}:
+- Sol: ${sun?.sign} Casa ${sun?.house}
+- Luna: ${moon?.sign} Casa ${moon?.house}
+- Ascendente: ${chartData.ascendant.sign}
+- Medio Cielo: ${chartData.midheaven.sign}
+- Elementos: Fuego ${elementos.fire.percentage}%, Tierra ${elementos.earth.percentage}%, Aire ${elementos.air.percentage}%, Agua ${elementos.water.percentage}%
+- Modalidades: Cardinal ${modalidades.cardinal.percentage}%, Fijo ${modalidades.fixed.percentage}%, Mutable ${modalidades.mutable.percentage}%
+
+{
+  "puntos_fundamentales": { "sol": {...}, "luna": {...}, "ascendente": {...}, "medio_cielo": {...}, "nodo_norte": {...} },
+  "sintesis_elemental": { "fuego": {...}, "tierra": {...}, "aire": {...}, "agua": {...}, "configuracion_alquimica": "[Párrafo PODEROSO]", "elemento_escaso": "[...]" },
+  "modalidades": { "cardinal": {...}, "fijo": {...}, "mutable": {...}, "ritmo_accion": "[...]" },
+  "esencia_revolucionaria": "[4-5 líneas PODEROSAS comenzando con 'Eres un Alma...']"
+}
+
+Lenguaje DISRUPTIVO: "NO viniste a...", "Tu misión es..."
+Solo JSON válido.`);
   Object.assign(result, chunk1);
 
-  // CHUNK 2: Propósito de vida y interpretaciones principales
-  onProgress?.('✨ Descifrando tu propósito de vida...', 30);
-  const chunk2 = await generateChunk2(openai, chartData, userProfile);
-  Object.assign(result, chunk2);
+  // CHUNK 2: Interpretaciones Sol, Luna, Ascendente, Mercurio
+  onProgress?.('☀️ Interpretando Sol, Luna y Ascendente...', 30);
+  const chunk2 = await generateChunk(openai, `
+Genera interpretaciones PROFUNDAS para ${userProfile.name}:
+- Sol: ${sun?.sign} Casa ${sun?.house}
+- Luna: ${moon?.sign} Casa ${moon?.house}
+- Ascendente: ${chartData.ascendant.sign}
+- Mercurio: ${mercury?.sign} Casa ${mercury?.house}
 
-  // CHUNK 3: Interpretaciones planetarias (Sol, Luna, Asc, MC)
-  onProgress?.('🪐 Interpretando tus planetas personales...', 50);
-  const chunk3 = await generateChunk3(openai, chartData, userProfile);
-  result.interpretaciones = { ...result.interpretaciones, ...chunk3 } as any;
+{
+  "interpretaciones_planetarias": {
+    "sol": {
+      "posicion": "${sun?.sign} Casa ${sun?.house}",
+      "titulo_arquetipo": "[Título creativo tipo 'La Mística que Transforma']",
+      "proposito_vida": "[3-4 párrafos PROFUNDOS]",
+      "trampa": "[La trampa de esta posición]",
+      "superpoder": "[El superpoder]",
+      "afirmacion": "[Mantra]"
+    },
+    "luna": {
+      "posicion": "${moon?.sign} Casa ${moon?.house}",
+      "titulo_arquetipo": "[Título]",
+      "mundo_emocional": "[2-3 párrafos]",
+      "como_se_nutre": "[4-5 formas]",
+      "patron_infancia": "[Patrón]",
+      "sanacion_emocional": "[Sanación]"
+    },
+    "ascendente": {
+      "posicion": "${chartData.ascendant.sign}",
+      "titulo_arquetipo": "[Título]",
+      "personalidad_visible": "[2-3 párrafos]",
+      "presencia": "[Tipo de presencia]",
+      "mascara_vs_esencia": "[Diferencia]"
+    },
+    "mercurio": {
+      "posicion": "${mercury?.sign} Casa ${mercury?.house}",
+      "titulo_arquetipo": "[Título]",
+      "como_piensa": "[2 párrafos]",
+      "fortalezas_mentales": "[4 fortalezas]",
+      "desafio": "[Desafío]"
+    }
+  }
+}
 
-  // CHUNK 4: Resto de planetas + Quirón + Lilith
-  onProgress?.('🌌 Explorando tus planetas transpersonales...', 65);
-  const chunk4 = await generateChunk4(openai, chartData, userProfile);
-  result.interpretaciones = { ...result.interpretaciones, ...chunk4 } as any;
+Cada interpretación con TÍTULO ARQUETIPO creativo. Solo JSON válido.`);
+  result.interpretaciones_planetarias = { ...result.interpretaciones_planetarias, ...chunk2.interpretaciones_planetarias };
 
-  // CHUNK 5: Fortalezas, áreas, sanación, amor
-  onProgress?.('💫 Revelando tus fortalezas y patrones...', 80);
-  const chunk5 = await generateChunk5(openai, chartData, userProfile);
+  // CHUNK 3: Venus, Marte, Júpiter, Saturno
+  onProgress?.('💕 Interpretando Venus, Marte, Júpiter, Saturno...', 45);
+  const chunk3 = await generateChunk(openai, `
+Genera interpretaciones para ${userProfile.name}:
+- Venus: ${venus?.sign} Casa ${venus?.house}
+- Marte: ${mars?.sign} Casa ${mars?.house}
+- Júpiter: ${jupiter?.sign} Casa ${jupiter?.house}
+- Saturno: ${saturn?.sign} Casa ${saturn?.house}
+
+{
+  "interpretaciones_planetarias": {
+    "venus": { "posicion": "...", "titulo_arquetipo": "...", "como_ama": "...", "que_necesita_en_pareja": "...", "trampa_amorosa": "...", "valores": "..." },
+    "marte": { "posicion": "...", "titulo_arquetipo": "...", "como_actua": "...", "energia_vital": "...", "ira": "...", "desafio": "..." },
+    "jupiter": { "posicion": "...", "titulo_arquetipo": "...", "donde_viene_suerte": "...", "expansion": "...", "consejo": "..." },
+    "saturno": { "posicion": "...", "titulo_arquetipo": "...", "karma_lecciones": "...", "responsabilidad": "...", "recompensa": "..." }
+  }
+}
+
+Solo JSON válido.`);
+  result.interpretaciones_planetarias = { ...result.interpretaciones_planetarias, ...chunk3.interpretaciones_planetarias };
+
+  // CHUNK 4: Transpersonales + Aspectos + Integración
+  onProgress?.('🌌 Planetas transpersonales y aspectos...', 60);
+  const chunk4 = await generateChunk(openai, `
+Para ${userProfile.name}, genera:
+
+{
+  "interpretaciones_planetarias": {
+    "urano": { "posicion": "...", "donde_revoluciona": "...", "genialidad": "..." },
+    "neptuno": { "posicion": "...", "espiritualidad": "...", "ilusion_vs_inspiracion": "..." },
+    "pluton": { "posicion": "...", "transformacion": "...", "sombra_y_poder": "..." },
+    "quiron": { "posicion": "...", "herida_principal": "...", "don_sanador": "..." }
+  },
+  "aspectos_destacados": {
+    "stelliums": "[Si hay 3+ planetas en mismo signo]",
+    "aspectos_tensos": "[2-3 cuadraturas/oposiciones]",
+    "aspectos_armoniosos": "[2-3 trígonos/sextiles]",
+    "patron_dominante": "[Patrón de la carta]"
+  },
+  "integracion_carta": {
+    "hilo_de_oro": "[Párrafo que UNE todo]",
+    "sintesis": "[Frase síntesis]",
+    "polaridades": [{ "polo_a": "...", "polo_b": "...", "integracion": "..." }]
+  }
+}
+
+Solo JSON válido.`);
+  result.interpretaciones_planetarias = { ...result.interpretaciones_planetarias, ...chunk4.interpretaciones_planetarias };
+  result.aspectos_destacados = chunk4.aspectos_destacados;
+  result.integracion_carta = chunk4.integracion_carta;
+
+  // CHUNK 5: Fortalezas, Áreas, Sanación
+  onProgress?.('📚 Fortalezas educativas y patrones de sanación...', 75);
+  const chunk5 = await generateChunk(openai, `
+Para ${userProfile.name} (Sol ${sun?.sign}, Luna ${moon?.sign}, Asc ${chartData.ascendant.sign}):
+
+{
+  "fortalezas_educativas": {
+    "como_aprende_mejor": ["Condición 1", "Condición 2", "Condición 3", "Condición 4"],
+    "inteligencias_dominantes": [{ "tipo": "...", "descripcion": "...", "planeta_origen": "..." }],
+    "modalidades_estudio": ["Modalidad 1", "Modalidad 2", "Modalidad 3"]
+  },
+  "areas_especializacion": [
+    { "area": "...", "origen_astrologico": "...", "profesiones": ["...", "...", "..."], "descripcion": "..." },
+    { "area": "...", "origen_astrologico": "...", "profesiones": ["...", "..."], "descripcion": "..." },
+    { "area": "...", "origen_astrologico": "...", "profesiones": ["...", "..."], "descripcion": "..." }
+  ],
+  "patrones_sanacion": {
+    "heridas": [
+      { "nombre": "...", "origen_astrologico": "...", "patron": "...", "origen_infancia": "...", "sanacion": "..." },
+      { "nombre": "...", "origen_astrologico": "...", "patron": "...", "origen_infancia": "...", "sanacion": "..." }
+    ],
+    "ciclos_sanacion_lunar": {
+      "luna_nueva": "[Ritual específico]",
+      "luna_creciente": "[Práctica]",
+      "luna_llena": "[Ritual]",
+      "luna_menguante": "[Práctica de soltar]"
+    },
+    "practicas_integracion": [
+      { "practica": "...", "duracion": "...", "beneficio": "...", "fase_lunar": "..." }
+    ]
+  }
+}
+
+Prácticas vinculadas a FASES LUNARES, NO a días de semana. Solo JSON válido.`);
   Object.assign(result, chunk5);
 
-  // CHUNK 6: Visualización y declaración final
-  onProgress?.('🔮 Preparando tu declaración de poder...', 95);
-  const chunk6 = await generateChunk6(openai, chartData, userProfile);
+  // CHUNK 6: Amor, Visualización, Agenda, Declaración
+  onProgress?.('💕 Manifestación del amor y visualización...', 90);
+  const chunk6 = await generateChunk(openai, `
+Para ${userProfile.name} (Venus ${venus?.sign}, Luna ${moon?.sign}, Sol ${sun?.sign}):
+
+{
+  "manifestacion_amor": {
+    "patron_amoroso": "[Párrafo sobre su patrón en amor]",
+    "que_atrae": "[Qué tipo de personas atrae]",
+    "que_necesita": "[Qué necesita en pareja]",
+    "trampa_amorosa": "[Patrón negativo]",
+    "ritual_luna_nueva_venus": {
+      "preparacion": "[Instrucciones - Luna Nueva en Libra]",
+      "activacion_28_dias": "[Práctica durante ciclo lunar]",
+      "entrega_luna_llena": "[Ritual de entrega]"
+    },
+    "declaracion_amor": "[Declaración poderosa tipo: 'Merezco un amor que...']"
+  },
+  "visualizacion_guiada": {
+    "titulo": "Encuentro con tu Carta Natal",
+    "duracion": "15-20 minutos",
+    "mejor_momento": "Luna Llena o cumpleaños solar",
+    "preparacion": ["Espacio tranquilo, luz de vela", "Carta natal visible", "Cuaderno cerca"],
+    "texto": "[Texto COMPLETO de visualización de 200-250 palabras personalizado con Sol ${sun?.sign}, Luna ${moon?.sign}, Ascendente ${chartData.ascendant.sign}]"
+  },
+  "datos_para_agenda": {
+    "eventos_lunares_personalizados": [
+      { "evento": "Luna Nueva en ${sun?.sign}", "significado": "...", "ritual": "...", "intencion": "..." },
+      { "evento": "Luna Llena en ${moon?.sign}", "significado": "...", "ritual": "...", "intencion": "..." }
+    ],
+    "practicas_por_fase": {
+      "luna_nueva": ["...", "..."],
+      "cuarto_creciente": ["...", "..."],
+      "luna_llena": ["...", "..."],
+      "cuarto_menguante": ["...", "..."]
+    },
+    "dias_poder": [
+      { "cuando": "Luna transita ${sun?.sign}", "que_hacer": "...", "que_evitar": "..." }
+    ],
+    "advertencias_cosmicas": [
+      { "situacion": "Mercurio Retrógrado", "como_afecta": "...", "precauciones": "..." }
+    ]
+  },
+  "declaracion_poder_final": "[5-6 líneas ÉPICAS en primera persona. Terminar con 'Este es mi mapa. Esta es mi magia. Esta SOY YO.']",
+  "mantra_personal": "[Frase corta: 'SOY FUEGO que transforma...']"
+}
+
+Solo JSON válido.`);
   Object.assign(result, chunk6);
 
   onProgress?.('✨ ¡Interpretación completa lista!', 100);
-
   console.log('🎯 [CHUNKED NATAL] All chunks completed');
 
   return result as CartaNatalCompleta;
 }
 
-// =============================================================================
-// CHUNK GENERATION HELPERS
-// =============================================================================
-
-async function generateChunk1(
-  openai: OpenAI,
-  chartData: ChartData,
-  userProfile: UserProfile,
-  elementos: ReturnType<typeof calculateElementDistribution>,
-  modalidades: ReturnType<typeof calculateModalityDistribution>
-): Promise<Pick<CartaNatalCompleta, 'puntos_fundamentales' | 'sintesis_elemental' | 'modalidades' | 'esencia_revolucionaria'>> {
-
-  const sol = chartData.planets.find(p => p.name.toLowerCase().includes('sol'));
-  const luna = chartData.planets.find(p => p.name.toLowerCase().includes('luna'));
-  const nodoNorte = chartData.planets.find(p => p.name.toLowerCase().includes('nodo norte'));
-  const nodoSur = chartData.planets.find(p => p.name.toLowerCase().includes('nodo sur'));
-
-  const prompt = `Genera JSON para la carta natal de ${userProfile.name}:
-
-DATOS:
-- Sol: ${sol?.sign} Casa ${sol?.house}
-- Luna: ${luna?.sign} Casa ${luna?.house}
-- Ascendente: ${chartData.ascendant.sign}
-- MC: ${chartData.midheaven.sign}
-- Nodo Norte: ${nodoNorte?.sign} Casa ${nodoNorte?.house}
-- Fuego: ${elementos.fire.percentage}%, Tierra: ${elementos.earth.percentage}%, Aire: ${elementos.air.percentage}%, Agua: ${elementos.water.percentage}%
-- Cardinal: ${modalidades.cardinal.percentage}%, Fijo: ${modalidades.fixed.percentage}%, Mutable: ${modalidades.mutable.percentage}%
-
-Genera JSON con:
-{
-  "puntos_fundamentales": { sol, luna, ascendente, medio_cielo, nodo_norte, nodo_sur - cada uno con signo, grado, casa, superpoder },
-  "sintesis_elemental": { fuego, tierra, aire, agua - cada uno con porcentaje, planetas[], significado + elemento_dominante, elemento_escaso, configuracion_alquimica },
-  "modalidades": { cardinal, fijo, mutable - cada uno con porcentaje, significado + ritmo_accion },
-  "esencia_revolucionaria": "Texto DISRUPTIVO 8-12 líneas empezando con '¡${userProfile.name.toUpperCase()}, NO VINISTE A ENCAJAR!'"
-}
-
-ESTILO: Disruptivo, transformacional, usa MAYÚSCULAS estratégicamente.`;
-
-  const completion = await openai.chat.completions.create({
+// Helper function for chunk generation
+async function generateChunk(openai: OpenAI, prompt: string): Promise<any> {
+  const response = await openai.chat.completions.create({
     model: 'gpt-4o',
     messages: [
-      { role: 'system', content: 'Astrólogo evolutivo disruptivo. Solo JSON válido.' },
+      {
+        role: 'system',
+        content: 'Eres un astrólogo experto. Responde SOLO con JSON válido, sin texto adicional. Lenguaje DISRUPTIVO y EMPODERADOR.'
+      },
       { role: 'user', content: prompt }
     ],
-    temperature: 0.85,
+    temperature: 0.8,
     max_tokens: 4000,
-    response_format: { type: 'json_object' },
+    response_format: { type: 'json_object' }
   });
 
-  const response = completion.choices[0]?.message?.content;
-  if (!response) throw new Error('No response for chunk 1');
+  const content = response.choices[0]?.message?.content;
+  if (!content) throw new Error('No content in chunk response');
 
-  return JSON.parse(response);
+  return JSON.parse(content);
 }
 
-async function generateChunk2(
-  openai: OpenAI,
-  chartData: ChartData,
-  userProfile: UserProfile
-): Promise<Pick<CartaNatalCompleta, 'proposito_vida'>> {
-
-  const nodoNorte = chartData.planets.find(p => p.name.toLowerCase().includes('nodo norte'));
-  const nodoSur = chartData.planets.find(p => p.name.toLowerCase().includes('nodo sur'));
-
-  const prompt = `Genera JSON de propósito de vida para ${userProfile.name}:
-
-NODO NORTE: ${nodoNorte?.sign} Casa ${nodoNorte?.house}
-NODO SUR: ${nodoSur?.sign} Casa ${nodoSur?.house}
-
-JSON:
-{
-  "proposito_vida": {
-    "nodo_norte": { signo, casa, mision (4-6 líneas DISRUPTIVAS), habilidades_activar: [4 items] },
-    "nodo_sur": { signo, casa, zona_confort (texto), patrones_soltar: [3 items] },
-    "salto_evolutivo": { de: "frase corta", a: "frase corta" }
-  }
-}`;
-
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-4o',
-    messages: [
-      { role: 'system', content: 'Astrólogo evolutivo disruptivo. Solo JSON válido.' },
-      { role: 'user', content: prompt }
-    ],
-    temperature: 0.85,
-    max_tokens: 2000,
-    response_format: { type: 'json_object' },
-  });
-
-  const response = completion.choices[0]?.message?.content;
-  if (!response) throw new Error('No response for chunk 2');
-
-  return JSON.parse(response);
-}
-
-async function generateChunk3(
-  openai: OpenAI,
-  chartData: ChartData,
-  userProfile: UserProfile
-): Promise<Pick<CartaNatalCompleta['interpretaciones'], 'sol' | 'luna' | 'ascendente' | 'medio_cielo'>> {
-
-  const sol = chartData.planets.find(p => p.name.toLowerCase().includes('sol'));
-  const luna = chartData.planets.find(p => p.name.toLowerCase().includes('luna'));
-
-  const prompt = `Genera interpretaciones completas para ${userProfile.name}:
-
-SOL: ${sol?.sign} Casa ${sol?.house} (${sol?.degree}°)
-LUNA: ${luna?.sign} Casa ${luna?.house} (${luna?.degree}°)
-ASCENDENTE: ${chartData.ascendant.sign} (${chartData.ascendant.degree}°)
-MEDIO CIELO: ${chartData.midheaven.sign} (${chartData.midheaven.degree}°)
-
-Para CADA UNO genera:
-{
-  "sol": {
-    "posicion": { signo, casa, grado },
-    "educativo": "6-8 líneas explicando qué es, qué significa en ese signo/casa",
-    "poderoso": "8-10 líneas DISRUPTIVAS con '¡NO VINISTE A...!' y MAYÚSCULAS",
-    "poetico": "4-6 líneas metafóricas hermosas",
-    "sombras": [{ nombre, patron, trampa: "❌ ...", regalo: "✅ ..." }, ...],
-    "sintesis": { frase: "15 palabras máx", declaracion: "YO SOY... 2-4 líneas" }
-  },
-  "luna": { ... mismo formato ... },
-  "ascendente": { ... mismo formato ... },
-  "medio_cielo": { ... mismo formato ... }
-}`;
-
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-4o',
-    messages: [
-      { role: 'system', content: 'Astrólogo evolutivo disruptivo. Solo JSON válido.' },
-      { role: 'user', content: prompt }
-    ],
-    temperature: 0.85,
-    max_tokens: 6000,
-    response_format: { type: 'json_object' },
-  });
-
-  const response = completion.choices[0]?.message?.content;
-  if (!response) throw new Error('No response for chunk 3');
-
-  return JSON.parse(response);
-}
-
-async function generateChunk4(
-  openai: OpenAI,
-  chartData: ChartData,
-  userProfile: UserProfile
-): Promise<Partial<CartaNatalCompleta['interpretaciones']>> {
-
-  const getPlanet = (name: string) => chartData.planets.find(p =>
-    p.name.toLowerCase().includes(name.toLowerCase())
-  );
-
-  const mercurio = getPlanet('mercurio');
-  const venus = getPlanet('venus');
-  const marte = getPlanet('marte');
-  const jupiter = getPlanet('jupiter') || getPlanet('júpiter');
-  const saturno = getPlanet('saturno');
-  const urano = getPlanet('urano');
-  const neptuno = getPlanet('neptuno');
-  const pluton = getPlanet('pluton') || getPlanet('plutón');
-  const quiron = getPlanet('quiron') || getPlanet('quirón') || getPlanet('chiron');
-  const lilith = getPlanet('lilith');
-  const nodoNorte = getPlanet('nodo norte');
-
-  const prompt = `Genera interpretaciones para ${userProfile.name}:
-
-MERCURIO: ${mercurio?.sign} Casa ${mercurio?.house}
-VENUS: ${venus?.sign} Casa ${venus?.house}
-MARTE: ${marte?.sign} Casa ${marte?.house}
-JÚPITER: ${jupiter?.sign} Casa ${jupiter?.house}
-SATURNO: ${saturno?.sign} Casa ${saturno?.house}
-URANO: ${urano?.sign} Casa ${urano?.house}
-NEPTUNO: ${neptuno?.sign} Casa ${neptuno?.house}
-PLUTÓN: ${pluton?.sign} Casa ${pluton?.house}
-QUIRÓN: ${quiron?.sign} Casa ${quiron?.house}
-LILITH: ${lilith?.sign} Casa ${lilith?.house}
-NODO NORTE: ${nodoNorte?.sign} Casa ${nodoNorte?.house}
-
-Para CADA planeta genera (mismo formato):
-{
-  "mercurio": { posicion, educativo, poderoso, poetico, sombras[], sintesis },
-  "venus": { ... },
-  "marte": { ... },
-  "jupiter": { ... },
-  "saturno": { ... },
-  "urano": { ... },
-  "neptuno": { ... },
-  "pluton": { ... },
-  "quiron": { ... herida sagrada, sanador herido ... },
-  "lilith": { ... poder femenino oculto ... },
-  "nodo_norte": { ... }
-}
-
-ESTILO: Disruptivo, "¡NO VINISTE A...!", MAYÚSCULAS, sombras con trampa/regalo.`;
-
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-4o',
-    messages: [
-      { role: 'system', content: 'Astrólogo evolutivo disruptivo. Solo JSON válido.' },
-      { role: 'user', content: prompt }
-    ],
-    temperature: 0.85,
-    max_tokens: 8000,
-    response_format: { type: 'json_object' },
-  });
-
-  const response = completion.choices[0]?.message?.content;
-  if (!response) throw new Error('No response for chunk 4');
-
-  return JSON.parse(response);
-}
-
-async function generateChunk5(
-  openai: OpenAI,
-  chartData: ChartData,
-  userProfile: UserProfile
-): Promise<Pick<CartaNatalCompleta, 'fortalezas_educativas' | 'areas_especializacion' | 'patrones_sanacion' | 'manifestacion_amor'>> {
-
-  const sol = chartData.planets.find(p => p.name.toLowerCase().includes('sol'));
-  const luna = chartData.planets.find(p => p.name.toLowerCase().includes('luna'));
-  const venus = chartData.planets.find(p => p.name.toLowerCase().includes('venus'));
-  const marte = chartData.planets.find(p => p.name.toLowerCase().includes('marte'));
-  const mercurio = chartData.planets.find(p => p.name.toLowerCase().includes('mercurio'));
-
-  const prompt = `Genera secciones especiales para ${userProfile.name}:
-
-SOL: ${sol?.sign} Casa ${sol?.house}
-LUNA: ${luna?.sign} Casa ${luna?.house}
-VENUS: ${venus?.sign} Casa ${venus?.house}
-MARTE: ${marte?.sign} Casa ${marte?.house}
-MERCURIO: ${mercurio?.sign} Casa ${mercurio?.house}
-ASCENDENTE: ${chartData.ascendant.sign}
-
-JSON:
-{
-  "fortalezas_educativas": {
-    "como_aprendes_mejor": ["4-5 items específicos basados en la carta"],
-    "inteligencias_dominantes": [{ tipo, descripcion, planeta_origen }, ...],
-    "modalidades_estudio": ["3-4 recomendaciones"]
-  },
-  "areas_especializacion": [
-    { area: "nombre área", planetas_origen: "qué planetas", profesiones_sugeridas: ["3 profesiones"] },
-    { ... 2 más ... }
-  ],
-  "patrones_sanacion": {
-    "heridas": [
-      { nombre: "La Herida de...", planeta_origen, patron, origen_infancia, como_se_manifiesta: ["3 items"], sanacion },
-      { ... otra herida ... }
-    ]
-  },
-  "manifestacion_amor": {
-    "patron_amoroso": "texto basado en Venus + Luna + Marte",
-    "que_atraes": "...",
-    "que_necesitas": "...",
-    "trampa_amorosa": "...",
-    "leccion_amorosa": "...",
-    "declaracion_amor": "3-4 líneas empezando con 'Merezco un amor que...'"
-  }
-}`;
-
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-4o',
-    messages: [
-      { role: 'system', content: 'Astrólogo evolutivo disruptivo. Solo JSON válido.' },
-      { role: 'user', content: prompt }
-    ],
-    temperature: 0.85,
-    max_tokens: 4000,
-    response_format: { type: 'json_object' },
-  });
-
-  const response = completion.choices[0]?.message?.content;
-  if (!response) throw new Error('No response for chunk 5');
-
-  return JSON.parse(response);
-}
-
-async function generateChunk6(
-  openai: OpenAI,
-  chartData: ChartData,
-  userProfile: UserProfile
-): Promise<Pick<CartaNatalCompleta, 'visualizacion' | 'declaracion_poder' | 'datos_para_agenda'>> {
-
-  const sol = chartData.planets.find(p => p.name.toLowerCase().includes('sol'));
-  const luna = chartData.planets.find(p => p.name.toLowerCase().includes('luna'));
-
-  const prompt = `Genera secciones finales para ${userProfile.name}:
-
-SOL: ${sol?.sign}
-LUNA: ${luna?.sign}
-ASCENDENTE: ${chartData.ascendant.sign}
-
-JSON:
-{
-  "visualizacion": {
-    "duracion": "15-20 minutos",
-    "mejor_momento": "Luna Llena o cumpleaños solar",
-    "preparacion": ["3-4 instrucciones"],
-    "texto_visualizacion": "Texto completo de visualización guiada (8-12 líneas) personalizado para ${userProfile.name}, mencionando su Sol en ${sol?.sign}, Luna en ${luna?.sign}, Ascendente ${chartData.ascendant.sign}. Que sea hermoso y transformador."
-  },
-  "declaracion_poder": "Texto ÉPICO de 10-14 líneas. Empieza con 'YO SOY la que/el que...'. Fusiona toda la carta. Usa MAYÚSCULAS. Termina impactante como '¡Y ASÍ ES!' o 'NO PIDO PERMISO PARA SER TODO YO.'",
-  "datos_para_agenda": {
-    "heridas_para_ciclos_lunares": ["nombre herida 1", "nombre herida 2"],
-    "ritual_amor_luna_optima": "Luna Nueva en [signo de Venus o Casa 7]",
-    "temas_principales": ["3 temas clave de la carta"]
-  }
-}`;
-
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-4o',
-    messages: [
-      { role: 'system', content: 'Astrólogo evolutivo disruptivo. Solo JSON válido.' },
-      { role: 'user', content: prompt }
-    ],
-    temperature: 0.85,
-    max_tokens: 3000,
-    response_format: { type: 'json_object' },
-  });
-
-  const response = completion.choices[0]?.message?.content;
-  if (!response) throw new Error('No response for chunk 6');
-
-  return JSON.parse(response);
-}
+export { type ChartData, type UserProfile };

@@ -1,7 +1,7 @@
 // =============================================================================
-// 🎯 COMPLETE NATAL CHART PROMPT - TODAS LAS SECCIONES
+// 🎯 COMPLETE NATAL CHART PROMPT - ESTRUCTURA DETALLADA
 // src/utils/prompts/completeNatalChartPrompt.ts
-// Genera interpretación completa con 17 secciones
+// Genera interpretación completa con todas las secciones en estilo DISRUPTIVO
 // =============================================================================
 
 export interface UserProfile {
@@ -29,495 +29,353 @@ export interface ChartData {
     type: string;
     orb: number;
   }>;
-  elementDistribution?: {
-    fire: number;
-    earth: number;
-    air: number;
-    water: number;
-  };
-  modalityDistribution?: {
-    cardinal: number;
-    fixed: number;
-    mutable: number;
-  };
 }
 
 // =============================================================================
-// HELPER: Calcular distribución de elementos si no viene
+// ELEMENT AND MODALITY CALCULATIONS
 // =============================================================================
 
-export function calculateElementDistribution(planets: ChartData['planets']): {
-  fire: { count: number; percentage: number; planets: string[] };
-  earth: { count: number; percentage: number; planets: string[] };
-  air: { count: number; percentage: number; planets: string[] };
-  water: { count: number; percentage: number; planets: string[] };
-} {
-  const fireSign = ['Aries', 'Leo', 'Sagitario', 'Sagittarius'];
-  const earthSigns = ['Tauro', 'Taurus', 'Virgo', 'Capricornio', 'Capricorn'];
-  const airSigns = ['Géminis', 'Gemini', 'Libra', 'Acuario', 'Aquarius'];
-  const waterSigns = ['Cáncer', 'Cancer', 'Escorpio', 'Scorpio', 'Piscis', 'Pisces'];
+const FIRE_SIGNS = ['Aries', 'Leo', 'Sagittarius', 'Sagitario'];
+const EARTH_SIGNS = ['Taurus', 'Tauro', 'Virgo', 'Capricorn', 'Capricornio'];
+const AIR_SIGNS = ['Gemini', 'Géminis', 'Libra', 'Aquarius', 'Acuario'];
+const WATER_SIGNS = ['Cancer', 'Cáncer', 'Scorpio', 'Escorpio', 'Pisces', 'Piscis'];
 
-  const result = {
-    fire: { count: 0, percentage: 0, planets: [] as string[] },
-    earth: { count: 0, percentage: 0, planets: [] as string[] },
-    air: { count: 0, percentage: 0, planets: [] as string[] },
-    water: { count: 0, percentage: 0, planets: [] as string[] },
-  };
+const CARDINAL_SIGNS = ['Aries', 'Cancer', 'Cáncer', 'Libra', 'Capricorn', 'Capricornio'];
+const FIXED_SIGNS = ['Taurus', 'Tauro', 'Leo', 'Scorpio', 'Escorpio', 'Aquarius', 'Acuario'];
+const MUTABLE_SIGNS = ['Gemini', 'Géminis', 'Virgo', 'Sagittarius', 'Sagitario', 'Pisces', 'Piscis'];
 
-  const mainPlanets = planets.filter(p =>
-    ['Sol', 'Luna', 'Mercurio', 'Venus', 'Marte', 'Jupiter', 'Júpiter', 'Saturno', 'Urano', 'Neptuno', 'Pluton', 'Plutón']
-    .some(name => p.name.toLowerCase().includes(name.toLowerCase()))
-  );
+export function calculateElementDistribution(planets: ChartData['planets']) {
+  const elements = { fire: [] as string[], earth: [] as string[], air: [] as string[], water: [] as string[] };
 
-  mainPlanets.forEach(planet => {
-    if (fireSign.some(s => planet.sign.toLowerCase().includes(s.toLowerCase()))) {
-      result.fire.count++;
-      result.fire.planets.push(planet.name);
-    } else if (earthSigns.some(s => planet.sign.toLowerCase().includes(s.toLowerCase()))) {
-      result.earth.count++;
-      result.earth.planets.push(planet.name);
-    } else if (airSigns.some(s => planet.sign.toLowerCase().includes(s.toLowerCase()))) {
-      result.air.count++;
-      result.air.planets.push(planet.name);
-    } else if (waterSigns.some(s => planet.sign.toLowerCase().includes(s.toLowerCase()))) {
-      result.water.count++;
-      result.water.planets.push(planet.name);
-    }
+  planets.forEach(p => {
+    const sign = p.sign;
+    if (FIRE_SIGNS.some(s => sign.toLowerCase().includes(s.toLowerCase()))) elements.fire.push(p.name);
+    else if (EARTH_SIGNS.some(s => sign.toLowerCase().includes(s.toLowerCase()))) elements.earth.push(p.name);
+    else if (AIR_SIGNS.some(s => sign.toLowerCase().includes(s.toLowerCase()))) elements.air.push(p.name);
+    else if (WATER_SIGNS.some(s => sign.toLowerCase().includes(s.toLowerCase()))) elements.water.push(p.name);
   });
 
-  const total = result.fire.count + result.earth.count + result.air.count + result.water.count;
-  if (total > 0) {
-    result.fire.percentage = Math.round((result.fire.count / total) * 100);
-    result.earth.percentage = Math.round((result.earth.count / total) * 100);
-    result.air.percentage = Math.round((result.air.count / total) * 100);
-    result.water.percentage = Math.round((result.water.count / total) * 100);
-  }
-
-  return result;
+  const total = planets.length || 1;
+  return {
+    fire: { count: elements.fire.length, percentage: Math.round((elements.fire.length / total) * 100), planets: elements.fire },
+    earth: { count: elements.earth.length, percentage: Math.round((elements.earth.length / total) * 100), planets: elements.earth },
+    air: { count: elements.air.length, percentage: Math.round((elements.air.length / total) * 100), planets: elements.air },
+    water: { count: elements.water.length, percentage: Math.round((elements.water.length / total) * 100), planets: elements.water },
+  };
 }
 
-export function calculateModalityDistribution(planets: ChartData['planets']): {
-  cardinal: { count: number; percentage: number; planets: string[] };
-  fixed: { count: number; percentage: number; planets: string[] };
-  mutable: { count: number; percentage: number; planets: string[] };
-} {
-  const cardinalSigns = ['Aries', 'Cáncer', 'Cancer', 'Libra', 'Capricornio', 'Capricorn'];
-  const fixedSigns = ['Tauro', 'Taurus', 'Leo', 'Escorpio', 'Scorpio', 'Acuario', 'Aquarius'];
-  const mutableSigns = ['Géminis', 'Gemini', 'Virgo', 'Sagitario', 'Sagittarius', 'Piscis', 'Pisces'];
+export function calculateModalityDistribution(planets: ChartData['planets']) {
+  const modalities = { cardinal: [] as string[], fixed: [] as string[], mutable: [] as string[] };
 
-  const result = {
-    cardinal: { count: 0, percentage: 0, planets: [] as string[] },
-    fixed: { count: 0, percentage: 0, planets: [] as string[] },
-    mutable: { count: 0, percentage: 0, planets: [] as string[] },
-  };
-
-  const mainPlanets = planets.filter(p =>
-    ['Sol', 'Luna', 'Mercurio', 'Venus', 'Marte', 'Jupiter', 'Júpiter', 'Saturno', 'Urano', 'Neptuno', 'Pluton', 'Plutón']
-    .some(name => p.name.toLowerCase().includes(name.toLowerCase()))
-  );
-
-  mainPlanets.forEach(planet => {
-    if (cardinalSigns.some(s => planet.sign.toLowerCase().includes(s.toLowerCase()))) {
-      result.cardinal.count++;
-      result.cardinal.planets.push(planet.name);
-    } else if (fixedSigns.some(s => planet.sign.toLowerCase().includes(s.toLowerCase()))) {
-      result.fixed.count++;
-      result.fixed.planets.push(planet.name);
-    } else if (mutableSigns.some(s => planet.sign.toLowerCase().includes(s.toLowerCase()))) {
-      result.mutable.count++;
-      result.mutable.planets.push(planet.name);
-    }
+  planets.forEach(p => {
+    const sign = p.sign;
+    if (CARDINAL_SIGNS.some(s => sign.toLowerCase().includes(s.toLowerCase()))) modalities.cardinal.push(p.name);
+    else if (FIXED_SIGNS.some(s => sign.toLowerCase().includes(s.toLowerCase()))) modalities.fixed.push(p.name);
+    else if (MUTABLE_SIGNS.some(s => sign.toLowerCase().includes(s.toLowerCase()))) modalities.mutable.push(p.name);
   });
 
-  const total = result.cardinal.count + result.fixed.count + result.mutable.count;
-  if (total > 0) {
-    result.cardinal.percentage = Math.round((result.cardinal.count / total) * 100);
-    result.fixed.percentage = Math.round((result.fixed.count / total) * 100);
-    result.mutable.percentage = Math.round((result.mutable.count / total) * 100);
-  }
-
-  return result;
+  const total = planets.length || 1;
+  return {
+    cardinal: { count: modalities.cardinal.length, percentage: Math.round((modalities.cardinal.length / total) * 100), planets: modalities.cardinal },
+    fixed: { count: modalities.fixed.length, percentage: Math.round((modalities.fixed.length / total) * 100), planets: modalities.fixed },
+    mutable: { count: modalities.mutable.length, percentage: Math.round((modalities.mutable.length / total) * 100), planets: modalities.mutable },
+  };
 }
 
 // =============================================================================
-// PROMPT PRINCIPAL: Genera TODA la carta natal
+// HELPER FUNCTIONS
 // =============================================================================
 
-export function generateCompleteNatalChartPrompt(
-  chartData: ChartData,
-  userProfile: UserProfile
-): string {
+function findPlanet(planets: ChartData['planets'], ...names: string[]) {
+  return planets.find(p => names.some(n => p.name.toLowerCase().includes(n.toLowerCase())));
+}
 
-  // Encontrar planetas clave
-  const sol = chartData.planets.find(p => p.name.toLowerCase().includes('sol') || p.name.toLowerCase() === 'sun');
-  const luna = chartData.planets.find(p => p.name.toLowerCase().includes('luna') || p.name.toLowerCase() === 'moon');
-  const mercurio = chartData.planets.find(p => p.name.toLowerCase().includes('mercurio') || p.name.toLowerCase() === 'mercury');
-  const venus = chartData.planets.find(p => p.name.toLowerCase().includes('venus'));
-  const marte = chartData.planets.find(p => p.name.toLowerCase().includes('marte') || p.name.toLowerCase() === 'mars');
-  const jupiter = chartData.planets.find(p => p.name.toLowerCase().includes('jupiter') || p.name.toLowerCase().includes('júpiter'));
-  const saturno = chartData.planets.find(p => p.name.toLowerCase().includes('saturno') || p.name.toLowerCase() === 'saturn');
-  const urano = chartData.planets.find(p => p.name.toLowerCase().includes('urano') || p.name.toLowerCase() === 'uranus');
-  const neptuno = chartData.planets.find(p => p.name.toLowerCase().includes('neptuno') || p.name.toLowerCase() === 'neptune');
-  const pluton = chartData.planets.find(p => p.name.toLowerCase().includes('pluton') || p.name.toLowerCase().includes('plutón') || p.name.toLowerCase() === 'pluto');
-  const quiron = chartData.planets.find(p => p.name.toLowerCase().includes('quiron') || p.name.toLowerCase().includes('quirón') || p.name.toLowerCase() === 'chiron');
-  const lilith = chartData.planets.find(p => p.name.toLowerCase().includes('lilith'));
-  const nodoNorte = chartData.planets.find(p => p.name.toLowerCase().includes('nodo norte') || p.name.toLowerCase().includes('north node') || p.name.toLowerCase().includes('rahu'));
-  const nodoSur = chartData.planets.find(p => p.name.toLowerCase().includes('nodo sur') || p.name.toLowerCase().includes('south node') || p.name.toLowerCase().includes('ketu'));
+function formatPlanetsForPrompt(planets: ChartData['planets']): string {
+  return planets.map(p =>
+    `- ${p.name}: ${p.sign} ${p.degree}° Casa ${p.house}${p.retrograde ? ' (R)' : ''}`
+  ).join('\n');
+}
 
-  // Calcular elementos y modalidades
+function formatAspectsForPrompt(aspects: ChartData['aspects']): string {
+  if (!aspects || aspects.length === 0) return 'No hay aspectos calculados';
+  return aspects.slice(0, 15).map(a => `- ${a.planet1} ${a.type} ${a.planet2} (orbe: ${a.orb}°)`).join('\n');
+}
+
+// =============================================================================
+// MAIN PROMPT GENERATOR
+// =============================================================================
+
+export function generateCompleteNatalChartPrompt(chartData: ChartData, userProfile: UserProfile): string {
   const elementos = calculateElementDistribution(chartData.planets);
   const modalidades = calculateModalityDistribution(chartData.planets);
 
-  // Determinar elemento dominante y escaso
-  const elementosArray = [
-    { name: 'Fuego', ...elementos.fire },
-    { name: 'Tierra', ...elementos.earth },
-    { name: 'Aire', ...elementos.air },
-    { name: 'Agua', ...elementos.water },
-  ];
-  const elementoDominante = elementosArray.reduce((a, b) => a.percentage > b.percentage ? a : b);
-  const elementoEscaso = elementosArray.reduce((a, b) => a.percentage < b.percentage ? a : b);
+  const sun = findPlanet(chartData.planets, 'sol', 'sun');
+  const moon = findPlanet(chartData.planets, 'luna', 'moon');
+  const mercury = findPlanet(chartData.planets, 'mercurio', 'mercury');
+  const venus = findPlanet(chartData.planets, 'venus');
+  const mars = findPlanet(chartData.planets, 'marte', 'mars');
+  const jupiter = findPlanet(chartData.planets, 'júpiter', 'jupiter');
+  const saturn = findPlanet(chartData.planets, 'saturno', 'saturn');
+  const uranus = findPlanet(chartData.planets, 'urano', 'uranus');
+  const neptune = findPlanet(chartData.planets, 'neptuno', 'neptune');
+  const pluto = findPlanet(chartData.planets, 'plutón', 'pluto');
+  const northNode = findPlanet(chartData.planets, 'nodo norte', 'north node', 'rahu');
+  const chiron = findPlanet(chartData.planets, 'quirón', 'chiron');
+  const lilith = findPlanet(chartData.planets, 'lilith');
 
-  return `Eres un astrólogo evolutivo DISRUPTIVO experto. Genera una interpretación COMPLETA y TRANSFORMACIONAL de la carta natal.
+  return `Eres un ASTRÓLOGO REVOLUCIONARIO con estilo ÚNICO que combina:
+- EDUCATIVO: Explicas qué significa cada posición astrológica
+- PODEROSO: Lenguaje DISRUPTIVO que DESPIERTA ("NO viniste a...", "Tu misión es...")
+- POÉTICO: Imágenes evocadoras y frases memorables
+- PRÁCTICO: Rituales vinculados a FASES LUNARES (NUNCA a días de semana como lunes, martes...)
 
-═══════════════════════════════════════════════════════════════════════════════
-DATOS DE LA PERSONA
-═══════════════════════════════════════════════════════════════════════════════
-NOMBRE: ${userProfile.name}
-EDAD: ${userProfile.age} años
-NACIMIENTO: ${userProfile.birthDate} a las ${userProfile.birthTime}
-LUGAR: ${userProfile.birthPlace}
+═══════════════════════════════════════════════
+DATOS DE LA CARTA NATAL DE ${userProfile.name.toUpperCase()}
+═══════════════════════════════════════════════
 
-═══════════════════════════════════════════════════════════════════════════════
-DATOS ASTROLÓGICOS
-═══════════════════════════════════════════════════════════════════════════════
-ASCENDENTE: ${chartData.ascendant.sign} ${chartData.ascendant.degree}°
-MEDIO CIELO: ${chartData.midheaven.sign} ${chartData.midheaven.degree}°
+PERSONA:
+- Nombre: ${userProfile.name}
+- Edad: ${userProfile.age} años
+- Fecha: ${userProfile.birthDate}
+- Hora: ${userProfile.birthTime}
+- Lugar: ${userProfile.birthPlace}
 
-SOL: ${sol?.sign || 'N/A'} ${sol?.degree || 0}° Casa ${sol?.house || 'N/A'}
-LUNA: ${luna?.sign || 'N/A'} ${luna?.degree || 0}° Casa ${luna?.house || 'N/A'}
-MERCURIO: ${mercurio?.sign || 'N/A'} ${mercurio?.degree || 0}° Casa ${mercurio?.house || 'N/A'}
-VENUS: ${venus?.sign || 'N/A'} ${venus?.degree || 0}° Casa ${venus?.house || 'N/A'}
-MARTE: ${marte?.sign || 'N/A'} ${marte?.degree || 0}° Casa ${marte?.house || 'N/A'}
-JÚPITER: ${jupiter?.sign || 'N/A'} ${jupiter?.degree || 0}° Casa ${jupiter?.house || 'N/A'}
-SATURNO: ${saturno?.sign || 'N/A'} ${saturno?.degree || 0}° Casa ${saturno?.house || 'N/A'}
-URANO: ${urano?.sign || 'N/A'} ${urano?.degree || 0}° Casa ${urano?.house || 'N/A'}
-NEPTUNO: ${neptuno?.sign || 'N/A'} ${neptuno?.degree || 0}° Casa ${neptuno?.house || 'N/A'}
-PLUTÓN: ${pluton?.sign || 'N/A'} ${pluton?.degree || 0}° Casa ${pluton?.house || 'N/A'}
-QUIRÓN: ${quiron?.sign || 'N/A'} ${quiron?.degree || 0}° Casa ${quiron?.house || 'N/A'}
-LILITH: ${lilith?.sign || 'N/A'} ${lilith?.degree || 0}° Casa ${lilith?.house || 'N/A'}
-NODO NORTE: ${nodoNorte?.sign || 'N/A'} ${nodoNorte?.degree || 0}° Casa ${nodoNorte?.house || 'N/A'}
-NODO SUR: ${nodoSur?.sign || 'N/A'} ${nodoSur?.degree || 0}° Casa ${nodoSur?.house || 'N/A'}
+PUNTOS CARDINALES:
+- Ascendente: ${chartData.ascendant.sign} ${chartData.ascendant.degree}°
+- Medio Cielo: ${chartData.midheaven.sign} ${chartData.midheaven.degree}°
 
-DISTRIBUCIÓN ELEMENTAL:
-- Fuego: ${elementos.fire.percentage}% (${elementos.fire.planets.join(', ') || 'ninguno'})
-- Tierra: ${elementos.earth.percentage}% (${elementos.earth.planets.join(', ') || 'ninguno'})
-- Aire: ${elementos.air.percentage}% (${elementos.air.planets.join(', ') || 'ninguno'})
-- Agua: ${elementos.water.percentage}% (${elementos.water.planets.join(', ') || 'ninguno'})
-- Elemento dominante: ${elementoDominante.name} (${elementoDominante.percentage}%)
-- Elemento escaso: ${elementoEscaso.name} (${elementoEscaso.percentage}%)
+POSICIONES PLANETARIAS:
+${formatPlanetsForPrompt(chartData.planets)}
 
-DISTRIBUCIÓN MODAL:
-- Cardinal: ${modalidades.cardinal.percentage}% (${modalidades.cardinal.planets.join(', ') || 'ninguno'})
-- Fijo: ${modalidades.fixed.percentage}% (${modalidades.fixed.planets.join(', ') || 'ninguno'})
-- Mutable: ${modalidades.mutable.percentage}% (${modalidades.mutable.planets.join(', ') || 'ninguno'})
+ASPECTOS PRINCIPALES:
+${formatAspectsForPrompt(chartData.aspects)}
 
-═══════════════════════════════════════════════════════════════════════════════
-INSTRUCCIONES DE ESTILO
-═══════════════════════════════════════════════════════════════════════════════
+DISTRIBUCIÓN ELEMENTAL (calculada):
+🔥 Fuego: ${elementos.fire.percentage}% (${elementos.fire.planets.join(', ') || 'ninguno'})
+🌍 Tierra: ${elementos.earth.percentage}% (${elementos.earth.planets.join(', ') || 'ninguno'})
+💨 Aire: ${elementos.air.percentage}% (${elementos.air.planets.join(', ') || 'ninguno'})
+🌊 Agua: ${elementos.water.percentage}% (${elementos.water.planets.join(', ') || 'ninguno'})
 
-LENGUAJE DISRUPTIVO:
-- Usa "¡NO VINISTE A...!" para romper creencias limitantes
-- Usa "¡ESTO ES ENORME!" para enfatizar aspectos importantes
-- Usa MAYÚSCULAS estratégicamente para ENFATIZAR palabras clave
-- Habla DIRECTO a ${userProfile.name}, usa su nombre
-- Mezcla: EDUCATIVO (claro) + PODEROSO (transformacional) + POÉTICO (metáforas)
-- Las sombras tienen TRAMPA (reactiva) y REGALO (consciente)
-- Declaraciones empiezan con "YO SOY..."
+DISTRIBUCIÓN MODAL (calculada):
+🚀 Cardinal: ${modalidades.cardinal.percentage}% (${modalidades.cardinal.planets.join(', ') || 'ninguno'})
+🗿 Fijo: ${modalidades.fixed.percentage}% (${modalidades.fixed.planets.join(', ') || 'ninguno'})
+🌊 Mutable: ${modalidades.mutable.percentage}% (${modalidades.mutable.planets.join(', ') || 'ninguno'})
 
-═══════════════════════════════════════════════════════════════════════════════
-ESTRUCTURA JSON REQUERIDA
-═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════
+GENERA LA INTERPRETACIÓN COMPLETA EN JSON
+═══════════════════════════════════════════════
 
-Responde ÚNICAMENTE con JSON válido. Sin texto adicional antes ni después.
+Responde ÚNICAMENTE con un JSON válido:
 
 {
   "puntos_fundamentales": {
-    "sol": { "signo": "${sol?.sign}", "grado": ${sol?.degree || 0}, "casa": ${sol?.house || 0}, "superpoder": "descripción corta del superpoder" },
-    "luna": { "signo": "${luna?.sign}", "grado": ${luna?.degree || 0}, "casa": ${luna?.house || 0}, "superpoder": "..." },
-    "ascendente": { "signo": "${chartData.ascendant.sign}", "grado": ${chartData.ascendant.degree}, "superpoder": "..." },
-    "medio_cielo": { "signo": "${chartData.midheaven.sign}", "grado": ${chartData.midheaven.degree}, "superpoder": "..." },
-    "nodo_norte": { "signo": "${nodoNorte?.sign}", "grado": ${nodoNorte?.degree || 0}, "casa": ${nodoNorte?.house || 0}, "superpoder": "..." },
-    "nodo_sur": { "signo": "${nodoSur?.sign}", "grado": ${nodoSur?.degree || 0}, "casa": ${nodoSur?.house || 0}, "superpoder": "..." }
+    "sol": { "signo": "${sun?.sign}", "grado": ${sun?.degree || 0}, "casa": ${sun?.house || 1}, "poder": "[Descripción del poder solar]" },
+    "luna": { "signo": "${moon?.sign}", "grado": ${moon?.degree || 0}, "casa": ${moon?.house || 1}, "poder": "[Descripción emocional]" },
+    "ascendente": { "signo": "${chartData.ascendant.sign}", "grado": ${chartData.ascendant.degree}, "casa": 1, "poder": "[Máscara al mundo]" },
+    "medio_cielo": { "signo": "${chartData.midheaven.sign}", "grado": ${chartData.midheaven.degree}, "casa": 10, "poder": "[Vocación]" },
+    "nodo_norte": { "signo": "${northNode?.sign || 'No disponible'}", "grado": ${northNode?.degree || 0}, "casa": ${northNode?.house || 1}, "poder": "[Destino evolutivo]" }
   },
 
   "sintesis_elemental": {
-    "fuego": { "porcentaje": ${elementos.fire.percentage}, "planetas": ${JSON.stringify(elementos.fire.planets)}, "significado": "qué significa tener este % de fuego" },
-    "tierra": { "porcentaje": ${elementos.earth.percentage}, "planetas": ${JSON.stringify(elementos.earth.planets)}, "significado": "..." },
-    "aire": { "porcentaje": ${elementos.air.percentage}, "planetas": ${JSON.stringify(elementos.air.planets)}, "significado": "..." },
-    "agua": { "porcentaje": ${elementos.water.percentage}, "planetas": ${JSON.stringify(elementos.water.planets)}, "significado": "..." },
-    "elemento_dominante": "${elementoDominante.name}",
-    "elemento_escaso": "${elementoEscaso.name}",
-    "configuracion_alquimica": "Texto de 4-6 líneas explicando la configuración elemental única de ${userProfile.name}. Ej: 'Eres FUEGO DOMINANTE con AIRE como aliado...'"
+    "fuego": { "porcentaje": ${elementos.fire.percentage}, "planetas": ${JSON.stringify(elementos.fire.planets)}, "significado": "[Qué significa este % de fuego para ${userProfile.name}]" },
+    "tierra": { "porcentaje": ${elementos.earth.percentage}, "planetas": ${JSON.stringify(elementos.earth.planets)}, "significado": "[Significado]" },
+    "aire": { "porcentaje": ${elementos.air.percentage}, "planetas": ${JSON.stringify(elementos.air.planets)}, "significado": "[Significado]" },
+    "agua": { "porcentaje": ${elementos.water.percentage}, "planetas": ${JSON.stringify(elementos.water.planets)}, "significado": "[Significado]" },
+    "configuracion_alquimica": "[Párrafo PODEROSO de 4-5 líneas: 'Eres un ser de X DOMINANTE con Y como aliado - esto significa que tu naturaleza es ACTUAR, CREAR... No viniste a contemplar desde la barrera...']",
+    "elemento_escaso": "[Si hay elemento <15%, explicar qué significa esa carencia y cómo trabajarla]"
   },
 
   "modalidades": {
-    "cardinal": { "porcentaje": ${modalidades.cardinal.percentage}, "significado": "qué significa ser X% cardinal" },
-    "fijo": { "porcentaje": ${modalidades.fixed.percentage}, "significado": "..." },
-    "mutable": { "porcentaje": ${modalidades.mutable.percentage}, "significado": "..." },
-    "ritmo_accion": "Texto explicando el ritmo de acción de ${userProfile.name}"
+    "cardinal": { "porcentaje": ${modalidades.cardinal.percentage}, "significado": "[Cómo inicia]" },
+    "fijo": { "porcentaje": ${modalidades.fixed.percentage}, "significado": "[Cómo sostiene]" },
+    "mutable": { "porcentaje": ${modalidades.mutable.percentage}, "significado": "[Cómo se adapta]" },
+    "ritmo_accion": "[Párrafo: CÓMO ${userProfile.name} toma acción en la vida según su distribución modal]"
   },
 
-  "esencia_revolucionaria": "Texto DISRUPTIVO de 8-12 líneas sobre la esencia de ${userProfile.name}. Empieza con '¡${userProfile.name.toUpperCase()}, NO VINISTE A ENCAJAR!' Fusiona Sol + Ascendente + Luna. Explica su combinación ÚNICA.",
+  "esencia_revolucionaria": "[4-5 líneas PODEROSAS: 'Eres un Alma [adjetivo] con el Sol en ${sun?.sign} y la Luna en ${moon?.sign}, destinada a... NO viniste a este mundo a pasar desapercibida...']",
 
-  "proposito_vida": {
-    "nodo_norte": {
-      "signo": "${nodoNorte?.sign}",
-      "casa": ${nodoNorte?.house || 0},
-      "mision": "Texto de 4-6 líneas sobre la misión evolutiva",
-      "habilidades_activar": ["habilidad 1", "habilidad 2", "habilidad 3", "habilidad 4"]
-    },
-    "nodo_sur": {
-      "signo": "${nodoSur?.sign}",
-      "casa": ${nodoSur?.house || 0},
-      "zona_confort": "Texto sobre la zona de confort kármica",
-      "patrones_soltar": ["patrón 1", "patrón 2", "patrón 3"]
-    },
-    "salto_evolutivo": {
-      "de": "De qué está evolucionando (ej: 'Gurú solitaria con LA verdad')",
-      "a": "Hacia qué evoluciona (ej: 'Facilitadora de redes donde TODOS brillan')"
-    }
-  },
-
-  "interpretaciones": {
+  "interpretaciones_planetarias": {
     "sol": {
-      "posicion": { "signo": "${sol?.sign}", "casa": ${sol?.house || 0}, "grado": ${sol?.degree || 0} },
-      "educativo": "Texto EDUCATIVO de 6-8 líneas. Explica QUÉ es el Sol, QUÉ significa en ${sol?.sign}, QUÉ implica la Casa ${sol?.house}.",
-      "poderoso": "Texto PODEROSO de 8-10 líneas. Usa '¡NO VINISTE A...!', 'Tu superpoder es...'. MAYÚSCULAS estratégicas.",
-      "poetico": "Texto POÉTICO de 4-6 líneas. Metáfora hermosa sobre el Sol en ${sol?.sign} Casa ${sol?.house}.",
-      "sombras": [
-        {
-          "nombre": "Nombre de la sombra 1",
-          "patron": "Cómo se manifiesta este patrón",
-          "trampa": "❌ La forma reactiva/inconsciente",
-          "regalo": "✅ La forma consciente/transformada"
-        },
-        {
-          "nombre": "Nombre de la sombra 2",
-          "patron": "...",
-          "trampa": "❌ ...",
-          "regalo": "✅ ..."
-        }
-      ],
-      "sintesis": {
-        "frase": "Frase memorable de máximo 15 palabras",
-        "declaracion": "YO SOY... (declaración de poder en 2-4 líneas)"
-      }
+      "posicion": "${sun?.sign} Casa ${sun?.house}",
+      "titulo_arquetipo": "[Título creativo: 'La Mística que Transforma' o similar]",
+      "proposito_vida": "[3-4 párrafos PROFUNDOS sobre propósito de vida. Incluir: DISOLVER, SANAR, TRANSFORMAR, CONECTAR...]",
+      "trampa": "[La trampa específica de esta posición - qué hacer MAL]",
+      "superpoder": "[El superpoder cuando se usa BIEN]",
+      "afirmacion": "[Mantra para este Sol]"
     },
     "luna": {
-      "posicion": { "signo": "${luna?.sign}", "casa": ${luna?.house || 0}, "grado": ${luna?.degree || 0} },
-      "educativo": "...",
-      "poderoso": "...",
-      "poetico": "...",
-      "sombras": [{ "nombre": "...", "patron": "...", "trampa": "...", "regalo": "..." }],
-      "sintesis": { "frase": "...", "declaracion": "..." }
+      "posicion": "${moon?.sign} Casa ${moon?.house}",
+      "titulo_arquetipo": "[Título: 'La Diplomática del Alma' o similar]",
+      "mundo_emocional": "[2-3 párrafos: cómo funciona emocionalmente]",
+      "como_se_nutre": "[4-5 formas en que se nutre emocionalmente]",
+      "patron_infancia": "[Patrón aprendido en infancia]",
+      "sanacion_emocional": "[Qué necesita sanar]"
     },
     "ascendente": {
-      "posicion": { "signo": "${chartData.ascendant.sign}", "casa": 1, "grado": ${chartData.ascendant.degree} },
-      "educativo": "...",
-      "poderoso": "...",
-      "poetico": "...",
-      "sombras": [{ "nombre": "...", "patron": "...", "trampa": "...", "regalo": "..." }],
-      "sintesis": { "frase": "...", "declaracion": "..." }
-    },
-    "medio_cielo": {
-      "posicion": { "signo": "${chartData.midheaven.sign}", "casa": 10, "grado": ${chartData.midheaven.degree} },
-      "educativo": "...",
-      "poderoso": "...",
-      "poetico": "...",
-      "sombras": [{ "nombre": "...", "patron": "...", "trampa": "...", "regalo": "..." }],
-      "sintesis": { "frase": "...", "declaracion": "..." }
+      "posicion": "${chartData.ascendant.sign} Casa 1",
+      "titulo_arquetipo": "[Título: 'La Reina que Brilla sin Pedir Permiso']",
+      "personalidad_visible": "[2-3 párrafos: cómo se presenta al mundo]",
+      "presencia": "[Qué tipo de presencia tiene]",
+      "mascara_vs_esencia": "[Diferencia entre lo que muestra y lo que ES]"
     },
     "mercurio": {
-      "posicion": { "signo": "${mercurio?.sign}", "casa": ${mercurio?.house || 0}, "grado": ${mercurio?.degree || 0} },
-      "educativo": "...",
-      "poderoso": "...",
-      "poetico": "...",
-      "sombras": [{ "nombre": "...", "patron": "...", "trampa": "...", "regalo": "..." }],
-      "sintesis": { "frase": "...", "declaracion": "..." }
+      "posicion": "${mercury?.sign} Casa ${mercury?.house}",
+      "titulo_arquetipo": "[Título: 'La Mente Relámpago']",
+      "como_piensa": "[2 párrafos: forma de pensar y comunicar]",
+      "fortalezas_mentales": "[4 fortalezas]",
+      "desafio": "[Principal desafío comunicativo]"
     },
     "venus": {
-      "posicion": { "signo": "${venus?.sign}", "casa": ${venus?.house || 0}, "grado": ${venus?.degree || 0} },
-      "educativo": "...",
-      "poderoso": "...",
-      "poetico": "...",
-      "sombras": [{ "nombre": "...", "patron": "...", "trampa": "...", "regalo": "..." }],
-      "sintesis": { "frase": "...", "declaracion": "..." }
+      "posicion": "${venus?.sign} Casa ${venus?.house}",
+      "titulo_arquetipo": "[Título: 'El Amor que Conquista']",
+      "como_ama": "[2 párrafos: forma de amar]",
+      "que_necesita_en_pareja": "[Párrafo específico]",
+      "trampa_amorosa": "[Patrón negativo]",
+      "valores": "[Qué considera bello/valioso]"
     },
     "marte": {
-      "posicion": { "signo": "${marte?.sign}", "casa": ${marte?.house || 0}, "grado": ${marte?.degree || 0} },
-      "educativo": "...",
-      "poderoso": "...",
-      "poetico": "...",
-      "sombras": [{ "nombre": "...", "patron": "...", "trampa": "...", "regalo": "..." }],
-      "sintesis": { "frase": "...", "declaracion": "..." }
+      "posicion": "${mars?.sign} Casa ${mars?.house}",
+      "titulo_arquetipo": "[Título: 'La Guerrera Nata']",
+      "como_actua": "[2 párrafos: cómo toma acción]",
+      "energia_vital": "[Motor interno]",
+      "ira": "[Cómo maneja la ira]",
+      "desafio": "[Qué canalizar mejor]"
     },
     "jupiter": {
-      "posicion": { "signo": "${jupiter?.sign}", "casa": ${jupiter?.house || 0}, "grado": ${jupiter?.degree || 0} },
-      "educativo": "...",
-      "poderoso": "...",
-      "poetico": "...",
-      "sombras": [{ "nombre": "...", "patron": "...", "trampa": "...", "regalo": "..." }],
-      "sintesis": { "frase": "...", "declaracion": "..." }
+      "posicion": "${jupiter?.sign} Casa ${jupiter?.house}",
+      "titulo_arquetipo": "[Título: 'La Suerte del Rebelde']",
+      "donde_viene_suerte": "[De dónde viene su fortuna]",
+      "expansion": "[Cómo y dónde expandirse]",
+      "consejo": "[Consejo específico]"
     },
     "saturno": {
-      "posicion": { "signo": "${saturno?.sign}", "casa": ${saturno?.house || 0}, "grado": ${saturno?.degree || 0} },
-      "educativo": "...",
-      "poderoso": "...",
-      "poetico": "...",
-      "sombras": [{ "nombre": "...", "patron": "...", "trampa": "...", "regalo": "..." }],
-      "sintesis": { "frase": "...", "declaracion": "..." }
+      "posicion": "${saturn?.sign} Casa ${saturn?.house}",
+      "titulo_arquetipo": "[Título: 'La Maestra de las Profundidades']",
+      "karma_lecciones": "[2 párrafos: lecciones kármicas]",
+      "responsabilidad": "[Responsabilidad principal]",
+      "recompensa": "[Qué gana después de los 29-30]"
     },
     "urano": {
-      "posicion": { "signo": "${urano?.sign}", "casa": ${urano?.house || 0}, "grado": ${urano?.degree || 0} },
-      "educativo": "...",
-      "poderoso": "...",
-      "poetico": "...",
-      "sombras": [{ "nombre": "...", "patron": "...", "trampa": "...", "regalo": "..." }],
-      "sintesis": { "frase": "...", "declaracion": "..." }
+      "posicion": "${uranus?.sign} Casa ${uranus?.house}",
+      "donde_revoluciona": "[Dónde rompe moldes]",
+      "genialidad": "[Su forma única de genialidad]"
     },
     "neptuno": {
-      "posicion": { "signo": "${neptuno?.sign}", "casa": ${neptuno?.house || 0}, "grado": ${neptuno?.degree || 0} },
-      "educativo": "...",
-      "poderoso": "...",
-      "poetico": "...",
-      "sombras": [{ "nombre": "...", "patron": "...", "trampa": "...", "regalo": "..." }],
-      "sintesis": { "frase": "...", "declaracion": "..." }
+      "posicion": "${neptune?.sign} Casa ${neptune?.house}",
+      "espiritualidad": "[Conexión espiritual]",
+      "ilusion_vs_inspiracion": "[Dónde puede engañarse vs inspirarse]"
     },
     "pluton": {
-      "posicion": { "signo": "${pluton?.sign}", "casa": ${pluton?.house || 0}, "grado": ${pluton?.degree || 0} },
-      "educativo": "...",
-      "poderoso": "...",
-      "poetico": "...",
-      "sombras": [{ "nombre": "...", "patron": "...", "trampa": "...", "regalo": "..." }],
-      "sintesis": { "frase": "...", "declaracion": "..." }
+      "posicion": "${pluto?.sign} Casa ${pluto?.house}",
+      "transformacion": "[Poder transformador]",
+      "sombra_y_poder": "[Sombra y cómo convertirla en poder]"
     },
     "quiron": {
-      "posicion": { "signo": "${quiron?.sign}", "casa": ${quiron?.house || 0}, "grado": ${quiron?.degree || 0} },
-      "educativo": "Explica Quirón como el sanador herido...",
-      "poderoso": "Tu herida es tu portal de sanación para otros...",
-      "poetico": "...",
-      "sombras": [{ "nombre": "...", "patron": "...", "trampa": "...", "regalo": "..." }],
-      "sintesis": { "frase": "...", "declaracion": "..." }
-    },
-    "lilith": {
-      "posicion": { "signo": "${lilith?.sign}", "casa": ${lilith?.house || 0}, "grado": ${lilith?.degree || 0} },
-      "educativo": "Explica Lilith como poder femenino oculto...",
-      "poderoso": "Tu poder rechazado que espera ser reclamado...",
-      "poetico": "...",
-      "sombras": [{ "nombre": "...", "patron": "...", "trampa": "...", "regalo": "..." }],
-      "sintesis": { "frase": "...", "declaracion": "..." }
-    },
-    "nodo_norte": {
-      "posicion": { "signo": "${nodoNorte?.sign}", "casa": ${nodoNorte?.house || 0}, "grado": ${nodoNorte?.degree || 0} },
-      "educativo": "...",
-      "poderoso": "...",
-      "poetico": "...",
-      "sombras": [{ "nombre": "...", "patron": "...", "trampa": "...", "regalo": "..." }],
-      "sintesis": { "frase": "...", "declaracion": "..." }
+      "posicion": "${chiron?.sign || 'No disponible'} Casa ${chiron?.house || 'N/A'}",
+      "herida_principal": "[Herida de Quirón]",
+      "don_sanador": "[Don que emerge de la herida]"
     }
   },
 
-  "fortalezas_educativas": {
-    "como_aprendes_mejor": [
-      "Cuando el tema te APASIONA (no por obligación)",
-      "Con aplicación PRÁCTICA inmediata",
-      "A tu PROPIO ritmo",
-      "..."
-    ],
-    "inteligencias_dominantes": [
-      { "tipo": "Inteligencia Intuitiva", "descripcion": "Captas info de fuentes no-lineales", "planeta_origen": "Neptuno fuerte / Luna" },
-      { "tipo": "...", "descripcion": "...", "planeta_origen": "..." }
-    ],
-    "modalidades_estudio": [
-      "Cursos intensivos (mejor que largos semestres)",
-      "Podcasts y audios (Casa 3 activa)",
-      "..."
+  "aspectos_destacados": {
+    "stelliums": "[Si hay 3+ planetas en mismo signo, describir el SÚPER-PODER]",
+    "aspectos_tensos": "[2-3 cuadraturas/oposiciones y su significado transformador]",
+    "aspectos_armoniosos": "[2-3 trígonos/sextiles y los dones que otorgan]",
+    "patron_dominante": "[Patrón astrológico dominante de la carta]"
+  },
+
+  "integracion_carta": {
+    "hilo_de_oro": "[Párrafo que UNE todas las posiciones en narrativa coherente: 'Tu carta cuenta una historia de FUSIÓN DE OPUESTOS...']",
+    "sintesis": "[Frase síntesis: 'Eres una GUERRERA MÍSTICA - alguien que lucha por causas espirituales...']",
+    "polaridades": [
+      { "polo_a": "[Ej: Acción]", "polo_b": "[Ej: Contemplación]", "integracion": "[Cómo integrar]" }
     ]
   },
 
+  "fortalezas_educativas": {
+    "como_aprende_mejor": ["[Condición 1]", "[Condición 2]", "[Condición 3]", "[Condición 4]"],
+    "inteligencias_dominantes": [
+      { "tipo": "[Tipo]", "descripcion": "[Descripción]", "planeta_origen": "[Planeta]" }
+    ],
+    "modalidades_estudio": ["[Modalidad 1]", "[Modalidad 2]", "[Modalidad 3]"]
+  },
+
   "areas_especializacion": [
-    {
-      "area": "Nombre del área (ej: Transformación y Sanación)",
-      "planetas_origen": "Sol Piscis Casa 8 + Plutón",
-      "profesiones_sugeridas": ["Psicología profunda", "Coaching transformacional", "Sanación energética"]
-    },
-    {
-      "area": "...",
-      "planetas_origen": "...",
-      "profesiones_sugeridas": ["...", "...", "..."]
-    },
-    {
-      "area": "...",
-      "planetas_origen": "...",
-      "profesiones_sugeridas": ["...", "...", "..."]
-    }
+    { "area": "[Área 1]", "origen_astrologico": "[Posiciones]", "profesiones": ["Prof1", "Prof2", "Prof3"], "descripcion": "[Por qué es natural]" },
+    { "area": "[Área 2]", "origen_astrologico": "[Posiciones]", "profesiones": ["Prof1", "Prof2"], "descripcion": "[Descripción]" },
+    { "area": "[Área 3]", "origen_astrologico": "[Posiciones]", "profesiones": ["Prof1", "Prof2"], "descripcion": "[Descripción]" }
   ],
 
   "patrones_sanacion": {
     "heridas": [
-      {
-        "nombre": "Nombre de la herida (ej: 'La Herida del Sacrificio')",
-        "planeta_origen": "Sol Piscis Casa 8",
-        "patron": "Descripción del patrón (ej: 'Creer que para ser amada debes DARTE hasta vaciarte')",
-        "origen_infancia": "Qué pasó en la infancia que creó este patrón",
-        "como_se_manifiesta": ["manifestación 1", "manifestación 2", "manifestación 3"],
-        "sanacion": "Qué práctica o cambio de perspectiva sana esto"
-      },
-      {
-        "nombre": "...",
-        "planeta_origen": "...",
-        "patron": "...",
-        "origen_infancia": "...",
-        "como_se_manifiesta": ["...", "..."],
-        "sanacion": "..."
-      }
+      { "nombre": "[Herida 1]", "origen_astrologico": "[Posición]", "patron": "[Patrón negativo]", "origen_infancia": "[Qué aprendió]", "sanacion": "[Práctica]" },
+      { "nombre": "[Herida 2]", "origen_astrologico": "[Posición]", "patron": "[Patrón]", "origen_infancia": "[Origen]", "sanacion": "[Sanación]" }
+    ],
+    "ciclos_sanacion_lunar": {
+      "luna_nueva": "[Ritual específico para Luna Nueva]",
+      "luna_creciente": "[Práctica luna creciente]",
+      "luna_llena": "[Ritual Luna Llena]",
+      "luna_menguante": "[Práctica de soltar]"
+    },
+    "practicas_integracion": [
+      { "practica": "[Práctica 1]", "duracion": "[Tiempo]", "beneficio": "[Beneficio para su carta]", "fase_lunar": "[Mejor fase]" },
+      { "practica": "[Práctica 2]", "duracion": "[Tiempo]", "beneficio": "[Beneficio]", "fase_lunar": "[Fase]" }
     ]
   },
 
   "manifestacion_amor": {
-    "patron_amoroso": "Descripción del patrón (ej: 'Con Venus Aries + Luna Libra, combinas fuego y aire...')",
-    "que_atraes": "Qué tipo de personas atraes naturalmente",
-    "que_necesitas": "Qué necesitas en una relación para sentirte plena",
-    "trampa_amorosa": "Tu trampa recurrente en el amor",
-    "leccion_amorosa": "Qué estás aprendiendo sobre el amor",
-    "declaracion_amor": "Declaración de poder sobre el amor (3-4 líneas)"
+    "patron_amoroso": "[Párrafo: patrón en amor según Venus, Marte, Luna, Casa 7]",
+    "que_atrae": "[Qué tipo de personas atrae]",
+    "que_necesita": "[Qué necesita realmente en pareja]",
+    "trampa_amorosa": "[Patrón negativo en amor]",
+    "ritual_luna_nueva_venus": {
+      "preparacion": "[Instrucciones - Luna Nueva en Libra o signo de Venus]",
+      "activacion_28_dias": "[Práctica durante ciclo lunar]",
+      "entrega_luna_llena": "[Ritual de entrega]"
+    },
+    "declaracion_amor": "[Declaración: 'Merezco un amor que iguale mi fuego sin quemarme...']"
   },
 
-  "visualizacion": {
+  "visualizacion_guiada": {
+    "titulo": "Encuentro con tu Carta Natal",
     "duracion": "15-20 minutos",
-    "mejor_momento": "Luna Llena o tu cumpleaños solar",
-    "preparacion": ["Espacio tranquilo, luz de vela", "Tu carta natal impresa o en pantalla", "Posición cómoda, ojos cerrados"],
-    "texto_visualizacion": "Texto completo de la visualización guiada personalizada para ${userProfile.name}, mencionando su Sol en ${sol?.sign}, Luna en ${luna?.sign}, Ascendente ${chartData.ascendant.sign}..."
+    "mejor_momento": "Luna Llena o cumpleaños solar",
+    "preparacion": ["Espacio tranquilo, luz de vela", "Carta natal visible", "Cuaderno cerca"],
+    "texto": "[Texto COMPLETO de visualización de 250-300 palabras personalizado. Incluir: encuentro con Sol en ${sun?.sign}, Luna en ${moon?.sign}, Ascendente ${chartData.ascendant.sign}. Terminar con preguntas reflexivas: '¿Qué necesito integrar hoy?']"
   },
-
-  "declaracion_poder": "Texto completo de la declaración de poder final. 8-12 líneas. Empieza con 'YO SOY...' Fusiona todos los elementos de la carta. Termina con algo impactante como 'NO PIDO PERMISO PARA SER TODA YO.'",
 
   "datos_para_agenda": {
-    "heridas_para_ciclos_lunares": ["nombre herida 1", "nombre herida 2"],
-    "ritual_amor_luna_optima": "Luna Nueva en Libra",
-    "temas_principales": ["tema 1 de la carta", "tema 2", "tema 3"]
-  }
+    "eventos_lunares_personalizados": [
+      { "evento": "Luna Nueva en ${sun?.sign}", "significado": "[Significado personal]", "ritual": "[Ritual]", "intencion": "[Intención a sembrar]" },
+      { "evento": "Luna Llena en ${moon?.sign}", "significado": "[Significado]", "ritual": "[Ritual]", "intencion": "[Intención]" }
+    ],
+    "practicas_por_fase": {
+      "luna_nueva": ["[Práctica 1]", "[Práctica 2]"],
+      "cuarto_creciente": ["[Práctica 1]", "[Práctica 2]"],
+      "luna_llena": ["[Práctica 1]", "[Práctica 2]"],
+      "cuarto_menguante": ["[Práctica 1]", "[Práctica 2]"]
+    },
+    "dias_poder": [
+      { "cuando": "Luna transita ${sun?.sign}", "que_hacer": "[Actividades de poder]", "que_evitar": "[Qué evitar]" },
+      { "cuando": "Luna transita ${chartData.ascendant.sign}", "que_hacer": "[Actividades]", "que_evitar": "[Evitar]" }
+    ],
+    "advertencias_cosmicas": [
+      { "situacion": "Mercurio Retrógrado", "como_afecta": "[Específico para Mercurio en ${mercury?.sign}]", "precauciones": "[Cuidar]" }
+    ]
+  },
+
+  "declaracion_poder_final": "[Declaración ÉPICA de 5-6 líneas en primera persona para ${userProfile.name}. Incluir esencia, propósito. Terminar con: 'Este es mi mapa. Esta es mi magia. Esta SOY YO.']",
+
+  "mantra_personal": "[Frase corta de mantra: 'SOY FUEGO que transforma, AGUA que sana, LUZ que guía...']"
 }
 
-═══════════════════════════════════════════════════════════════════════════════
-IMPORTANTE
-═══════════════════════════════════════════════════════════════════════════════
-- Responde SOLO con JSON válido
-- NO agregues texto antes ni después del JSON
-- USA el nombre ${userProfile.name} en los textos
-- Sé ESPECÍFICO para esta carta, no genérico
-- El tono es DISRUPTIVO, TRANSFORMACIONAL, EMPODERADOR
-- Cada sección debe tener contenido SUSTANCIAL (no texto placeholder)
-`;
+INSTRUCCIONES CRÍTICAS:
+1. TODOS los campos con contenido REAL y PERSONALIZADO para ${userProfile.name}
+2. Lenguaje DISRUPTIVO: "TÚ", "NO viniste a...", "Tu misión es..."
+3. Prácticas SIEMPRE vinculadas a FASES LUNARES, NUNCA a días de semana
+4. Usa los DATOS ESPECÍFICOS de las posiciones (signos, casas, grados)
+5. JSON válido y completo sin [...] ni comentarios
+6. Cada interpretación planetaria debe tener TÍTULO ARQUETIPO creativo`;
 }
+
+export default generateCompleteNatalChartPrompt;
