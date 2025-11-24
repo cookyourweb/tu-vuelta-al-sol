@@ -284,6 +284,7 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
                 <InterpretationButton
                   onClick={() => {
                     console.log('🎯 CLICK: Ver interpretación completa para planeta', planet.name);
+                    // NO cerrar tooltip - mantenerlo abierto mientras se abre el drawer
                     openInterpretationDrawer('planet', {
                       name: planet.name,
                       sign: planet.sign,

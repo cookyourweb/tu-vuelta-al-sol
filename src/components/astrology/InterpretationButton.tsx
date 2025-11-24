@@ -2362,9 +2362,12 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         {hasRecentInterpretation && interpretation ? (
           <>
             <Button
-              onClick={() => setShowModal(true)}
-              className={`w-full ${isNatal 
-                ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700' 
+              onClick={(e) => {
+                e.stopPropagation(); // Prevenir que se cierre un tooltip padre
+                setShowModal(true);
+              }}
+              className={`w-full ${isNatal
+                ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700'
                 : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700'
               }`}
             >
@@ -2377,7 +2380,10 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
             
             {isAdmin && (
               <Button
-                onClick={() => generateInterpretation(true)}
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevenir que se cierre un tooltip padre
+                  generateInterpretation(true);
+                }}
                 disabled={loading}
                 variant="outline"
                 className={`w-full ${isNatal
@@ -2402,7 +2408,10 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         ) : (
           <>
             <Button
-              onClick={() => generateInterpretation(false)}
+              onClick={(e) => {
+                e.stopPropagation(); // Prevenir que se cierre un tooltip padre
+                generateInterpretation(false);
+              }}
               disabled={loading}
               className={`w-full ${isNatal
                 ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'
@@ -2427,7 +2436,10 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
 
             {isAdmin && (
               <Button
-                onClick={() => generateInterpretation(true)}
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevenir que se cierre un tooltip padre
+                  generateInterpretation(true);
+                }}
                 disabled={loading}
                 variant="outline"
                 className={`w-full mt-2 ${isNatal
