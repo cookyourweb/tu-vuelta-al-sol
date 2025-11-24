@@ -345,6 +345,7 @@ export default function SolarReturnPage() {
                   birthDate={birthData?.date || birthData?.birthDate}
                   birthTime={birthData?.time || birthData?.birthTime}
                   birthPlace={birthData?.birthPlace}
+                  currentLocation={birthData?.currentLocation || birthData?.birthPlace} // ✅ Use current location for SR
                   solarReturnYear={new Date().getFullYear()}
                   solarReturnTheme="Revolución de Identidad y Empoderamiento Profesional"
                   ascSRInNatalHouse={10}

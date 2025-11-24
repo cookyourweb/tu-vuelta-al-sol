@@ -25,6 +25,7 @@ export interface ChartDisplayProps {
   birthDate?: string;
   birthTime?: string;
   birthPlace?: string;
+  currentLocation?: string; // ✅ Location where user was on birthday (for Solar Return)
   solarReturnYear?: number;
   solarReturnTheme?: string;
   ascSRInNatalHouse?: number;

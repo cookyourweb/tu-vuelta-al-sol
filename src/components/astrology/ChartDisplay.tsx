@@ -48,6 +48,7 @@ const ChartDisplay = ({
   birthDate,
   birthTime,
   birthPlace,
+  currentLocation, // ✅ Location where user was on birthday (for SR)
   solarReturnYear,
   solarReturnTheme,
   ascSRInNatalHouse,
@@ -1210,8 +1211,13 @@ const ChartDisplay = ({
           <div className="bg-rose-800/30 rounded-lg p-3">
             <p className="text-rose-200 text-xs mb-1">📍 Lugar del SR</p>
             <p className="text-rose-50 text-sm line-clamp-2">
-              {birthPlace?.split(',').slice(0, 2).join(', ') || 'No disponible'}
+              {(currentLocation || birthPlace)?.split(',').slice(0, 2).join(', ') || 'No disponible'}
             </p>
+            {currentLocation && currentLocation !== birthPlace && (
+              <p className="text-rose-300 text-xs mt-1 italic">
+                (Tu ubicación actual, no tu lugar de nacimiento)
+              </p>
+            )}
           </div>
 
           {solarReturnTheme && (
