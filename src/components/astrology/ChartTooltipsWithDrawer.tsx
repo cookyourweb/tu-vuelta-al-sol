@@ -304,31 +304,31 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
 
                   <button
                     onClick={(e) => {
-                      console.log('🎯 CLICK: Ir a generar interpretaciones');
+                      console.log('🎯 CLICK: Generar interpretaciones desde planeta');
                       e.stopPropagation();
                       e.preventDefault();
 
-                      // Cerrar tooltip
-                      setHoveredPlanet(null);
-
-                      // Scroll al botón de interpretar
-                      const interpretButton = document.querySelector('[data-interpret-button]');
+                      // ✅ NO cerrar tooltip - mantenerlo abierto
+                      // ✅ Buscar y hacer CLICK en el botón de interpretar
+                      const interpretButton = document.querySelector('[data-interpret-button]') as HTMLButtonElement;
                       console.log('🎯 Buscando botón interpretar:', interpretButton);
                       if (interpretButton) {
+                        // Hacer scroll suave
                         interpretButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-                        // Parpadear el botón para llamar la atención
-                        interpretButton.classList.add('animate-pulse');
+                        // Esperar a que termine el scroll y luego hacer CLICK automático
                         setTimeout(() => {
-                          interpretButton.classList.remove('animate-pulse');
-                        }, 3000);
+                          interpretButton.click();
+                          console.log('✅ Click automático en botón de interpretación');
+                        }, 800);
                       } else {
                         console.log('❌ No se encontró el botón interpretar');
+                        alert('No se encontró el botón de interpretación. Recarga la página e intenta nuevamente.');
                       }
                     }}
                     className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
                   >
-                    🎯 Ir a generar interpretaciones
+                    🎯 Generar interpretaciones completas
                   </button>
                 </div>
               );
@@ -445,31 +445,31 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
 
                   <button
                     onClick={(e) => {
-                      console.log('🎯 CLICK: Ir a generar interpretaciones (aspecto)');
+                      console.log('🎯 CLICK: Generar interpretaciones desde aspecto');
                       e.stopPropagation();
                       e.preventDefault();
 
-                      // Cerrar tooltip
-                      setHoveredAspect(null);
-
-                      // Scroll al botón de interpretar
-                      const interpretButton = document.querySelector('[data-interpret-button]');
+                      // ✅ NO cerrar tooltip - mantenerlo abierto
+                      // ✅ Buscar y hacer CLICK en el botón de interpretar
+                      const interpretButton = document.querySelector('[data-interpret-button]') as HTMLButtonElement;
                       console.log('🎯 Buscando botón interpretar:', interpretButton);
                       if (interpretButton) {
+                        // Hacer scroll suave
                         interpretButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-                        // Parpadear el botón para llamar la atención
-                        interpretButton.classList.add('animate-pulse');
+                        // Esperar a que termine el scroll y luego hacer CLICK automático
                         setTimeout(() => {
-                          interpretButton.classList.remove('animate-pulse');
-                        }, 3000);
+                          interpretButton.click();
+                          console.log('✅ Click automático en botón de interpretación');
+                        }, 800);
                       } else {
                         console.log('❌ No se encontró el botón interpretar');
+                        alert('No se encontró el botón de interpretación. Recarga la página e intenta nuevamente.');
                       }
                     }}
                     className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
                   >
-                    🎯 Ir a generar interpretaciones
+                    🎯 Generar interpretaciones completas
                   </button>
                 </div>
               );
