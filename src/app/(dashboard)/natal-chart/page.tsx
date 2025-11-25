@@ -292,23 +292,7 @@ export default function NatalChartPage() {
       });
       console.log('🗑️ Interpretaciones borradas:', deleteInterpResponse.ok);
 
-      // 3. Generar nueva carta con mensajes de progreso
-      const progressMessages = [
-        '🌌 Conectando con el cosmos...',
-        '⚡ Calculando posiciones planetarias exactas...',
-        '🔮 Descifrando tu mapa cósmico...',
-        '✨ Interpretando las energías astrales...',
-        '🪐 Analizando aspectos planetarios...',
-        '🌟 Revelando tu configuración única...',
-        '💫 Casi listo... preparando tu revolución personal...'
-      ];
-
-      let messageIndex = 0;
-      const messageInterval = setInterval(() => {
-        messageIndex = (messageIndex + 1) % progressMessages.length;
-        setLoadingMessage(progressMessages[messageIndex]);
-      }, 2000);
-
+      // 3. Generar nueva carta (los mensajes de progreso se manejan en el useEffect)
       const response = await fetch('/api/charts/natal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -318,7 +302,6 @@ export default function NatalChartPage() {
         })
       });
 
-      clearInterval(messageInterval);
       console.log('📡 Response status:', response.status);
 
       if (response.ok) {
@@ -380,9 +363,9 @@ export default function NatalChartPage() {
     autoGenerateIfNeeded();
   }, [chartData, birthData, user?.uid]);
 
-  // ✅ ANIMACIÓN DE MENSAJES DE CARGA
+  // ✅ ANIMACIÓN DE MENSAJES DE CARGA (para loading inicial y regeneración)
   useEffect(() => {
-    if (loading) {
+    if (loading || isRegenerating) {
       const messages = [
         '🌌 Conectando con el cosmos...',
         '⚡ Calculando posiciones planetarias exactas...',
@@ -401,7 +384,7 @@ export default function NatalChartPage() {
 
       return () => clearInterval(interval);
     }
-  }, [loading]);
+  }, [loading, isRegenerating]);
 
   // ✅ FUNCIONES DE NAVEGACIÓN
   const navigateToBirthData = () => {

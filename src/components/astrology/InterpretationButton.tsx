@@ -2310,8 +2310,8 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               </span>
             </Button>
 
-            {/* ⚠️ TEMPORAL: Botones visibles para todos (no solo admin) para debugging */}
-            {true && (
+            {/* Admin-only buttons for regeneration */}
+            {isAdmin && (
               <>
                 <Button
                   onClick={(e) => {
