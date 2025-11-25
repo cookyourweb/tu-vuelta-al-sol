@@ -285,52 +285,90 @@ Responde ÚNICAMENTE con un JSON válido:
     },
     "jupiter": {
       "posicion": "${jupiter?.sign} Casa ${jupiter?.house}",
-      "titulo_arquetipo": "[Título TRANSFORMATIONAL Y TRANSFORMADOR: 'Quien Expande a través del Riesgo Consciente']",
-      "donde_viene_suerte": "[DIRECTO Y HONESTO: 'Tu crecimiento y oportunidades vienen de PARTICIPAR ACTIVAMENTE en [área] con compromiso real (real commitment). Júpiter en ${jupiter?.sign} Casa ${jupiter?.house} se expande con DECISIONES ASIMÉTRICAS en [contexto] - donde el potencial de ganancia supera el riesgo...']",
-      "expansion": "[Expansión vía TRANSFORMATION: 'Pequeñas inversiones estratégicas en [área] que pueden generar grandes retornos. Exposición controlada al riesgo'...]",
-      "consejo": "[Estrategia TALEB (Barbell): 'Usa balanced strategy: estabilidad en [área A], exposición calculada al riesgo en [área B]. Evita la zona media que ofrece falsa seguridad.']"
+      "que_significa_casa": "[Una línea: Ej: 'Casa 9 = tu expansión filosófica; dónde creces y enseñas; tu búsqueda de significado']",
+      "tu_esencia": "[2-3 párrafos POÉTICO-TRANSFORMATIONAL: 'Tu forma de crecer no es lineal: es expansiva. Júpiter en ${jupiter?.sign} Casa ${jupiter?.house} no busca más de lo mismo: busca [tipo de abundancia específica]. Donde otros ven límites, tú ves [posibilidad jupiteriana]. Tu suerte no es azar: es el resultado de [actitud/acción del signo]. Expandes como [metáfora]. Tu optimismo no es ingenuidad: es [reframe de fortaleza]. Enseñas [tema] solo con existir...']",
+      "tu_sombra_transformational": "[2-3 líneas: 'A veces puedes [exceso jupiteriano: exagerar/prometer de más/dispersarte]. No es falta de disciplina: es tu sistema buscando [necesidad de expansión]. Cuando sientas que [sensación], pregúntate: ¿estoy expandiendo o escapando?...']",
+      "tu_regalo_evolutivo": "[3 líneas: 'Ver posibilidades donde otros ven cierre. Inspirar [tipo de] fe en los demás. Crecer a través de [experiencia/área] y llevar a otros contigo...']",
+      "mini_coach": "[3-4 acciones: '• Durante Luna Llena, revisa: ¿dónde estoy creciendo vs. dónde estoy escapando?', '• Estudia/viaja/expande en [área de casa]', '• Enseña [tema del signo] a quien lo necesite']",
+      "mantra": "[Frase sobre expansión consciente. Ej: 'Crezco hacia lo que me inspira, no solo hacia lo que me distrae.']"
     },
     "saturno": {
       "posicion": "${saturn?.sign} Casa ${saturn?.house}",
-      "titulo_arquetipo": "[Título TRANSFORMATIONAL Y TRANSFORMADOR: 'El/La Maestro/a que se Fortalece con la Disciplina']",
-      "karma_lecciones": "[2 párrafos DIRECTOS: Tu aprendizaje saturnino no es un castigo - es RETROALIMENTACIÓN del sistema sobre qué funciona. Saturno en ${saturn?.sign} Casa ${saturn?.house} establece límites en [área] para DESARROLLAR TU MAESTRÍA. Cada obstáculo aquí es información valiosa sobre cómo construir de forma más sólida. Reconstruye con [enfoque]...]",
-      "responsabilidad": "[Responsabilidad TRANSFORMATIONAL: 'Construir estructuras y sistemas que MEJOREN con el tiempo (enduring value) en [área]. Crear valor duradero.']",
-      "recompensa": "[Recompensa post-Retorno Saturno: 'Sistema TRANSFORMATIONAL en [área] que mejora con cada desafío. Autoridad basada en experiencia real (real commitment), no solo en credenciales.']"
+      "que_significa_casa": "[Una línea: Ej: 'Casa 10 = tu estructura profesional; dónde construyes legado; tu autoridad ganada con tiempo']",
+      "tu_esencia": "[2-3 párrafos POÉTICO-TRANSFORMATIONAL: 'Tu relación con el tiempo es tu superpoder secreto. Saturno en ${saturn?.sign} Casa ${saturn?.house} no te castiga: te entrena. Donde otros buscan atajos, tú [acción saturnina]. Tu disciplina no es rigidez: es [reframe como fortaleza]. Los límites en [área de casa] no son muros: son escultores de tu maestría. Construyes como [metáfora]. Cada obstáculo aquí es retroalimentación, no rechazo. Tu autoridad viene de [fuente real de experiencia]...']",
+      "tu_sombra_transformational": "[2-3 líneas: 'A veces puedes sentir [miedo saturnino: inadecuación/rigidez excesiva/auto-sabotaje]. No es verdad sobre ti: es Saturno preguntándote si realmente quieres esto. Tu dureza contigo mismo pide [necesidad]...']",
+      "tu_regalo_evolutivo": "[3 líneas: 'Construir lo que perdura cuando todo lo demás se desmorona. Transformar limitaciones en arquitectura. Ser la roca para quien lo necesita...']",
+      "mini_coach": "[3-4 acciones: '• Durante Luna Menguante, revisa: ¿qué estructuras ya no sirven?', '• Compromete 20 min diarios a [área de maestría en casa/signo]', '• Cuando sientas el obstáculo, pregunta: ¿qué me está enseñando esto?']",
+      "mantra": "[Frase sobre maestría y tiempo. Ej: 'Mi disciplina es mi libertad. Mis límites, mi escultura.']"
     },
     "urano": {
       "posicion": "${uranus?.sign} Casa ${uranus?.house}",
-      "donde_revoluciona": "[Dónde rompe moldes]",
-      "genialidad": "[Su forma única de genialidad]"
+      "que_significa_casa": "[Una línea: Ej: 'Casa 11 = tu tribu cósmica; dónde innovas; tu contribución al futuro']",
+      "tu_esencia": "[2-3 párrafos POÉTICO-TRANSFORMATIONAL: 'Tu genialidad no pide permiso. Urano en ${uranus?.sign} Casa ${uranus?.house} no vino a encajar: vino a [propósito uraniano]. Donde otros siguen el guión, tú [acción disruptiva]. Tu rareza no es defecto: es [reframe como don evolutivo]. Innovas como [metáfora]. Tus ideas llegan antes que el mundo esté listo, y eso es perfecto. Revolucionas [área] solo con ser tú...']",
+      "tu_sombra_transformational": "[2-3 líneas: 'A veces puedes sentirte [sensación uraniana: aislado/demasiado diferente/rebelde sin causa]. No es desconexión: es Urano pidiéndote que encuentres TU tribu, no que te adaptes a la incorrecta...']",
+      "tu_regalo_evolutivo": "[3 líneas: 'Ver futuros que otros no imaginan. Liberar a los demás de [patrón] con tu ejemplo. Ser el catalizador de [tipo de cambio]...']",
+      "mini_coach": "[3-4 acciones: '• Durante Luna Nueva, siembra UNA idea disruptiva en [área]', '• Conecta con comunidad que comparta [visión uraniana]', '• Cuando te sientas "demasiado raro", pregúntate: ¿o estoy en el lugar equivocado?']",
+      "mantra": "[Frase sobre autenticidad radical. Ej: 'Mi rareza es mi frecuencia. Los míos me encontrarán.']"
     },
     "neptuno": {
       "posicion": "${neptune?.sign} Casa ${neptune?.house}",
-      "espiritualidad": "[Conexión espiritual]",
-      "ilusion_vs_inspiracion": "[Dónde puede engañarse vs inspirarse]"
+      "que_significa_casa": "[Una línea: Ej: 'Casa 12 = tu conexión con lo invisible; dónde te disuelves y renaces; tu espiritualidad']",
+      "tu_esencia": "[2-3 párrafos POÉTICO-TRANSFORMATIONAL: 'Tu conexión con lo sutil es tu don más delicado. Neptuno en ${neptune?.sign} Casa ${neptune?.house} no busca lo tangible: busca [necesidad neptuniana]. Donde otros piden pruebas, tú [percepción neptuniana]. Tu sensibilidad no es fragilidad: es [reframe como capacidad]. Sientes como [metáfora]. Canalizas [energía/arte/compasión] de dimensiones que otros no perciben. Tu espiritualidad es [característica]...']",
+      "tu_sombra_transformational": "[2-3 líneas: 'A veces puedes [sombra neptuniana: escapar/engañarte/perderte en fantasías]. No es debilidad: es Neptuno sin anclaje. Tu sensibilidad pide LÍMITES conscientes, no menos sensibilidad...']",
+      "tu_regalo_evolutivo": "[3 líneas: 'Disolver fronteras entre [X] y [Y]. Canalizar arte/compasión/medicina desde lo invisible. Recordarles a otros que hay más allá de lo visible...']",
+      "mini_coach": "[3-4 acciones: '• Meditación/arte/música durante Luna Llena para canalizar', '• Mantén UN pie en lo místico, otro en lo práctico', '• Cuando sientas confusión, pregúntate: ¿estoy escapando o trascendiendo?']",
+      "mantra": "[Frase sobre sensibilidad como fortaleza. Ej: 'Siento lo invisible. Eso no me debilita: me conecta.']"
     },
     "pluton": {
       "posicion": "${pluto?.sign} Casa ${pluto?.house}",
-      "transformacion": "[Poder transformador]",
-      "sombra_y_poder": "[Sombra y cómo convertirla en poder]"
+      "que_significa_casa": "[Una línea: Ej: 'Casa 8 = tu poder de transformación; dónde mueres y renaces; tus recursos ocultos']",
+      "tu_esencia": "[2-3 párrafos POÉTICO-TRANSFORMATIONAL: 'Tu poder es subterráneo, pero eso no lo hace menos real. Plutón en ${pluton?.sign} Casa ${pluton?.house} no teme a [situación plutoniana]. Donde otros huyen de la profundidad, tú [acción plutoniana]. Tu intensidad no es dramatismo: es [reframe como capacidad de transformación]. Regeneras como [metáfora]. Ves las sombras porque no les temes. Transformas [área] desde la raíz, no desde la superficie...']",
+      "tu_sombra_transformational": "[2-3 líneas: 'A veces puedes [sombra plutoniana: controlar/obsesionarte/destruir por miedo]. No es maldad: es Plutón sin confiar en el proceso. Tu poder pide SOLTAR, no apretar más...']",
+      "tu_regalo_evolutivo": "[3 líneas: 'Morir y renacer en [área] cuantas veces sea necesario. Acompañar a otros en sus propias muertes simbólicas. Transformar [recurso] en poder regenerativo...']",
+      "mini_coach": "[3-4 acciones: '• Durante Luna Menguante, suelta conscientemente [patrón de control]', '• Investiga las profundidades de [tema de casa]', '• Cuando sientas el impulso de controlar, respira y pregúntate: ¿qué estoy evitando sentir?']",
+      "mantra": "[Frase sobre transformación. Ej: 'Muero y renazco. Ese es mi poder, no mi tragedia.']"
     },
     "quiron": {
       "posicion": "${chiron?.sign || 'No disponible'} Casa ${chiron?.house || 'N/A'}",
-      "herida_principal": "[Herida de Quirón]",
-      "don_sanador": "[Don que emerge de la herida]"
+      "que_significa_casa": "[Una línea: Ej: 'Casa 6 = tu sanación a través del servicio; donde tu herida se vuelve medicina']",
+      "tu_esencia": "[2-3 párrafos POÉTICO-TRANSFORMATIONAL: 'Tu herida más profunda es tu medicina más potente. Quirón en ${chiron?.sign} Casa ${chiron?.house} marca [área de herida]. Esta no es una herida para "superar": es una herida para INTEGRAR. Donde más dolió, más sanador/a puedes ser. Tu cicatriz en [tema] te permite [capacidad única de empatía/sanación]. Sanas como [metáfora]. No necesitas estar "curado" para ayudar: necesitas estar CONSCIENTE...']",
+      "tu_sombra_transformational": "[2-3 líneas: 'A veces tu herida puede [patrón: identificarte con el dolor/rechazar tu don/herir desde tu herida]. No eres tu herida: eres quien aprendió a [acción sanadora] A PESAR de ella...']",
+      "tu_regalo_evolutivo": "[3 líneas: 'Sostener el dolor de otros en [área] sin colapsar. Transformar tu herida en puente hacia los heridos. Enseñar [sabiduría] que solo se aprende en la oscuridad...']",
+      "mini_coach": "[3-4 acciones: '• Durante Luna Nueva, honra tu herida sin identificarte con ella', '• Comparte tu proceso (no tu dolor) con quien lo necesite', '• Estudia [modalidad de sanación] relacionada con tu herida']",
+      "mantra": "[Frase sobre herida como medicina. Ej: 'Mi herida no me define. Mi sanación sí.']"
+    },
+    "lilith": {
+      "posicion": "${lilith?.sign || 'No disponible'} Casa ${lilith?.house || 'N/A'}",
+      "que_significa_casa": "[Una línea: Ej: 'Casa 5 = tu sexualidad salvaje; tu creatividad sin pedir permiso; tu poder sin domesticar']",
+      "tu_esencia": "[2-3 párrafos POÉTICO-TRANSFORMATIONAL: 'Tu poder sin domesticar vive aquí. Lilith en ${lilith?.sign} Casa ${lilith?.house} es tu [característica lilithiana]. Donde te dijeron que fueras menos, Lilith dice: SÉ MÁS. Tu rabia en [área] no es histeria: es [reframe como poder]. Tu sexualidad/creatividad/poder en [tema] no necesita validación. Eres [metáfora de poder femenino/salvaje]. Lo que otros llaman "demasiado" en ti, es exactamente suficiente...']",
+      "tu_sombra_transformational": "[2-3 líneas: 'A veces puedes [sombra lilithiana: rechazar/reprimir/expresar destructivamente este poder]. No es demasiado: es sin canal. Tu Lilith pide EXPRESIÓN consciente, no represión ni explosión...']",
+      "tu_regalo_evolutivo": "[3 líneas: 'Recuperar poder en [área] que te hicieron creer que debías ceder. Dar permiso a otros para ser "demasiado". Crear/amar/existir sin pedir disculpas...']",
+      "mini_coach": "[3-4 acciones: '• Durante Luna Oscura, conecta con tu rabia sagrada', '• Expresa [cualidad de Lilith] sin suavizarla para otros', '• Pregúntate: ¿dónde estoy siendo "buena" en lugar de real?']",
+      "mantra": "[Frase sobre poder sin domesticar. Ej: 'No soy demasiado. Soy exactamente yo.']"
+    },
+    "nodo_norte": {
+      "posicion": "${northNode?.sign || 'No disponible'} Casa ${northNode?.house || 'N/A'}",
+      "que_significa_casa": "[Una línea: Ej: 'Casa 7 = tu destino en las relaciones; hacia dónde creces']",
+      "tu_esencia": "[2-3 párrafos POÉTICO-TRANSFORMATIONAL: 'Tu norte evolutivo no es cómodo: es necesario. Nodo Norte en ${northNode?.sign} Casa ${northNode?.house} te llama hacia [dirección evolutiva]. Mientras tu Nodo Sur (opuesto) es tu zona de confort en [área opuesta], tu crecimiento real está en [área del Nodo Norte]. No se trata de abandonar tu pasado: se trata de integrar [cualidad del NN] que te falta. Evolucionas hacia [metáfora]. Cada vez que eliges [acción del NN] sobre [patrón del NS], creces...']",
+      "tu_sombra_transformational": "[2-3 líneas: 'A veces puedes [evitar el NN/refugiarte en el NS]. Tu zona de confort NO es tu zona de crecimiento. Tu Nodo Norte pide valentía, no perfección...']",
+      "tu_regalo_evolutivo": "[3 líneas: 'Desarrollar [cualidad del NN] que tu alma vino a cultivar. Balancear [talento del NS] con [desarrollo del NN]. Ser ejemplo de crecimiento en [área]...']",
+      "mini_coach": "[3-4 acciones: '• Durante Luna Nueva, activa conscientemente [cualidad del NN]', '• Nota cuándo te refugias en [patrón del Nodo Sur]', '• Elige UNA práctica de [área del NN] por 28 días']",
+      "mantra": "[Frase sobre evolución consciente. Ej: 'Mi comodidad está atrás. Mi destino, adelante.']"
     }
   },
 
   "aspectos_destacados": {
-    "stelliums": "[Si hay 3+ planetas en mismo signo, describir el SÚPER-PODER]",
-    "aspectos_tensos": "[2-3 cuadraturas/oposiciones y su significado transformador]",
-    "aspectos_armoniosos": "[2-3 trígonos/sextiles y los dones que otorgan]",
-    "patron_dominante": "[Patrón astrológico dominante de la carta]"
+    "stelliums": "[Si hay 3+ planetas en mismo signo/casa: '🔥 STELLIUM EN [SIGNO/CASA]: Tienes [número] planetas aquí. Esto no es acumulación: es CONCENTRACIÓN DE PODER. Tu energía en [área] es [metáfora]. Donde otros dispersan, tú ENFOCAS. Tu regalo: maestría en [tema]. Tu entrenamiento: no dispersarte en mil direcciones cuando tu carta te pide profundidad en UNA.']",
+    "aspectos_tensos": "[2-3 cuadraturas/oposiciones principales: 'TENSIÓN CREATIVA: [Planeta A] cuadratura [Planeta B] - Esta no es una pelea interna: es un DIÁLOGO PRODUCTIVO entre [área A] y [área B]. Tu crecimiento viene de integrar ambos, no de elegir uno. [Planeta C] oposición [Planeta D] - La polaridad entre [tema C] y [tema D] te entrena en [capacidad]. Cada vez que navegas esta tensión, te vuelves más sabio/a...']",
+    "aspectos_armoniosos": "[2-3 trígonos/sextiles: 'DONES NATURALES: [Planeta A] trígono [Planeta B] - [Capacidad] te sale natural. Es tan fácil que podrías darlo por sentado. NO LO HAGAS. Es tu superpoder en [área]. [Planeta C] sextile [Planeta D] - Puedes conectar [tema C] con [tema D] sin esfuerzo. Otros pagan por aprender esto; tú lo traes integrado...']",
+    "patron_dominante": "[Identificar patrón: Gran Trígono/T-Cuadrada/Yod/Stellium/etc: 'PATRÓN ARQUITECTÓNICO: Tu carta forma un [patrón]. Esto significa que [explicación del patrón en lenguaje claro]. Tu vida tiene un TEMA RECURRENTE: [tema]. No es karma: es tu curriculum evolutivo. Cada experiencia en [área] te prepara para [propósito]...']"
   },
 
   "integracion_carta": {
-    "hilo_de_oro": "[Párrafo TRANSFORMATIONAL que UNE todo: 'Tu carta NO cuenta una historia bonita. Cuenta una estrategia de SUPERVIVENCIA MEJORADA. Sol en ${sun?.sign} + Luna en ${moon?.sign} + Ascendente ${chartData.ascendant.sign} = un sistema diseñado para STRENGTHENSRSE con [tipo específico de caos]. Las tensiones en tu carta NO son errores - son OPORTUNIDADES de transformation. Cada cuadratura es un gimnasio...']",
-    "sintesis": "[Frase DIRECT síntesis: 'Eres un SISTEMA TRANSFORMATIONAL camuflado de [arquetipo] - alguien que se STRENGTHENS específicamente con [tipo de adversidad]...']",
+    "hilo_de_oro": "[Párrafo POÉTICO-TRANSFORMATIONAL que UNE todo: 'Tu carta natal no es una sentencia: es un mapa de entrenamiento. Con Sol en ${sun?.sign}, Luna en ${moon?.sign}, y Ascendente ${chartData.ascendant.sign}, tu sistema está diseñado para crecer específicamente a través de [tipo de experiencias]. Las tensiones en tu carta no son defectos de fábrica: son gimnasios específicos. Tu cuadratura entre [X] y [Y] te entrena en [capacidad]. Tu trígono entre [A] y [B] te equipa con [don]. Donde otros ven contradicciones, tu carta revela ESTRATEGIA. Eres [metáfora arquitectónica] construyéndote a través de [proceso]...']",
+    "sintesis": "[Frase POÉTICA síntesis: 'Eres [arquetipo] aprendiendo a [verbo transformacional] a través de [área/tema]. Tu carta dice: crecerás más en [situación] que en [situación opuesta]. Y eso está perfecto.']",
     "polaridades": [
-      { "polo_a": "[Ej: Acción impulsiva]", "polo_b": "[Ej: Parálisis mental]", "integracion": "[TRANSFORMATIONAL: 'Esta tensión NO se resuelve buscando balance. Se USA alternando extremos según contexto. Estrategia Barbell: X en [situación A], Y en [situación B]...']" }
+      { "polo_a": "[Ej: Tu necesidad de libertad (Urano)]", "polo_b": "[Ej: Tu necesidad de estructura (Saturno)]", "integracion": "[POÉTICO-TRANSFORMATIONAL: 'Esta tensión entre [A] y [B] no es para resolverse: es para DANZAR con ella. A veces necesitarás [polo A] - en momentos de [contexto]. Otras veces, [polo B] - cuando [contexto opuesto]. Tu sabiduría está en saber cuándo activar cuál, no en forzar un balance artificial que ninguno de los dos polos quiere...']" }
     ]
   },
 
@@ -366,24 +404,24 @@ Responde ÚNICAMENTE con un JSON válido:
   },
 
   "manifestacion_amor": {
-    "patron_amoroso": "[Párrafo DIRECTO: Tu patrón relacional tiene una cualidad única. Venus en ${venus?.sign}, Marte en ${mars?.sign}, Luna en ${moon?.sign} = atraes [tipo de dinámica específica] porque tu sistema busca DESARROLLO a través de relaciones auténticas. Tu amor se PROFUNDIZA y fortalece con [tipo específico de intensidad relacional]...]",
-    "que_atrae": "[DIRECTO Y HONESTO: 'Atraes personas que te CHALLENGESN e inspiran en [área]. No es casualidad - es tu configuración buscando CRECIMIENTO TRANSFORMATIONAL vía relaciones.']",
-    "que_necesita": "[DIRECTO Y HONESTO: 'Tu crecimiento relacional viene de vínculos con compromiso mutuo real. Necesitas alguien con REAL COMMITMENT en [área] - alguien comprometido activamente contigo, no un observador pasivo.']",
-    "trampa_amorosa": "[TRANSFORMATIONAL Y HONESTO: 'Tiendes a buscar [comportamiento de seguridad] en pareja. Este patrón limita tu desarrollo relacional. Tus relaciones evolucionan con PROFUNDIDAD e INTENSIDAD en [área específica]. Tu crecimiento viene de participar en [tipo de dinámica].']",
+    "patron_amoroso": "[Párrafo POÉTICO-TRANSFORMATIONAL: 'Tu patrón relacional es único y tiene su propia sabiduría. Con Venus en ${venus?.sign}, Marte en ${mars?.sign}, y Luna en ${moon?.sign}, atraes [tipo de dinámica específica] porque tu alma busca CRECER a través del amor. Tu forma de amar se profundiza con [tipo de experiencia relacional]. No es casual: es tu configuración pidiendo evolución a través de la intimidad...']",
+    "que_atrae": "[POÉTICO Y HONESTO: 'Atraes personas que te desafían e inspiran en [área]. No es casualidad: es tu carta buscando crecimiento a través de las relaciones. Los vínculos que te transforman son los que te llevan a [proceso]...']",
+    "que_necesita": "[POÉTICO Y HONESTO: 'Tu corazón necesita vínculos donde ambos estén comprometidos con crecer. Necesitas alguien que esté PRESENTE en [área] - alguien que camine contigo, no que solo observe desde la barrera...']",
+    "trampa_amorosa": "[POÉTICO Y HONESTO: 'A veces puedes buscar [comportamiento de seguridad] en pareja. Este patrón te mantiene cómodo/a pero no te hace crecer. Tus relaciones evolucionan cuando hay profundidad e intensidad en [área]. Tu crecimiento viene de permitir [tipo de vulnerabilidad]...']",
     "ritual_luna_nueva_venus": {
-      "preparacion": "[TRANSFORMATIONAL: 'Luna Nueva en ${venus?.sign} o en tu signo de Venus. Prepara: lista de COMPROMISOS RELACIONALES con consecuencias tangibles y compromiso real (real commitment).']",
-      "activacion_28_dias": "[Práctica: 'Participar en [situación relacional desafiante] 1x por semana. Registra: qué te desafió, qué te fortaleció. AJUSTA estrategia según retroalimentación.']",
-      "entrega_luna_llena": "[Ritual: 'Luna Llena - observa RESULTADOS, no solo intenciones. ¿Qué te comprometiste a hacer? ¿Qué cumpliste? Honestidad radical. Consecuencias conscientes para promesas no cumplidas.']"
+      "preparacion": "[POÉTICO: 'Durante Luna Nueva en ${venus?.sign} o en tu signo de Venus, prepara un espacio sagrado. Lista: compromisos relacionales que quieres cultivar - con consecuencias reales, no solo palabras...']",
+      "activacion_28_dias": "[Práctica: 'Una vez por semana, participa conscientemente en [situación relacional que te desafía]. Registra en tu diario: qué sentiste, qué aprendiste, qué te fortaleció. Ajusta tu enfoque según lo que descubras...']",
+      "entrega_luna_llena": "[Ritual: 'Luna Llena - momento de verdad. Revisa: ¿Qué te comprometiste a cultivar? ¿Qué realmente hiciste? Honestidad sin crueldad. Si no cumpliste, pregúntate por qué, sin juicio, solo curiosidad...']"
     },
-    "declaracion_amor": "[DIRECTA Y EMPODERADORA: 'Merezco un amor que me inspire a CRECER en [área], no solo que me acompañe. Merezco alguien con compromiso real (real commitment), no un observador pasivo. Abrazo la PROFUNDIDAD e INTENSIDAD relacional porque ahí es donde evoluciono.']"
+    "declaracion_amor": "[POÉTICA Y EMPODERADORA: 'Merezco un amor que me inspire a crecer en [área], no solo que me acompañe. Merezco presencia real, no observación pasiva. Abrazo la profundidad relacional porque ahí es donde mi corazón evoluciona.']"
   },
 
   "visualizacion_guiada": {
-    "titulo": "Confrontación con tu Sistema Transformational",
-    "duracion": "10-15 minutos (sin fluff)",
-    "mejor_momento": "Luna Llena (momento de VERDAD)",
-    "preparacion": ["Espacio sin distracciones", "Carta natal visible", "Cuaderno para FEEDBACK honesto"],
-    "texto": "[Texto TRANSFORMATIONAL de 200-250 palabras SIN poesía: 'Cierra los ojos. Respira. Tu carta natal NO es un mapa de destino - es un MANUAL de qué tipo de DYNAMIC CHALLENGES te STRENGTHENS. Visualiza tu Sol en ${sun?.sign}: esta parte de ti se CONSTRUYE cuando [situación específica de estrés]. No cuando todo va bien - cuando TODO VA MAL en [área]. Ahora tu Luna en ${moon?.sign}: tu mundo emocional CRECE con [tipo de dynamic change emocional]. Deja de evitarlo. Tu Ascendente ${chartData.ascendant.sign} proyecta [característica] al mundo y el mundo te RESPONDS con [feedback]. Perfecto - úsalo. Pregúntate SIN AUTOENGAÑO: ¿Dónde estoy siendo VULNERABLE? ¿Qué caos estoy evitando que debería abrazar? ¿Dónde necesito más REAL COMMITMENT? Abre los ojos. Escribe la verdad.']"
+    "titulo": "Encuentro con tu Carta Natal",
+    "duracion": "10-15 minutos",
+    "mejor_momento": "Luna Llena (momento de claridad)",
+    "preparacion": ["Espacio tranquilo sin distracciones", "Tu carta natal visible", "Cuaderno para reflexiones honestas"],
+    "texto": "[Texto POÉTICO-TRANSFORMATIONAL de 200-250 palabras: 'Cierra los ojos. Respira profundo tres veces. Tu carta natal no es un destino fijo: es un mapa de cómo creces mejor. Visualiza tu Sol en ${sun?.sign}: esta parte de ti se fortalece cuando [situación específica]. Tu luz brilla más intensamente en [área]. Ahora tu Luna en ${moon?.sign}: tu mundo emocional se nutre con [tipo de experiencia emocional]. No lo evites: permítelo. Tu Ascendente ${chartData.ascendant.sign} es tu puerta al mundo - proyectas [característica] y el mundo responde con [feedback]. Esto es información valiosa. Ahora pregúntate con honestidad amorosa: ¿Dónde estoy creciendo realmente? ¿Qué experiencias estoy evitando que podrían ser mis mejores maestras? ¿Dónde necesito más compromiso conmigo mismo/a? Respira. Siente. No juzgues. Solo observa. Tu carta no te pide perfección: te invita a ser consciente. Abre los ojos cuando estés listo/a. Escribe lo que descubriste.']"
   },
 
   "datos_para_agenda": {
@@ -406,9 +444,9 @@ Responde ÚNICAMENTE con un JSON válido:
     ]
   },
 
-  "declaracion_poder_final": "[Declaración TRANSFORMATIONAL de 5-6 líneas en primera persona DIRECTA Y EMPODERADORA: 'Mi carta natal no me define - me EQUIPA con un mapa único. Sol en ${sun?.sign}, Luna en ${moon?.sign}, Ascendente ${chartData.ascendant.sign} = un sistema diseñado para DESARROLLARSE a través de [tipo de desafíos]. Busco EXPOSICIÓN consciente a experiencias que me fortalecen. Los desafíos en [área] me DESARROLLAN y construyen. Tengo COMPROMISO REAL (REAL COMMITMENT) en mi propia evolución. Este es mi manual de transformation. Soy un SISTEMA que se optimiza con cada experiencia.']",
+  "declaracion_poder_final": "[Declaración POÉTICA Y EMPODERADORA de 5-6 líneas en primera persona: 'Mi carta natal no me limita: me revela. Con Sol en ${sun?.sign}, Luna en ${moon?.sign}, y Ascendente ${chartData.ascendant.sign}, mi sistema está diseñado para crecer a través de [tipo de experiencias]. Busco conscientemente experiencias que me desafían y fortalecen. Los desafíos en [área] me enseñan y me construyen. Estoy comprometido/a con mi propia evolución. Este es mi mapa de crecimiento. Soy [metáfora] que se fortalece con cada experiencia consciente.']",
 
-  "mantra_personal": "[Mantra TRANSFORMATIONAL DIRECTO Y EMPODERADOR - práctico y orientado a la acción: 'Me FORTALEZCO con los desafíos en [área específica]. Las dificultades en [contexto] me desarrollan y construyen. Abrazo la incertidumbre y la dynamic change.']"
+  "mantra_personal": "[Mantra POÉTICO Y EMPODERADOR - inspirador y práctico: 'Crezco a través de [experiencia específica del área]. Los desafíos en [contexto] me fortalecen. Abrazo el cambio porque es mi forma de evolucionar.']"
 }
 
 IMPORTANT INSTRUCTIONS:
