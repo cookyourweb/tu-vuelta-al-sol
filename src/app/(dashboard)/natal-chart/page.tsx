@@ -528,9 +528,12 @@ export default function NatalChartPage() {
 
         {/* ✅ NEW: Progress Modals */}
         <ChartProgressModal
-          isOpen={loading && !isRegenerating}
+          isOpen={loading || isRegenerating}
           progress={loadingMessage}
-          onClose={() => setLoading(false)}
+          onClose={() => {
+            setLoading(false);
+            setIsRegenerating(false);
+          }}
         />
 
         <InterpretationProgressModal

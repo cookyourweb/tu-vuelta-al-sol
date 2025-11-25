@@ -1,7 +1,7 @@
 // src/components/astrology/NatalChartWheel.tsx - VERSIÓN FINAL CORREGIDA
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 
 interface Planet {
   name: string;
@@ -60,6 +60,41 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
 }) => {
   const [hoveredPlanet, setHoveredPlanet] = useState<string | null>(null);
   const [hoveredAspect, setHoveredAspect] = useState<string | null>(null);
+  const aspectHoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Manejar hover de aspectos con delay para dar tiempo a mover mouse al tooltip
+  const handleAspectMouseEnter = (aspectId: string) => {
+    // Cancelar cualquier timeout pendiente
+    if (aspectHoverTimeoutRef.current) {
+      clearTimeout(aspectHoverTimeoutRef.current);
+      aspectHoverTimeoutRef.current = null;
+    }
+    setHoveredAspect(aspectId);
+  };
+
+  const handleAspectMouseLeave = () => {
+    // Agregar delay de 800ms antes de ocultar - tiempo suficiente para mover mouse al tooltip
+    aspectHoverTimeoutRef.current = setTimeout(() => {
+      setHoveredAspect(null);
+    }, 800);
+  };
+
+  const cancelAspectHideTimeout = () => {
+    // Cancelar timeout si el mouse entra al tooltip
+    if (aspectHoverTimeoutRef.current) {
+      clearTimeout(aspectHoverTimeoutRef.current);
+      aspectHoverTimeoutRef.current = null;
+    }
+  };
+
+  // Cleanup al desmontar
+  React.useEffect(() => {
+    return () => {
+      if (aspectHoverTimeoutRef.current) {
+        clearTimeout(aspectHoverTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Constantes para dibujar el gráfico
   const centerX = width / 2;
@@ -490,8 +525,8 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
               filter: isHovered ? `drop-shadow(0 0 6px ${style.color})` : `drop-shadow(0 0 2px ${style.color})`,
               transition: 'all 0.3s ease'
             }}
-            onMouseEnter={() => setHoveredAspect(aspectId)}
-            onMouseLeave={() => setHoveredAspect(null)}
+            onMouseEnter={() => handleAspectMouseEnter(aspectId)}
+            onMouseLeave={() => handleAspectMouseLeave()}
           />
           
           {/* Tooltip para aspecto */}
