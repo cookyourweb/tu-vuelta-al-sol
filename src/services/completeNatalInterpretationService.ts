@@ -291,8 +291,26 @@ export async function generateCompleteNatalInterpretation(
   const generationTime = ((Date.now() - startTime) / 1000).toFixed(1);
   console.log('🎯 [COMPLETE NATAL] Generation completed in', generationTime, 'seconds');
 
+  // 🔍 DEBUG: Inspect OpenAI response structure
+  console.log('🔍 [DEBUG] OpenAI Response structure:', {
+    hasChoices: !!response.choices,
+    choicesLength: response.choices?.length,
+    firstChoice: response.choices?.[0] ? {
+      hasMessage: !!response.choices[0].message,
+      messageRole: response.choices[0].message?.role,
+      hasContent: !!response.choices[0].message?.content,
+      contentLength: response.choices[0].message?.content?.length,
+      finishReason: response.choices[0].finish_reason,
+      refusal: response.choices[0].message?.refusal
+    } : null,
+    usage: response.usage,
+    id: response.id,
+    model: response.model
+  });
+
   const content = response.choices[0]?.message?.content;
   if (!content) {
+    console.error('❌ [DEBUG] No content found. Full response:', JSON.stringify(response, null, 2));
     throw new Error('No content in OpenAI response');
   }
 
