@@ -86,7 +86,7 @@ export const InterpretationDrawer: React.FC<InterpretationDrawerProps> = ({
   // 🎨 RENDERIZADO
   // =========================================================================
   return (
-    <div className="fixed inset-0 z-[200000]">
+    <div className="fixed inset-0 z-[999999]">
       {/* Overlay más transparente - SIN BLUR */}
       <div
         className="absolute inset-0 bg-black/30"

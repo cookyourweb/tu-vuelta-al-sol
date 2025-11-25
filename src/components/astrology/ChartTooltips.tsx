@@ -363,7 +363,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
     return (
       <div
-        className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-md pointer-events-auto z-[150000]"
+        className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-md pointer-events-auto z-50"
         style={{
           left: tooltipPosition.x + 25,
           top: tooltipPosition.y - 50,
@@ -525,7 +525,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
     return (
       <div
-        className="fixed bg-gradient-to-r from-green-500/95 to-emerald-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm pointer-events-auto z-[150000]"
+        className="fixed bg-gradient-to-r from-green-500/95 to-emerald-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm pointer-events-auto z-50"
         style={{
           left: tooltipPosition.x + 25,
           top: tooltipPosition.y - 50,
@@ -638,7 +638,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
     return (
       <div
-        className="fixed bg-gradient-to-r from-purple-500/95 to-violet-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm pointer-events-auto z-[150000]"
+        className="fixed bg-gradient-to-r from-purple-500/95 to-violet-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm pointer-events-auto z-50"
         style={{
           left: tooltipPosition.x + 25,
           top: tooltipPosition.y - 50,
@@ -758,7 +758,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
     return (
       <div
-        className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-lg pointer-events-auto z-[150000]"
+        className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-lg pointer-events-auto z-50"
         style={{
           left: tooltipPosition.x,
           top: tooltipPosition.y,
@@ -951,7 +951,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
   if (hoveredHouse) {
     return (
       <div
-        className="chart-tooltip fixed bg-gradient-to-r from-blue-500/95 to-cyan-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm pointer-events-auto z-[150000]"
+        className="chart-tooltip fixed bg-gradient-to-r from-blue-500/95 to-cyan-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm pointer-events-auto z-50"
         style={{
           left: tooltipPosition.x + 25,
           top: tooltipPosition.y - 50,
@@ -984,7 +984,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
     if (hoveredCard === 'birth-data') {
       return (
         <div
-          className="fixed bg-gradient-to-r from-green-500/95 to-emerald-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-md pointer-events-auto z-[150000]"
+          className="fixed bg-gradient-to-r from-green-500/95 to-emerald-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-md pointer-events-auto z-50"
           style={{
             left: tooltipPosition.x + 25,
             top: tooltipPosition.y - 50,
@@ -1053,7 +1053,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
       return (
         <div
-          className="fixed bg-gradient-to-r from-indigo-500/95 to-purple-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-lg pointer-events-auto z-[150000]"
+          className="fixed bg-gradient-to-r from-indigo-500/95 to-purple-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-lg pointer-events-auto z-50"
           style={{
             left: tooltipPosition.x + 25,
             top: tooltipPosition.y - 50,
@@ -1153,7 +1153,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
       return (
         <div
-          className="fixed bg-gradient-to-r from-orange-500/95 to-red-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-lg pointer-events-auto z-[150000]"
+          className="fixed bg-gradient-to-r from-orange-500/95 to-red-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-lg pointer-events-auto z-50"
           style={{
             left: tooltipPosition.x + 25,
             top: tooltipPosition.y - 50,
@@ -1218,7 +1218,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
     if (hoveredCard === 'solar-return') {
       return (
         <div
-          className="fixed bg-gradient-to-r from-rose-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-md pointer-events-auto z-[150000]"
+          className="fixed bg-gradient-to-r from-rose-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-md pointer-events-auto z-50"
           style={{
             left: tooltipPosition.x + 25,
             top: tooltipPosition.y - 50,

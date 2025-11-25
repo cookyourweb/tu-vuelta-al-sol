@@ -226,7 +226,7 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
     return (
       <>
         <div 
-          className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm z-[99998]"
+          className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm z-50"
           style={{ 
             left: tooltipPosition.x + 25,
             top: tooltipPosition.y - 50,
@@ -362,7 +362,7 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
     return (
       <>
         <div
-          className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-lg z-[99998]"
+          className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-lg z-50"
           style={{
             left: tooltipPosition.x,
             top: tooltipPosition.y,
@@ -503,7 +503,7 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
     return (
       <>
         <div 
-          className="fixed bg-gradient-to-r from-green-500/95 to-emerald-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm z-[99998]"
+          className="fixed bg-gradient-to-r from-green-500/95 to-emerald-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm z-50"
           style={{ 
             left: tooltipPosition.x + 25,
             top: tooltipPosition.y - 50,
@@ -612,7 +612,7 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
     return (
       <>
         <div 
-          className="fixed bg-gradient-to-r from-purple-500/95 to-violet-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm z-[99998]"
+          className="fixed bg-gradient-to-r from-purple-500/95 to-violet-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm z-50"
           style={{ 
             left: tooltipPosition.x + 25,
             top: tooltipPosition.y - 50,
@@ -717,7 +717,7 @@ const ChartTooltipsWithDrawer: React.FC<ChartTooltipsWithDrawerProps> = ({
   if (hoveredHouse) {
     return (
       <div 
-        className="fixed bg-gradient-to-r from-blue-500/95 to-cyan-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm pointer-events-none z-[99998]"
+        className="fixed bg-gradient-to-r from-blue-500/95 to-cyan-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm pointer-events-none z-50"
         style={{ 
           left: tooltipPosition.x + 25,
           top: tooltipPosition.y - 50,
