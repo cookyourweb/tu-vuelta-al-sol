@@ -276,14 +276,14 @@ export async function generateCompleteNatalInterpretation(
     messages: [
       {
         role: 'system',
-        content: 'Eres un astrólogo experto que genera interpretaciones en JSON válido. SIEMPRE responde SOLO con JSON, sin texto adicional.'
+        content: 'You are a helpful assistant that generates detailed astrological chart interpretations in valid JSON format. Always respond with ONLY JSON, no additional text.'
       },
       {
         role: 'user',
         content: prompt
       }
     ],
-    temperature: 0.8,
+    temperature: 0.7,
     max_tokens: 16000,
     response_format: { type: 'json_object' }
   });

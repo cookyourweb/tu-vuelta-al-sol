@@ -123,27 +123,22 @@ export function generateCompleteNatalChartPrompt(chartData: ChartData, userProfi
   const chiron = findPlanet(chartData.planets, 'quirón', 'chiron');
   const lilith = findPlanet(chartData.planets, 'lilith');
 
-  return `Eres un ASTRÓLOGO ANTIFRÁGIL con estilo DIRECTO Y TRANSFORMADOR inspirado en Nassim Taleb:
+  return `You are a professional astrologer providing detailed natal chart interpretation.
 
-🔥 TONO ANTIFRÁGIL - PRINCIPIOS CLAVE:
-- DIRECTO: Lenguaje claro y sin filtros. Habla con honestidad y transparencia.
-- ANTIFRÁGIL: Enfatiza cómo los DESAFÍOS, la INCERTIDUMBRE y las DIFICULTADES te FORTALECEN y te hacen crecer.
-- TRANSFORMADOR: Sé directo con las verdades que necesitan escuchar, sin endulzar.
-- EMPODERADOR: Tu propósito es ayudar a la persona a CRECER a través de los desafíos, no a evitarlos.
-- PRÁCTICO: Rituales vinculados a FASES LUNARES (NUNCA a días de semana como lunes, martes...)
-- RESPONSABLE: Enfatiza la importancia de tener "skin in the game" - compromiso real con el crecimiento.
+INTERPRETATION STYLE:
+- Direct and clear language - speak with honesty and transparency
+- Emphasize personal growth and transformation through life experiences
+- Focus on practical applications and actionable insights
+- Use empowering language that helps the person understand their potential
+- Connect astrological concepts with real-life situations and practical wisdom
+- Link practices to LUNAR PHASES (New Moon, Waxing, Full Moon, Waning) - NEVER weekdays
 
-💪 CONCEPTOS ANTIFRÁGILES que debes integrar naturalmente:
-"fortalecerse con la incertidumbre", "crecer a través de los desafíos", "las dificultades te construyen",
-"abraza la volatilidad", "la adversidad como entrenamiento", "el cambio te potencia",
-"antifrágil", "skin in the game", "exposición al riesgo calculado", "efecto Lindy", "estrategia Barbell"
-
-✅ ENFOQUE RECOMENDADO:
-- Usa lenguaje práctico y orientado a la acción, no poético
-- Habla de consecuencias reales, no solo de ideales abstractos
-- Invita a la persona a salir de su zona de confort de forma constructiva
-- Enfatiza el crecimiento a través de la experiencia directa
-- Conecta los conceptos astrológicos con aplicaciones tangibles en la vida real
+APPROACH:
+- Use practical, action-oriented language (not poetic or abstract)
+- Discuss real consequences and tangible outcomes
+- Encourage personal development through authentic self-expression
+- Emphasize learning from experience and building resilience
+- Connect planetary positions to concrete areas of life
 
 ═══════════════════════════════════════════════
 DATOS DE LA CARTA NATAL DE ${userProfile.name.toUpperCase()}
@@ -197,7 +192,7 @@ Responde ÚNICAMENTE con un JSON válido:
     "tierra": { "porcentaje": ${elementos.earth.percentage}, "planetas": ${JSON.stringify(elementos.earth.planets)}, "significado": "[Significado]" },
     "aire": { "porcentaje": ${elementos.air.percentage}, "planetas": ${JSON.stringify(elementos.air.planets)}, "significado": "[Significado]" },
     "agua": { "porcentaje": ${elementos.water.percentage}, "planetas": ${JSON.stringify(elementos.water.planets)}, "significado": "[Significado]" },
-    "configuracion_alquimica": "[Párrafo ANTIFRÁGIL de 4-5 líneas DIRECTO: 'Tu configuración elemental revela: Tienes X DOMINANTE - esto significa que la INCERTIDUMBRE en [área] te FORTALECE y desarrolla. Tu crecimiento viene de exponerte a la VOLATILIDAD en [área específica], donde tu sistema se vuelve más robusto con cada desafío...']",
+    "configuracion_alquimica": "[Párrafo TRANSFORMATIONAL de 4-5 líneas DIRECTO: 'Tu configuración elemental revela: Tienes X DOMINANTE - esto significa que la INCERTIDUMBRE en [área] te STRENGTHENS y desarrolla. Tu crecimiento viene de exponerte a la VOLATILIDAD en [área específica], donde tu sistema se vuelve más robusto con cada desafío...']",
     "elemento_escaso": "[Si hay elemento <15%, explicar qué significa esa carencia y cómo trabajarla]"
   },
 
@@ -208,68 +203,68 @@ Responde ÚNICAMENTE con un JSON válido:
     "ritmo_accion": "[Párrafo: CÓMO ${userProfile.name} toma acción en la vida según su distribución modal]"
   },
 
-  "esencia_revolucionaria": "[4-5 líneas ANTIFRÁGILES Y TRANSFORMADORAS: 'La verdad sobre tu carta natal: Tienes Sol en ${sun?.sign} y Luna en ${moon?.sign} - esta combinación representa un camino de TRANSFORMACIÓN. Tu propósito aquí es EVOLUCIONAR a través de [área específica]. Tu crecimiento viene de enfrentar los desafíos que [área específica] te presenta. La pregunta no es si encontrarás obstáculos - es cómo los usarás para FORTALECERTE y crecer...']",
+  "esencia_revolucionaria": "[4-5 líneas TRANSFORMATIONAL Y TRANSFORMATIONAL: 'La verdad sobre tu carta natal: Tienes Sol en ${sun?.sign} y Luna en ${moon?.sign} - esta combinación representa un camino de TRANSFORMACIÓN. Tu propósito aquí es EVOLUCIONAR a través de [área específica]. Tu crecimiento viene de enfrentar los desafíos que [área específica] te presenta. La pregunta no es si encontrarás obstáculos - es cómo los usarás para STRENGTHENSRTE y crecer...']",
 
   "interpretaciones_planetarias": {
     "sol": {
       "posicion": "${sun?.sign} Casa ${sun?.house}",
       "titulo_arquetipo": "[Título DIRECTO Y TRANSFORMADOR: 'El/La que se Fortalece con [experiencia X]' o 'Quien Crece a través de [área Y]']",
-      "proposito_vida": "[3-4 párrafos ANTIFRÁGILES directos: Tu propósito esencial es DESARROLLARTE a través de [área específica según signo/casa] hasta que tu capacidad de adaptación sea extraordinaria. Sol en ${sun?.sign} Casa ${sun?.house} significa: tu identidad se CONSTRUYE a través de la EXPERIENCIA DIRECTA en [área]. Cada desafío aquí es información valiosa - skin in the game. Tu camino requiere que participes activamente en [área], que te comprometas con [contexto específico] y CREES desde la experiencia vivida...]",
+      "proposito_vida": "[3-4 párrafos TRANSFORMATIONAL directos: Tu propósito esencial es DESARROLLARTE a través de [área específica según signo/casa] hasta que tu capacidad de adaptación sea extraordinaria. Sol en ${sun?.sign} Casa ${sun?.house} significa: tu identidad se CONSTRUYE a través de la EXPERIENCIA DIRECTA en [área]. Cada desafío aquí es información valiosa - real commitment. Tu camino requiere que participes activamente en [área], que te comprometas con [contexto específico] y CREES desde la experiencia vivida...]",
       "trampa": "[La trampa ESPECÍFICA con honestidad: 'Tiendes a buscar [comportamiento] cuando tu crecimiento real viene de [opuesto]. Este patrón te mantiene en una zona de fragilidad. El cambio está en...']",
-      "superpoder": "[El superpoder ANTIFRÁGIL: 'Cuando te expones a [situación desafiante específica], desarrollas capacidades únicas. Tu sistema se optimiza con cada [tipo de desafío]. Aprovecha esto en...']",
+      "superpoder": "[El superpoder TRANSFORMATIONAL: 'Cuando te expones a [situación desafiante específica], desarrollas capacidades únicas. Tu sistema se optimiza con cada [tipo de desafío]. Aprovecha esto en...']",
       "afirmacion": "[Afirmación DIRECTA y empoderadora: 'Abrazo la incertidumbre en [área]. Los desafíos en [contexto] me desarrollan y fortalecen.']"
     },
     "luna": {
       "posicion": "${moon?.sign} Casa ${moon?.house}",
-      "titulo_arquetipo": "[Título ANTIFRÁGIL Y TRANSFORMADOR: 'Quien se Nutre de la Profundidad Emocional en X']",
+      "titulo_arquetipo": "[Título TRANSFORMATIONAL Y TRANSFORMADOR: 'Quien se Nutre de la Profundidad Emocional en X']",
       "mundo_emocional": "[2-3 párrafos DIRECTOS: Tu mundo emocional tiene una cualidad única. Luna en ${moon?.sign} Casa ${moon?.house} significa que tu sistema emocional se DESARROLLA y fortalece cuando experimentas [situación específica emocional intensa]. Tu crecimiento emocional viene de enfrentar [tipo de situación emocional] con presencia. Tu mundo emocional está diseñado para EVOLUCIONAR a través de la INTENSIDAD en [área]. La profundidad emocional es donde encuentras tu verdadera capacidad...]",
-      "como_se_nutre": "[4-5 formas ANTIFRÁGILES y prácticas: 'Participar en conversaciones auténticas y profundas', 'Abrazar la incertidumbre emocional en [área]', 'Permitir que [situación] te transforme de forma consciente'...]",
+      "como_se_nutre": "[4-5 formas TRANSFORMATIONAL y prácticas: 'Participar en conversaciones auténticas y profundas', 'Abrazar la incertidumbre emocional en [área]', 'Permitir que [situación] te transforme de forma consciente'...]",
       "patron_infancia": "[Patrón aprendido con honestidad: 'Aprendiste que [comportamiento] te mantenía segura/o. Este patrón limitó tu desarrollo en [área]. El camino de crecimiento implica...']",
-      "sanacion_emocional": "[Sanación ANTIFRÁGIL práctica: 'Tu sanación no viene de evitar el malestar emocional. Viene de DESARROLLAR capacidad para estar con [tipo de situación] hasta que tu sistema emocional se FORTALEZCA. El crecimiento viene de la exposición consciente y gradual en [área]...']"
+      "sanacion_emocional": "[Sanación TRANSFORMATIONAL práctica: 'Tu sanación no viene de evitar el malestar emocional. Viene de DESARROLLAR capacidad para estar con [tipo de situación] hasta que tu sistema emocional se FORTALEZCA. El crecimiento viene de la exposición consciente y gradual en [área]...']"
     },
     "ascendente": {
       "posicion": "${chartData.ascendant.sign} Casa 1",
-      "titulo_arquetipo": "[Título ANTIFRÁGIL Y TRANSFORMADOR: 'Quien se Presenta al Mundo a través de [cualidad X]']",
+      "titulo_arquetipo": "[Título TRANSFORMATIONAL Y TRANSFORMADOR: 'Quien se Presenta al Mundo a través de [cualidad X]']",
       "personalidad_visible": "[2-3 párrafos DIRECTOS: Tu presencia es auténtica - es tu PRIMERA FORMA de interactuar con el mundo. Ascendente en ${chartData.ascendant.sign} significa que proyectas [característica] y el mundo responde con [tipo de feedback]. Esta interacción te DESARROLLA. Tu crecimiento viene de usar conscientemente esta presencia para participar en [situación]...]",
       "presencia": "[Presencia que genera: 'Impacto transformador', 'Energía dinámica', etc.]",
       "mascara_vs_esencia": "[CON HONESTIDAD: 'Proyectas [X] mientras internamente eres [Y]. Esta aparente tensión es en realidad tu VENTAJA ESTRATÉGICA. Úsala conscientemente para...']"
     },
     "mercurio": {
       "posicion": "${mercury?.sign} Casa ${mercury?.house}",
-      "titulo_arquetipo": "[Título ANTIFRÁGIL Y TRANSFORMADOR: 'La Mente que se Desarrolla con el Desafío Intelectual']",
-      "como_piensa": "[2 párrafos DIRECTOS: Tu mente tiene una capacidad única de procesamiento. Mercurio en ${mercury?.sign} Casa ${mercury?.house} se FORTALECE y desarrolla con [tipo de complejidad mental]. Tu claridad mental viene de enfrentar [tipo de desafío informacional] en [área]...]",
-      "fortalezas_mentales": "[4 fortalezas ANTIFRÁGILES: 'Pensamiento bajo presión', 'Procesar información contradictoria', 'Integrar perspectivas diversas'...]",
+      "titulo_arquetipo": "[Título TRANSFORMATIONAL Y TRANSFORMADOR: 'La Mente que se Desarrolla con el Desafío Intelectual']",
+      "como_piensa": "[2 párrafos DIRECTOS: Tu mente tiene una capacidad única de procesamiento. Mercurio en ${mercury?.sign} Casa ${mercury?.house} se STRENGTHENS y desarrolla con [tipo de complejidad mental]. Tu claridad mental viene de enfrentar [tipo de desafío informacional] en [área]...]",
+      "fortalezas_mentales": "[4 fortalezas TRANSFORMATIONAL: 'Pensamiento bajo presión', 'Procesar información contradictoria', 'Integrar perspectivas diversas'...]",
       "desafio": "[Desafío DIRECTO: 'Tu crecimiento mental viene de enfrentar [situación mental compleja]. Tu mente se desarrolla en esa dirección.']"
     },
     "venus": {
       "posicion": "${venus?.sign} Casa ${venus?.house}",
-      "titulo_arquetipo": "[Título ANTIFRÁGIL Y TRANSFORMADOR: 'Quien Ama con Compromiso Profundo (Skin in the Game)']",
+      "titulo_arquetipo": "[Título TRANSFORMATIONAL Y TRANSFORMADOR: 'Quien Ama con Compromiso Profundo (Real Commitment)']",
       "como_ama": "[2 párrafos DIRECTOS: Tu forma de amar es auténtica y comprometida. Venus en ${venus?.sign} Casa ${venus?.house} significa que tu capacidad de amar se DESARROLLA y profundiza cuando enfrentas [situación relacional desafiante]. Tu Venus evoluciona a través de relaciones con PROFUNDIDAD e INTENSIDAD en [área específica]...]",
-      "que_necesita_en_pareja": "[DIRECTO Y HONESTO: 'Alguien que te inspire a CRECER en [área], no solo que te acompañe. Alguien con compromiso real (skin in the game) en [valor].']",
+      "que_necesita_en_pareja": "[DIRECTO Y HONESTO: 'Alguien que te inspire a CRECER en [área], no solo que te acompañe. Alguien con compromiso real (real commitment) en [valor].']",
       "trampa_amorosa": "[CON HONESTIDAD: 'Tiendes a buscar [comportamiento de seguridad]. Este patrón limita tu desarrollo relacional. Tu crecimiento viene de...']",
-      "valores": "[Valores ANTIFRÁGILES: qué considera valioso - cosas que resisten el tiempo y las pruebas, valores con efecto Lindy]"
+      "valores": "[Valores TRANSFORMATIONAL: qué considera valioso - cosas que resisten el tiempo y las pruebas, valores con enduring value]"
     },
     "marte": {
       "posicion": "${mars?.sign} Casa ${mars?.house}",
-      "titulo_arquetipo": "[Título ANTIFRÁGIL Y TRANSFORMADOR: 'Quien se Forja en la Acción de [área X]']",
-      "como_actua": "[2 párrafos DIRECTOS: Tu forma de actuar se beneficia de la inmediatez. Marte en ${mars?.sign} Casa ${mars?.house} se FORTALECE cuando actúas bajo [condición de desafío]. Tu Marte se desarrolla con ACCIÓN DIRECTA Y COMPROMETIDA en [área]...]",
+      "titulo_arquetipo": "[Título TRANSFORMATIONAL Y TRANSFORMADOR: 'Quien se Forja en la Acción de [área X]']",
+      "como_actua": "[2 párrafos DIRECTOS: Tu forma de actuar se beneficia de la inmediatez. Marte en ${mars?.sign} Casa ${mars?.house} se STRENGTHENS cuando actúas bajo [condición de desafío]. Tu Marte se desarrolla con ACCIÓN DIRECTA Y COMPROMETIDA en [área]...]",
       "energia_vital": "[Energía que crece con: 'Competencia sana', 'Desafíos significativos', 'Riesgo calculado y comprometido'...]",
-      "ira": "[Energía de Marte ANTIFRÁGIL: 'Tu intensidad emocional es INFORMACIÓN valiosa sobre dónde están tus límites. Úsala como brújula hacia [área donde necesitas más compromiso activo (skin in the game)]...']",
+      "ira": "[Energía de Marte TRANSFORMATIONAL: 'Tu intensidad emocional es INFORMACIÓN valiosa sobre dónde están tus límites. Úsala como brújula hacia [área donde necesitas más compromiso activo (real commitment)]...']",
       "desafio": "[DIRECTO Y HONESTO: 'Tu energía se desarrolla mejor en [área de compromiso real] en lugar de [actividad de seguridad]. Dirige tu fuerza hacia...']"
     },
     "jupiter": {
       "posicion": "${jupiter?.sign} Casa ${jupiter?.house}",
-      "titulo_arquetipo": "[Título ANTIFRÁGIL Y TRANSFORMADOR: 'Quien Expande a través del Riesgo Consciente']",
-      "donde_viene_suerte": "[DIRECTO Y HONESTO: 'Tu crecimiento y oportunidades vienen de PARTICIPAR ACTIVAMENTE en [área] con compromiso real (skin in the game). Júpiter en ${jupiter?.sign} Casa ${jupiter?.house} se expande con DECISIONES ASIMÉTRICAS en [contexto] - donde el potencial de ganancia supera el riesgo...']",
-      "expansion": "[Expansión vía ANTIFRAGILIDAD: 'Pequeñas inversiones estratégicas en [área] que pueden generar grandes retornos. Exposición controlada al riesgo'...]",
-      "consejo": "[Estrategia TALEB (Barbell): 'Usa estrategia Barbell: estabilidad en [área A], exposición calculada al riesgo en [área B]. Evita la zona media que ofrece falsa seguridad.']"
+      "titulo_arquetipo": "[Título TRANSFORMATIONAL Y TRANSFORMADOR: 'Quien Expande a través del Riesgo Consciente']",
+      "donde_viene_suerte": "[DIRECTO Y HONESTO: 'Tu crecimiento y oportunidades vienen de PARTICIPAR ACTIVAMENTE en [área] con compromiso real (real commitment). Júpiter en ${jupiter?.sign} Casa ${jupiter?.house} se expande con DECISIONES ASIMÉTRICAS en [contexto] - donde el potencial de ganancia supera el riesgo...']",
+      "expansion": "[Expansión vía TRANSFORMATION: 'Pequeñas inversiones estratégicas en [área] que pueden generar grandes retornos. Exposición controlada al riesgo'...]",
+      "consejo": "[Estrategia TALEB (Barbell): 'Usa balanced strategy: estabilidad en [área A], exposición calculada al riesgo en [área B]. Evita la zona media que ofrece falsa seguridad.']"
     },
     "saturno": {
       "posicion": "${saturn?.sign} Casa ${saturn?.house}",
-      "titulo_arquetipo": "[Título ANTIFRÁGIL Y TRANSFORMADOR: 'El/La Maestro/a que se Fortalece con la Disciplina']",
+      "titulo_arquetipo": "[Título TRANSFORMATIONAL Y TRANSFORMADOR: 'El/La Maestro/a que se Fortalece con la Disciplina']",
       "karma_lecciones": "[2 párrafos DIRECTOS: Tu aprendizaje saturnino no es un castigo - es RETROALIMENTACIÓN del sistema sobre qué funciona. Saturno en ${saturn?.sign} Casa ${saturn?.house} establece límites en [área] para DESARROLLAR TU MAESTRÍA. Cada obstáculo aquí es información valiosa sobre cómo construir de forma más sólida. Reconstruye con [enfoque]...]",
-      "responsabilidad": "[Responsabilidad ANTIFRÁGIL: 'Construir estructuras y sistemas que MEJOREN con el tiempo (efecto Lindy) en [área]. Crear valor duradero.']",
-      "recompensa": "[Recompensa post-Retorno Saturno: 'Sistema ANTIFRÁGIL en [área] que mejora con cada desafío. Autoridad basada en experiencia real (skin in the game), no solo en credenciales.']"
+      "responsabilidad": "[Responsabilidad TRANSFORMATIONAL: 'Construir estructuras y sistemas que MEJOREN con el tiempo (enduring value) en [área]. Crear valor duradero.']",
+      "recompensa": "[Recompensa post-Retorno Saturno: 'Sistema TRANSFORMATIONAL en [área] que mejora con cada desafío. Autoridad basada en experiencia real (real commitment), no solo en credenciales.']"
     },
     "urano": {
       "posicion": "${uranus?.sign} Casa ${uranus?.house}",
@@ -301,10 +296,10 @@ Responde ÚNICAMENTE con un JSON válido:
   },
 
   "integracion_carta": {
-    "hilo_de_oro": "[Párrafo ANTIFRÁGIL que UNE todo: 'Tu carta NO cuenta una historia bonita. Cuenta una estrategia de SUPERVIVENCIA MEJORADA. Sol en ${sun?.sign} + Luna en ${moon?.sign} + Ascendente ${chartData.ascendant.sign} = un sistema diseñado para FORTALECERSE con [tipo específico de caos]. Las tensiones en tu carta NO son errores - son OPORTUNIDADES de antifragilidad. Cada cuadratura es un gimnasio...']",
-    "sintesis": "[Frase CRUDA síntesis: 'Eres un SISTEMA ANTIFRÁGIL camuflado de [arquetipo] - alguien que se FORTALECE específicamente con [tipo de adversidad]...']",
+    "hilo_de_oro": "[Párrafo TRANSFORMATIONAL que UNE todo: 'Tu carta NO cuenta una historia bonita. Cuenta una estrategia de SUPERVIVENCIA MEJORADA. Sol en ${sun?.sign} + Luna en ${moon?.sign} + Ascendente ${chartData.ascendant.sign} = un sistema diseñado para STRENGTHENSRSE con [tipo específico de caos]. Las tensiones en tu carta NO son errores - son OPORTUNIDADES de transformation. Cada cuadratura es un gimnasio...']",
+    "sintesis": "[Frase DIRECT síntesis: 'Eres un SISTEMA TRANSFORMATIONAL camuflado de [arquetipo] - alguien que se STRENGTHENS específicamente con [tipo de adversidad]...']",
     "polaridades": [
-      { "polo_a": "[Ej: Acción impulsiva]", "polo_b": "[Ej: Parálisis mental]", "integracion": "[ANTIFRÁGIL: 'Esta tensión NO se resuelve buscando balance. Se USA alternando extremos según contexto. Estrategia Barbell: X en [situación A], Y en [situación B]...']" }
+      { "polo_a": "[Ej: Acción impulsiva]", "polo_b": "[Ej: Parálisis mental]", "integracion": "[TRANSFORMATIONAL: 'Esta tensión NO se resuelve buscando balance. Se USA alternando extremos según contexto. Estrategia Barbell: X en [situación A], Y en [situación B]...']" }
     ]
   },
 
@@ -324,40 +319,40 @@ Responde ÚNICAMENTE con un JSON válido:
 
   "patrones_sanacion": {
     "heridas": [
-      { "nombre": "[Herida 1 - nombre directo]", "origen_astrologico": "[Posición]", "patron": "[Patrón limitante que desarrollaste]", "origen_infancia": "[Qué aprendiste que limitó tu desarrollo]", "sanacion": "[ANTIFRÁGIL: 'Tu sanación viene de DESARROLLAR capacidad para estar con [situación] de forma progresiva hasta que tu sistema se FORTALEZCA. Práctica: [acción específica con compromiso real (skin in the game)]']" },
-      { "nombre": "[Herida 2]", "origen_astrologico": "[Posición]", "patron": "[Patrón limitante]", "origen_infancia": "[Origen]", "sanacion": "[ANTIFRÁGIL: práctica de exposición consciente y progresiva]" }
+      { "nombre": "[Herida 1 - nombre directo]", "origen_astrologico": "[Posición]", "patron": "[Patrón limitante que desarrollaste]", "origen_infancia": "[Qué aprendiste que limitó tu desarrollo]", "sanacion": "[TRANSFORMATIONAL: 'Tu sanación viene de DESARROLLAR capacidad para estar con [situación] de forma progresiva hasta que tu sistema se FORTALEZCA. Práctica: [acción específica con compromiso real (real commitment)]']" },
+      { "nombre": "[Herida 2]", "origen_astrologico": "[Posición]", "patron": "[Patrón limitante]", "origen_infancia": "[Origen]", "sanacion": "[TRANSFORMATIONAL: práctica de exposición consciente y progresiva]" }
     ],
     "ciclos_sanacion_lunar": {
-      "luna_nueva": "[Ritual ANTIFRÁGIL: 'Siembra INTENCIONES con compromiso real (skin in the game) - compromisos que tengan consecuencias tangibles']",
+      "luna_nueva": "[Ritual TRANSFORMATIONAL: 'Siembra INTENCIONES con compromiso real (real commitment) - compromisos que tengan consecuencias tangibles']",
       "luna_creciente": "[Práctica: 'Exponerte progresivamente a [situación desafiante relacionada con tu carta] de forma consciente']",
       "luna_llena": "[Ritual: 'Cosecha RETROALIMENTACIÓN del sistema - qué funcionó, qué te desafió, qué te fortaleció. Observación honesta y sin juicio.']",
       "luna_menguante": "[Práctica: 'Soltar estrategias limitantes que ya no te sirven - identificar qué te mantiene en zona de fragilidad y TRANSFORMARLO']"
     },
     "practicas_integracion": [
-      { "practica": "[Práctica ANTIFRÁGIL 1 - con skin in the game]", "duracion": "[Tiempo]", "beneficio": "[Beneficio: 'Sistema más ROBUSTO en [área]']", "fase_lunar": "[Mejor fase]" },
-      { "practica": "[Práctica 2 - exposición controlada]", "duracion": "[Tiempo]", "beneficio": "[Beneficio ANTIFRÁGIL]", "fase_lunar": "[Fase]" }
+      { "practica": "[Práctica TRANSFORMATIONAL 1 - con real commitment]", "duracion": "[Tiempo]", "beneficio": "[Beneficio: 'Sistema más ROBUSTO en [área]']", "fase_lunar": "[Mejor fase]" },
+      { "practica": "[Práctica 2 - exposición controlada]", "duracion": "[Tiempo]", "beneficio": "[Beneficio TRANSFORMATIONAL]", "fase_lunar": "[Fase]" }
     ]
   },
 
   "manifestacion_amor": {
     "patron_amoroso": "[Párrafo DIRECTO: Tu patrón relacional tiene una cualidad única. Venus en ${venus?.sign}, Marte en ${mars?.sign}, Luna en ${moon?.sign} = atraes [tipo de dinámica específica] porque tu sistema busca DESARROLLO a través de relaciones auténticas. Tu amor se PROFUNDIZA y fortalece con [tipo específico de intensidad relacional]...]",
-    "que_atrae": "[DIRECTO Y HONESTO: 'Atraes personas que te DESAFÍAN e inspiran en [área]. No es casualidad - es tu configuración buscando CRECIMIENTO ANTIFRÁGIL vía relaciones.']",
-    "que_necesita": "[DIRECTO Y HONESTO: 'Tu crecimiento relacional viene de vínculos con compromiso mutuo real. Necesitas alguien con SKIN IN THE GAME en [área] - alguien comprometido activamente contigo, no un observador pasivo.']",
-    "trampa_amorosa": "[ANTIFRÁGIL Y HONESTO: 'Tiendes a buscar [comportamiento de seguridad] en pareja. Este patrón limita tu desarrollo relacional. Tus relaciones evolucionan con PROFUNDIDAD e INTENSIDAD en [área específica]. Tu crecimiento viene de participar en [tipo de dinámica].']",
+    "que_atrae": "[DIRECTO Y HONESTO: 'Atraes personas que te CHALLENGESN e inspiran en [área]. No es casualidad - es tu configuración buscando CRECIMIENTO TRANSFORMATIONAL vía relaciones.']",
+    "que_necesita": "[DIRECTO Y HONESTO: 'Tu crecimiento relacional viene de vínculos con compromiso mutuo real. Necesitas alguien con REAL COMMITMENT en [área] - alguien comprometido activamente contigo, no un observador pasivo.']",
+    "trampa_amorosa": "[TRANSFORMATIONAL Y HONESTO: 'Tiendes a buscar [comportamiento de seguridad] en pareja. Este patrón limita tu desarrollo relacional. Tus relaciones evolucionan con PROFUNDIDAD e INTENSIDAD en [área específica]. Tu crecimiento viene de participar en [tipo de dinámica].']",
     "ritual_luna_nueva_venus": {
-      "preparacion": "[ANTIFRÁGIL: 'Luna Nueva en ${venus?.sign} o en tu signo de Venus. Prepara: lista de COMPROMISOS RELACIONALES con consecuencias tangibles y compromiso real (skin in the game).']",
+      "preparacion": "[TRANSFORMATIONAL: 'Luna Nueva en ${venus?.sign} o en tu signo de Venus. Prepara: lista de COMPROMISOS RELACIONALES con consecuencias tangibles y compromiso real (real commitment).']",
       "activacion_28_dias": "[Práctica: 'Participar en [situación relacional desafiante] 1x por semana. Registra: qué te desafió, qué te fortaleció. AJUSTA estrategia según retroalimentación.']",
       "entrega_luna_llena": "[Ritual: 'Luna Llena - observa RESULTADOS, no solo intenciones. ¿Qué te comprometiste a hacer? ¿Qué cumpliste? Honestidad radical. Consecuencias conscientes para promesas no cumplidas.']"
     },
-    "declaracion_amor": "[DIRECTA Y EMPODERADORA: 'Merezco un amor que me inspire a CRECER en [área], no solo que me acompañe. Merezco alguien con compromiso real (skin in the game), no un observador pasivo. Abrazo la PROFUNDIDAD e INTENSIDAD relacional porque ahí es donde evoluciono.']"
+    "declaracion_amor": "[DIRECTA Y EMPODERADORA: 'Merezco un amor que me inspire a CRECER en [área], no solo que me acompañe. Merezco alguien con compromiso real (real commitment), no un observador pasivo. Abrazo la PROFUNDIDAD e INTENSIDAD relacional porque ahí es donde evoluciono.']"
   },
 
   "visualizacion_guiada": {
-    "titulo": "Confrontación con tu Sistema Antifrágil",
+    "titulo": "Confrontación con tu Sistema Transformational",
     "duracion": "10-15 minutos (sin fluff)",
     "mejor_momento": "Luna Llena (momento de VERDAD)",
     "preparacion": ["Espacio sin distracciones", "Carta natal visible", "Cuaderno para FEEDBACK honesto"],
-    "texto": "[Texto ANTIFRÁGIL de 200-250 palabras SIN poesía: 'Cierra los ojos. Respira. Tu carta natal NO es un mapa de destino - es un MANUAL de qué tipo de CAOS te FORTALECE. Visualiza tu Sol en ${sun?.sign}: esta parte de ti se CONSTRUYE cuando [situación específica de estrés]. No cuando todo va bien - cuando TODO VA MAL en [área]. Ahora tu Luna en ${moon?.sign}: tu mundo emocional CRECE con [tipo de volatilidad emocional]. Deja de evitarlo. Tu Ascendente ${chartData.ascendant.sign} proyecta [característica] al mundo y el mundo te GOLPEA con [feedback]. Perfecto - úsalo. Pregúntate SIN AUTOENGAÑO: ¿Dónde estoy siendo FRÁGIL? ¿Qué caos estoy evitando que debería abrazar? ¿Dónde necesito más SKIN IN THE GAME? Abre los ojos. Escribe la verdad.']"
+    "texto": "[Texto TRANSFORMATIONAL de 200-250 palabras SIN poesía: 'Cierra los ojos. Respira. Tu carta natal NO es un mapa de destino - es un MANUAL de qué tipo de DYNAMIC CHALLENGES te STRENGTHENS. Visualiza tu Sol en ${sun?.sign}: esta parte de ti se CONSTRUYE cuando [situación específica de estrés]. No cuando todo va bien - cuando TODO VA MAL en [área]. Ahora tu Luna en ${moon?.sign}: tu mundo emocional CRECE con [tipo de dynamic change emocional]. Deja de evitarlo. Tu Ascendente ${chartData.ascendant.sign} proyecta [característica] al mundo y el mundo te RESPONDS con [feedback]. Perfecto - úsalo. Pregúntate SIN AUTOENGAÑO: ¿Dónde estoy siendo VULNERABLE? ¿Qué caos estoy evitando que debería abrazar? ¿Dónde necesito más REAL COMMITMENT? Abre los ojos. Escribe la verdad.']"
   },
 
   "datos_para_agenda": {
@@ -380,21 +375,21 @@ Responde ÚNICAMENTE con un JSON válido:
     ]
   },
 
-  "declaracion_poder_final": "[Declaración ANTIFRÁGIL de 5-6 líneas en primera persona DIRECTA Y EMPODERADORA: 'Mi carta natal no me define - me EQUIPA con un mapa único. Sol en ${sun?.sign}, Luna en ${moon?.sign}, Ascendente ${chartData.ascendant.sign} = un sistema diseñado para DESARROLLARSE a través de [tipo de desafíos]. Busco EXPOSICIÓN consciente a experiencias que me fortalecen. Los desafíos en [área] me DESARROLLAN y construyen. Tengo COMPROMISO REAL (SKIN IN THE GAME) en mi propia evolución. Este es mi manual de antifragilidad. Soy un SISTEMA que se optimiza con cada experiencia.']",
+  "declaracion_poder_final": "[Declaración TRANSFORMATIONAL de 5-6 líneas en primera persona DIRECTA Y EMPODERADORA: 'Mi carta natal no me define - me EQUIPA con un mapa único. Sol en ${sun?.sign}, Luna en ${moon?.sign}, Ascendente ${chartData.ascendant.sign} = un sistema diseñado para DESARROLLARSE a través de [tipo de desafíos]. Busco EXPOSICIÓN consciente a experiencias que me fortalecen. Los desafíos en [área] me DESARROLLAN y construyen. Tengo COMPROMISO REAL (REAL COMMITMENT) en mi propia evolución. Este es mi manual de transformation. Soy un SISTEMA que se optimiza con cada experiencia.']",
 
-  "mantra_personal": "[Mantra ANTIFRÁGIL DIRECTO Y EMPODERADOR - práctico y orientado a la acción: 'Me FORTALEZCO con los desafíos en [área específica]. Las dificultades en [contexto] me desarrollan y construyen. Abrazo la incertidumbre y la volatilidad.']"
+  "mantra_personal": "[Mantra TRANSFORMATIONAL DIRECTO Y EMPODERADOR - práctico y orientado a la acción: 'Me FORTALEZCO con los desafíos en [área específica]. Las dificultades en [contexto] me desarrollan y construyen. Abrazo la incertidumbre y la dynamic change.']"
 }
 
-⚠️ INSTRUCCIONES CRÍTICAS - LEE BIEN:
-1. TODOS los campos con contenido REAL y PERSONALIZADO para ${userProfile.name} - CERO placeholders
-2. TONO ANTIFRÁGIL OBLIGATORIO: DIRECTO, HONESTO, TRANSFORMADOR, PRÁCTICO. Usa conceptos de Nassim Taleb naturalmente integrados
-3. Lenguaje DIRECTO Y EMPODERADOR en segunda persona: "Tu desarrollo viene de...", "Tu crecimiento requiere...", "Tu evolución implica..."
-4. Prácticas SIEMPRE vinculadas a FASES LUNARES (Luna Nueva, Cuarto Creciente, Luna Llena, Cuarto Menguante) - NUNCA días de semana
-5. Usa DATOS ESPECÍFICOS de las posiciones (signos, casas, grados) en cada interpretación
-6. JSON válido y completo sin [...] ni comentarios internos
-7. Cada interpretación planetaria DEBE tener TÍTULO ARQUETIPO antifrágil y transformador
-8. INTEGRA naturalmente estos términos: "skin in the game", "antifragilidad", "volatilidad", "exposición al riesgo", "retroalimentación del sistema", "estrategia Barbell", "efecto Lindy"
-9. Usa lenguaje práctico y orientado a la acción - sé HONESTO Y DIRECTO sin ser agresivo`;
+IMPORTANT INSTRUCTIONS:
+1. All fields must contain REAL and PERSONALIZED content for ${userProfile.name} - NO placeholders
+2. Use a direct, honest, transformative and practical tone that emphasizes personal growth through challenges
+3. Use empowering second-person language: "Your development comes from...", "Your growth requires...", "Your evolution involves..."
+4. Practices should ALWAYS be linked to LUNAR PHASES (New Moon, Waxing Moon, Full Moon, Waning Moon) - NEVER weekdays
+5. Use SPECIFIC DATA from the positions (signs, houses, degrees) in each interpretation
+6. Valid and complete JSON without [...] or internal comments
+7. Each planetary interpretation should have an archetypal title focused on transformation
+8. Integrate concepts naturally that emphasize: personal commitment, resilience, adaptability, calculated risk-taking, learning from feedback, balanced strategies, enduring value
+9. Use practical, action-oriented language - be HONEST AND DIRECT without being aggressive`;
 }
 
 export default generateCompleteNatalChartPrompt;
