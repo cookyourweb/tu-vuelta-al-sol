@@ -241,17 +241,12 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       return;
     }
 
-    // ✅ Use regenerating state for force regenerate
-    if (forceRegenerate) {
-      setRegenerating(true);
-      setGenerationProgress('Iniciando regeneración revolucionaria...');
-      setGenerationStartTime(Date.now());
-      setChunkProgress(0);
-      setCurrentChunk('');
-    } else {
-      setLoading(true);
-    }
-
+    // ✅ Use regenerating state for ANY generation (first time or force)
+    setRegenerating(true);
+    setGenerationProgress('Iniciando generación revolucionaria...');
+    setGenerationStartTime(Date.now());
+    setChunkProgress(0);
+    setCurrentChunk('');
     setError(null);
 
     try {
@@ -263,13 +258,11 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       // ✅ SINGLE REQUEST - Use new complete endpoint for natal
       {
         // ✅ Simulate progress messages
-        if (forceRegenerate) {
-          setTimeout(() => setGenerationProgress('Conectando con los astros...'), 500);
-          setTimeout(() => setGenerationProgress('Analizando tu carta natal...'), 2000);
-          setTimeout(() => setGenerationProgress('Calculando posiciones planetarias...'), 4000);
-          setTimeout(() => setGenerationProgress('Generando interpretación disruptiva con IA...'), 6000);
-          setTimeout(() => setGenerationProgress('Casi listo... Creando tu revolución personal...'), 10000);
-        }
+        setTimeout(() => setGenerationProgress('Conectando con los astros...'), 500);
+        setTimeout(() => setGenerationProgress('Analizando tu carta natal...'), 2000);
+        setTimeout(() => setGenerationProgress('Calculando posiciones planetarias...'), 4000);
+        setTimeout(() => setGenerationProgress('Generando interpretación ANTIFRÁGIL con IA...'), 6000);
+        setTimeout(() => setGenerationProgress('Casi listo... Creando tu revolución personal...'), 10000);
 
         // ✅ NEW: Different request body structure for complete natal interpretation
         const requestBody = isNatal

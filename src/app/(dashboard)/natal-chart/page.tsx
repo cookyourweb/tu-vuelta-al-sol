@@ -114,7 +114,7 @@ export default function NatalChartPage() {
     
     try {
       console.log('🔍 Checking if interpretations exist...');
-      const response = await fetch(`/api/astrology/interpret-natal?userId=${user.uid}`);
+      const response = await fetch(`/api/astrology/interpret-natal-complete?userId=${user.uid}`);
       const result = await response.json();
       
       if (result.success && result.data) {
@@ -145,7 +145,7 @@ export default function NatalChartPage() {
     try {
       console.log('🚀 Starting AI interpretation generation...');
       
-      const response = await fetch('/api/astrology/interpret-natal', {
+      const response = await fetch('/api/astrology/interpret-natal-complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -279,7 +279,7 @@ export default function NatalChartPage() {
       console.log('🗑️ Carta borrada:', deleteResponse.ok);
 
       // 2. ✅ Borrar interpretaciones cacheadas
-      const deleteInterpResponse = await fetch(`/api/astrology/interpret-natal?userId=${user.uid}`, {
+      const deleteInterpResponse = await fetch(`/api/astrology/interpret-natal-complete?userId=${user.uid}`, {
         method: 'DELETE'
       });
       console.log('🗑️ Interpretaciones borradas:', deleteInterpResponse.ok);
