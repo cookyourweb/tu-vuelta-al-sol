@@ -273,10 +273,51 @@ Sistema de feedback visual avanzado que transforma la espera de procesos largos 
 - **Educación:** +200% conocimiento astrológico durante uso
 - **Satisfacción:** +85% feedback positivo en UX
 
-## 🤖 **Sistema de Interpretaciones Triple Fusionado**
+## 🤖 **Sistema de Interpretaciones con LLM (OpenAI GPT-4o)**
 
 ### **Visión General**
-Sistema revolucionario de interpretaciones astrológicas que combina tres lenguajes complementarios para crear experiencias transformacionales profundas. Cada interpretación se genera con IA usando prompts especializados que fusionan educación, empoderamiento y poesía.
+Sistema completo de interpretaciones astrológicas personalizadas usando **OpenAI GPT-4o** con estilo único **"Poético Antifrágil & Rebelde Constructivo"**. Cada carta natal genera interpretaciones profundas que combinan educación, empoderamiento y poesía.
+
+### 📚 **Documentación Completa**
+
+Para entender completamente cómo funciona el sistema de interpretaciones con LLM:
+
+#### **Guías Técnicas Detalladas**
+
+1. **[Sistema de Interpretaciones con LLM](./documentacion/SISTEMA_INTERPRETACIONES_LLM.md)** 📖
+   - Arquitectura completa del sistema
+   - Flujo de generación paso a paso
+   - Manejo de OpenAI GPT-4o
+   - Estructura JSON de respuesta
+   - Troubleshooting y optimizaciones
+
+2. **[Prompt "Poético Antifrágil & Rebelde Constructivo"](./documentacion/PROMPT_POETICO_ANTIFRAGIL.md)** 🎨
+   - Filosofía y pilares del estilo
+   - Anatomía completa del prompt
+   - Ejemplos de interpretaciones
+   - Reglas de oro
+   - Testing y evolución futura
+
+#### **Resumen Rápido**
+
+**Estilo Único**: Cada interpretación combina:
+- ✨ **Poético**: Metáforas evocativas y profundas
+- ⚡ **Antifrágil**: Sombras como oportunidades de crecimiento
+- 🔥 **Rebelde Constructivo**: Directo pero compasivo, sin espiritualidad "light"
+
+**Estructura por Planeta** (6 elementos obligatorios):
+1. **que_significa_casa**: Pedagogía clara sin tecnicismos
+2. **tu_esencia**: 2-3 párrafos poético-transformacionales
+3. **tu_sombra_transformational**: Aspectos retadores como oportunidades
+4. **tu_regalo_evolutivo**: Fortalezas únicas
+5. **mini_coach**: 3-4 acciones prácticas vinculadas a fases lunares
+6. **mantra**: Frase corta y empoderadora
+
+**Modelo LLM**: OpenAI GPT-4o optimizado
+- Temperature: 0.7 (balance creatividad/consistencia)
+- Max tokens: 16000 (respuestas completas)
+- Response format: JSON estructurado
+- Tiempo promedio: 35-70 segundos por carta completa
 
 ### **🎯 Arquitectura Técnica**
 
