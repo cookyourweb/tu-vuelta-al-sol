@@ -98,8 +98,8 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
       const target = event.target as HTMLElement;
 
       // Verificar si el clic fue fuera de los tooltips
-      const isTooltip = target.closest('.chart-tooltip');
-      const isChart = target.closest('.chart-container');
+      const isTooltip = target && typeof target.closest === 'function' ? target.closest('.chart-tooltip') : null;
+      const isChart = target && typeof target.closest === 'function' ? target.closest('.chart-container') : null;
 
       if (!isTooltip && !isChart) {
         // Cerrar todos los tooltips
@@ -378,7 +378,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           console.log('🎯 MOUSE LEFT TOOLTIP - PLANET');
           // Don't close tooltip immediately if mouse is over a button
           const target = e.relatedTarget as HTMLElement;
-          const isButton = target?.closest('button');
+          const isButton = target && typeof target.closest === 'function' ? target.closest('button') : null;
           if (!isButton && !clickedPlanet && !drawerOpen) {
             setHoveredPlanet(null);
           }
@@ -540,7 +540,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           console.log('🎯 MOUSE LEFT TOOLTIP - ASCENDANT');
           // Don't close tooltip immediately if mouse is over a button
           const target = e.relatedTarget as HTMLElement;
-          const isButton = target?.closest('button');
+          const isButton = target && typeof target.closest === 'function' ? target.closest('button') : null;
           if (!isButton && !drawerOpen) {
             setHoveredPlanet(null);
           }
@@ -653,7 +653,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           console.log('🎯 MOUSE LEFT TOOLTIP - MIDHEAVEN');
           // Don't close tooltip immediately if mouse is over a button
           const target = e.relatedTarget as HTMLElement;
-          const isButton = target?.closest('button');
+          const isButton = target && typeof target.closest === 'function' ? target.closest('button') : null;
           if (!isButton && !drawerOpen) {
             setHoveredPlanet(null);
           }
@@ -774,7 +774,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           console.log('🎯 MOUSE LEFT TOOLTIP - ASPECT');
           // Don't close tooltip immediately if mouse is over a button
           const target = e.relatedTarget as HTMLElement;
-          const isButton = target?.closest('button');
+          const isButton = target && typeof target.closest === 'function' ? target.closest('button') : null;
           if (!isButton) {
             if (!aspectTooltipLocked && !generatingAspect) {
               handleAspectMouseLeave();

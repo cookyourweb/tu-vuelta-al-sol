@@ -646,17 +646,17 @@ const ChartDisplay = ({
               <span className="text-sm text-gray-400">Personalizada</span>
             </div>
             
-            <div className="relative" style={{ zIndex: 100000 }}>
-              <svg 
+            <div className="relative z-40">
+              <svg
                 className="w-5 h-5 text-blue-400 cursor-help hover:text-blue-300 transition-colors duration-200"
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
                 strokeWidth="2"
                 onMouseEnter={(e) => {
                   setHoveredNavGuide(true);
                   const rect = e.currentTarget.getBoundingClientRect();
-                  setTooltipPosition({ 
+                  setTooltipPosition({
                     x: rect.left - 300,
                     y: rect.top - 20
                   });
@@ -674,12 +674,11 @@ const ChartDisplay = ({
 
       {/* TOOLTIP NAVEGACIÓN */}
       {hoveredNavGuide && (
-        <div 
-          className="fixed bg-gradient-to-r from-blue-500/95 to-purple-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-md pointer-events-none"
-          style={{ 
-            left: tooltipPosition.x, 
-            top: tooltipPosition.y,
-            zIndex: 100000
+        <div
+          className="fixed bg-gradient-to-r from-blue-500/95 to-purple-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-md pointer-events-none z-40"
+          style={{
+            left: tooltipPosition.x,
+            top: tooltipPosition.y
           }}
         >
           <div className="text-white font-bold mb-2">Guía de navegación</div>
