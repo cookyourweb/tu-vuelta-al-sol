@@ -2316,8 +2316,9 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                 {interpretation.cached ? getTimeSinceGeneration(interpretation.generatedAt) : 'Nueva'}
               </span>
             </Button>
-            
-            {isAdmin && (
+
+            {/* ⚠️ TEMPORAL: Botones visibles para todos (no solo admin) para debugging */}
+            {true && (
               <>
                 <Button
                   onClick={(e) => {
