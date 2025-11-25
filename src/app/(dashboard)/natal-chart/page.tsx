@@ -133,24 +133,32 @@ export default function NatalChartPage() {
   };
 
   // ✅ NEW: Generate AI interpretations
-  const generateInterpretations = async () => {
+  const generateInterpretations = async (customChartData?: any) => {
     if (!user?.uid || !birthData) {
       console.log('⚠️ Cannot generate - missing user or birth data');
       return;
     }
-    
+
+    // ✅ Use provided chartData or fall back to state
+    const dataToUse = customChartData || chartData;
+
+    if (!dataToUse) {
+      console.log('⚠️ Cannot generate - missing chart data');
+      return;
+    }
+
     setGeneratingInterpretations(true);
     setInterpretationProgress('🔮 Iniciando generación de interpretaciones AI...');
-    
+
     try {
       console.log('🚀 Starting AI interpretation generation...');
-      
+
       const response = await fetch('/api/astrology/interpret-natal-complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: user.uid,
-          chartData: chartData,
+          chartData: dataToUse,
           userProfile: {
             name: birthData.fullName || 'Usuario',
             age: new Date().getFullYear() - new Date(birthData.birthDate).getFullYear(),
@@ -324,9 +332,10 @@ export default function NatalChartPage() {
           await loadBirthDataInfo();
 
           // 4. ✅ Auto-generate NEW interpretations after regeneration
+          // ✅ IMPORTANT: Pass processedData directly to avoid state timing issues
           console.log('🔮 Generating new interpretations after chart regeneration...');
           setHasInterpretations(false);
-          await generateInterpretations();
+          await generateInterpretations(processedData);
 
           console.log('✅ Regeneración completada');
         }
