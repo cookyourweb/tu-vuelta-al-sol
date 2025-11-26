@@ -132,24 +132,68 @@ export async function POST(request: NextRequest) {
     const events = await calculateSolarYearEvents(dateObj);
 
     console.log('✅ Events calculated successfully');
+    console.log('📊 Event counts:', {
+      lunarPhases: events.lunarPhases.length,
+      retrogrades: events.retrogrades.length,
+      eclipses: events.eclipses.length,
+      planetaryIngresses: events.planetaryIngresses.length,
+      seasonalEvents: events.seasonalEvents.length
+    });
+
+    // Convert Date objects to ISO strings for JSON serialization
+    const serializedEvents = {
+      lunarPhases: events.lunarPhases.map(p => ({
+        ...p,
+        date: p.date instanceof Date ? p.date.toISOString() : p.date,
+        phase: p.type === 'new_moon' ? 'Luna Nueva' : 'Luna Llena',
+        zodiacSign: p.sign
+      })),
+      retrogrades: events.retrogrades.map(r => ({
+        ...r,
+        startDate: r.startDate instanceof Date ? r.startDate.toISOString() : r.startDate,
+        endDate: r.endDate instanceof Date ? r.endDate.toISOString() : r.endDate,
+        sign: r.startSign
+      })),
+      eclipses: events.eclipses.map(e => ({
+        ...e,
+        date: e.date instanceof Date ? e.date.toISOString() : e.date,
+        zodiacSign: e.sign
+      })),
+      planetaryIngresses: events.planetaryIngresses.map(i => ({
+        ...i,
+        date: i.date instanceof Date ? i.date.toISOString() : i.date,
+        newSign: i.toSign,
+        previousSign: i.fromSign
+      })),
+      seasonalEvents: events.seasonalEvents.map(s => ({
+        ...s,
+        date: s.date instanceof Date ? s.date.toISOString() : s.date
+      }))
+    };
 
     // Sort all events by date for timeline view
     const allEvents = [
-      ...events.lunarPhases.map(e => ({ ...e, category: 'lunar_phase' })),
-      ...events.retrogrades.map(e => ({ ...e, category: 'retrograde' })),
-      ...events.eclipses.map(e => ({ ...e, category: 'eclipse' })),
-      ...events.planetaryIngresses.map(e => ({ ...e, category: 'ingress' })),
-      ...events.seasonalEvents.map(e => ({ ...e, category: 'seasonal' }))
+      ...serializedEvents.lunarPhases.map(e => ({ ...e, category: 'lunar_phase' })),
+      ...serializedEvents.retrogrades.map(e => ({ ...e, category: 'retrograde' })),
+      ...serializedEvents.eclipses.map(e => ({ ...e, category: 'eclipse' })),
+      ...serializedEvents.planetaryIngresses.map(e => ({ ...e, category: 'ingress' })),
+      ...serializedEvents.seasonalEvents.map(e => ({ ...e, category: 'seasonal' }))
     ].sort((a, b) => {
-      const dateA = 'date' in a ? a.date : 'startDate' in a ? a.startDate : new Date(0);
-      const dateB = 'date' in b ? b.date : 'startDate' in b ? b.startDate : new Date(0);
+      const dateA = 'date' in a ? a.date : 'startDate' in a ? a.startDate : '';
+      const dateB = 'date' in b ? b.date : 'startDate' in b ? b.startDate : '';
       return new Date(dateA).getTime() - new Date(dateB).getTime();
+    });
+
+    console.log('📋 Sample events:', {
+      firstLunarPhase: serializedEvents.lunarPhases[0],
+      firstRetrograde: serializedEvents.retrogrades[0],
+      totalEvents: allEvents.length
     });
 
     return NextResponse.json({
       success: true,
       data: {
-        events: events,
+        events: serializedEvents,
         timeline: allEvents
       },
       period: {
@@ -162,11 +206,11 @@ export async function POST(request: NextRequest) {
         birthPlace
       },
       stats: {
-        totalLunarPhases: events.lunarPhases.length,
-        totalRetrogrades: events.retrogrades.length,
-        totalEclipses: events.eclipses.length,
-        totalPlanetaryIngresses: events.planetaryIngresses.length,
-        totalSeasonalEvents: events.seasonalEvents.length,
+        totalLunarPhases: serializedEvents.lunarPhases.length,
+        totalRetrogrades: serializedEvents.retrogrades.length,
+        totalEclipses: serializedEvents.eclipses.length,
+        totalPlanetaryIngresses: serializedEvents.planetaryIngresses.length,
+        totalSeasonalEvents: serializedEvents.seasonalEvents.length,
         totalEvents: allEvents.length
       }
     });
