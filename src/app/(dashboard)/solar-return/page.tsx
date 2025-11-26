@@ -42,7 +42,9 @@ function SectionNavigation({ currentSection }: { currentSection?: string }) {
   const sections = [
     { id: 'carta', label: '🌟 Carta' },
     { id: 'aspectos', label: '✨ Aspectos' },
-    { id: 'carta', label: '🪐 Planetas', displayId: 'planetas' }
+    { id: 'carta', label: '🪐 Planetas', displayId: 'planetas' },
+    { id: 'linea-tiempo', label: '📅 Línea de Tiempo' },
+    { id: 'integracion', label: '💫 Integración' }
   ];
 
   return (
@@ -488,6 +490,7 @@ export default function SolarReturnPage() {
 
         {/* ✅ SECCIÓN 5: LÍNEA DE TIEMPO SOLAR RETURN */}
         <div id="linea-tiempo" className="max-w-7xl mx-auto mb-12 scroll-mt-24">
+          <SectionNavigation currentSection="linea-tiempo" />
           <div className="bg-gradient-to-br from-slate-900/95 to-purple-900/95 backdrop-blur-sm rounded-3xl p-8 md:p-12 border-2 border-purple-400/40 shadow-2xl">
 
             {/* Header mejorado */}
@@ -667,6 +670,7 @@ export default function SolarReturnPage() {
 
         {/* ✅ SECCIÓN 6: INTEGRACIÓN FINAL */}
         <div id="integracion" className="max-w-4xl mx-auto mb-12 scroll-mt-24">
+          <SectionNavigation currentSection="integracion" />
           <div className="bg-gradient-to-br from-emerald-900/50 to-teal-900/50 backdrop-blur-sm rounded-3xl p-8 md:p-12 border-2 border-emerald-400/40 shadow-2xl">
 
             {/* Header */}
