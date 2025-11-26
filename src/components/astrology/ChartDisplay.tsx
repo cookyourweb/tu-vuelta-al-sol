@@ -744,7 +744,37 @@ const ChartDisplay = ({
           Planetas
         </button>
 
+        {chartType === 'solar-return' && (
+          <>
+            <button
+              onClick={() => scrollToSection('linea-tiempo')}
+              className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 bg-slate-800/50 border border-slate-600/30 text-slate-400 hover:border-rose-500/50 hover:text-rose-300"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12,6 12,12 16,14"/>
+              </svg>
+              Línea de Tiempo
+            </button>
 
+            <button
+              onClick={() => {
+                const integracionSection = document.getElementById('integracion');
+                if (integracionSection) {
+                  integracionSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }}
+              className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 bg-slate-800/50 border border-slate-600/30 text-slate-400 hover:border-purple-500/50 hover:text-purple-300"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5"/>
+                <path d="M2 12l10 5 10-5"/>
+              </svg>
+              Integración Final
+            </button>
+          </>
+        )}
       </div>
 
 {/* 🎯 SECCIÓN: TRES CARDS PRINCIPALES - ADAPTATIVO SEGÚN TIPO DE CARTA */}
