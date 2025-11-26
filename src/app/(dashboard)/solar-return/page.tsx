@@ -37,6 +37,39 @@ function getMonthWithYear(birthDate: string, monthOffset: number, currentYear: n
   return `${monthName} ${year}`;
 }
 
+// Componente de navegación reutilizable para secciones
+function SectionNavigation({ currentSection }: { currentSection?: string }) {
+  const sections = [
+    { id: 'carta', label: '🌟 Carta' },
+    { id: 'aspectos', label: '✨ Aspectos' },
+    { id: 'carta', label: '🪐 Planetas', displayId: 'planetas' }
+  ];
+
+  return (
+    <div className="bg-gradient-to-r from-purple-900/50 to-pink-900/50 backdrop-blur-sm rounded-xl p-4 mb-6 border border-purple-400/20">
+      <nav className="flex items-center justify-center gap-2 md:gap-3 flex-wrap">
+        {sections.map((section, idx) => {
+          const displayId = section.displayId || section.id;
+          const isActive = currentSection === displayId;
+          return (
+            <a
+              key={`${section.id}-${idx}`}
+              href={`#${section.id}`}
+              className={`px-3 py-1.5 text-xs md:text-sm font-semibold rounded-lg transition-all duration-200 ${
+                isActive
+                  ? 'bg-purple-600 text-white shadow-lg'
+                  : 'text-purple-200 hover:text-white hover:bg-purple-700/50'
+              }`}
+            >
+              {section.label}
+            </a>
+          );
+        })}
+      </nav>
+    </div>
+  );
+}
+
 export default function SolarReturnPage() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
@@ -392,6 +425,7 @@ export default function SolarReturnPage() {
         {/* ✅ SECCIÓN 3: CARTA ASTROLÓGICA */}
         {chartData && (
           <div id="carta" className="max-w-5xl mx-auto mb-12 scroll-mt-24">
+            <SectionNavigation currentSection="carta" />
             <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 border border-purple-500/30">
               <h2 className="text-2xl font-bold text-purple-100 mb-6 text-center">
                 🌟 Tu Rueda Solar Return {new Date().getFullYear()}
@@ -423,6 +457,7 @@ export default function SolarReturnPage() {
         {/* ✅ SECCIÓN 4: ASPECTOS */}
         {chartData && chartData.keyAspects && chartData.keyAspects.length > 0 && (
           <div id="aspectos" className="max-w-6xl mx-auto mb-12 scroll-mt-24">
+            <SectionNavigation currentSection="aspectos" />
             <div className="bg-gradient-to-br from-cyan-900/40 to-blue-900/40 rounded-2xl p-8 border border-cyan-400/30">
               <h2 className="text-2xl md:text-3xl font-bold text-cyan-100 mb-6 text-center">
                 ✨ Aspectos Planetarios Clave
