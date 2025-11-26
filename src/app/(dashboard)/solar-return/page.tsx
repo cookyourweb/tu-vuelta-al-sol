@@ -166,6 +166,25 @@ export default function SolarReturnPage() {
     setError(null);
 
     try {
+      // STEP 1: Delete cached interpretation first
+      console.log('🗑️ [REGENERATE] Deleting cached interpretation...');
+      try {
+        const deleteInterpretationRes = await fetch(`/api/astrology/interpret-solar-return?userId=${user.uid}`, {
+          method: 'DELETE'
+        });
+
+        if (deleteInterpretationRes.ok) {
+          console.log('✅ [REGENERATE] Cached interpretation deleted successfully');
+        } else {
+          console.warn('⚠️ [REGENERATE] Could not delete cached interpretation (might not exist)');
+        }
+      } catch (deleteErr) {
+        console.warn('⚠️ [REGENERATE] Error deleting interpretation cache:', deleteErr);
+        // Continue anyway - not critical
+      }
+
+      // STEP 2: Regenerate Solar Return chart
+      console.log('🔄 [REGENERATE] Regenerating Solar Return chart...');
       const response = await fetch('/api/charts/solar-return', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -198,13 +217,13 @@ export default function SolarReturnPage() {
         console.log('✅ [REGENERATE] Chart updated successfully');
 
         // Show success message
-        alert('✅ Solar Return regenerado exitosamente');
+        alert('✅ Solar Return y su interpretación regenerados exitosamente.\n\n💡 Presiona el botón "Generar Interpretación Completa" para ver la nueva interpretación.');
       } else if (data.solarReturnChart) {
         // Fallback for different response structure
         setChartData(data.solarReturnChart);
         setSolarReturnData(data.solarReturnChart);
         console.log('✅ [REGENERATE] Chart updated successfully (fallback structure)');
-        alert('✅ Solar Return regenerado exitosamente');
+        alert('✅ Solar Return y su interpretación regenerados exitosamente.\n\n💡 Presiona el botón "Generar Interpretación Completa" para ver la nueva interpretación.');
       } else {
         throw new Error('No se recibió la carta regenerada');
       }
