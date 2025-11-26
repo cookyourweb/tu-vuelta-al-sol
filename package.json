@@ -13,6 +13,7 @@
     "@hookform/resolvers": "^5.1.1",
     "@shadcn/ui": "^0.0.4",
     "@types/puppeteer": "^5.4.7",
+    "astronomy-engine": "^2.1.19",
     "axios": "^1.4.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
