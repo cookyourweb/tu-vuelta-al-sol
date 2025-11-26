@@ -37,39 +37,6 @@ function getMonthWithYear(birthDate: string, monthOffset: number, currentYear: n
   return `${monthName} ${year}`;
 }
 
-// Componente de navegación reutilizable
-function SectionNavigation({ currentSection }: { currentSection?: string }) {
-  const sections = [
-    { id: 'carta', label: '🌟 Carta', icon: '🌟' },
-    { id: 'aspectos', label: '✨ Aspectos', icon: '✨' },
-    { id: 'carta', label: '🪐 Planetas', icon: '🪐', displayId: 'planetas' }
-  ];
-
-  return (
-    <div className="bg-gradient-to-r from-purple-900/50 to-pink-900/50 backdrop-blur-sm rounded-xl p-4 mb-6 border border-purple-400/20">
-      <nav className="flex items-center justify-center gap-2 md:gap-3 flex-wrap">
-        {sections.map((section, idx) => {
-          const displayId = section.displayId || section.id;
-          const isActive = currentSection === displayId;
-          return (
-            <a
-              key={`${section.id}-${idx}`}
-              href={`#${section.id}`}
-              className={`px-3 py-1.5 text-xs md:text-sm font-semibold rounded-lg transition-all duration-200 ${
-                isActive
-                  ? 'bg-purple-600 text-white shadow-lg'
-                  : 'text-purple-200 hover:text-white hover:bg-purple-700/50'
-              }`}
-            >
-              {section.label}
-            </a>
-          );
-        })}
-      </nav>
-    </div>
-  );
-}
-
 export default function SolarReturnPage() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
@@ -425,7 +392,6 @@ export default function SolarReturnPage() {
         {/* ✅ SECCIÓN 3: CARTA ASTROLÓGICA */}
         {chartData && (
           <div id="carta" className="max-w-5xl mx-auto mb-12 scroll-mt-24">
-            <SectionNavigation currentSection="carta" />
             <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 border border-purple-500/30">
               <h2 className="text-2xl font-bold text-purple-100 mb-6 text-center">
                 🌟 Tu Rueda Solar Return {new Date().getFullYear()}
@@ -457,7 +423,6 @@ export default function SolarReturnPage() {
         {/* ✅ SECCIÓN 4: ASPECTOS */}
         {chartData && chartData.keyAspects && chartData.keyAspects.length > 0 && (
           <div id="aspectos" className="max-w-6xl mx-auto mb-12 scroll-mt-24">
-            <SectionNavigation currentSection="aspectos" />
             <div className="bg-gradient-to-br from-cyan-900/40 to-blue-900/40 rounded-2xl p-8 border border-cyan-400/30">
               <h2 className="text-2xl md:text-3xl font-bold text-cyan-100 mb-6 text-center">
                 ✨ Aspectos Planetarios Clave
@@ -731,7 +696,35 @@ export default function SolarReturnPage() {
           </div>
         </div>
 
-        {/* ✅ SECCIÓN 7: RESUMEN DE ASPECTOS */}
+        {/* ✅ SECCIÓN 7: RESUMEN - QUÉ ES SOLAR RETURN */}
+        <div id="resumen" className="max-w-4xl mx-auto mb-12 scroll-mt-24">
+          <div className="bg-gradient-to-br from-purple-900/40 to-blue-900/40 rounded-2xl p-8 border border-purple-400/30">
+            <h2 className="text-2xl font-bold text-purple-100 mb-4 flex items-center gap-3">
+              <Sparkles className="w-6 h-6 text-purple-300" />
+              ¿Qué es la Revolución Solar?
+            </h2>
+            <div className="space-y-4 text-purple-50">
+              <p className="leading-relaxed">
+                La <strong>Revolución Solar</strong> es la carta astral levantada para el momento exacto
+                en que el Sol regresa a la posición que tenía cuando naciste. Este evento ocurre cerca
+                de tu cumpleaños cada año y marca el inicio de un nuevo ciclo anual.
+              </p>
+              <div className="bg-purple-800/30 rounded-lg p-4">
+                <p className="text-sm text-purple-200">
+                  <strong>💡 Dato clave:</strong> El Sol siempre está en la misma posición zodiacal
+                  que en tu carta natal, pero los otros planetas cambian, creando un mapa único de
+                  energías disponibles para los próximos 12 meses.
+                </p>
+              </div>
+              <p className="leading-relaxed">
+                Esta técnica predictiva te permite conocer las áreas de vida que se activarán,
+                los desafíos que enfrentarás y las oportunidades que surgirán durante tu año personal.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* ✅ SECCIÓN 8: RESUMEN DE ASPECTOS */}
         <div className="max-w-4xl mx-auto mb-12">
           <div className="bg-gradient-to-br from-cyan-900/40 to-blue-900/40 rounded-2xl p-8 border border-cyan-400/30">
             <h2 className="text-2xl font-bold text-cyan-100 mb-6 flex items-center gap-3">
@@ -786,34 +779,6 @@ export default function SolarReturnPage() {
                   </p>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ✅ SECCIÓN 8: RESUMEN - QUÉ ES SOLAR RETURN */}
-        <div id="resumen" className="max-w-4xl mx-auto mb-12 scroll-mt-24">
-          <div className="bg-gradient-to-br from-purple-900/40 to-blue-900/40 rounded-2xl p-8 border border-purple-400/30">
-            <h2 className="text-2xl font-bold text-purple-100 mb-4 flex items-center gap-3">
-              <Sparkles className="w-6 h-6 text-purple-300" />
-              ¿Qué es la Revolución Solar?
-            </h2>
-            <div className="space-y-4 text-purple-50">
-              <p className="leading-relaxed">
-                La <strong>Revolución Solar</strong> es la carta astral levantada para el momento exacto
-                en que el Sol regresa a la posición que tenía cuando naciste. Este evento ocurre cerca
-                de tu cumpleaños cada año y marca el inicio de un nuevo ciclo anual.
-              </p>
-              <div className="bg-purple-800/30 rounded-lg p-4">
-                <p className="text-sm text-purple-200">
-                  <strong>💡 Dato clave:</strong> El Sol siempre está en la misma posición zodiacal
-                  que en tu carta natal, pero los otros planetas cambian, creando un mapa único de
-                  energías disponibles para los próximos 12 meses.
-                </p>
-              </div>
-              <p className="leading-relaxed">
-                Esta técnica predictiva te permite conocer las áreas de vida que se activarán,
-                los desafíos que enfrentarás y las oportunidades que surgirán durante tu año personal.
-              </p>
             </div>
           </div>
         </div>
