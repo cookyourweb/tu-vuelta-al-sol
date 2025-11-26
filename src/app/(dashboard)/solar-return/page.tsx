@@ -324,7 +324,7 @@ export default function SolarReturnPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-purple-900/20 to-gray-900">
       <div className="container mx-auto px-4 py-8">
-        
+
         {/* ✅ SECCIÓN 1: HEADER */}
         <div className="mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-300 mb-2 text-center">
@@ -333,6 +333,50 @@ export default function SolarReturnPage() {
           <p className="text-purple-200 text-center text-lg">
             Revolución Solar • Ciclo Anual Personalizado
           </p>
+        </div>
+
+        {/* ✅ MENÚ DE NAVEGACIÓN STICKY */}
+        <div className="sticky top-0 z-50 bg-gradient-to-r from-purple-900/95 to-pink-900/95 backdrop-blur-md border-b border-purple-400/30 shadow-lg mb-8">
+          <div className="max-w-7xl mx-auto px-4">
+            <nav className="flex items-center justify-center gap-2 md:gap-4 py-3 overflow-x-auto scrollbar-hide">
+              <a
+                href="#resumen"
+                className="px-3 md:px-4 py-2 text-xs md:text-sm font-semibold text-purple-200 hover:text-white hover:bg-purple-700/50 rounded-lg transition-all duration-200 whitespace-nowrap"
+              >
+                📋 Resumen
+              </a>
+              <a
+                href="#rueda"
+                className="px-3 md:px-4 py-2 text-xs md:text-sm font-semibold text-purple-200 hover:text-white hover:bg-purple-700/50 rounded-lg transition-all duration-200 whitespace-nowrap"
+              >
+                🌟 Rueda
+              </a>
+              <a
+                href="#planetas"
+                className="px-3 md:px-4 py-2 text-xs md:text-sm font-semibold text-purple-200 hover:text-white hover:bg-purple-700/50 rounded-lg transition-all duration-200 whitespace-nowrap"
+              >
+                🪐 Planetas
+              </a>
+              <a
+                href="#aspectos"
+                className="px-3 md:px-4 py-2 text-xs md:text-sm font-semibold text-purple-200 hover:text-white hover:bg-purple-700/50 rounded-lg transition-all duration-200 whitespace-nowrap"
+              >
+                ✨ Aspectos
+              </a>
+              <a
+                href="#linea-tiempo"
+                className="px-3 md:px-4 py-2 text-xs md:text-sm font-semibold text-purple-200 hover:text-white hover:bg-purple-700/50 rounded-lg transition-all duration-200 whitespace-nowrap"
+              >
+                📅 Línea Tiempo
+              </a>
+              <a
+                href="#integracion"
+                className="px-3 md:px-4 py-2 text-xs md:text-sm font-semibold text-purple-200 hover:text-white hover:bg-purple-700/50 rounded-lg transition-all duration-200 whitespace-nowrap"
+              >
+                🌟 Integración
+              </a>
+            </nav>
+          </div>
         </div>
 
         {/* ✅ SECCIÓN 2: BOTÓN DE INTERPRETACIÓN */}
@@ -370,7 +414,7 @@ export default function SolarReturnPage() {
         })()}
 
         {/* ✅ SECCIÓN 3: EXPLICACIÓN QUÉ ES SOLAR RETURN */}
-        <div className="max-w-4xl mx-auto mb-12">
+        <div id="resumen" className="max-w-4xl mx-auto mb-12 scroll-mt-24">
           <div className="bg-gradient-to-br from-purple-900/40 to-blue-900/40 rounded-2xl p-8 border border-purple-400/30">
             <h2 className="text-2xl font-bold text-purple-100 mb-4 flex items-center gap-3">
               <Sparkles className="w-6 h-6 text-purple-300" />
@@ -399,7 +443,7 @@ export default function SolarReturnPage() {
 
         {/* ✅ SECCIÓN 4: RUEDA ASTROLÓGICA CON 3 CARDS */}
         {chartData && (
-          <div className="max-w-5xl mx-auto mb-12">
+          <div id="rueda" className="max-w-5xl mx-auto mb-12 scroll-mt-24">
             <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 border border-purple-500/30">
               <h2 className="text-2xl font-bold text-purple-100 mb-6 text-center">
                 🌟 Tu Rueda Solar Return {new Date().getFullYear()}
@@ -428,8 +472,79 @@ export default function SolarReturnPage() {
           </div>
         )}
 
-        {/* ✅ SECCIÓN 5: LÍNEA DE TIEMPO SOLAR RETURN - REDISEÑADA */}
-        <div id="linea-tiempo-solar" className="max-w-7xl mx-auto mb-12">
+        {/* ✅ SECCIÓN 5: PLANETAS EN SOLAR RETURN */}
+        {chartData && chartData.planets && (
+          <div id="planetas" className="max-w-6xl mx-auto mb-12 scroll-mt-24">
+            <div className="bg-gradient-to-br from-indigo-900/40 to-purple-900/40 rounded-2xl p-8 border border-indigo-400/30">
+              <h2 className="text-2xl md:text-3xl font-bold text-indigo-100 mb-6 text-center">
+                🪐 Planetas en tu Solar Return {new Date().getFullYear()}
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {chartData.planets.map((planet: any, index: number) => (
+                  <div
+                    key={index}
+                    className="bg-gradient-to-br from-indigo-800/40 to-purple-800/40 backdrop-blur-sm rounded-xl p-5 border border-indigo-400/20 hover:border-indigo-400/40 transition-all duration-300 hover:scale-105"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-lg font-bold text-indigo-100">{planet.name}</h3>
+                      <span className="text-2xl">{getPlanetEmoji(planet.name)}</span>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <p className="text-indigo-200">
+                        <span className="font-semibold">Signo:</span> {planet.sign}
+                      </p>
+                      <p className="text-indigo-200">
+                        <span className="font-semibold">Casa:</span> {planet.house}
+                      </p>
+                      <p className="text-indigo-200">
+                        <span className="font-semibold">Grado:</span> {planet.degree?.toFixed(2)}°
+                      </p>
+                      {planet.retrograde && (
+                        <span className="inline-block bg-red-600/30 border border-red-400/40 text-red-200 text-xs px-2 py-1 rounded-full">
+                          ⏪ Retrógrado
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ✅ SECCIÓN 6: ASPECTOS */}
+        {chartData && chartData.keyAspects && chartData.keyAspects.length > 0 && (
+          <div id="aspectos" className="max-w-6xl mx-auto mb-12 scroll-mt-24">
+            <div className="bg-gradient-to-br from-cyan-900/40 to-blue-900/40 rounded-2xl p-8 border border-cyan-400/30">
+              <h2 className="text-2xl md:text-3xl font-bold text-cyan-100 mb-6 text-center">
+                ✨ Aspectos Planetarios Clave
+              </h2>
+              <div className="space-y-4">
+                {chartData.keyAspects.map((aspect: any, index: number) => (
+                  <div
+                    key={index}
+                    className="bg-gradient-to-r from-cyan-800/40 to-blue-800/40 backdrop-blur-sm rounded-xl p-5 border border-cyan-400/20 hover:border-cyan-400/40 transition-all duration-300"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-lg font-bold text-cyan-100">
+                        {aspect.planet1} {getAspectSymbol(aspect.aspect)} {aspect.planet2}
+                      </h3>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getAspectColor(aspect.aspect)}`}>
+                        {aspect.aspect}
+                      </span>
+                    </div>
+                    <p className="text-cyan-200 text-sm">
+                      Orbe: {aspect.orb?.toFixed(2)}°
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ✅ SECCIÓN 7: LÍNEA DE TIEMPO SOLAR RETURN - REDISEÑADA */}
+        <div id="linea-tiempo" className="max-w-7xl mx-auto mb-12 scroll-mt-24">
           <div className="bg-gradient-to-br from-slate-900/95 to-purple-900/95 backdrop-blur-sm rounded-3xl p-8 md:p-12 border-2 border-purple-400/40 shadow-2xl">
 
             {/* Header mejorado */}
@@ -607,7 +722,73 @@ export default function SolarReturnPage() {
           </div>
         </div>
 
-        {/* ✅ SECCIÓN 6: BOTÓN REGENERAR */}
+        {/* ✅ SECCIÓN 8: INTEGRACIÓN FINAL - RESUMEN DEL AÑO */}
+        <div id="integracion" className="max-w-4xl mx-auto mb-12 scroll-mt-24">
+          <div className="bg-gradient-to-br from-emerald-900/50 to-teal-900/50 backdrop-blur-sm rounded-3xl p-8 md:p-12 border-2 border-emerald-400/40 shadow-2xl">
+
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="inline-block bg-gradient-to-r from-emerald-600/30 to-teal-600/30 backdrop-blur-sm rounded-2xl px-6 py-3 mb-4 border border-emerald-400/30">
+                <span className="text-4xl">🌟</span>
+              </div>
+              <h3 className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-300 mb-3">
+                Integración Final
+              </h3>
+              <p className="text-emerald-200 text-lg">
+                Síntesis de Tu Revolución Solar
+              </p>
+            </div>
+
+            {/* Contenido */}
+            <div className="space-y-6">
+              <div className="bg-gradient-to-r from-emerald-800/40 to-teal-800/40 backdrop-blur-sm rounded-2xl p-6 border border-emerald-400/20">
+                <h4 className="text-emerald-100 font-bold text-xl mb-4 flex items-center gap-2">
+                  <span className="text-2xl">💭</span>
+                  Síntesis del Año
+                </h4>
+                <p className="text-emerald-50 text-base leading-relaxed">
+                  Este año {new Date().getFullYear()}-{new Date().getFullYear() + 1} es tu <strong>LABORATORIO DE TRANSFORMACIÓN CONSCIENTE</strong>.
+                  No es tiempo de víctimas ni espectadores - es tiempo de <strong>PROTAGONISTAS REVOLUCIONARIOS</strong>.
+                  Cada Luna Nueva es un reinicio. Cada decisión cuenta. Cada acción crea tu realidad.
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-r from-teal-800/40 to-emerald-800/40 backdrop-blur-sm rounded-2xl p-6 border border-teal-400/20">
+                <h4 className="text-teal-100 font-bold text-xl mb-4 flex items-center gap-2">
+                  <span className="text-2xl">🎯</span>
+                  Tu Poder de Elección
+                </h4>
+                <p className="text-teal-50 text-base leading-relaxed">
+                  El Solar Return te entrega el <strong>MAPA</strong> - tú decides si lo sigues con valentía disruptiva
+                  o lo ignoras por comodidad mediocre. La astrología no predice - <strong>PREPARA</strong>.
+                  Usa este conocimiento para volverte <strong>ANTIFRÁGIL</strong>: más fuerte ante cada desafío,
+                  más consciente ante cada oportunidad, más auténtico ante cada elección.
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-br from-emerald-900/60 to-teal-900/60 backdrop-blur-sm rounded-2xl p-8 border-2 border-emerald-400/40">
+                <h4 className="text-emerald-100 font-bold text-xl mb-4 flex items-center gap-2 justify-center">
+                  <span className="text-2xl">💫</span>
+                  Pregunta para Reflexionar
+                </h4>
+                <p className="text-emerald-50 text-lg md:text-xl font-semibold text-center italic leading-relaxed">
+                  "¿Qué versión de ti mismo/a elegirás manifestar este año:
+                  la <strong className="text-emerald-300">VALIENTE y AUTÉNTICA</strong>,
+                  o la <strong className="text-gray-400">cómoda y conocida</strong>?"
+                </p>
+              </div>
+
+              <div className="text-center mt-8">
+                <p className="text-emerald-200 text-sm">
+                  ✨ Tu revolución personal ya comenzó ✨
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* ✅ SECCIÓN 9: BOTÓN REGENERAR */}
         <div className="max-w-2xl mx-auto mb-8">
           <button
             onClick={handleRegenerateChart}
@@ -643,4 +824,42 @@ function calculateAge(birthDateString: string): number {
   }
 
   return age;
+}
+
+function getPlanetEmoji(planetName: string): string {
+  const emojis: Record<string, string> = {
+    'Sol': '☀️',
+    'Luna': '🌙',
+    'Mercurio': '☿️',
+    'Venus': '♀️',
+    'Marte': '♂️',
+    'Júpiter': '♃',
+    'Saturno': '♄',
+    'Urano': '♅',
+    'Neptuno': '♆',
+    'Plutón': '♇'
+  };
+  return emojis[planetName] || '⭐';
+}
+
+function getAspectSymbol(aspectType: string): string {
+  const symbols: Record<string, string> = {
+    'Conjunción': '☌',
+    'Oposición': '☍',
+    'Trígono': '△',
+    'Cuadratura': '□',
+    'Sextil': '⚹'
+  };
+  return symbols[aspectType] || '◇';
+}
+
+function getAspectColor(aspectType: string): string {
+  const colors: Record<string, string> = {
+    'Conjunción': 'bg-yellow-600/30 border border-yellow-400/40 text-yellow-200',
+    'Oposición': 'bg-red-600/30 border border-red-400/40 text-red-200',
+    'Trígono': 'bg-green-600/30 border border-green-400/40 text-green-200',
+    'Cuadratura': 'bg-orange-600/30 border border-orange-400/40 text-orange-200',
+    'Sextil': 'bg-blue-600/30 border border-blue-400/40 text-blue-200'
+  };
+  return colors[aspectType] || 'bg-purple-600/30 border border-purple-400/40 text-purple-200';
 }
