@@ -28,6 +28,43 @@ export interface SRComparison {
     interpretacion: string;
     importancia: 'alta' | 'media' | 'baja';
   }>;
+  solarYearEvents?: {
+    lunarPhases: Array<{
+      type: 'new_moon' | 'full_moon';
+      date: Date;
+      sign: string;
+      degree: number;
+      description: string;
+    }>;
+    retrogrades: Array<{
+      planet: string;
+      startDate: Date;
+      endDate: Date;
+      startSign: string;
+      endSign: string;
+      description: string;
+    }>;
+    eclipses: Array<{
+      type: 'solar' | 'lunar';
+      date: Date;
+      sign: string;
+      degree: number;
+      magnitude: number;
+      description: string;
+    }>;
+    planetaryIngresses: Array<{
+      planet: string;
+      date: Date;
+      fromSign: string;
+      toSign: string;
+      description: string;
+    }>;
+    seasonalEvents: Array<{
+      type: 'spring_equinox' | 'summer_solstice' | 'autumn_equinox' | 'winter_solstice';
+      date: Date;
+      description: string;
+    }>;
+  };
 }
 
 /**
