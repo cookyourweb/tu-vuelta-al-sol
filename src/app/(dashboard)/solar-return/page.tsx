@@ -354,118 +354,7 @@ export default function SolarReturnPage() {
           </div>
         )}
 
-        {/* ✅ SECCIÓN 5: LÍNEA DE TIEMPO SOLAR RETURN */}
-        <div id="linea-tiempo-solar" className="max-w-6xl mx-auto mb-12">
-          <div className="bg-gradient-to-br from-rose-900/40 to-pink-900/40 rounded-xl p-8 border border-rose-400/30">
-            <h3 className="text-2xl font-bold text-rose-100 mb-6 text-center flex items-center justify-center gap-3">
-              <span className="text-3xl">📅</span>
-              Línea de Tiempo Solar Return {new Date().getFullYear()}-{new Date().getFullYear() + 1}
-            </h3>
-
-            <div className="relative">
-              <div className="absolute left-8 top-0 bottom-0 w-1 bg-gradient-to-b from-rose-500 via-pink-500 to-rose-500"></div>
-
-              <div className="space-y-6">
-                {/* Mes 1 */}
-                <div className="flex items-start gap-4 relative">
-                  <div className="w-16 h-16 rounded-full bg-rose-600 flex items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
-                    <span className="text-white font-bold text-sm">MES 1</span>
-                  </div>
-                  <div className="flex-1 bg-rose-800/30 rounded-lg p-4">
-                    <h4 className="text-rose-100 font-bold mb-2">🎯 Activación del Ciclo Anual</h4>
-                    <p className="text-rose-200 text-sm mb-2">
-                      📅 {formatDate(birthData?.date || birthData?.birthDate)} {new Date().getFullYear()}
-                    </p>
-                    <p className="text-rose-50 text-sm">
-                      Las primeras 4 semanas marcan el TONO del año. Cada acción cuenta DOBLE.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Mes 3 */}
-                <div className="flex items-start gap-4 relative">
-                  <div className="w-16 h-16 rounded-full bg-orange-600 flex items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
-                    <span className="text-white font-bold text-sm">MES 3</span>
-                  </div>
-                  <div className="flex-1 bg-orange-800/30 rounded-lg p-4">
-                    <h4 className="text-orange-100 font-bold mb-2">⚡ Primera Cuadratura Solar</h4>
-                    <p className="text-orange-200 text-sm mb-2">Tipo: Desafío Necesario</p>
-                    <p className="text-orange-50 text-sm">
-                      MOMENTO DE VERDAD: ¿Estás alineado con tus intenciones o solo hablando?
-                    </p>
-                  </div>
-                </div>
-
-                {/* Mes 6 */}
-                <div className="flex items-start gap-4 relative">
-                  <div className="w-16 h-16 rounded-full bg-green-600 flex items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
-                    <span className="text-white font-bold text-sm">MES 6</span>
-                  </div>
-                  <div className="flex-1 bg-green-800/30 rounded-lg p-4">
-                    <h4 className="text-green-100 font-bold mb-2">🌟 Trígono Solar - Flujo Cósmico</h4>
-                    <p className="text-green-200 text-sm mb-2">Tipo: Ventana de Oportunidad</p>
-                    <p className="text-green-50 text-sm">
-                      TODO fluye SI hiciste el trabajo previo. Momento de CAPITALIZAR esfuerzos.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Mes 7 */}
-                <div className="flex items-start gap-4 relative">
-                  <div className="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
-                    <span className="text-white font-bold text-sm">MES 7</span>
-                  </div>
-                  <div className="flex-1 bg-red-800/30 rounded-lg p-4 border-2 border-red-500/50">
-                    <h4 className="text-red-100 font-bold mb-2 text-lg">🔥 OPOSICIÓN SOLAR - Momento de Verdad Definitivo</h4>
-                    <p className="text-red-200 text-sm mb-2">Tipo: Revelación Total (Crítico)</p>
-                    <p className="text-red-50 text-sm">
-                      VES con claridad TOTAL: ¿funcionó tu estrategia o no? Sin filtros, sin excusas.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Mes 9 */}
-                <div className="flex items-start gap-4 relative">
-                  <div className="w-16 h-16 rounded-full bg-yellow-600 flex items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
-                    <span className="text-white font-bold text-sm">MES 9</span>
-                  </div>
-                  <div className="flex-1 bg-yellow-800/30 rounded-lg p-4">
-                    <h4 className="text-yellow-100 font-bold mb-2">🎁 Cosecha Visible</h4>
-                    <p className="text-yellow-200 text-sm mb-2">Tipo: Manifestación de Resultados</p>
-                    <p className="text-yellow-50 text-sm">
-                      Frutos de tu trabajo se vuelven VISIBLES. Si trabajaste, cosecharás.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Mes 12 */}
-                <div className="flex items-start gap-4 relative">
-                  <div className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
-                    <span className="text-white font-bold text-sm">MES 12</span>
-                  </div>
-                  <div className="flex-1 bg-purple-800/30 rounded-lg p-4">
-                    <h4 className="text-purple-100 font-bold mb-2">🌙 Cierre e Integración</h4>
-                    <p className="text-purple-200 text-sm mb-2">
-                      📅 {formatDate(birthData?.date || birthData?.birthDate)} {new Date().getFullYear() + 1}
-                    </p>
-                    <p className="text-purple-50 text-sm">
-                      Último mes para cerrar ciclos conscientes y preparar siguiente revolución.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 p-4 bg-rose-900/40 rounded-lg border border-rose-400/20">
-              <p className="text-rose-200 text-sm text-center">
-                💡 <strong>Nota Importante:</strong> Estos momentos clave se activan automáticamente cuando el Sol transita
-                las posiciones críticas respecto a tu Solar Return. Úsalos para evaluar tu progreso anual.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* ✅ SECCIÓN 6: INTEGRACIÓN FINAL */}
+        {/* ✅ SECCIÓN 5: INTEGRACIÓN FINAL */}
         <div id="integracion" className="max-w-6xl mx-auto mb-12 scroll-mt-24">
           <div className="bg-gradient-to-br from-purple-900/40 to-indigo-900/40 rounded-2xl p-8 border border-purple-400/30">
             <h3 className="text-3xl font-bold text-purple-100 mb-6 text-center flex items-center justify-center gap-3">
@@ -627,12 +516,6 @@ export default function SolarReturnPage() {
 }
 
 // ✅ HELPER FUNCTIONS
-function formatDate(dateString: string): string {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' });
-}
-
 function calculateAge(birthDateString: string): number {
   if (!birthDateString) return 0;
   const birthDate = new Date(birthDateString);
