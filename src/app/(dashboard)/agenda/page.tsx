@@ -118,10 +118,19 @@ const AgendaPersonalizada = () => {
 
   // 🔧 NEW: Fetch Solar Year Events from API
   const fetchSolarYearEvents = async (): Promise<AstrologicalEvent[]> => {
-    if (!userProfile || !userProfile.birthDate) return [];
+    if (!userProfile || !userProfile.birthDate) {
+      console.log('⚠️ [AGENDA] Cannot fetch events - missing userProfile or birthDate');
+      return [];
+    }
 
     try {
       console.log('🌟 [AGENDA] Fetching Solar Year Events...');
+      console.log('📤 [AGENDA] Request payload:', {
+        birthDate: userProfile.birthDate,
+        birthTime: userProfile.birthTime,
+        birthPlace: userProfile.birthPlace,
+        currentYear: new Date().getFullYear()
+      });
 
       const response = await fetch('/api/astrology/solar-year-events', {
         method: 'POST',
@@ -134,13 +143,23 @@ const AgendaPersonalizada = () => {
         })
       });
 
+      console.log('📥 [AGENDA] Response status:', response.status, response.statusText);
+
       if (!response.ok) {
+        const errorText = await response.text();
         console.error('❌ [AGENDA] Failed to fetch Solar Year Events');
+        console.error('❌ [AGENDA] Error response:', errorText);
         return generateExampleEvents();
       }
 
       const result = await response.json();
-      console.log('✅ [AGENDA] Solar Year Events fetched:', result.stats);
+      console.log('✅ [AGENDA] Solar Year Events fetched successfully');
+      console.log('📊 [AGENDA] Stats:', result.stats);
+      console.log('📦 [AGENDA] Data structure:', {
+        hasData: !!result.data,
+        hasEvents: !!result.data?.events,
+        eventTypes: result.data?.events ? Object.keys(result.data.events) : []
+      });
 
       // Transform API events to AstrologicalEvent format
       const transformedEvents: AstrologicalEvent[] = [];
@@ -259,11 +278,29 @@ const AgendaPersonalizada = () => {
         });
       });
 
-      console.log(`✅ [AGENDA] Transformed ${transformedEvents.length} events`);
+      console.log(`✅ [AGENDA] Transformed ${transformedEvents.length} total events`);
+      console.log('📈 [AGENDA] Event breakdown:', {
+        lunarPhases: transformedEvents.filter(e => e.type === 'lunar_phase').length,
+        retrogrades: transformedEvents.filter(e => e.type === 'retrograde').length,
+        eclipses: transformedEvents.filter(e => e.type === 'eclipse').length,
+        planetaryTransits: transformedEvents.filter(e => e.type === 'planetary_transit').length,
+        seasonal: transformedEvents.filter(e => e.type === 'seasonal').length
+      });
+
+      if (transformedEvents.length > 0) {
+        const dates = transformedEvents.map(e => new Date(e.date)).sort((a, b) => a.getTime() - b.getTime());
+        console.log('📅 [AGENDA] Event date range:', {
+          first: dates[0].toISOString(),
+          last: dates[dates.length - 1].toISOString(),
+          currentMonth: new Date().toISOString().substring(0, 7)
+        });
+      }
+
       return transformedEvents;
 
     } catch (error) {
       console.error('❌ [AGENDA] Error fetching Solar Year Events:', error);
+      console.error('❌ [AGENDA] Stack trace:', error instanceof Error ? error.stack : 'No stack');
       return generateExampleEvents();
     }
   };
@@ -429,7 +466,16 @@ const AgendaPersonalizada = () => {
 
   // Cargar eventos al iniciar
   useEffect(() => {
-    if (!userProfile) return;
+    if (!userProfile) {
+      console.log('⚠️ [AGENDA] No userProfile available yet');
+      return;
+    }
+
+    console.log('🎯 [AGENDA] UserProfile loaded:', {
+      hasUser: !!userProfile,
+      hasBirthDate: !!userProfile.birthDate,
+      birthDate: userProfile.birthDate
+    });
 
     const loadEvents = async () => {
       setLoading(true);
@@ -440,12 +486,19 @@ const AgendaPersonalizada = () => {
         const solarYearEvents = await fetchSolarYearEvents();
 
         console.log(`✅ [AGENDA] Loaded ${solarYearEvents.length} Solar Year Events`);
+        if (solarYearEvents.length > 0) {
+          console.log('📅 [AGENDA] First event:', solarYearEvents[0]);
+          console.log('📅 [AGENDA] Last event:', solarYearEvents[solarYearEvents.length - 1]);
+        }
         setEvents(solarYearEvents);
       } catch (error) {
         console.error('❌ [AGENDA] Error loading events:', error);
+        console.error('❌ [AGENDA] Error details:', error instanceof Error ? error.message : String(error));
         // Fallback to example events
         const exampleEvents = generateExampleEvents();
+        console.log(`⚠️ [AGENDA] Using ${exampleEvents.length} fallback example events`);
         setEvents(exampleEvents);
+        setError('No se pudieron cargar los eventos del año. Mostrando eventos de ejemplo.');
       } finally {
         setLoading(false);
       }
@@ -495,7 +548,7 @@ const AgendaPersonalizada = () => {
 
     const days = eachDayOfInterval({ start: startDate, end: endDate });
 
-    return days.map(day => {
+    const daysWithEvents = days.map(day => {
       const dayEvents = events.filter(event => {
         const eventDate = new Date(event.date);
         return isSameDay(day, eventDate);
@@ -508,6 +561,16 @@ const AgendaPersonalizada = () => {
         hasEvents: dayEvents.length > 0
       };
     });
+
+    // Debug logging
+    const totalDaysWithEvents = daysWithEvents.filter(d => d.hasEvents).length;
+    if (totalDaysWithEvents > 0) {
+      console.log('📆 [CALENDAR] Rendering month:', format(currentMonth, 'MMMM yyyy', { locale: es }));
+      console.log('📆 [CALENDAR] Days with events in this view:', totalDaysWithEvents);
+      console.log('📆 [CALENDAR] Total events in memory:', events.length);
+    }
+
+    return daysWithEvents;
   };
 
   const goToPreviousMonth = () => {
@@ -678,6 +741,42 @@ const AgendaPersonalizada = () => {
             </div>
           </div>
         </div>
+
+        {/* ERROR BANNER - Si hay errores cargando eventos */}
+        {error && (
+          <div className="mb-6 bg-red-900/50 border border-red-500/50 rounded-xl p-4 backdrop-blur-sm">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">⚠️</span>
+              <div className="flex-1">
+                <h3 className="text-red-200 font-bold mb-1">Problema al cargar eventos</h3>
+                <p className="text-red-300 text-sm">{error}</p>
+                <p className="text-red-400 text-xs mt-2">
+                  Por favor, revisa la consola del navegador para más detalles o intenta recargar la página.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* DEBUG INFO - Mostrar cuando hay pocos o ningún evento */}
+        {!loading && events.length === 0 && (
+          <div className="mb-6 bg-yellow-900/50 border border-yellow-500/50 rounded-xl p-4 backdrop-blur-sm">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">🔍</span>
+              <div className="flex-1">
+                <h3 className="text-yellow-200 font-bold mb-1">No hay eventos disponibles</h3>
+                <p className="text-yellow-300 text-sm">
+                  No se encontraron eventos astrológicos. Por favor, verifica:
+                </p>
+                <ul className="text-yellow-400 text-xs mt-2 list-disc list-inside space-y-1">
+                  <li>Que tu fecha de nacimiento esté configurada correctamente</li>
+                  <li>La consola del navegador para mensajes de diagnóstico</li>
+                  <li>Tu conexión a internet</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* LAYOUT DESKTOP/MOBILE */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
