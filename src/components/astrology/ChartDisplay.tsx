@@ -100,7 +100,7 @@ const ChartDisplay = ({
 
   // ✅ INTERSECTION OBSERVER PARA NAVEGACIÓN
   useEffect(() => {
-    const sections = ['carta-visual', 'aspectos-detectados', 'posiciones-planetarias'];
+    const sections = ['carta-visual', 'aspectos-detectados', 'posiciones-planetarias', 'linea-tiempo'];
     const observers: IntersectionObserver[] = [];
 
     sections.forEach(sectionId => {
