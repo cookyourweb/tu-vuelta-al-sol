@@ -164,8 +164,9 @@ const AgendaPersonalizada = () => {
       // Transform API events to AstrologicalEvent format
       const transformedEvents: AstrologicalEvent[] = [];
 
-      // Lunar Phases
+      // Lunar Phases - Con ejercicios y advertencias detalladas
       result.data.events.lunarPhases?.forEach((phase: any) => {
+        const isNewMoon = phase.phase.includes('Nueva');
         transformedEvents.push({
           id: `lunar-${phase.date}`,
           date: phase.date,
@@ -176,16 +177,85 @@ const AgendaPersonalizada = () => {
           importance: 'high',
           planet: 'Luna',
           sign: phase.zodiacSign || 'N/A',
-          aiInterpretation: {
-            meaning: `¡ACTIVACIÓN LUNAR PODEROSA ${userProfile.name?.toUpperCase()}! Esta ${phase.phase} es un momento clave para ${phase.phase.includes('Nueva') ? 'nuevos comienzos y manifestaciones' : 'culminaciones y liberaciones'}.`,
-            advice: phase.phase.includes('Nueva')
+          personalInterpretation: {
+            meaning: `¡ACTIVACIÓN LUNAR PODEROSA ${userProfile.name?.toUpperCase()}! Esta ${phase.phase} es un momento clave para ${isNewMoon ? 'nuevos comienzos y manifestaciones' : 'culminaciones y liberaciones'}.`,
+            lifeAreas: isNewMoon
+              ? ['Manifestaciones', 'Nuevos Proyectos', 'Intenciones', 'Intuición']
+              : ['Liberación', 'Cosecha', 'Culminación', 'Gratitud'],
+            advice: isNewMoon
               ? 'ESTABLECE intenciones claras y planta semillas para tus proyectos. Es momento de iniciar ciclos.'
               : 'LIBERA lo que ya no sirve y celebra tus logros. Momento de cosecha emocional.',
-            mantra: phase.phase.includes('Nueva')
+            mantra: isNewMoon
               ? 'MANIFIESTO MIS DESEOS CON CLARIDAD Y PROPÓSITO.'
               : 'LIBERO CON GRATITUD LO QUE YA CUMPLIÓ SU CICLO.',
-            ritual: 'Escribe 3 intenciones específicas y colócalas bajo la luz lunar durante la noche.',
-            lifeAreas: ['Emociones', 'Intuición', 'Ciclos Naturales']
+            ritual: isNewMoon
+              ? '🌑 RITUAL LUNA NUEVA:\n1. Escribe 3 intenciones específicas en papel\n2. Léelas en voz alta bajo la luz de la luna (o visualizándola)\n3. Guarda el papel en un lugar especial\n4. Actúa en las próximas 48 horas hacia una de ellas'
+              : '🌕 RITUAL LUNA LLENA:\n1. Lista 3 cosas que quieres soltar\n2. Escríbelas en papel y quémalas (con seguridad)\n3. Lista 3 logros que celebras este mes\n4. Agradece en voz alta cada uno',
+            actionPlan: isNewMoon ? [
+              {
+                category: 'crecimiento',
+                action: 'Inicia UN proyecto nuevo que hayas estado postergando',
+                timing: 'inmediato',
+                difficulty: 'fácil',
+                impact: 'transformador'
+              },
+              {
+                category: 'creatividad',
+                action: 'Dedica 20 minutos a brainstorming de ideas sin filtros',
+                timing: 'esta_semana',
+                difficulty: 'fácil',
+                impact: 'medio'
+              },
+              {
+                category: 'relaciones',
+                action: 'Inicia una conversación importante que has estado evitando',
+                timing: 'esta_semana',
+                difficulty: 'moderado',
+                impact: 'alto'
+              }
+            ] : [
+              {
+                category: 'crecimiento',
+                action: 'Haz una lista de 10 logros del último mes (grandes y pequeños)',
+                timing: 'inmediato',
+                difficulty: 'fácil',
+                impact: 'medio'
+              },
+              {
+                category: 'salud',
+                action: 'Suelta un hábito que sabes que no te sirve',
+                timing: 'esta_semana',
+                difficulty: 'desafiante',
+                impact: 'transformador'
+              },
+              {
+                category: 'relaciones',
+                action: 'Perdona a alguien (aunque sea en tu mente) y libera esa energía',
+                timing: 'este_mes',
+                difficulty: 'moderado',
+                impact: 'alto'
+              }
+            ],
+            warningsAndOpportunities: {
+              warnings: isNewMoon ? [
+                '⚠️ No te sobrecargues con demasiadas intenciones - elige MÁXIMO 3 prioridades',
+                '⚠️ Evita tomar decisiones importantes sin reflexionar al menos 24 horas',
+                '⚠️ Cuidado con el exceso de entusiasmo que te haga prometer lo que no puedes cumplir'
+              ] : [
+                '⚠️ No fuerces conclusiones - algunas cosas necesitan más tiempo para resolverse',
+                '⚠️ Evita confrontaciones emocionales intensas - las emociones están amplificadas',
+                '⚠️ No tomes decisiones drásticas bajo el impulso de la luna llena'
+              ],
+              opportunities: isNewMoon ? [
+                '🌟 Ventana perfecta para manifestar cambios importantes en tu vida',
+                '🌟 Tu intuición está especialmente activa - confía en tus corazonadas',
+                '🌟 Excelente momento para networking y conocer gente nueva'
+              ] : [
+                '🌟 Claridad máxima sobre situaciones que has estado analizando',
+                '🌟 Momento ideal para completar proyectos y cerrar ciclos',
+                '🌟 Tu carisma y magnetismo personal están en el punto más alto'
+              ]
+            }
           }
         });
       });
