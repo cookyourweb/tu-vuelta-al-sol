@@ -42,7 +42,7 @@ function SectionNavigation({ currentSection }: { currentSection?: string }) {
   const sections = [
     { id: 'carta', label: '🌟 Carta' },
     { id: 'aspectos', label: '✨ Aspectos' },
-    { id: 'carta', label: '🪐 Planetas', displayId: 'planetas' },
+    { id: 'planetas', label: '🪐 Planetas' },
     { id: 'linea-tiempo', label: '📅 Línea de Tiempo' },
     { id: 'integracion', label: '💫 Integración' }
   ];
@@ -488,7 +488,52 @@ export default function SolarReturnPage() {
           </div>
         )}
 
-        {/* ✅ SECCIÓN 5: LÍNEA DE TIEMPO SOLAR RETURN */}
+        {/* ✅ SECCIÓN 5: PLANETAS */}
+        {chartData && chartData.planets && chartData.planets.length > 0 && (
+          <div id="planetas" className="max-w-6xl mx-auto mb-12 scroll-mt-24">
+            <SectionNavigation currentSection="planetas" />
+            <div className="bg-gradient-to-br from-indigo-900/40 to-purple-900/40 rounded-2xl p-8 border border-indigo-400/30">
+              <h2 className="text-2xl md:text-3xl font-bold text-indigo-100 mb-6 text-center">
+                🪐 Planetas en tu Solar Return
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {chartData.planets.map((planet: any, index: number) => (
+                  <div
+                    key={index}
+                    className="bg-gradient-to-r from-indigo-800/40 to-purple-800/40 backdrop-blur-sm rounded-xl p-5 border border-indigo-400/20 hover:border-indigo-400/40 transition-all duration-300"
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="text-3xl">{getPlanetEmoji(planet.name)}</span>
+                      <h3 className="text-xl font-bold text-indigo-100">
+                        {planet.name}
+                      </h3>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <p className="text-indigo-200">
+                        <span className="font-semibold">Signo:</span> {planet.sign}
+                      </p>
+                      <p className="text-indigo-200">
+                        <span className="font-semibold">Posición:</span> {planet.degree?.toFixed(2)}°
+                      </p>
+                      {planet.house && (
+                        <p className="text-indigo-200">
+                          <span className="font-semibold">Casa:</span> {planet.house}
+                        </p>
+                      )}
+                      {planet.isRetrograde && (
+                        <span className="inline-block bg-orange-600/30 border border-orange-400/40 text-orange-200 px-2 py-1 rounded-full text-xs font-semibold">
+                          ℞ Retrógrado
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ✅ SECCIÓN 6: LÍNEA DE TIEMPO SOLAR RETURN */}
         <div id="linea-tiempo" className="max-w-7xl mx-auto mb-12 scroll-mt-24">
           <SectionNavigation currentSection="linea-tiempo" />
           <div className="bg-gradient-to-br from-slate-900/95 to-purple-900/95 backdrop-blur-sm rounded-3xl p-8 md:p-12 border-2 border-purple-400/40 shadow-2xl">
@@ -668,7 +713,7 @@ export default function SolarReturnPage() {
           </div>
         </div>
 
-        {/* ✅ SECCIÓN 6: INTEGRACIÓN FINAL */}
+        {/* ✅ SECCIÓN 7: INTEGRACIÓN FINAL */}
         <div id="integracion" className="max-w-4xl mx-auto mb-12 scroll-mt-24">
           <SectionNavigation currentSection="integracion" />
           <div className="bg-gradient-to-br from-emerald-900/50 to-teal-900/50 backdrop-blur-sm rounded-3xl p-8 md:p-12 border-2 border-emerald-400/40 shadow-2xl">
@@ -735,7 +780,7 @@ export default function SolarReturnPage() {
           </div>
         </div>
 
-        {/* ✅ SECCIÓN 7: RESUMEN - QUÉ ES SOLAR RETURN */}
+        {/* ✅ SECCIÓN 8: RESUMEN - QUÉ ES SOLAR RETURN */}
         <div id="resumen" className="max-w-4xl mx-auto mb-12 scroll-mt-24">
           <div className="bg-gradient-to-br from-purple-900/40 to-blue-900/40 rounded-2xl p-8 border border-purple-400/30">
             <h2 className="text-2xl font-bold text-purple-100 mb-4 flex items-center gap-3">
@@ -763,7 +808,7 @@ export default function SolarReturnPage() {
           </div>
         </div>
 
-        {/* ✅ SECCIÓN 8: RESUMEN DE ASPECTOS */}
+        {/* ✅ SECCIÓN 9: RESUMEN DE ASPECTOS */}
         <div className="max-w-4xl mx-auto mb-12">
           <div className="bg-gradient-to-br from-cyan-900/40 to-blue-900/40 rounded-2xl p-8 border border-cyan-400/30">
             <h2 className="text-2xl font-bold text-cyan-100 mb-6 flex items-center gap-3">
@@ -822,7 +867,7 @@ export default function SolarReturnPage() {
           </div>
         </div>
 
-        {/* ✅ SECCIÓN 9: BOTÓN REGENERAR */}
+        {/* ✅ SECCIÓN 10: BOTÓN REGENERAR */}
         <div className="max-w-2xl mx-auto mb-8">
           <button
             onClick={handleRegenerateChart}
