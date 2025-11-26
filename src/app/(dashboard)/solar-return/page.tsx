@@ -38,46 +38,34 @@ function getMonthWithYear(birthDate: string, monthOffset: number, currentYear: n
 }
 
 // Componente de navegación reutilizable
-function SectionNavigation() {
+function SectionNavigation({ currentSection }: { currentSection?: string }) {
+  const sections = [
+    { id: 'carta', label: '🌟 Carta', icon: '🌟' },
+    { id: 'aspectos', label: '✨ Aspectos', icon: '✨' },
+    { id: 'planetas', label: '🪐 Planetas', icon: '🪐' },
+    { id: 'linea-tiempo', label: '📅 Línea de Tiempo', icon: '📅' },
+    { id: 'integracion', label: '💫 Integración Final', icon: '💫' }
+  ];
+
   return (
     <div className="bg-gradient-to-r from-purple-900/50 to-pink-900/50 backdrop-blur-sm rounded-xl p-4 mb-6 border border-purple-400/20">
       <nav className="flex items-center justify-center gap-2 md:gap-3 flex-wrap">
-        <a
-          href="#resumen"
-          className="px-3 py-1.5 text-xs md:text-sm font-semibold text-purple-200 hover:text-white hover:bg-purple-700/50 rounded-lg transition-all duration-200"
-        >
-          📋 Resumen
-        </a>
-        <a
-          href="#rueda"
-          className="px-3 py-1.5 text-xs md:text-sm font-semibold text-purple-200 hover:text-white hover:bg-purple-700/50 rounded-lg transition-all duration-200"
-        >
-          🌟 Rueda
-        </a>
-        <a
-          href="#planetas"
-          className="px-3 py-1.5 text-xs md:text-sm font-semibold text-purple-200 hover:text-white hover:bg-purple-700/50 rounded-lg transition-all duration-200"
-        >
-          🪐 Planetas
-        </a>
-        <a
-          href="#aspectos"
-          className="px-3 py-1.5 text-xs md:text-sm font-semibold text-purple-200 hover:text-white hover:bg-purple-700/50 rounded-lg transition-all duration-200"
-        >
-          ✨ Aspectos
-        </a>
-        <a
-          href="#linea-tiempo"
-          className="px-3 py-1.5 text-xs md:text-sm font-semibold text-purple-200 hover:text-white hover:bg-purple-700/50 rounded-lg transition-all duration-200"
-        >
-          📅 Línea Tiempo
-        </a>
-        <a
-          href="#integracion"
-          className="px-3 py-1.5 text-xs md:text-sm font-semibold text-purple-200 hover:text-white hover:bg-purple-700/50 rounded-lg transition-all duration-200"
-        >
-          🌟 Integración
-        </a>
+        {sections.map((section) => {
+          const isActive = currentSection === section.id;
+          return (
+            <a
+              key={section.id}
+              href={`#${section.id}`}
+              className={`px-3 py-1.5 text-xs md:text-sm font-semibold rounded-lg transition-all duration-200 ${
+                isActive
+                  ? 'bg-purple-600 text-white shadow-lg'
+                  : 'text-purple-200 hover:text-white hover:bg-purple-700/50'
+              }`}
+            >
+              {section.label}
+            </a>
+          );
+        })}
       </nav>
     </div>
   );
@@ -95,6 +83,7 @@ export default function SolarReturnPage() {
   const [error, setError] = useState<string | null>(null);
   const [regenerating, setRegenerating] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('☀️ Iniciando tu Vuelta al Sol...');
+  const [loadingProgress, setLoadingProgress] = useState(0);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -107,22 +96,28 @@ export default function SolarReturnPage() {
   useEffect(() => {
     if (loading) {
       const messages = [
-        '☀️ Iniciando tu Vuelta al Sol...',
-        '🔄 Calculando tu revolución solar anual...',
-        '🌅 Localizando el momento exacto de tu retorno solar...',
-        '⚡ Comparando carta natal vs solar return...',
-        '🪐 Identificando energías del nuevo ciclo...',
-        '✨ Determinando áreas de vida activadas...',
-        '💫 Preparando tu mapa anual personalizado...'
+        { text: '☀️ Iniciando tu Vuelta al Sol...', progress: 5 },
+        { text: '🔄 Calculando tu revolución solar anual...', progress: 20 },
+        { text: '🌅 Localizando el momento exacto de tu retorno solar...', progress: 35 },
+        { text: '⚡ Comparando carta natal vs solar return...', progress: 50 },
+        { text: '🪐 Identificando energías del nuevo ciclo...', progress: 65 },
+        { text: '✨ Determinando áreas de vida activadas...', progress: 80 },
+        { text: '💫 Preparando tu mapa anual personalizado...', progress: 95 }
       ];
 
       let index = 0;
+      setLoadingMessage(messages[0].text);
+      setLoadingProgress(messages[0].progress);
+
       const interval = setInterval(() => {
         index = (index + 1) % messages.length;
-        setLoadingMessage(messages[index]);
+        setLoadingMessage(messages[index].text);
+        setLoadingProgress(messages[index].progress);
       }, 2500);
 
       return () => clearInterval(interval);
+    } else {
+      setLoadingProgress(100);
     }
   }, [loading]);
 
@@ -287,7 +282,7 @@ export default function SolarReturnPage() {
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 via-orange-900/20 to-gray-900 flex items-center justify-center p-4">
-        <div className="text-center max-w-md">
+        <div className="text-center max-w-md w-full">
           <div className="relative mb-8">
             <div className="w-24 h-24 mx-auto relative">
               <div className="absolute inset-0 bg-orange-500 rounded-full animate-ping opacity-20"></div>
@@ -302,15 +297,28 @@ export default function SolarReturnPage() {
             {loadingMessage}
           </h2>
 
-          <div className="bg-orange-900/30 backdrop-blur-sm border border-orange-400/30 rounded-xl p-4">
+          <div className="bg-orange-900/30 backdrop-blur-sm border border-orange-400/30 rounded-xl p-4 mb-6">
             <p className="text-orange-200 text-sm">
               Estamos calculando tu Solar Return con precisión astronómica.
               Este proceso puede tomar hasta 90 segundos...
             </p>
           </div>
 
-          <div className="mt-6 w-full bg-gray-700 rounded-full h-2 overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-orange-500 to-amber-500 animate-progress"></div>
+          {/* Barra de progreso con porcentaje */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-orange-300 font-semibold">Progreso</span>
+              <span className="text-orange-200 font-bold text-lg">{loadingProgress}%</span>
+            </div>
+            <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden shadow-lg">
+              <div
+                className="h-full bg-gradient-to-r from-orange-500 to-amber-500 transition-all duration-500 ease-out rounded-full"
+                style={{ width: `${loadingProgress}%` }}
+              ></div>
+            </div>
+            <p className="text-orange-400/70 text-xs mt-2">
+              Por favor, no abandones esta página mientras calculamos tu carta...
+            </p>
           </div>
         </div>
       </div>
@@ -415,39 +423,10 @@ export default function SolarReturnPage() {
           );
         })()}
 
-        {/* ✅ SECCIÓN 3: EXPLICACIÓN QUÉ ES SOLAR RETURN */}
-        <div id="resumen" className="max-w-4xl mx-auto mb-12 scroll-mt-24">
-          <SectionNavigation />
-          <div className="bg-gradient-to-br from-purple-900/40 to-blue-900/40 rounded-2xl p-8 border border-purple-400/30">
-            <h2 className="text-2xl font-bold text-purple-100 mb-4 flex items-center gap-3">
-              <Sparkles className="w-6 h-6 text-purple-300" />
-              ¿Qué es la Revolución Solar?
-            </h2>
-            <div className="space-y-4 text-purple-50">
-              <p className="leading-relaxed">
-                La <strong>Revolución Solar</strong> es la carta astral levantada para el momento exacto 
-                en que el Sol regresa a la posición que tenía cuando naciste. Este evento ocurre cerca 
-                de tu cumpleaños cada año y marca el inicio de un nuevo ciclo anual.
-              </p>
-              <div className="bg-purple-800/30 rounded-lg p-4">
-                <p className="text-sm text-purple-200">
-                  <strong>💡 Dato clave:</strong> El Sol siempre está en la misma posición zodiacal 
-                  que en tu carta natal, pero los otros planetas cambian, creando un mapa único de 
-                  energías disponibles para los próximos 12 meses.
-                </p>
-              </div>
-              <p className="leading-relaxed">
-                Esta técnica predictiva te permite conocer las áreas de vida que se activarán, 
-                los desafíos que enfrentarás y las oportunidades que surgirán durante tu año personal.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* ✅ SECCIÓN 4: RUEDA ASTROLÓGICA CON 3 CARDS */}
+        {/* ✅ SECCIÓN 3: CARTA ASTROLÓGICA */}
         {chartData && (
-          <div id="rueda" className="max-w-5xl mx-auto mb-12 scroll-mt-24">
-            <SectionNavigation />
+          <div id="carta" className="max-w-5xl mx-auto mb-12 scroll-mt-24">
+            <SectionNavigation currentSection="carta" />
             <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 border border-purple-500/30">
               <h2 className="text-2xl font-bold text-purple-100 mb-6 text-center">
                 🌟 Tu Rueda Solar Return {new Date().getFullYear()}
@@ -476,10 +455,42 @@ export default function SolarReturnPage() {
           </div>
         )}
 
+        {/* ✅ SECCIÓN 4: ASPECTOS */}
+        {chartData && chartData.keyAspects && chartData.keyAspects.length > 0 && (
+          <div id="aspectos" className="max-w-6xl mx-auto mb-12 scroll-mt-24">
+            <SectionNavigation currentSection="aspectos" />
+            <div className="bg-gradient-to-br from-cyan-900/40 to-blue-900/40 rounded-2xl p-8 border border-cyan-400/30">
+              <h2 className="text-2xl md:text-3xl font-bold text-cyan-100 mb-6 text-center">
+                ✨ Aspectos Planetarios Clave
+              </h2>
+              <div className="space-y-4">
+                {chartData.keyAspects.map((aspect: any, index: number) => (
+                  <div
+                    key={index}
+                    className="bg-gradient-to-r from-cyan-800/40 to-blue-800/40 backdrop-blur-sm rounded-xl p-5 border border-cyan-400/20 hover:border-cyan-400/40 transition-all duration-300"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-lg font-bold text-cyan-100">
+                        {aspect.planet1} {getAspectSymbol(aspect.aspect)} {aspect.planet2}
+                      </h3>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getAspectColor(aspect.aspect)}`}>
+                        {aspect.aspect}
+                      </span>
+                    </div>
+                    <p className="text-cyan-200 text-sm">
+                      Orbe: {aspect.orb?.toFixed(2)}°
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ✅ SECCIÓN 5: PLANETAS EN SOLAR RETURN */}
         {chartData && chartData.planets && (
           <div id="planetas" className="max-w-6xl mx-auto mb-12 scroll-mt-24">
-            <SectionNavigation />
+            <SectionNavigation currentSection="planetas" />
             <div className="bg-gradient-to-br from-indigo-900/40 to-purple-900/40 rounded-2xl p-8 border border-indigo-400/30">
               <h2 className="text-2xl md:text-3xl font-bold text-indigo-100 mb-6 text-center">
                 🪐 Planetas en tu Solar Return {new Date().getFullYear()}
@@ -517,41 +528,9 @@ export default function SolarReturnPage() {
           </div>
         )}
 
-        {/* ✅ SECCIÓN 6: ASPECTOS */}
-        {chartData && chartData.keyAspects && chartData.keyAspects.length > 0 && (
-          <div id="aspectos" className="max-w-6xl mx-auto mb-12 scroll-mt-24">
-            <SectionNavigation />
-            <div className="bg-gradient-to-br from-cyan-900/40 to-blue-900/40 rounded-2xl p-8 border border-cyan-400/30">
-              <h2 className="text-2xl md:text-3xl font-bold text-cyan-100 mb-6 text-center">
-                ✨ Aspectos Planetarios Clave
-              </h2>
-              <div className="space-y-4">
-                {chartData.keyAspects.map((aspect: any, index: number) => (
-                  <div
-                    key={index}
-                    className="bg-gradient-to-r from-cyan-800/40 to-blue-800/40 backdrop-blur-sm rounded-xl p-5 border border-cyan-400/20 hover:border-cyan-400/40 transition-all duration-300"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-lg font-bold text-cyan-100">
-                        {aspect.planet1} {getAspectSymbol(aspect.aspect)} {aspect.planet2}
-                      </h3>
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getAspectColor(aspect.aspect)}`}>
-                        {aspect.aspect}
-                      </span>
-                    </div>
-                    <p className="text-cyan-200 text-sm">
-                      Orbe: {aspect.orb?.toFixed(2)}°
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ✅ SECCIÓN 7: LÍNEA DE TIEMPO SOLAR RETURN - REDISEÑADA */}
+        {/* ✅ SECCIÓN 6: LÍNEA DE TIEMPO SOLAR RETURN */}
         <div id="linea-tiempo" className="max-w-7xl mx-auto mb-12 scroll-mt-24">
-          <SectionNavigation />
+          <SectionNavigation currentSection="linea-tiempo" />
           <div className="bg-gradient-to-br from-slate-900/95 to-purple-900/95 backdrop-blur-sm rounded-3xl p-8 md:p-12 border-2 border-purple-400/40 shadow-2xl">
 
             {/* Header mejorado */}
@@ -729,9 +708,9 @@ export default function SolarReturnPage() {
           </div>
         </div>
 
-        {/* ✅ SECCIÓN 8: INTEGRACIÓN FINAL - RESUMEN DEL AÑO */}
+        {/* ✅ SECCIÓN 7: INTEGRACIÓN FINAL */}
         <div id="integracion" className="max-w-4xl mx-auto mb-12 scroll-mt-24">
-          <SectionNavigation />
+          <SectionNavigation currentSection="integracion" />
           <div className="bg-gradient-to-br from-emerald-900/50 to-teal-900/50 backdrop-blur-sm rounded-3xl p-8 md:p-12 border-2 border-emerald-400/40 shadow-2xl">
 
             {/* Header */}
@@ -793,6 +772,34 @@ export default function SolarReturnPage() {
               </div>
             </div>
 
+          </div>
+        </div>
+
+        {/* ✅ SECCIÓN 8: RESUMEN - QUÉ ES SOLAR RETURN */}
+        <div id="resumen" className="max-w-4xl mx-auto mb-12 scroll-mt-24">
+          <div className="bg-gradient-to-br from-purple-900/40 to-blue-900/40 rounded-2xl p-8 border border-purple-400/30">
+            <h2 className="text-2xl font-bold text-purple-100 mb-4 flex items-center gap-3">
+              <Sparkles className="w-6 h-6 text-purple-300" />
+              ¿Qué es la Revolución Solar?
+            </h2>
+            <div className="space-y-4 text-purple-50">
+              <p className="leading-relaxed">
+                La <strong>Revolución Solar</strong> es la carta astral levantada para el momento exacto
+                en que el Sol regresa a la posición que tenía cuando naciste. Este evento ocurre cerca
+                de tu cumpleaños cada año y marca el inicio de un nuevo ciclo anual.
+              </p>
+              <div className="bg-purple-800/30 rounded-lg p-4">
+                <p className="text-sm text-purple-200">
+                  <strong>💡 Dato clave:</strong> El Sol siempre está en la misma posición zodiacal
+                  que en tu carta natal, pero los otros planetas cambian, creando un mapa único de
+                  energías disponibles para los próximos 12 meses.
+                </p>
+              </div>
+              <p className="leading-relaxed">
+                Esta técnica predictiva te permite conocer las áreas de vida que se activarán,
+                los desafíos que enfrentarás y las oportunidades que surgirán durante tu año personal.
+              </p>
+            </div>
           </div>
         </div>
 
