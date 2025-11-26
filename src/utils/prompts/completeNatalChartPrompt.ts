@@ -118,7 +118,7 @@ export function generateCompleteNatalChartPrompt(chartData: ChartData, userProfi
   const saturn = findPlanet(chartData.planets, 'saturno', 'saturn');
   const uranus = findPlanet(chartData.planets, 'urano', 'uranus');
   const neptune = findPlanet(chartData.planets, 'neptuno', 'neptune');
-  const pluto = findPlanet(chartData.planets, 'plutón', 'pluto');
+  const pluto = findPlanet(chartData.planets, 'plutón', 'pluto', 'pluton');
   const northNode = findPlanet(chartData.planets, 'nodo norte', 'north node', 'rahu');
   const chiron = findPlanet(chartData.planets, 'quirón', 'chiron');
   const lilith = findPlanet(chartData.planets, 'lilith');
@@ -320,6 +320,7 @@ Responde ÚNICAMENTE con un JSON válido:
       "mantra": "[Frase sobre sensibilidad como fortaleza. Ej: 'Siento lo invisible. Eso no me debilita: me conecta.']"
     },
     "pluton": {
+<<<<<<< HEAD
       "posicion": "${pluto?.sign} Casa ${pluto?.house}",
       "que_significa_casa": "[Una línea: Ej: 'Casa 8 = tu poder de transformación; dónde mueres y renaces; tus recursos ocultos']",
       "tu_esencia": "[2-3 párrafos POÉTICO-TRANSFORMATIONAL: 'Tu poder es subterráneo, pero eso no lo hace menos real. Plutón en ${pluton?.sign} Casa ${pluton?.house} no teme a [situación plutoniana]. Donde otros huyen de la profundidad, tú [acción plutoniana]. Tu intensidad no es dramatismo: es [reframe como capacidad de transformación]. Regeneras como [metáfora]. Ves las sombras porque no les temes. Transformas [área] desde la raíz, no desde la superficie...']",
@@ -327,6 +328,11 @@ Responde ÚNICAMENTE con un JSON válido:
       "tu_regalo_evolutivo": "[3 líneas: 'Morir y renacer en [área] cuantas veces sea necesario. Acompañar a otros en sus propias muertes simbólicas. Transformar [recurso] en poder regenerativo...']",
       "mini_coach": "[3-4 acciones: '• Durante Luna Menguante, suelta conscientemente [patrón de control]', '• Investiga las profundidades de [tema de casa]', '• Cuando sientas el impulso de controlar, respira y pregúntate: ¿qué estoy evitando sentir?']",
       "mantra": "[Frase sobre transformación. Ej: 'Muero y renazco. Ese es mi poder, no mi tragedia.']"
+=======
+      "posicion": "${pluto?.sign || 'N/A'} Casa ${pluto?.house || 'N/A'}",
+      "transformacion": "[Poder transformador]",
+      "sombra_y_poder": "[Sombra y cómo convertirla en poder]"
+>>>>>>> 31f69b2 (🐛 FIX: Add defensive checks for Pluto planet data)
     },
     "quiron": {
       "posicion": "${chiron?.sign || 'No disponible'} Casa ${chiron?.house || 'N/A'}",
