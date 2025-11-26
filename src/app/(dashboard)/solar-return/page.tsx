@@ -453,51 +453,10 @@ export default function SolarReturnPage() {
           </div>
         )}
 
-        {/* ✅ SECCIÓN 5: PLANETAS */}
-        {chartData && chartData.planets && chartData.planets.length > 0 && (
-          <div id="planetas" className="max-w-6xl mx-auto mb-12 scroll-mt-24">
-            <div className="bg-gradient-to-br from-indigo-900/40 to-purple-900/40 rounded-2xl p-8 border border-indigo-400/30">
-              <h2 className="text-2xl md:text-3xl font-bold text-indigo-100 mb-6 text-center">
-                🪐 Planetas en tu Solar Return
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {chartData.planets.map((planet: any, index: number) => (
-                  <div
-                    key={index}
-                    className="bg-gradient-to-r from-indigo-800/40 to-purple-800/40 backdrop-blur-sm rounded-xl p-5 border border-indigo-400/20 hover:border-indigo-400/40 transition-all duration-300"
-                  >
-                    <div className="flex items-center gap-3 mb-3">
-                      <span className="text-3xl">{getPlanetEmoji(planet.name)}</span>
-                      <h3 className="text-xl font-bold text-indigo-100">
-                        {planet.name}
-                      </h3>
-                    </div>
-                    <div className="space-y-2 text-sm">
-                      <p className="text-indigo-200">
-                        <span className="font-semibold">Signo:</span> {planet.sign}
-                      </p>
-                      <p className="text-indigo-200">
-                        <span className="font-semibold">Posición:</span> {planet.degree?.toFixed(2)}°
-                      </p>
-                      {planet.house && (
-                        <p className="text-indigo-200">
-                          <span className="font-semibold">Casa:</span> {planet.house}
-                        </p>
-                      )}
-                      {planet.isRetrograde && (
-                        <span className="inline-block bg-orange-600/30 border border-orange-400/40 text-orange-200 px-2 py-1 rounded-full text-xs font-semibold">
-                          ℞ Retrógrado
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
+   ∫
 
-        {/* ✅ SECCIÓN 6: LÍNEA DE TIEMPO SOLAR RETURN */}
+      
+  {/* ✅ SECCIÓN 6: LÍNEA DE TIEMPO SOLAR RETURN */}
         <div id="linea-tiempo" className="max-w-7xl mx-auto mb-12 scroll-mt-24">
           <div className="bg-gradient-to-br from-slate-900/95 to-purple-900/95 backdrop-blur-sm rounded-3xl p-8 md:p-12 border-2 border-purple-400/40 shadow-2xl">
 
@@ -675,10 +634,9 @@ export default function SolarReturnPage() {
             </div>
           </div>
         </div>
-
         {/* ✅ SECCIÓN 7: INTEGRACIÓN FINAL */}
         <div id="integracion" className="max-w-4xl mx-auto mb-12 scroll-mt-24">
-          <SectionNavigation currentSection="integracion" />
+          
           <div className="bg-gradient-to-br from-emerald-900/50 to-teal-900/50 backdrop-blur-sm rounded-3xl p-8 md:p-12 border-2 border-emerald-400/40 shadow-2xl">
 
             {/* Header */}
@@ -743,92 +701,120 @@ export default function SolarReturnPage() {
           </div>
         </div>
 
-        {/* ✅ SECCIÓN 8: RESUMEN - QUÉ ES SOLAR RETURN */}
-        <div id="resumen" className="max-w-4xl mx-auto mb-12 scroll-mt-24">
-          <div className="bg-gradient-to-br from-purple-900/40 to-blue-900/40 rounded-2xl p-8 border border-purple-400/30">
-            <h2 className="text-2xl font-bold text-purple-100 mb-4 flex items-center gap-3">
-              <Sparkles className="w-6 h-6 text-purple-300" />
-              ¿Qué es la Revolución Solar?
-            </h2>
-            <div className="space-y-4 text-purple-50">
-              <p className="leading-relaxed">
-                La <strong>Revolución Solar</strong> es la carta astral levantada para el momento exacto
-                en que el Sol regresa a la posición que tenía cuando naciste. Este evento ocurre cerca
-                de tu cumpleaños cada año y marca el inicio de un nuevo ciclo anual.
-              </p>
-              <div className="bg-purple-800/30 rounded-lg p-4">
-                <p className="text-sm text-purple-200">
-                  <strong>💡 Dato clave:</strong> El Sol siempre está en la misma posición zodiacal
-                  que en tu carta natal, pero los otros planetas cambian, creando un mapa único de
-                  energías disponibles para los próximos 12 meses.
-                </p>
-              </div>
-              <p className="leading-relaxed">
-                Esta técnica predictiva te permite conocer las áreas de vida que se activarán,
-                los desafíos que enfrentarás y las oportunidades que surgirán durante tu año personal.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* ✅ SECCIÓN 9: RESUMEN DE ASPECTOS */}
-        <div className="max-w-4xl mx-auto mb-12">
-          <div className="bg-gradient-to-br from-cyan-900/40 to-blue-900/40 rounded-2xl p-8 border border-cyan-400/30">
-            <h2 className="text-2xl font-bold text-cyan-100 mb-6 flex items-center gap-3">
-              <Sparkles className="w-6 h-6 text-cyan-300" />
+    {/* 📊 SECCIONES EDUCATIVAS */}
+      <div className="space-y-8">
+        <div className="p-6 bg-gradient-to-r from-indigo-900/40 to-purple-900/40 rounded-xl border border-indigo-400/30">
+          <div className="text-center mb-6">
+            <h4 className="text-white font-bold text-xl mb-3">
+              <svg className="w-6 h-6 inline mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14,2 14,8 20,8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10,9 9,9 8,9"/>
+              </svg>
               Resumen de Aspectos - Cómo interactúan tus energías planetarias
-            </h2>
-            <p className="text-cyan-50 mb-6 leading-relaxed">
-              Comprende las dinámicas internas de tu personalidad a través de los aspectos astrológicos
-            </p>
+            </h4>
+            <div className="text-indigo-200 text-base mb-4">Comprende las dinámicas internas de tu personalidad a través de los aspectos astrológicos</div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
+            <div className="text-center p-4 bg-green-400/10 rounded-xl border border-green-400/30">
+              <div className="text-green-300 font-bold text-xl mb-3 flex items-center justify-center">
+                <svg className="w-6 h-6 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M20 6 9 17l-5-5"/>
+                </svg>
+                Aspectos Armónicos
+              </div>
+              <div className="text-green-200 text-sm mb-2 font-semibold">Trígono (120°), Sextil (60°), Semisextil (30°)</div>
+              <div className="text-green-100 text-xs leading-relaxed">
+                <strong>🌟 Qué significan:</strong> Son tus facilidades naturales, talentos innatos y energías que fluyen sin esfuerzo. 
+                Representan las áreas donde tienes habilidades naturales y donde las cosas te salen más fácil.
+              </div>
+              <div className="text-green-200 text-xs mt-2 font-medium">✨ En tu vida: Aprovecha estos aspectos para desarrollar tus fortalezas</div>
+            </div>
+            
+            <div className="text-center p-4 bg-red-400/10 rounded-xl border border-red-400/30">
+              <div className="text-red-300 font-bold text-xl mb-3 flex items-center justify-center">
+                <svg className="w-6 h-6 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/>
+                </svg>
+                Aspectos Tensos
+              </div>
+              <div className="text-red-200 text-sm mb-2 font-semibold">Cuadratura (90°), Oposición (180°), Quincuncio (150°)</div>
+              <div className="text-red-100 text-xs leading-relaxed">
+                <strong>⚡ Qué significan:</strong> Son tus desafíos internos que generan crecimiento. Crean tensión creativa que te impulsa 
+                a evolucionar y desarrollar nuevas capacidades. Son tu motor de transformación personal.
+              </div>
+              <div className="text-red-200 text-xs mt-2 font-medium">🚀 En tu vida: Abraza estos desafíos como oportunidades de crecimiento</div>
+            </div>
+            
+            <div className="text-center p-4 bg-yellow-400/10 rounded-xl border border-yellow-400/30">
+              <div className="text-yellow-300 font-bold text-xl mb-3 flex items-center justify-center">
+                <svg className="w-6 h-6 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <circle cx="12" cy="12" r="6"/>
+                  <circle cx="12" cy="12" r="2"/>
+                </svg>
+                Aspectos Especiales
+              </div>
+              <div className="text-yellow-200 text-sm mb-2 font-semibold">Conjunción (0°), Aspectos Menores</div>
+              <div className="text-yellow-100 text-xs leading-relaxed">
+                <strong>🔥 Qué significan:</strong> Las conjunciones fusionan energías planetarias creando una fuerza unificada muy potente. 
+                Los aspectos menores añaden matices y sutilezas a tu personalidad.
+              </div>
+              <div className="text-yellow-200 text-xs mt-2 font-medium">💫 En tu vida: Reconoce estas energías intensas y únicas en ti</div>
+            </div>
+          </div>
+        </div>
 
-            <div className="space-y-6">
-              {/* Aspectos Armónicos */}
-              <div className="bg-cyan-800/30 rounded-xl p-6 border border-cyan-400/20">
-                <h3 className="text-xl font-bold text-cyan-100 mb-4 flex items-center gap-2">
-                  <span className="text-2xl">🌟</span>
-                  Aspectos Armónicos
-                </h3>
-                <p className="text-cyan-200 text-sm mb-3 italic">
-                  Trígono (120°), Sextil (60°), Semisextil (30°)
-                </p>
-                <div className="space-y-3 text-cyan-50">
-                  <p>
-                    <strong className="text-cyan-200">🌟 Qué significan:</strong> Son tus facilidades naturales,
-                    talentos innatos y energías que fluyen sin esfuerzo. Representan las áreas donde tienes
-                    habilidades naturales y donde las cosas te salen más fácil.
-                  </p>
-                  <p>
-                    <strong className="text-cyan-200">✨ En tu vida:</strong> Aprovecha estos aspectos para
-                    desarrollar tus fortalezas
-                  </p>
+        <div className="p-6 bg-yellow-400/15 border border-yellow-400/40 rounded-xl">
+          <div className="text-center mb-4">
+            <div className="text-yellow-300 font-bold text-xl mb-2 flex items-center justify-center">
+              <svg className="w-6 h-6 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+              </svg>
+              ¿Qué son los Aspectos EXACTOS?
+            </div>
+          </div>
+          
+          <div className="text-yellow-100 text-sm leading-relaxed max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <div className="font-semibold mb-2 text-yellow-200">🎯 Definición:</div>
+                <div className="mb-4">
+                  Un aspecto se considera <span className="bg-yellow-400 text-black px-2 py-1 rounded font-bold">EXACTO</span> cuando 
+                  el orbe (diferencia angular) es menor a <span className="font-semibold text-yellow-200">1 grado</span>. 
+                  Esto significa que los planetas están casi en el ángulo perfecto del aspecto.
+                </div>
+                
+                <div className="font-semibold mb-2 text-yellow-200">⚡ Intensidad:</div>
+                <div>
+                  Los aspectos exactos tienen <span className="font-semibold text-yellow-200">máxima potencia energética</span> 
+                  y representan las influencias <span className="font-semibold text-yellow-200">más poderosas y definitorias</span> 
+                  en tu personalidad y destino.
                 </div>
               </div>
-
-              {/* Aspectos Tensos */}
-              <div className="bg-orange-800/30 rounded-xl p-6 border border-orange-400/20">
-                <h3 className="text-xl font-bold text-orange-100 mb-4 flex items-center gap-2">
-                  <span className="text-2xl">⚡</span>
-                  Aspectos Tensos
-                </h3>
-                <p className="text-orange-200 text-sm mb-3 italic">
-                  Cuadratura (90°), Oposición (180°), Quincuncio (150°)
-                </p>
-                <div className="space-y-3 text-orange-50">
-                  <p>
-                    <strong className="text-orange-200">⚡ Qué significan:</strong> Son tus desafíos internos que
-                    generan crecimiento. Crean tensión creativa que te impulsa a evolucionar y desarrollar nuevas
-                    capacidades. Son tu motor de transformación personal.
-                  </p>
-                  <p>
-                    <strong className="text-orange-200">🚀 En tu vida:</strong> Abraza estos desafíos como
-                    oportunidades de crecimiento
-                  </p>
+              
+              <div>
+                <div className="font-semibold mb-2 text-yellow-200">🌟 En tu carta:</div>
+                <div className="mb-4">
+                  Si tienes aspectos exactos, estas energías planetarias están <span className="font-semibold text-yellow-200">perfectamente sincronizadas</span> 
+                  en tu ser. Son como "superpoderes astrológicos" que definen rasgos muy marcados de tu personalidad.
+                </div>
+                
+                <div className="font-semibold mb-2 text-yellow-200">💫 Importancia:</div>
+                <div>
+                  Presta especial atención a tus aspectos exactos: son las <span className="font-semibold text-yellow-200">claves maestras</span> 
+                  para entender tu naturaleza más profunda y tus potenciales más desarrollados.
                 </div>
               </div>
             </div>
           </div>
         </div>
+      </div>
+
+
 
         {/* ✅ SECCIÓN 10: BOTÓN REGENERAR */}
         <div className="max-w-2xl mx-auto mb-8">
