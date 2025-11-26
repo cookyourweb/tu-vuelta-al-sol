@@ -42,9 +42,7 @@ function SectionNavigation({ currentSection }: { currentSection?: string }) {
   const sections = [
     { id: 'carta', label: '🌟 Carta', icon: '🌟' },
     { id: 'aspectos', label: '✨ Aspectos', icon: '✨' },
-    { id: 'planetas', label: '🪐 Planetas', icon: '🪐' },
-    { id: 'linea-tiempo', label: '📅 Línea de Tiempo', icon: '📅' },
-    { id: 'integracion', label: '💫 Integración Final', icon: '💫' }
+    { id: 'planetas', label: '🪐 Planetas', icon: '🪐' }
   ];
 
   return (
@@ -487,50 +485,8 @@ export default function SolarReturnPage() {
           </div>
         )}
 
-        {/* ✅ SECCIÓN 5: PLANETAS EN SOLAR RETURN */}
-        {chartData && chartData.planets && (
-          <div id="planetas" className="max-w-6xl mx-auto mb-12 scroll-mt-24">
-            <SectionNavigation currentSection="planetas" />
-            <div className="bg-gradient-to-br from-indigo-900/40 to-purple-900/40 rounded-2xl p-8 border border-indigo-400/30">
-              <h2 className="text-2xl md:text-3xl font-bold text-indigo-100 mb-6 text-center">
-                🪐 Planetas en tu Solar Return {new Date().getFullYear()}
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {chartData.planets.map((planet: any, index: number) => (
-                  <div
-                    key={index}
-                    className="bg-gradient-to-br from-indigo-800/40 to-purple-800/40 backdrop-blur-sm rounded-xl p-5 border border-indigo-400/20 hover:border-indigo-400/40 transition-all duration-300 hover:scale-105"
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-lg font-bold text-indigo-100">{planet.name}</h3>
-                      <span className="text-2xl">{getPlanetEmoji(planet.name)}</span>
-                    </div>
-                    <div className="space-y-2 text-sm">
-                      <p className="text-indigo-200">
-                        <span className="font-semibold">Signo:</span> {planet.sign}
-                      </p>
-                      <p className="text-indigo-200">
-                        <span className="font-semibold">Casa:</span> {planet.house}
-                      </p>
-                      <p className="text-indigo-200">
-                        <span className="font-semibold">Grado:</span> {planet.degree?.toFixed(2)}°
-                      </p>
-                      {planet.retrograde && (
-                        <span className="inline-block bg-red-600/30 border border-red-400/40 text-red-200 text-xs px-2 py-1 rounded-full">
-                          ⏪ Retrógrado
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ✅ SECCIÓN 6: LÍNEA DE TIEMPO SOLAR RETURN */}
+        {/* ✅ SECCIÓN 5: LÍNEA DE TIEMPO SOLAR RETURN */}
         <div id="linea-tiempo" className="max-w-7xl mx-auto mb-12 scroll-mt-24">
-          <SectionNavigation currentSection="linea-tiempo" />
           <div className="bg-gradient-to-br from-slate-900/95 to-purple-900/95 backdrop-blur-sm rounded-3xl p-8 md:p-12 border-2 border-purple-400/40 shadow-2xl">
 
             {/* Header mejorado */}
@@ -708,9 +664,8 @@ export default function SolarReturnPage() {
           </div>
         </div>
 
-        {/* ✅ SECCIÓN 7: INTEGRACIÓN FINAL */}
+        {/* ✅ SECCIÓN 6: INTEGRACIÓN FINAL */}
         <div id="integracion" className="max-w-4xl mx-auto mb-12 scroll-mt-24">
-          <SectionNavigation currentSection="integracion" />
           <div className="bg-gradient-to-br from-emerald-900/50 to-teal-900/50 backdrop-blur-sm rounded-3xl p-8 md:p-12 border-2 border-emerald-400/40 shadow-2xl">
 
             {/* Header */}
@@ -772,6 +727,65 @@ export default function SolarReturnPage() {
               </div>
             </div>
 
+          </div>
+        </div>
+
+        {/* ✅ SECCIÓN 7: RESUMEN DE ASPECTOS */}
+        <div className="max-w-4xl mx-auto mb-12">
+          <div className="bg-gradient-to-br from-cyan-900/40 to-blue-900/40 rounded-2xl p-8 border border-cyan-400/30">
+            <h2 className="text-2xl font-bold text-cyan-100 mb-6 flex items-center gap-3">
+              <Sparkles className="w-6 h-6 text-cyan-300" />
+              Resumen de Aspectos - Cómo interactúan tus energías planetarias
+            </h2>
+            <p className="text-cyan-50 mb-6 leading-relaxed">
+              Comprende las dinámicas internas de tu personalidad a través de los aspectos astrológicos
+            </p>
+
+            <div className="space-y-6">
+              {/* Aspectos Armónicos */}
+              <div className="bg-cyan-800/30 rounded-xl p-6 border border-cyan-400/20">
+                <h3 className="text-xl font-bold text-cyan-100 mb-4 flex items-center gap-2">
+                  <span className="text-2xl">🌟</span>
+                  Aspectos Armónicos
+                </h3>
+                <p className="text-cyan-200 text-sm mb-3 italic">
+                  Trígono (120°), Sextil (60°), Semisextil (30°)
+                </p>
+                <div className="space-y-3 text-cyan-50">
+                  <p>
+                    <strong className="text-cyan-200">🌟 Qué significan:</strong> Son tus facilidades naturales,
+                    talentos innatos y energías que fluyen sin esfuerzo. Representan las áreas donde tienes
+                    habilidades naturales y donde las cosas te salen más fácil.
+                  </p>
+                  <p>
+                    <strong className="text-cyan-200">✨ En tu vida:</strong> Aprovecha estos aspectos para
+                    desarrollar tus fortalezas
+                  </p>
+                </div>
+              </div>
+
+              {/* Aspectos Tensos */}
+              <div className="bg-orange-800/30 rounded-xl p-6 border border-orange-400/20">
+                <h3 className="text-xl font-bold text-orange-100 mb-4 flex items-center gap-2">
+                  <span className="text-2xl">⚡</span>
+                  Aspectos Tensos
+                </h3>
+                <p className="text-orange-200 text-sm mb-3 italic">
+                  Cuadratura (90°), Oposición (180°), Quincuncio (150°)
+                </p>
+                <div className="space-y-3 text-orange-50">
+                  <p>
+                    <strong className="text-orange-200">⚡ Qué significan:</strong> Son tus desafíos internos que
+                    generan crecimiento. Crean tensión creativa que te impulsa a evolucionar y desarrollar nuevas
+                    capacidades. Son tu motor de transformación personal.
+                  </p>
+                  <p>
+                    <strong className="text-orange-200">🚀 En tu vida:</strong> Abraza estos desafíos como
+                    oportunidades de crecimiento
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
