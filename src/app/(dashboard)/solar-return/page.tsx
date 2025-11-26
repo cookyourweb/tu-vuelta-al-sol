@@ -37,6 +37,52 @@ function getMonthWithYear(birthDate: string, monthOffset: number, currentYear: n
   return `${monthName} ${year}`;
 }
 
+// Componente de navegación reutilizable
+function SectionNavigation() {
+  return (
+    <div className="bg-gradient-to-r from-purple-900/50 to-pink-900/50 backdrop-blur-sm rounded-xl p-4 mb-6 border border-purple-400/20">
+      <nav className="flex items-center justify-center gap-2 md:gap-3 flex-wrap">
+        <a
+          href="#resumen"
+          className="px-3 py-1.5 text-xs md:text-sm font-semibold text-purple-200 hover:text-white hover:bg-purple-700/50 rounded-lg transition-all duration-200"
+        >
+          📋 Resumen
+        </a>
+        <a
+          href="#rueda"
+          className="px-3 py-1.5 text-xs md:text-sm font-semibold text-purple-200 hover:text-white hover:bg-purple-700/50 rounded-lg transition-all duration-200"
+        >
+          🌟 Rueda
+        </a>
+        <a
+          href="#planetas"
+          className="px-3 py-1.5 text-xs md:text-sm font-semibold text-purple-200 hover:text-white hover:bg-purple-700/50 rounded-lg transition-all duration-200"
+        >
+          🪐 Planetas
+        </a>
+        <a
+          href="#aspectos"
+          className="px-3 py-1.5 text-xs md:text-sm font-semibold text-purple-200 hover:text-white hover:bg-purple-700/50 rounded-lg transition-all duration-200"
+        >
+          ✨ Aspectos
+        </a>
+        <a
+          href="#linea-tiempo"
+          className="px-3 py-1.5 text-xs md:text-sm font-semibold text-purple-200 hover:text-white hover:bg-purple-700/50 rounded-lg transition-all duration-200"
+        >
+          📅 Línea Tiempo
+        </a>
+        <a
+          href="#integracion"
+          className="px-3 py-1.5 text-xs md:text-sm font-semibold text-purple-200 hover:text-white hover:bg-purple-700/50 rounded-lg transition-all duration-200"
+        >
+          🌟 Integración
+        </a>
+      </nav>
+    </div>
+  );
+}
+
 export default function SolarReturnPage() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
@@ -335,50 +381,6 @@ export default function SolarReturnPage() {
           </p>
         </div>
 
-        {/* ✅ MENÚ DE NAVEGACIÓN STICKY */}
-        <div className="sticky top-0 z-50 bg-gradient-to-r from-purple-900/95 to-pink-900/95 backdrop-blur-md border-b border-purple-400/30 shadow-lg mb-8">
-          <div className="max-w-7xl mx-auto px-4">
-            <nav className="flex items-center justify-center gap-2 md:gap-4 py-3 overflow-x-auto scrollbar-hide">
-              <a
-                href="#resumen"
-                className="px-3 md:px-4 py-2 text-xs md:text-sm font-semibold text-purple-200 hover:text-white hover:bg-purple-700/50 rounded-lg transition-all duration-200 whitespace-nowrap"
-              >
-                📋 Resumen
-              </a>
-              <a
-                href="#rueda"
-                className="px-3 md:px-4 py-2 text-xs md:text-sm font-semibold text-purple-200 hover:text-white hover:bg-purple-700/50 rounded-lg transition-all duration-200 whitespace-nowrap"
-              >
-                🌟 Rueda
-              </a>
-              <a
-                href="#planetas"
-                className="px-3 md:px-4 py-2 text-xs md:text-sm font-semibold text-purple-200 hover:text-white hover:bg-purple-700/50 rounded-lg transition-all duration-200 whitespace-nowrap"
-              >
-                🪐 Planetas
-              </a>
-              <a
-                href="#aspectos"
-                className="px-3 md:px-4 py-2 text-xs md:text-sm font-semibold text-purple-200 hover:text-white hover:bg-purple-700/50 rounded-lg transition-all duration-200 whitespace-nowrap"
-              >
-                ✨ Aspectos
-              </a>
-              <a
-                href="#linea-tiempo"
-                className="px-3 md:px-4 py-2 text-xs md:text-sm font-semibold text-purple-200 hover:text-white hover:bg-purple-700/50 rounded-lg transition-all duration-200 whitespace-nowrap"
-              >
-                📅 Línea Tiempo
-              </a>
-              <a
-                href="#integracion"
-                className="px-3 md:px-4 py-2 text-xs md:text-sm font-semibold text-purple-200 hover:text-white hover:bg-purple-700/50 rounded-lg transition-all duration-200 whitespace-nowrap"
-              >
-                🌟 Integración
-              </a>
-            </nav>
-          </div>
-        </div>
-
         {/* ✅ SECCIÓN 2: BOTÓN DE INTERPRETACIÓN */}
         {solarReturnData && natalChart && birthData && (() => {
           const userProfile = {
@@ -415,6 +417,7 @@ export default function SolarReturnPage() {
 
         {/* ✅ SECCIÓN 3: EXPLICACIÓN QUÉ ES SOLAR RETURN */}
         <div id="resumen" className="max-w-4xl mx-auto mb-12 scroll-mt-24">
+          <SectionNavigation />
           <div className="bg-gradient-to-br from-purple-900/40 to-blue-900/40 rounded-2xl p-8 border border-purple-400/30">
             <h2 className="text-2xl font-bold text-purple-100 mb-4 flex items-center gap-3">
               <Sparkles className="w-6 h-6 text-purple-300" />
@@ -444,6 +447,7 @@ export default function SolarReturnPage() {
         {/* ✅ SECCIÓN 4: RUEDA ASTROLÓGICA CON 3 CARDS */}
         {chartData && (
           <div id="rueda" className="max-w-5xl mx-auto mb-12 scroll-mt-24">
+            <SectionNavigation />
             <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 border border-purple-500/30">
               <h2 className="text-2xl font-bold text-purple-100 mb-6 text-center">
                 🌟 Tu Rueda Solar Return {new Date().getFullYear()}
@@ -475,6 +479,7 @@ export default function SolarReturnPage() {
         {/* ✅ SECCIÓN 5: PLANETAS EN SOLAR RETURN */}
         {chartData && chartData.planets && (
           <div id="planetas" className="max-w-6xl mx-auto mb-12 scroll-mt-24">
+            <SectionNavigation />
             <div className="bg-gradient-to-br from-indigo-900/40 to-purple-900/40 rounded-2xl p-8 border border-indigo-400/30">
               <h2 className="text-2xl md:text-3xl font-bold text-indigo-100 mb-6 text-center">
                 🪐 Planetas en tu Solar Return {new Date().getFullYear()}
@@ -515,6 +520,7 @@ export default function SolarReturnPage() {
         {/* ✅ SECCIÓN 6: ASPECTOS */}
         {chartData && chartData.keyAspects && chartData.keyAspects.length > 0 && (
           <div id="aspectos" className="max-w-6xl mx-auto mb-12 scroll-mt-24">
+            <SectionNavigation />
             <div className="bg-gradient-to-br from-cyan-900/40 to-blue-900/40 rounded-2xl p-8 border border-cyan-400/30">
               <h2 className="text-2xl md:text-3xl font-bold text-cyan-100 mb-6 text-center">
                 ✨ Aspectos Planetarios Clave
@@ -545,6 +551,7 @@ export default function SolarReturnPage() {
 
         {/* ✅ SECCIÓN 7: LÍNEA DE TIEMPO SOLAR RETURN - REDISEÑADA */}
         <div id="linea-tiempo" className="max-w-7xl mx-auto mb-12 scroll-mt-24">
+          <SectionNavigation />
           <div className="bg-gradient-to-br from-slate-900/95 to-purple-900/95 backdrop-blur-sm rounded-3xl p-8 md:p-12 border-2 border-purple-400/40 shadow-2xl">
 
             {/* Header mejorado */}
@@ -724,6 +731,7 @@ export default function SolarReturnPage() {
 
         {/* ✅ SECCIÓN 8: INTEGRACIÓN FINAL - RESUMEN DEL AÑO */}
         <div id="integracion" className="max-w-4xl mx-auto mb-12 scroll-mt-24">
+          <SectionNavigation />
           <div className="bg-gradient-to-br from-emerald-900/50 to-teal-900/50 backdrop-blur-sm rounded-3xl p-8 md:p-12 border-2 border-emerald-400/40 shadow-2xl">
 
             {/* Header */}
