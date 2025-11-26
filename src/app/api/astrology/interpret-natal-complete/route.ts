@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userId, chartData, userProfile, regenerate = false, useChunked = false } = body;
+    const { userId, chartData, userProfile, regenerate = false, useChunked = true } = body;
 
     console.log('🎯 [COMPLETE NATAL] POST request received');
     console.log('🎯 [COMPLETE NATAL] userId:', userId);

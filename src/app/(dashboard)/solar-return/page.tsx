@@ -10,6 +10,33 @@ import {
   Sun, RefreshCw, Sparkles, AlertTriangle
 } from 'lucide-react';
 
+// Helper function to get month name in Spanish from birthday
+function getMonthName(birthDate: string, monthOffset: number): string {
+  const months = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ];
+
+  const date = new Date(birthDate);
+  const birthMonth = date.getMonth(); // 0-11
+  const targetMonth = (birthMonth + monthOffset) % 12;
+
+  return months[targetMonth];
+}
+
+// Helper function to get month with year
+function getMonthWithYear(birthDate: string, monthOffset: number, currentYear: number): string {
+  const monthName = getMonthName(birthDate, monthOffset);
+  const date = new Date(birthDate);
+  const birthMonth = date.getMonth();
+
+  // Calculate if we're in the next year
+  const yearsToAdd = Math.floor((birthMonth + monthOffset) / 12);
+  const year = currentYear + yearsToAdd;
+
+  return `${monthName} ${year}`;
+}
+
 export default function SolarReturnPage() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
@@ -126,11 +153,15 @@ export default function SolarReturnPage() {
   };
 
   const handleRegenerateChart = async () => {
+    console.log('🔄 [REGENERATE] Button clicked');
+
     if (!user?.uid || !birthData) {
+      console.error('❌ [REGENERATE] Missing user or birthData');
       setError('Faltan datos necesarios');
       return;
     }
 
+    console.log('🔄 [REGENERATE] Starting regeneration for user:', user.uid);
     setLoading(true);
     setError(null);
 
@@ -148,21 +179,43 @@ export default function SolarReturnPage() {
         })
       });
 
+      console.log('📡 [REGENERATE] Response status:', response.status);
+
       if (!response.ok) {
         throw new Error('Error regenerando carta');
       }
 
       const data = await response.json();
+      console.log('✅ [REGENERATE] Response received:', {
+        success: data.success,
+        hasChart: !!data.data?.solarReturnChart,
+        source: data.data?.source
+      });
 
-      if (data.solarReturnChart) {
+      if (data.success && data.data?.solarReturnChart) {
+        setChartData(data.data.solarReturnChart);
+        setSolarReturnData(data.data.solarReturnChart);
+        console.log('✅ [REGENERATE] Chart updated successfully');
+
+        // Show success message
+        alert('✅ Solar Return regenerado exitosamente');
+      } else if (data.solarReturnChart) {
+        // Fallback for different response structure
         setChartData(data.solarReturnChart);
         setSolarReturnData(data.solarReturnChart);
+        console.log('✅ [REGENERATE] Chart updated successfully (fallback structure)');
+        alert('✅ Solar Return regenerado exitosamente');
+      } else {
+        throw new Error('No se recibió la carta regenerada');
       }
 
     } catch (err) {
+      console.error('❌ [REGENERATE] Error:', err);
       setError(err instanceof Error ? err.message : 'Error desconocido');
+      alert('❌ Error al regenerar la carta: ' + (err instanceof Error ? err.message : 'Error desconocido'));
     } finally {
       setLoading(false);
+      console.log('🔄 [REGENERATE] Process finished');
     }
   };
 
@@ -370,8 +423,9 @@ export default function SolarReturnPage() {
               <div className="space-y-6">
                 {/* Mes 1 */}
                 <div className="flex items-start gap-4 relative">
-                  <div className="w-16 h-16 rounded-full bg-rose-600 flex items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
-                    <span className="text-white font-bold text-sm">MES 1</span>
+                  <div className="w-20 h-20 rounded-full bg-rose-600 flex flex-col items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
+                    <span className="text-white font-bold text-xs">MES 1</span>
+                    <span className="text-white text-xs mt-0.5">{birthData && getMonthWithYear(birthData.birthDate || birthData.date, 0, new Date().getFullYear())}</span>
                   </div>
                   <div className="flex-1 bg-rose-800/30 rounded-lg p-4">
                     <h4 className="text-rose-100 font-bold mb-2">🎯 Activación del Ciclo Anual</h4>
@@ -386,8 +440,9 @@ export default function SolarReturnPage() {
 
                 {/* Mes 3 */}
                 <div className="flex items-start gap-4 relative">
-                  <div className="w-16 h-16 rounded-full bg-orange-600 flex items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
-                    <span className="text-white font-bold text-sm">MES 3</span>
+                  <div className="w-20 h-20 rounded-full bg-orange-600 flex flex-col items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
+                    <span className="text-white font-bold text-xs">MES 3</span>
+                    <span className="text-white text-xs mt-0.5">{birthData && getMonthWithYear(birthData.birthDate || birthData.date, 2, new Date().getFullYear())}</span>
                   </div>
                   <div className="flex-1 bg-orange-800/30 rounded-lg p-4">
                     <h4 className="text-orange-100 font-bold mb-2">⚡ Primera Cuadratura Solar</h4>
@@ -400,8 +455,9 @@ export default function SolarReturnPage() {
 
                 {/* Mes 6 */}
                 <div className="flex items-start gap-4 relative">
-                  <div className="w-16 h-16 rounded-full bg-green-600 flex items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
-                    <span className="text-white font-bold text-sm">MES 6</span>
+                  <div className="w-20 h-20 rounded-full bg-green-600 flex flex-col items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
+                    <span className="text-white font-bold text-xs">MES 6</span>
+                    <span className="text-white text-xs mt-0.5">{birthData && getMonthWithYear(birthData.birthDate || birthData.date, 5, new Date().getFullYear())}</span>
                   </div>
                   <div className="flex-1 bg-green-800/30 rounded-lg p-4">
                     <h4 className="text-green-100 font-bold mb-2">🌟 Trígono Solar - Flujo Cósmico</h4>
@@ -414,8 +470,9 @@ export default function SolarReturnPage() {
 
                 {/* Mes 7 */}
                 <div className="flex items-start gap-4 relative">
-                  <div className="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
-                    <span className="text-white font-bold text-sm">MES 7</span>
+                  <div className="w-20 h-20 rounded-full bg-red-600 flex flex-col items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
+                    <span className="text-white font-bold text-xs">MES 7</span>
+                    <span className="text-white text-xs mt-0.5">{birthData && getMonthWithYear(birthData.birthDate || birthData.date, 6, new Date().getFullYear())}</span>
                   </div>
                   <div className="flex-1 bg-red-800/30 rounded-lg p-4 border-2 border-red-500/50">
                     <h4 className="text-red-100 font-bold mb-2 text-lg">🔥 OPOSICIÓN SOLAR - Momento de Verdad Definitivo</h4>
@@ -428,8 +485,9 @@ export default function SolarReturnPage() {
 
                 {/* Mes 9 */}
                 <div className="flex items-start gap-4 relative">
-                  <div className="w-16 h-16 rounded-full bg-yellow-600 flex items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
-                    <span className="text-white font-bold text-sm">MES 9</span>
+                  <div className="w-20 h-20 rounded-full bg-yellow-600 flex flex-col items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
+                    <span className="text-white font-bold text-xs">MES 9</span>
+                    <span className="text-white text-xs mt-0.5">{birthData && getMonthWithYear(birthData.birthDate || birthData.date, 8, new Date().getFullYear())}</span>
                   </div>
                   <div className="flex-1 bg-yellow-800/30 rounded-lg p-4">
                     <h4 className="text-yellow-100 font-bold mb-2">🎁 Cosecha Visible</h4>
@@ -442,8 +500,9 @@ export default function SolarReturnPage() {
 
                 {/* Mes 12 */}
                 <div className="flex items-start gap-4 relative">
-                  <div className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
-                    <span className="text-white font-bold text-sm">MES 12</span>
+                  <div className="w-20 h-20 rounded-full bg-purple-600 flex flex-col items-center justify-center flex-shrink-0 z-10 border-4 border-rose-900">
+                    <span className="text-white font-bold text-xs">MES 12</span>
+                    <span className="text-white text-xs mt-0.5">{birthData && getMonthWithYear(birthData.birthDate || birthData.date, 11, new Date().getFullYear())}</span>
                   </div>
                   <div className="flex-1 bg-purple-800/30 rounded-lg p-4">
                     <h4 className="text-purple-100 font-bold mb-2">🌙 Cierre e Integración</h4>

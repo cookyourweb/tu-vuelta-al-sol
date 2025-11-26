@@ -116,7 +116,174 @@ const AgendaPersonalizada = () => {
     }
   }, []);
 
-  // Eventos de ejemplo ÉPICOS con variedad visual
+  // 🔧 NEW: Fetch Solar Year Events from API
+  const fetchSolarYearEvents = async (): Promise<AstrologicalEvent[]> => {
+    if (!userProfile || !userProfile.birthDate) return [];
+
+    try {
+      console.log('🌟 [AGENDA] Fetching Solar Year Events...');
+
+      const response = await fetch('/api/astrology/solar-year-events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          birthDate: userProfile.birthDate,
+          birthTime: userProfile.birthTime,
+          birthPlace: userProfile.birthPlace,
+          currentYear: new Date().getFullYear()
+        })
+      });
+
+      if (!response.ok) {
+        console.error('❌ [AGENDA] Failed to fetch Solar Year Events');
+        return generateExampleEvents();
+      }
+
+      const result = await response.json();
+      console.log('✅ [AGENDA] Solar Year Events fetched:', result.stats);
+
+      // Transform API events to AstrologicalEvent format
+      const transformedEvents: AstrologicalEvent[] = [];
+
+      // Lunar Phases
+      result.data.events.lunarPhases?.forEach((phase: any) => {
+        transformedEvents.push({
+          id: `lunar-${phase.date}`,
+          date: phase.date,
+          title: `🌙 ${phase.phase}${phase.zodiacSign ? ` en ${phase.zodiacSign}` : ''}`,
+          description: `Fase lunar importante para reflexión y manifestación`,
+          type: 'lunar_phase',
+          priority: 'high',
+          importance: 'high',
+          planet: 'Luna',
+          sign: phase.zodiacSign || 'N/A',
+          aiInterpretation: {
+            meaning: `¡ACTIVACIÓN LUNAR PODEROSA ${userProfile.name?.toUpperCase()}! Esta ${phase.phase} es un momento clave para ${phase.phase.includes('Nueva') ? 'nuevos comienzos y manifestaciones' : 'culminaciones y liberaciones'}.`,
+            advice: phase.phase.includes('Nueva')
+              ? 'ESTABLECE intenciones claras y planta semillas para tus proyectos. Es momento de iniciar ciclos.'
+              : 'LIBERA lo que ya no sirve y celebra tus logros. Momento de cosecha emocional.',
+            mantra: phase.phase.includes('Nueva')
+              ? 'MANIFIESTO MIS DESEOS CON CLARIDAD Y PROPÓSITO.'
+              : 'LIBERO CON GRATITUD LO QUE YA CUMPLIÓ SU CICLO.',
+            ritual: 'Escribe 3 intenciones específicas y colócalas bajo la luz lunar durante la noche.',
+            lifeAreas: ['Emociones', 'Intuición', 'Ciclos Naturales']
+          }
+        });
+      });
+
+      // Retrogrades
+      result.data.events.retrogrades?.forEach((retrograde: any) => {
+        transformedEvents.push({
+          id: `retro-${retrograde.planet}-${retrograde.startDate}`,
+          date: retrograde.startDate,
+          title: `⏪ ${retrograde.planet} Retrógrado`,
+          description: `Período de revisión y reflexión en temas de ${retrograde.planet}`,
+          type: 'retrograde',
+          priority: retrograde.planet === 'Mercurio' ? 'high' : 'medium',
+          importance: retrograde.planet === 'Mercurio' ? 'high' : 'medium',
+          planet: retrograde.planet,
+          sign: retrograde.sign || 'N/A',
+          aiInterpretation: {
+            meaning: `MOMENTO DE REFLEXIÓN ${retrograde.planet.toUpperCase()}. Desde el ${new Date(retrograde.startDate).toLocaleDateString('es-ES')} hasta el ${new Date(retrograde.endDate).toLocaleDateString('es-ES')}.`,
+            advice: `REVISA y reorganiza temas relacionados con ${getPlanetTheme(retrograde.planet)}. No es momento de iniciar, sino de perfeccionar.`,
+            mantra: `ACEPTO EL TIEMPO DE REFLEXIÓN Y CRECIMIENTO INTERNO.`,
+            ritual: `Dedica tiempo diario a revisar proyectos pasados relacionados con ${getPlanetTheme(retrograde.planet)}.`,
+            lifeAreas: [getPlanetTheme(retrograde.planet), 'Reflexión', 'Revisión']
+          }
+        });
+      });
+
+      // Eclipses
+      result.data.events.eclipses?.forEach((eclipse: any) => {
+        transformedEvents.push({
+          id: `eclipse-${eclipse.date}`,
+          date: eclipse.date,
+          title: `🌑 Eclipse ${eclipse.type === 'solar' ? 'Solar' : 'Lunar'}`,
+          description: `Portal de transformación y cambios importantes`,
+          type: 'eclipse',
+          priority: 'high',
+          importance: 'high',
+          planet: eclipse.type === 'solar' ? 'Sol' : 'Luna',
+          sign: eclipse.zodiacSign || 'N/A',
+          aiInterpretation: {
+            meaning: `¡PORTAL DE ECLIPSE TRANSFORMADOR! Los eclipses son puntos de inflexión que marcan cambios profundos en tu vida.`,
+            advice: `PREPÁRATE para cambios inevitables. Los eclipses revelan verdades ocultas y abren nuevos caminos.`,
+            mantra: 'ABRAZO LOS CAMBIOS QUE EL UNIVERSO TRAE PARA MI EVOLUCIÓN.',
+            ritual: 'Medita sobre qué necesitas soltar y qué nuevo capítulo está comenzando en tu vida.',
+            lifeAreas: ['Transformación', 'Cambios Mayores', 'Evolución']
+          }
+        });
+      });
+
+      // Planetary Ingresses
+      result.data.events.planetaryIngresses?.forEach((ingress: any) => {
+        transformedEvents.push({
+          id: `ingress-${ingress.planet}-${ingress.date}`,
+          date: ingress.date,
+          title: `🪐 ${ingress.planet} entra en ${ingress.newSign}`,
+          description: `Cambio de energía planetaria`,
+          type: 'planetary_transit',
+          priority: ingress.planet === 'Sol' ? 'medium' : 'low',
+          importance: ingress.planet === 'Sol' ? 'medium' : 'low',
+          planet: ingress.planet,
+          sign: ingress.newSign,
+          aiInterpretation: {
+            meaning: `${ingress.planet} cambia de ${ingress.previousSign} a ${ingress.newSign}, modificando la energía de ${getPlanetTheme(ingress.planet)}.`,
+            advice: `Adapta tu enfoque en ${getPlanetTheme(ingress.planet)} según la nueva energía ${ingress.newSign}.`,
+            mantra: `FLUYO CON LOS CAMBIOS CÓSMICOS Y ME ADAPTO CONSCIENTEMENTE.`,
+            ritual: 'Observa cómo esta nueva energía influye en tu vida diaria durante los próximos días.',
+            lifeAreas: [getPlanetTheme(ingress.planet), 'Adaptación', 'Cambios']
+          }
+        });
+      });
+
+      // Seasonal Events
+      result.data.events.seasonalEvents?.forEach((seasonal: any) => {
+        transformedEvents.push({
+          id: `seasonal-${seasonal.date}`,
+          date: seasonal.date,
+          title: `🌸 ${seasonal.type.replace('_', ' ')}`,
+          description: seasonal.description || 'Evento estacional importante',
+          type: 'seasonal',
+          priority: 'medium',
+          importance: 'medium',
+          planet: 'Sol',
+          sign: seasonal.zodiacSign || 'N/A',
+          aiInterpretation: {
+            meaning: `Cambio estacional que marca un nuevo ciclo natural y energético.`,
+            advice: 'Alinéate con los ciclos naturales de la Tierra para mayor armonía.',
+            mantra: 'ME SINCRONIZO CON LOS RITMOS NATURALES DEL UNIVERSO.',
+            ritual: 'Pasa tiempo en la naturaleza y observa los cambios estacionales.',
+            lifeAreas: ['Naturaleza', 'Ciclos', 'Equilibrio']
+          }
+        });
+      });
+
+      console.log(`✅ [AGENDA] Transformed ${transformedEvents.length} events`);
+      return transformedEvents;
+
+    } catch (error) {
+      console.error('❌ [AGENDA] Error fetching Solar Year Events:', error);
+      return generateExampleEvents();
+    }
+  };
+
+  // Helper function to get planet theme
+  const getPlanetTheme = (planet: string): string => {
+    const themes: Record<string, string> = {
+      'Mercurio': 'Comunicación',
+      'Venus': 'Amor y Valores',
+      'Marte': 'Acción y Energía',
+      'Júpiter': 'Expansión y Abundancia',
+      'Saturno': 'Estructura y Disciplina',
+      'Urano': 'Innovación y Cambio',
+      'Neptuno': 'Espiritualidad e Intuición',
+      'Plutón': 'Transformación Profunda'
+    };
+    return themes[planet] || 'Crecimiento Personal';
+  };
+
+  // Eventos de ejemplo ÉPICOS (fallback)
   const generateExampleEvents = (): AstrologicalEvent[] => {
     if (!userProfile) return [];
 
@@ -264,33 +431,27 @@ const AgendaPersonalizada = () => {
   useEffect(() => {
     if (!userProfile) return;
 
-    const exampleEvents = generateExampleEvents();
-    // Generar más eventos para llenar el mes
-    const additionalEvents = [];
-    for (let day = 1; day <= 30; day++) {
-      if (Math.random() > 0.7) { // 30% probabilidad de evento
-        const randomImportance = getRandomImportance() as 'high' | 'medium' | 'low';
-        additionalEvents.push({
-          id: `day-${day}`,
-          date: `2025-09-${day.toString().padStart(2, '0')}`,
-          title: getRandomEventTitle(),
-          description: 'Evento astrológico personalizado para tu evolución',
-          type: getRandomEventType(),
-          priority: randomImportance,
-          importance: randomImportance,
-          planet: getRandomPlanet(),
-          sign: getRandomSign(),
-          aiInterpretation: {
-            meaning: `¡ACTIVACIÓN ESPECÍFICA para ${userProfile.name}!`,
-            advice: 'Consejo personalizado basado en tu carta natal',
-            mantra: 'MANTRA ESPECÍFICO para tu evolución',
-            ritual: 'Ritual personalizado para este evento',
-            lifeAreas: ['Crecimiento', 'Autoconocimiento']
-          }
-        });
+    const loadEvents = async () => {
+      setLoading(true);
+      console.log('🌟 [AGENDA] Loading Solar Year Events...');
+
+      try {
+        // Fetch real Solar Year Events from API
+        const solarYearEvents = await fetchSolarYearEvents();
+
+        console.log(`✅ [AGENDA] Loaded ${solarYearEvents.length} Solar Year Events`);
+        setEvents(solarYearEvents);
+      } catch (error) {
+        console.error('❌ [AGENDA] Error loading events:', error);
+        // Fallback to example events
+        const exampleEvents = generateExampleEvents();
+        setEvents(exampleEvents);
+      } finally {
+        setLoading(false);
       }
-    }
-    setEvents([...exampleEvents, ...additionalEvents]);
+    };
+
+    loadEvents();
   }, [userProfile]);
 
   // Funciones auxiliares
