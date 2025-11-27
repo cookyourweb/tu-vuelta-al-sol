@@ -998,6 +998,286 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           </div>
         )}
 
+        {/* ✅ SOLAR RETURN: BLOQUEOS PSICOLÓGICOS */}
+        {data.bloqueos_psicologicos && type === 'solar-return' && (
+          <div className="space-y-6">
+            <h3 className="text-3xl font-bold text-white text-center mb-8">
+              🧠 Bloqueos Psicológicos a Trabajar Este Año
+            </h3>
+
+            {/* Bloqueos Emocionales */}
+            {data.bloqueos_psicologicos.bloqueos_emocionales && (
+              <div className="bg-gradient-to-br from-blue-900/40 to-cyan-900/40 rounded-2xl p-8 border border-blue-400/30">
+                <h4 className="text-blue-100 font-bold text-2xl mb-6 flex items-center gap-3">
+                  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  </svg>
+                  ⭐ Bloqueos Emocionales
+                </h4>
+                <div className="space-y-4">
+                  <div className="bg-blue-800/30 rounded-lg p-4">
+                    <p className="text-blue-200 font-semibold text-sm mb-2">🌙 Patrón Natal:</p>
+                    <p className="text-blue-50">{data.bloqueos_psicologicos.bloqueos_emocionales.patron_natal}</p>
+                  </div>
+                  <div className="bg-blue-800/30 rounded-lg p-4">
+                    <p className="text-blue-200 font-semibold text-sm mb-2">🔄 Cómo se Reactiva Este Año:</p>
+                    <p className="text-blue-50">{data.bloqueos_psicologicos.bloqueos_emocionales.como_se_reactiva_este_anio}</p>
+                  </div>
+                  <div className="bg-red-900/30 rounded-lg p-4 border border-red-500/30">
+                    <p className="text-red-200 font-semibold text-sm mb-2">⚠️ Comportamiento Autodestructivo:</p>
+                    <p className="text-red-50">{data.bloqueos_psicologicos.bloqueos_emocionales.donde_busca_seguridad_autodestructiva}</p>
+                  </div>
+                  <div className="bg-blue-800/30 rounded-lg p-4">
+                    <p className="text-blue-200 font-semibold text-sm mb-2">💔 Herida de Infancia:</p>
+                    <p className="text-blue-50">{data.bloqueos_psicologicos.bloqueos_emocionales.herida_de_infancia}</p>
+                  </div>
+                  <div className="bg-green-900/30 rounded-lg p-4 border border-green-500/30">
+                    <p className="text-green-200 font-semibold text-sm mb-2">✅ Ejercicio Terapéutico:</p>
+                    <p className="text-green-50">{data.bloqueos_psicologicos.bloqueos_emocionales.ejercicio_terapeutico}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Bloqueos Relacionales */}
+            {data.bloqueos_psicologicos.bloqueos_relacionales && (
+              <div className="bg-gradient-to-br from-pink-900/40 to-rose-900/40 rounded-2xl p-8 border border-pink-400/30">
+                <h4 className="text-pink-100 font-bold text-2xl mb-6 flex items-center gap-3">
+                  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                  💕 Bloqueos Relacionales
+                </h4>
+                <div className="space-y-4">
+                  <div className="bg-pink-800/30 rounded-lg p-4">
+                    <p className="text-pink-200 font-semibold text-sm mb-2">🔄 Patrón de Vínculos:</p>
+                    <p className="text-pink-50">{data.bloqueos_psicologicos.bloqueos_relacionales.patron_vinculos}</p>
+                  </div>
+                  <div className="bg-pink-800/30 rounded-lg p-4">
+                    <p className="text-pink-200 font-semibold text-sm mb-2">👶 Aprendizaje en Infancia:</p>
+                    <p className="text-pink-50">{data.bloqueos_psicologicos.bloqueos_relacionales.aprendizaje_infancia}</p>
+                  </div>
+                  <div className="bg-red-900/30 rounded-lg p-4 border border-red-500/30">
+                    <p className="text-red-200 font-semibold text-sm mb-2">⚠️ Dónde Sabotea:</p>
+                    <p className="text-red-50">{data.bloqueos_psicologicos.bloqueos_relacionales.donde_sabotea}</p>
+                  </div>
+                  <div className="bg-pink-800/30 rounded-lg p-4">
+                    <p className="text-pink-200 font-semibold text-sm mb-2">🌱 Qué Necesita Sanar:</p>
+                    <p className="text-pink-50">{data.bloqueos_psicologicos.bloqueos_relacionales.que_necesita_sanar}</p>
+                  </div>
+                  <div className="bg-green-900/30 rounded-lg p-4 border border-green-500/30">
+                    <p className="text-green-200 font-semibold text-sm mb-2">✅ Ejercicio Terapéutico:</p>
+                    <p className="text-green-50">{data.bloqueos_psicologicos.bloqueos_relacionales.ejercicio_terapeutico}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Bloqueos Financieros */}
+            {data.bloqueos_psicologicos.bloqueos_financieros && (
+              <div className="bg-gradient-to-br from-emerald-900/40 to-green-900/40 rounded-2xl p-8 border border-emerald-400/30">
+                <h4 className="text-emerald-100 font-bold text-2xl mb-6 flex items-center gap-3">
+                  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="12" y1="1" x2="12" y2="23"/>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                  </svg>
+                  💰 Bloqueos Financieros
+                </h4>
+                <div className="space-y-4">
+                  <div className="bg-emerald-800/30 rounded-lg p-4">
+                    <p className="text-emerald-200 font-semibold text-sm mb-2">💭 Creencia Limitante:</p>
+                    <p className="text-emerald-50">{data.bloqueos_psicologicos.bloqueos_financieros.creencia_limitante}</p>
+                  </div>
+                  <div className="bg-emerald-800/30 rounded-lg p-4">
+                    <p className="text-emerald-200 font-semibold text-sm mb-2">👨‍👩‍👧 Patrón Familiar:</p>
+                    <p className="text-emerald-50">{data.bloqueos_psicologicos.bloqueos_financieros.patron_familiar}</p>
+                  </div>
+                  <div className="bg-red-900/30 rounded-lg p-4 border border-red-500/30">
+                    <p className="text-red-200 font-semibold text-sm mb-2">🚫 Dónde se Bloquea:</p>
+                    <p className="text-red-50">{data.bloqueos_psicologicos.bloqueos_financieros.donde_se_bloquea}</p>
+                  </div>
+                  <div className="bg-emerald-800/30 rounded-lg p-4">
+                    <p className="text-emerald-200 font-semibold text-sm mb-2">🔄 Qué Debe Cambiar:</p>
+                    <p className="text-emerald-50">{data.bloqueos_psicologicos.bloqueos_financieros.que_debe_cambiar}</p>
+                  </div>
+                  <div className="bg-green-900/30 rounded-lg p-4 border border-green-500/30">
+                    <p className="text-green-200 font-semibold text-sm mb-2">✅ Ejercicio Terapéutico:</p>
+                    <p className="text-green-50">{data.bloqueos_psicologicos.bloqueos_financieros.ejercicio_terapeutico}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Bloqueos de Autoestima */}
+            {data.bloqueos_psicologicos.bloqueos_autoestima && (
+              <div className="bg-gradient-to-br from-yellow-900/40 to-amber-900/40 rounded-2xl p-8 border border-yellow-400/30">
+                <h4 className="text-yellow-100 font-bold text-2xl mb-6 flex items-center gap-3">
+                  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <circle cx="12" cy="12" r="4"/>
+                  </svg>
+                  🌟 Bloqueos de Autoestima
+                </h4>
+                <div className="space-y-4">
+                  <div className="bg-yellow-800/30 rounded-lg p-4">
+                    <p className="text-yellow-200 font-semibold text-sm mb-2">🌑 Dónde No Brilla:</p>
+                    <p className="text-yellow-50">{data.bloqueos_psicologicos.bloqueos_autoestima.donde_no_brilla}</p>
+                  </div>
+                  <div className="bg-yellow-800/30 rounded-lg p-4">
+                    <p className="text-yellow-200 font-semibold text-sm mb-2">👶 Mensaje de Infancia:</p>
+                    <p className="text-yellow-50">{data.bloqueos_psicologicos.bloqueos_autoestima.mensaje_infancia}</p>
+                  </div>
+                  <div className="bg-yellow-800/30 rounded-lg p-4">
+                    <p className="text-yellow-200 font-semibold text-sm mb-2">🎭 Identidad Reprimida:</p>
+                    <p className="text-yellow-50">{data.bloqueos_psicologicos.bloqueos_autoestima.identidad_reprimida}</p>
+                  </div>
+                  <div className="bg-red-900/30 rounded-lg p-4 border border-red-500/30">
+                    <p className="text-red-200 font-semibold text-sm mb-2">⚠️ Cómo se Manifiesta:</p>
+                    <p className="text-red-50">{data.bloqueos_psicologicos.bloqueos_autoestima.como_se_manifiesta}</p>
+                  </div>
+                  <div className="bg-green-900/30 rounded-lg p-4 border border-green-500/30">
+                    <p className="text-green-200 font-semibold text-sm mb-2">✅ Ejercicio Terapéutico:</p>
+                    <p className="text-green-50">{data.bloqueos_psicologicos.bloqueos_autoestima.ejercicio_terapeutico}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Bloqueos Familiares */}
+            {data.bloqueos_psicologicos.bloqueos_familiares && (
+              <div className="bg-gradient-to-br from-purple-900/40 to-indigo-900/40 rounded-2xl p-8 border border-purple-400/30">
+                <h4 className="text-purple-100 font-bold text-2xl mb-6 flex items-center gap-3">
+                  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9,22 9,12 15,12 15,22"/>
+                  </svg>
+                  🏠 Bloqueos Familiares
+                </h4>
+                <div className="space-y-4">
+                  <div className="bg-purple-800/30 rounded-lg p-4">
+                    <p className="text-purple-200 font-semibold text-sm mb-2">🔄 Patrón Repetitivo:</p>
+                    <p className="text-purple-50">{data.bloqueos_psicologicos.bloqueos_familiares.patron_repetitivo}</p>
+                  </div>
+                  <div className="bg-purple-800/30 rounded-lg p-4">
+                    <p className="text-purple-200 font-semibold text-sm mb-2">🔗 Lealtades Invisibles:</p>
+                    <p className="text-purple-50">{data.bloqueos_psicologicos.bloqueos_familiares.lealtades_invisibles}</p>
+                  </div>
+                  <div className="bg-purple-800/30 rounded-lg p-4">
+                    <p className="text-purple-200 font-semibold text-sm mb-2">✂️ Dónde Debe Separarse:</p>
+                    <p className="text-purple-50">{data.bloqueos_psicologicos.bloqueos_familiares.donde_debe_separarse}</p>
+                  </div>
+                  <div className="bg-red-900/30 rounded-lg p-4 border border-red-500/30">
+                    <p className="text-red-200 font-semibold text-sm mb-2">🎒 Qué Debe Soltar:</p>
+                    <p className="text-red-50">{data.bloqueos_psicologicos.bloqueos_familiares.que_debe_soltar}</p>
+                  </div>
+                  <div className="bg-green-900/30 rounded-lg p-4 border border-green-500/30">
+                    <p className="text-green-200 font-semibold text-sm mb-2">✅ Ejercicio Terapéutico:</p>
+                    <p className="text-green-50">{data.bloqueos_psicologicos.bloqueos_familiares.ejercicio_terapeutico}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Bloqueos de Expresión */}
+            {data.bloqueos_psicologicos.bloqueos_expresion && (
+              <div className="bg-gradient-to-br from-orange-900/40 to-red-900/40 rounded-2xl p-8 border border-orange-400/30">
+                <h4 className="text-orange-100 font-bold text-2xl mb-6 flex items-center gap-3">
+                  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  </svg>
+                  🎨 Bloqueos de Expresión Personal
+                </h4>
+                <div className="space-y-4">
+                  <div className="bg-orange-800/30 rounded-lg p-4">
+                    <p className="text-orange-200 font-semibold text-sm mb-2">🎭 Autenticidad Reprimida:</p>
+                    <p className="text-orange-50">{data.bloqueos_psicologicos.bloqueos_expresion.autenticidad_reprimida}</p>
+                  </div>
+                  <div className="bg-orange-800/30 rounded-lg p-4">
+                    <p className="text-orange-200 font-semibold text-sm mb-2">🎨 Creatividad Bloqueada:</p>
+                    <p className="text-orange-50">{data.bloqueos_psicologicos.bloqueos_expresion.creatividad_bloqueada}</p>
+                  </div>
+                  <div className="bg-orange-800/30 rounded-lg p-4">
+                    <p className="text-orange-200 font-semibold text-sm mb-2">👶 Mensaje sobre "Ser Diferente":</p>
+                    <p className="text-orange-50">{data.bloqueos_psicologicos.bloqueos_expresion.mensaje_sobre_diferencia}</p>
+                  </div>
+                  <div className="bg-red-900/30 rounded-lg p-4 border border-red-500/30">
+                    <p className="text-red-200 font-semibold text-sm mb-2">⚠️ Cómo se Autocensura:</p>
+                    <p className="text-red-50">{data.bloqueos_psicologicos.bloqueos_expresion.como_se_autocensura}</p>
+                  </div>
+                  <div className="bg-green-900/30 rounded-lg p-4 border border-green-500/30">
+                    <p className="text-green-200 font-semibold text-sm mb-2">✅ Ejercicio Terapéutico:</p>
+                    <p className="text-green-50">{data.bloqueos_psicologicos.bloqueos_expresion.ejercicio_terapeutico}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ✅ SOLAR RETURN: EJERCICIOS TERAPÉUTICOS PERSONALIZADOS */}
+        {data.ejercicios_terapeuticos_personalizados && type === 'solar-return' && data.ejercicios_terapeuticos_personalizados.length > 0 && (
+          <div className="bg-gradient-to-br from-teal-900/40 to-cyan-900/40 rounded-2xl p-8 border border-teal-400/30">
+            <h3 className="text-3xl font-bold text-white text-center mb-8">
+              💎 Ejercicios Terapéuticos Personalizados
+            </h3>
+            <div className="space-y-6">
+              {data.ejercicios_terapeuticos_personalizados.map((ejercicio: any, i: number) => (
+                <div key={i} className="bg-teal-800/30 rounded-xl p-6 border border-teal-500/20">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h4 className="text-teal-100 font-bold text-xl mb-2">{ejercicio.ejercicio}</h4>
+                      <div className="flex items-center gap-3">
+                        <span className="bg-teal-600/40 text-teal-100 px-3 py-1 rounded-full text-xs font-semibold">
+                          {ejercicio.area}
+                        </span>
+                        <span className="bg-cyan-600/40 text-cyan-100 px-3 py-1 rounded-full text-xs font-semibold">
+                          {ejercicio.frecuencia}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="bg-red-900/30 rounded-lg p-4 border border-red-500/30">
+                      <p className="text-red-200 font-semibold text-sm mb-2">🎯 Bloqueo Específico:</p>
+                      <p className="text-red-50 text-sm">{ejercicio.bloqueo_especifico}</p>
+                    </div>
+
+                    <div className="bg-teal-700/30 rounded-lg p-4">
+                      <p className="text-teal-200 font-semibold text-sm mb-2">📋 Cómo Hacerlo:</p>
+                      <p className="text-teal-50 text-sm leading-relaxed">{ejercicio.descripcion_completa}</p>
+                    </div>
+
+                    {ejercicio.materiales && ejercicio.materiales.length > 0 && (
+                      <div className="bg-teal-700/30 rounded-lg p-4">
+                        <p className="text-teal-200 font-semibold text-sm mb-2">🛠️ Materiales Necesarios:</p>
+                        <ul className="list-disc list-inside space-y-1">
+                          {ejercicio.materiales.map((material: string, j: number) => (
+                            <li key={j} className="text-teal-50 text-sm">{material}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    <div className="bg-blue-900/30 rounded-lg p-4 border border-blue-500/30">
+                      <p className="text-blue-200 font-semibold text-sm mb-2">🧠 Por Qué Funciona:</p>
+                      <p className="text-blue-50 text-sm">{ejercicio.porque_funciona}</p>
+                    </div>
+
+                    <div className="bg-green-900/30 rounded-lg p-4 border border-green-500/30">
+                      <p className="text-green-200 font-semibold text-sm mb-2">✅ Señales de Progreso:</p>
+                      <p className="text-green-50 text-sm">{ejercicio.señales_progreso}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* ✅ SOLAR RETURN: CALENDARIO LUNAR ANUAL */}
         {data.calendario_lunar && type === 'solar-return' && (
           <div className="bg-gradient-to-br from-slate-900/60 to-slate-800/60 rounded-2xl p-8 border border-slate-400/30">
