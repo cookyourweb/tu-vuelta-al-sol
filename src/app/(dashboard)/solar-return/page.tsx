@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import ChartDisplay from '@/components/astrology/ChartDisplay';
 import InterpretationButton from '@/components/astrology/InterpretationButton';
+import SectionNavigation from '@/components/solar-return/SectionNavigation';
 import {
   Sun, RefreshCw, Sparkles, AlertTriangle
 } from 'lucide-react';
@@ -52,6 +53,7 @@ export default function SolarReturnPage() {
   const [regenerating, setRegenerating] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('☀️ Iniciando tu Vuelta al Sol...');
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [currentSection, setCurrentSection] = useState('carta');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -88,6 +90,23 @@ export default function SolarReturnPage() {
       setLoadingProgress(100);
     }
   }, [loading]);
+
+  // Handle section navigation from URL hash
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash && ['carta', 'aspectos', 'planetas', 'linea-tiempo', 'integracion'].includes(hash)) {
+        setCurrentSection(hash);
+      }
+    };
+
+    // Check initial hash
+    handleHashChange();
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   const loadAllData = async () => {
     console.log('🚀 ===== INICIO loadAllData =====');
@@ -356,6 +375,9 @@ export default function SolarReturnPage() {
             Revolución Solar • Ciclo Anual Personalizado
           </p>
         </div>
+
+        {/* ✅ SECCIÓN 1.5: NAVEGACIÓN DE SECCIONES */}
+        <SectionNavigation currentSection={currentSection} onSectionChange={setCurrentSection} />
 
         {/* ✅ SECCIÓN 2: BOTÓN DE INTERPRETACIÓN */}
         {solarReturnData && natalChart && birthData && (() => {

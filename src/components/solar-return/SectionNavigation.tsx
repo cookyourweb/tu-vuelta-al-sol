@@ -3,9 +3,10 @@ import React from 'react';
 // Componente de navegación reutilizable para secciones
 interface SectionNavigationProps {
   currentSection?: string;
+  onSectionChange?: (section: string) => void;
 }
 
-export default function SectionNavigation({ currentSection }: SectionNavigationProps) {
+export default function SectionNavigation({ currentSection, onSectionChange }: SectionNavigationProps) {
   const sections = [
     { id: 'carta', label: '🌟 Carta' },
     { id: 'aspectos', label: '✨ Aspectos' },
@@ -18,7 +19,7 @@ export default function SectionNavigation({ currentSection }: SectionNavigationP
     <div className="bg-gradient-to-r from-purple-900/50 to-pink-900/50 backdrop-blur-sm rounded-xl p-4 mb-6 border border-purple-400/20">
       <nav className="flex items-center justify-center gap-2 md:gap-3 flex-wrap">
         {sections.map((section, idx) => {
-          const displayId = section.displayId || section.id;
+          const displayId = section.id;
           const isActive = currentSection === displayId;
           return (
             <a
