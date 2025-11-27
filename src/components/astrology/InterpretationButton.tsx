@@ -1508,28 +1508,329 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           </div>
         )}
 
-        {/* ✅ SOLAR RETURN: INTEGRACIÓN FINAL */}
+        {/* ✅ SOLAR RETURN: INTEGRACIÓN FINAL - COMPARATIVA NATAL-SOLAR */}
         {data.integracion_final && type === 'solar-return' && (
-          <div className="bg-gradient-to-br from-emerald-900/40 to-teal-900/40 rounded-2xl p-8 border border-emerald-400/30">
-            <h3 className="text-3xl font-bold text-white text-center mb-8">
-              🌟 Integración Final
-            </h3>
+          <div className="space-y-8">
+            {/* Título Principal */}
+            <div className="bg-gradient-to-br from-purple-900/40 to-indigo-900/40 rounded-2xl p-8 border border-purple-400/30 text-center">
+              <h2 className="text-4xl font-bold text-purple-100 mb-3">
+                {data.integracion_final.titulo || '🔮 Comparativa entre tu Carta Natal y tu Carta Solar'}
+              </h2>
+              <p className="text-purple-200 text-lg italic">
+                {data.integracion_final.subtitulo || 'Interpretación psicológica profunda de lo que vas a sanar este año'}
+              </p>
+            </div>
 
-            {data.integracion_final.sintesis && (
-              <div className="mb-6">
-                <h4 className="text-emerald-200 font-bold text-xl mb-3">Síntesis del Año</h4>
-                <p className="text-emerald-50 text-lg leading-relaxed">
-                  {data.integracion_final.sintesis}
-                </p>
+            {/* 1. COMPARATIVA NATAL VS SOLAR */}
+            {data.integracion_final.comparativa_natal_vs_solar && (
+              <div className="bg-gradient-to-br from-blue-900/40 to-cyan-900/40 rounded-2xl p-8 border border-blue-400/30">
+                <h3 className="text-3xl font-bold text-blue-100 mb-6 text-center">
+                  🔮 1. COMPARATIVA NATAL VS. SOLAR
+                </h3>
+
+                {data.integracion_final.comparativa_natal_vs_solar.introduccion && (
+                  <p className="text-blue-50 text-lg mb-8 text-center leading-relaxed">
+                    {data.integracion_final.comparativa_natal_vs_solar.introduccion}
+                  </p>
+                )}
+
+                <div className="space-y-6">
+                  {/* Sol Solar sobre Casa Natal */}
+                  {data.integracion_final.comparativa_natal_vs_solar.sol_solar_sobre_casa_natal && (
+                    <div className="bg-yellow-900/30 rounded-xl p-6 border border-yellow-400/30">
+                      <h4 className="text-yellow-100 font-bold text-2xl mb-4">
+                        ☀️ {data.integracion_final.comparativa_natal_vs_solar.sol_solar_sobre_casa_natal.titulo}
+                      </h4>
+                      <div className="space-y-3 text-yellow-50">
+                        <p><strong className="text-yellow-200">Posición Natal:</strong> {data.integracion_final.comparativa_natal_vs_solar.sol_solar_sobre_casa_natal.posicion_natal}</p>
+                        <p><strong className="text-yellow-200">Posición Solar:</strong> {data.integracion_final.comparativa_natal_vs_solar.sol_solar_sobre_casa_natal.posicion_solar}</p>
+                        <div className="bg-yellow-800/40 rounded-lg p-4 mt-3">
+                          <p className="text-yellow-200 font-semibold mb-2">💎 ¿Qué activa?</p>
+                          <p className="leading-relaxed">{data.integracion_final.comparativa_natal_vs_solar.sol_solar_sobre_casa_natal.que_activa}</p>
+                        </div>
+                        {data.integracion_final.comparativa_natal_vs_solar.sol_solar_sobre_casa_natal.aspectos_clave && (
+                          <p className="text-sm"><strong className="text-yellow-200">Aspectos Clave:</strong> {data.integracion_final.comparativa_natal_vs_solar.sol_solar_sobre_casa_natal.aspectos_clave}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Luna Solar sobre Casa Natal */}
+                  {data.integracion_final.comparativa_natal_vs_solar.luna_solar_sobre_casa_natal && (
+                    <div className="bg-indigo-900/30 rounded-xl p-6 border border-indigo-400/30">
+                      <h4 className="text-indigo-100 font-bold text-2xl mb-4">
+                        🌙 {data.integracion_final.comparativa_natal_vs_solar.luna_solar_sobre_casa_natal.titulo}
+                      </h4>
+                      <div className="space-y-3 text-indigo-50">
+                        <p><strong className="text-indigo-200">Posición Natal:</strong> {data.integracion_final.comparativa_natal_vs_solar.luna_solar_sobre_casa_natal.posicion_natal}</p>
+                        <p><strong className="text-indigo-200">Posición Solar:</strong> {data.integracion_final.comparativa_natal_vs_solar.luna_solar_sobre_casa_natal.posicion_solar}</p>
+                        <div className="bg-indigo-800/40 rounded-lg p-4 mt-3">
+                          <p className="text-indigo-200 font-semibold mb-2">💎 ¿Qué activa?</p>
+                          <p className="leading-relaxed">{data.integracion_final.comparativa_natal_vs_solar.luna_solar_sobre_casa_natal.que_activa}</p>
+                        </div>
+                        {data.integracion_final.comparativa_natal_vs_solar.luna_solar_sobre_casa_natal.catarsis_emocional && (
+                          <div className="bg-purple-800/40 rounded-lg p-4 mt-3">
+                            <p className="text-purple-200 font-semibold mb-2">🌊 Catarsis Emocional:</p>
+                            <p className="leading-relaxed">{data.integracion_final.comparativa_natal_vs_solar.luna_solar_sobre_casa_natal.catarsis_emocional}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ASC Solar sobre Casa Natal */}
+                  {data.integracion_final.comparativa_natal_vs_solar.asc_solar_sobre_casa_natal && (
+                    <div className="bg-rose-900/30 rounded-xl p-6 border border-rose-400/30">
+                      <h4 className="text-rose-100 font-bold text-2xl mb-4">
+                        ⬆️ {data.integracion_final.comparativa_natal_vs_solar.asc_solar_sobre_casa_natal.titulo}
+                      </h4>
+                      <div className="space-y-3 text-rose-50">
+                        <p><strong className="text-rose-200">{data.integracion_final.comparativa_natal_vs_solar.asc_solar_sobre_casa_natal.casa_natal_donde_cae}</strong></p>
+                        <div className="bg-rose-800/40 rounded-lg p-4 mt-3">
+                          <p className="text-rose-200 font-semibold mb-2">💎 ¿Qué activa?</p>
+                          <p className="leading-relaxed">{data.integracion_final.comparativa_natal_vs_solar.asc_solar_sobre_casa_natal.que_activa}</p>
+                        </div>
+                        {data.integracion_final.comparativa_natal_vs_solar.asc_solar_sobre_casa_natal.personaje_del_anio && (
+                          <p className="text-sm"><strong className="text-rose-200">Personaje del Año:</strong> {data.integracion_final.comparativa_natal_vs_solar.asc_solar_sobre_casa_natal.personaje_del_anio}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Planetas Lentos Activaciones */}
+                  {data.integracion_final.comparativa_natal_vs_solar.planetas_lentos_activaciones && data.integracion_final.comparativa_natal_vs_solar.planetas_lentos_activaciones.length > 0 && (
+                    <div className="bg-purple-900/30 rounded-xl p-6 border border-purple-400/30">
+                      <h4 className="text-purple-100 font-bold text-2xl mb-4">🪐 Planetas Lentos - Procesos Profundos</h4>
+                      <div className="space-y-4">
+                        {data.integracion_final.comparativa_natal_vs_solar.planetas_lentos_activaciones.map((planeta: any, i: number) => (
+                          <div key={i} className="bg-purple-800/30 rounded-lg p-4">
+                            <h5 className="text-purple-200 font-bold text-lg mb-2">
+                              {planeta.planeta} en {planeta.casa_natal_donde_cae}
+                            </h5>
+                            <p className="text-purple-50 mb-2">{planeta.que_activa}</p>
+                            <p className="text-purple-100 text-sm"><strong>Proceso Psicológico:</strong> {planeta.proceso_psicologico}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Encuentros Planetarios */}
+                  {data.integracion_final.comparativa_natal_vs_solar.encuentros_planetarios && data.integracion_final.comparativa_natal_vs_solar.encuentros_planetarios.length > 0 && (
+                    <div className="bg-pink-900/30 rounded-xl p-6 border border-pink-400/30">
+                      <h4 className="text-pink-100 font-bold text-2xl mb-4">✨ Encuentros Planetarios SR-Natal</h4>
+                      <div className="space-y-4">
+                        {data.integracion_final.comparativa_natal_vs_solar.encuentros_planetarios.map((encuentro: any, i: number) => (
+                          <div key={i} className="bg-pink-800/30 rounded-lg p-4">
+                            <h5 className="text-pink-200 font-bold text-lg mb-2">
+                              {encuentro.planeta_solar} {encuentro.tipo_aspecto} {encuentro.planeta_natal}
+                            </h5>
+                            <p className="text-pink-50 mb-2">{encuentro.interpretacion}</p>
+                            <div className="bg-green-900/30 rounded-lg p-3 mt-2 border border-green-500/30">
+                              <p className="text-green-200 font-semibold text-sm mb-1">✅ Qué Sanas:</p>
+                              <p className="text-green-50 text-sm">{encuentro.que_sanas}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Tema Anual Sintético */}
+                  {data.integracion_final.comparativa_natal_vs_solar.tema_anual_sintetico && (
+                    <div className="bg-gradient-to-r from-orange-900/40 to-red-900/40 rounded-xl p-6 border border-orange-400/30 text-center">
+                      <p className="text-orange-100 text-2xl font-bold italic">
+                        "{data.integracion_final.comparativa_natal_vs_solar.tema_anual_sintetico}"
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
-            {data.integracion_final.pregunta_reflexion && (
-              <div className="bg-emerald-800/30 rounded-xl p-6 border border-emerald-400/20">
-                <p className="text-emerald-200 font-semibold mb-2">💭 Pregunta para Reflexionar:</p>
-                <p className="text-emerald-50 text-lg italic">
-                  "{data.integracion_final.pregunta_reflexion}"
-                </p>
+            {/* 2. INTERPRETACIÓN PSICOLÓGICA PROFUNDA */}
+            {data.integracion_final.interpretacion_psicologica_profunda && (
+              <div className="bg-gradient-to-br from-teal-900/40 to-emerald-900/40 rounded-2xl p-8 border border-teal-400/30">
+                <h3 className="text-3xl font-bold text-teal-100 mb-6 text-center">
+                  🌙 2. INTERPRETACIÓN PSICOLÓGICA PROFUNDA
+                </h3>
+
+                {data.integracion_final.interpretacion_psicologica_profunda.introduccion && (
+                  <p className="text-teal-50 text-lg mb-8 text-center leading-relaxed">
+                    {data.integracion_final.interpretacion_psicologica_profunda.introduccion}
+                  </p>
+                )}
+
+                <div className="space-y-6">
+                  {/* Pilar 1: Heridas de Infancia */}
+                  {data.integracion_final.interpretacion_psicologica_profunda.pilar_1_heridas_infancia && (
+                    <div className="bg-blue-900/30 rounded-xl p-6 border border-blue-400/30">
+                      <h4 className="text-blue-100 font-bold text-2xl mb-4">
+                        {data.integracion_final.interpretacion_psicologica_profunda.pilar_1_heridas_infancia.titulo}
+                      </h4>
+                      <div className="space-y-4 text-blue-50">
+                        <div className="bg-blue-800/30 rounded-lg p-4">
+                          <p className="text-blue-200 font-semibold text-sm mb-2">Casa 4:</p>
+                          <p>{data.integracion_final.interpretacion_psicologica_profunda.pilar_1_heridas_infancia.casa_4_natal}</p>
+                        </div>
+                        <div className="bg-blue-800/30 rounded-lg p-4">
+                          <p className="text-blue-200 font-semibold text-sm mb-2">Luna Natal + Aspectos:</p>
+                          <p>{data.integracion_final.interpretacion_psicologica_profunda.pilar_1_heridas_infancia.luna_natal_aspectos}</p>
+                        </div>
+                        <div className="bg-blue-800/30 rounded-lg p-4">
+                          <p className="text-blue-200 font-semibold text-sm mb-2">Saturno Natal:</p>
+                          <p>{data.integracion_final.interpretacion_psicologica_profunda.pilar_1_heridas_infancia.saturno_natal}</p>
+                        </div>
+                        <div className="bg-indigo-900/40 rounded-lg p-4 border border-indigo-400/30">
+                          <p className="text-indigo-200 font-bold mb-3">💔 Patrón Formado:</p>
+                          <p className="leading-relaxed">{data.integracion_final.interpretacion_psicologica_profunda.pilar_1_heridas_infancia.patron_formado}</p>
+                        </div>
+                        <div className="bg-green-900/30 rounded-lg p-4 border border-green-500/30">
+                          <p className="text-green-200 font-bold mb-2">✅ Qué Sana Este Año:</p>
+                          <p className="text-green-50">{data.integracion_final.interpretacion_psicologica_profunda.pilar_1_heridas_infancia.que_sana_este_anio}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Pilar 2: Patrones Afectivos */}
+                  {data.integracion_final.interpretacion_psicologica_profunda.pilar_2_patrones_afectivos && (
+                    <div className="bg-pink-900/30 rounded-xl p-6 border border-pink-400/30">
+                      <h4 className="text-pink-100 font-bold text-2xl mb-4">
+                        {data.integracion_final.interpretacion_psicologica_profunda.pilar_2_patrones_afectivos.titulo}
+                      </h4>
+                      <div className="space-y-4 text-pink-50">
+                        <div className="bg-pink-800/30 rounded-lg p-4">
+                          <p className="text-pink-200 font-semibold text-sm mb-2">Venus Natal:</p>
+                          <p>{data.integracion_final.interpretacion_psicologica_profunda.pilar_2_patrones_afectivos.venus_natal}</p>
+                        </div>
+                        <div className="bg-pink-800/30 rounded-lg p-4">
+                          <p className="text-pink-200 font-semibold text-sm mb-2">Casa 7 Natal:</p>
+                          <p>{data.integracion_final.interpretacion_psicologica_profunda.pilar_2_patrones_afectivos.casa_7_natal}</p>
+                        </div>
+                        <div className="bg-pink-800/30 rounded-lg p-4">
+                          <p className="text-pink-200 font-semibold text-sm mb-2">Aspectos de Venus:</p>
+                          <p>{data.integracion_final.interpretacion_psicologica_profunda.pilar_2_patrones_afectivos.aspectos_venus}</p>
+                        </div>
+                        <div className="bg-red-900/40 rounded-lg p-4 border border-red-400/30">
+                          <p className="text-red-200 font-bold mb-3">💔 Patrón Repetitivo:</p>
+                          <p className="leading-relaxed">{data.integracion_final.interpretacion_psicologica_profunda.pilar_2_patrones_afectivos.patron_repetitivo}</p>
+                        </div>
+                        <div className="bg-green-900/30 rounded-lg p-4 border border-green-500/30">
+                          <p className="text-green-200 font-bold mb-2">✅ Qué Sana Este Año:</p>
+                          <p className="text-green-50">{data.integracion_final.interpretacion_psicologica_profunda.pilar_2_patrones_afectivos.que_sana_este_anio}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Pilar 3: Heridas Profundas y Sombra */}
+                  {data.integracion_final.interpretacion_psicologica_profunda.pilar_3_heridas_profundas_sombra && (
+                    <div className="bg-purple-900/30 rounded-xl p-6 border border-purple-400/30">
+                      <h4 className="text-purple-100 font-bold text-2xl mb-4">
+                        {data.integracion_final.interpretacion_psicologica_profunda.pilar_3_heridas_profundas_sombra.titulo}
+                      </h4>
+                      <div className="space-y-4 text-purple-50">
+                        <div className="bg-purple-800/30 rounded-lg p-4">
+                          <p className="text-purple-200 font-semibold text-sm mb-2">Casa 8 Natal:</p>
+                          <p>{data.integracion_final.interpretacion_psicologica_profunda.pilar_3_heridas_profundas_sombra.casa_8_natal}</p>
+                        </div>
+                        <div className="bg-purple-800/30 rounded-lg p-4">
+                          <p className="text-purple-200 font-semibold text-sm mb-2">Plutón + Aspectos:</p>
+                          <p>{data.integracion_final.interpretacion_psicologica_profunda.pilar_3_heridas_profundas_sombra.pluton_natal_aspectos}</p>
+                        </div>
+                        <div className="bg-purple-800/30 rounded-lg p-4">
+                          <p className="text-purple-200 font-semibold text-sm mb-2">Aspectos Tensos:</p>
+                          <p>{data.integracion_final.interpretacion_psicologica_profunda.pilar_3_heridas_profundas_sombra.aspectos_tensos}</p>
+                        </div>
+                        <div className="bg-red-900/40 rounded-lg p-4 border border-red-400/30">
+                          <p className="text-red-200 font-bold mb-3">🖤 Patrón Oscuro:</p>
+                          <p className="leading-relaxed">{data.integracion_final.interpretacion_psicologica_profunda.pilar_3_heridas_profundas_sombra.patron_oscuro}</p>
+                        </div>
+                        <div className="bg-orange-900/30 rounded-lg p-4 border border-orange-400/30">
+                          <p className="text-orange-200 font-bold mb-2">🔥 Qué se Activa Este Año:</p>
+                          <p className="text-orange-50">{data.integracion_final.interpretacion_psicologica_profunda.pilar_3_heridas_profundas_sombra.que_se_activa_este_anio}</p>
+                        </div>
+                        <div className="bg-green-900/30 rounded-lg p-4 border border-green-500/30">
+                          <p className="text-green-200 font-bold mb-2">✅ Qué Sana Este Año:</p>
+                          <p className="text-green-50">{data.integracion_final.interpretacion_psicologica_profunda.pilar_3_heridas_profundas_sombra.que_sana_este_anio}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Pilar 4: Abundancia y Autoestima */}
+                  {data.integracion_final.interpretacion_psicologica_profunda.pilar_4_abundancia_autoestima && (
+                    <div className="bg-emerald-900/30 rounded-xl p-6 border border-emerald-400/30">
+                      <h4 className="text-emerald-100 font-bold text-2xl mb-4">
+                        {data.integracion_final.interpretacion_psicologica_profunda.pilar_4_abundancia_autoestima.titulo}
+                      </h4>
+                      <div className="space-y-4 text-emerald-50">
+                        <div className="bg-emerald-800/30 rounded-lg p-4">
+                          <p className="text-emerald-200 font-semibold text-sm mb-2">Casa 2 Natal:</p>
+                          <p>{data.integracion_final.interpretacion_psicologica_profunda.pilar_4_abundancia_autoestima.casa_2_natal}</p>
+                        </div>
+                        <div className="bg-emerald-800/30 rounded-lg p-4">
+                          <p className="text-emerald-200 font-semibold text-sm mb-2">Saturno + Casa 2:</p>
+                          <p>{data.integracion_final.interpretacion_psicologica_profunda.pilar_4_abundancia_autoestima.saturno_relacion_casa_2}</p>
+                        </div>
+                        <div className="bg-emerald-800/30 rounded-lg p-4">
+                          <p className="text-emerald-200 font-semibold text-sm mb-2">Venus + Autoestima:</p>
+                          <p>{data.integracion_final.interpretacion_psicologica_profunda.pilar_4_abundancia_autoestima.venus_autoestima}</p>
+                        </div>
+                        <div className="bg-red-900/40 rounded-lg p-4 border border-red-400/30">
+                          <p className="text-red-200 font-bold mb-3">🚫 Bloqueo Nuclear:</p>
+                          <p className="leading-relaxed">{data.integracion_final.interpretacion_psicologica_profunda.pilar_4_abundancia_autoestima.bloqueo_nuclear}</p>
+                        </div>
+                        <div className="bg-green-900/30 rounded-lg p-4 border border-green-500/30">
+                          <p className="text-green-200 font-bold mb-2">✅ Qué Transforma Este Año:</p>
+                          <p className="text-green-50">{data.integracion_final.interpretacion_psicologica_profunda.pilar_4_abundancia_autoestima.que_transforma_este_anio}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* 3. SÍNTESIS PSICOLÓGICA DEL AÑO */}
+            {data.integracion_final.sintesis_psicologica_del_anio && (
+              <div className="bg-gradient-to-br from-orange-900/40 to-amber-900/40 rounded-2xl p-8 border border-orange-400/30">
+                <h3 className="text-3xl font-bold text-orange-100 mb-6 text-center">
+                  🌟 3. SÍNTESIS PSICOLÓGICA DEL AÑO
+                </h3>
+
+                {data.integracion_final.sintesis_psicologica_del_anio.mantra_evolutivo && (
+                  <div className="bg-orange-800/30 rounded-xl p-6 mb-6 border border-orange-400/30">
+                    <p className="text-orange-50 text-lg leading-relaxed">
+                      {data.integracion_final.sintesis_psicologica_del_anio.mantra_evolutivo}
+                    </p>
+                  </div>
+                )}
+
+                {data.integracion_final.sintesis_psicologica_del_anio.areas_transformacion && data.integracion_final.sintesis_psicologica_del_anio.areas_transformacion.length > 0 && (
+                  <div className="bg-amber-900/30 rounded-xl p-6 mb-6 border border-amber-400/30">
+                    <h4 className="text-amber-100 font-bold text-xl mb-4 text-center">✨ Áreas de Transformación</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {data.integracion_final.sintesis_psicologica_del_anio.areas_transformacion.map((area: string, i: number) => (
+                        <div key={i} className="bg-amber-800/30 rounded-lg p-3 border border-amber-500/20">
+                          <p className="text-amber-50 flex items-center gap-2">
+                            <span className="text-amber-300">✔️</span>
+                            {area}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {data.integracion_final.sintesis_psicologica_del_anio.frase_poder_final && (
+                  <div className="bg-gradient-to-r from-yellow-900/40 to-orange-900/40 rounded-xl p-8 border-2 border-yellow-400/50 text-center">
+                    <p className="text-yellow-100 text-2xl font-bold italic leading-relaxed">
+                      "{data.integracion_final.sintesis_psicologica_del_anio.frase_poder_final}"
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>
