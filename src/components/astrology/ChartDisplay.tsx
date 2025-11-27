@@ -1949,9 +1949,37 @@ const ChartDisplay = ({
         </div>
       )}
 
-      {/* 📊 SECCIONES EDUCATIVAS */}
-      <div className="space-y-8">
-        <div className="p-6 bg-gradient-to-r from-indigo-900/40 to-purple-900/40 rounded-xl border border-indigo-400/30">
+      {/* 💫 INTEGRACIÓN FINAL - Solo para Solar Return */}
+      {chartType === 'solar-return' && (
+        <div id="integracion" className="mb-8 scroll-mt-24">
+          <div className="bg-gradient-to-br from-purple-900/40 to-indigo-900/40 rounded-2xl p-8 border border-purple-400/30">
+            <h3 className="text-3xl font-bold text-purple-100 mb-6 text-center flex items-center justify-center gap-3">
+              <span className="text-3xl">💫</span>
+              Integración Final - Tu Año Solar
+            </h3>
+
+            {/* Resumen Solar Return */}
+            <div className="mb-8 p-6 bg-purple-800/30 rounded-xl border border-purple-400/20">
+              <h4 className="text-xl font-bold text-purple-100 mb-4">🌟 Síntesis de tu Revolución Solar</h4>
+              <div className="text-purple-50 space-y-3">
+                <p className="leading-relaxed">
+                  Este año solar representa un ciclo único en tu vida, marcado por las posiciones planetarias
+                  específicas que se activaron en el momento exacto de tu retorno solar. La combinación de
+                  los planetas en las casas y los aspectos que forman entre sí crean el mapa energético de
+                  tu año personal.
+                </p>
+                <p className="leading-relaxed">
+                  Los temas principales que se destacan en tu Solar Return indican las áreas de vida donde
+                  experimentarás mayor actividad, aprendizaje y transformación durante los próximos 12 meses.
+                  Presta especial atención a las casas donde se concentran más planetas y a los aspectos exactos,
+                  ya que representan las energías más poderosas de tu año.
+                </p>
+              </div>
+            </div>
+
+            {/* Secciones Educativas */}
+            <div className="space-y-8 mb-8">
+              <div className="p-6 bg-gradient-to-r from-indigo-900/40 to-purple-900/40 rounded-xl border border-indigo-400/30">
           <div className="text-center mb-6">
             <h4 className="text-white font-bold text-xl mb-3">
               <svg className="w-6 h-6 inline mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -2060,7 +2088,10 @@ const ChartDisplay = ({
             </div>
           </div>
         </div>
-      </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 🎯 TOOLTIPS DINÁMICOS CON DRAWER */}
       <ChartTooltips
