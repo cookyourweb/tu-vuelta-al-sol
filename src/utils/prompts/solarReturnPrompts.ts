@@ -538,8 +538,110 @@ Responde ÚNICAMENTE con un objeto JSON válido en español (sin markdown, sin b
   ],
   
   "integracion_final": {
-    "sintesis": "150 palabras. ¿Cómo integrar TODO lo anterior en un camino coherente? ¿Cuál es el hilo conductor del año?",
-    "pregunta_reflexion": "Una pregunta poderosa para que la persona reflexione durante el año"
+    "titulo": "Comparativa entre tu Carta Natal y tu Carta Solar ${returnYear}-${returnYear + 1}",
+    "subtitulo": "Interpretación psicológica profunda de lo que vas a sanar este año",
+
+    "comparativa_natal_vs_solar": {
+      "introduccion": "50 palabras. Explica que esta comparativa muestra qué áreas de tu psique se activan y por qué.",
+
+      "sol_solar_sobre_casa_natal": {
+        "titulo": "Sol Solar en Casa ${srSol?.house} Solar + Casa ${natalSol?.house} Natal",
+        "posicion_natal": "Descripción: Sol natal en ${natalSol?.sign} Casa ${natalSol?.house} → qué representa (identidad, esencia, herida nuclear)",
+        "posicion_solar": "Sol solar en Casa ${srSol?.house} → qué activa este año (renovación, enfoque, misión)",
+        "que_activa": "100 palabras. ¿Qué herida nuclear se activa? ¿Qué parte de la identidad renace? ¿Qué mensaje viene a decir? USO TONO ANTIFRAGIL.",
+        "aspectos_clave": "Menciona aspectos natales del Sol que se reactivan (ej: Sol conjunción Júpiter, Sol cuadratura Marte, etc.)"
+      },
+
+      "luna_solar_sobre_casa_natal": {
+        "titulo": "Luna Solar en Casa ${srLuna?.house} + Luna Natal en Casa ${natalLuna?.house}",
+        "posicion_natal": "Luna natal en ${natalLuna?.sign} Casa ${natalLuna?.house} → necesidad emocional, seguridad, patrón de infancia",
+        "posicion_solar": "Luna solar en Casa ${srLuna?.house} → emociones activadas este año",
+        "que_activa": "150 palabras. Si activa Luna-Plutón, Saturno o Casa 8 → año de sanación emocional profunda. Menciona: miedo al abandono, patrón de complacencia, temas de intimidad, control emocional, lealtades familiares. TONO DIRECTO.",
+        "catarsis_emocional": "¿Qué memorias antiguas se limpian? ¿Qué patrón emocional se rompe?"
+      },
+
+      "asc_solar_sobre_casa_natal": {
+        "titulo": "Ascendente Solar en Casa Natal",
+        "casa_natal_donde_cae": "ASC Solar cae en Casa ${ascSRenCasaNatal} natal",
+        "que_activa": "100 palabras. Qué ciclo cierra, qué heridas sana, qué liberación ocurre. Si toca Casa 12: ciclos kármicos, memorias inconscientes, liberación de culpas.",
+        "personaje_del_anio": "¿Qué máscara o rol adoptas este año? ¿Cómo vivirás emocionalmente y psicológicamente?"
+      },
+
+      "planetas_lentos_activaciones": [
+        {
+          "planeta": "Plutón/Saturno/Urano/Neptuno",
+          "casa_natal_donde_cae": "Casa X",
+          "que_activa": "80 palabras. Plutón=transformación profunda, Saturno=lecciones/límites, Urano=cambios inesperados, Neptuno=intuiciones. ESPECÍFICO A LA CARTA.",
+          "proceso_psicologico": "¿Qué parte interna se trabaja?"
+        }
+      ],
+
+      "encuentros_planetarios": [
+        {
+          "planeta_solar": "Nombre del planeta SR",
+          "planeta_natal": "Nombre del planeta natal",
+          "tipo_aspecto": "conjunción/cuadratura/trígono/oposición",
+          "interpretacion": "100 palabras. Sol solar conjunción planeta natal = activación de identidad. Luna solar conjunción = activación emocional. Venus solar = amor/autoestima. Marte = acción/conflicto. Saturno = bloqueos+madurez. Plutón = renacimiento.",
+          "que_sanas": "¿Qué patrón específico se transforma?"
+        }
+      ],
+
+      "tema_anual_sintetico": "Una frase de 15-25 palabras que resuma el tema del año. Ejemplo: 'Año de sanar relaciones y aprender límites' o 'Año de renacimiento personal y limpieza emocional profunda'."
+    },
+
+    "interpretacion_psicologica_profunda": {
+      "introduccion": "Esta interpretación se basa en los 4 pilares psicológicos fundamentales que revelan tus patrones más profundos.",
+
+      "pilar_1_heridas_infancia": {
+        "titulo": "🧠 1. Heridas de la Infancia (Casa 4, Luna, Saturno)",
+        "casa_4_natal": "¿Qué describe la Casa 4? Ambiente familiar, emociones tempranas",
+        "luna_natal_aspectos": "Luna en ${natalLuna?.sign} Casa ${natalLuna?.house} + aspectos (especialmente Luna-Plutón, Luna-Saturno) → ¿Qué aprendió de niño/a?",
+        "saturno_natal": "Saturno en Casa X → ¿Qué limitó su espontaneidad? ¿Qué responsabilidades asumió siendo niño/a?",
+        "patron_formado": "200 palabras. Describe cómo se sentía el niño interior, qué heredó emocionalmente, qué roles tomó para sobrevivir (complacer, cuidar, ser fuerte, evitar conflictos). TONO EMPÁTICO PERO DIRECTO.",
+        "que_sana_este_anio": "¿Qué específicamente se libera este año? (ej: necesidad de complacer, miedo al rechazo, peso de responsabilidades familiares, autocensura emocional)"
+      },
+
+      "pilar_2_patrones_afectivos": {
+        "titulo": "❤️‍🩹 2. Patrones Afectivos (Casa 7, Venus, aspectos a Venus)",
+        "venus_natal": "Venus en ${natalChart.planets?.find((p: any) => p.name === 'Venus')?.sign || 'signo'} Casa ${natalChart.planets?.find((p: any) => p.name === 'Venus')?.house || 'X'} → ¿Cómo ama? ¿Qué busca en relaciones?",
+        "casa_7_natal": "Casa 7 en signo X → ¿Qué tipo de parejas atrae?",
+        "aspectos_venus": "Venus cuadratura Urano/Plutón/Saturno → patrones de ruptura, idealización, sacrificio",
+        "patron_repetitivo": "150 palabras. ¿Qué repite en relaciones? Dar demasiado, amar desde el sacrificio, idealización, atraer personas heridas, dinámicas de salvadora, amor condicionado. LENGUAJE CLARO.",
+        "que_sana_este_anio": "Herida de 'no soy suficiente', necesidad de validación externa, idealización emocional, atracción a relaciones que drenan"
+      },
+
+      "pilar_3_heridas_profundas_sombra": {
+        "titulo": "🔐 3. Heridas Profundas y Sombra (Casa 8, Plutón, aspectos difíciles)",
+        "casa_8_natal": "Casa 8 → secretos familiares, cargas heredadas, roles de salvadora, miedos transgeneracionales",
+        "pluton_natal_aspectos": "Plutón conjunción Luna/Venus/Sol → miedo al abandono, control emocional, intensidad reprimida",
+        "aspectos_tensos": "Cuadraturas, oposiciones → ¿Qué sombra carga?",
+        "patron_oscuro": "200 palabras. Describe: miedo al abandono cuando es auténtica, control emocional, intensidad interna oculta, atracción a personas heridas, necesidad de fusionarse para sentir seguridad, absorber dolor ajeno, dependencia emocional. TONO REVELADOR.",
+        "que_se_activa_este_anio": "Tu sombra, tus traumas, tus miedos más profundos, tus patrones repetitivos, tu dependencia emocional",
+        "que_sana_este_anio": "Cortar lealtades familiares invisibles, liberarte de rol de salvadora, soltar control, permitir que otros vivan su proceso"
+      },
+
+      "pilar_4_abundancia_autoestima": {
+        "titulo": "💰 4. Patrones de Abundancia y Autoestima (Casa 2, Saturno, Venus, Júpiter)",
+        "casa_2_natal": "Casa 2 → dinero, merecimiento, autoestima, seguridad material",
+        "saturno_relacion_casa_2": "Saturno en relación a Casa 1/2 → bloqueos de merecimiento",
+        "venus_autoestima": "Venus en Casa X → ¿Cómo se valora a sí misma?",
+        "bloqueo_nuclear": "150 palabras. Narrativa interna: 'Si no trabajo duro, no merezco ganar', 'Debo esforzarme demasiado para recibir poco', culpa de recibir, miedo a cobrar lo que vale, autoexigencia, sensación de insuficiencia. DIRECTO.",
+        "que_transforma_este_anio": "Relación con valor personal, narrativa sobre dinero, derecho a recibir, límites sanos en dar/recibir"
+      }
+    },
+
+    "sintesis_psicologica_del_anio": {
+      "mantra_evolutivo": "200 palabras. TONO ANTIFRAGIL Y MOTIVADOR. Lista de lo que viene a sanar: valor personal, derecho a recibir, capacidad de poner límites, herida de abandono, patrón de amor sacrificado, miedo a expresar autenticidad, lealtad emocional a familia, narrativa sobre abundancia. Frase final poderosa tipo: 'Es un año de renacimiento emocional, identitario y económico. Tu alma está lista.'",
+      "areas_transformacion": [
+        "Tu relación contigo misma",
+        "Tu forma de amar",
+        "Tus patrones de infancia",
+        "Tus heridas familiares",
+        "Tu relación con el dinero",
+        "Tu valentía para ser tú misma"
+      ],
+      "frase_poder_final": "Una declaración potente de 20-30 palabras. Ejemplo: 'Este año, ${userProfile.name}, renaces. Lo que antes te limitaba, ahora te libera. Tu autenticidad es tu poder.'"
+    }
   }
 }
 \`\`\`
