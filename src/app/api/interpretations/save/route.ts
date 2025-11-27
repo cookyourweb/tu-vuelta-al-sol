@@ -39,12 +39,13 @@ export async function POST(request: NextRequest) {
 
     const expirationDate = new Date(Date.now() + CACHE_DURATION);
 
-    // ✅ UPSERT: Update if exists, create if not
+    // ✅ UPSERT: Update if exists (even if expired), create if not
+    // ⚠️ REMOVED expiresAt filter to always update the same document
     const result = await Interpretation.findOneAndUpdate(
       {
         userId,
-        chartType: 'solar-return',
-        expiresAt: { $gt: new Date() } // Only update active interpretations
+        chartType: 'solar-return'
+        // ✅ NO expiresAt filter - always update, even if expired
       },
       {
         $set: {
