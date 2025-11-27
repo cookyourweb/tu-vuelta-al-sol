@@ -1,8 +1,8 @@
 "use client";
 import { loadStripe } from "@stripe/stripe-js";
 
-const stripePromise = process.env.REACT_APP_STRIPE_PUBLIC_KEY
-  ? loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY)
+const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY
+  ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY)
   : null;
 
 interface PaymentButtonProps {

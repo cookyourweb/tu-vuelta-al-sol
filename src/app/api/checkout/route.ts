@@ -5,11 +5,18 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 export async function POST() {
   try {
     const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
+      mode: "payment",
       payment_method_types: ["card"],
       line_items: [
         {
-          price: process.env.STRIPE_SUBSCRIPTION_PRICE_ID || "price_xxxxxxxxx", // ID del precio creado en Stripe
+          price_data: {
+            currency: "eur",
+            product_data: {
+              name: "Agenda Astrológica Personalizada",
+              description: "Tu agenda cósmica mensual con eventos y rituales personalizados",
+            },
+            unit_amount: 1500, // €15.00 en céntimos
+          },
           quantity: 1,
         },
       ],
@@ -19,9 +26,9 @@ export async function POST() {
 
     return Response.json({ id: session.id });
   } catch (error) {
-    console.error("Error creating subscription session:", error);
+    console.error("Error creating checkout session:", error);
     return Response.json(
-      { error: "Error al crear la sesión de suscripción" },
+      { error: "Error al crear la sesión de pago" },
       { status: 500 }
     );
   }
