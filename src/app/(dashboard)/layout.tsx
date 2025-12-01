@@ -3,6 +3,7 @@
 
 import Footer from '@/components/layout/Footer';
 import PrimaryHeader from '@/components/layout/PrimaryHeader';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import React from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -51,10 +52,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Estructura sin espacios */}
       <div className="relative z-10 flex flex-col min-h-screen">
         <PrimaryHeader />
-        <main className="flex-1">
+        <main className="flex-1 pb-16 md:pb-0">
           {children}
         </main>
-        <Footer />
+        {/* Footer en desktop, MobileBottomNav en mobile */}
+        <div className="hidden md:block">
+          <Footer />
+        </div>
+        <MobileBottomNav />
       </div>
     </div>
   );

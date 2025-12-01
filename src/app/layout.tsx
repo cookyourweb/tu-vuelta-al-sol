@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Inter, Playfair_Display } from 'next/font/google';
 import { AuthProvider } from '@/context/AuthContext';
 import { NotificationProvider } from '@/context/NotificationContext';
+import WelcomeModal from '@/components/modals/WelcomeModal';
 import './globals.css';
 
 const inter = Inter({ 
@@ -127,6 +128,7 @@ export default function RootLayout({
           <NotificationProvider>
             <div className="relative z-10 min-h-screen">
               {/* IMPORTANTE: No header aquí - cada layout maneja el suyo */}
+              <WelcomeModal />
               {children}
             </div>
           </NotificationProvider>

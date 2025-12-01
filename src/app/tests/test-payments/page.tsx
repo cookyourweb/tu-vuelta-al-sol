@@ -1,4 +1,4 @@
-import PaymentButton, { SubscriptionButton } from '@/components/PaymentButton';
+import PaymentButton, { SubscriptionButton } from '@/components/stripe/PaymentButton';
 
 export default function TestPaymentsPage() {
   return (
@@ -9,12 +9,19 @@ export default function TestPaymentsPage() {
         <div className="space-y-4">
           <div>
             <h2 className="text-2xl font-semibold text-white mb-4">Pago Único</h2>
-            <PaymentButton />
+            <PaymentButton
+              priceId={process.env.NEXT_PUBLIC_STRIPE_TEST_PRICE_ID || "price_test_example"}
+              userId="test_user_id"
+            >
+              Pagar $10
+            </PaymentButton>
           </div>
 
           <div>
             <h2 className="text-2xl font-semibold text-white mb-4">Suscripción</h2>
-            <SubscriptionButton />
+            <SubscriptionButton plan="basic">
+              Suscribirse al Plan Básico
+            </SubscriptionButton>
           </div>
         </div>
 

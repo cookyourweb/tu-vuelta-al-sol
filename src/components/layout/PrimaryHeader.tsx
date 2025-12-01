@@ -1,4 +1,4 @@
-// src/components/layout/PrimaryHeader.tsx - VERSIÓN FINAL COMPLETA
+// src/components/layout/PrimaryHeader.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -10,16 +10,17 @@ import {
   LogOut,
   ChevronDown,
   Star,
-  Moon,
   Sunrise,
   Sparkles,
   Calendar,
-  Menu,
-  X,
-  Settings
+  Settings,
+  ShoppingCart
 } from 'lucide-react';
+import Logo from '@/components/icons/Logo';
+import LogoSimple from '../icons/Logosimple';
 
-// 🌟 Iconos zodiacales para avatares (mismos del dashboard)
+
+// Iconos zodiacales para avatares
 const ZodiacIcons: { [key: string]: string } = {
   'Aries': '♈',
   'Tauro': '♉', 
@@ -35,31 +36,31 @@ const ZodiacIcons: { [key: string]: string } = {
   'Piscis': '♓'
 };
 
-// 🧭 Enlaces de navegación principales - FLUJO COMPLETO
+// Enlaces de navegacion principales
 const navItems = [
   { 
     href: '/birth-data', 
     label: 'Datos Nacimiento',
-    icon: Sparkles,  // ✨ MÁGICO - Primer paso
-    description: 'Configura tu información natal'
+    icon: Sparkles,
+    description: 'Configura tu informacion natal'
   },
   { 
     href: '/natal-chart', 
     label: 'Carta Natal',
-    icon: Star,      // ⭐ Estrella - Base astrológica
-    description: 'Tu mapa astrológico personal'
+    icon: Star,
+    description: 'Tu mapa astrologico personal'
   },
   {
     href: '/solar-return',
     label: 'Retorno Solar',
-    icon: Sunrise,      // 🌅 Sol - Retorno Solar
-    description: 'Tu evolución astrológica anual'
+    icon: Sunrise,
+    description: 'Tu evolucion astrologica anual'
   },
   { 
     href: '/agenda',   
-    label: 'Tu Agenda Personalizada',   
-    icon: Calendar,  // 📅 Calendario - OBJETIVO FINAL
-    description: 'Tu guía astrológica completa'
+    label: 'Tu Agenda',   
+    icon: Calendar,
+    description: 'Tu guia astrologica completa'
   }
 ];
 
@@ -70,9 +71,8 @@ interface PrimaryHeaderProps {
 export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
   const { user, logout } = useAuth();
   const router = useRouter();
-  const pathname = usePathname(); // 🎯 Para detectar página activa
+  const pathname = usePathname();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userZodiacSign, setUserZodiacSign] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
 
@@ -96,7 +96,6 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
     };
   }, []);
 
-  // 🔍 Obtener rol del usuario desde la API
   const fetchUserRole = async () => {
     if (!user) return;
     
@@ -115,7 +114,6 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
     if (!user) return;
     
     try {
-      // Primero intentar obtener desde datos de nacimiento
       const response = await fetch(`/api/birth-data?userId=${user.uid}`);
       if (response.ok) {
         const data = await response.json();
@@ -127,7 +125,6 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
         }
       }
       
-      // Si no hay datos de nacimiento, intentar desde carta natal
       const chartResponse = await fetch(`/api/charts/natal?userId=${user.uid}`);
       if (chartResponse.ok) {
         const chartData = await chartResponse.json();
@@ -140,7 +137,6 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
     }
   };
 
-  // Función para calcular el signo zodiacal basado en la fecha
   const getZodiacSign = (date: Date): string | null => {
     const day = date.getDate();
     const month = date.getMonth() + 1;
@@ -158,7 +154,7 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
     if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) return 'Acuario';
     if ((month === 2 && day >= 19) || (month === 3 && day <= 20)) return 'Piscis';
     
-    return null; // No default, retorna null si no se puede determinar
+    return null;
   };
 
   const handleLogout = async () => {
@@ -167,7 +163,7 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
       setIsDropdownOpen(false);
       router.push('/');
     } catch (error) {
-      console.error('Error al cerrar sesión:', error);
+      console.error('Error al cerrar sesion:', error);
     }
   };
 
@@ -179,52 +175,64 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
 
   const zodiacIcon = userZodiacSign ? ZodiacIcons[userZodiacSign] : '❓';
 
-  // 🎯 Función para determinar si una ruta está activa
   const isActiveRoute = (href: string) => {
     return pathname === href;
   };
 
-  // Cerrar menús al hacer click fuera
   useEffect(() => {
     const handleClickOutside = () => {
       setIsDropdownOpen(false);
-      setIsMobileMenuOpen(false);
     };
 
-    if (isDropdownOpen || isMobileMenuOpen) {
+    if (isDropdownOpen) {
       document.addEventListener('click', handleClickOutside);
       return () => document.removeEventListener('click', handleClickOutside);
     }
-  }, [isDropdownOpen, isMobileMenuOpen]);
+  }, [isDropdownOpen]);
 
   return (
-    <header className={`bg-purple-900/95 backdrop-blur-sm border-b border-purple-700/50 sticky top-0 z-50 ${className}`}>
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+    <header className={`bg-gradient-to-r from-purple-900 to-indigo-900 backdrop-blur-sm border-b border-purple-700/50 sticky top-0 z-50 shadow-lg ${className}`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20">
           
-          {/* 🌟 Logo - Diseño mágico mejorado */}
+          {/* Logo - Diseño mágico responsive */}
           <Link 
             href={user ? "/dashboard" : "/"} 
-            className="flex items-center space-x-3 hover:opacity-80 transition-all duration-300 group"
+            className="flex flex-col items-start space-y-0.5 hover:opacity-90 transition-all duration-300 group"
           >
-            <div className="relative">
-              <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-yellow-400/50 transition-all duration-300">
-                <Star className="w-5 h-5 text-white group-hover:rotate-12 transition-transform duration-300" />
+            <div className="flex items-center space-x-2 md:space-x-3">
+              {/* Logo Desktop - Animado MÁS GRANDE */}
+              <div className="hidden md:block">
+                <Logo size={52} className="group-hover:scale-105 transition-transform duration-300" />
               </div>
-              {/* Resplandor mágico */}
-              <div className="absolute inset-0 w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full opacity-0 group-hover:opacity-30 blur-sm transition-all duration-300"></div>
+              
+              {/* Logo Mobile - Simple MANTENIDO */}
+              <div className="md:hidden">
+                <LogoSimple size={40} className="group-hover:scale-105 transition-transform duration-300" />
+              </div>
+              
+              {/* Texto del logo - SIEMPRE VISIBLE */}
+              <div>
+                <h1 className="text-base md:text-xl font-bold text-white group-hover:text-yellow-200 transition-colors duration-300 whitespace-nowrap">
+                  Tu Vuelta al Sol
+                </h1>
+                
+                {/* Tagline Mobile - Visible solo en mobile */}
+                <p className="text-[9px] md:hidden text-purple-200 group-hover:text-purple-100 transition-colors duration-300 whitespace-nowrap">
+                  Tu Agenda Astrológica
+                </p>
+              </div>
             </div>
-            <div className="hidden sm:block">
-              <h1 className="text-xl font-bold text-white group-hover:text-yellow-200 transition-colors duration-300">
-                Tu Vuelta al Sol
-              </h1>
-              <p className="text-xs text-purple-200 group-hover:text-purple-100 transition-colors duration-300">
+            
+            {/* Badge flotante - SIN ICONO, más cerca del título */}
+            <div className="hidden md:flex items-center ml-16">
+              <span className="text-[10px] px-2.5 py-0.5 bg-purple-700/50 border border-purple-500/30 rounded-full text-purple-200 backdrop-blur-sm">
                 Agenda Astrológica Personalizada
-              </p>
+              </span>
             </div>
           </Link>
 
-          {/* 🧭 Navegación Principal Desktop (solo si está logado) */}
+          {/* Navegación Principal Desktop (solo si está logado) */}
           {user && (
             <nav className="hidden md:flex items-center space-x-1">
               {/* Enlace de Administración (solo para admins) */}
@@ -245,12 +253,10 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
                   }`} />
                   <span className="font-medium">Admin</span>
                   
-                  {/* Indicador de página activa */}
                   {isActiveRoute('/admin') && (
                     <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
                   )}
                   
-                  {/* Efecto hover mágico */}
                   {!isActiveRoute('/admin') && (
                     <div className="absolute inset-0 bg-gradient-to-r from-purple-600/0 via-purple-600/20 to-purple-600/0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
                   )}
@@ -279,12 +285,10 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
                     }`} />
                     <span className="font-medium">{item.label}</span>
                     
-                    {/* Indicador de página activa */}
                     {isActive && (
                       <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
                     )}
                     
-                    {/* Efecto hover mágico */}
                     {!isActive && (
                       <div className="absolute inset-0 bg-gradient-to-r from-purple-600/0 via-purple-600/20 to-purple-600/0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
                     )}
@@ -294,20 +298,19 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
             </nav>
           )}
 
-          {/* 👤 Área de Usuario */}
-          <div className="flex items-center space-x-4">
+          {/* Área de Usuario */}
+          <div className="flex items-center space-x-2 md:space-x-4">
             {user ? (
-              <div className="flex items-center space-x-3">
-                {/* Menú hamburguesa móvil */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsMobileMenuOpen(!isMobileMenuOpen);
-                  }}
-                  className="md:hidden p-2 rounded-lg text-purple-200 hover:text-white hover:bg-purple-800/50 transition-colors duration-200"
+              <div className="flex items-center space-x-2 md:space-x-3">
+                {/* Botón Carrito - Visible en mobile y desktop */}
+                <Link
+                  href="/compra/agenda"
+                  className="flex items-center justify-center bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-white p-2 md:px-4 md:py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-yellow-500/25"
+                  title="Comprar Agenda Astrológica"
                 >
-                  {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                </button>
+                  <ShoppingCart className="w-5 h-5 md:w-4 md:h-4" />
+                  <span className="hidden lg:inline ml-2">Comprar</span>
+                </Link>
 
                 {/* Dropdown Usuario */}
                 <div className="relative">
@@ -316,15 +319,15 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
                       e.stopPropagation();
                       setIsDropdownOpen(!isDropdownOpen);
                     }}
-                    className="flex items-center space-x-3 bg-purple-800/50 hover:bg-purple-700/50 rounded-lg px-3 py-2 transition-all duration-300 group"
+                    className="flex items-center space-x-2 md:space-x-3 bg-purple-800/50 hover:bg-purple-700/50 rounded-lg px-2 md:px-3 py-2 transition-all duration-300 group"
                   >
-                    {/* 🌟 Avatar Zodiacal */}
+                    {/* Avatar Zodiacal */}
                     <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white text-lg font-bold shadow-md group-hover:shadow-purple-400/50 transition-all duration-300">
                       {zodiacIcon}
                     </div>
                     
-                    {/* Nombre usuario */}
-                    <div className="hidden sm:block text-left">
+                    {/* Nombre usuario - Solo desktop */}
+                    <div className="hidden md:block text-left">
                       <p className="text-white font-medium text-sm group-hover:text-purple-100 transition-colors duration-300">
                         {getUserDisplayName()}
                       </p>
@@ -333,10 +336,10 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
                       </p>
                     </div>
                     
-                    <ChevronDown className={`w-4 h-4 text-purple-300 transition-all duration-300 group-hover:text-purple-100 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`hidden md:block w-4 h-4 text-purple-300 transition-all duration-300 group-hover:text-purple-100 ${isDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
 
-                  {/* 📋 Dropdown Menu */}
+                  {/* Dropdown Menu */}
                   {isDropdownOpen && (
                     <div className="absolute right-0 mt-2 w-56 bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl border border-purple-200/50 py-2 z-50 animate-in slide-in-from-top-2 duration-200">
                       {/* Header del usuario */}
@@ -384,13 +387,13 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
               /* Usuario No Logado */
               <div className="flex items-center space-x-3">
                 <Link
-                  href="/auth/login"
+                  href="/login"
                   className="text-purple-200 hover:text-white transition-colors font-medium px-3 py-2 rounded-lg hover:bg-purple-800/30"
                 >
                   Iniciar Sesión
                 </Link>
                 <Link
-                  href="/auth/register"
+                  href="/register"
                   className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-purple-500/25"
                 >
                   Registrarse
@@ -399,46 +402,6 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
             )}
           </div>
         </div>
-
-        {/* 📱 Navegación Móvil (solo si está logado) */}
-        {user && isMobileMenuOpen && (
-          <div className="md:hidden border-t border-purple-700/50 py-4 animate-in slide-in-from-top-2 duration-200">
-            <nav className="space-y-2">
-              {navItems.map((item) => {
-                const IconComponent = item.icon;
-                const isActive = isActiveRoute(item.href);
-                
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 ${
-                      isActive 
-                        ? 'bg-purple-700/70 text-white border border-purple-500/50' 
-                        : 'text-purple-200 hover:text-white hover:bg-purple-800/50'
-                    }`}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <IconComponent className={`w-5 h-5 ${
-                      isActive ? 'text-yellow-400' : ''
-                    }`} />
-                    <div>
-                      <span className="font-medium block">{item.label}</span>
-                      <span className={`text-xs ${
-                        isActive ? 'text-purple-200' : 'text-purple-300'
-                      }`}>{item.description}</span>
-                    </div>
-                    
-                    {/* Indicador móvil */}
-                    {isActive && (
-                      <div className="ml-auto w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
-                    )}
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
-        )}
       </div>
     </header>
   );

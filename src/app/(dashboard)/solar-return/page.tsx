@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation';
 import ChartDisplay from '@/components/astrology/ChartDisplay';
 import InterpretationButton from '@/components/astrology/InterpretationButton';
 import SectionNavigation from '@/components/solar-return/SectionNavigation';
+import { useInterpretationDrawer } from '@/hooks/useInterpretationDrawer';
+import { InterpretationDrawer } from '@/components/astrology/InterpretationDrawer';
 import {
   Sun, RefreshCw, Sparkles, AlertTriangle
 } from 'lucide-react';
@@ -43,7 +45,10 @@ function getMonthWithYear(birthDate: string, monthOffset: number, currentYear: n
 export default function SolarReturnPage() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
-  
+
+  // Drawer functionality
+  const { isOpen: drawerOpen, content: drawerContent, open: openDrawer, close: closeDrawer } = useInterpretationDrawer();
+
   const [chartData, setChartData] = useState<any>(null);
   const [natalChart, setNatalChart] = useState<any>(null);
   const [birthData, setBirthData] = useState<any>(null);
@@ -438,6 +443,10 @@ export default function SolarReturnPage() {
                   solarReturnYear={new Date().getFullYear()}
                   solarReturnTheme="Revolución de Identidad y Empoderamiento Profesional"
                   ascSRInNatalHouse={10}
+                  onOpenDrawer={openDrawer}
+                  onCloseDrawer={closeDrawer}
+                  drawerOpen={drawerOpen}
+                  userId={user?.uid}
                 />
               </div>
             </div>
@@ -851,6 +860,13 @@ export default function SolarReturnPage() {
         </div>
 
       </div>
+
+      {/* Drawer global para interpretaciones */}
+      <InterpretationDrawer
+        isOpen={drawerOpen}
+        content={drawerContent}
+        onClose={closeDrawer}
+      />
     </div>
   );
 }

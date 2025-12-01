@@ -164,7 +164,15 @@ const PLANET_NAMES: Record<Astronomy.Body, string> = {
   [Astronomy.Body.Moon]: 'Luna',
   [Astronomy.Body.Earth]: 'Tierra',
   [Astronomy.Body.EMB]: 'EMB',
-  [Astronomy.Body.SSB]: 'SSB'
+  [Astronomy.Body.SSB]: 'SSB',
+  [Astronomy.Body.Star1]: 'Estrella1',
+  [Astronomy.Body.Star2]: 'Estrella2',
+  [Astronomy.Body.Star3]: 'Estrella3',
+  [Astronomy.Body.Star4]: 'Estrella4',
+  [Astronomy.Body.Star5]: 'Estrella5',
+  [Astronomy.Body.Star6]: 'Estrella6',
+  [Astronomy.Body.Star7]: 'Estrella7',
+  [Astronomy.Body.Star8]: 'Estrella8'
 };
 
 function getPlanetName(body: Astronomy.Body): string {

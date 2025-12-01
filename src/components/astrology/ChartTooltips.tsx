@@ -81,28 +81,83 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
   // STATE
   // =============================================================================
 
+  // =============================================================================
+
   const [natalInterpretations, setNatalInterpretations] = useState<any>(null);
   const [loadingInterpretations, setLoadingInterpretations] = useState(true);
   const [tooltipTimer, setTooltipTimer] = useState<NodeJS.Timeout | null>(null);
   const [generatingAspect, setGeneratingAspect] = useState(false);
   const [aspectTooltipLocked, setAspectTooltipLocked] = useState(false);
+  const [showLongGeneratingMessage, setShowLongGeneratingMessage] = useState(false);
 
   // ✅ NEW: Hover delay timers (matching ChartDisplay.tsx)
   const [planetTooltipTimer, setPlanetTooltipTimer] = useState<NodeJS.Timeout | null>(null);
   const [aspectTooltipTimer, setAspectTooltipTimer] = useState<NodeJS.Timeout | null>(null);
   const [clickedTooltipTimer, setClickedTooltipTimer] = useState<NodeJS.Timeout | null>(null);
+  const [tooltipLocked, setTooltipLocked] = useState(false); // ⭐ NUEVO: Controla si tooltip permanece abierto con drawer
 
-  // ✅ NUEVO: Hook para detectar clic fuera
+  // ⭐ NUEVO: Estado global de generación para el modal
+  const [isGenerating, setIsGenerating] = useState(false);
+  // =============================================================================
+
+  // ✅ Hook para detectar clic fuera - MEJORADO
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as HTMLElement;
 
-      // Verificar si el clic fue fuera de los tooltips
+      // Verificar si el clic fue en tooltip, drawer o chart
       const isTooltip = target && typeof target.closest === 'function' ? target.closest('.chart-tooltip') : null;
+      const isDrawer = target && typeof target.closest === 'function' ? target.closest('.interpretation-drawer') : null;
       const isChart = target && typeof target.closest === 'function' ? target.closest('.chart-container') : null;
 
-      if (!isTooltip && !isChart) {
-        // Cerrar todos los tooltips
+      // ⭐ CRÍTICO: NO cerrar si está generando
+      if (isGenerating) {
+        console.log('🔒 GENERANDO - NO CERRAR TOOLTIP');
+        return;
+      }
+
+      // ⭐ NUEVO: Si el tooltip está "locked" (porque se abrió el drawer), NO cerrar
+      if (tooltipLocked) {
+        // Solo cerrar si se hace click fuera del tooltip Y fuera del drawer
+        if (!isTooltip && !isDrawer) {
+          setHoveredPlanet(null);
+          setHoveredAspect(null);
+          setHoveredHouse(null);
+          setHoveredCard?.(null);
+          setClickedPlanet?.(null);
+          setClickedAspect?.(null);
+          setTooltipLocked(false);
+        }
+        return;
+      }
+
+      // Comportamiento normal si NO está locked
+      if (!isTooltip && !isChart && !isDrawer) {
+        setHoveredPlanet(null);
+        setHoveredAspect(null);
+        setHoveredHouse(null);
+        setHoveredCard?.(null);
+        setClickedPlanet?.(null);
+        setClickedAspect?.(null);
+      }
+
+      // ⭐ NUEVO: Si el tooltip está "locked" (porque se abrió el drawer), NO cerrar
+      if (tooltipLocked) {
+        // Solo cerrar si se hace click fuera del tooltip Y fuera del drawer
+        if (!isTooltip && !isDrawer) {
+          setHoveredPlanet(null);
+          setHoveredAspect(null);
+          setHoveredHouse(null);
+          setHoveredCard?.(null);
+          setClickedPlanet?.(null);
+          setClickedAspect?.(null);
+          setTooltipLocked(false);
+        }
+        return;
+      }
+
+      // Comportamiento normal si NO está locked
+      if (!isTooltip && !isChart && !isDrawer) {
         setHoveredPlanet(null);
         setHoveredAspect(null);
         setHoveredHouse(null);
@@ -114,26 +169,33 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [tooltipLocked, isGenerating]); // ⭐ Agregar isGenerating
 
   // =============================================================================
   // FETCH AI INTERPRETATIONS
   // =============================================================================
   
   useEffect(() => {
-    async function fetchNatalInterpretations() {
-      if (!userId || chartType !== 'natal') {
+    async function fetchInterpretations() {
+      if (!userId) {
         setLoadingInterpretations(false);
         return;
       }
-      
+
       setLoadingInterpretations(true);
-      
+
       try {
-        console.log('🔍 Fetching interpretations for userId:', userId);
-        const response = await fetch(`/api/astrology/interpret-natal?userId=${userId}`);
+        console.log('🔍 Fetching interpretations for userId:', userId, 'chartType:', chartType);
+
+        // ⭐ NUEVO: Construir URL con chartType
+        let url = `/api/astrology/interpret-natal?userId=${userId}`;
+        if (chartType === 'solar-return') {
+          url = `/api/astrology/interpret-solar-return?userId=${userId}`;
+        }
+
+        const response = await fetch(url);
         const result = await response.json();
-        
+
         if (result.success && result.data) {
           console.log('✅ AI Interpretations loaded:', Object.keys(result.data.planets || {}).length, 'planets');
           setNatalInterpretations(result.data);
@@ -148,15 +210,21 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
         setLoadingInterpretations(false);
       }
     }
-    
-    fetchNatalInterpretations();
-  }, [userId, chartType]);
+
+    fetchInterpretations();
+  }, [userId, chartType, solarReturnYear]);
 
   // =============================================================================
   // TOOLTIP HOVER DELAY (CONFIGURABLE PER TYPE)
   // =============================================================================
 
   const handleMouseLeaveTooltip = (callback: () => void, delay: number = 1000, unlockAspect: boolean = false) => {
+    // ⭐ CRÍTICO: NO cerrar si está generando
+    if (isGenerating) {
+      console.log('🔒 Generando - tooltip NO se cierra');
+      return;
+    }
+
     if (tooltipTimer) {
       clearTimeout(tooltipTimer);
     }
@@ -290,7 +358,14 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
     }
 
     setGeneratingAspect(true);
-    setAspectTooltipLocked(true); // Lock tooltip while generating
+    setIsGenerating(true); // ⭐ NUEVO: Para el modal
+    setAspectTooltipLocked(true);
+    setShowLongGeneratingMessage(false);
+
+    // ⭐ Timer para mensaje largo
+    const longGenerationTimer = setTimeout(() => {
+      setShowLongGeneratingMessage(true);
+    }, 5000); // Después de 5 segundos
 
     try {
       console.log(`🎯 Generating aspect: ${planet1} ${aspectType} ${planet2}`);
@@ -335,6 +410,9 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
       alert('❌ Error generando interpretación');
     } finally {
       setGeneratingAspect(false);
+      setIsGenerating(false); // ⭐ NUEVO: Para el modal
+      setShowLongGeneratingMessage(false);
+      clearTimeout(longGenerationTimer);
     }
   };
 
@@ -350,9 +428,13 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
     const interpretationKey = `${planet.name}-${planet.sign}-${planet.house}`;
     let interpretation = null;
 
+    // Check planets first, then asteroids (for Lilith, Chiron, etc.)
     if (natalInterpretations?.planets?.[interpretationKey]) {
       interpretation = natalInterpretations.planets[interpretationKey];
-      console.log('✅ Using AI interpretation for', interpretationKey);
+      console.log('✅ Using AI interpretation for planet', interpretationKey);
+    } else if (natalInterpretations?.asteroids?.[interpretationKey]) {
+      interpretation = natalInterpretations.asteroids[interpretationKey];
+      console.log('✅ Using AI interpretation for asteroid', interpretationKey);
     } else {
       interpretation = getExampleInterpretation(interpretationKey);
       console.log('⚠️ Using fallback for', interpretationKey);
@@ -363,26 +445,34 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
     return (
       <div
-        className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-md pointer-events-auto z-50"
+        className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-6 shadow-2xl w-[90vw] md:w-auto max-w-sm md:max-w-md overflow-y-auto pointer-events-auto z-50"
         style={{
-          left: tooltipPosition.x + 25,
-          top: tooltipPosition.y - 50,
-          transform: tooltipPosition.x > window.innerWidth - 400 ? 'translateX(-100%)' : 'none'
+          left: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.x + 25,
+          top: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.y - 50,
+          transform: typeof window !== 'undefined' && window.innerWidth < 768
+            ? 'translate(-50%, -50%)'
+            : (tooltipPosition.x > window.innerWidth - 400 ? 'translateX(-100%)' : 'none')
         }}
         onMouseEnter={(e) => {
           console.log('🎯 MOUSE ENTERED TOOLTIP - PLANET');
           e.stopPropagation();
           handleTooltipMouseEnter();
         }}
-        onMouseLeave={(e) => {
-          console.log('🎯 MOUSE LEFT TOOLTIP - PLANET');
-          // Don't close tooltip immediately if mouse is over a button
-          const target = e.relatedTarget as HTMLElement;
-          const isButton = target && typeof target.closest === 'function' ? target.closest('button') : null;
-          if (!isButton && !clickedPlanet && !drawerOpen) {
-            setHoveredPlanet(null);
-          }
-        }}
+          onMouseLeave={(e) => {
+            console.log('🎯 MOUSE LEFT TOOLTIP - PLANET');
+
+            // ⭐ NUEVO: Si está locked O generando, NO cerrar
+            if (tooltipLocked || isGenerating) {
+              console.log('🔒 Tooltip locked o generando - no se cierra');
+              return;
+            }
+
+            handleMouseLeaveTooltip(() => {
+              if (!drawerOpen) {
+                setHoveredPlanet(null);
+              }
+            }, 1000); // 1 second for planets
+          }}
         onClick={(e) => {
           console.log('🎯 TOOLTIP CLICKED (parent) - PLANET');
           e.stopPropagation();
@@ -415,9 +505,10 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
                 setClickedTooltipTimer(null);
               }
             }}
-            className="text-gray-400 hover:text-white transition-colors p-1"
+            className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
+            aria-label="Cerrar"
           >
-            ✕
+            <X className="w-5 h-5 text-white" />
           </button>
         </div>
 
@@ -456,51 +547,133 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
         {interpretation?.drawer && (
           <button
-            onMouseDown={(e) => {
-              console.log('═══════════════════════════════════');
-              console.log('🎯 ABRIENDO DRAWER CON MOUSEDOWN - PLANET');
-              console.log('1. onOpenDrawer exists?', !!onOpenDrawer);
-              console.log('2. interpretation.drawer:', interpretation.drawer);
-              console.log('3. interpretation.drawer.titulo:', interpretation?.drawer?.titulo);
-              console.log('═══════════════════════════════════');
-
+            onMouseDown={async (e) => {
               e.stopPropagation();
               e.preventDefault();
 
-              if (!onOpenDrawer) {
-                console.error('❌ onOpenDrawer is undefined');
+              const interpretationKey = `${planet.name}-${planet.sign}-${planet.house}`;
+              const hasAI = natalInterpretations?.planets?.[interpretationKey];
+
+              if (!hasAI && userId) {
+                // ⭐ GENERAR PLANETA INDIVIDUAL
+                setTooltipLocked(true);
+                setGeneratingAspect(true);
+                setIsGenerating(true); // ⭐ NUEVO: Para el modal
+
+                // ⭐ AGREGAR: Timer para mensaje largo
+                const longGenerationTimer = setTimeout(() => {
+                  setShowLongGeneratingMessage(true);
+                }, 5000); // Después de 5 segundos
+
+                try {
+                  console.log('🎯 Generando planeta individual:', planet.name);
+
+                  // ⭐ LLAMAR AL NUEVO ENDPOINT
+                  const response = await fetch('/api/astrology/interpret-planet', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      userId,
+                      planetName: planet.name,
+                      sign: planet.sign,
+                      house: planet.house,
+                      degree: planet.degree,
+                      chartType,  // ⭐ Incluye chartType
+                      year: solarReturnYear
+                    })
+                  });
+
+                  const result = await response.json();
+
+                  if (result.success) {
+                    console.log('✅ Planeta generado:', planet.name);
+
+                    // Refrescar interpretaciones
+                    const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`);
+                    const refreshResult = await refreshResponse.json();
+
+                    // ⭐ DEBUGGING: Ver qué devuelve la API
+                    console.log('📦 Refresh result completo:', refreshResult);
+                    console.log('📦 refreshResult.success:', refreshResult.success);
+                    console.log('📦 refreshResult.data:', refreshResult.data);
+                    console.log('📦 refreshResult.data?.planets:', refreshResult.data?.planets);
+
+                    if (refreshResult.success) {
+                      console.log('🔄 Actualizando estado con:', refreshResult.data);
+                      setNatalInterpretations(refreshResult.data);
+
+                      const newKey = `${planet.name}-${planet.sign}-${planet.house}`;
+                      console.log('🔍 Buscando interpretación con key:', newKey);
+
+                      // ⭐ CRÍTICO: Buscar en refreshResult.data (NO en estado)
+                      let newInterpretation =
+                        refreshResult.data?.planets?.[newKey] ||
+                        refreshResult.data?.asteroids?.[newKey] ||
+                        refreshResult.data?.nodes?.[newKey];
+
+                      console.log('📖 Interpretación encontrada:', !!newInterpretation);
+
+                      if (newInterpretation?.drawer && onOpenDrawer) {
+                        console.log('✅ Abriendo drawer para:', planet.name);
+                        onOpenDrawer(newInterpretation.drawer);
+                      } else {
+                        console.error('❌ No se encontró interpretación para:', newKey);
+                        console.error('   - Secciones disponibles:', Object.keys(refreshResult.data || {}));
+                        console.error('   - Nodes keys:', Object.keys(refreshResult.data?.nodes || {}));
+                        console.error('   - Asteroids keys:', Object.keys(refreshResult.data?.asteroids || {}));
+                      }
+                    } else {
+                      console.error('❌ Refresh failed:', refreshResult);
+                    }
+                  } else {
+                    throw new Error(result.error || 'Error generando interpretación');
+                  }
+                } catch (error) {
+                  console.error('❌ Error:', error);
+                  alert('Error generando interpretación: ' + (error as Error).message);
+                } finally {
+                  setGeneratingAspect(false);
+                  setIsGenerating(false); // ⭐ NUEVO: Para el modal
+                  setShowLongGeneratingMessage(false);
+                }
+                clearTimeout(longGenerationTimer); // ⭐ Limpiar timer después del finally
                 return;
               }
 
-              if (!interpretation?.drawer) {
-                console.error('❌ interpretation.drawer is undefined');
-                return;
-              }
-
-              try {
-                console.log('✅ Calling onOpenDrawer...');
+              // Si ya tiene AI, abrir drawer
+              setTooltipLocked(true);
+              if (onOpenDrawer && interpretation?.drawer) {
                 onOpenDrawer(interpretation.drawer);
-                console.log('✅ onOpenDrawer called successfully');
-              } catch (error) {
-                console.error('❌ Error calling onOpenDrawer:', error);
               }
             }}
+            disabled={generatingAspect}
             style={{
               pointerEvents: 'auto',
               zIndex: 9999999,
               cursor: 'pointer'
             }}
-            className="w-full py-2.5 px-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group shadow-lg"
+            className="w-full py-2.5 px-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span>📖 Ver interpretación completa</span>
-            <span className="group-hover:translate-x-1 transition-transform">→</span>
+            {generatingAspect ? (
+              <>
+                <div className="animate-spin">⏳</div>
+                <span>Generando...</span>
+              </>
+            ) : (
+              <>
+                {(natalInterpretations?.planets?.[`${planet.name}-${planet.sign}-${planet.house}`] || natalInterpretations?.asteroids?.[`${planet.name}-${planet.sign}-${planet.house}`]) ? (
+                  <>
+                    <span>📖 Ver interpretación completa</span>
+                    <span className="group-hover:translate-x-1 transition-transform">→</span>
+                  </>
+                ) : (
+                  <>
+                    <span>✨ Generar Interpretación IA</span>
+                  </>
+                )}
+              </>
+            )}
           </button>
-        )}
-
-        {!interpretation?.drawer && (
-          <div className="text-center text-xs text-gray-400 py-2">
-            💡 Haz hover más tiempo para ver la interpretación
-          </div>
         )}
 
         {!interpretation?.drawer && (
@@ -525,11 +698,13 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
     return (
       <div
-        className="fixed bg-gradient-to-r from-green-500/95 to-emerald-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm pointer-events-auto z-50"
+        className="fixed bg-gradient-to-r from-green-500/95 to-emerald-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-6 shadow-2xl w-[90vw] md:w-auto max-w-sm md:max-w-md overflow-y-auto pointer-events-auto z-50"
         style={{
-          left: tooltipPosition.x + 25,
-          top: tooltipPosition.y - 50,
-          transform: tooltipPosition.x > window.innerWidth - 300 ? 'translateX(-100%)' : 'none'
+          left: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.x + 25,
+          top: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.y - 50,
+          transform: typeof window !== 'undefined' && window.innerWidth < 768
+            ? 'translate(-50%, -50%)'
+            : (tooltipPosition.x > window.innerWidth - 300 ? 'translateX(-100%)' : 'none')
         }}
         onMouseEnter={(e) => {
           console.log('🎯 MOUSE ENTERED TOOLTIP - ASCENDANT');
@@ -538,18 +713,37 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
         }}
         onMouseLeave={(e) => {
           console.log('🎯 MOUSE LEFT TOOLTIP - ASCENDANT');
-          // Don't close tooltip immediately if mouse is over a button
-          const target = e.relatedTarget as HTMLElement;
-          const isButton = target && typeof target.closest === 'function' ? target.closest('button') : null;
-          if (!isButton && !drawerOpen) {
-            setHoveredPlanet(null);
+          // ⭐ NUEVO: Si está locked, NO cerrar
+          if (tooltipLocked) {
+            return;
           }
+          // Add a small delay to allow drawer state to update
+          setTimeout(() => {
+            // Don't close tooltip immediately if mouse is over a button
+            const target = e.relatedTarget as HTMLElement;
+            const isButton = target && typeof target.closest === 'function' ? target.closest('button') : null;
+            if (!isButton && !drawerOpen) {
+              setHoveredPlanet(null);
+            }
+          }, 100); // 100ms delay to allow drawer state update
         }}
         onClick={(e) => {
           console.log('🎯 TOOLTIP CLICKED (parent) - ASCENDANT');
           e.stopPropagation();
         }}
       >
+        {/* ✅ NUEVO: Botón de cierre */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setHoveredPlanet(null);
+          }}
+          className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
+          aria-label="Cerrar"
+        >
+          <X className="w-4 h-4 text-white" />
+        </button>
+
         <div className="flex items-center mb-3">
           <svg className="w-8 h-8 text-white mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="12" y1="19" x2="12" y2="5"/>
@@ -638,11 +832,13 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
     return (
       <div
-        className="fixed bg-gradient-to-r from-purple-500/95 to-violet-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm pointer-events-auto z-50"
+        className="fixed bg-gradient-to-r from-purple-500/95 to-violet-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-6 shadow-2xl w-[90vw] md:w-auto max-w-sm md:max-w-md overflow-y-auto pointer-events-auto z-50"
         style={{
-          left: tooltipPosition.x + 25,
-          top: tooltipPosition.y - 50,
-          transform: tooltipPosition.x > window.innerWidth - 300 ? 'translateX(-100%)' : 'none'
+          left: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.x + 25,
+          top: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.y - 50,
+          transform: typeof window !== 'undefined' && window.innerWidth < 768
+            ? 'translate(-50%, -50%)'
+            : (tooltipPosition.x > window.innerWidth - 300 ? 'translateX(-100%)' : 'none')
         }}
         onMouseEnter={(e) => {
           console.log('🎯 MOUSE ENTERED TOOLTIP - MIDHEAVEN');
@@ -651,11 +847,18 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
         }}
         onMouseLeave={(e) => {
           console.log('🎯 MOUSE LEFT TOOLTIP - MIDHEAVEN');
-          // Don't close tooltip immediately if mouse is over a button
-          const target = e.relatedTarget as HTMLElement;
-          const isButton = target && typeof target.closest === 'function' ? target.closest('button') : null;
-          if (!isButton && !drawerOpen) {
-            setHoveredPlanet(null);
+          // ⭐ NUEVO: Si está locked, NO cerrar
+          if (tooltipLocked) {
+            return;
+          }
+          // Don't close tooltip if drawer is open - tooltip should stay visible with drawer
+          if (!drawerOpen) {
+            // Don't close tooltip immediately if mouse is over a button
+            const target = e.relatedTarget as HTMLElement;
+            const isButton = target && typeof target.closest === 'function' ? target.closest('button') : null;
+            if (!isButton) {
+              setHoveredPlanet(null);
+            }
           }
         }}
         onClick={(e) => {
@@ -717,6 +920,9 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
               }
 
               try {
+                // ⭐ NUEVO: Marcar tooltip como "locked" para que NO se cierre
+                setTooltipLocked(true);
+
                 console.log('✅ Calling onOpenDrawer...');
                 onOpenDrawer(interpretation.drawer);
                 console.log('✅ onOpenDrawer called successfully');
@@ -758,11 +964,13 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
     return (
       <div
-        className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-lg pointer-events-auto z-50"
+        className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-6 shadow-2xl w-[90vw] md:w-auto max-w-lg md:max-w-xl overflow-y-auto pointer-events-auto z-50"
         style={{
-          left: tooltipPosition.x,
-          top: tooltipPosition.y,
-          transform: tooltipPosition.x > window.innerWidth - 350 ? 'translateX(-100%)' : 'none'
+          left: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.x,
+          top: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.y,
+          transform: typeof window !== 'undefined' && window.innerWidth < 768
+            ? 'translate(-50%, -50%)'
+            : (tooltipPosition.x > window.innerWidth - 450 ? 'translateX(-100%)' : 'none')
         }}
         onMouseEnter={(e) => {
           console.log('🎯 MOUSE ENTERED TOOLTIP - ASPECT');
@@ -772,20 +980,29 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
         }}
         onMouseLeave={(e) => {
           console.log('🎯 MOUSE LEFT TOOLTIP - ASPECT');
-          // Don't close tooltip immediately if mouse is over a button
-          const target = e.relatedTarget as HTMLElement;
-          const isButton = target && typeof target.closest === 'function' ? target.closest('button') : null;
-          if (!isButton) {
-            if (!aspectTooltipLocked && !generatingAspect) {
-              handleAspectMouseLeave();
-            } else {
-              // If locked or generating, still allow mouse leave to clear timers
-              if (aspectTooltipTimer) {
-                clearTimeout(aspectTooltipTimer);
-                setAspectTooltipTimer(null);
+
+          // ⭐ Si está locked O generando, NO cerrar NUNCA
+          if (tooltipLocked || generatingAspect) {
+            console.log('🔒 Tooltip locked - NO SE CIERRA');
+            return;
+          }
+
+          // Solo cerrar si NO está locked ni generando
+          setTimeout(() => {
+            if (!drawerOpen) {
+              // Don't close tooltip immediately if mouse is over a button
+              const target = e.relatedTarget as HTMLElement;
+              const isButton = target && typeof target.closest === 'function' ? target.closest('button') : null;
+              if (!isButton) {
+                // Add a small delay to allow drawer to open first
+                setTimeout(() => {
+                  if (!aspectTooltipLocked && !generatingAspect && !tooltipLocked) {
+                    handleAspectMouseLeave();
+                  }
+                }, 100); // 100ms delay to allow drawer state to update
               }
             }
-          }
+          }, 100); // 100ms delay to allow drawer state update
         }}
         onClick={(e) => {
           console.log('🎯 TOOLTIP CLICKED (parent) - ASPECT');
@@ -857,32 +1074,67 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
         {/* Generate AI interpretation button */}
         {!hasAIInterpretation && userId && (
-          <button
-            onClick={async (e) => {
-              e.stopPropagation();
-              setAspectTooltipLocked(true);
-              await generateAspectInterpretation(
-                currentAspect.planet1,
-                currentAspect.planet2,
-                currentAspect.type,
-                currentAspect.orb
-              );
-            }}
-            disabled={generatingAspect}
-            className="w-full py-2.5 px-4 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white rounded-lg text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {generatingAspect ? (
-              <>
-                <div className="animate-spin">⏳</div>
-                <span>Generando interpretación...</span>
-              </>
-            ) : (
-              <>
-                <span>✨</span>
-                <span>Generar Interpretación IA</span>
-              </>
+          <div className="space-y-2">
+            <button
+              onMouseDown={async (e) => {
+                console.log('═══════════════════════════════════');
+                console.log('🎯 GENERANDO ASPECTO - MOUSEDOWN');
+                console.log('═══════════════════════════════════');
+
+                e.stopPropagation();
+                e.preventDefault();
+
+                // ⭐ CRÍTICO: Marcar tooltip como "locked" INMEDIATAMENTE
+                setTooltipLocked(true);
+                setAspectTooltipLocked(true);
+
+                console.log('🔒 Tooltip locked - permanecerá abierto durante generación');
+
+                // ⭐ AGREGAR: Timer para mensaje largo
+                const longGenerationTimer = setTimeout(() => {
+                  setShowLongGeneratingMessage(true);
+                }, 5000); // Después de 5 segundos
+
+                try {
+                  await generateAspectInterpretation(
+                    currentAspect.planet1,
+                    currentAspect.planet2,
+                    currentAspect.type,
+                    currentAspect.orb
+                  );
+                } finally {
+                  clearTimeout(longGenerationTimer); // ⭐ Limpiar timer
+                  setShowLongGeneratingMessage(false);
+                }
+              }}
+              disabled={generatingAspect}
+              style={{
+                pointerEvents: 'auto',
+                cursor: 'pointer'
+              }}
+              className="w-full py-2.5 px-4 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white rounded-lg text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {generatingAspect ? (
+                <>
+                  <div className="animate-spin">⏳</div>
+                  <span>Generando interpretación...</span>
+                </>
+              ) : (
+                <>
+                  <span>✨</span>
+                  <span>Generar Interpretación IA</span>
+                </>
+              )}
+            </button>
+
+            {/* Show message when generation takes too long */}
+            {showLongGeneratingMessage && (
+              <div className="text-center text-yellow-300 text-xs bg-yellow-500/20 rounded-lg p-2 border border-yellow-500/30">
+                <div className="font-semibold">⏳ Calculando interpretación...</div>
+                <div className="text-yellow-200">Esto puede tomar unos momentos. ¡Gracias por tu paciencia!</div>
+              </div>
             )}
-          </button>
+          </div>
         )}
 
         {/* Show full interpretation if available */}
@@ -916,6 +1168,9 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
               }
 
               try {
+                // ⭐ NUEVO: Marcar tooltip como "locked" para que NO se cierre
+                setTooltipLocked(true);
+
                 console.log('✅ Calling onOpenDrawer...');
                 onOpenDrawer(aspectInterpretation.drawer);
                 console.log('✅ onOpenDrawer called successfully');
@@ -928,7 +1183,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
               zIndex: 9999999,
               cursor: 'pointer'
             }}
-            className="w-full py-2.5 px-4 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 group"
+            className="w-full py-2.5 px-4 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 group shadow-lg"
           >
             <span>📖</span>
             <span>Ver interpretación completa</span>
@@ -951,13 +1206,27 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
   if (hoveredHouse) {
     return (
       <div
-        className="chart-tooltip fixed bg-gradient-to-r from-blue-500/95 to-cyan-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-sm pointer-events-auto z-50"
+        className="chart-tooltip fixed bg-gradient-to-r from-blue-500/95 to-cyan-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-6 shadow-2xl w-[90vw] md:w-auto max-w-sm md:max-w-md overflow-y-auto pointer-events-auto z-50"
         style={{
-          left: tooltipPosition.x + 25,
-          top: tooltipPosition.y - 50,
-          transform: tooltipPosition.x > window.innerWidth - 300 ? 'translateX(-100%)' : 'none'
+          left: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.x + 25,
+          top: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.y - 50,
+          transform: typeof window !== 'undefined' && window.innerWidth < 768
+            ? 'translate(-50%, -50%)'
+            : (tooltipPosition.x > window.innerWidth - 300 ? 'translateX(-100%)' : 'none')
         }}
       >
+        {/* ✅ NUEVO: Botón de cierre */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setHoveredHouse(null);
+          }}
+          className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
+          aria-label="Cerrar"
+        >
+          <X className="w-4 h-4 text-white" />
+        </button>
+
         <div className="flex items-start mb-3">
           <span className="text-3xl mr-3">🏠</span>
           <div>
@@ -984,14 +1253,21 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
     if (hoveredCard === 'birth-data') {
       return (
         <div
-          className="fixed bg-gradient-to-r from-green-500/95 to-emerald-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-md pointer-events-auto z-50"
+          className="fixed bg-gradient-to-r from-green-500/95 to-emerald-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-6 shadow-2xl w-[90vw] md:w-auto max-w-sm md:max-w-md overflow-y-auto pointer-events-auto z-50"
           style={{
-            left: tooltipPosition.x + 25,
-            top: tooltipPosition.y - 50,
-            transform: tooltipPosition.x > window.innerWidth - 400 ? 'translateX(-100%)' : 'none'
+            left: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.x + 25,
+            top: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.y - 50,
+            transform: typeof window !== 'undefined' && window.innerWidth < 768
+              ? 'translate(-50%, -50%)'
+              : (tooltipPosition.x > window.innerWidth - 300 ? 'translateX(-100%)' : 'none')
           }}
         onMouseEnter={handleTooltipMouseEnter}
-        onMouseLeave={() => handleMouseLeaveTooltip(() => { setHoveredCard?.(null); }, 2000)}
+        onMouseLeave={() => {
+          // Don't close tooltip if drawer is open - tooltip should stay visible with drawer
+          if (!drawerOpen) {
+            handleMouseLeaveTooltip(() => { setHoveredCard?.(null); }, 2000);
+          }
+        }}
         >
           <div className="flex items-center mb-3">
             <svg className="w-8 h-8 text-white mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -1053,14 +1329,21 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
       return (
         <div
-          className="fixed bg-gradient-to-r from-indigo-500/95 to-purple-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-lg pointer-events-auto z-50"
+          className="fixed bg-gradient-to-r from-indigo-500/95 to-purple-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-6 shadow-2xl w-[90vw] md:w-auto max-w-sm md:max-w-md overflow-y-auto pointer-events-auto z-50"
           style={{
-            left: tooltipPosition.x + 25,
-            top: tooltipPosition.y - 50,
-            transform: tooltipPosition.x > window.innerWidth - 450 ? 'translateX(-100%)' : 'none'
+            left: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.x + 25,
+            top: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.y - 50,
+            transform: typeof window !== 'undefined' && window.innerWidth < 768
+              ? 'translate(-50%, -50%)'
+              : (tooltipPosition.x > window.innerWidth - 300 ? 'translateX(-100%)' : 'none')
           }}
         onMouseEnter={handleTooltipMouseEnter}
-        onMouseLeave={() => handleMouseLeaveTooltip(() => setHoveredCard?.(null), 2000)}
+        onMouseLeave={() => {
+          // Don't close tooltip if drawer is open - tooltip should stay visible with drawer
+          if (!drawerOpen) {
+            handleMouseLeaveTooltip(() => setHoveredCard?.(null), 2000);
+          }
+        }}
         >
           <div className="flex items-center mb-3">
             <span className="text-3xl mr-3">⚡</span>
@@ -1153,15 +1436,34 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
       return (
         <div
-          className="fixed bg-gradient-to-r from-orange-500/95 to-red-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-lg pointer-events-auto z-50"
+          className="fixed bg-gradient-to-r from-orange-500/95 to-red-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-6 shadow-2xl w-[90vw] md:w-auto max-w-sm md:max-w-md overflow-y-auto pointer-events-auto z-50"
           style={{
-            left: tooltipPosition.x + 25,
-            top: tooltipPosition.y - 50,
-            transform: tooltipPosition.x > window.innerWidth - 450 ? 'translateX(-100%)' : 'none'
+            left: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.x + 25,
+            top: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.y - 50,
+            transform: typeof window !== 'undefined' && window.innerWidth < 768
+              ? 'translate(-50%, -50%)'
+              : (tooltipPosition.x > window.innerWidth - 300 ? 'translateX(-100%)' : 'none')
           }}
           onMouseEnter={handleTooltipMouseEnter}
-          onMouseLeave={() => handleTooltipMouseLeave('house')} // Use house delay for distributions
+          onMouseLeave={() => {
+            // Don't close tooltip if drawer is open - tooltip should stay visible with drawer
+            if (!drawerOpen) {
+              handleTooltipMouseLeave('house');
+            }
+          }}
         >
+          {/* ✅ NUEVO: Botón de cierre */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setHoveredCard?.(null);
+            }}
+            className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
+            aria-label="Cerrar"
+          >
+            <X className="w-4 h-4 text-white" />
+          </button>
+
           <div className="flex items-center mb-3">
             <span className="text-3xl mr-3">🔥</span>
             <div>
@@ -1179,7 +1481,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           {/* Dominant Element Analysis */}
           <div className="bg-orange-800/30 rounded-lg p-3 mb-3 border border-orange-400/20">
             <div className="flex items-center mb-2">
-              <span className="text-orange-300 text-sm font-semibold">⚡ Dominante: {dominantElement.key} ({dominantElement.value}%)</span>
+              <span className="text-orange-300 text-lg font-semibold">⚡ Dominante: {dominantElement.key} ({dominantElement.value}%)</span>
             </div>
             <div className="text-orange-200 text-xs leading-relaxed">
               {dominantElement.key === 'Aire' && 'Tu energía es intelectual, comunicativa y adaptable. Te expresas con claridad y visión amplia. Tu mente es tu superpoder - procesas información rápidamente y conectas ideas de manera innovadora.'}
@@ -1192,7 +1494,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           {/* Dominant Modality Analysis */}
           <div className="bg-red-800/30 rounded-lg p-3 mb-3 border border-red-400/20">
             <div className="flex items-center mb-2">
-              <span className="text-red-300 text-sm font-semibold">🎯 Estilo: {dominantModality.key} ({dominantModality.value}%)</span>
+              <span className="text-red-300 text-lg font-semibold">🎯 Estilo: {dominantModality.key} ({dominantModality.value}%)</span>
             </div>
             <div className="text-red-200 text-xs leading-relaxed">
               {dominantModality.key === 'Cardinal' && 'Inicias proyectos con energía decisiva. Tu superpoder es comenzar revoluciones y liderar cambios. Eres el catalizador que transforma ideas en acción.'}
@@ -1218,15 +1520,34 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
     if (hoveredCard === 'solar-return') {
       return (
         <div
-          className="fixed bg-gradient-to-r from-rose-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl max-w-md pointer-events-auto z-50"
+          className="fixed bg-gradient-to-r from-rose-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-4 shadow-2xl w-[90vw] md:w-auto max-w-sm md:max-w-md pointer-events-auto z-50"
           style={{
-            left: tooltipPosition.x + 25,
-            top: tooltipPosition.y - 50,
-            transform: tooltipPosition.x > window.innerWidth - 400 ? 'translateX(-100%)' : 'none'
+            left: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.x + 25,
+            top: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.y - 50,
+            transform: typeof window !== 'undefined' && window.innerWidth < 768
+              ? 'translate(-50%, -50%)'
+              : (tooltipPosition.x > window.innerWidth - 400 ? 'translateX(-100%)' : 'none')
           }}
           onMouseEnter={handleTooltipMouseEnter}
-          onMouseLeave={() => handleMouseLeaveTooltip(() => setHoveredCard?.(null), 2000)}
+          onMouseLeave={() => {
+            // Don't close tooltip if drawer is open - tooltip should stay visible with drawer
+            if (!drawerOpen) {
+              handleMouseLeaveTooltip(() => setHoveredCard?.(null), 2000);
+            }
+          }}
         >
+          {/* ✅ NUEVO: Botón de cierre */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setHoveredCard?.(null);
+            }}
+            className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
+            aria-label="Cerrar"
+          >
+            <X className="w-4 h-4 text-white" />
+          </button>
+
           <div className="flex items-center mb-3">
             <span className="text-3xl mr-3">✨</span>
             <div>
@@ -1265,6 +1586,56 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
         </div>
       );
     }
+  }
+
+  // =============================================================================
+  // ⭐ MODAL DE GENERACIÓN - ANTES DEL RETURN NULL FINAL
+  // =============================================================================
+
+  if (isGenerating) {
+    return (
+      <div
+        className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[200000] flex items-center justify-center"
+        style={{ pointerEvents: 'auto' }}
+      >
+        <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl p-8 shadow-2xl max-w-md mx-4 border-2 border-white/20">
+          {/* Spinner */}
+          <div className="flex justify-center mb-6">
+            <div className="relative">
+              <div className="w-20 h-20 border-4 border-white/30 rounded-full"></div>
+              <div className="w-20 h-20 border-4 border-white border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
+              <div className="absolute inset-0 flex items-center justify-center text-3xl">✨</div>
+            </div>
+          </div>
+
+          {/* Título */}
+          <h3 className="text-white text-2xl font-bold text-center mb-4">
+            Generando Interpretación
+          </h3>
+
+          {/* Mensaje */}
+          <div className="text-white/90 text-center space-y-2 mb-6">
+            <p className="text-lg">Analizando tu configuración astrológica...</p>
+            <p className="text-sm text-white/70">Esto puede tomar 5-40 segundos</p>
+          </div>
+
+          {/* Barra de progreso */}
+          <div className="w-full bg-white/20 rounded-full h-2 overflow-hidden mb-4">
+            <div className="h-full bg-white rounded-full animate-pulse" style={{ width: '70%' }}></div>
+          </div>
+
+          {/* Mensaje si tarda mucho */}
+          {showLongGeneratingMessage && (
+            <div className="text-center text-yellow-200 text-sm bg-yellow-500/20 rounded-lg p-3 border border-yellow-400/30 animate-pulse">
+              <div className="font-semibold">⏳ Calculando interpretación profunda...</div>
+              <div className="text-yellow-100 text-xs mt-1">
+                ¡Gracias por tu paciencia! Estamos creando algo único para ti.
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
   }
 
   return null;
