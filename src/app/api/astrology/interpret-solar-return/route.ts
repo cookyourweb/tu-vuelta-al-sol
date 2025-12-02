@@ -20,12 +20,100 @@ const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 // 📊 COMPLETE SOLAR RETURN INTERFACE
 // ==========================================
 
+interface SolarReturnInterpretationSection {
+  tooltip: {
+    titulo: string;
+    descripcionBreve: string;
+    significado: string;
+    efecto: string;
+    tipo: string;
+  };
+  drawer: {
+    titulo: string;
+    educativo: string;
+    poderoso: string;
+    poetico: string;
+    sombras: Array<{
+      nombre: string;
+      descripcion: string;
+      trampa: string;
+      regalo: string;
+    }>;
+    sintesis: {
+      frase: string;
+      declaracion: string;
+    };
+  };
+}
+
 interface CompleteSolarReturnInterpretation {
-  // CORE ESSENCE (3 fields - you already have these)
-  esencia_revolucionaria_anual: string;
-  proposito_vida_anual: string;
-  tema_central_del_anio: string;
-  
+  // CORE ESSENCE (matching natal structure with tooltip/drawer)
+  esencia_revolucionaria_anual: SolarReturnInterpretationSection;
+  proposito_vida_anual: SolarReturnInterpretationSection;
+  tema_central_del_anio: SolarReturnInterpretationSection;
+
+  // FORMATION TEMPRANA (adapted for annual context)
+  formacion_temprana: {
+    casa_lunar: {
+      signo_casa: string;
+      interpretacion: string;
+      influencia: string;
+    };
+    casa_saturnina: {
+      signo_casa: string;
+      interpretacion: string;
+      leccion: string;
+    };
+    casa_venusina: {
+      signo_casa: string;
+      interpretacion: string;
+      valores: string;
+    };
+  };
+
+  // PATRONES PSICOLOGICOS (annual psychological patterns)
+  patrones_psicologicos: Array<{
+    planeta: string;
+    infancia_emocional: string;
+    patron_formado: string;
+    impacto_adulto: string;
+  }>;
+
+  // PLANETAS PROFUNDOS (Urano, Neptuno, Plutón annual activation)
+  planetas_profundos: {
+    urano: string;
+    neptuno: string;
+    pluton: string;
+  };
+
+  // ANGULOS VITALES (Ascendente y Medio Cielo annual)
+  angulos_vitales: {
+    ascendente: {
+      posicion: string;
+      mascara_social: string;
+      superpoder: string;
+    };
+    medio_cielo: {
+      posicion: string;
+      vocacion_soul: string;
+      legado: string;
+    };
+  };
+
+  // NODOS LUNALES (annual nodal activation)
+  nodos_lunares: {
+    nodo_norte: {
+      signo_casa: string;
+      direccion_evolutiva: string;
+      desafio: string;
+    };
+    nodo_sur: {
+      signo_casa: string;
+      zona_comfort: string;
+      patron_repetitivo: string;
+    };
+  };
+
   // TECHNICAL ANALYSIS (professional methodology)
   analisis_tecnico_profesional: {
     asc_sr_en_casa_natal: {
@@ -52,7 +140,7 @@ interface CompleteSolarReturnInterpretation {
     }>;
     configuraciones_especiales: string[];
   };
-  
+
   // ACTION PLAN (quarterly breakdown)
   plan_accion: {
     trimestre_1: { foco: string; acciones: string[] };
@@ -60,20 +148,20 @@ interface CompleteSolarReturnInterpretation {
     trimestre_3: { foco: string; acciones: string[] };
     trimestre_4: { foco: string; acciones: string[] };
   };
-  
+
   // LUNAR CALENDAR (12 months)
   calendario_lunar_anual: Array<{
     mes: string;
     luna_nueva: { fecha: string; signo: string; mensaje: string };
     luna_llena: { fecha: string; signo: string; mensaje: string };
   }>;
-  
+
   // POWER DECLARATION
   declaracion_poder_anual: string;
-  
+
   // WARNINGS
   advertencias: string[];
-  
+
   // KEY EVENTS (timeline)
   eventos_clave_del_anio: Array<{
     periodo: string;
@@ -83,13 +171,16 @@ interface CompleteSolarReturnInterpretation {
     planetas_involucrados?: string[];
     accion_recomendada: string;
   }>;
-  
+
   // INSIGHTS
   insights_transformacionales: string[];
-  
+
   // RITUALS
   rituales_recomendados: string[];
-  
+
+  // FINAL REFLECTION QUESTION
+  pregunta_final_reflexion: string;
+
   // INTEGRATION
   integracion_final: {
     sintesis: string;
@@ -137,7 +228,7 @@ async function generateCompleteWithOpenAI(
   let systemPrompt = `You are a PROFESSIONAL astrologer specializing in Solar Return (Annual Revolution) following Shea, Teal, and Louis methodology.
 
 ⚠️ CRITICAL REQUIREMENTS:
-1. You MUST respond with VALID JSON containing ALL 12 required sections
+1. You MUST respond with VALID JSON containing ALL 17 required sections
 2. Use the REAL astronomical data provided (planets, houses, signs, degrees)
 3. Use the REAL user data: ${userProfile.name}, age ${userProfile.age}, from ${userProfile.birthPlace}
 4. Reference SPECIFIC positions like "Sol en ${solarReturnChart?.planets?.find((p: any) => p.name === 'Sol')?.sign} Casa ${solarReturnChart?.planets?.find((p: any) => p.name === 'Sol')?.house}"
@@ -147,9 +238,72 @@ async function generateCompleteWithOpenAI(
 
 Required JSON structure:
 {
-  "esencia_revolucionaria_anual": "string with SPECIFIC references to ${userProfile.name}'s chart",
-  "proposito_vida_anual": "string",
-  "tema_central_del_anio": "string",
+  "esencia_revolucionaria_anual": {
+    "tooltip": {
+      "titulo": "string",
+      "descripcionBreve": "string",
+      "significado": "string",
+      "efecto": "string",
+      "tipo": "string"
+    },
+    "drawer": {
+      "titulo": "string",
+      "educativo": "string",
+      "poderoso": "string",
+      "poetico": "string",
+      "sombras": [{"nombre": "string", "descripcion": "string", "trampa": "string", "regalo": "string"}],
+      "sintesis": {"frase": "string", "declaracion": "string"}
+    }
+  },
+  "proposito_vida_anual": {
+    "tooltip": {
+      "titulo": "string",
+      "descripcionBreve": "string",
+      "significado": "string",
+      "efecto": "string",
+      "tipo": "string"
+    },
+    "drawer": {
+      "titulo": "string",
+      "educativo": "string",
+      "poderoso": "string",
+      "poetico": "string",
+      "sombras": [{"nombre": "string", "descripcion": "string", "trampa": "string", "regalo": "string"}],
+      "sintesis": {"frase": "string", "declaracion": "string"}
+    }
+  },
+  "tema_central_del_anio": {
+    "tooltip": {
+      "titulo": "string",
+      "descripcionBreve": "string",
+      "significado": "string",
+      "efecto": "string",
+      "tipo": "string"
+    },
+    "drawer": {
+      "titulo": "string",
+      "educativo": "string",
+      "poderoso": "string",
+      "poetico": "string",
+      "sombras": [{"nombre": "string", "descripcion": "string", "trampa": "string", "regalo": "string"}],
+      "sintesis": {"frase": "string", "declaracion": "string"}
+    }
+  },
+  "formacion_temprana": {
+    "casa_lunar": {"signo_casa": "string", "interpretacion": "string", "influencia": "string"},
+    "casa_saturnina": {"signo_casa": "string", "interpretacion": "string", "leccion": "string"},
+    "casa_venusina": {"signo_casa": "string", "interpretacion": "string", "valores": "string"}
+  },
+  "patrones_psicologicos": [{"planeta": "string", "infancia_emocional": "string", "patron_formado": "string", "impacto_adulto": "string"}],
+  "planetas_profundos": {"urano": "string", "neptuno": "string", "pluton": "string"},
+  "angulos_vitales": {
+    "ascendente": {"posicion": "string", "mascara_social": "string", "superpoder": "string"},
+    "medio_cielo": {"posicion": "string", "vocacion_soul": "string", "legado": "string"}
+  },
+  "nodos_lunares": {
+    "nodo_norte": {"signo_casa": "string", "direccion_evolutiva": "string", "desafio": "string"},
+    "nodo_sur": {"signo_casa": "string", "zona_comfort": "string", "patron_repetitivo": "string"}
+  },
   "analisis_tecnico_profesional": {
     "asc_sr_en_casa_natal": {
       "casa": number (from comparison data),
@@ -177,6 +331,7 @@ Required JSON structure:
   "eventos_clave_del_anio": [...],
   "insights_transformacionales": [...],
   "rituales_recomendados": [...],
+  "pregunta_final_reflexion": "string",
   "integracion_final": {
     "sintesis": "string mentioning ${userProfile.name}",
     "pregunta_reflexion": "string"
@@ -224,6 +379,11 @@ Required JSON structure:
         'esencia_revolucionaria_anual',
         'proposito_vida_anual',
         'tema_central_del_anio',
+        'formacion_temprana',
+        'patrones_psicologicos',
+        'planetas_profundos',
+        'angulos_vitales',
+        'nodos_lunares',
         'analisis_tecnico_profesional',
         'plan_accion',
         'calendario_lunar_anual',
@@ -232,6 +392,7 @@ Required JSON structure:
         'eventos_clave_del_anio',
         'insights_transformacionales',
         'rituales_recomendados',
+        'pregunta_final_reflexion',
         'integracion_final'
       ];
 
@@ -240,11 +401,11 @@ Required JSON structure:
       );
 
       if (missingSections.length === 0) {
-        // ✅ VALIDATE CONTENT QUALITY
-        const hasUserName = parsedResponse.esencia_revolucionaria_anual.includes(userProfile.name) ||
+      // ✅ VALIDATE CONTENT QUALITY
+        const hasUserName = parsedResponse.esencia_revolucionaria_anual?.tooltip?.descripcionBreve?.includes(userProfile.name) ||
                            parsedResponse.declaracion_poder_anual.includes(userProfile.name.toUpperCase());
 
-        const hasRealData = parsedResponse.esencia_revolucionaria_anual !== "Usuario, este año 2025-2026 marca tu REVOLUCIÓN PERSONAL";
+        const hasRealData = parsedResponse.esencia_revolucionaria_anual?.drawer?.educativo !== "Usuario, este año 2025-2026 marca tu REVOLUCIÓN PERSONAL";
 
         if (!hasUserName || !hasRealData) {
           console.warn('⚠️ Response has all sections but uses generic data');
@@ -278,7 +439,7 @@ Required JSON structure:
 
   console.log('✅ OpenAI interpretation validated:', {
     sections: Object.keys(parsedResponse).length,
-    hasUserName: parsedResponse.esencia_revolucionaria_anual.includes(userProfile.name)
+    hasUserName: parsedResponse.esencia_revolucionaria_anual?.tooltip?.descripcionBreve?.includes(userProfile.name)
   });
 
   return parsedResponse;
@@ -308,14 +469,154 @@ function completeMissingKeys(
                  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
   
   return {
-    esencia_revolucionaria_anual: partial.esencia_revolucionaria_anual || 
-      `${userName}, este año ${returnYear}-${returnYear + 1} marca tu REVOLUCIÓN PERSONAL en ${currentLocation}. No es un ciclo más - es tu momento de REESCRIBIR tu realidad desde la autenticidad radical. ${relocationNote}`,
-    
-    proposito_vida_anual: partial.proposito_vida_anual ||
-      `Tu misión NO NEGOCIABLE: Desmantelar estructuras mentales limitantes y emerger como la AUTORIDAD de tu propia vida. Sin disculpas. Sin retrasos.`,
-    
-    tema_central_del_anio: partial.tema_central_del_anio ||
-      `Reinvención Consciente y Empoderamiento Personal`,
+    esencia_revolucionaria_anual: partial.esencia_revolucionaria_anual || {
+      tooltip: {
+        titulo: "Esencia Revolucionaria Anual",
+        descripcionBreve: `${userName}, este año ${returnYear}-${returnYear + 1} marca tu REVOLUCIÓN PERSONAL en ${currentLocation}. No es un ciclo más - es tu momento de REESCRIBIR tu realidad desde la autenticidad radical.`,
+        significado: "Tu esencia revolucionaria anual representa el núcleo transformador de este ciclo solar, donde rompes con patrones antiguos para emerger como arquitecto de tu propia realidad.",
+        efecto: "Activación profunda de tu poder soberano y capacidad de manifestación consciente.",
+        tipo: "Esencia Transformadora"
+      },
+      drawer: {
+        titulo: "Tu Revolución Personal",
+        educativo: `${userName}, este año ${returnYear}-${returnYear + 1} marca tu REVOLUCIÓN PERSONAL en ${currentLocation}. No es un ciclo más - es tu momento de REESCRIBIR tu realidad desde la autenticidad radical. ${relocationNote}`,
+        poderoso: "Eres el PROTAGONISTA de tu transformación. No esperes permisos ni validaciones externas - tu poder reside en tu DECISIÓN consciente.",
+        poetico: "Como el fénix que renace de sus cenizas, este año transformas las sombras del pasado en alas de libertad absoluta.",
+        sombras: [
+          {
+            nombre: "Resistencia al Cambio",
+            descripcion: "Miedo inconsciente a abandonar la zona de confort, disfrazado de 'prudencia'",
+            trampa: "Creer que el cambio requiere tiempo infinito cuando en realidad exige acción inmediata",
+            regalo: "La transformación radical solo ocurre cuando abrazas lo desconocido con valentía"
+          }
+        ],
+        sintesis: {
+          frase: "Tu revolución ya comenzó",
+          declaracion: "YO, ${userName.toUpperCase()}, RECLAMO MI PODER SOBERANO. ESTE AÑO SOY EL ARQUITECTO CONSCIENTE DE MI REALIDAD."
+        }
+      }
+    },
+
+    proposito_vida_anual: partial.proposito_vida_anual || {
+      tooltip: {
+        titulo: "Propósito de Vida Anual",
+        descripcionBreve: "Tu misión NO NEGOCIABLE: Desmantelar estructuras mentales limitantes y emerger como la AUTORIDAD de tu propia vida.",
+        significado: "El propósito anual revela la dirección específica que tu alma elige para este ciclo solar, guiándote hacia tu evolución consciente.",
+        efecto: "Claridad absoluta sobre tu contribución única al mundo y el legado que deseas construir.",
+        tipo: "Dirección Evolutiva"
+      },
+      drawer: {
+        titulo: "Tu Misión Anual",
+        educativo: "Tu misión NO NEGOCIABLE: Desmantelar estructuras mentales limitantes y emerger como la AUTORIDAD de tu propia vida. Sin disculpas. Sin retrasos.",
+        poderoso: "Tu propósito no es opcional - es la razón por la cual existes en este momento específico de la historia.",
+        poetico: "Como una flecha lanzada hacia el corazón del universo, tu propósito te guía con precisión infalible hacia tu destino.",
+        sombras: [
+          {
+            nombre: "Duda del Propósito",
+            descripcion: "Creer que tu contribución es insignificante o que otros son más importantes",
+            trampa: "Compararte con otros en lugar de honrar tu unicidad irrepetible",
+            regalo: "Tu propósito específico es exactamente lo que el mundo necesita en este momento"
+          }
+        ],
+        sintesis: {
+          frase: "Tu propósito te espera",
+          declaracion: "Mi contribución única al mundo es esencial e irreemplazable."
+        }
+      }
+    },
+
+    tema_central_del_anio: partial.tema_central_del_anio || {
+      tooltip: {
+        titulo: "Tema Central del Año",
+        descripcionBreve: "Reinvención Consciente y Empoderamiento Personal",
+        significado: "El tema central sintetiza la energía predominante de tu año solar, revelando el patrón maestro que conecta todas tus experiencias.",
+        efecto: "Comprensión profunda de por qué ciertos eventos ocurren y cómo contribuir a tu evolución.",
+        tipo: "Patrón Maestro"
+      },
+      drawer: {
+        titulo: "El Tema de Tu Año",
+        educativo: "Reinvención Consciente y Empoderamiento Personal - este año no se trata de sobrevivir, se trata de DOMINAR tu realidad con maestría absoluta.",
+        poderoso: "Cada desafío es una oportunidad para demostrar tu poder. Cada victoria es una confirmación de tu divinidad.",
+        poetico: "Como un alquimista transformando plomo en oro, este año conviertes tus limitaciones en superpoderes ilimitados.",
+        sombras: [
+          {
+            nombre: "Ilusión de Victimismo",
+            descripcion: "Creer que las circunstancias externas controlan tu destino",
+            trampa: "Culpar a otros o al 'universo' por tus resultados",
+            regalo: "Eres el creador consciente de tu experiencia, con poder absoluto sobre tu realidad"
+          }
+        ],
+        sintesis: {
+          frase: "Tu poder es ilimitado",
+          declaracion: "Soy el arquitecto soberano de mi realidad, creando mi experiencia con intención consciente."
+        }
+      }
+    },
+
+    formacion_temprana: partial.formacion_temprana || {
+      casa_lunar: {
+        signo_casa: "Casa Lunar SR",
+        interpretacion: "Este año, tu casa lunar SR activa temas emocionales profundos relacionados con raíces y seguridad emocional.",
+        influencia: "Las emociones del año pasado se transforman en sabiduría emocional práctica."
+      },
+      casa_saturnina: {
+        signo_casa: "Casa Saturnina SR",
+        interpretacion: "Saturno SR te pide responsabilidad y madurez en áreas específicas de tu vida.",
+        leccion: "Aprender a construir estructuras sólidas que soporten tu crecimiento futuro."
+      },
+      casa_venusina: {
+        signo_casa: "Casa Venusina SR",
+        interpretacion: "Venus SR ilumina tus valores y relaciones, mostrando dónde necesitas más amor y abundancia.",
+        valores: "Este año redefine qué es verdaderamente valioso para ti."
+      }
+    },
+
+    patrones_psicologicos: partial.patrones_psicologicos || [
+      {
+        planeta: "Luna SR",
+        infancia_emocional: "Patrones emocionales del año pasado resurgen para ser sanados.",
+        patron_formado: "Necesidad de seguridad emocional que puede limitar tu expansión.",
+        impacto_adulto: "Este año transforma inseguridades emocionales en confianza profunda."
+      },
+      {
+        planeta: "Saturno SR",
+        infancia_emocional: "Miedos de fracaso aprendidos en la infancia se activan.",
+        patron_formado: "Autolimitación por miedo al juicio o fracaso.",
+        impacto_adulto: "Construir confianza real a través de logros tangibles."
+      }
+    ],
+
+    planetas_profundos: partial.planetas_profundos || {
+      urano: "Urano SR trae cambios inesperados y libertad. Este año rompe cadenas invisibles que te atan al pasado.",
+      neptuno: "Neptuno SR activa tu intuición espiritual. Conecta con tu guía interna para navegar este año.",
+      pluton: "Plutón SR inicia transformaciones profundas. Lo que muere este año crea espacio para lo nuevo."
+    },
+
+    angulos_vitales: partial.angulos_vitales || {
+      ascendente: {
+        posicion: "Ascendente SR",
+        mascara_social: "Tu presentación anual al mundo cambia - nuevas oportunidades aparecen.",
+        superpoder: "Capacidad de reinventar tu imagen y atraer lo que realmente deseas."
+      },
+      medio_cielo: {
+        posicion: "Medio Cielo SR",
+        vocacion_soul: "Tu vocación del año se revela - no es trabajo, es CONTRIBUCIÓN.",
+        legado: "Este año construye el legado que quieres dejar en el mundo."
+      }
+    },
+
+    nodos_lunares: partial.nodos_lunares || {
+      nodo_norte: {
+        signo_casa: "Nodo Norte SR",
+        direccion_evolutiva: "Hacia dónde tu alma quiere crecer este año específico.",
+        desafio: "Dejar atrás comodidades del pasado para abrazar tu futuro."
+      },
+      nodo_sur: {
+        signo_casa: "Nodo Sur SR",
+        zona_comfort: "Habilidades que dominas pero que ya no te sirven.",
+        patron_repetitivo: "Ciclos que repites por costumbre, no por elección."
+      }
+    },
     
     analisis_tecnico_profesional: partial.analisis_tecnico_profesional || {
       asc_sr_en_casa_natal: {
@@ -481,6 +782,9 @@ function completeMissingKeys(
       '🔥 RITUAL DE CIERRE (3 días pre-cumpleaños): Escribir "Sangre, Sudor y Lágrimas del año". ¿Valió la pena? Integrar TODO antes del siguiente ciclo.'
     ],
     
+    pregunta_final_reflexion: partial.pregunta_final_reflexion ||
+      `¿Qué versión de ti mismo/a elegirás manifestar este año: la VALIENTE y AUTÉNTICA, o la cómoda y conocida?`,
+
     integracion_final: partial.integracion_final || {
       sintesis: `Este año ${returnYear}-${returnYear + 1} es tu LABORATORIO DE TRANSFORMACIÓN CONSCIENTE, ${userName}. No es tiempo de víctimas ni espectadores - es tiempo de PROTAGONISTAS REVOLUCIONARIOS. Cada Luna Nueva es un reinicio. Cada decisión cuenta. Cada acción crea tu realidad. El Solar Return te entrega el MAPA - tú decides si lo sigues con valentía disruptiva o lo ignoras por comodidad mediocre. La astrología no predice - PREPARA. Usa este conocimiento para volverse ANTIFRÁGIL: más fuerte ante cada desafío, más consciente ante cada oportunidad, más auténtico ante cada elección. Tu revolución personal ya comenzó.`,
       pregunta_reflexion: `¿Qué versión de ti mismo/a elegirás manifestar este año: la VALIENTE y AUTÉNTICA, o la cómoda y conocida?`

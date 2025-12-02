@@ -44,9 +44,11 @@ interface ChartTooltipsProps {
   solarReturnYear?: number;
   solarReturnTheme?: string;
   ascSRInNatalHouse?: number;
+  cardHoverTimer?: NodeJS.Timeout | null;
+  setCardHoverTimer?: (timer: NodeJS.Timeout | null) => void;
 }
 
-const ChartTooltips: React.FC<ChartTooltipsProps> = ({
+const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
   hoveredPlanet,
   hoveredAspect,
   hoveredHouse,
@@ -1641,4 +1643,4 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
   return null;
 };
 
-export default ChartTooltips;
+export default ChartTooltipsComponent;

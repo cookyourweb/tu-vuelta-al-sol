@@ -110,9 +110,11 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       if (!response.ok) {
         // 404 = No interpretation found (normal on first load)
         if (response.status === 404) {
-          console.log('ℹ️ No hay interpretación guardada aún (primera vez)');
+          console.log('ℹ️ No hay interpretación guardada aún (primera vez) - generando automáticamente');
           setSavedInterpretations([]);
           setHasRecentInterpretation(false);
+          // ✅ Automatically generate interpretation when not found
+          generateInterpretation(false);
           return;
         }
 
@@ -512,7 +514,14 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               eventos_clave: rawInterpretation.eventos_clave_del_anio,
               insights_transformacionales: rawInterpretation.insights_transformacionales,
               rituales_recomendados: rawInterpretation.rituales_recomendados,
-              integracion_final: rawInterpretation.integracion_final
+              integracion_final: rawInterpretation.integracion_final,
+              // ✅ ADD MISSING SECTIONS FOR COMPLETE SOLAR RETURN DISPLAY
+              formacion_temprana: rawInterpretation.formacion_temprana,
+              patrones_psicologicos: rawInterpretation.patrones_psicologicos,
+              planetas_profundos: rawInterpretation.planetas_profundos,
+              angulos_vitales: rawInterpretation.angulos_vitales,
+              nodos_lunares: rawInterpretation.nodos_lunares,
+              pregunta_final_reflexion: rawInterpretation.pregunta_final_reflexion
             };
           } else {
             interpretationData = rawInterpretation;
@@ -694,6 +703,12 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
     }
 
     const data = interpretation.interpretation;
+
+    // ✅ SAFETY: Ensure data is a plain object and filter out non-renderable properties
+    if (typeof data !== 'object' || Array.isArray(data) || data === null) {
+      console.log('🎨 ❌ Data is not a valid object - return null');
+      return null;
+    }
 
     console.log('🎨 data keys:', Object.keys(data));
     console.log('🎨 data.esencia_revolucionaria:', data.esencia_revolucionaria ? 'EXISTS' : 'NOT FOUND');
