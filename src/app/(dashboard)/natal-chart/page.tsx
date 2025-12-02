@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import ChartDisplay from '@/components/astrology/ChartDisplay';
@@ -60,6 +60,9 @@ export default function NatalChartPage() {
   const [hasInterpretations, setHasInterpretations] = useState(false);
   const [generatingInterpretations, setGeneratingInterpretations] = useState(false);
   const [interpretationProgress, setInterpretationProgress] = useState('');
+
+  // ✅ FIX: useRef para evitar doble generación de interpretaciones
+  const interpretationCheckDone = useRef(false);
 
   // ✅ FUNCIÓN: Procesar datos de carta
   const processChartData = (rawData: any): NatalChartData => {
@@ -132,7 +135,7 @@ export default function NatalChartPage() {
     }
   };
 
-  // ✅ NEW: Generate AI interpretations
+  // ✅ NEW: Generate AI interpretations with detailed progress
   const generateInterpretations = async (customChartData?: any) => {
     if (!user?.uid || !birthData) {
       console.log('⚠️ Cannot generate - missing user or birth data');
@@ -148,11 +151,47 @@ export default function NatalChartPage() {
     }
 
     setGeneratingInterpretations(true);
-    setInterpretationProgress('🔮 Iniciando generación de interpretaciones AI...');
+
+    // ⚠️ MENSAJE INICIAL DE ADVERTENCIA
+    setInterpretationProgress('⚠️ IMPORTANTE: Este es un análisis muy detallado que tomará 2-3 minutos. Por favor NO cierres esta pantalla.');
+
+    // Esperar 3 segundos para que lean la advertencia
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
     try {
       console.log('🚀 Starting AI interpretation generation...');
 
+      // 📊 MENSAJES DE PROGRESO SIMULADOS (actualizados mientras el backend trabaja)
+      const progressMessages = [
+        { message: '🔮 Conectando con GPT-4o para análisis profundo...', delay: 500 },
+        { message: '🌅 Generando Ascendente y Medio Cielo...', delay: 8000 },
+        { message: '🪐 Iniciando interpretaciones de planetas...', delay: 5000 },
+        { message: '☀️ Generando Sol en ' + (dataToUse?.planets.find(p => p.name === 'Sun' || p.name === 'Sol')?.sign || 'tu signo') + '...', delay: 10000 },
+        { message: '🌙 Generando Luna en ' + (dataToUse?.planets.find(p => p.name === 'Moon' || p.name === 'Luna')?.sign || 'tu signo') + '...', delay: 10000 },
+        { message: '☿️ Generando Mercurio en ' + (dataToUse?.planets.find(p => p.name === 'Mercury' || p.name === 'Mercurio')?.sign || 'tu signo') + '...', delay: 10000 },
+        { message: '💎 Generando Venus en ' + (dataToUse?.planets.find(p => p.name === 'Venus')?.sign || 'tu signo') + '...', delay: 10000 },
+        { message: '⚔️ Generando Marte en ' + (dataToUse?.planets.find(p => p.name === 'Mars' || p.name === 'Marte')?.sign || 'tu signo') + '...', delay: 10000 },
+        { message: '🎯 Generando Jupiter en ' + (dataToUse?.planets.find(p => p.name === 'Jupiter' || p.name === 'Júpiter')?.sign || 'tu signo') + '...', delay: 10000 },
+        { message: '⏳ Generando Saturno en ' + (dataToUse?.planets.find(p => p.name === 'Saturn' || p.name === 'Saturno')?.sign || 'tu signo') + '...', delay: 10000 },
+        { message: '🌑 Procesando Lilith y Chiron...', delay: 8000 },
+        { message: '🔄 Generando Nodos Lunares (evolución kármica)...', delay: 10000 },
+        { message: '🔥 Analizando Elemento Fuego...', delay: 5000 },
+        { message: '🌍 Analizando Elemento Tierra...', delay: 5000 },
+        { message: '💨 Analizando Elemento Aire...', delay: 5000 },
+        { message: '💧 Analizando Elemento Agua...', delay: 5000 },
+        { message: '⚡ Procesando Modalidades astrológicas...', delay: 5000 },
+        { message: '✨ Finalizando interpretaciones...', delay: 3000 },
+      ];
+
+      let messageIndex = 0;
+      const messageInterval = setInterval(() => {
+        if (messageIndex < progressMessages.length) {
+          setInterpretationProgress(progressMessages[messageIndex].message);
+          messageIndex++;
+        }
+      }, 7000); // Cambiar mensaje cada 7 segundos
+
+      // 🚀 LLAMADA AL BACKEND (mientras mostramos progreso)
       const response = await fetch('/api/astrology/interpret-natal-complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -169,26 +208,32 @@ export default function NatalChartPage() {
         })
       });
 
+      clearInterval(messageInterval);
       const result = await response.json();
 
       if (result.success) {
         console.log('✅ AI Interpretations generated successfully!');
         setHasInterpretations(true);
-        setInterpretationProgress('✨ ¡Interpretaciones listas!');
-        
-        // Clear progress message after 3 seconds
+        setInterpretationProgress('🎉 ¡Interpretaciones completadas! Tu análisis profundo está listo.');
+
+        // Clear progress message after 5 seconds
         setTimeout(() => {
           setInterpretationProgress('');
-        }, 3000);
+          setGeneratingInterpretations(false);
+        }, 5000);
       } else {
         console.error('❌ Error generating interpretations:', result.error);
-        setInterpretationProgress('⚠️ Error generando interpretaciones');
+        setInterpretationProgress('⚠️ Error generando interpretaciones: ' + (result.error || 'Error desconocido'));
+        setTimeout(() => {
+          setGeneratingInterpretations(false);
+        }, 5000);
       }
     } catch (error) {
       console.error('❌ Error in generation request:', error);
-      setInterpretationProgress('❌ Error en la solicitud');
-    } finally {
-      setGeneratingInterpretations(false);
+      setInterpretationProgress('❌ Error en la solicitud. Por favor intenta de nuevo.');
+      setTimeout(() => {
+        setGeneratingInterpretations(false);
+      }, 5000);
     }
   };
 
@@ -343,15 +388,33 @@ export default function NatalChartPage() {
 
   // ✅ NEW: Auto-generate interpretations when chart + birth data are ready
   useEffect(() => {
+    let isMounted = true;
+
     async function autoGenerateIfNeeded() {
-      if (!chartData || !birthData || !user?.uid) {
-        console.log('⏸️ Waiting for chart and birth data...');
+      // ✅ FIX: Usar useRef para evitar múltiples llamadas
+      if (interpretationCheckDone.current) {
+        console.log('⏸️ Interpretation check already done, skipping...');
         return;
       }
-      
+
+      if (!chartData || !birthData || !user?.uid) {
+        if (!chartData) console.log('⏸️ Waiting for chartData...');
+        if (!birthData) console.log('⏸️ Waiting for birthData...');
+        if (!user?.uid) console.log('⏸️ Waiting for user...');
+        return;
+      }
+
+      // ✅ FIX: Marcar como hecho ANTES de cualquier operación async
+      interpretationCheckDone.current = true;
+
       console.log('🔍 Chart and birth data ready, checking interpretations...');
+      console.log('🔍 chartData planets:', chartData.planets?.length);
+      console.log('🔍 birthData:', birthData.fullName);
+
       const exists = await checkInterpretations();
-      
+
+      if (!isMounted) return;
+
       if (!exists) {
         console.log('🚀 No interpretations found - auto-generating...');
         await generateInterpretations();
@@ -359,8 +422,12 @@ export default function NatalChartPage() {
         console.log('✅ Interpretations already exist, skipping generation');
       }
     }
-    
+
     autoGenerateIfNeeded();
+
+    return () => {
+      isMounted = false;
+    };
   }, [chartData, birthData, user?.uid]);
 
   // ✅ ANIMACIÓN DE MENSAJES DE CARGA (para loading inicial y regeneración)

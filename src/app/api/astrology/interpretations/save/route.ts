@@ -252,11 +252,14 @@ Example start:
   }
 }
 
-// ✅ GET: RETRIEVE CACHED INTERPRETATION
+// ✅ GET: RETRIEVE CACHED INTERPRETATION (supports all chart types)
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
+    const chartType = searchParams.get('chartType') || 'solar-return'; // ✅ FIX: Support all chart types
+
+    console.log('🔍 [GET] Retrieving interpretation:', { userId, chartType });
 
     if (!userId) {
       return NextResponse.json(
@@ -267,9 +270,10 @@ export async function GET(request: NextRequest) {
 
     await connectDB();
 
+    // ✅ FIX: Search by dynamic chartType, not just 'solar-return'
     const interpretationDoc = await Interpretation.findOne({
       userId,
-      chartType: 'solar-return',
+      chartType,
       expiresAt: { $gt: new Date() }
     })
     .sort({ generatedAt: -1 })
@@ -277,11 +281,14 @@ export async function GET(request: NextRequest) {
     .exec() as any;
 
     if (!interpretationDoc) {
+      console.log(`ℹ️ [GET] No ${chartType} interpretation found for user`);
       return NextResponse.json({
         success: false,
-        message: 'No Solar Return interpretation available'
+        message: `No ${chartType} interpretation available`
       }, { status: 404 });
     }
+
+    console.log(`✅ [GET] Found ${chartType} interpretation from ${interpretationDoc.generatedAt}`);
 
     return NextResponse.json({
       success: true,
@@ -292,10 +299,78 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('❌ Error retrieving Solar Return:', error);
+    console.error('❌ Error retrieving interpretation:', error);
     return NextResponse.json({
       success: false,
       error: 'Failed to retrieve interpretation'
+    }, { status: 500 });
+  }
+}
+
+// ✅ PUT: SAVE/UPDATE INTERPRETATION (for natal and other chart types)
+// Uses upsert to REPLACE existing interpretation instead of creating duplicates
+export async function PUT(request: NextRequest) {
+  try {
+    console.log('💾 ===== SAVE/UPDATE INTERPRETATION REQUEST =====');
+
+    const body = await request.json();
+    const {
+      userId,
+      chartType,
+      interpretation,
+      userProfile,
+      generatedAt
+    } = body;
+
+    console.log('📋 Save request:', {
+      userId,
+      chartType,
+      hasInterpretation: !!interpretation,
+      userProfile: userProfile?.name
+    });
+
+    if (!userId || !chartType || !interpretation) {
+      return NextResponse.json(
+        { success: false, error: 'userId, chartType, and interpretation are required' },
+        { status: 400 }
+      );
+    }
+
+    await connectDB();
+
+    // ✅ Use findOneAndUpdate with upsert to REPLACE existing interpretation
+    const result = await Interpretation.findOneAndUpdate(
+      { userId, chartType },
+      {
+        $set: {
+          userId,
+          chartType,
+          userProfile: userProfile || {},
+          interpretation,
+          generatedAt: generatedAt ? new Date(generatedAt) : new Date(),
+          expiresAt: new Date(Date.now() + CACHE_DURATION),
+          method: 'api',
+          cached: false
+        }
+      },
+      { upsert: true, new: true }
+    );
+
+    console.log(`✅ [PUT] Interpretation saved/updated for ${chartType}:`, result._id);
+
+    return NextResponse.json({
+      success: true,
+      interpretationId: result._id,
+      message: `Interpretation ${chartType} saved successfully`,
+      generatedAt: result.generatedAt
+    });
+
+  } catch (error) {
+    console.error('❌ Error saving interpretation:', error);
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to save interpretation',
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }
