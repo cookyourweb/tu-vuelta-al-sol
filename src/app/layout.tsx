@@ -1,6 +1,7 @@
 // src/app/layout.tsx
 import type { Metadata } from 'next';
 import { Inter, Playfair_Display } from 'next/font/google';
+import { getMessages } from 'next-intl/server';
 import { AuthProvider } from '@/context/AuthContext';
 import { NotificationProvider } from '@/context/NotificationContext';
 import WelcomeModal from '@/components/modals/WelcomeModal';
