@@ -5,6 +5,8 @@
 // =============================================================================
 
 import { NextRequest, NextResponse } from 'next/server';
+
+export const maxDuration = 300;
 import connectToDatabase from '@/lib/db';
 import {
   generateCompleteNatalInterpretation,

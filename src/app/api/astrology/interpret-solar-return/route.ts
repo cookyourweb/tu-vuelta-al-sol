@@ -4,6 +4,8 @@
 // Output: Full year prediction with actionable insights
 
 import { NextRequest, NextResponse } from 'next/server';
+
+export const maxDuration = 300;
 import OpenAI from 'openai';
 import connectDB from '@/lib/db';
 import Interpretation from '@/models/Interpretation';
