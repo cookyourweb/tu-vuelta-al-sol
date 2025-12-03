@@ -80,8 +80,10 @@ const ChartDisplay = ({
   const [clickedPlanet, setClickedPlanet] = useState<string | null>(null);
   const [clickedAspect, setClickedAspect] = useState<string | null>(null);
 
-  // ✅ Hover delay timers
+  // ✅ Hover delay timers (reduced to 150ms for better responsiveness on small elements)
   const [cardHoverTimer, setCardHoverTimer] = useState<NodeJS.Timeout | null>(null);
+  // ✅ Track mouse down state for aspect lines to prevent tooltip hiding on click
+  const [aspectMouseDown, setAspectMouseDown] = useState(false);
 
   // ✅ FUNCIONES UTILITARIAS
   const handleMouseMove = (event: React.MouseEvent) => {
@@ -295,11 +297,33 @@ const ChartDisplay = ({
             strokeDasharray={isMinor ? "3,3" : "none"}
             className="transition-all duration-200 cursor-pointer"
             onMouseEnter={(e) => {
-              setHoveredAspect(aspectKey);
-              handleMouseMove(e);
+              // ✅ DELAY: Clear any existing timer and set new one
+              if (cardHoverTimer) clearTimeout(cardHoverTimer);
+              const timer = setTimeout(() => {
+                setHoveredAspect(aspectKey);
+                handleMouseMove(e);
+              }, 150); // 150ms delay for better responsiveness on small elements
+              setCardHoverTimer(timer);
             }}
             onMouseMove={handleMouseMove}
-            onMouseLeave={() => setHoveredAspect(null)}
+            onMouseLeave={() => {
+              // ✅ IMMEDIATE: Clear timer and hide tooltip immediately on mouse leave (unless mouse is down)
+              if (!aspectMouseDown) {
+                if (cardHoverTimer) {
+                  clearTimeout(cardHoverTimer);
+                  setCardHoverTimer(null);
+                }
+                setHoveredAspect(null);
+              }
+            }}
+            onMouseDown={() => {
+              setAspectMouseDown(true);
+              setHoveredAspect(aspectKey);
+              handleMouseMove({ clientX: 0, clientY: 0 } as any);
+            }}
+            onMouseUp={() => {
+              setAspectMouseDown(false);
+            }}
             onClick={(e) => {
               setHoveredAspect(aspectKey);
               handleMouseMove(e);
@@ -330,11 +354,27 @@ const ChartDisplay = ({
             strokeWidth={isHovered ? "2" : "1"}
             className="cursor-pointer transition-all duration-200"
             onMouseEnter={(e) => {
-              setHoveredPlanet(planet.name);
-              handleMouseMove(e);
+              // ✅ DELAY: Clear any existing timer and set new one
+              if (cardHoverTimer) clearTimeout(cardHoverTimer);
+              const timer = setTimeout(() => {
+                setHoveredPlanet(planet.name);
+                handleMouseMove(e);
+              }, 150); // 150ms delay for better responsiveness on small elements
+              setCardHoverTimer(timer);
             }}
             onMouseMove={handleMouseMove}
-            onMouseLeave={() => setHoveredPlanet(null)}
+            onMouseLeave={() => {
+              // ✅ IMMEDIATE: Clear timer and hide tooltip immediately on mouse leave
+              if (cardHoverTimer) {
+                clearTimeout(cardHoverTimer);
+                setCardHoverTimer(null);
+              }
+              setHoveredPlanet(null);
+            }}
+            onMouseDown={() => {
+              setHoveredPlanet(planet.name);
+              handleMouseMove({ clientX: 0, clientY: 0 } as any);
+            }}
             onClick={(e) => {
               setClickedPlanet(planet.name);
               setHoveredPlanet(planet.name);
@@ -433,11 +473,27 @@ const ChartDisplay = ({
             strokeWidth="1"
             className="cursor-pointer transition-all duration-200"
             onMouseEnter={(e) => {
-              setHoveredHouse(houseNumber);
-              handleMouseMove(e);
+              // ✅ DELAY: Clear any existing timer and set new one
+              if (cardHoverTimer) clearTimeout(cardHoverTimer);
+              const timer = setTimeout(() => {
+                setHoveredHouse(houseNumber);
+                handleMouseMove(e);
+              }, 150); // 150ms delay for better responsiveness on small elements
+              setCardHoverTimer(timer);
             }}
             onMouseMove={handleMouseMove}
-            onMouseLeave={() => setHoveredHouse(null)}
+            onMouseLeave={() => {
+              // ✅ IMMEDIATE: Clear timer and hide tooltip immediately on mouse leave
+              if (cardHoverTimer) {
+                clearTimeout(cardHoverTimer);
+                setCardHoverTimer(null);
+              }
+              setHoveredHouse(null);
+            }}
+            onMouseDown={() => {
+              setHoveredHouse(houseNumber);
+              handleMouseMove({ clientX: 0, clientY: 0 } as any);
+            }}
           />
           
           <text
@@ -535,11 +591,27 @@ const ChartDisplay = ({
             strokeWidth="2"
             className="cursor-pointer hover:r-10 transition-all duration-200"
             onMouseEnter={(e) => {
-              setHoveredPlanet('Ascendente');
-              handleMouseMove(e);
+              // ✅ DELAY: Clear any existing timer and set new one
+              if (cardHoverTimer) clearTimeout(cardHoverTimer);
+              const timer = setTimeout(() => {
+                setHoveredPlanet('Ascendente');
+                handleMouseMove(e);
+              }, 150); // 150ms delay for better responsiveness on small elements
+              setCardHoverTimer(timer);
             }}
             onMouseMove={handleMouseMove}
-            onMouseLeave={() => setHoveredPlanet(null)}
+            onMouseLeave={() => {
+              // ✅ IMMEDIATE: Clear timer and hide tooltip immediately on mouse leave
+              if (cardHoverTimer) {
+                clearTimeout(cardHoverTimer);
+                setCardHoverTimer(null);
+              }
+              setHoveredPlanet(null);
+            }}
+            onMouseDown={() => {
+              setHoveredPlanet('Ascendente');
+              handleMouseMove({ clientX: 0, clientY: 0 } as React.MouseEvent);
+            }}
           />
           
           <text
@@ -601,11 +673,27 @@ const ChartDisplay = ({
             strokeWidth="1"
             className="cursor-pointer hover:r-8 transition-all duration-200"
             onMouseEnter={(e) => {
-              setHoveredPlanet('Medio Cielo');
-              handleMouseMove(e);
+              // ✅ DELAY: Clear any existing timer and set new one
+              if (cardHoverTimer) clearTimeout(cardHoverTimer);
+              const timer = setTimeout(() => {
+                setHoveredPlanet('Medio Cielo');
+                handleMouseMove(e);
+              }, 300); // 300ms delay
+              setCardHoverTimer(timer);
             }}
             onMouseMove={handleMouseMove}
-            onMouseLeave={() => setHoveredPlanet(null)}
+            onMouseLeave={() => {
+              // ✅ IMMEDIATE: Clear timer and hide tooltip immediately on mouse leave
+              if (cardHoverTimer) {
+                clearTimeout(cardHoverTimer);
+                setCardHoverTimer(null);
+              }
+              setHoveredPlanet(null);
+            }}
+            onMouseDown={() => {
+              setHoveredPlanet('Medio Cielo');
+              handleMouseMove({ clientX: 0, clientY: 0 } as any);
+            }}
           />
           
           <text
@@ -760,7 +848,7 @@ const ChartDisplay = ({
         const timer = setTimeout(() => {
           setHoveredCard('birth-data');
           handleMouseMove(e);
-        }, 300); // 300ms delay
+        }, 150); // 150ms delay for better responsiveness on small elements
         setCardHoverTimer(timer);
       }}
       onMouseMove={handleMouseMove}
@@ -1120,12 +1208,12 @@ const ChartDisplay = ({
         const timer = setTimeout(() => {
           setHoveredCard('distributions');
           handleMouseMove(e);
-        }, 300); // 300ms delay
+        }, 150); // 150ms delay for better responsiveness on small elements
         setCardHoverTimer(timer);
       }}
       onMouseMove={handleMouseMove}
       onMouseLeave={() => {
-        // ✅ DELAY: Clear timer on mouse leave
+        // ✅ IMMEDIATE: Clear timer and hide tooltip immediately on mouse leave
         if (cardHoverTimer) {
           clearTimeout(cardHoverTimer);
           setCardHoverTimer(null);
@@ -1884,6 +1972,7 @@ const ChartDisplay = ({
         hoveredAspect={hoveredAspect}
         hoveredHouse={hoveredHouse}
         hoveredCard={hoveredCard}
+        setHoveredCard={setHoveredCard}
         ascendant={ascendant ?? undefined}
         midheaven={midheaven ?? undefined}
         planets={normalizedPlanets}
@@ -1908,6 +1997,9 @@ const ChartDisplay = ({
         solarReturnYear={solarReturnYear}
         solarReturnTheme={solarReturnTheme}
         ascSRInNatalHouse={ascSRInNatalHouse}
+        // ✅ FIX: Pass card timer props for tooltip to cancel close timer
+        cardHoverTimer={cardHoverTimer}
+        setCardHoverTimer={setCardHoverTimer}
       />
 
 

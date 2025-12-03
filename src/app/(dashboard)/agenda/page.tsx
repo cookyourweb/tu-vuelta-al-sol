@@ -178,7 +178,7 @@ const AgendaPersonalizada = () => {
           planet: 'Luna',
           sign: phase.zodiacSign || 'N/A',
           personalInterpretation: {
-            meaning: `¡ACTIVACIÓN LUNAR PODEROSA ${userProfile.name?.toUpperCase()}! Esta ${phase.phase} es un momento clave para ${isNewMoon ? 'nuevos comienzos y manifestaciones' : 'culminaciones y liberaciones'}.`,
+            meaning: `¡ACTIVACIÓN LUNAR PODEROSA ${userProfile?.name?.toUpperCase()}! Esta ${phase.phase} es un momento clave para ${isNewMoon ? 'nuevos comienzos y manifestaciones' : 'culminaciones y liberaciones'}.`,
             lifeAreas: isNewMoon
               ? ['Manifestaciones', 'Nuevos Proyectos', 'Intenciones', 'Intuición']
               : ['Liberación', 'Cosecha', 'Culminación', 'Gratitud'],

@@ -118,7 +118,13 @@ const parseCoords = (coords: string): { lat: number; lng: number } | null => {
 // COMPONENTE PRINCIPAL
 // ==========================================
 
-export default function BirthDataForm() {
+interface BirthDataFormProps {
+  recipientId?: string;
+  onBirthDataChange?: (field: keyof FormData, value: string) => void;
+  initialData?: Partial<FormData>;
+}
+
+export default function BirthDataForm({ recipientId, onBirthDataChange, initialData }: BirthDataFormProps = {}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -148,16 +154,18 @@ export default function BirthDataForm() {
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      fullName: '',
-      birthDate: '',
-      birthTime: '',
-      birthTimeKnown: true,
-      inputMethod: 'location',
-      birthPlace: '',
-      timezone: 'Europe/Madrid',
-      // ✅ AGREGAR:
-      currentLocationMethod: 'same',
-      livesInSamePlace: true,
+      fullName: initialData?.fullName || '',
+      birthDate: initialData?.birthDate || '',
+      birthTime: initialData?.birthTime || '',
+      birthTimeKnown: initialData?.birthTimeKnown ?? true,
+      inputMethod: initialData?.inputMethod || 'location',
+      birthPlace: initialData?.birthPlace || '',
+      timezone: initialData?.timezone || 'Europe/Madrid',
+      currentLocationMethod: initialData?.currentLocationMethod || 'same',
+      livesInSamePlace: initialData?.livesInSamePlace ?? true,
+      currentPlace: initialData?.currentPlace || '',
+      currentLatitude: initialData?.currentLatitude,
+      currentLongitude: initialData?.currentLongitude,
     }
   });
 
@@ -381,11 +389,23 @@ export default function BirthDataForm() {
   // ==========================================
 
   const onSubmit = async (data: FormData) => {
+    // Si es componente controlado, solo llamar al callback
+    if (recipientId && onBirthDataChange) {
+      // Llamar al callback con los datos procesados
+      onBirthDataChange('fullName', data.fullName);
+      onBirthDataChange('birthDate', data.birthDate);
+      onBirthDataChange('birthTime', data.birthTime || '');
+      onBirthDataChange('birthPlace', data.birthPlace || '');
+      onBirthDataChange('currentPlace', data.currentPlace || '');
+      // Aquí podríamos agregar más campos si es necesario
+      return;
+    }
+
     if (!user) {
       setError('Debes iniciar sesión para guardar tus datos');
       return;
     }
-    
+
     setIsSubmitting(true);
     setError(null);
     
@@ -557,8 +577,8 @@ export default function BirthDataForm() {
             <p className="text-xl text-gray-300">Información precisa para tu carta natal</p>
           </div>
 
-          {/* ✅ ÉXITO SIMPLIFICADO */}
-          {success && (
+          {/* ✅ ÉXITO SIMPLIFICADO - Solo mostrar si NO es componente controlado */}
+          {success && !recipientId && (
             <div className="bg-gradient-to-br from-green-500/20 to-emerald-600/20 backdrop-blur-sm border border-green-400/30 rounded-3xl p-8 mb-8">
               <div className="text-center">
                 <CheckCircle2 className="w-16 h-16 text-green-400 mx-auto mb-4 animate-pulse" />
@@ -566,7 +586,7 @@ export default function BirthDataForm() {
                 <p className="text-green-200 text-lg mb-6">
                   Tu información natal ha sido procesada y está lista para generar tu carta astrológica.
                 </p>
-                
+
                 {/* Botones de navegación */}
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <button
@@ -577,7 +597,7 @@ export default function BirthDataForm() {
                     Ver mi Carta Natal
                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                   </button>
-                  
+
                   <button
                     onClick={goToDashboard}
                     className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-8 rounded-2xl font-bold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-xl flex items-center justify-center"
@@ -589,8 +609,8 @@ export default function BirthDataForm() {
             </div>
           )}
 
-          {/* Formulario - Solo mostrar si no hay éxito */}
-          {!success && (
+          {/* Formulario - Solo mostrar si no hay éxito o si es componente controlado */}
+          {(!success || recipientId) && (
             <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-8">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 
@@ -986,30 +1006,34 @@ export default function BirthDataForm() {
                   </div>
                 )}
 
-                {/* Botón enviar */}
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-4 px-6 rounded-xl font-semibold hover:from-yellow-600 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                      Guardando datos...
-                    </>
-                  ) : (
-                    <>
-                      <Star className="w-5 h-5 mr-2" />
-                      Guardar datos de nacimiento
-                    </>
-                  )}
-                </button>
+                {/* Botón enviar - Solo mostrar si NO es componente controlado */}
+                {!recipientId && (
+                  <>
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-4 px-6 rounded-xl font-semibold hover:from-yellow-600 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                          Guardando datos...
+                        </>
+                      ) : (
+                        <>
+                          <Star className="w-5 h-5 mr-2" />
+                          Guardar datos de nacimiento
+                        </>
+                      )}
+                    </button>
 
-                <div className="text-center">
-                  <p className="text-xs text-gray-400">
-                    🌟 Información segura y procesada automáticamente
-                  </p>
-                </div>
+                    <div className="text-center">
+                      <p className="text-xs text-gray-400">
+                        🌟 Información segura y procesada automáticamente
+                      </p>
+                    </div>
+                  </>
+                )}
               </form>
             </div>
           )}

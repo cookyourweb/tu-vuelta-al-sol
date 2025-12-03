@@ -35,9 +35,9 @@ const PLANET_NAME_MAPPINGS: Record<string, string[]> = {
   'Lilith': ['Lilith', 'lilith', 'Lilith Negra', 'lilith negra'],
   'Chiron': ['Chiron', 'Quirón', 'chiron', 'quirón', 'Chiron', 'Quirón'],
 
-  // Nodos lunares
-  'Nodo Norte': ['Nodo Norte', 'North Node', 'nodo norte', 'north node', 'Rahu', 'rahu'],
-  'Nodo Sur': ['Nodo Sur', 'South Node', 'nodo sur', 'south node', 'Ketu', 'ketu'],
+  // Nodos lunares - ✅ FIX: Agregar variaciones "Nodo N/S Verdadero"
+  'Nodo Norte': ['Nodo Norte', 'North Node', 'nodo norte', 'north node', 'Rahu', 'rahu', 'Nodo N Verdadero', 'nodo n verdadero', 'True North Node'],
+  'Nodo Sur': ['Nodo Sur', 'South Node', 'nodo sur', 'south node', 'Ketu', 'ketu', 'Nodo S Verdadero', 'nodo s verdadero', 'True South Node'],
 };
 
 // =============================================================================
@@ -74,8 +74,19 @@ export function findPlanetByName(planets: PlanetData[], targetName: string): Pla
     return planet;
   }
 
-  // Buscar en mappings
-  const possibleNames = PLANET_NAME_MAPPINGS[normalizedTarget] || [normalizedTarget];
+  // Buscar en mappings - ✅ FIX: Buscar case-insensitive
+  let possibleNames: string[] = [normalizedTarget];
+
+  // Buscar en todas las keys del mapping para encontrar coincidencia
+  for (const [canonicalName, aliases] of Object.entries(PLANET_NAME_MAPPINGS)) {
+    // Verificar si el target coincide con algún alias
+    if (aliases.some(alias => normalizePlanetName(alias) === normalizedTarget)) {
+      possibleNames = aliases;
+      console.log(`🔍 [findPlanetByName] Encontrado en mapping "${canonicalName}":`, possibleNames);
+      break;
+    }
+  }
+
   console.log(`🔍 [findPlanetByName] Posibles nombres alternativos:`, possibleNames);
 
   for (const altName of possibleNames) {

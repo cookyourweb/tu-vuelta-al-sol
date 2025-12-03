@@ -1,0 +1,414 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Star, Sparkles, CreditCard, User, Mail, MapPin, Heart, Clock, Globe, CheckCircle2 } from 'lucide-react';
+import PaymentButton from '@/components/stripe/PaymentButton';
+import { useAuth } from '@/context/AuthContext';
+import BirthDataForm from '@/components/dashboard/BirthDataForm';
+
+interface BirthData {
+  name: string;
+  birthDate: string;
+  birthTime: string;
+  birthPlace: string;
+  currentLocation: string;
+}
+
+interface RecipientInfo {
+  isForSelf: boolean;
+  email: string;
+  address: string;
+  message: string;
+  birthData: BirthData;
+}
+
+export default function BuyAgendaPage() {
+  const { user } = useAuth();
+  const [recipientInfo, setRecipientInfo] = useState<RecipientInfo>({
+    isForSelf: true,
+    email: '',
+    address: '',
+    message: '',
+    birthData: {
+      name: '',
+      birthDate: '',
+      birthTime: '',
+      birthPlace: '',
+      currentLocation: '',
+    }
+  });
+
+  const [birthDataSaved, setBirthDataSaved] = useState(false);
+  const [savedBirthData, setSavedBirthData] = useState<any>(null);
+
+  // Load existing birth data from API
+  useEffect(() => {
+    console.log('🔍 [COMPRA AGENDA] useEffect ejecutado');
+    console.log('🔍 [COMPRA AGENDA] user object:', user);
+
+    if (user) {
+      console.log('🔍 [COMPRA AGENDA] Usuario autenticado, uid:', user.uid);
+      console.log('🔍 [COMPRA AGENDA] Email del usuario:', user.email);
+
+      const fetchBirthData = async () => {
+        try {
+          const apiUrl = `/api/birth-data?userId=${user.uid}`;
+          console.log('📡 [COMPRA AGENDA] URL de la petición:', apiUrl);
+
+          const res = await fetch(apiUrl);
+          console.log('📡 [COMPRA AGENDA] Respuesta del fetch:', res);
+          console.log('📡 [COMPRA AGENDA] Status:', res.status, res.statusText);
+
+          if (res.ok) {
+            const responseData = await res.json();
+            console.log('✅ [COMPRA AGENDA] Datos de respuesta:', responseData);
+
+            if (responseData.success && responseData.data) {
+              console.log('📝 [COMPRA AGENDA] Datos encontrados:', responseData.data);
+              setSavedBirthData(responseData.data);
+              setBirthDataSaved(true);
+
+              setRecipientInfo(prev => ({
+                ...prev,
+                email: user.email || '',
+                birthData: {
+                  name: responseData.data.fullName || user.displayName || '',
+                  birthDate: responseData.data.date || '',
+                  birthTime: responseData.data.time || '',
+                  birthPlace: responseData.data.location || '',
+                  currentLocation: responseData.data.livesInSamePlace ? responseData.data.location : (responseData.data.currentPlace || ''),
+                }
+              }));
+              console.log('✅ [COMPRA AGENDA] Datos cargados exitosamente en el formulario');
+            } else {
+              console.log('⚠️ [COMPRA AGENDA] No se encontraron datos en la respuesta');
+            }
+          } else {
+            console.log('❌ [COMPRA AGENDA] Error en la respuesta:', res.status, res.statusText);
+            const errorText = await res.text();
+            console.log('❌ [COMPRA AGENDA] Error body:', errorText);
+          }
+        } catch (error) {
+          console.error('❌ [COMPRA AGENDA] Error fetching birth data:', error);
+        }
+      };
+
+      fetchBirthData();
+    } else {
+      console.log('⚠️ [COMPRA AGENDA] No hay usuario autenticado');
+    }
+  }, [user]);
+
+  const handleRecipientChange = (field: keyof Omit<RecipientInfo, 'birthData'>, value: string | boolean) => {
+    setRecipientInfo(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleBirthDataChange = (field: keyof BirthData, value: string) => {
+    setRecipientInfo(prev => ({
+      ...prev,
+      birthData: {
+        ...prev.birthData,
+        [field]: value
+      }
+    }));
+  };
+
+  const isFormValid =
+    recipientInfo.email &&
+    recipientInfo.address &&
+    recipientInfo.birthData.name &&
+    recipientInfo.birthData.birthDate &&
+    recipientInfo.birthData.birthTime &&
+    recipientInfo.birthData.birthPlace &&
+    recipientInfo.birthData.currentLocation;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+      {/* 🌟 Fondo estelar */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-yellow-300 rounded-full animate-pulse"></div>
+        <div className="absolute top-3/4 right-1/5 w-2 h-2 bg-pink-300 rounded-full animate-pulse delay-1000"></div>
+        <div className="absolute top-1/6 right-2/5 w-2 h-2 bg-purple-200 rounded-full animate-bounce delay-500"></div>
+        <div className="absolute bottom-1/6 left-2/5 w-2 h-2 bg-blue-200 rounded-full animate-pulse delay-1500"></div>
+      </div>
+
+      <div className="relative z-10 container mx-auto px-4 py-16">
+        <div className="max-w-4xl mx-auto">
+          {/* 🌙 Header */}
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-sm rounded-full px-6 py-3 mb-6">
+              <Sparkles className="w-5 h-5 text-yellow-400" />
+              <span className="text-white font-medium">Agenda Astrológica Personalizada</span>
+              <Sparkles className="w-5 h-5 text-yellow-400" />
+            </div>
+
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              Regala una Agenda Cósmica
+            </h1>
+
+            <p className="text-xl text-purple-200 leading-relaxed">
+              Sorprende a alguien especial con una agenda astrológica personalizada basada en su carta natal,
+              con eventos cósmicos y rituales energéticos.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* 📅 Información del Regalo */}
+            <div className="space-y-6">
+              {/* Información del Destinatario */}
+              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                <div className="flex items-center gap-3 mb-4">
+                  <Heart className="w-6 h-6 text-pink-400" />
+                  <h2 className="text-2xl font-bold text-white">¿Para Quién es?</h2>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Selector: Para ti o para otra persona */}
+                  <div className="bg-white/5 rounded-lg p-4 space-y-3">
+                    <label className="block text-white text-sm font-medium mb-3">
+                      ¿Para quién es la agenda? *
+                    </label>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => handleRecipientChange('isForSelf', true)}
+                        className={`p-4 rounded-lg border-2 transition-all ${
+                          recipientInfo.isForSelf
+                            ? 'border-pink-400 bg-pink-400/20 text-white'
+                            : 'border-white/20 bg-white/5 text-white/60 hover:border-white/40'
+                        }`}
+                      >
+                        <User className="w-6 h-6 mx-auto mb-2" />
+                        <span className="font-medium">Para mí</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleRecipientChange('isForSelf', false)}
+                        className={`p-4 rounded-lg border-2 transition-all ${
+                          !recipientInfo.isForSelf
+                            ? 'border-pink-400 bg-pink-400/20 text-white'
+                            : 'border-white/20 bg-white/5 text-white/60 hover:border-white/40'
+                        }`}
+                      >
+                        <Heart className="w-6 h-6 mx-auto mb-2" />
+                        <span className="font-medium">Es un regalo</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* ✅ FORMULARIO COMPLETO DE DATOS DE NACIMIENTO */}
+                  <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg p-4 border border-purple-400/30">
+                    <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                      <Star className="w-5 h-5 text-yellow-400" />
+                      Datos para la Carta Natal
+                    </h3>
+
+                    {/* Usar el componente BirthDataForm del dashboard */}
+                    <div className="bg-white rounded-lg p-4">
+                      <BirthDataForm />
+                    </div>
+
+                    {/* Mostrar estado de datos guardados */}
+                    {birthDataSaved && savedBirthData && (
+                      <div className="mt-4 bg-green-400/10 border border-green-400/30 rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <CheckCircle2 className="w-5 h-5 text-green-400" />
+                          <span className="text-green-300 font-semibold">Datos de nacimiento guardados</span>
+                        </div>
+                        <div className="text-green-200 text-sm space-y-1">
+                          <p>👤 {savedBirthData.fullName}</p>
+                          <p>📅 {savedBirthData.date} {savedBirthData.time}</p>
+                          <p>📍 {savedBirthData.location}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Información de Entrega */}
+                  <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-lg p-4 border border-blue-400/30">
+                    <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                      <Mail className="w-5 h-5 text-blue-400" />
+                      Información de Entrega
+                    </h3>
+
+                    <div className="space-y-4">
+                      {/* Email */}
+                      <div>
+                        <label className="block text-white text-sm font-medium mb-2">
+                          Email {recipientInfo.isForSelf ? 'de entrega' : 'del destinatario'} *
+                        </label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/60" />
+                          <input
+                            type="email"
+                            value={recipientInfo.email}
+                            onChange={(e) => handleRecipientChange('email', e.target.value)}
+                            placeholder="correo@ejemplo.com"
+                            className="w-full pl-10 pr-4 py-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                          />
+                        </div>
+                        <p className="text-white/60 text-xs mt-1">
+                          📧 Recibirás la versión digital aquí
+                        </p>
+                      </div>
+
+                      {/* Dirección */}
+                      <div>
+                        <label className="block text-white text-sm font-medium mb-2">
+                          Dirección postal completa *
+                        </label>
+                        <div className="relative">
+                          <MapPin className="absolute left-3 top-3 w-5 h-5 text-white/60" />
+                          <textarea
+                            value={recipientInfo.address}
+                            onChange={(e) => handleRecipientChange('address', e.target.value)}
+                            placeholder="Dirección completa para envío postal"
+                            rows={3}
+                            className="w-full pl-10 pr-4 py-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent resize-none"
+                          />
+                        </div>
+                        <p className="text-white/60 text-xs mt-1">
+                          📦 Para el envío del calendario físico
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Mensaje Personal (solo si es regalo) */}
+                  {!recipientInfo.isForSelf && (
+                    <div>
+                      <label className="block text-white text-sm font-medium mb-2">
+                        Mensaje personalizado (opcional)
+                      </label>
+                      <textarea
+                        value={recipientInfo.message}
+                        onChange={(e) => handleRecipientChange('message', e.target.value)}
+                        placeholder="Un mensaje especial para acompañar el regalo..."
+                        rows={3}
+                        className="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent resize-none"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* 💰 Precio y Beneficios */}
+            <div className="space-y-6">
+              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                <div className="text-center mb-6">
+                  <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-600/20 to-emerald-600/20 backdrop-blur-sm rounded-full px-4 py-2 mb-4">
+                    <CreditCard className="w-4 h-4 text-green-400" />
+                    <span className="text-green-300 font-medium">Precio Especial</span>
+                  </div>
+
+                  <div className="text-5xl font-bold text-white mb-2">
+                    €80
+                    <span className="text-2xl text-purple-300 font-normal"> único</span>
+                  </div>
+
+                  <p className="text-purple-200">Envío incluido en toda España</p>
+                </div>
+
+                {/* ✨ Beneficios */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 text-white">
+                    <Star className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+                    <span>Agenda personalizada basada en carta natal</span>
+                  </div>
+
+                  <div className="flex items-center gap-3 text-white">
+                    <Star className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+                    <span>Eventos cósmicos y transitos importantes</span>
+                  </div>
+
+                  <div className="flex items-center gap-3 text-white">
+                    <Star className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+                    <span>Rituales energéticos y afirmaciones diarias</span>
+                  </div>
+
+                  <div className="flex items-center gap-3 text-white">
+                    <Star className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+                    <span>Consejos astrológicos para maximizar tu energía</span>
+                  </div>
+
+                  <div className="flex items-center gap-3 text-white">
+                    <Star className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+                    <span>Envío postal certificado</span>
+                  </div>
+
+                  <div className="flex items-center gap-3 text-white">
+                    <Star className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+                    <span>Versión digital incluida por email</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 🛒 Botón de Compra */}
+              <div className="text-center">
+                {isFormValid ? (
+                  <div className="space-y-4">
+                    <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg p-4 border border-purple-400/30">
+                      <p className="text-white text-lg mb-2">
+                        {recipientInfo.isForSelf ? (
+                          <>
+                            ✨ Tu agenda personalizada para{' '}
+                            <span className="text-yellow-300 font-bold">
+                              {recipientInfo.birthData.name}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            🎁 Vas a regalar una agenda cósmica a{' '}
+                            <span className="text-yellow-300 font-bold">
+                              {recipientInfo.birthData.name}
+                            </span>
+                          </>
+                        )}
+                      </p>
+                      <div className="text-white/80 text-sm space-y-1">
+                        <p>📅 Nacimiento: {new Date(recipientInfo.birthData.birthDate).toLocaleDateString('es-ES')}</p>
+                        <p>🕐 Hora: {recipientInfo.birthData.birthTime}</p>
+                        <p>📍 Lugar: {recipientInfo.birthData.birthPlace}</p>
+                      </div>
+                    </div>
+
+                    <PaymentButton
+                      priceId={process.env.NEXT_PUBLIC_STRIPE_AGENDA_DIGITAL_PRICE_ID!}
+                      userId={user?.uid || ''}
+                      className="inline-flex items-center gap-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+                    >
+                      💫 Comprar por €80
+                    </PaymentButton>
+                  </div>
+                ) : (
+                  <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+                    <p className="text-white text-lg mb-2">
+                      💫 Completa todos los campos obligatorios para continuar
+                    </p>
+                    <p className="text-white/60 text-sm">
+                      Necesitamos tus datos de nacimiento para crear tu carta natal personalizada
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* 🔒 Garantía */}
+              <div className="text-center">
+                <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+                  <span className="text-green-400">🔒</span>
+                  <span className="text-white text-sm">Pago seguro con Stripe</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

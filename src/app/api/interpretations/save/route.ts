@@ -237,6 +237,84 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// ✅ PUT: Actualizar/reemplazar interpretación existente (usado por InterpretationButton)
+export async function PUT(request: NextRequest) {
+  try {
+    console.log('📝 ===== PUT: UPDATING INTERPRETATION =====');
+
+    const body = await request.json();
+    const { userId, chartType, interpretation, userProfile, generatedAt } = body;
+
+    // Validación
+    if (!userId || !chartType || !interpretation) {
+      return NextResponse.json(
+        { success: false, error: 'userId, chartType e interpretation son requeridos' },
+        { status: 400 }
+      );
+    }
+
+    console.log('🔍 PUT - Datos recibidos:', {
+      userId,
+      chartType,
+      interpretationKeys: Object.keys(interpretation),
+      hasAdvertencias: !!interpretation.advertencias,
+      hasInsights: !!interpretation.insights_transformacionales,
+      hasRituales: !!interpretation.rituales_recomendados
+    });
+
+    await connectDB();
+
+    const expirationDate = new Date(Date.now() + CACHE_DURATION);
+
+    // ✅ UPSERT: Reemplaza existente o crea nuevo
+    const result = await Interpretation.findOneAndUpdate(
+      { userId, chartType },
+      {
+        $set: {
+          userId,
+          chartType,
+          interpretation, // ← Guarda TODO el objeto completo
+          userProfile: userProfile || {},
+          generatedAt: generatedAt ? new Date(generatedAt) : new Date(),
+          expiresAt: expirationDate,
+          method: 'openai',
+          cached: false,
+          lastModified: new Date()
+        }
+      },
+      {
+        upsert: true,    // Crear si no existe
+        new: true,       // Devolver documento actualizado
+        runValidators: false
+      }
+    );
+
+    console.log('✅ PUT UPSERT exitoso:', {
+      _id: result._id,
+      userId: result.userId,
+      chartType: result.chartType,
+      generatedAt: result.generatedAt,
+      interpretationKeys: Object.keys(result.interpretation || {})
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: `${chartType} interpretation saved/updated successfully`,
+      interpretationId: result._id.toString(),
+      interpretation: result.interpretation,
+      generatedAt: result.generatedAt,
+      expiresAt: result.expiresAt
+    });
+
+  } catch (error) {
+    console.error('❌ PUT Error:', error);
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    }, { status: 500 });
+  }
+}
+
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);

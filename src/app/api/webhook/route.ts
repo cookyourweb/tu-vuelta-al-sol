@@ -1,164 +1,226 @@
-// src/app/api/webhook/route.ts
-// 🔔 STRIPE WEBHOOKS - Handle payment events and fulfill orders
+// app/api/webhooks/stripe/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { headers } from 'next/headers';
+import { stripe } from '@/lib/stripe';
+import Stripe from 'stripe';
+import connectDB from '@/lib/db';
+import Subscription from '@/models/Subscription';
+import User from '@/models/User';
 
-import Stripe from "stripe";
-import { headers } from "next/headers";
-import { NextResponse } from "next/server";
-import connectDB from "@/lib/db";
+export const runtime = 'nodejs';
 
-export const runtime = "nodejs";
+// Deshabilitar el parsing automático del body
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-
-// ==========================================
-// 🎯 WEBHOOK HANDLER
-// ==========================================
-
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   const body = await req.text();
-  const sig = headers().get("stripe-signature");
+  const headersList = await headers();
+  const signature = headersList.get('stripe-signature');
+
+  if (!signature) {
+    return NextResponse.json(
+      { error: 'No signature provided' },
+      { status: 400 }
+    );
+  }
 
   let event: Stripe.Event;
 
   try {
     event = stripe.webhooks.constructEvent(
       body,
-      sig!,
+      signature,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
-  } catch (err) {
-    console.error("❌ Webhook signature verification failed:", err);
-    return new Response(`Webhook Error: ${(err as Error).message}`, { status: 400 });
+  } catch (err: any) {
+    console.error('Webhook signature verification failed:', err.message);
+    return NextResponse.json(
+      { error: `Webhook Error: ${err.message}` },
+      { status: 400 }
+    );
   }
 
-  console.log(`📨 Webhook received: ${event.type}`);
+  // Conectar a la base de datos
+  await connectDB();
 
   try {
-    await connectDB();
-
     switch (event.type) {
-      case "checkout.session.completed":
-        await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session;
+        await handleCheckoutSessionCompleted(session);
         break;
+      }
 
-      case "customer.subscription.created":
-        await handleSubscriptionCreated(event.data.object as Stripe.Subscription);
+      case 'customer.subscription.created': {
+        const subscription = event.data.object as Stripe.Subscription;
+        await handleSubscriptionCreated(subscription);
         break;
+      }
 
-      case "customer.subscription.updated":
-        await handleSubscriptionUpdated(event.data.object as Stripe.Subscription);
+      case 'customer.subscription.updated': {
+        const subscription = event.data.object as Stripe.Subscription;
+        await handleSubscriptionUpdated(subscription);
         break;
+      }
 
-      case "customer.subscription.deleted":
-        await handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
+      case 'customer.subscription.deleted': {
+        const subscription = event.data.object as Stripe.Subscription;
+        await handleSubscriptionDeleted(subscription);
         break;
+      }
 
-      case "payment_intent.succeeded":
-        await handlePaymentSucceeded(event.data.object as Stripe.PaymentIntent);
+      case 'invoice.payment_succeeded': {
+        const invoice = event.data.object as Stripe.Invoice;
+        await handleInvoicePaymentSucceeded(invoice);
         break;
+      }
+
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as Stripe.Invoice;
+        await handleInvoicePaymentFailed(invoice);
+        break;
+      }
 
       default:
-        console.log(`⚠️ Unhandled event type: ${event.type}`);
+        console.log(`Unhandled event type: ${event.type}`);
     }
 
-    return NextResponse.json({ received: true, processed: true });
-
-  } catch (error) {
-    console.error("❌ Error processing webhook:", error);
+    return NextResponse.json({ received: true });
+  } catch (error: any) {
+    console.error('Error processing webhook:', error);
     return NextResponse.json(
-      { received: true, processed: false, error: (error as Error).message },
+      { error: `Webhook processing error: ${error.message}` },
       { status: 500 }
     );
   }
 }
 
-// ==========================================
-// 🎁 HANDLE CHECKOUT COMPLETED
-// ==========================================
+// ============= HANDLERS =============
 
-async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
-  console.log("✅ Checkout completed:", session.id);
-
-  const { customer_email, metadata, amount_total, currency } = session;
-  const productType = metadata?.productType || 'unknown';
-  const productName = metadata?.productName || 'Unknown Product';
-
-  // TODO: Save order to MongoDB
-  // - Create Order model
-  // - Store: userId, productType, amount, status, etc.
-  // - Send confirmation email
-  // - For digital products: generate download link
-  // - For physical products: notify fulfillment system
-
-  console.log("📦 Order details:", {
-    email: customer_email,
-    productType,
-    productName,
-    amount: amount_total ? amount_total / 100 : 0,
-    currency
-  });
-
-  // For Agenda Digital: Generate PDF and Google Calendar link
-  if (productType === 'agenda-digital') {
-    console.log("📅 TODO: Generate agenda for user:", customer_email);
-    // TODO:
-    // 1. Get user's birth data from MongoDB
-    // 2. Generate personalized agenda
-    // 3. Create PDF
-    // 4. Generate Google Calendar .ics file
-    // 5. Send email with download links
+async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
+  console.log('Checkout session completed:', session.id);
+  
+  const userId = session.metadata?.userId;
+  if (!userId) {
+    console.error('No userId in session metadata');
+    return;
   }
 
-  // For physical products: Mark for shipment
-  if (['kit-rituales', 'vela-personalizada', 'bundle-completo'].includes(productType)) {
-    console.log("📦 TODO: Process shipment for:", customer_email);
-    // TODO:
-    // 1. Create shipment record
-    // 2. Notify warehouse/fulfillment
-    // 3. Send tracking email when shipped
+  // Si es una suscripción, se manejará en subscription.created
+  if (session.mode === 'subscription') {
+    console.log('Subscription checkout, will be handled by subscription.created event');
+    return;
+  }
+
+  // Para pagos únicos, registrar la compra
+  const user = await User.findById(userId);
+  if (user) {
+    if (!user.purchases) {
+      user.purchases = [];
+    }
+    user.purchases.push({
+      sessionId: session.id,
+      amount: session.amount_total || 0,
+      currency: session.currency || 'eur',
+      status: 'completed',
+      createdAt: new Date(),
+    });
+    await user.save();
+    console.log('Purchase recorded for user:', userId);
   }
 }
 
-// ==========================================
-// 🔄 HANDLE SUBSCRIPTION EVENTS
-// ==========================================
-
 async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
-  console.log("🎉 New subscription created:", subscription.id);
+  console.log('Subscription created:', subscription.id);
+  
+  const userId = subscription.metadata?.userId;
+  if (!userId) {
+    console.error('No userId in subscription metadata');
+    return;
+  }
 
-  // TODO:
-  // - Save subscription to MongoDB
-  // - Grant access to premium features
-  // - Send welcome email
-  // - Schedule first monthly agenda generation
+  // Crear o actualizar suscripción en la base de datos
+  await Subscription.findOneAndUpdate(
+    { stripeSubscriptionId: subscription.id },
+    {
+      userId,
+      stripeCustomerId: subscription.customer as string,
+      stripeSubscriptionId: subscription.id,
+      stripePriceId: subscription.items.data[0].price.id,
+      status: subscription.status,
+      currentPeriodStart: new Date((subscription as any).current_period_start * 1000),
+      currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
+      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      canceledAt: subscription.canceled_at ? new Date(subscription.canceled_at * 1000) : null,
+      trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
+    },
+    { upsert: true, new: true }
+  );
+
+  console.log('Subscription saved to database for user:', userId);
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
-  console.log("🔄 Subscription updated:", subscription.id);
+  console.log('Subscription updated:', subscription.id);
+  
+  await Subscription.findOneAndUpdate(
+    { stripeSubscriptionId: subscription.id },
+    {
+      status: subscription.status,
+      currentPeriodStart: new Date((subscription as any).current_period_start * 1000),
+      currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
+      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      canceledAt: subscription.canceled_at ? new Date(subscription.canceled_at * 1000) : null,
+    }
+  );
 
-  // TODO:
-  // - Update subscription status in MongoDB
-  // - Handle plan changes
-  // - Adjust access permissions
+  console.log('Subscription updated in database');
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-  console.log("❌ Subscription cancelled:", subscription.id);
+  console.log('Subscription deleted:', subscription.id);
+  
+  await Subscription.findOneAndUpdate(
+    { stripeSubscriptionId: subscription.id },
+    {
+      status: 'canceled',
+      canceledAt: new Date(),
+    }
+  );
 
-  // TODO:
-  // - Update subscription status in MongoDB
-  // - Revoke premium access (at period end)
-  // - Send cancellation confirmation email
+  console.log('Subscription marked as canceled in database');
 }
 
-// ==========================================
-// 💳 HANDLE PAYMENT SUCCEEDED
-// ==========================================
+async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
+  console.log('Invoice payment succeeded:', invoice.id);
+  
+  // Actualizar estado de suscripción si es necesario
+  if ((invoice as any).subscription) {
+    await Subscription.findOneAndUpdate(
+      { stripeSubscriptionId: (invoice as any).subscription as string },
+      {
+        status: 'active',
+        lastPaymentDate: new Date(),
+      }
+    );
+  }
+}
 
-async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
-  console.log("💰 Payment succeeded:", paymentIntent.id);
-
-  // TODO:
-  // - Update order status to 'paid'
-  // - Trigger fulfillment
+async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
+  console.log('Invoice payment failed:', invoice.id);
+  
+  // Actualizar estado de suscripción
+  if ((invoice as any).subscription) {
+    await Subscription.findOneAndUpdate(
+      { stripeSubscriptionId: (invoice as any).subscription as string },
+      {
+        status: 'past_due',
+        lastPaymentError: new Date(),
+      }
+    );
+  }
 }
