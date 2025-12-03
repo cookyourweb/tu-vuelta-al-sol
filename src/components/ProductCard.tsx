@@ -66,15 +66,10 @@ export default function ProductCard({
       }
 
       // Redirect to Stripe Checkout
-      if (stripe && data.id) {
-        const { error } = await stripe.redirectToCheckout({
-          sessionId: data.id
-        });
-
-        if (error) {
-          console.error('Stripe redirect error:', error);
-          alert('Error al redirigir al pago. Por favor, inténtalo de nuevo.');
-        }
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert('Error al obtener la URL de pago. Por favor, inténtalo de nuevo.');
       }
     } catch (error) {
       console.error('Error al procesar el pago:', error);
