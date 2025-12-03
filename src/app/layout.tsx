@@ -1,11 +1,9 @@
 // src/app/layout.tsx
 import type { Metadata } from 'next';
 import { Inter, Playfair_Display } from 'next/font/google';
-import { getMessages } from 'next-intl/server';
 import { AuthProvider } from '@/context/AuthContext';
 import { NotificationProvider } from '@/context/NotificationContext';
 import WelcomeModal from '@/components/modals/WelcomeModal';
-import IntlProvider from '@/components/IntlProvider';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import './globals.css';
 
@@ -53,18 +51,13 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({
   children,
-  params
 }: Readonly<{
   children: React.ReactNode;
-  params: { locale: string };
 }>) {
-  // Get the locale from params or default to 'es'
-  const locale = params?.locale || 'es';
-  // Get messages for the current locale
-  const messages = await getMessages({ locale });
+  const messages = await getMessages();
 
   return (
-    <html lang={locale} className={`${inter.variable} ${playfair.variable}`}>
+    <html lang="es" className={`${inter.variable} ${playfair.variable}`}>
       <head>
         {/* Optimizaciones de rendimiento */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -134,7 +127,7 @@ export default async function RootLayout({
         </div>
 
         {/* 🔮 APLICACIÓN PRINCIPAL - Solo proveedores */}
-        <IntlProvider locale={locale} messages={messages}>
+        <NextIntlClientProvider messages={messages}>
           <AuthProvider>
             <NotificationProvider>
               <div className="relative z-10 min-h-screen">
@@ -148,7 +141,7 @@ export default async function RootLayout({
               </div>
             </NotificationProvider>
           </AuthProvider>
-        </IntlProvider>
+        </NextIntlClientProvider>
 
         {/* 🌙 EFECTOS ADICIONALES DE INMERSIÓN */}
         <div className="fixed inset-0 pointer-events-none">
