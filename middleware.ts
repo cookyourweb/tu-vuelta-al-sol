@@ -1,5 +1,5 @@
 import type { NextRequest } from 'next/server';
-import admin from 'firebase-admin';
+import * as admin from 'firebase-admin';
 import { cert } from 'firebase-admin/app';
 
 // Lazy-initialized Firebase Admin
@@ -89,11 +89,13 @@ export async function middleware(request: NextRequest) {
         }
 
         // Verify Firebase token
+        const authInstance = initializeFirebase();
         await authInstance.verifyIdToken(token);
       } else {
         // Bearer token authentication
         const token = authHeader.substring(7);
-        await auth.verifyIdToken(token);
+        const authInstance = initializeFirebase();
+        await authInstance.verifyIdToken(token);
       }
     } catch (error) {
       console.error('Auth middleware error:', error);
