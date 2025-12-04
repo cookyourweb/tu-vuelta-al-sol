@@ -4,8 +4,8 @@ import { NextResponse } from 'next/server';
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // 🚫 BLOCK all protected routes by default for security
-  // ⛔ API routes require authentication, so return 401
+  // 🔒 CHECK AUTHENTICATION for protected routes
+  // ⭕ Allow authenticated requests through, block unauthenticated ones
   if (pathname.startsWith('/api/interpretations') ||
       pathname.startsWith('/api/astrology') ||
       pathname.startsWith('/api/charts') ||
@@ -14,9 +14,17 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith('/api/pdf') ||
       pathname.startsWith('/api/cache')) {
 
-    // 🚫 Return 401 Unauthorized for all protected routes
-    // ⚡ Routes now handle their own authentication internally
-    // 🔒 This prevents unauthorized access while avoiding middleware failures
+    // ✅ Check if request has authentication token
+    const authHeader = request.headers.get('authorization');
+    const hasBearerToken = authHeader?.startsWith('Bearer ');
+    const hasTokenParam = request.nextUrl.searchParams.has('token');
+
+    // 🟢 Allow through if has authentication
+    if (hasBearerToken || hasTokenParam) {
+      return NextResponse.next();
+    }
+
+    // 🚫 Block unauthenticated requests
     return NextResponse.json({
       success: false,
       error: 'Authentication required'
