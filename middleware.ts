@@ -31,6 +31,15 @@ export async function middleware(request: NextRequest) {
     return; // Allow GET requests to pass through
   }
 
+  // Better Firebase initialization check
+  if (!process.env.FIREBASE_PROJECT_ID ||
+      !process.env.FIREBASE_CLIENT_EMAIL ||
+      !process.env.FIREBASE_PRIVATE_KEY) {
+    console.error('Firebase environment variables not configured');
+    // Skip auth for now if Firebase vars are missing
+    return;
+  }
+
   // Protected API routes
   if (pathname.startsWith('/api/interpretations') ||
       pathname.startsWith('/api/astrology') ||
@@ -65,8 +74,11 @@ export async function middleware(request: NextRequest) {
       }
     } catch (error) {
       console.error('Auth middleware error:', error);
+      // For debugging, also return the error
+      console.error('Full error object:', error);
       return new Response(JSON.stringify({
-        error: 'Authentication failed - Invalid token'
+        error: 'Authentication failed - Invalid token',
+        details: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined
       }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' }

@@ -643,7 +643,7 @@ export default function InterpretationDisplay({ interpretation, chartType }: Pro
           >
             <div className="text-orange-50">
               <p className="text-lg leading-relaxed">
-                {i.tema_central_del_anio}
+                {typeof i.tema_central_del_anio === 'string' ? i.tema_central_del_anio : safeRender(i.tema_central_del_anio)}
               </p>
             </div>
           </Section>
