@@ -9,10 +9,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { Planet, Aspect } from '../../types/astrology/chartDisplay';
-import { planetMeanings, signMeanings, houseMeanings, aspectMeanings, PLANET_SYMBOLS, PLANET_COLORS } from '../../constants/astrology';
-import { getPersonalizedPlanetInterpretation, getPersonalizedAspectInterpretation } from '../../services/chartInterpretationsService';
-import { getExampleInterpretation } from '../../data/interpretations/ExampleInterpretations';
+import { Planet, Aspect } from '@/types/astrology/chartDisplay';
+import { planetMeanings, signMeanings, houseMeanings, aspectMeanings, PLANET_SYMBOLS, PLANET_COLORS } from '@/constants/astrology';
+import { getPersonalizedPlanetInterpretation, getPersonalizedAspectInterpretation } from '@/services/chartInterpretationsService';
+import { getExampleInterpretation } from '@/data/interpretations/ExampleInterpretations';
 
 interface ChartTooltipsProps {
   hoveredPlanet: string | null;
@@ -48,36 +48,37 @@ interface ChartTooltipsProps {
   setCardHoverTimer?: (timer: NodeJS.Timeout | null) => void;
 }
 
-const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
-  hoveredPlanet,
-  hoveredAspect,
-  hoveredHouse,
-  hoveredCard,
-  ascendant,
-  midheaven,
-  planets,
-  calculatedAspects,
-  tooltipPosition,
-  setHoveredPlanet,
-  setHoveredAspect,
-  setHoveredHouse,
-  setHoveredCard,
-  onOpenDrawer,
-  onCloseDrawer,
-  drawerOpen = false,
-  clickedPlanet = null,
-  setClickedPlanet,
-  clickedAspect = null,
-  setClickedAspect,
-  userId,
-  chartType = 'natal',
-  birthData,
-  elementDistribution,
-  modalityDistribution,
-  solarReturnYear,
-  solarReturnTheme,
-  ascSRInNatalHouse
-}) => {
+const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
+  const {
+    hoveredPlanet,
+    hoveredAspect,
+    hoveredHouse,
+    hoveredCard,
+    ascendant,
+    midheaven,
+    planets,
+    calculatedAspects,
+    tooltipPosition,
+    setHoveredPlanet,
+    setHoveredAspect,
+    setHoveredHouse,
+    setHoveredCard,
+    onOpenDrawer,
+    onCloseDrawer,
+    drawerOpen = false,
+    clickedPlanet = null,
+    setClickedPlanet,
+    clickedAspect = null,
+    setClickedAspect,
+    userId,
+    chartType = 'natal',
+    birthData,
+    elementDistribution,
+    modalityDistribution,
+    solarReturnYear,
+    solarReturnTheme,
+    ascSRInNatalHouse
+  } = props;
 
   // =============================================================================
   // STATE
@@ -102,13 +103,13 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
   const [isGenerating, setIsGenerating] = useState(false);
   // =============================================================================
 
-  // ✅ Hook para detectar clic fuera - MEJORADO
+  // ✅ Hook para detectar clic fuera - SIMPLIFICADO Y CONSISTENTE
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as HTMLElement;
 
       // Verificar si el clic fue en tooltip, drawer o chart
-      const isTooltip = target && typeof target.closest === 'function' ? target.closest('.chart-tooltip') : null;
+      const isTooltip = target && typeof target.closest === 'function' ? target.closest('[class*="tooltip"], [class*="chart-tooltip"]') : null;
       const isDrawer = target && typeof target.closest === 'function' ? target.closest('.interpretation-drawer') : null;
       const isChart = target && typeof target.closest === 'function' ? target.closest('.chart-container') : null;
 
@@ -118,10 +119,10 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
         return;
       }
 
-      // ⭐ NUEVO: Si el tooltip está "locked" (porque se abrió el drawer), NO cerrar
+      // ⭐ Si el tooltip está "locked" (porque se abrió el drawer), solo cerrar si se hace click fuera del tooltip Y fuera del drawer
       if (tooltipLocked) {
-        // Solo cerrar si se hace click fuera del tooltip Y fuera del drawer
         if (!isTooltip && !isDrawer) {
+          console.log('🔓 Desbloqueando tooltip y cerrando');
           setHoveredPlanet(null);
           setHoveredAspect(null);
           setHoveredHouse(null);
@@ -133,33 +134,9 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
         return;
       }
 
-      // Comportamiento normal si NO está locked
-      if (!isTooltip && !isChart && !isDrawer) {
-        setHoveredPlanet(null);
-        setHoveredAspect(null);
-        setHoveredHouse(null);
-        setHoveredCard?.(null);
-        setClickedPlanet?.(null);
-        setClickedAspect?.(null);
-      }
-
-      // ⭐ NUEVO: Si el tooltip está "locked" (porque se abrió el drawer), NO cerrar
-      if (tooltipLocked) {
-        // Solo cerrar si se hace click fuera del tooltip Y fuera del drawer
-        if (!isTooltip && !isDrawer) {
-          setHoveredPlanet(null);
-          setHoveredAspect(null);
-          setHoveredHouse(null);
-          setHoveredCard?.(null);
-          setClickedPlanet?.(null);
-          setClickedAspect?.(null);
-          setTooltipLocked(false);
-        }
-        return;
-      }
-
-      // Comportamiento normal si NO está locked
-      if (!isTooltip && !isChart && !isDrawer) {
+      // Comportamiento normal: cerrar si se hace click fuera de tooltip, drawer y chart
+      if (!isTooltip && !isDrawer && !isChart) {
+        console.log('🎯 Click fuera - cerrando todos los tooltips');
         setHoveredPlanet(null);
         setHoveredAspect(null);
         setHoveredHouse(null);
@@ -171,7 +148,7 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [tooltipLocked, isGenerating]); // ⭐ Agregar isGenerating
+  }, [tooltipLocked, isGenerating]);
 
   // =============================================================================
   // FETCH AI INTERPRETATIONS
@@ -983,28 +960,16 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
         onMouseLeave={(e) => {
           console.log('🎯 MOUSE LEFT TOOLTIP - ASPECT');
 
-          // ⭐ Si está locked O generando, NO cerrar NUNCA
-          if (tooltipLocked || generatingAspect) {
-            console.log('🔒 Tooltip locked - NO SE CIERRA');
+          // ⭐ Si está locked O generando, NO cerrar
+          if (tooltipLocked || isGenerating) {
+            console.log('🔒 Tooltip locked o generando - no se cierra');
             return;
           }
 
-          // Solo cerrar si NO está locked ni generando
-          setTimeout(() => {
-            if (!drawerOpen) {
-              // Don't close tooltip immediately if mouse is over a button
-              const target = e.relatedTarget as HTMLElement;
-              const isButton = target && typeof target.closest === 'function' ? target.closest('button') : null;
-              if (!isButton) {
-                // Add a small delay to allow drawer to open first
-                setTimeout(() => {
-                  if (!aspectTooltipLocked && !generatingAspect && !tooltipLocked) {
-                    handleAspectMouseLeave();
-                  }
-                }, 100); // 100ms delay to allow drawer state to update
-              }
-            }
-          }, 100); // 100ms delay to allow drawer state update
+          // Comportamiento consistente: cerrar después de delay
+          handleMouseLeaveTooltip(() => {
+            setHoveredAspect(null);
+          }, 2000); // 2 seconds for aspects
         }}
         onClick={(e) => {
           console.log('🎯 TOOLTIP CLICKED (parent) - ASPECT');

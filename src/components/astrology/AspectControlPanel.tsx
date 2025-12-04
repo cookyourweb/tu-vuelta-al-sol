@@ -2,7 +2,7 @@
 // Panel de control para filtros de aspectos extraído del ChartDisplay
 
 import React from 'react';
-import type { SelectedAspectTypes } from '../../types/astrology/chartDisplay';
+import type { SelectedAspectTypes } from '@/types/astrology/chartDisplay';
 
 interface AspectControlPanelProps {
   showAspects: boolean;

@@ -3,7 +3,7 @@
 
 import React from 'react';
 // ✅ IMPORT CORREGIDO
-import { SIGN_SYMBOLS, signMeanings } from '../../constants/astrology/chartConstants';
+import { SIGN_SYMBOLS, signMeanings } from '@/constants/astrology/chartConstants';
 
 interface MidheavenCardProps {
   midheaven?: { 
