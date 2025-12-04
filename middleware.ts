@@ -36,8 +36,14 @@ export async function middleware(request: NextRequest) {
       !process.env.FIREBASE_CLIENT_EMAIL ||
       !process.env.FIREBASE_PRIVATE_KEY) {
     console.error('Firebase environment variables not configured');
-    // Skip auth for now if Firebase vars are missing
-    return;
+    // Return error instead of skipping auth in production
+    return new Response(JSON.stringify({
+      error: 'Server configuration error - Firebase not properly configured',
+      code: 'FIREBASE_CONFIG_ERROR'
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 
   // Protected API routes
