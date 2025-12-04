@@ -50,17 +50,40 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const uid = searchParams.get('uid');
-    
+
     if (!uid) {
       return NextResponse.json({ error: 'UID es requerido' }, { status: 400 });
     }
 
     await connectDB();
 
-    const user = await User.findOne({ uid });
-    
+    let user = await User.findOne({ uid });
+
+    // If user doesn't exist, create a basic user record
     if (!user) {
-      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
+      // Try to get user details from Firebase Auth
+      try {
+        const { getAuth } = await import('firebase-admin/auth');
+        const auth = getAuth();
+        const firebaseUser = await auth.getUser(uid);
+
+        user = new User({
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          fullName: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Usuario',
+          createdAt: new Date(),
+          lastLogin: new Date(),
+          role: 'user',
+          isVerified: firebaseUser.emailVerified,
+          subscriptionStatus: 'free'
+        });
+
+        await user.save();
+        console.log('User created automatically:', uid);
+      } catch (firebaseError) {
+        console.error('Error creating user from Firebase:', firebaseError);
+        return NextResponse.json({ error: 'Error al obtener usuario desde Firebase' }, { status: 500 });
+      }
     }
 
     return NextResponse.json(user);
