@@ -48,24 +48,59 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const uid = searchParams.get('uid');
+    // 🔒 AUTHENTICATION REQUIRED - Users can only access their own data
+    const authHeader = request.headers.get('authorization');
+    let token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
 
-    if (!uid) {
+    if (!token) {
+      token = new URL(request.url).searchParams.get('token') || null;
+    }
+
+    if (!token) {
+      return NextResponse.json({
+        error: 'Unauthorized - Authentication token required'
+      }, { status: 401 });
+    }
+
+    // Initialize Firebase Admin for token verification
+    const admin = await import('firebase-admin');
+    if (!admin.apps.length) {
+      admin.initializeApp({
+        credential: admin.credential.cert({
+          projectId: process.env.FIREBASE_PROJECT_ID!,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL!,
+          privateKey: process.env.FIREBASE_PRIVATE_KEY!.replace(/\\n/g, '\n'),
+        }),
+      });
+    }
+
+    // Verify token and extract authenticated user
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    const authenticatedUserId = decodedToken.uid;
+
+    const { searchParams } = new URL(request.url);
+    const requestedUid = searchParams.get('uid');
+
+    if (!requestedUid) {
       return NextResponse.json({ error: 'UID es requerido' }, { status: 400 });
+    }
+
+    // 🔒 SECURITY CHECK - Users can only access their own data
+    if (authenticatedUserId !== requestedUid) {
+      return NextResponse.json({
+        error: 'Forbidden - Cannot access other users\' data'
+      }, { status: 403 });
     }
 
     await connectDB();
 
-    let user = await User.findOne({ uid });
+    let user = await User.findOne({ uid: requestedUid });
 
-    // If user doesn't exist, create a basic user record
+    // If user doesn't exist, create a basic user record from Firebase
     if (!user) {
-      // Try to get user details from Firebase Auth
       try {
-        const { getAuth } = await import('firebase-admin/auth');
-        const auth = getAuth();
-        const firebaseUser = await auth.getUser(uid);
+        const auth = admin.auth();
+        const firebaseUser = await auth.getUser(requestedUid);
 
         user = new User({
           uid: firebaseUser.uid,
@@ -79,7 +114,7 @@ export async function GET(request: Request) {
         });
 
         await user.save();
-        console.log('User created automatically:', uid);
+        console.log('User created automatically:', requestedUid);
       } catch (firebaseError) {
         console.error('Error creating user from Firebase:', firebaseError);
         return NextResponse.json({ error: 'Error al obtener usuario desde Firebase' }, { status: 500 });

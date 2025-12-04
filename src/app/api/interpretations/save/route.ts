@@ -1,5 +1,6 @@
 // src/app/api/interpretations/save/route.ts
 import { NextRequest, NextResponse } from 'next/server';
+import * as admin from 'firebase-admin';
 import connectDB from '@/lib/db';
 import Interpretation from '@/models/Interpretation';
 
@@ -7,6 +8,34 @@ const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
 export async function POST(request: NextRequest) {
   try {
+    // 🔒 AUTHENTICATION - Routes handle their own Firebase auth since middleware blocks all protected routes
+    const authHeader = request.headers.get('authorization');
+    let token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+
+    if (!token) {
+      token = request.nextUrl.searchParams.get('token') || null;
+    }
+
+    if (!token) {
+      return NextResponse.json({
+        success: false,
+        error: 'Unauthorized - No authentication token provided'
+      }, { status: 401 });
+    }
+
+    // Initialize Firebase Admin
+    if (!admin.apps.length) {
+      admin.initializeApp({
+        credential: admin.credential.cert({
+          projectId: process.env.FIREBASE_PROJECT_ID!,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL!,
+          privateKey: process.env.FIREBASE_PRIVATE_KEY!.replace(/\\n/g, '\n'),
+        }),
+      });
+    }
+
+    await admin.auth().verifyIdToken(token);
+
     const body = await request.json();
     const { chartType } = body;
 
@@ -239,6 +268,36 @@ export async function GET(request: NextRequest) {
 // ✅ PUT: Actualizar/reemplazar interpretación existente (usado por InterpretationButton)
 export async function PUT(request: NextRequest) {
   try {
+    // Authenticate the request
+    const authHeader = request.headers.get('authorization');
+    let token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+
+    if (!token) {
+      token = request.cookies.get('token')?.value ||
+              request.nextUrl.searchParams.get('token') || null;
+    }
+
+    if (!token) {
+      return NextResponse.json({
+        success: false,
+        error: 'Unauthorized - No authentication token provided'
+      }, { status: 401 });
+    }
+
+    // Initialize Firebase if not already initialized
+    if (!admin.apps.length) {
+      admin.initializeApp({
+        credential: admin.credential.cert({
+          projectId: process.env.FIREBASE_PROJECT_ID!,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL!,
+          privateKey: process.env.FIREBASE_PRIVATE_KEY!.replace(/\\n/g, '\n'),
+        }),
+      });
+    }
+
+    // Verify the token
+    await admin.auth().verifyIdToken(token);
+
     console.log('📝 ===== PUT: UPDATING INTERPRETATION =====');
 
     const body = await request.json();
