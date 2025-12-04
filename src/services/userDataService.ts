@@ -7,6 +7,26 @@
 // O si usas mongoose:
 // import mongoose from 'mongoose';
 
+// Import Firebase auth for authentication
+import { getAuth } from 'firebase/auth';
+
+// Helper function to get authentication headers
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  const auth = getAuth();
+  const user = auth.currentUser;
+
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+
+  const idToken = await user.getIdToken();
+
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${idToken}`
+  };
+}
+
 export interface UserBirthData {
   date: string;
   time: string;
@@ -50,10 +70,13 @@ async function getDbConnection() {
 export async function getUserBirthData(userId: string): Promise<UserBirthData | null> {
   try {
     console.log(`🔍 Obteniendo datos de nacimiento para usuario: ${userId}`);
-    
+
     // 🔄 USAR TU ENDPOINT EXISTENTE DE BIRTH-DATA
-    const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/birth-data?userId=${userId}`);
-    
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/birth-data?userId=${userId}`, {
+      headers
+    });
+
     if (!response.ok) {
       console.log(`❌ No se encontraron datos de nacimiento para usuario: ${userId}`);
       return null;
@@ -98,14 +121,20 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
     let hasProgressedChart = false;
     
     try {
-      const natalResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/charts/natal?userId=${userId}`);
+      const headers = await getAuthHeaders();
+      const natalResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/charts/natal?userId=${userId}`, {
+        headers
+      });
       hasNatalChart = natalResponse.ok;
     } catch (error) {
       console.log('❌ Error verificando carta natal:', error);
     }
-    
+
     try {
-      const progressedResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/charts/progressed?userId=${userId}`);
+      const headers = await getAuthHeaders();
+      const progressedResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/charts/progressed?userId=${userId}`, {
+        headers
+      });
       hasProgressedChart = progressedResponse.ok;
     } catch (error) {
       console.log('❌ Error verificando carta progresada:', error);
@@ -143,11 +172,10 @@ export async function saveUserBirthData(userId: string, birthData: UserBirthData
     console.log(`💾 Guardando datos de nacimiento para usuario: ${userId}`);
     
     // Usar tu endpoint existente para guardar datos
+    const headers = await getAuthHeaders();
     const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/birth-data`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({
         userId,
         ...birthData
