@@ -35,25 +35,29 @@ function initializeFirebase() {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Skip middleware for non-API routes and static files
-  if (!pathname.startsWith('/api/') ||
-      pathname.includes('.') ||
-      pathname.includes('auth') ||
-      pathname.includes('checkout')) {
+  // Skip middleware for static files and assets
+  if (pathname.includes('.') ||
+      pathname.startsWith('/favicon.ico') ||
+      pathname.startsWith('/_next/')) {
     return;
   }
 
-  // Allow GET requests for interpretations (they use query params for auth)
-  if (pathname.startsWith('/api/interpretations/save') && request.method === 'GET') {
-    return; // Allow GET requests to pass through
+  // Skip authentication for public API endpoints
+  if (pathname.startsWith('/api/checkout') ||
+      pathname.startsWith('/api/webhook') ||
+      pathname.startsWith('/api/auth') ||
+      pathname.startsWith('/api/prokerala') ||
+      pathname.startsWith('/api/geocode') ||
+      pathname.startsWith('/api/reverse-geocode')) {
+    return;
   }
 
-  // Better Firebase initialization check
+  // Check Firebase configuration once at the beginning
   if (!process.env.FIREBASE_PROJECT_ID ||
       !process.env.FIREBASE_CLIENT_EMAIL ||
       !process.env.FIREBASE_PRIVATE_KEY) {
     console.error('Firebase environment variables not configured');
-    // Return error instead of skipping auth in production
+    // In production, return error instead of skipping auth
     return new Response(JSON.stringify({
       error: 'Server configuration error - Firebase not properly configured',
       code: 'FIREBASE_CONFIG_ERROR'
@@ -63,44 +67,43 @@ export async function middleware(request: NextRequest) {
     });
   }
 
-  // Protected API routes
+  // Protected API routes that require authentication
   if (pathname.startsWith('/api/interpretations') ||
       pathname.startsWith('/api/astrology') ||
       pathname.startsWith('/api/charts') ||
-      pathname.startsWith('/api/users')) {
+      pathname.startsWith('/api/users') ||
+      pathname.startsWith('/api/birth-data') ||
+      pathname.startsWith('/api/pdf') ||
+      pathname.startsWith('/api/cache')) {
 
     try {
-      // Try to get token from authorization header
+      // Always try Bearer token first
       const authHeader = request.headers.get('authorization');
+      let token: string | null = null;
 
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        // For production, try to get token from cookies or query params
-        const token = request.cookies.get('token')?.value ||
-                     request.nextUrl.searchParams.get('token');
-
-        if (!token) {
-          // Return JSON error instead of redirect for API routes
-          return new Response(JSON.stringify({
-            error: 'Unauthorized - No authentication token provided'
-          }), {
-            status: 401,
-            headers: { 'Content-Type': 'application/json' }
-          });
-        }
-
-        // Verify Firebase token
-        const authInstance = initializeFirebase();
-        await authInstance.verifyIdToken(token);
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7);
       } else {
-        // Bearer token authentication
-        const token = authHeader.substring(7);
-        const authInstance = initializeFirebase();
-        await authInstance.verifyIdToken(token);
+        // Fallback to cookie or query param
+        token = request.cookies.get('token')?.value ||
+               request.nextUrl.searchParams.get('token') || null;
       }
+
+      if (!token) {
+        return new Response(JSON.stringify({
+          error: 'Unauthorized - No authentication token provided'
+        }), {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Verify Firebase token
+      const authInstance = initializeFirebase();
+      await authInstance.verifyIdToken(token);
+
     } catch (error) {
       console.error('Auth middleware error:', error);
-      // For debugging, also return the error
-      console.error('Full error object:', error);
       return new Response(JSON.stringify({
         error: 'Authentication failed - Invalid token',
         details: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined
