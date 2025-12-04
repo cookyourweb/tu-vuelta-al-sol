@@ -6,6 +6,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Brain, Sparkles, RefreshCw, Eye, X, Star, Target, Zap, Copy, Check, Download, Clock, TrendingUp } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import { useAuth } from '@/context/AuthContext';
 
 interface InterpretationButtonProps {
   type: 'natal' | 'progressed' | 'solar-return';
@@ -50,6 +51,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
   className = "",
   isAdmin = false
 }) => {
+  const { user } = useAuth();
   const [interpretation, setInterpretation] = useState<InterpretationData | null>(null);
   const [loading, setLoading] = useState(false);
   const [checkingCache, setCheckingCache] = useState(true);
@@ -578,6 +580,12 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       console.log('💾 chartType:', type);
       console.log('💾 generatedAt:', interpretationData.generatedAt);
 
+      // Get Firebase ID token for authentication
+      let token = null;
+      if (user) {
+        token = await user.getIdToken();
+      }
+
       const saveData = {
         userId,
         chartType: type,
@@ -590,16 +598,24 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         userId: saveData.userId,
         chartType: saveData.chartType,
         interpretationKeys: Object.keys(saveData.interpretation),
-        generatedAt: saveData.generatedAt
+        generatedAt: saveData.generatedAt,
+        hasToken: !!token
       });
 
       // ✅ FIX: Use PUT method to REPLACE existing interpretation (upsert)
       // POST creates duplicates, PUT replaces the existing one
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      // Add authorization header if token is available
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch('/api/interpretations/save', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(saveData)
       });
 
