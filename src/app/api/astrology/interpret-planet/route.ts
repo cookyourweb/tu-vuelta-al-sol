@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
 import { generatePlanetInterpretation } from '@/services/tripleFusedInterpretationService';
+import * as admin from 'firebase-admin';
 
 
 // =============================================================================
