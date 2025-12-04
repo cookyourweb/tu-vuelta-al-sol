@@ -2,18 +2,35 @@ import type { NextRequest } from 'next/server';
 import admin from 'firebase-admin';
 import { cert } from 'firebase-admin/app';
 
-// Initialize Firebase Admin if not already done
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    }),
-  });
-}
+// Lazy-initialized Firebase Admin
+let firebaseApp: admin.app.App | null = null;
+let auth: admin.auth.Auth | null = null;
 
-const auth = admin.auth();
+function initializeFirebase() {
+  if (!firebaseApp) {
+    // Check environment variables first
+    if (!process.env.FIREBASE_PROJECT_ID ||
+        !process.env.FIREBASE_CLIENT_EMAIL ||
+        !process.env.FIREBASE_PRIVATE_KEY) {
+      throw new Error('Firebase environment variables not configured');
+    }
+
+    try {
+      firebaseApp = admin.initializeApp({
+        credential: cert({
+          projectId: process.env.FIREBASE_PROJECT_ID,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+          privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        }),
+      });
+      auth = firebaseApp.auth();
+    } catch (error) {
+      console.error('Error initializing Firebase:', error);
+      throw new Error('Failed to initialize Firebase');
+    }
+  }
+  return auth as admin.auth.Auth;
+}
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -72,7 +89,7 @@ export async function middleware(request: NextRequest) {
         }
 
         // Verify Firebase token
-        await auth.verifyIdToken(token);
+        await authInstance.verifyIdToken(token);
       } else {
         // Bearer token authentication
         const token = authHeader.substring(7);
