@@ -188,14 +188,13 @@ export async function GET(request: NextRequest) {
 
     await connectDB();
 
-    // ✅ FIX: Find THE MOST RECENT interpretation (not just any valid one)
+    // ✅ Find active (non-expired) interpretations only
     const interpretationDoc = await Interpretation.findOne({
       userId,
       chartType,
-      // ❌ REMOVE: expiresAt filter (we want latest even if expired)
-      // expiresAt: { $gt: new Date() }
+      expiresAt: { $gt: new Date() } // Only return active interpretations
     })
-    .sort({ generatedAt: -1, _id: -1 }) // ✅ Sort by date DESC + _id DESC
+    .sort({ generatedAt: -1, _id: -1 }) // Sort by date DESC + _id DESC
     .lean()
     .exec() as any;
 

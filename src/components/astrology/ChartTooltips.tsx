@@ -192,7 +192,7 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
         // ⭐ NUEVO: Construir URL con chartType
         let url = `/api/astrology/interpret-natal?userId=${userId}`;
         if (chartType === 'solar-return') {
-          url = `/api/astrology/interpret-solar-return?userId=${userId}`;
+          url = `/api/interpretations/save?userId=${userId}&chartType=solar-return`;
         }
 
         const response = await fetch(url);
