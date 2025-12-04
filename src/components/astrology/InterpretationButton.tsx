@@ -724,7 +724,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               <Star className="w-8 h-8 text-purple-300" />
               Tu Esencia Revolucionaria
             </h4>
-            <p className="text-purple-50 text-lg leading-relaxed font-medium">{data.esencia_revolucionaria}</p>
+            <p className="text-purple-50 text-lg leading-relaxed font-medium">{typeof data.esencia_revolucionaria === 'string' ? data.esencia_revolucionaria : JSON.stringify(data.esencia_revolucionaria)}</p>
           </div>
         )}
 
@@ -734,7 +734,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               <Target className="w-8 h-8 text-blue-300" />
               Tu Propósito de Vida
             </h4>
-      <p className="text-blue-50 text-lg leading-relaxed font-medium">{data.proposito_vida}</p>
+      <p className="text-blue-50 text-lg leading-relaxed font-medium">{typeof data.proposito_vida === 'string' ? data.proposito_vida : JSON.stringify(data.proposito_vida)}</p>
           </div>
         )}
 
@@ -1002,7 +1002,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               Tema Central del Año
             </h4>
             <p className="text-amber-50 text-2xl leading-relaxed font-bold text-center italic">
-              "{data.tema_anual}"
+              "{typeof data.tema_anual === 'string' ? data.tema_anual : JSON.stringify(data.tema_anual)}"
             </p>
           </div>
         )}

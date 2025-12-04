@@ -490,7 +490,7 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
             </span>
             <div>
             <div className="text-white font-bold text-lg">
-              {PLANET_SYMBOLS[planet.name] || planet.name.charAt(0)} {typeof interpretation?.tooltip?.titulo === 'string' ? interpretation?.tooltip?.titulo : planet.name}
+              {PLANET_SYMBOLS[planet.name] || planet.name.charAt(0)} {typeof interpretation?.tooltip?.titulo === 'string' ? interpretation.tooltip.titulo : planet.name}
             </div>
               <div className="text-gray-200 text-sm">
                 {planet.degree}° {planet.sign}
@@ -527,16 +527,16 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
             </span> Significado:
           </div>
           <div className="text-gray-200 text-sm leading-relaxed">
-            {interpretation?.tooltip?.significado || getPersonalizedPlanetInterpretation(planet)}
+            {typeof interpretation?.tooltip?.significado === 'string' ? interpretation.tooltip.significado : getPersonalizedPlanetInterpretation(planet)}
           </div>
         </div>
 
         <div className="space-y-1 mb-3">
           <div className="text-cyan-200 text-xs">
-            <strong>Efecto:</strong> {interpretation?.tooltip?.efecto || 'Influencia planetaria significativa'}
+            <strong>Efecto:</strong> {typeof interpretation?.tooltip?.efecto === 'string' ? interpretation.tooltip.efecto : 'Influencia planetaria significativa'}
           </div>
           <div className="text-purple-200 text-xs">
-            <strong>Tipo:</strong> {interpretation?.tooltip?.tipo || 'Energía transformadora'}
+            <strong>Tipo:</strong> {typeof interpretation?.tooltip?.tipo === 'string' ? interpretation.tooltip.tipo : 'Energía transformadora'}
           </div>
         </div>
 
@@ -753,26 +753,26 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
           </svg>
           <div>
             <div className="text-white font-bold text-lg">
-              {typeof interpretation?.tooltip?.titulo === 'string' ? interpretation?.tooltip?.titulo : 'Ascendente'}
+              {typeof interpretation?.tooltip?.titulo === 'string' ? interpretation.tooltip.titulo : 'Ascendente'}
             </div>
             <div className="text-gray-200 text-sm">
               {ascendant.degree}° {ascendant.sign}
             </div>
           </div>
         </div>
-        
+
         <div className="text-white text-sm font-semibold mb-1">🎯 Significado:</div>
         <div className="text-gray-200 text-xs mb-2">
-          {interpretation?.tooltip?.significado || 
+          {typeof interpretation?.tooltip?.significado === 'string' ? interpretation.tooltip.significado :
             `Tu máscara social, cómo te presentas al mundo y tu apariencia física.`}
         </div>
-        
+
         <div className="space-y-1 mb-3">
           <div className="text-cyan-200 text-xs">
-            <strong>Efecto:</strong> {interpretation?.tooltip?.efecto || 'Influencia angular significativa'}
+            <strong>Efecto:</strong> {typeof interpretation?.tooltip?.efecto === 'string' ? interpretation.tooltip.efecto : 'Influencia angular significativa'}
           </div>
           <div className="text-purple-200 text-xs">
-            <strong>Tipo:</strong> {interpretation?.tooltip?.tipo || 'Energía directiva'}
+            <strong>Tipo:</strong> {typeof interpretation?.tooltip?.tipo === 'string' ? interpretation.tooltip.tipo : 'Energía directiva'}
           </div>
         </div>
 
@@ -875,7 +875,7 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
           </svg>
           <div>
             <div className="text-white font-bold text-lg">
-              {typeof interpretation?.tooltip?.titulo === 'string' ? interpretation?.tooltip?.titulo : 'Medio Cielo'}
+              {typeof interpretation?.tooltip?.titulo === 'string' ? interpretation.tooltip.titulo : 'Medio Cielo'}
             </div>
             <div className="text-gray-200 text-sm">
               {midheaven.degree}° {midheaven.sign}
@@ -885,16 +885,16 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
         
         <div className="text-white text-sm font-semibold mb-1">🎯 Significado:</div>
         <div className="text-gray-200 text-xs mb-2">
-          {interpretation?.tooltip?.significado || 
+          {typeof interpretation?.tooltip?.significado === 'string' ? interpretation.tooltip.significado :
             `Tu vocación, imagen pública y dirección profesional.`}
         </div>
-        
+
         <div className="space-y-1 mb-3">
           <div className="text-cyan-200 text-xs">
-            <strong>Efecto:</strong> {interpretation?.tooltip?.efecto || 'Influencia angular significativa'}
+            <strong>Efecto:</strong> {typeof interpretation?.tooltip?.efecto === 'string' ? interpretation.tooltip.efecto : 'Influencia angular significativa'}
           </div>
           <div className="text-purple-200 text-xs">
-            <strong>Tipo:</strong> {interpretation?.tooltip?.tipo || 'Energía directiva'}
+            <strong>Tipo:</strong> {typeof interpretation?.tooltip?.tipo === 'string' ? interpretation.tooltip.tipo : 'Energía directiva'}
           </div>
         </div>
 
