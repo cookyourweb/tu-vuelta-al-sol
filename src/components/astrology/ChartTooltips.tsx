@@ -489,9 +489,9 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
               {PLANET_SYMBOLS[planet.name] || planet.name.charAt(0)}
             </span>
             <div>
-              <div className="text-white font-bold text-lg">
-                {PLANET_SYMBOLS[planet.name] || planet.name.charAt(0)} {interpretation?.tooltip?.titulo || planet.name}
-              </div>
+            <div className="text-white font-bold text-lg">
+              {PLANET_SYMBOLS[planet.name] || planet.name.charAt(0)} {typeof interpretation?.tooltip?.titulo === 'string' ? interpretation?.tooltip?.titulo : planet.name}
+            </div>
               <div className="text-gray-200 text-sm">
                 {planet.degree}° {planet.sign}
               </div>
@@ -753,7 +753,7 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
           </svg>
           <div>
             <div className="text-white font-bold text-lg">
-              {interpretation?.tooltip?.titulo || 'Ascendente'}
+              {typeof interpretation?.tooltip?.titulo === 'string' ? interpretation?.tooltip?.titulo : 'Ascendente'}
             </div>
             <div className="text-gray-200 text-sm">
               {ascendant.degree}° {ascendant.sign}
@@ -875,7 +875,7 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
           </svg>
           <div>
             <div className="text-white font-bold text-lg">
-              {interpretation?.tooltip?.titulo || 'Medio Cielo'}
+              {typeof interpretation?.tooltip?.titulo === 'string' ? interpretation?.tooltip?.titulo : 'Medio Cielo'}
             </div>
             <div className="text-gray-200 text-sm">
               {midheaven.degree}° {midheaven.sign}
