@@ -13,6 +13,7 @@ import { Planet, Aspect } from '@/types/astrology/chartDisplay';
 import { planetMeanings, signMeanings, houseMeanings, aspectMeanings, PLANET_SYMBOLS, PLANET_COLORS } from '@/constants/astrology';
 import { getPersonalizedPlanetInterpretation, getPersonalizedAspectInterpretation } from '@/services/chartInterpretationsService';
 import { getExampleInterpretation } from '@/data/interpretations/ExampleInterpretations';
+import { useAuth } from '@/context/AuthContext';
 
 interface ChartTooltipsProps {
   hoveredPlanet: string | null;
@@ -49,6 +50,7 @@ interface ChartTooltipsProps {
 }
 
 const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
+  const { user } = useAuth();
   const {
     hoveredPlanet,
     hoveredAspect,
@@ -366,8 +368,16 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
       if (result.success) {
         console.log('✅ Aspect interpretation generated');
 
+        // Get Firebase ID token for authentication
+        const token = await user!.getIdToken();
+
         // Refresh interpretations
-        const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`);
+        const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
         const refreshResult = await refreshResponse.json();
 
         if (refreshResult.success) {
@@ -567,8 +577,16 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                   if (result.success) {
                     console.log('✅ Planeta generado:', planet.name);
 
+                    // Get Firebase ID token for authentication
+                    const token = await user!.getIdToken();
+
                     // Refrescar interpretaciones
-                    const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`);
+                    const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`, {
+                      headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                      }
+                    });
                     const refreshResult = await refreshResponse.json();
 
                     // ⭐ DEBUGGING: Ver qué devuelve la API
@@ -929,7 +947,7 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
   if ((hoveredAspect || clickedAspect) && calculatedAspects.length > 0) {
     const aspectKey = clickedAspect || hoveredAspect;
-    const currentAspect = calculatedAspects.find(aspect =>
+    const currentAspect = calculatedAspects.find((aspect: Aspect & { config: { color: string; difficulty: string; name: string; angle: number; orb: number }; exact: boolean }) =>
       `${aspect.planet1}-${aspect.planet2}-${aspect.type}` === aspectKey
     );
 
