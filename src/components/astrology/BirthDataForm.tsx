@@ -46,12 +46,7 @@ export default function BirthDataForm() {
       }
       
       try {
-        const idToken = await user.getIdToken();
-        const response = await fetch(`/api/birth-data?userId=${user.uid}`, {
-          headers: {
-            'Authorization': `Bearer ${idToken}`
-          }
-        });
+        const response = await fetch(`/api/birth-data?userId=${user.uid}`);
         
         if (response.ok) {
           const { data } = await response.json();
@@ -137,13 +132,11 @@ if (data.birthTime && data.birthTime.trim()) {
 }
       
       console.log('Datos a enviar al servidor:', birthData);
-      
-      const idToken = await user.getIdToken();
+
       const response = await fetch('/api/birth-data', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${idToken}`
         },
         body: JSON.stringify(birthData),
       });
@@ -158,14 +151,12 @@ if (data.birthTime && data.birthTime.trim()) {
       }
       
       setSuccess(true);
-      
+
       try {
-        const idToken = await user.getIdToken();
         const chartResponse = await fetch('/api/charts/natal', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${idToken}`
           },
           body: JSON.stringify({
             userId: user.uid,
