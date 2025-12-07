@@ -2,9 +2,6 @@
 // 🧑‍💼 SERVICIO PARA OBTENER DATOS DEL USUARIO - COMPATIBLE CON TU SISTEMA
 // ✅ FIXED: Soporte para llamadas server-side y client-side
 
-import connectDB from '@/lib/db';
-import BirthData, { IBirthData } from '@/models/BirthData';
-
 export interface UserBirthData {
   date: string;
   time: string;
@@ -74,6 +71,10 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
 export async function getUserBirthDataDirect(userId: string): Promise<UserBirthData | null> {
   try {
     console.log(`🔍 [SERVER] Obteniendo datos de nacimiento directo para usuario: ${userId}`);
+
+    // Importar dinámicamente para evitar errores en build time
+    const { default: connectDB } = await import('@/lib/db');
+    const { default: BirthData } = await import('@/models/BirthData');
 
     await connectDB();
 
