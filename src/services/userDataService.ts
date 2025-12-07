@@ -3,7 +3,7 @@
 // ✅ FIXED: Soporte para llamadas server-side y client-side
 
 import connectDB from '@/lib/db';
-import BirthData from '@/models/BirthData';
+import BirthData, { IBirthData } from '@/models/BirthData';
 
 export interface UserBirthData {
   date: string;
@@ -82,7 +82,7 @@ export async function getUserBirthDataDirect(userId: string): Promise<UserBirthD
         { userId: userId },
         { uid: userId }
       ]
-    }).lean();
+    }).lean() as any;
 
     if (!birthDataRaw) {
       console.log(`❌ [SERVER] No se encontraron datos para userId: ${userId}`);
