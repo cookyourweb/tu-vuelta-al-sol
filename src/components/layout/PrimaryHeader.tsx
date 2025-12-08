@@ -206,9 +206,9 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
                 <Logo size={44} className="group-hover:scale-105 transition-transform duration-300" />
               </div>
               
-              {/* Logo Mobile - Simple MANTENIDO */}
+              {/* Logo Mobile - Optimizado para mejor visibilidad */}
               <div className="md:hidden">
-                <LogoSimple size={40} className="group-hover:scale-105 transition-transform duration-300" />
+                <LogoSimple size={48} className="group-hover:scale-105 transition-transform duration-300" />
               </div>
               
               {/* Texto del logo - SIEMPRE VISIBLE */}
@@ -224,8 +224,8 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
               </div>
             </div>
             
-            {/* Badge flotante - Compacto y elegante */}
-            <div className="hidden md:flex items-center ml-14">
+            {/* Badge flotante - Compacto y elegante con mejor espaciado */}
+            <div className="hidden md:flex items-center ml-14 mt-1">
               <span className="text-[9px] px-2 py-0.5 bg-purple-700/50 border border-purple-500/30 rounded-full text-purple-200 backdrop-blur-sm">
                 Agenda Astrológica
               </span>
