@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { Sparkles, Star, Sunrise, Calendar, Settings } from 'lucide-react';
+import { Sparkles, Star, Sun, Calendar, Settings } from 'lucide-react';
 
 const baseNavItems = [
   {
@@ -23,7 +23,7 @@ const baseNavItems = [
   {
     href: '/solar-return',
     label: 'R.Solar',
-    icon: Sunrise,
+    icon: Sun,
     shortLabel: 'R.Solar'
   },
   {
@@ -102,13 +102,13 @@ export default function MobileBottomNav() {
               <div className={`relative transition-all duration-300 ${
                 isActive ? 'scale-110' : 'scale-100'
               }`}>
-                <IconComponent className={`w-6 h-6 ${
+                <IconComponent className={`w-7 h-7 ${
                   isActive ? 'drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]' : ''
                 }`} />
-                
+
                 {/* Resplandor para activo */}
                 {isActive && (
-                  <div className="absolute inset-0 w-6 h-6 bg-yellow-400 rounded-full opacity-20 blur-md -z-10"></div>
+                  <div className="absolute inset-0 w-7 h-7 bg-yellow-400 rounded-full opacity-20 blur-md -z-10"></div>
                 )}
               </div>
               

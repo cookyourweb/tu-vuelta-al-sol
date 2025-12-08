@@ -201,9 +201,9 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
             className="flex flex-col items-start space-y-0.5 hover:opacity-90 transition-all duration-300 group"
           >
             <div className="flex items-center space-x-2 md:space-x-3">
-              {/* Logo Desktop - Animado MÁS GRANDE */}
+              {/* Logo Desktop - Tamaño optimizado */}
               <div className="hidden md:block">
-                <Logo size={52} className="group-hover:scale-105 transition-transform duration-300" />
+                <Logo size={44} className="group-hover:scale-105 transition-transform duration-300" />
               </div>
               
               {/* Logo Mobile - Simple MANTENIDO */}
@@ -224,10 +224,10 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
               </div>
             </div>
             
-            {/* Badge flotante - SIN ICONO, más cerca del título */}
-            <div className="hidden md:flex items-center ml-16">
-              <span className="text-[10px] px-2.5 py-0.5 bg-purple-700/50 border border-purple-500/30 rounded-full text-purple-200 backdrop-blur-sm">
-                Agenda Astrológica Personalizada
+            {/* Badge flotante - Compacto y elegante */}
+            <div className="hidden md:flex items-center ml-14">
+              <span className="text-[9px] px-2 py-0.5 bg-purple-700/50 border border-purple-500/30 rounded-full text-purple-200 backdrop-blur-sm">
+                Agenda Astrológica
               </span>
             </div>
           </Link>
