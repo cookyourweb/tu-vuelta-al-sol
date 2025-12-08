@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import Logo from '@/components/icons/Logo';
 import LogoSimple from '../icons/Logosimple';
+import LogoSimpleGold from '../icons/LogoSimpleGold';
 
 
 // Iconos zodiacales para avatares
@@ -203,7 +204,7 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
             <div className="flex items-center space-x-2 md:space-x-3">
               {/* Logo Desktop - Tamaño optimizado */}
               <div className="hidden md:block">
-                <Logo size={44} className="group-hover:scale-105 transition-transform duration-300" />
+                <LogoSimpleGold size={48} className="group-hover:scale-105 transition-transform duration-300" />
               </div>
               
               {/* Logo Mobile - Simple MANTENIDO */}
