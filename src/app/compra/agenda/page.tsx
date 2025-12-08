@@ -5,6 +5,8 @@ import { Star, Sparkles, CreditCard, User, Mail, MapPin, Heart, Clock, Globe, Ch
 import PaymentButton from '@/components/stripe/PaymentButton';
 import { useAuth } from '@/context/AuthContext';
 import BirthDataForm from '@/components/dashboard/BirthDataForm';
+import PrimaryHeader from '@/components/layout/PrimaryHeader';
+import Footer from '@/components/layout/Footer';
 
 interface BirthData {
   name: string;
@@ -203,16 +205,20 @@ export default function BuyAgendaPage() {
       );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-      {/* 🌟 Fondo estelar */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-yellow-300 rounded-full animate-pulse"></div>
-        <div className="absolute top-3/4 right-1/5 w-2 h-2 bg-pink-300 rounded-full animate-pulse delay-1000"></div>
-        <div className="absolute top-1/6 right-2/5 w-2 h-2 bg-purple-200 rounded-full animate-bounce delay-500"></div>
-        <div className="absolute bottom-1/6 left-2/5 w-2 h-2 bg-blue-200 rounded-full animate-pulse delay-1500"></div>
-      </div>
+    <>
+      {/* Header */}
+      <PrimaryHeader />
 
-      <div className="relative z-10 container mx-auto px-4 py-16">
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+        {/* 🌟 Fondo estelar */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-yellow-300 rounded-full animate-pulse"></div>
+          <div className="absolute top-3/4 right-1/5 w-2 h-2 bg-pink-300 rounded-full animate-pulse delay-1000"></div>
+          <div className="absolute top-1/6 right-2/5 w-2 h-2 bg-purple-200 rounded-full animate-bounce delay-500"></div>
+          <div className="absolute bottom-1/6 left-2/5 w-2 h-2 bg-blue-200 rounded-full animate-pulse delay-1500"></div>
+        </div>
+
+        <div className="relative z-10 container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto">
           {/* 🌙 Header */}
           <div className="text-center mb-12">
@@ -664,6 +670,9 @@ export default function BuyAgendaPage() {
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Footer */}
+      <Footer />
+    </>
   );
 }
