@@ -39,8 +39,8 @@ export default function PaymentButton({
         body: JSON.stringify({
           priceId,
           userId,
-          successUrl: `${window.location.origin}/stripe/success`,
-          cancelUrl: `${window.location.origin}/stripe/cancel`
+          successUrl: `${window.location.origin}/compra/success?session_id={CHECKOUT_SESSION_ID}`,
+          cancelUrl: `${window.location.origin}/compra/cancel`
         })
       });
 
