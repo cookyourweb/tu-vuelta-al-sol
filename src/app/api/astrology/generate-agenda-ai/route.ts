@@ -3,6 +3,17 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { calculateSolarYearEvents } from '@/utils/astrology/solarYearEvents';
+import {
+  createDefaultAccessStatus,
+  filterEventsByAccess,
+  calculateAIBudget,
+  markEventsWithAccessStatus,
+  getAccessStats
+} from '@/utils/agendaAccessControl';
+import {
+  generateBatchInterpretations,
+  InterpretationLevel
+} from '@/services/eventInterpretationService';
 
 // INTERFACES COMPLETAS
 interface AgendaRequest {
@@ -184,6 +195,60 @@ export async function POST(request: NextRequest) {
       ingresses: solarYearEvents.planetaryIngresses.length
     });
 
+    // 🔒 FASE 3: Control de acceso y preview gratuito
+    // TODO: En producción, verificar estado de pago real desde MongoDB
+    // Por ahora, todos los usuarios tienen preview de 2 meses
+    const accessStatus = createDefaultAccessStatus(user_id || 'unknown', new Date().getFullYear());
+
+    console.log('🔒 [DEBUG] Estado de acceso:', {
+      hasPaid: accessStatus.hasPaid,
+      previewMonths: accessStatus.previewMonths,
+      fullYear: accessStatus.fullYearUnlocked
+    });
+
+    // Filtrar eventos según acceso (2 meses preview vs año completo)
+    const accessibleEvents = filterEventsByAccess(realEvents, nextBirthday, accessStatus);
+    const eventsWithAccessMarkers = markEventsWithAccessStatus(realEvents, nextBirthday, accessStatus);
+
+    const accessStats = getAccessStats(realEvents.length, accessibleEvents.length, accessStatus);
+    console.log('📊 [DEBUG] Stats de acceso:', accessStats);
+
+    // 🤖 FASE 3: Generar interpretaciones personalizadas con AI
+    const aiProfile = {
+      name: userProfile.name,
+      sunSign: carta_natal?.sol?.sign || 'Acuario',
+      moonSign: carta_natal?.luna?.sign || 'Libra',
+      risingSign: carta_natal?.ascendente?.sign || 'Acuario',
+      sunHouse: carta_natal?.sol?.house || 1,
+      moonHouse: carta_natal?.luna?.house || 7,
+      currentAge: userProfile.currentAge,
+      solarReturnTheme: 'Transformación y expansión' // TODO: extraer de carta progresada
+    };
+
+    // Calcular presupuesto AI según estado de pago
+    const aiBudget = calculateAIBudget(accessibleEvents.length, accessStatus);
+    console.log('💰 [DEBUG] Presupuesto AI:', aiBudget);
+
+    // Generar interpretaciones personalizadas para eventos accesibles
+    console.log('🎨 [DEBUG] Generando interpretaciones personalizadas...');
+    const personalizedInterpretations = await generateBatchInterpretations(
+      accessibleEvents.map(e => ({
+        eventType: e.type as any,
+        eventDate: e.date,
+        eventTitle: e.title,
+        eventDescription: e.description,
+        sign: e.sign || '',
+        planet: 'planet' in e ? e.planet : undefined
+      })),
+      aiProfile,
+      {
+        maxAIInterpretations: aiBudget.maxAIInterpretations,
+        priorityTypes: ['lunar_phase', 'eclipse']
+      }
+    );
+
+    console.log(`✅ [DEBUG] ${personalizedInterpretations.length} interpretaciones generadas`);
+
     let interpretations;
     
     try {
@@ -216,6 +281,19 @@ export async function POST(request: NextRequest) {
       console.log('✅ [DEBUG] Fallback astrológico generado con análisis natal-progresada');
     }
         
+        // Combinar eventos con interpretaciones personalizadas
+        const eventosConInterpretaciones = eventsWithAccessMarkers.map(event => {
+          const interpretation = personalizedInterpretations.find(
+            interp => interp.eventId.includes(event.date.slice(0, 10))
+          );
+
+          return {
+            ...event,
+            personalizedInterpretation: interpretation || null,
+            hasPersonalizedContent: !!interpretation
+          };
+        });
+
         const agendaFinal = {
           metadata: {
             usuario: datos_usuario.nombre,
@@ -226,22 +304,36 @@ export async function POST(request: NextRequest) {
               ascendente: carta_natal?.ascendente?.sign || 'Acuario'
             },
             generado: new Date().toISOString(),
-            version: '4.0-typescript-corregido'
+            version: '5.0-preview-system'
+          },
+          // 🔒 Información de acceso (nuevo en v5.0)
+          accessInfo: {
+            hasPaid: accessStatus.hasPaid,
+            previewMonths: accessStatus.previewMonths,
+            fullYearUnlocked: accessStatus.fullYearUnlocked,
+            stats: accessStats,
+            message: accessStats.message
           },
           carta_natal_interpretacion: {
             titulo: "🌟 TU CONFIGURACIÓN CÓSMICA BASE",
             ...interpretations.natal
           },
           carta_progresada_interpretacion: {
-            titulo: "🌙 TU EVOLUCIÓN ASTROLÓGICA ACTIVADA", 
+            titulo: "🌙 TU EVOLUCIÓN ASTROLÓGICA ACTIVADA",
             ...interpretations.progressed
           },
           agenda_revolucionaria: interpretations.agenda,
-          eventos_personalizados: interpretations.processedEvents,
+          // 🎨 Eventos con interpretaciones personalizadas (nuevo en v5.0)
+          eventos_personalizados: eventosConInterpretaciones,
+          // Mantener compatibilidad con versión anterior
+          eventos_legacy: interpretations.processedEvents,
           herramientas_crecimiento: createAstrologicalTools(carta_natal, datos_usuario.nombre)
         };
 
     console.log('✅ [DEBUG] Respuesta final creada correctamente');
+    console.log('📊 [DEBUG] Eventos totales:', realEvents.length);
+    console.log('🔓 [DEBUG] Eventos accesibles:', accessibleEvents.length);
+    console.log('🤖 [DEBUG] Interpretaciones AI:', personalizedInterpretations.length);
 
     return NextResponse.json({
       success: true,
@@ -252,11 +344,16 @@ export async function POST(request: NextRequest) {
       },
       metadata: {
         generationTimeMs: 1000,
-        version: '4.0-typescript-corregido',
+        version: '5.0-preview-system',
         debugMode: true,
         solarReturnPeriod: true,
         astrologicalPersonalization: true,
-        progressedAnalysis: true
+        progressedAnalysis: true,
+        // Nuevo en v5.0
+        aiInterpretations: personalizedInterpretations.length,
+        previewSystem: !accessStatus.hasPaid,
+        previewMonths: accessStatus.previewMonths,
+        estimatedCost: aiBudget.estimatedCost
       }
     });
 
