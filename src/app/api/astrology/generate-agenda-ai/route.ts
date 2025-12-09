@@ -2,6 +2,7 @@
 // VERSIÓN CORREGIDA Y COMPLETA - TODAS LAS FUNCIONES DEFINIDAS
 
 import { NextRequest, NextResponse } from 'next/server';
+import { calculateSolarYearEvents } from '@/utils/astrology/solarYearEvents';
 
 // INTERFACES COMPLETAS
 interface AgendaRequest {
@@ -102,31 +103,86 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ [DEBUG] Perfil básico creado');
 
-    const mockEvents = [
-      {
-        id: 'test_event_1',
-        type: 'lunar_phase' as const,
-        date: '2025-02-15',
-        title: 'Luna Nueva en Acuario',
-        description: 'Nueva siembra de intenciones',
-        importance: 'high' as const,
-        priority: 'high' as const,
-        sign: 'Acuario'
-      },
-      {
-        id: 'test_event_2', 
-        type: 'planetary_transit' as const,
-        date: '2025-03-20',
-        title: 'Sol entra en Aries',
-        description: 'Equinoccio de Primavera',
-        importance: 'high' as const,
-        priority: 'high' as const,
-        planet: 'Sol',
-        sign: 'Aries'
-      }
+    // 🚀 FASE 2: Cálculo dinámico de eventos astrológicos REALES
+    console.log('🌟 [DEBUG] Calculando eventos astrológicos reales del año solar...');
+    const birthDate = new Date(datos_usuario.fecha_nacimiento);
+
+    // Calcular para el próximo año solar (desde próximo cumpleaños)
+    const now = new Date();
+    const nextBirthday = new Date(birthDate);
+    nextBirthday.setFullYear(now.getFullYear());
+    if (nextBirthday < now) {
+      nextBirthday.setFullYear(now.getFullYear() + 1);
+    }
+
+    console.log('📅 [DEBUG] Calculando eventos desde:', nextBirthday.toISOString());
+    const solarYearEvents = await calculateSolarYearEvents(nextBirthday);
+
+    // Transformar eventos a formato esperado por el sistema de interpretación
+    const realEvents = [
+      ...solarYearEvents.lunarPhases.map((phase, idx) => {
+        const dateStr = phase.date instanceof Date ? phase.date.toISOString().split('T')[0] : String(phase.date).split('T')[0];
+        return {
+          id: `lunar_${idx}`,
+          type: 'lunar_phase' as const,
+          date: dateStr,
+          title: phase.description,
+          description: `Fase lunar en ${phase.sign}`,
+          importance: 'high' as const,
+          priority: 'high' as const,
+          sign: phase.sign,
+          planet: 'Luna'
+        };
+      }),
+      ...solarYearEvents.eclipses.map((eclipse, idx) => {
+        const dateStr = eclipse.date instanceof Date ? eclipse.date.toISOString().split('T')[0] : String(eclipse.date).split('T')[0];
+        return {
+          id: `eclipse_${idx}`,
+          type: 'eclipse' as const,
+          date: dateStr,
+          title: eclipse.description,
+          description: `Eclipse ${eclipse.type === 'solar' ? 'Solar' : 'Lunar'} en ${eclipse.sign}`,
+          importance: 'high' as const,
+          priority: 'high' as const,
+          sign: eclipse.sign
+        };
+      }),
+      ...solarYearEvents.retrogrades.map((retro, idx) => {
+        const dateStr = retro.startDate instanceof Date ? retro.startDate.toISOString().split('T')[0] : String(retro.startDate).split('T')[0];
+        return {
+          id: `retrograde_${idx}`,
+          type: 'retrograde' as const,
+          date: dateStr,
+          title: retro.description,
+          description: `${retro.planet} retrógrado desde ${retro.startSign} hasta ${retro.endSign}`,
+          importance: 'medium' as const,
+          priority: 'medium' as const,
+          planet: retro.planet,
+          sign: retro.startSign
+        };
+      }),
+      ...solarYearEvents.planetaryIngresses.slice(0, 20).map((ingress, idx) => {
+        const dateStr = ingress.date instanceof Date ? ingress.date.toISOString().split('T')[0] : String(ingress.date).split('T')[0];
+        return {
+          id: `ingress_${idx}`,
+          type: 'planetary_transit' as const,
+          date: dateStr,
+          title: ingress.description,
+          description: `${ingress.planet} entra en ${ingress.toSign}`,
+          importance: ingress.planet === 'Sol' ? 'high' as const : 'medium' as const,
+          priority: ingress.planet === 'Sol' ? 'high' as const : 'medium' as const,
+          planet: ingress.planet,
+          sign: ingress.toSign
+        };
+      })
     ];
 
-    console.log(`📅 [DEBUG] Eventos mock creados: ${mockEvents.length}`);
+    console.log(`✅ [DEBUG] Eventos reales calculados: ${realEvents.length}`, {
+      lunarPhases: solarYearEvents.lunarPhases.length,
+      eclipses: solarYearEvents.eclipses.length,
+      retrogrades: solarYearEvents.retrogrades.length,
+      ingresses: solarYearEvents.planetaryIngresses.length
+    });
 
     let interpretations;
     
@@ -146,16 +202,16 @@ export async function POST(request: NextRequest) {
       interpretations = await generateCompleteInterpretation(
         carta_natal,
         carta_progresada,
-        mockEvents,
+        realEvents,
         userProfile
       );
-      
+
       console.log('✅ [DEBUG] Interpretaciones IA completadas');
-      
+
     } catch (aiError) {
       console.error('❌ [DEBUG] Error con IA, usando fallback astrológico:', aiError);
-      
-      interpretations = createAstrologicalFallback(carta_natal, carta_progresada, userProfile, mockEvents);
+
+      interpretations = createAstrologicalFallback(carta_natal, carta_progresada, userProfile, realEvents);
       
       console.log('✅ [DEBUG] Fallback astrológico generado con análisis natal-progresada');
     }
