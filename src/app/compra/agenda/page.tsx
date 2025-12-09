@@ -669,6 +669,7 @@ export default function BuyAgendaPage() {
             </div>
           </div>
         </div>
+        </div>
       </div>
 
       {/* Footer */}
