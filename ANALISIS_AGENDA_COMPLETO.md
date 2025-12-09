@@ -863,25 +863,25 @@ Para que veas el flujo end-to-end funcionando, aunque sea con eventos hardcodead
 ### **ORDEN DE IMPLEMENTACIÓN COMPLETO:**
 
 ```
-PASO 1: COMPLETAR AGENDA (Este documento)
-├── Fase 1: Eventos dinámicos (1-2 días)
-├── Fase 2: Integración sistemas (2-3 días)
-├── Fase 3: Interpretaciones personalizadas (2-3 días)
-├── Fase 4: Renovación automática (1 día)
-└── Fase 5: PDF imprimible (3-4 días)
+PASO 1: COMPLETAR AGENDA
+├── Fase 1: Eventos dinámicos
+├── Fase 2: Integración sistemas
+├── Fase 3: Interpretaciones personalizadas
+├── Fase 4: Renovación automática
+└── Fase 5: PDF imprimible
     │
     ↓ AGENDA FUNCIONAL Y LISTA PARA VENDER
     │
-PASO 2: SISTEMA DE PAGO CON STRIPE
+PASO 2: SISTEMA DE PAGO STRIPE
 ├── Ver documentación: SISTEMA_COMPRA_AGENDA.md
-├── Implementar flujo de compra (digital + físico)
+├── Implementar flujo de compra
 ├── Integrar con generación de agenda
 ├── Panel admin para pedidos
-└── Sistema de envío (manual → automático)
+└── Sistema de envío
     │
     ↓ PLATAFORMA MONETIZABLE COMPLETA
     │
-PASO 3: LANZAMIENTO Y MARKETING
+PASO 3: LANZAMIENTO
 ```
 
 ### **Documentación de Referencia:**
@@ -986,29 +986,22 @@ Una vez la agenda esté completa, el flujo de compra será:
 
 ### **Próximos Hitos:**
 
-1. **ESTE SPRINT: Completar Agenda (9-13 días)**
+1. **AHORA: Completar Agenda**
    - Eventos dinámicos
    - Integración completa
-   - Interpretaciones personalizadas por evento
+   - Interpretaciones personalizadas
    - PDF imprimible
 
-2. **SIGUIENTE SPRINT: Sistema de Pago (5-7 días)**
+2. **DESPUÉS: Sistema de Pago**
    - Ver `SISTEMA_COMPRA_AGENDA.md`
    - Integración Stripe
    - Flujo de compra completo
    - Panel admin
 
-3. **LANZAMIENTO BETA:**
-   - 10-20 usuarios de prueba
-   - Recoger feedback
-   - Ajustar interpretaciones
-   - Pulir UX
-
-4. **LANZAMIENTO PÚBLICO:**
-   - Marketing
-   - Pricing final
-   - Automatización completa
-   - Escalar
+3. **BETA Y LANZAMIENTO:**
+   - Testing con usuarios
+   - Ajustes finales
+   - Marketing y escala
 
 ### **Tu Ventaja Competitiva:**
 
