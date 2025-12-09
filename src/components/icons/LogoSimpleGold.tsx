@@ -7,6 +7,12 @@ interface LogoSimpleGoldProps {
 }
 
 export default function LogoSimpleGold({ className = '', size = 48 }: LogoSimpleGoldProps) {
+  // Generate unique IDs to avoid conflicts when multiple logos are on the same page
+  const uniqueId = React.useId();
+  const sunGoldId = `sunGold-${uniqueId}`;
+  const raysGoldId = `raysGold-${uniqueId}`;
+  const orbitGoldId = `orbitGold-${uniqueId}`;
+
   return (
     <svg
       width={size}
@@ -18,20 +24,20 @@ export default function LogoSimpleGold({ className = '', size = 48 }: LogoSimple
     >
       <defs>
         {/* Gradiente DORADO para el sol - Oro brillante */}
-        <radialGradient id="sunGold" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#FFD700" />   {/* Oro brillante */}
-          <stop offset="40%" stopColor="#FFA500" />  {/* Naranja dorado */}
-          <stop offset="100%" stopColor="#FF8C00" /> {/* Naranja oscuro */}
+        <radialGradient id={sunGoldId} cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#FFD700" />
+          <stop offset="40%" stopColor="#FFA500" />
+          <stop offset="100%" stopColor="#FF8C00" />
         </radialGradient>
 
         {/* Gradiente para rayos - Brillo dorado */}
-        <linearGradient id="raysGold" x1="0%" y1="0%" x2="100%" y2="100%">
+        <linearGradient id={raysGoldId} x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#FFD700" />
           <stop offset="100%" stopColor="#FFA500" />
         </linearGradient>
 
         {/* Gradiente para órbita */}
-        <linearGradient id="orbitGold" x1="0%" y1="0%" x2="100%" y2="100%">
+        <linearGradient id={orbitGoldId} x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#A78BFA" stopOpacity="0.5" />
           <stop offset="100%" stopColor="#EC4899" stopOpacity="0.3" />
         </linearGradient>
@@ -42,7 +48,7 @@ export default function LogoSimpleGold({ className = '', size = 48 }: LogoSimple
         cx="50"
         cy="50"
         r="42"
-        stroke="url(#orbitGold)"
+        stroke={`url(#${orbitGoldId})`}
         strokeWidth="1.5"
         fill="none"
         strokeDasharray="6 4"
@@ -53,7 +59,7 @@ export default function LogoSimpleGold({ className = '', size = 48 }: LogoSimple
         cx="50"
         cy="50"
         r="28"
-        fill="url(#sunGold)"
+        fill={`url(#${sunGoldId})`}
         opacity="0.2"
         filter="blur(2px)"
       />
@@ -63,7 +69,7 @@ export default function LogoSimpleGold({ className = '', size = 48 }: LogoSimple
         cx="50"
         cy="50"
         r="24"
-        fill="url(#sunGold)"
+        fill={`url(#${sunGoldId})`}
         opacity="0.4"
       />
 
@@ -72,7 +78,7 @@ export default function LogoSimpleGold({ className = '', size = 48 }: LogoSimple
         cx="50"
         cy="50"
         r="18"
-        fill="url(#sunGold)"
+        fill={`url(#${sunGoldId})`}
       />
 
       {/* Círculo interior - Brillo central */}
@@ -99,7 +105,7 @@ export default function LogoSimpleGold({ className = '', size = 48 }: LogoSimple
             y1={y1}
             x2={x2}
             y2={y2}
-            stroke="url(#raysGold)"
+            stroke={`url(#${raysGoldId})`}
             strokeWidth="3"
             strokeLinecap="round"
             opacity="0.9"
