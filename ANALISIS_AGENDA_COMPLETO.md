@@ -855,3 +855,181 @@ Todo usando `astronomy-engine` para CUALQUIER año.
 Para que veas el flujo end-to-end funcionando, aunque sea con eventos hardcodeados todavía.
 
 **Dime por dónde quieres empezar y arrancamos.** 🔥
+
+---
+
+## 📋 DESPUÉS DE LA AGENDA → IMPLEMENTAR STRIPE
+
+### **ORDEN DE IMPLEMENTACIÓN COMPLETO:**
+
+```
+PASO 1: COMPLETAR AGENDA (Este documento)
+├── Fase 1: Eventos dinámicos (1-2 días)
+├── Fase 2: Integración sistemas (2-3 días)
+├── Fase 3: Interpretaciones personalizadas (2-3 días)
+├── Fase 4: Renovación automática (1 día)
+└── Fase 5: PDF imprimible (3-4 días)
+    │
+    ↓ AGENDA FUNCIONAL Y LISTA PARA VENDER
+    │
+PASO 2: SISTEMA DE PAGO CON STRIPE
+├── Ver documentación: SISTEMA_COMPRA_AGENDA.md
+├── Implementar flujo de compra (digital + físico)
+├── Integrar con generación de agenda
+├── Panel admin para pedidos
+└── Sistema de envío (manual → automático)
+    │
+    ↓ PLATAFORMA MONETIZABLE COMPLETA
+    │
+PASO 3: LANZAMIENTO Y MARKETING
+```
+
+### **Documentación de Referencia:**
+
+| Documento | Propósito |
+|-----------|-----------|
+| **`ANALISIS_AGENDA_COMPLETO.md`** (este) | Estado actual y roadmap de la Agenda |
+| **`SISTEMA_COMPRA_AGENDA.md`** | Documentación completa del sistema de pago |
+| **`SISTEMA_INTERPRETACIONES_LLM.md`** | Cómo funcionan las interpretaciones AI |
+| **`PLAN_ACCION_INTERPRETACION.md`** | Plan original de interpretaciones |
+
+### **Integración Agenda → Stripe:**
+
+Una vez la agenda esté completa, el flujo de compra será:
+
+```typescript
+// USUARIO COMPRA AGENDA DIGITAL (29€)
+1. Usuario → /compra/agenda
+2. Selecciona "Agenda Digital"
+3. Selecciona "Para mí" o "Es regalo"
+4. Si para mí:
+   - Completa datos de nacimiento + residencia actual
+   - Pago con Stripe
+   - ✅ Sistema genera:
+     * Carta Natal (si no existe)
+     * Solar Return
+     * Agenda personalizada completa
+     * Eventos con interpretaciones
+   - Usuario recibe email con acceso
+   - Puede ver su agenda en /agenda
+
+5. Si es regalo:
+   - Pago con Stripe
+   - Destinatario recibe código de activación
+   - Destinatario completa datos
+   - Sistema genera su agenda
+   - Acceso en /agenda
+
+// USUARIO COMPRA LIBRO FÍSICO (80€)
+1. Usuario → /compra/agenda
+2. Selecciona "Libro Físico"
+3. Completa datos de nacimiento + residencia actual
+4. Completa dirección de envío
+5. Pago con Stripe
+6. ✅ Sistema genera:
+   * Carta Natal (si no existe)
+   * Solar Return
+   * Agenda personalizada completa
+   * PDF completo para impresión (FASE 5)
+7. Pedido aparece en panel admin
+8. Admin descarga PDF → envía a imprenta
+9. Imprenta imprime y encuaderna
+10. Admin marca como "Enviado" + tracking
+11. Usuario recibe libro + código acceso digital
+```
+
+### **Valor Agregado de la Agenda:**
+
+**Sin agenda completa:**
+- Solo cartas natal y solar return individuales
+- Interpretaciones estáticas
+- No hay guía del año completo
+
+**Con agenda completa:**
+- **PRODUCTO MONETIZABLE ÚNICO**
+- Guía completa del año solar (365 días)
+- Interpretación personalizada de CADA evento
+- Consejos específicos basados en natal + solar
+- Rituales y mantras personalizados
+- Versión digital (29€) + Libro físico (80€)
+- **DIFERENCIADOR COMPETITIVO TOTAL**
+
+### **ROI del Desarrollo:**
+
+**Inversión:**
+- Desarrollo: 9-13 días
+- Coste por agenda generada: $4-6 (optimizado)
+
+**Retorno:**
+- Agenda digital: 29€ → Margen: ~25€ por venta
+- Libro físico: 80€ → Margen: ~50-60€ por venta (menos imprenta ~15-20€)
+
+**Break-even:**
+- Con 10 ventas digitales → ROI positivo
+- Con 5 libros físicos → ROI muy positivo
+
+**Escalabilidad:**
+- Agenda se genera 1 vez por usuario/año
+- Reutilización: Natal + Solar ya calculados
+- Coste marginal: Solo interpretaciones de eventos nuevos
+- Tiempo: Automatizado (25-50 min sin intervención)
+
+---
+
+## 🎯 CONCLUSIÓN Y SIGUIENTES PASOS
+
+### **Estado Actual:**
+✅ Tienes el 70% del sistema construido
+✅ Interpretaciones AI funcionando perfecto
+✅ Natal Chart + Solar Return operativos
+⚠️ Falta: Conectar todo + eventos dinámicos
+
+### **Próximos Hitos:**
+
+1. **ESTE SPRINT: Completar Agenda (9-13 días)**
+   - Eventos dinámicos
+   - Integración completa
+   - Interpretaciones personalizadas por evento
+   - PDF imprimible
+
+2. **SIGUIENTE SPRINT: Sistema de Pago (5-7 días)**
+   - Ver `SISTEMA_COMPRA_AGENDA.md`
+   - Integración Stripe
+   - Flujo de compra completo
+   - Panel admin
+
+3. **LANZAMIENTO BETA:**
+   - 10-20 usuarios de prueba
+   - Recoger feedback
+   - Ajustar interpretaciones
+   - Pulir UX
+
+4. **LANZAMIENTO PÚBLICO:**
+   - Marketing
+   - Pricing final
+   - Automatización completa
+   - Escalar
+
+### **Tu Ventaja Competitiva:**
+
+```
+Otras apps de astrología:
+"Eclipse en Aries el 25 de marzo"
+
+TU VUELTA AL SOL:
+"Eclipse en Aries - María, esto activa tu Sol natal
+en Aries Casa 10 + este año tu Casa 10 está super
+activada en tu Solar Return. Este es TU momento para
+lanzar ese proyecto. Ritual: escribe 3 objetivos
+profesionales específicos. Hazlo el día del eclipse
+entre las 2-4pm. Tu Marte en Leo te da la valentía."
+```
+
+**Eso es INVALUABLE y único en el mercado.**
+
+---
+
+**Archivo creado:** `ANALISIS_AGENDA_COMPLETO.md` ✅
+**Siguiente documento:** `SISTEMA_COMPRA_AGENDA.md` (ya existe) ✅
+
+**¿Empezamos con FASE 1 de la Agenda?** 🚀
