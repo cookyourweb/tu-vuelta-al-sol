@@ -6,6 +6,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Brain, Sparkles, RefreshCw, Eye, X, Star, Target, Zap, Copy, Check, Download, Clock, TrendingUp } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import { useAuth } from '@/context/AuthContext';
 
 interface InterpretationButtonProps {
   type: 'natal' | 'progressed' | 'solar-return';
@@ -50,6 +51,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
   className = "",
   isAdmin = false
 }) => {
+  const { user } = useAuth();
   const [interpretation, setInterpretation] = useState<InterpretationData | null>(null);
   const [loading, setLoading] = useState(false);
   const [checkingCache, setCheckingCache] = useState(true);
@@ -578,6 +580,12 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       console.log('💾 chartType:', type);
       console.log('💾 generatedAt:', interpretationData.generatedAt);
 
+      // Get Firebase ID token for authentication
+      let token = null;
+      if (user) {
+        token = await user.getIdToken();
+      }
+
       const saveData = {
         userId,
         chartType: type,
@@ -590,16 +598,24 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         userId: saveData.userId,
         chartType: saveData.chartType,
         interpretationKeys: Object.keys(saveData.interpretation),
-        generatedAt: saveData.generatedAt
+        generatedAt: saveData.generatedAt,
+        hasToken: !!token
       });
 
       // ✅ FIX: Use PUT method to REPLACE existing interpretation (upsert)
       // POST creates duplicates, PUT replaces the existing one
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      // Add authorization header if token is available
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch('/api/interpretations/save', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(saveData)
       });
 
@@ -724,7 +740,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               <Star className="w-8 h-8 text-purple-300" />
               Tu Esencia Revolucionaria
             </h4>
-            <p className="text-purple-50 text-lg leading-relaxed font-medium">{data.esencia_revolucionaria}</p>
+            <p className="text-purple-50 text-lg leading-relaxed font-medium">{typeof data.esencia_revolucionaria === 'string' ? data.esencia_revolucionaria : JSON.stringify(data.esencia_revolucionaria)}</p>
           </div>
         )}
 
@@ -734,7 +750,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               <Target className="w-8 h-8 text-blue-300" />
               Tu Propósito de Vida
             </h4>
-      <p className="text-blue-50 text-lg leading-relaxed font-medium">{data.proposito_vida}</p>
+      <p className="text-blue-50 text-lg leading-relaxed font-medium">{typeof data.proposito_vida === 'string' ? data.proposito_vida : JSON.stringify(data.proposito_vida)}</p>
           </div>
         )}
 
@@ -1002,7 +1018,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               Tema Central del Año
             </h4>
             <p className="text-amber-50 text-2xl leading-relaxed font-bold text-center italic">
-              "{data.tema_anual}"
+              "{typeof data.tema_anual === 'string' ? data.tema_anual : JSON.stringify(data.tema_anual)}"
             </p>
           </div>
         )}

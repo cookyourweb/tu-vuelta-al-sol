@@ -88,61 +88,63 @@ function eclipticLongitudeToZodiac(longitude: number): { sign: string; degree: n
 export function calculateLunarPhases(startDate: Date, endDate: Date): LunarPhase[] {
   const phases: LunarPhase[] = [];
 
-  // Known lunar phases for 2024-2025 (simplified approach for performance)
-  const knownPhases = [
-    // New Moons
-    { type: 'new_moon' as const, date: '2024-01-11', sign: 'Capricornio', degree: 20.5 },
-    { type: 'new_moon' as const, date: '2024-02-10', sign: 'Acuario', degree: 21.2 },
-    { type: 'new_moon' as const, date: '2024-03-10', sign: 'Piscis', degree: 20.1 },
-    { type: 'new_moon' as const, date: '2024-04-08', sign: 'Aries', degree: 19.2 },
-    { type: 'new_moon' as const, date: '2024-05-08', sign: 'Tauro', degree: 18.1 },
-    { type: 'new_moon' as const, date: '2024-06-06', sign: 'Géminis', degree: 16.2 },
-    { type: 'new_moon' as const, date: '2024-07-05', sign: 'Cáncer', degree: 14.1 },
-    { type: 'new_moon' as const, date: '2024-08-04', sign: 'Leo', degree: 12.5 },
-    { type: 'new_moon' as const, date: '2024-09-03', sign: 'Virgo', degree: 11.2 },
-    { type: 'new_moon' as const, date: '2024-10-02', sign: 'Libra', degree: 10.1 },
-    { type: 'new_moon' as const, date: '2024-11-01', sign: 'Escorpio', degree: 9.3 },
-    { type: 'new_moon' as const, date: '2024-12-01', sign: 'Sagitario', degree: 9.8 },
-    { type: 'new_moon' as const, date: '2024-12-31', sign: 'Capricornio', degree: 10.2 },
+  // 🚀 DYNAMIC CALCULATION - Works for ANY year
+  // Calculate all New Moons in the period
+  let currentDate = new Date(startDate);
+  currentDate.setDate(currentDate.getDate() - 30); // Start searching 30 days before to catch edge cases
 
-    // Full Moons
-    { type: 'full_moon' as const, date: '2024-01-25', sign: 'Leo', degree: 5.1 },
-    { type: 'full_moon' as const, date: '2024-02-24', sign: 'Virgo', degree: 5.8 },
-    { type: 'full_moon' as const, date: '2024-03-25', sign: 'Libra', degree: 5.2 },
-    { type: 'full_moon' as const, date: '2024-04-24', sign: 'Escorpio', degree: 4.9 },
-    { type: 'full_moon' as const, date: '2024-05-23', sign: 'Sagitario', degree: 3.1 },
-    { type: 'full_moon' as const, date: '2024-06-22', sign: 'Capricornio', degree: 1.8 },
-    { type: 'full_moon' as const, date: '2024-07-21', sign: 'Capricornio', degree: 29.2 },
-    { type: 'full_moon' as const, date: '2024-08-20', sign: 'Acuario', degree: 27.8 },
-    { type: 'full_moon' as const, date: '2024-09-18', sign: 'Piscis', degree: 25.9 },
-    { type: 'full_moon' as const, date: '2024-10-17', sign: 'Aries', degree: 24.5 },
-    { type: 'full_moon' as const, date: '2024-11-15', sign: 'Tauro', degree: 23.8 },
-    { type: 'full_moon' as const, date: '2024-12-15', sign: 'Géminis', degree: 23.2 },
+  while (currentDate < endDate) {
+    try {
+      // Search for next New Moon (phase = 0)
+      const newMoonSearch = Astronomy.SearchMoonPhase(0, currentDate, 40);
+      if (newMoonSearch && newMoonSearch.date.getTime() <= endDate.getTime()) {
+        const newMoonDate = newMoonSearch.date; // Convert AstroTime to Date
 
-    // 2025 New Moons
-    { type: 'new_moon' as const, date: '2025-01-29', sign: 'Acuario', degree: 10.5 },
-    { type: 'new_moon' as const, date: '2025-02-28', sign: 'Piscis', degree: 10.1 },
-    { type: 'new_moon' as const, date: '2025-03-30', sign: 'Aries', degree: 9.8 },
+        // Get Moon's ecliptic longitude at new moon
+        const moonVec = Astronomy.GeoVector(Astronomy.Body.Moon, newMoonDate, false);
+        const ecliptic = Astronomy.Ecliptic(moonVec);
+        const zodiacInfo = eclipticLongitudeToZodiac(ecliptic.elon);
 
-    // 2025 Full Moons
-    { type: 'full_moon' as const, date: '2025-01-14', sign: 'Cáncer', degree: 24.1 },
-    { type: 'full_moon' as const, date: '2025-02-12', sign: 'Leo', degree: 24.2 },
-    { type: 'full_moon' as const, date: '2025-03-14', sign: 'Virgo', degree: 23.9 }
-  ];
+        if (newMoonDate.getTime() >= startDate.getTime()) {
+          phases.push({
+            type: 'new_moon',
+            date: newMoonDate,
+            sign: zodiacInfo.sign,
+            degree: zodiacInfo.degree,
+            description: `🌑 Luna Nueva en ${zodiacInfo.sign} ${zodiacInfo.degree.toFixed(1)}°`
+          });
+        }
 
-  // Filter phases within the date range
-  for (const phase of knownPhases) {
-    const phaseDate = new Date(phase.date);
-    if (phaseDate >= startDate && phaseDate <= endDate) {
-      phases.push({
-        type: phase.type,
-        date: phaseDate,
-        sign: phase.sign,
-        degree: phase.degree,
-        description: phase.type === 'new_moon'
-          ? `🌑 Luna Nueva en ${phase.sign} ${phase.degree.toFixed(1)}°`
-          : `🌕 Luna Llena en ${phase.sign} ${phase.degree.toFixed(1)}°`
-      });
+        // Search for Full Moon (phase = 2) after this New Moon
+        const fullMoonSearch = Astronomy.SearchMoonPhase(2, newMoonDate, 20);
+        if (fullMoonSearch && fullMoonSearch.date.getTime() <= endDate.getTime()) {
+          const fullMoonDate = fullMoonSearch.date; // Convert AstroTime to Date
+
+          // Get Moon's position at full moon
+          const moonVecFull = Astronomy.GeoVector(Astronomy.Body.Moon, fullMoonDate, false);
+          const eclipticFull = Astronomy.Ecliptic(moonVecFull);
+          const zodiacInfoFull = eclipticLongitudeToZodiac(eclipticFull.elon);
+
+          if (fullMoonDate.getTime() >= startDate.getTime()) {
+            phases.push({
+              type: 'full_moon',
+              date: fullMoonDate,
+              sign: zodiacInfoFull.sign,
+              degree: zodiacInfoFull.degree,
+              description: `🌕 Luna Llena en ${zodiacInfoFull.sign} ${zodiacInfoFull.degree.toFixed(1)}°`
+            });
+          }
+        }
+
+        // Move to next cycle
+        currentDate = new Date(newMoonDate);
+        currentDate.setDate(currentDate.getDate() + 25); // Jump ~25 days to next cycle
+      } else {
+        break;
+      }
+    } catch (error) {
+      console.error('Error calculating lunar phase:', error);
+      break;
     }
   }
 
@@ -195,81 +197,89 @@ function getPlanetName(body: Astronomy.Body): string {
 export function calculateRetrogrades(startDate: Date, endDate: Date): Retrograde[] {
   const retrogrades: Retrograde[] = [];
 
-  // Known retrograde periods for 2024-2025 (can be expanded)
-  // This is a simplified version - in production would use ephemeris calculations
-  const knownRetrogrades = [
-    {
-      planet: 'Mercurio',
-      periods: [
-        { start: '2024-04-01', end: '2024-04-25', sign: 'Aries' },
-        { start: '2024-08-05', end: '2024-08-28', sign: 'Virgo' },
-        { start: '2024-11-25', end: '2024-12-15', sign: 'Sagitario' }
-      ]
-    },
-    {
-      planet: 'Venus',
-      periods: [
-        // Venus retrogrades are rare - approximately every 18 months
-        // 2024 doesn't have a Venus retrograde
-      ]
-    },
-    {
-      planet: 'Marte',
-      periods: [
-        // Mars retrograde occurs approximately every 2 years
-        // Next one is in 2025
-        { start: '2025-01-06', end: '2025-02-23', sign: 'Cáncer' }
-      ]
-    },
-    {
-      planet: 'Júpiter',
-      periods: [
-        { start: '2024-10-09', end: '2025-02-04', sign: 'Géminis' }
-      ]
-    },
-    {
-      planet: 'Saturno',
-      periods: [
-        { start: '2024-06-29', end: '2024-11-15', sign: 'Piscis' }
-      ]
-    },
-    {
-      planet: 'Urano',
-      periods: [
-        { start: '2024-09-01', end: '2025-01-30', sign: 'Tauro' }
-      ]
-    },
-    {
-      planet: 'Neptuno',
-      periods: [
-        { start: '2024-07-02', end: '2024-12-07', sign: 'Piscis' }
-      ]
-    },
-    {
-      planet: 'Plutón',
-      periods: [
-        { start: '2024-05-02', end: '2024-10-11', sign: 'Acuario' }
-      ]
-    }
-  ];
+  // 🚀 DYNAMIC CALCULATION - Works for ANY year
+  // Extend search range to catch retrogrades that start before or end after period
+  const searchStart = new Date(startDate);
+  searchStart.setDate(searchStart.getDate() - 60);
+  const searchEnd = new Date(endDate);
+  searchEnd.setDate(searchEnd.getDate() + 60);
 
-  // Filter retrogrades within the date range
-  for (const planetData of knownRetrogrades) {
-    for (const period of planetData.periods) {
-      const periodStart = new Date(period.start);
-      const periodEnd = new Date(period.end);
+  for (const body of RETROGRADE_PLANETS) {
+    try {
+      let currentDate = new Date(searchStart);
+      let wasRetrograde = false;
+      let retrogradeStart: Date | null = null;
+      let retrogradeStartSign = '';
+      let lastLongitude: number | null = null;
 
-      // Check if period overlaps with our date range
-      if (periodEnd >= startDate && periodStart <= endDate) {
-        retrogrades.push({
-          planet: planetData.planet,
-          startDate: periodStart,
-          endDate: periodEnd,
-          startSign: period.sign,
-          endSign: period.sign,
-          description: `☿️ ${planetData.planet} Retrógrado en ${period.sign}`
-        });
+      // Sample every 2 days to detect retrograde motion
+      while (currentDate < searchEnd) {
+        const pos = Astronomy.Ecliptic(Astronomy.GeoVector(body, currentDate, false));
+        const longitude = pos.elon;
+
+        // Detect retrograde by checking if longitude is decreasing
+        // (accounting for 360° wrap-around)
+        if (lastLongitude !== null) {
+          let lonDiff = longitude - lastLongitude;
+
+          // Handle 360° boundary crossing
+          if (lonDiff > 180) lonDiff -= 360;
+          if (lonDiff < -180) lonDiff += 360;
+
+          const isRetrograde = lonDiff < -0.01; // Moving backwards
+
+          if (isRetrograde && !wasRetrograde) {
+            // Retrograde period starts
+            retrogradeStart = new Date(currentDate);
+            retrogradeStartSign = eclipticLongitudeToZodiac(longitude).sign;
+            wasRetrograde = true;
+          } else if (!isRetrograde && wasRetrograde && retrogradeStart) {
+            // Retrograde period ends
+            const retrogradeEnd = new Date(currentDate);
+            const retrogradeEndSign = eclipticLongitudeToZodiac(longitude).sign;
+
+            // Only include if it overlaps with our actual date range
+            if (retrogradeEnd >= startDate && retrogradeStart <= endDate) {
+              const planetName = getPlanetName(body);
+              retrogrades.push({
+                planet: planetName,
+                startDate: retrogradeStart,
+                endDate: retrogradeEnd,
+                startSign: retrogradeStartSign,
+                endSign: retrogradeEndSign,
+                description: `☿️ ${planetName} Retrógrado en ${retrogradeStartSign}`
+              });
+            }
+
+            wasRetrograde = false;
+            retrogradeStart = null;
+          }
+        }
+
+        lastLongitude = longitude;
+        currentDate.setDate(currentDate.getDate() + 2); // Check every 2 days
       }
+
+      // If still in retrograde at the end, close the period
+      if (wasRetrograde && retrogradeStart) {
+        const retrogradeEnd = new Date(currentDate);
+        const pos = Astronomy.Ecliptic(Astronomy.GeoVector(body, retrogradeEnd, false));
+        const retrogradeEndSign = eclipticLongitudeToZodiac(pos.elon).sign;
+
+        if (retrogradeEnd >= startDate && retrogradeStart <= endDate) {
+          const planetName = getPlanetName(body);
+          retrogrades.push({
+            planet: planetName,
+            startDate: retrogradeStart,
+            endDate: retrogradeEnd,
+            startSign: retrogradeStartSign,
+            endSign: retrogradeEndSign,
+            description: `☿️ ${planetName} Retrógrado en ${retrogradeStartSign}`
+          });
+        }
+      }
+    } catch (error) {
+      console.error(`Error calculating retrograde for ${getPlanetName(body)}:`, error);
     }
   }
 
@@ -283,79 +293,81 @@ export function calculateRetrogrades(startDate: Date, endDate: Date): Retrograde
 export function calculateEclipses(startDate: Date, endDate: Date): Eclipse[] {
   const eclipses: Eclipse[] = [];
 
-  // Known eclipses for 2024-2025 (simplified approach for performance)
-  const knownEclipses = [
-    {
-      type: 'solar' as const,
-      date: '2024-04-08',
-      sign: 'Aries',
-      degree: 19.2,
-      magnitude: 0.8,
-      description: '☀️🌑 Eclipse Solar en Aries 19.2°'
-    },
-    {
-      type: 'lunar' as const,
-      date: '2024-03-14',
-      sign: 'Libra',
-      degree: 24.1,
-      magnitude: 0.6,
-      description: '🌑🌕 Eclipse Lunar en Libra 24.1°'
-    },
-    {
-      type: 'lunar' as const,
-      date: '2024-09-07',
-      sign: 'Piscis',
-      degree: 15.3,
-      magnitude: 0.5,
-      description: '🌑🌕 Eclipse Lunar en Piscis 15.3°'
-    },
-    {
-      type: 'solar' as const,
-      date: '2024-10-02',
-      sign: 'Libra',
-      degree: 10.1,
-      magnitude: 0.9,
-      description: '☀️🌑 Eclipse Solar en Libra 10.1°'
-    },
-    {
-      type: 'lunar' as const,
-      date: '2025-03-03',
-      sign: 'Virgo',
-      degree: 12.8,
-      magnitude: 0.4,
-      description: '🌑🌕 Eclipse Lunar en Virgo 12.8°'
-    },
-    {
-      type: 'solar' as const,
-      date: '2025-03-29',
-      sign: 'Aries',
-      degree: 8.9,
-      magnitude: 0.7,
-      description: '☀️🌑 Eclipse Solar en Aries 8.9°'
-    },
-    {
-      type: 'lunar' as const,
-      date: '2025-09-07',
-      sign: 'Piscis',
-      degree: 15.3,
-      magnitude: 0.6,
-      description: '🌑🌕 Eclipse Lunar en Piscis 15.3°'
-    }
-  ];
+  // 🚀 DYNAMIC CALCULATION - Works for ANY year
+  try {
+    // Calculate Solar Eclipses
+    let currentDate = new Date(startDate);
+    currentDate.setDate(currentDate.getDate() - 30); // Start a bit earlier
 
-  // Filter eclipses within the date range
-  for (const eclipse of knownEclipses) {
-    const eclipseDate = new Date(eclipse.date);
-    if (eclipseDate >= startDate && eclipseDate <= endDate) {
-      eclipses.push({
-        type: eclipse.type,
-        date: eclipseDate,
-        sign: eclipse.sign,
-        degree: eclipse.degree,
-        magnitude: eclipse.magnitude,
-        description: eclipse.description
-      });
+    for (let i = 0; i < 10; i++) { // Max 10 solar eclipses in ~1 year period
+      try {
+        const solarEclipse = Astronomy.SearchGlobalSolarEclipse(currentDate);
+        if (solarEclipse && solarEclipse.peak.date.getTime() <= endDate.getTime()) {
+          const eclipseDate = solarEclipse.peak.date; // Convert AstroTime to Date
+
+          // Get Sun's position at eclipse
+          const sunPos = Astronomy.Ecliptic(Astronomy.GeoVector(Astronomy.Body.Sun, eclipseDate, false));
+          const zodiacInfo = eclipticLongitudeToZodiac(sunPos.elon);
+
+          if (eclipseDate.getTime() >= startDate.getTime()) {
+            eclipses.push({
+              type: 'solar',
+              date: eclipseDate,
+              sign: zodiacInfo.sign,
+              degree: zodiacInfo.degree,
+              magnitude: solarEclipse.obscuration || 0.5,
+              description: `☀️🌑 Eclipse Solar en ${zodiacInfo.sign} ${zodiacInfo.degree.toFixed(1)}°`
+            });
+          }
+
+          // Move to day after eclipse to search for next one
+          currentDate = new Date(eclipseDate);
+          currentDate.setDate(currentDate.getDate() + 150); // Eclipses are ~6 months apart minimum
+        } else {
+          break;
+        }
+      } catch (error) {
+        break;
+      }
     }
+
+    // Calculate Lunar Eclipses
+    currentDate = new Date(startDate);
+    currentDate.setDate(currentDate.getDate() - 30);
+
+    for (let i = 0; i < 10; i++) { // Max 10 lunar eclipses in ~1 year period
+      try {
+        const lunarEclipse = Astronomy.SearchLunarEclipse(currentDate);
+        if (lunarEclipse && lunarEclipse.peak.date.getTime() <= endDate.getTime()) {
+          const eclipseDate = lunarEclipse.peak.date; // Convert AstroTime to Date
+
+          // Get Moon's position at eclipse
+          const moonPos = Astronomy.Ecliptic(Astronomy.GeoVector(Astronomy.Body.Moon, eclipseDate, false));
+          const zodiacInfo = eclipticLongitudeToZodiac(moonPos.elon);
+
+          if (eclipseDate.getTime() >= startDate.getTime()) {
+            eclipses.push({
+              type: 'lunar',
+              date: eclipseDate,
+              sign: zodiacInfo.sign,
+              degree: zodiacInfo.degree,
+              magnitude: lunarEclipse.obscuration || 0.5,
+              description: `🌑🌕 Eclipse Lunar en ${zodiacInfo.sign} ${zodiacInfo.degree.toFixed(1)}°`
+            });
+          }
+
+          // Move to day after eclipse
+          currentDate = new Date(eclipseDate);
+          currentDate.setDate(currentDate.getDate() + 150);
+        } else {
+          break;
+        }
+      } catch (error) {
+        break;
+      }
+    }
+  } catch (error) {
+    console.error('Error calculating eclipses:', error);
   }
 
   return eclipses.sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -393,30 +405,69 @@ export function calculatePlanetaryIngresses(startDate: Date, endDate: Date): Pla
 function calculateSunIngresses(startDate: Date, endDate: Date): PlanetaryIngress[] {
   const ingresses: PlanetaryIngress[] = [];
 
-  // Known Sun ingresses for 2024-2025 (simplified approach for performance)
-  const knownSunIngresses = [
-    { date: '2024-03-20', fromSign: 'Piscis', toSign: 'Aries', description: '♈ Sol ingresa en Aries' },
-    { date: '2024-06-21', fromSign: 'Géminis', toSign: 'Cáncer', description: '♈ Sol ingresa en Cáncer' },
-    { date: '2024-09-23', fromSign: 'Virgo', toSign: 'Libra', description: '♈ Sol ingresa en Libra' },
-    { date: '2024-12-22', fromSign: 'Sagitario', toSign: 'Capricornio', description: '♈ Sol ingresa en Capricornio' },
-    { date: '2025-03-20', fromSign: 'Piscis', toSign: 'Aries', description: '♈ Sol ingresa en Aries' },
-    { date: '2025-06-21', fromSign: 'Géminis', toSign: 'Cáncer', description: '♈ Sol ingresa en Cáncer' },
-    { date: '2025-09-23', fromSign: 'Virgo', toSign: 'Libra', description: '♈ Sol ingresa en Libra' },
-    { date: '2025-12-22', fromSign: 'Sagitario', toSign: 'Capricornio', description: '♈ Sol ingresa en Capricornio' }
-  ];
+  // 🚀 DYNAMIC CALCULATION - Works for ANY year
+  try {
+    // Use astronomy-engine's Seasons function for precise equinox/solstice dates
+    const startYear = startDate.getFullYear();
+    const endYear = endDate.getFullYear();
 
-  // Filter ingresses within the date range
-  for (const ingress of knownSunIngresses) {
-    const ingressDate = new Date(ingress.date);
-    if (ingressDate >= startDate && ingressDate <= endDate) {
-      ingresses.push({
-        planet: 'Sol',
-        date: ingressDate,
-        fromSign: ingress.fromSign,
-        toSign: ingress.toSign,
-        description: ingress.description
-      });
+    for (let year = startYear; year <= endYear + 1; year++) {
+      try {
+        const seasons = Astronomy.Seasons(year);
+
+        // Spring Equinox - Sun enters Aries (0°)
+        const marEquinoxDate = seasons.mar_equinox.date;
+        if (marEquinoxDate.getTime() >= startDate.getTime() && marEquinoxDate.getTime() <= endDate.getTime()) {
+          ingresses.push({
+            planet: 'Sol',
+            date: marEquinoxDate,
+            fromSign: 'Piscis',
+            toSign: 'Aries',
+            description: '♈ Sol ingresa en Aries'
+          });
+        }
+
+        // Summer Solstice - Sun enters Cancer (90°)
+        const junSolsticeDate = seasons.jun_solstice.date;
+        if (junSolsticeDate.getTime() >= startDate.getTime() && junSolsticeDate.getTime() <= endDate.getTime()) {
+          ingresses.push({
+            planet: 'Sol',
+            date: junSolsticeDate,
+            fromSign: 'Géminis',
+            toSign: 'Cáncer',
+            description: '♋ Sol ingresa en Cáncer'
+          });
+        }
+
+        // Autumn Equinox - Sun enters Libra (180°)
+        const sepEquinoxDate = seasons.sep_equinox.date;
+        if (sepEquinoxDate.getTime() >= startDate.getTime() && sepEquinoxDate.getTime() <= endDate.getTime()) {
+          ingresses.push({
+            planet: 'Sol',
+            date: sepEquinoxDate,
+            fromSign: 'Virgo',
+            toSign: 'Libra',
+            description: '♎ Sol ingresa en Libra'
+          });
+        }
+
+        // Winter Solstice - Sun enters Capricorn (270°)
+        const decSolsticeDate = seasons.dec_solstice.date;
+        if (decSolsticeDate.getTime() >= startDate.getTime() && decSolsticeDate.getTime() <= endDate.getTime()) {
+          ingresses.push({
+            planet: 'Sol',
+            date: decSolsticeDate,
+            fromSign: 'Sagitario',
+            toSign: 'Capricornio',
+            description: '♑ Sol ingresa en Capricornio'
+          });
+        }
+      } catch (error) {
+        console.error(`Error calculating seasons for year ${year}:`, error);
+      }
     }
+  } catch (error) {
+    console.error('Error calculating sun ingresses:', error);
   }
 
   return ingresses;
@@ -426,82 +477,68 @@ function calculateSunIngresses(startDate: Date, endDate: Date): PlanetaryIngress
 function getKnownPlanetaryIngresses(startDate: Date, endDate: Date): PlanetaryIngress[] {
   const ingresses: PlanetaryIngress[] = [];
 
-  // Known planetary ingresses for 2024-2025 (approximate dates)
-  const knownIngresses = [
-    // Mercury ingresses
-    { planet: 'Mercurio', date: '2024-01-14', fromSign: 'Capricornio', toSign: 'Acuario' },
-    { planet: 'Mercurio', date: '2024-02-03', fromSign: 'Acuario', toSign: 'Piscis' },
-    { planet: 'Mercurio', date: '2024-02-24', fromSign: 'Piscis', toSign: 'Aries' },
-    { planet: 'Mercurio', date: '2024-03-15', fromSign: 'Aries', toSign: 'Tauro' },
-    { planet: 'Mercurio', date: '2024-04-04', fromSign: 'Tauro', toSign: 'Géminis' },
-    { planet: 'Mercurio', date: '2024-04-25', fromSign: 'Géminis', toSign: 'Tauro' },
-    { planet: 'Mercurio', date: '2024-05-14', fromSign: 'Tauro', toSign: 'Géminis' },
-    { planet: 'Mercurio', date: '2024-06-04', fromSign: 'Géminis', toSign: 'Cáncer' },
-    { planet: 'Mercurio', date: '2024-06-26', fromSign: 'Cáncer', toSign: 'Leo' },
-    { planet: 'Mercurio', date: '2024-07-18', fromSign: 'Leo', toSign: 'Virgo' },
-    { planet: 'Mercurio', date: '2024-08-06', fromSign: 'Virgo', toSign: 'Leo' },
-    { planet: 'Mercurio', date: '2024-08-29', fromSign: 'Leo', toSign: 'Virgo' },
-    { planet: 'Mercurio', date: '2024-09-18', fromSign: 'Virgo', toSign: 'Libra' },
-    { planet: 'Mercurio', date: '2024-10-10', fromSign: 'Libra', toSign: 'Escorpio' },
-    { planet: 'Mercurio', date: '2024-11-01', fromSign: 'Escorpio', toSign: 'Sagitario' },
-    { planet: 'Mercurio', date: '2024-11-24', fromSign: 'Sagitario', toSign: 'Escorpio' },
-    { planet: 'Mercurio', date: '2024-12-16', fromSign: 'Escorpio', toSign: 'Sagitario' },
-
-    // Venus ingresses
-    { planet: 'Venus', date: '2024-01-24', fromSign: 'Sagitario', toSign: 'Capricornio' },
-    { planet: 'Venus', date: '2024-02-17', fromSign: 'Capricornio', toSign: 'Acuario' },
-    { planet: 'Venus', date: '2024-03-12', fromSign: 'Acuario', toSign: 'Piscis' },
-    { planet: 'Venus', date: '2024-04-05', fromSign: 'Piscis', toSign: 'Aries' },
-    { planet: 'Venus', date: '2024-04-30', fromSign: 'Aries', toSign: 'Tauro' },
-    { planet: 'Venus', date: '2024-05-24', fromSign: 'Tauro', toSign: 'Géminis' },
-    { planet: 'Venus', date: '2024-06-18', fromSign: 'Géminis', toSign: 'Cáncer' },
-    { planet: 'Venus', date: '2024-07-12', fromSign: 'Cáncer', toSign: 'Leo' },
-    { planet: 'Venus', date: '2024-08-05', fromSign: 'Leo', toSign: 'Virgo' },
-    { planet: 'Venus', date: '2024-08-30', fromSign: 'Virgo', toSign: 'Libra' },
-    { planet: 'Venus', date: '2024-09-23', fromSign: 'Libra', toSign: 'Escorpio' },
-    { planet: 'Venus', date: '2024-10-18', fromSign: 'Escorpio', toSign: 'Sagitario' },
-    { planet: 'Venus', date: '2024-11-12', fromSign: 'Sagitario', toSign: 'Capricornio' },
-    { planet: 'Venus', date: '2024-12-07', fromSign: 'Capricornio', toSign: 'Acuario' },
-
-    // Mars ingresses
-    { planet: 'Marte', date: '2024-01-14', fromSign: 'Sagitario', toSign: 'Capricornio' },
-    { planet: 'Marte', date: '2024-02-24', fromSign: 'Capricornio', toSign: 'Acuario' },
-    { planet: 'Marte', date: '2024-04-01', fromSign: 'Acuario', toSign: 'Piscis' },
-    { planet: 'Marte', date: '2024-05-13', fromSign: 'Piscis', toSign: 'Aries' },
-    { planet: 'Marte', date: '2024-06-10', fromSign: 'Aries', toSign: 'Tauro' },
-    { planet: 'Marte', date: '2024-07-21', fromSign: 'Tauro', toSign: 'Géminis' },
-    { planet: 'Marte', date: '2024-09-05', fromSign: 'Géminis', toSign: 'Leo' },
-    { planet: 'Marte', date: '2024-10-05', fromSign: 'Leo', toSign: 'Virgo' },
-    { planet: 'Marte', date: '2024-11-04', fromSign: 'Virgo', toSign: 'Libra' },
-    { planet: 'Marte', date: '2024-12-08', fromSign: 'Libra', toSign: 'Escorpio' },
-
-    // Jupiter ingresses (Jupiter moves slowly, so fewer ingresses)
-    { planet: 'Júpiter', date: '2024-05-26', fromSign: 'Tauro', toSign: 'Géminis' },
-
-    // Saturn ingresses (Saturn moves very slowly)
-    // No Saturn ingresses in 2024-2025
-
-    // Uranus ingresses (Uranus moves very slowly)
-    // No Uranus ingresses in 2024-2025
-
-    // Neptune ingresses (Neptune moves very slowly)
-    // No Neptune ingresses in 2024-2025
-
-    // Pluto ingresses (Pluto moves very slowly)
-    // No Pluto ingresses in 2024-2025
+  // 🚀 DYNAMIC CALCULATION - Works for ANY year
+  // Calculate ingresses for fast-moving planets: Mercury, Venus, Mars
+  const ingressPlanets = [
+    { body: Astronomy.Body.Mercury, name: 'Mercurio', sampleDays: 2 },
+    { body: Astronomy.Body.Venus, name: 'Venus', sampleDays: 3 },
+    { body: Astronomy.Body.Mars, name: 'Marte', sampleDays: 4 },
+    { body: Astronomy.Body.Jupiter, name: 'Júpiter', sampleDays: 7 },
+    { body: Astronomy.Body.Saturn, name: 'Saturno', sampleDays: 10 }
   ];
 
-  // Filter ingresses within the date range
-  for (const ingress of knownIngresses) {
-    const ingressDate = new Date(ingress.date);
-    if (ingressDate >= startDate && ingressDate <= endDate) {
-      ingresses.push({
-        planet: ingress.planet,
-        date: ingressDate,
-        fromSign: ingress.fromSign,
-        toSign: ingress.toSign,
-        description: `♈ ${ingress.planet} ingresa en ${ingress.toSign}`
-      });
+  for (const planetInfo of ingressPlanets) {
+    try {
+      let currentDate = new Date(startDate);
+      currentDate.setDate(currentDate.getDate() - 40); // Start earlier to catch edge cases
+
+      let lastSign = '';
+
+      // Sample planet positions at regular intervals
+      while (currentDate < endDate) {
+        const pos = Astronomy.Ecliptic(Astronomy.GeoVector(planetInfo.body, currentDate, false));
+        const zodiacInfo = eclipticLongitudeToZodiac(pos.elon);
+        const currentSign = zodiacInfo.sign;
+
+        if (lastSign && currentSign !== lastSign && currentDate >= startDate) {
+          // Sign change detected - refine the exact moment
+          let refinedDate = new Date(currentDate);
+
+          // Binary search for exact ingress moment (within 1 hour precision)
+          let searchStart = new Date(currentDate);
+          searchStart.setDate(searchStart.getDate() - planetInfo.sampleDays);
+          let searchEnd = new Date(currentDate);
+
+          for (let i = 0; i < 10; i++) { // 10 iterations = ~1 hour precision
+            const midDate = new Date((searchStart.getTime() + searchEnd.getTime()) / 2);
+            const midPos = Astronomy.Ecliptic(Astronomy.GeoVector(planetInfo.body, midDate, false));
+            const midSign = eclipticLongitudeToZodiac(midPos.elon).sign;
+
+            if (midSign === lastSign) {
+              searchStart = midDate;
+            } else {
+              searchEnd = midDate;
+            }
+          }
+
+          refinedDate = searchEnd;
+
+          if (refinedDate >= startDate && refinedDate <= endDate) {
+            ingresses.push({
+              planet: planetInfo.name,
+              date: refinedDate,
+              fromSign: lastSign,
+              toSign: currentSign,
+              description: `♈ ${planetInfo.name} ingresa en ${currentSign}`
+            });
+          }
+        }
+
+        lastSign = currentSign;
+        currentDate.setDate(currentDate.getDate() + planetInfo.sampleDays);
+      }
+    } catch (error) {
+      console.error(`Error calculating ingresses for ${planetInfo.name}:`, error);
     }
   }
 
@@ -515,28 +552,60 @@ function getKnownPlanetaryIngresses(startDate: Date, endDate: Date): PlanetaryIn
 export function calculateSeasonalEvents(startDate: Date, endDate: Date): SeasonalEvent[] {
   const events: SeasonalEvent[] = [];
 
-  // Known seasonal events for 2024-2025 (simplified approach for performance)
-  const knownSeasonalEvents = [
-    { type: 'spring_equinox' as const, date: '2024-03-20', description: '🌸 Equinoccio de Primavera (Sol ingresa en Aries)' },
-    { type: 'summer_solstice' as const, date: '2024-06-21', description: '☀️ Solsticio de Verano (Sol ingresa en Cáncer)' },
-    { type: 'autumn_equinox' as const, date: '2024-09-23', description: '🍂 Equinoccio de Otoño (Sol ingresa en Libra)' },
-    { type: 'winter_solstice' as const, date: '2024-12-22', description: '❄️ Solsticio de Invierno (Sol ingresa en Capricornio)' },
-    { type: 'spring_equinox' as const, date: '2025-03-20', description: '🌸 Equinoccio de Primavera (Sol ingresa en Aries)' },
-    { type: 'summer_solstice' as const, date: '2025-06-21', description: '☀️ Solsticio de Verano (Sol ingresa en Cáncer)' },
-    { type: 'autumn_equinox' as const, date: '2025-09-23', description: '🍂 Equinoccio de Otoño (Sol ingresa en Libra)' },
-    { type: 'winter_solstice' as const, date: '2025-12-22', description: '❄️ Solsticio de Invierno (Sol ingresa en Capricornio)' }
-  ];
+  // 🚀 DYNAMIC CALCULATION - Works for ANY year
+  try {
+    const startYear = startDate.getFullYear();
+    const endYear = endDate.getFullYear();
 
-  // Filter events within the date range
-  for (const event of knownSeasonalEvents) {
-    const eventDate = new Date(event.date);
-    if (eventDate >= startDate && eventDate <= endDate) {
-      events.push({
-        type: event.type,
-        date: eventDate,
-        description: event.description
-      });
+    for (let year = startYear; year <= endYear + 1; year++) {
+      try {
+        const seasons = Astronomy.Seasons(year);
+
+        // Spring Equinox
+        const marEquinoxDate = seasons.mar_equinox.date;
+        if (marEquinoxDate.getTime() >= startDate.getTime() && marEquinoxDate.getTime() <= endDate.getTime()) {
+          events.push({
+            type: 'spring_equinox',
+            date: marEquinoxDate,
+            description: '🌸 Equinoccio de Primavera (Sol ingresa en Aries)'
+          });
+        }
+
+        // Summer Solstice
+        const junSolsticeDate = seasons.jun_solstice.date;
+        if (junSolsticeDate.getTime() >= startDate.getTime() && junSolsticeDate.getTime() <= endDate.getTime()) {
+          events.push({
+            type: 'summer_solstice',
+            date: junSolsticeDate,
+            description: '☀️ Solsticio de Verano (Sol ingresa en Cáncer)'
+          });
+        }
+
+        // Autumn Equinox
+        const sepEquinoxDate = seasons.sep_equinox.date;
+        if (sepEquinoxDate.getTime() >= startDate.getTime() && sepEquinoxDate.getTime() <= endDate.getTime()) {
+          events.push({
+            type: 'autumn_equinox',
+            date: sepEquinoxDate,
+            description: '🍂 Equinoccio de Otoño (Sol ingresa en Libra)'
+          });
+        }
+
+        // Winter Solstice
+        const decSolsticeDate = seasons.dec_solstice.date;
+        if (decSolsticeDate.getTime() >= startDate.getTime() && decSolsticeDate.getTime() <= endDate.getTime()) {
+          events.push({
+            type: 'winter_solstice',
+            date: decSolsticeDate,
+            description: '❄️ Solsticio de Invierno (Sol ingresa en Capricornio)'
+          });
+        }
+      } catch (error) {
+        console.error(`Error calculating seasonal events for year ${year}:`, error);
+      }
     }
+  } catch (error) {
+    console.error('Error calculating seasonal events:', error);
   }
 
   return events.sort((a, b) => a.date.getTime() - b.date.getTime());

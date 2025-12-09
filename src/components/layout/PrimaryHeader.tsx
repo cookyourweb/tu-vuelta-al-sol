@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import Logo from '@/components/icons/Logo';
 import LogoSimple from '../icons/Logosimple';
+import LogoSimpleGold from '../icons/LogoSimpleGold';
 
 
 // Iconos zodiacales para avatares
@@ -98,9 +99,16 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
 
   const fetchUserRole = async () => {
     if (!user) return;
-    
+
     try {
-      const res = await fetch(`/api/users?uid=${user.uid}`);
+      // Get Firebase ID token for authentication
+      const token = await user.getIdToken();
+
+      const res = await fetch(`/api/users?uid=${user.uid}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
       if (res.ok) {
         const userData = await res.json();
         setUserRole(userData.role);
@@ -201,14 +209,14 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
             className="flex flex-col items-start space-y-0.5 hover:opacity-90 transition-all duration-300 group"
           >
             <div className="flex items-center space-x-2 md:space-x-3">
-              {/* Logo Desktop - Animado MÁS GRANDE */}
+              {/* Logo Desktop - Tamaño optimizado */}
               <div className="hidden md:block">
-                <Logo size={52} className="group-hover:scale-105 transition-transform duration-300" />
+                <LogoSimpleGold size={48} className="group-hover:scale-105 transition-transform duration-300" />
               </div>
               
-              {/* Logo Mobile - Simple MANTENIDO */}
+              {/* Logo Mobile - Optimizado para mejor visibilidad */}
               <div className="md:hidden">
-                <LogoSimple size={40} className="group-hover:scale-105 transition-transform duration-300" />
+                <LogoSimple size={48} className="group-hover:scale-105 transition-transform duration-300" />
               </div>
               
               {/* Texto del logo - SIEMPRE VISIBLE */}
@@ -224,10 +232,10 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
               </div>
             </div>
             
-            {/* Badge flotante - SIN ICONO, más cerca del título */}
-            <div className="hidden md:flex items-center ml-16">
-              <span className="text-[10px] px-2.5 py-0.5 bg-purple-700/50 border border-purple-500/30 rounded-full text-purple-200 backdrop-blur-sm">
-                Agenda Astrológica Personalizada
+            {/* Badge flotante - Compacto y elegante con mejor espaciado */}
+            <div className="hidden md:flex items-center ml-14 mt-1">
+              <span className="text-[9px] px-2 py-0.5 bg-purple-700/50 border border-purple-500/30 rounded-full text-purple-200 backdrop-blur-sm">
+                Agenda Astrológica
               </span>
             </div>
           </Link>

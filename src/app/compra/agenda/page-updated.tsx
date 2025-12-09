@@ -379,7 +379,7 @@ export default function BuyAgendaPage() {
                     </div>
 
                     <PaymentButton
-                      priceId={process.env.NEXT_PUBLIC_STRIPE_AGENDA_DIGITAL_PRICE_ID!}
+                      priceId={process.env.NEXT_PUBLIC_STRIPE_AGENDA_LIBRO_PRICE_ID!}
                       userId={user?.uid || ''}
                       className="inline-flex items-center gap-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
                     >

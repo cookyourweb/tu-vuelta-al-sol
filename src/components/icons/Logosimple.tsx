@@ -41,30 +41,30 @@ export default function LogoSimple({ className = '', size = 40 }: LogoSimpleProp
         strokeDasharray="6 4"
       />
 
-      {/* Resplandor del sol */}
+      {/* Resplandor del sol - Más grande para mejor visibilidad */}
+      <circle
+        cx="50"
+        cy="50"
+        r="24"
+        fill="url(#sunSimple)"
+        opacity="0.3"
+      />
+
+      {/* Sol central - Aumentado para mejor visibilidad en móvil */}
       <circle
         cx="50"
         cy="50"
         r="18"
         fill="url(#sunSimple)"
-        opacity="0.3"
       />
 
-      {/* Sol central */}
-      <circle
-        cx="50"
-        cy="50"
-        r="14"
-        fill="url(#sunSimple)"
-      />
-
-      {/* Rayos del sol - simplificados */}
+      {/* Rayos del sol - Más largos y visibles */}
       {[0, 90, 180, 270].map((angle, index) => {
         const radians = (angle * Math.PI) / 180;
-        const x1 = 50 + Math.cos(radians) * 16;
-        const y1 = 50 + Math.sin(radians) * 16;
-        const x2 = 50 + Math.cos(radians) * 22;
-        const y2 = 50 + Math.sin(radians) * 22;
+        const x1 = 50 + Math.cos(radians) * 20;
+        const y1 = 50 + Math.sin(radians) * 20;
+        const x2 = 50 + Math.cos(radians) * 28;
+        const y2 = 50 + Math.sin(radians) * 28;
         
         return (
           <line

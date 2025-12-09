@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 
 // ✅ IMPORTACIONES MODULARIZADAS
-import type { ChartDisplayProps } from '../../types/astrology/chartDisplay';
+import type { ChartDisplayProps } from '@/types/astrology/chartDisplay';
 import {
   ASPECTS,
   PLANET_SYMBOLS,
