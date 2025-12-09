@@ -9,10 +9,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { Planet, Aspect } from '../../types/astrology/chartDisplay';
-import { planetMeanings, signMeanings, houseMeanings, aspectMeanings, PLANET_SYMBOLS, PLANET_COLORS } from '../../constants/astrology';
-import { getPersonalizedPlanetInterpretation, getPersonalizedAspectInterpretation } from '../../services/chartInterpretationsService';
-import { getExampleInterpretation } from '../../data/interpretations/ExampleInterpretations';
+import { Planet, Aspect } from '@/types/astrology/chartDisplay';
+import { planetMeanings, signMeanings, houseMeanings, aspectMeanings, PLANET_SYMBOLS, PLANET_COLORS } from '@/constants/astrology';
+import { getPersonalizedPlanetInterpretation, getPersonalizedAspectInterpretation } from '@/services/chartInterpretationsService';
+import { getExampleInterpretation } from '@/data/interpretations/ExampleInterpretations';
+import { useAuth } from '@/context/AuthContext';
 
 interface ChartTooltipsProps {
   hoveredPlanet: string | null;
@@ -48,36 +49,38 @@ interface ChartTooltipsProps {
   setCardHoverTimer?: (timer: NodeJS.Timeout | null) => void;
 }
 
-const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
-  hoveredPlanet,
-  hoveredAspect,
-  hoveredHouse,
-  hoveredCard,
-  ascendant,
-  midheaven,
-  planets,
-  calculatedAspects,
-  tooltipPosition,
-  setHoveredPlanet,
-  setHoveredAspect,
-  setHoveredHouse,
-  setHoveredCard,
-  onOpenDrawer,
-  onCloseDrawer,
-  drawerOpen = false,
-  clickedPlanet = null,
-  setClickedPlanet,
-  clickedAspect = null,
-  setClickedAspect,
-  userId,
-  chartType = 'natal',
-  birthData,
-  elementDistribution,
-  modalityDistribution,
-  solarReturnYear,
-  solarReturnTheme,
-  ascSRInNatalHouse
-}) => {
+const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
+  const { user } = useAuth();
+  const {
+    hoveredPlanet,
+    hoveredAspect,
+    hoveredHouse,
+    hoveredCard,
+    ascendant,
+    midheaven,
+    planets,
+    calculatedAspects,
+    tooltipPosition,
+    setHoveredPlanet,
+    setHoveredAspect,
+    setHoveredHouse,
+    setHoveredCard,
+    onOpenDrawer,
+    onCloseDrawer,
+    drawerOpen = false,
+    clickedPlanet = null,
+    setClickedPlanet,
+    clickedAspect = null,
+    setClickedAspect,
+    userId,
+    chartType = 'natal',
+    birthData,
+    elementDistribution,
+    modalityDistribution,
+    solarReturnYear,
+    solarReturnTheme,
+    ascSRInNatalHouse
+  } = props;
 
   // =============================================================================
   // STATE
@@ -102,13 +105,13 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
   const [isGenerating, setIsGenerating] = useState(false);
   // =============================================================================
 
-  // ✅ Hook para detectar clic fuera - MEJORADO
+  // ✅ Hook para detectar clic fuera - SIMPLIFICADO Y CONSISTENTE
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as HTMLElement;
 
       // Verificar si el clic fue en tooltip, drawer o chart
-      const isTooltip = target && typeof target.closest === 'function' ? target.closest('.chart-tooltip') : null;
+      const isTooltip = target && typeof target.closest === 'function' ? target.closest('[class*="tooltip"], [class*="chart-tooltip"]') : null;
       const isDrawer = target && typeof target.closest === 'function' ? target.closest('.interpretation-drawer') : null;
       const isChart = target && typeof target.closest === 'function' ? target.closest('.chart-container') : null;
 
@@ -118,10 +121,10 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
         return;
       }
 
-      // ⭐ NUEVO: Si el tooltip está "locked" (porque se abrió el drawer), NO cerrar
+      // ⭐ Si el tooltip está "locked" (porque se abrió el drawer), solo cerrar si se hace click fuera del tooltip Y fuera del drawer
       if (tooltipLocked) {
-        // Solo cerrar si se hace click fuera del tooltip Y fuera del drawer
         if (!isTooltip && !isDrawer) {
+          console.log('🔓 Desbloqueando tooltip y cerrando');
           setHoveredPlanet(null);
           setHoveredAspect(null);
           setHoveredHouse(null);
@@ -133,33 +136,9 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
         return;
       }
 
-      // Comportamiento normal si NO está locked
-      if (!isTooltip && !isChart && !isDrawer) {
-        setHoveredPlanet(null);
-        setHoveredAspect(null);
-        setHoveredHouse(null);
-        setHoveredCard?.(null);
-        setClickedPlanet?.(null);
-        setClickedAspect?.(null);
-      }
-
-      // ⭐ NUEVO: Si el tooltip está "locked" (porque se abrió el drawer), NO cerrar
-      if (tooltipLocked) {
-        // Solo cerrar si se hace click fuera del tooltip Y fuera del drawer
-        if (!isTooltip && !isDrawer) {
-          setHoveredPlanet(null);
-          setHoveredAspect(null);
-          setHoveredHouse(null);
-          setHoveredCard?.(null);
-          setClickedPlanet?.(null);
-          setClickedAspect?.(null);
-          setTooltipLocked(false);
-        }
-        return;
-      }
-
-      // Comportamiento normal si NO está locked
-      if (!isTooltip && !isChart && !isDrawer) {
+      // Comportamiento normal: cerrar si se hace click fuera de tooltip, drawer y chart
+      if (!isTooltip && !isDrawer && !isChart) {
+        console.log('🎯 Click fuera - cerrando todos los tooltips');
         setHoveredPlanet(null);
         setHoveredAspect(null);
         setHoveredHouse(null);
@@ -171,7 +150,7 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [tooltipLocked, isGenerating]); // ⭐ Agregar isGenerating
+  }, [tooltipLocked, isGenerating]);
 
   // =============================================================================
   // FETCH AI INTERPRETATIONS
@@ -192,7 +171,7 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
         // ⭐ NUEVO: Construir URL con chartType
         let url = `/api/astrology/interpret-natal?userId=${userId}`;
         if (chartType === 'solar-return') {
-          url = `/api/astrology/interpret-solar-return?userId=${userId}`;
+          url = `/api/interpretations/save?userId=${userId}&chartType=solar-return`;
         }
 
         const response = await fetch(url);
@@ -389,8 +368,16 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
       if (result.success) {
         console.log('✅ Aspect interpretation generated');
 
+        // Get Firebase ID token for authentication
+        const token = await user!.getIdToken();
+
         // Refresh interpretations
-        const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`);
+        const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
         const refreshResult = await refreshResponse.json();
 
         if (refreshResult.success) {
@@ -489,9 +476,9 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
               {PLANET_SYMBOLS[planet.name] || planet.name.charAt(0)}
             </span>
             <div>
-              <div className="text-white font-bold text-lg">
-                {PLANET_SYMBOLS[planet.name] || planet.name.charAt(0)} {interpretation?.tooltip?.titulo || planet.name}
-              </div>
+            <div className="text-white font-bold text-lg">
+              {PLANET_SYMBOLS[planet.name] || planet.name.charAt(0)} {typeof interpretation?.tooltip?.titulo === 'string' ? interpretation.tooltip.titulo : planet.name}
+            </div>
               <div className="text-gray-200 text-sm">
                 {planet.degree}° {planet.sign}
               </div>
@@ -527,16 +514,16 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
             </span> Significado:
           </div>
           <div className="text-gray-200 text-sm leading-relaxed">
-            {interpretation?.tooltip?.significado || getPersonalizedPlanetInterpretation(planet)}
+            {typeof interpretation?.tooltip?.significado === 'string' ? interpretation.tooltip.significado : getPersonalizedPlanetInterpretation(planet)}
           </div>
         </div>
 
         <div className="space-y-1 mb-3">
           <div className="text-cyan-200 text-xs">
-            <strong>Efecto:</strong> {interpretation?.tooltip?.efecto || 'Influencia planetaria significativa'}
+            <strong>Efecto:</strong> {typeof interpretation?.tooltip?.efecto === 'string' ? interpretation.tooltip.efecto : 'Influencia planetaria significativa'}
           </div>
           <div className="text-purple-200 text-xs">
-            <strong>Tipo:</strong> {interpretation?.tooltip?.tipo || 'Energía transformadora'}
+            <strong>Tipo:</strong> {typeof interpretation?.tooltip?.tipo === 'string' ? interpretation.tooltip.tipo : 'Energía transformadora'}
           </div>
         </div>
 
@@ -590,8 +577,16 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
                   if (result.success) {
                     console.log('✅ Planeta generado:', planet.name);
 
+                    // Get Firebase ID token for authentication
+                    const token = await user!.getIdToken();
+
                     // Refrescar interpretaciones
-                    const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`);
+                    const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`, {
+                      headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                      }
+                    });
                     const refreshResult = await refreshResponse.json();
 
                     // ⭐ DEBUGGING: Ver qué devuelve la API
@@ -753,26 +748,26 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
           </svg>
           <div>
             <div className="text-white font-bold text-lg">
-              {interpretation?.tooltip?.titulo || 'Ascendente'}
+              {typeof interpretation?.tooltip?.titulo === 'string' ? interpretation.tooltip.titulo : 'Ascendente'}
             </div>
             <div className="text-gray-200 text-sm">
               {ascendant.degree}° {ascendant.sign}
             </div>
           </div>
         </div>
-        
+
         <div className="text-white text-sm font-semibold mb-1">🎯 Significado:</div>
         <div className="text-gray-200 text-xs mb-2">
-          {interpretation?.tooltip?.significado || 
+          {typeof interpretation?.tooltip?.significado === 'string' ? interpretation.tooltip.significado :
             `Tu máscara social, cómo te presentas al mundo y tu apariencia física.`}
         </div>
-        
+
         <div className="space-y-1 mb-3">
           <div className="text-cyan-200 text-xs">
-            <strong>Efecto:</strong> {interpretation?.tooltip?.efecto || 'Influencia angular significativa'}
+            <strong>Efecto:</strong> {typeof interpretation?.tooltip?.efecto === 'string' ? interpretation.tooltip.efecto : 'Influencia angular significativa'}
           </div>
           <div className="text-purple-200 text-xs">
-            <strong>Tipo:</strong> {interpretation?.tooltip?.tipo || 'Energía directiva'}
+            <strong>Tipo:</strong> {typeof interpretation?.tooltip?.tipo === 'string' ? interpretation.tooltip.tipo : 'Energía directiva'}
           </div>
         </div>
 
@@ -875,7 +870,7 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
           </svg>
           <div>
             <div className="text-white font-bold text-lg">
-              {interpretation?.tooltip?.titulo || 'Medio Cielo'}
+              {typeof interpretation?.tooltip?.titulo === 'string' ? interpretation.tooltip.titulo : 'Medio Cielo'}
             </div>
             <div className="text-gray-200 text-sm">
               {midheaven.degree}° {midheaven.sign}
@@ -885,16 +880,16 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
         
         <div className="text-white text-sm font-semibold mb-1">🎯 Significado:</div>
         <div className="text-gray-200 text-xs mb-2">
-          {interpretation?.tooltip?.significado || 
+          {typeof interpretation?.tooltip?.significado === 'string' ? interpretation.tooltip.significado :
             `Tu vocación, imagen pública y dirección profesional.`}
         </div>
-        
+
         <div className="space-y-1 mb-3">
           <div className="text-cyan-200 text-xs">
-            <strong>Efecto:</strong> {interpretation?.tooltip?.efecto || 'Influencia angular significativa'}
+            <strong>Efecto:</strong> {typeof interpretation?.tooltip?.efecto === 'string' ? interpretation.tooltip.efecto : 'Influencia angular significativa'}
           </div>
           <div className="text-purple-200 text-xs">
-            <strong>Tipo:</strong> {interpretation?.tooltip?.tipo || 'Energía directiva'}
+            <strong>Tipo:</strong> {typeof interpretation?.tooltip?.tipo === 'string' ? interpretation.tooltip.tipo : 'Energía directiva'}
           </div>
         </div>
 
@@ -952,7 +947,7 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
 
   if ((hoveredAspect || clickedAspect) && calculatedAspects.length > 0) {
     const aspectKey = clickedAspect || hoveredAspect;
-    const currentAspect = calculatedAspects.find(aspect =>
+    const currentAspect = calculatedAspects.find((aspect: Aspect & { config: { color: string; difficulty: string; name: string; angle: number; orb: number }; exact: boolean }) =>
       `${aspect.planet1}-${aspect.planet2}-${aspect.type}` === aspectKey
     );
 
@@ -983,28 +978,16 @@ const ChartTooltipsComponent: React.FC<ChartTooltipsProps> = ({
         onMouseLeave={(e) => {
           console.log('🎯 MOUSE LEFT TOOLTIP - ASPECT');
 
-          // ⭐ Si está locked O generando, NO cerrar NUNCA
-          if (tooltipLocked || generatingAspect) {
-            console.log('🔒 Tooltip locked - NO SE CIERRA');
+          // ⭐ Si está locked O generando, NO cerrar
+          if (tooltipLocked || isGenerating) {
+            console.log('🔒 Tooltip locked o generando - no se cierra');
             return;
           }
 
-          // Solo cerrar si NO está locked ni generando
-          setTimeout(() => {
-            if (!drawerOpen) {
-              // Don't close tooltip immediately if mouse is over a button
-              const target = e.relatedTarget as HTMLElement;
-              const isButton = target && typeof target.closest === 'function' ? target.closest('button') : null;
-              if (!isButton) {
-                // Add a small delay to allow drawer to open first
-                setTimeout(() => {
-                  if (!aspectTooltipLocked && !generatingAspect && !tooltipLocked) {
-                    handleAspectMouseLeave();
-                  }
-                }, 100); // 100ms delay to allow drawer state to update
-              }
-            }
-          }, 100); // 100ms delay to allow drawer state update
+          // Comportamiento consistente: cerrar después de delay
+          handleMouseLeaveTooltip(() => {
+            setHoveredAspect(null);
+          }, 2000); // 2 seconds for aspects
         }}
         onClick={(e) => {
           console.log('🎯 TOOLTIP CLICKED (parent) - ASPECT');

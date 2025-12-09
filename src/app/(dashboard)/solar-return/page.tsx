@@ -202,7 +202,7 @@ export default function SolarReturnPage() {
       // STEP 1: Delete cached interpretation first
       console.log('🗑️ [REGENERATE] Deleting cached interpretation...');
       try {
-        const deleteInterpretationRes = await fetch(`/api/astrology/interpret-solar-return?userId=${user.uid}`, {
+        const deleteInterpretationRes = await fetch(`/api/interpretations/save?userId=${user.uid}&chartType=solar-return`, {
           method: 'DELETE'
         });
 

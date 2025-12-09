@@ -66,10 +66,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       // Aquí podrías hacer una llamada API para guardar datos adicionales en MongoDB
       try {
+        // Get the ID token for authentication
+        const token = await userCredential.user.getIdToken();
+
         await fetch('/api/users', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify({
             uid: userCredential.user.uid,
