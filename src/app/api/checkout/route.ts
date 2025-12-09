@@ -80,20 +80,25 @@ export async function POST(req: NextRequest) {
       allow_promotion_codes: true,
     });
 
-    // Guardar información de la sesión en Firestore para seguimiento
-    await db.collection('checkout_sessions').doc(session.id).set({
-      userId,
-      customerId,
-      sessionId: session.id,
-      priceId,
-      mode,
-      status: 'created',
-      createdAt: new Date(),
-      metadata: {
+    // Guardar información de la sesión en Firestore para seguimiento (opcional)
+    try {
+      await db.collection('checkout_sessions').doc(session.id).set({
         userId,
+        customerId,
+        sessionId: session.id,
         priceId,
-      },
-    });
+        mode,
+        status: 'created',
+        createdAt: new Date(),
+        metadata: {
+          userId,
+          priceId,
+        },
+      });
+    } catch (firestoreError) {
+      // Log the error but don't fail the checkout
+      console.warn('Warning: Could not save session to Firestore:', firestoreError);
+    }
 
     return NextResponse.json({
       sessionId: session.id,
