@@ -10,6 +10,9 @@ import Interpretation from '@/models/Interpretation';
 import { generateSolarReturnMasterPrompt } from '@/utils/prompts/solarReturnPrompts';
 import { generateSRComparison } from '@/utils/astrology/solarReturnComparison';
 
+// ⏱️ CRITICAL: Increase timeout for AI generation (Solar Return takes 2-3 minutes)
+export const maxDuration = 300; // 5 minutes
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
