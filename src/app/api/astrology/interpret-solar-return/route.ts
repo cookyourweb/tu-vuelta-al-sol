@@ -10,10 +10,6 @@ import Interpretation from '@/models/Interpretation';
 import { generateSolarReturnMasterPrompt } from '@/utils/prompts/solarReturnPrompts';
 import { generateSRComparison } from '@/utils/astrology/solarReturnComparison';
 
-// ⏱️ Vercel Hobby plan limit: 60 seconds max
-// Note: AI generation may take longer, consider caching or async processing
-export const maxDuration = 60; // 1 minute (Vercel Hobby limit)
-
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });

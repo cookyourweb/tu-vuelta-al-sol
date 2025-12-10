@@ -5,8 +5,6 @@
 // ✅ FIXED: Now returns proper JSON structure with OBJECTS not STRINGS
 // =============================================================================
 
-export const maxDuration = 60;
-
 import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
 import OpenAI from 'openai';
