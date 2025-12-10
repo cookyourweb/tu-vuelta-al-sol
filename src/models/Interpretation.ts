@@ -100,8 +100,8 @@ const InterpretationSchema = new Schema<IInterpretation>({
   
   expiresAt: {
     type: Date,
-    required: true,
-    index: true // ✅ Para limpiar automáticamente con TTL
+    required: true
+    // Note: Index is defined separately with TTL (see schema.index() below)
   },
   
   method: {
