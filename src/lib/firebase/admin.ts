@@ -37,6 +37,13 @@ export const getFirebaseAdmin = (): admin.app.App => {
   return initializeFirebaseAdmin();
 };
 
-// Default export for backward compatibility
-const defaultExport = getFirebaseAdmin();
-export default defaultExport;
+// Default export for backward compatibility - LAZY INITIALIZATION
+// Don't call getFirebaseAdmin() at module load time to avoid build errors
+export default {
+  get app() {
+    return getFirebaseAdmin();
+  },
+  auth: () => getFirebaseAdmin().auth(),
+  firestore: () => getFirebaseAdmin().firestore(),
+  database: () => getFirebaseAdmin().database(),
+};

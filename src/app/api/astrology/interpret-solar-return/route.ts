@@ -4,15 +4,11 @@
 // Output: Full year prediction with actionable insights
 
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
+import { getOpenAIClient } from '@/lib/openai';
 import connectDB from '@/lib/db';
 import Interpretation from '@/models/Interpretation';
 import { generateSolarReturnMasterPrompt } from '@/utils/prompts/solarReturnPrompts';
 import { generateSRComparison } from '@/utils/astrology/solarReturnComparison';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -349,6 +345,7 @@ Required JSON structure:
     try {
       console.log(`🤖 OpenAI attempt ${attempts + 1}/${MAX_ATTEMPTS}`);
 
+      const openai = getOpenAIClient();
       const completion = await openai.chat.completions.create({
         model: 'gpt-4o-2024-08-06',
         messages: [

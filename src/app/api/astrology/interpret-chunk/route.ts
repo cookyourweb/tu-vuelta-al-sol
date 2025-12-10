@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
-
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { getOpenAIClient } from '@/lib/openai';
 
 interface ChunkRequest {
   userId: string;
@@ -174,6 +169,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate with OpenAI - use faster model and limited tokens
+    const openai = getOpenAIClient();
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo", // Faster than GPT-4
       messages: [

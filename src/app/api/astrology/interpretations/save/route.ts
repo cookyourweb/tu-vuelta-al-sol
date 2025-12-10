@@ -1,6 +1,6 @@
 // src/app/api/astrology/interpretations/save/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
+import { getOpenAIClient } from '@/lib/openai';
 import connectDB from '@/lib/db';
 import Interpretation from '@/models/Interpretation';
 import { generateSolarReturnMasterPrompt } from '@/utils/prompts/solarReturnPrompts';
@@ -11,10 +11,6 @@ import type {
   APIResponse,
   InterpretationDocument
 } from '@/types/astrology/interpretation'; // ✅ ADD THIS
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 const CACHE_DURATION = 24 * 60 * 60 * 1000;
 
@@ -161,6 +157,7 @@ Example start:
   ...
 }`;
 
+        const openai = getOpenAIClient();
         const completion = await openai.chat.completions.create({
           model: 'gpt-4-turbo-preview',
           messages: [
