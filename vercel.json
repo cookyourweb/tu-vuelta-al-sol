@@ -1,9 +1,4 @@
 {
   "installCommand": "npm install --legacy-peer-deps",
-  "buildCommand": "npm run build",
-  "functions": {
-    "src/app/api/astrology/**/*.ts": {
-      "maxDuration": 60
-    }
-  }
+  "buildCommand": "npm run build"
 }
