@@ -82,7 +82,7 @@ export async function getUserBirthDataDirect(userId: string): Promise<UserBirthD
         { userId: userId },
         { uid: userId }
       ]
-    }).lean();
+    }).lean() as any;
 
     if (!birthDataRaw) {
       console.log(`❌ [SERVER] No se encontraron datos para userId: ${userId}`);
