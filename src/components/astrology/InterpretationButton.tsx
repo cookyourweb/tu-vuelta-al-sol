@@ -718,7 +718,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
 
     return (
       <div className="space-y-8">
-        {data.esencia_revolucionaria && (
+        {typeof data.esencia_revolucionaria === 'string' && (
           <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 rounded-2xl p-8 border border-purple-400/30">
             <h4 className="text-purple-100 font-bold text-xl mb-4 flex items-center gap-3">
               <Star className="w-8 h-8 text-purple-300" />
@@ -728,7 +728,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           </div>
         )}
 
-        {data.proposito_vida && (
+        {typeof data.proposito_vida === 'string' && (
           <div className="bg-gradient-to-br from-blue-900/40 to-indigo-900/40 rounded-2xl p-8 border border-blue-400/30">
             <h4 className="text-blue-100 font-bold text-xl mb-4 flex items-center gap-3">
               <Target className="w-8 h-8 text-blue-300" />
@@ -739,7 +739,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         )}
 
         {/* ✅ NUEVA SECCIÓN: FORMACIÓN TEMPRANA */}
-        {data.formacion_temprana && (
+        {typeof data.formacion_temprana === 'object' && !Array.isArray(data.formacion_temprana) && (
           <div className="bg-gradient-to-br from-cyan-900/40 to-teal-900/40 rounded-2xl p-8 border border-cyan-400/30">
             <h4 className="text-cyan-100 font-bold text-xl mb-6 flex items-center gap-3">
               <Star className="w-8 h-8 text-cyan-300" />
@@ -844,7 +844,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         )}
 
         {/* ✅ NUEVA SECCIÓN: PATRONES PSICOLÓGICOS */}
-        {data.patrones_psicologicos && (
+        {(Array.isArray(data.patrones_psicologicos) || typeof data.patrones_psicologicos === 'string') && (
           <div className="bg-gradient-to-br from-indigo-900/40 to-purple-900/40 rounded-2xl p-8 border border-indigo-400/30">
             <h4 className="text-indigo-100 font-bold text-xl mb-6 flex items-center gap-3">
               <Brain className="w-8 h-8 text-indigo-300" />
@@ -874,7 +874,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         )}
 
         {/* ✅ NUEVA SECCIÓN: PLANETAS PROFUNDOS */}
-        {data.planetas_profundos && (
+        {typeof data.planetas_profundos === 'object' && !Array.isArray(data.planetas_profundos) && (
           <div className="bg-gradient-to-br from-violet-900/40 to-purple-900/40 rounded-2xl p-8 border border-violet-400/30">
             <h4 className="text-violet-100 font-bold text-xl mb-6 flex items-center gap-3">
               <Sparkles className="w-8 h-8 text-violet-300" />
@@ -904,7 +904,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         )}
 
         {/* ✅ NUEVA SECCIÓN: NODOS LUNALES */}
-        {data.nodos_lunares && (
+        {typeof data.nodos_lunares === 'object' && !Array.isArray(data.nodos_lunares) && (
           <div className="bg-gradient-to-br from-slate-900/40 to-gray-900/40 rounded-2xl p-8 border border-slate-400/30">
             <h4 className="text-slate-100 font-bold text-xl mb-6 flex items-center gap-3">
               <Target className="w-8 h-8 text-slate-300" />
@@ -995,7 +995,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         )}
 
         {/* ✅ SOLAR RETURN: TEMA CENTRAL DEL AÑO */}
-        {data.tema_anual && type === 'solar-return' && (
+        {typeof data.tema_anual === 'string' && type === 'solar-return' && (
           <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 rounded-2xl p-8 border border-amber-400/30">
             <h4 className="text-amber-100 font-bold text-xl mb-4 flex items-center gap-3">
               <Sparkles className="w-8 h-8 text-amber-300" />
@@ -1200,14 +1200,14 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           </div>
         )}
 
-        {data.plan_accion && (
+        {typeof data.plan_accion === 'object' && !Array.isArray(data.plan_accion) && (
           <div className="bg-gradient-to-br from-orange-900/40 to-red-900/40 rounded-2xl p-8 border border-orange-400/30">
             <h4 className="text-orange-100 font-bold text-xl mb-6 flex items-center gap-3">
               <Zap className="w-8 h-8 text-orange-300" />
               Plan de Acción Inmediato
             </h4>
-            
-            {data.plan_accion.hoy_mismo && (
+
+            {data.plan_accion.hoy_mismo && Array.isArray(data.plan_accion.hoy_mismo) && (
               <div className="mb-6">
                 <h5 className="text-orange-200 font-bold text-lg mb-3">🔥 HOY MISMO:</h5>
                 <ul className="space-y-3">
@@ -1221,7 +1221,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               </div>
             )}
 
-            {data.plan_accion.esta_semana && (
+            {data.plan_accion.esta_semana && Array.isArray(data.plan_accion.esta_semana) && (
               <div className="mb-6">
                 <h5 className="text-orange-200 font-bold text-lg mb-3">⚡ ESTA SEMANA:</h5>
                 <ul className="space-y-3">
@@ -1235,7 +1235,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               </div>
             )}
 
-            {data.plan_accion.este_mes && (
+            {data.plan_accion.este_mes && Array.isArray(data.plan_accion.este_mes) && (
               <div>
                 <h5 className="text-orange-200 font-bold text-lg mb-3">🚀 ESTE MES:</h5>
                 <ul className="space-y-3">
@@ -1251,7 +1251,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           </div>
         )}
 
-        {data.declaracion_poder && (
+        {typeof data.declaracion_poder === 'string' && (
           <div className="bg-gradient-to-br from-emerald-900/40 to-green-900/40 rounded-2xl p-8 border border-emerald-400/30">
             <h4 className="text-emerald-100 font-bold text-xl mb-4 flex items-center gap-3">
               <TrendingUp className="w-8 h-8 text-emerald-300" />
@@ -1265,7 +1265,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           </div>
         )}
 
-        {data.advertencias && (
+        {Array.isArray(data.advertencias) && (
           <div className="bg-gradient-to-br from-red-900/40 to-rose-900/40 rounded-2xl p-8 border border-red-400/30">
             <h4 className="text-red-100 font-bold text-xl mb-4">⚠️ Advertencias Brutalmente Honestas</h4>
             <ul className="space-y-3">
@@ -1279,7 +1279,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           </div>
         )}
 
-        {data.insights_transformacionales && (
+        {Array.isArray(data.insights_transformacionales) && (
           <div className="bg-green-900/30 rounded-xl p-6">
             <h4 className="text-green-200 font-semibold mb-3 flex items-center gap-2">
               <Sparkles className="w-5 h-5" />
@@ -1296,7 +1296,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           </div>
         )}
 
-        {data.rituales_recomendados && (
+        {Array.isArray(data.rituales_recomendados) && (
           <div className="bg-violet-900/30 rounded-xl p-6">
             <h4 className="text-violet-200 font-semibold mb-3">
               🕯️ Rituales Recomendados
@@ -1369,7 +1369,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         )}
 
         {/* ✅ NUEVA SECCIÓN: PREGUNTA FINAL DE REFLEXIÓN */}
-        {data.pregunta_final_reflexion && (
+        {typeof data.pregunta_final_reflexion === 'string' && (
           <div className="bg-gradient-to-br from-pink-900/40 to-rose-900/40 rounded-2xl p-8 border border-pink-400/30">
             <h4 className="text-pink-100 font-bold text-xl mb-4 flex items-center gap-3">
               <Sparkles className="w-8 h-8 text-pink-300" />
