@@ -724,7 +724,11 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               <Star className="w-8 h-8 text-purple-300" />
               Tu Esencia Revolucionaria
             </h4>
-            <p className="text-purple-50 text-lg leading-relaxed font-medium">{data.esencia_revolucionaria}</p>
+            <p className="text-purple-50 text-lg leading-relaxed font-medium">
+              {typeof data.esencia_revolucionaria === 'string'
+                ? data.esencia_revolucionaria
+                : data.esencia_revolucionaria?.drawer?.poderoso || data.esencia_revolucionaria?.tooltip?.descripcionBreve || 'No disponible'}
+            </p>
           </div>
         )}
 
@@ -734,7 +738,11 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               <Target className="w-8 h-8 text-blue-300" />
               Tu Propósito de Vida
             </h4>
-      <p className="text-blue-50 text-lg leading-relaxed font-medium">{data.proposito_vida}</p>
+      <p className="text-blue-50 text-lg leading-relaxed font-medium">
+        {typeof data.proposito_vida === 'string'
+          ? data.proposito_vida
+          : data.proposito_vida?.drawer?.poderoso || data.proposito_vida?.tooltip?.descripcionBreve || 'No disponible'}
+      </p>
           </div>
         )}
 
