@@ -101,7 +101,7 @@ const InterpretationSchema = new Schema<IInterpretation>({
   expiresAt: {
     type: Date,
     required: true
-    // Note: Index is defined separately with TTL (see line 124)
+    // Note: Index is defined separately with TTL (see schema.index() below)
   },
   
   method: {
