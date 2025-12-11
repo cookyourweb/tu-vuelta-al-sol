@@ -6,11 +6,11 @@ export async function middleware(request: NextRequest) {
 
   // 🔒 CHECK AUTHENTICATION for protected routes
   // ⭕ Allow authenticated requests through, block unauthenticated ones
+  // ⚠️ NOTE: /api/birth-data and /api/charts are NOT protected here
+  //    because they are called server-side and have internal userId validation
   if (pathname.startsWith('/api/interpretations') ||
       pathname.startsWith('/api/astrology') ||
-      pathname.startsWith('/api/charts') ||
       pathname.startsWith('/api/users') ||
-      pathname.startsWith('/api/birth-data') ||
       pathname.startsWith('/api/pdf') ||
       pathname.startsWith('/api/cache')) {
 
