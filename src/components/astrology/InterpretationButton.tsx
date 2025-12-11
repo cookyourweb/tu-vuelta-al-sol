@@ -505,8 +505,8 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
             };
           } else if (type === 'solar-return') {
             interpretationData = {
-              esencia_revolucionaria: rawInterpretation.esencia_revolucionaria_anual,
-              proposito_vida: rawInterpretation.proposito_vida_anual,
+              esencia_revolucionaria_anual: rawInterpretation.esencia_revolucionaria_anual,
+              proposito_vida_anual: rawInterpretation.proposito_vida_anual,
               tema_anual: rawInterpretation.tema_central_del_anio,
               analisis_tecnico: rawInterpretation.analisis_tecnico_profesional,
               plan_accion: rawInterpretation.plan_accion,

@@ -1,5 +1,6 @@
 # Lecciones Aprendidas - No Volver a Romper Producción
 
+<<<<<<< HEAD
 ## 🚨 INCIDENTE: Middleware causando 404 en APIs críticas (REVERTIDO)
 
 ### 📅 Fecha
@@ -57,6 +58,8 @@ Trabajo en progreso documentado en `TRABAJO_EN_PROGRESO_CARGA_LAZY.md`:
 
 ---
 
+=======
+>>>>>>> claude/fix-solar-return-fixes-from-stable-018yVirvPCdaUMFpETP4HATz
 ## 🚨 INCIDENTE: Build fallando después de commit a512618
 
 ### 📅 Fecha
