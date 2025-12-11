@@ -711,37 +711,37 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
     }
 
     console.log('🎨 data keys:', Object.keys(data));
-    console.log('🎨 data.esencia_revolucionaria:', data.esencia_revolucionaria ? 'EXISTS' : 'NOT FOUND');
-    console.log('🎨 data.proposito_vida:', data.proposito_vida ? 'EXISTS' : 'NOT FOUND');
+    console.log('🎨 data.esencia_revolucionaria_anual:', data.esencia_revolucionaria_anual ? 'EXISTS' : 'NOT FOUND');
+    console.log('🎨 data.proposito_vida_anual:', data.proposito_vida_anual ? 'EXISTS' : 'NOT FOUND');
     console.log('🎨 data.planets:', data.planets ? 'EXISTS' : 'NOT FOUND');
     console.log('🎨 Full data:', data);
 
     return (
       <div className="space-y-8">
-        {data.esencia_revolucionaria && (
+        {data.esencia_revolucionaria_anual && (
           <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 rounded-2xl p-8 border border-purple-400/30">
             <h4 className="text-purple-100 font-bold text-xl mb-4 flex items-center gap-3">
               <Star className="w-8 h-8 text-purple-300" />
-              Tu Esencia Revolucionaria
+              Tu Esencia Revolucionaria del Año
             </h4>
             <p className="text-purple-50 text-lg leading-relaxed font-medium">
-              {typeof data.esencia_revolucionaria === 'string'
-                ? data.esencia_revolucionaria
-                : data.esencia_revolucionaria?.drawer?.poderoso || data.esencia_revolucionaria?.tooltip?.descripcionBreve || 'No disponible'}
+              {typeof data.esencia_revolucionaria_anual === 'string'
+                ? data.esencia_revolucionaria_anual
+                : data.esencia_revolucionaria_anual?.drawer?.poderoso || data.esencia_revolucionaria_anual?.tooltip?.descripcionBreve || 'No disponible'}
             </p>
           </div>
         )}
 
-        {data.proposito_vida && (
+        {data.proposito_vida_anual && (
           <div className="bg-gradient-to-br from-blue-900/40 to-indigo-900/40 rounded-2xl p-8 border border-blue-400/30">
             <h4 className="text-blue-100 font-bold text-xl mb-4 flex items-center gap-3">
               <Target className="w-8 h-8 text-blue-300" />
-              Tu Propósito de Vida
+              Tu Propósito de Vida este Año
             </h4>
       <p className="text-blue-50 text-lg leading-relaxed font-medium">
-        {typeof data.proposito_vida === 'string'
-          ? data.proposito_vida
-          : data.proposito_vida?.drawer?.poderoso || data.proposito_vida?.tooltip?.descripcionBreve || 'No disponible'}
+        {typeof data.proposito_vida_anual === 'string'
+          ? data.proposito_vida_anual
+          : data.proposito_vida_anual?.drawer?.poderoso || data.proposito_vida_anual?.tooltip?.descripcionBreve || 'No disponible'}
       </p>
           </div>
         )}
