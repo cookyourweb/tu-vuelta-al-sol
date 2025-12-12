@@ -6,7 +6,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Brain, Sparkles, RefreshCw, Eye, X, Star, Target, Zap, Copy, Check, Download, Clock, TrendingUp } from 'lucide-react';
 import Button from '@/components/ui/Button';
-import { useAuth } from '@/context/AuthContext';
 
 interface InterpretationButtonProps {
   type: 'natal' | 'progressed' | 'solar-return';
@@ -51,7 +50,6 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
   className = "",
   isAdmin = false
 }) => {
-  const { user } = useAuth();
   const [interpretation, setInterpretation] = useState<InterpretationData | null>(null);
   const [loading, setLoading] = useState(false);
   const [checkingCache, setCheckingCache] = useState(true);
@@ -505,8 +503,8 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
             };
           } else if (type === 'solar-return') {
             interpretationData = {
-              esencia_revolucionaria_anual: rawInterpretation.esencia_revolucionaria_anual,
-              proposito_vida_anual: rawInterpretation.proposito_vida_anual,
+              esencia_revolucionaria: rawInterpretation.esencia_revolucionaria_anual,
+              proposito_vida: rawInterpretation.proposito_vida_anual,
               tema_anual: rawInterpretation.tema_central_del_anio,
               analisis_tecnico: rawInterpretation.analisis_tecnico_profesional,
               plan_accion: rawInterpretation.plan_accion,
@@ -580,12 +578,6 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       console.log('💾 chartType:', type);
       console.log('💾 generatedAt:', interpretationData.generatedAt);
 
-      // Get Firebase ID token for authentication
-      let token = null;
-      if (user) {
-        token = await user.getIdToken();
-      }
-
       const saveData = {
         userId,
         chartType: type,
@@ -598,24 +590,16 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         userId: saveData.userId,
         chartType: saveData.chartType,
         interpretationKeys: Object.keys(saveData.interpretation),
-        generatedAt: saveData.generatedAt,
-        hasToken: !!token
+        generatedAt: saveData.generatedAt
       });
 
       // ✅ FIX: Use PUT method to REPLACE existing interpretation (upsert)
       // POST creates duplicates, PUT replaces the existing one
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
-
-      // Add authorization header if token is available
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
       const response = await fetch('/api/interpretations/save', {
         method: 'PUT',
-        headers,
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(saveData)
       });
 
@@ -727,43 +711,35 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
     }
 
     console.log('🎨 data keys:', Object.keys(data));
-    console.log('🎨 data.esencia_revolucionaria_anual:', data.esencia_revolucionaria_anual ? 'EXISTS' : 'NOT FOUND');
-    console.log('🎨 data.proposito_vida_anual:', data.proposito_vida_anual ? 'EXISTS' : 'NOT FOUND');
+    console.log('🎨 data.esencia_revolucionaria:', data.esencia_revolucionaria ? 'EXISTS' : 'NOT FOUND');
+    console.log('🎨 data.proposito_vida:', data.proposito_vida ? 'EXISTS' : 'NOT FOUND');
     console.log('🎨 data.planets:', data.planets ? 'EXISTS' : 'NOT FOUND');
     console.log('🎨 Full data:', data);
 
     return (
       <div className="space-y-8">
-        {data.esencia_revolucionaria_anual && (
+        {data.esencia_revolucionaria && (
           <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 rounded-2xl p-8 border border-purple-400/30">
-    <h4 className="text-purple-100 font-bold text-xl mb-4 flex items-center gap-3">
-      <Star className="w-8 h-8 text-purple-300" />
-      Tu Esencia Revolucionaria del Año
-    </h4>
-    <p className="text-purple-50 text-lg leading-relaxed font-medium">
-      {typeof data.esencia_revolucionaria_anual === 'string'
-        ? data.esencia_revolucionaria_anual
-        : data.esencia_revolucionaria_anual?.drawer?.poderoso || data.esencia_revolucionaria_anual?.tooltip?.descripcionBreve || 'No disponible'}
-    </p>
-  </div>
-)}
+            <h4 className="text-purple-100 font-bold text-xl mb-4 flex items-center gap-3">
+              <Star className="w-8 h-8 text-purple-300" />
+              Tu Esencia Revolucionaria
+            </h4>
+            <p className="text-purple-50 text-lg leading-relaxed font-medium">{data.esencia_revolucionaria}</p>
+          </div>
+        )}
 
-{data.proposito_vida_anual && (
-  <div className="bg-gradient-to-br from-blue-900/40 to-indigo-900/40 rounded-2xl p-8 border border-blue-400/30">
-    <h4 className="text-blue-100 font-bold text-xl mb-4 flex items-center gap-3">
-      <Target className="w-8 h-8 text-blue-300" />
-      Tu Propósito de Vida del Año
-    </h4>
-    <p className="text-blue-50 text-lg leading-relaxed font-medium">
-      {typeof data.proposito_vida_anual === 'string'
-        ? data.proposito_vida_anual
-        : data.proposito_vida_anual?.drawer?.poderoso || data.proposito_vida_anual?.tooltip?.descripcionBreve || 'No disponible'}
-    </p>
-  </div>
-)}
+        {data.proposito_vida && (
+          <div className="bg-gradient-to-br from-blue-900/40 to-indigo-900/40 rounded-2xl p-8 border border-blue-400/30">
+            <h4 className="text-blue-100 font-bold text-xl mb-4 flex items-center gap-3">
+              <Target className="w-8 h-8 text-blue-300" />
+              Tu Propósito de Vida
+            </h4>
+      <p className="text-blue-50 text-lg leading-relaxed font-medium">{data.proposito_vida}</p>
+          </div>
+        )}
 
         {/* ✅ NUEVA SECCIÓN: FORMACIÓN TEMPRANA */}
-        {typeof data.formacion_temprana === 'object' && !Array.isArray(data.formacion_temprana) && (
+        {data.formacion_temprana && (
           <div className="bg-gradient-to-br from-cyan-900/40 to-teal-900/40 rounded-2xl p-8 border border-cyan-400/30">
             <h4 className="text-cyan-100 font-bold text-xl mb-6 flex items-center gap-3">
               <Star className="w-8 h-8 text-cyan-300" />
@@ -868,7 +844,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         )}
 
         {/* ✅ NUEVA SECCIÓN: PATRONES PSICOLÓGICOS */}
-        {(Array.isArray(data.patrones_psicologicos) || typeof data.patrones_psicologicos === 'string') && (
+        {data.patrones_psicologicos && (
           <div className="bg-gradient-to-br from-indigo-900/40 to-purple-900/40 rounded-2xl p-8 border border-indigo-400/30">
             <h4 className="text-indigo-100 font-bold text-xl mb-6 flex items-center gap-3">
               <Brain className="w-8 h-8 text-indigo-300" />
@@ -898,7 +874,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         )}
 
         {/* ✅ NUEVA SECCIÓN: PLANETAS PROFUNDOS */}
-        {typeof data.planetas_profundos === 'object' && !Array.isArray(data.planetas_profundos) && (
+        {data.planetas_profundos && (
           <div className="bg-gradient-to-br from-violet-900/40 to-purple-900/40 rounded-2xl p-8 border border-violet-400/30">
             <h4 className="text-violet-100 font-bold text-xl mb-6 flex items-center gap-3">
               <Sparkles className="w-8 h-8 text-violet-300" />
@@ -928,7 +904,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         )}
 
         {/* ✅ NUEVA SECCIÓN: NODOS LUNALES */}
-        {typeof data.nodos_lunares === 'object' && !Array.isArray(data.nodos_lunares) && (
+        {data.nodos_lunares && (
           <div className="bg-gradient-to-br from-slate-900/40 to-gray-900/40 rounded-2xl p-8 border border-slate-400/30">
             <h4 className="text-slate-100 font-bold text-xl mb-6 flex items-center gap-3">
               <Target className="w-8 h-8 text-slate-300" />
@@ -1019,14 +995,14 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         )}
 
         {/* ✅ SOLAR RETURN: TEMA CENTRAL DEL AÑO */}
-        {typeof data.tema_anual === 'string' && type === 'solar-return' && (
+        {data.tema_anual && type === 'solar-return' && (
           <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 rounded-2xl p-8 border border-amber-400/30">
             <h4 className="text-amber-100 font-bold text-xl mb-4 flex items-center gap-3">
               <Sparkles className="w-8 h-8 text-amber-300" />
               Tema Central del Año
             </h4>
             <p className="text-amber-50 text-2xl leading-relaxed font-bold text-center italic">
-              "{typeof data.tema_anual === 'string' ? data.tema_anual : JSON.stringify(data.tema_anual)}"
+              "{data.tema_anual}"
             </p>
           </div>
         )}
@@ -1224,14 +1200,14 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           </div>
         )}
 
-        {typeof data.plan_accion === 'object' && !Array.isArray(data.plan_accion) && (
+        {data.plan_accion && (
           <div className="bg-gradient-to-br from-orange-900/40 to-red-900/40 rounded-2xl p-8 border border-orange-400/30">
             <h4 className="text-orange-100 font-bold text-xl mb-6 flex items-center gap-3">
               <Zap className="w-8 h-8 text-orange-300" />
               Plan de Acción Inmediato
             </h4>
-
-            {data.plan_accion.hoy_mismo && Array.isArray(data.plan_accion.hoy_mismo) && (
+            
+            {data.plan_accion.hoy_mismo && (
               <div className="mb-6">
                 <h5 className="text-orange-200 font-bold text-lg mb-3">🔥 HOY MISMO:</h5>
                 <ul className="space-y-3">
@@ -1245,7 +1221,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               </div>
             )}
 
-            {data.plan_accion.esta_semana && Array.isArray(data.plan_accion.esta_semana) && (
+            {data.plan_accion.esta_semana && (
               <div className="mb-6">
                 <h5 className="text-orange-200 font-bold text-lg mb-3">⚡ ESTA SEMANA:</h5>
                 <ul className="space-y-3">
@@ -1259,7 +1235,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               </div>
             )}
 
-            {data.plan_accion.este_mes && Array.isArray(data.plan_accion.este_mes) && (
+            {data.plan_accion.este_mes && (
               <div>
                 <h5 className="text-orange-200 font-bold text-lg mb-3">🚀 ESTE MES:</h5>
                 <ul className="space-y-3">
@@ -1275,7 +1251,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           </div>
         )}
 
-        {typeof data.declaracion_poder === 'string' && (
+        {data.declaracion_poder && (
           <div className="bg-gradient-to-br from-emerald-900/40 to-green-900/40 rounded-2xl p-8 border border-emerald-400/30">
             <h4 className="text-emerald-100 font-bold text-xl mb-4 flex items-center gap-3">
               <TrendingUp className="w-8 h-8 text-emerald-300" />
@@ -1289,7 +1265,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           </div>
         )}
 
-        {Array.isArray(data.advertencias) && (
+        {data.advertencias && (
           <div className="bg-gradient-to-br from-red-900/40 to-rose-900/40 rounded-2xl p-8 border border-red-400/30">
             <h4 className="text-red-100 font-bold text-xl mb-4">⚠️ Advertencias Brutalmente Honestas</h4>
             <ul className="space-y-3">
@@ -1303,7 +1279,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           </div>
         )}
 
-        {Array.isArray(data.insights_transformacionales) && (
+        {data.insights_transformacionales && (
           <div className="bg-green-900/30 rounded-xl p-6">
             <h4 className="text-green-200 font-semibold mb-3 flex items-center gap-2">
               <Sparkles className="w-5 h-5" />
@@ -1320,7 +1296,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           </div>
         )}
 
-        {Array.isArray(data.rituales_recomendados) && (
+        {data.rituales_recomendados && (
           <div className="bg-violet-900/30 rounded-xl p-6">
             <h4 className="text-violet-200 font-semibold mb-3">
               🕯️ Rituales Recomendados
@@ -1393,7 +1369,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         )}
 
         {/* ✅ NUEVA SECCIÓN: PREGUNTA FINAL DE REFLEXIÓN */}
-        {typeof data.pregunta_final_reflexion === 'string' && (
+        {data.pregunta_final_reflexion && (
           <div className="bg-gradient-to-br from-pink-900/40 to-rose-900/40 rounded-2xl p-8 border border-pink-400/30">
             <h4 className="text-pink-100 font-bold text-xl mb-4 flex items-center gap-3">
               <Sparkles className="w-8 h-8 text-pink-300" />
