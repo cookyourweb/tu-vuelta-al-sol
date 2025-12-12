@@ -121,6 +121,21 @@ const AgendaPersonalizada = () => {
     }
   }, []);
 
+  // 🔧 Helper function to get planet theme (DEBE ESTAR ANTES de fetchMonthlyEvents)
+  const getPlanetTheme = (planet: string): string => {
+    const themes: Record<string, string> = {
+      'Mercurio': 'Comunicación',
+      'Venus': 'Amor y Valores',
+      'Marte': 'Acción y Energía',
+      'Júpiter': 'Expansión y Abundancia',
+      'Saturno': 'Estructura y Disciplina',
+      'Urano': 'Innovación y Cambio',
+      'Neptuno': 'Espiritualidad e Intuición',
+      'Plutón': 'Transformación Profunda'
+    };
+    return themes[planet] || 'Crecimiento Personal';
+  };
+
   // 🌙 CARGA LAZY: Fetch Monthly Events (solo un mes específico)
   const fetchMonthlyEvents = async (targetMonth: Date): Promise<AstrologicalEvent[]> => {
     if (!userProfile || !userProfile.birthDate) {
@@ -616,21 +631,6 @@ const AgendaPersonalizada = () => {
       console.error('❌ [AGENDA] Stack trace:', error instanceof Error ? error.stack : 'No stack');
       return generateExampleEvents();
     }
-  };
-
-  // Helper function to get planet theme
-  const getPlanetTheme = (planet: string): string => {
-    const themes: Record<string, string> = {
-      'Mercurio': 'Comunicación',
-      'Venus': 'Amor y Valores',
-      'Marte': 'Acción y Energía',
-      'Júpiter': 'Expansión y Abundancia',
-      'Saturno': 'Estructura y Disciplina',
-      'Urano': 'Innovación y Cambio',
-      'Neptuno': 'Espiritualidad e Intuición',
-      'Plutón': 'Transformación Profunda'
-    };
-    return themes[planet] || 'Crecimiento Personal';
   };
 
   // Eventos de ejemplo ÉPICOS (fallback)
