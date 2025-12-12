@@ -42,17 +42,36 @@ export async function POST(request: NextRequest) {
       dateObj.setHours(hours, minutes, 0, 0);
     }
 
-    // Calculate events for the full year
+    // 🔧 CÁLCULO CORRECTO DEL AÑO SOLAR SEGÚN EL MES SOLICITADO
     const currentYear = parseInt(year, 10);
-    dateObj.setFullYear(currentYear);
+    const targetMonth = parseInt(month, 10);
+    const birthMonth = dateObj.getMonth() + 1; // Mes de cumpleaños (1-12)
+    const birthDay = dateObj.getDate();
 
-    console.log('📅 Calculating events for year:', currentYear);
+    // Determinar qué año solar usar
+    // Si el mes solicitado es ANTES del cumpleaños, usar año solar anterior
+    let solarYearToUse = currentYear;
+    const requestedMonthDate = new Date(currentYear, targetMonth - 1, 1);
+    const birthdayThisYear = new Date(currentYear, birthMonth - 1, birthDay);
 
-    // Calculate all events for the year
+    if (requestedMonthDate < birthdayThisYear) {
+      // El mes solicitado está ANTES del cumpleaños este año
+      // Usar año solar anterior (que empezó en cumpleaños del año pasado)
+      solarYearToUse = currentYear - 1;
+      console.log(`📅 Mes ${targetMonth}/${currentYear} está ANTES del cumpleaños → usando año solar ${solarYearToUse}`);
+    } else {
+      console.log(`📅 Mes ${targetMonth}/${currentYear} está DESPUÉS del cumpleaños → usando año solar ${solarYearToUse}`);
+    }
+
+    // Setear fecha para calcular año solar correcto
+    dateObj.setFullYear(solarYearToUse);
+
+    console.log('🌟 Calculating Solar Year Events from:', dateObj.toISOString());
+
+    // Calculate all events for the solar year
     const allEvents = await calculateSolarYearEvents(dateObj);
 
     // Filter events for the specific month
-    const targetMonth = parseInt(month, 10);
     const monthStart = startOfMonth(new Date(currentYear, targetMonth - 1, 1));
     const monthEnd = endOfMonth(monthStart);
 
