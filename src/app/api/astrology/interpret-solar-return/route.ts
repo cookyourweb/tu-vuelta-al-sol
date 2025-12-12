@@ -10,9 +10,17 @@ import Interpretation from '@/models/Interpretation';
 import { generateSolarReturnMasterPrompt } from '@/utils/prompts/solarReturnPrompts';
 import { generateSRComparison } from '@/utils/astrology/solarReturnComparison';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// ✅ Lazy initialization to avoid build-time errors
+let openai: OpenAI | null = null;
+
+function getOpenAI() {
+  if (!openai && process.env.OPENAI_API_KEY) {
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return openai;
+}
 
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -349,7 +357,12 @@ Required JSON structure:
     try {
       console.log(`🤖 OpenAI attempt ${attempts + 1}/${MAX_ATTEMPTS}`);
 
-      const completion = await openai.chat.completions.create({
+      const client = getOpenAI();
+      if (!client) {
+        throw new Error('OpenAI client not available');
+      }
+
+      const completion = await client.chat.completions.create({
         model: 'gpt-4o-2024-08-06',
         messages: [
           { role: 'system', content: systemPrompt },

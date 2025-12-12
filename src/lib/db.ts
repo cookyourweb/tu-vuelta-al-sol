@@ -1,12 +1,6 @@
 //src/lib/db.ts
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI!;
-
-if (!MONGODB_URI) {
-  throw new Error('Por favor define la variable de entorno MONGODB_URI');
-}
-
 interface MongooseCache {
   conn: typeof mongoose | null;
   promise: Promise<typeof mongoose> | null;
@@ -20,6 +14,13 @@ if (!cached) {
 }
 
 async function connectDB() {
+  // ✅ Only validate during runtime, not at module import time
+  const MONGODB_URI = process.env.MONGODB_URI;
+
+  if (!MONGODB_URI) {
+    throw new Error('Por favor define la variable de entorno MONGODB_URI');
+  }
+
   if (cached.conn) {
     return cached.conn;
   }
@@ -33,7 +34,7 @@ async function connectDB() {
       return mongoose;
     });
   }
-  
+
   cached.conn = await cached.promise;
   return cached.conn;
 }
