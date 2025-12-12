@@ -209,7 +209,8 @@ const AgendaPersonalizada = () => {
           personalInterpretation: {
             meaning: `${retro.planet} entra en retrogradación. Tiempo de revisar y revaluar en las áreas que ${retro.planet} gobierna.`,
             lifeAreas: ['Revisión', 'Re-evaluación', 'Introspección'],
-            advice: 'No inicies proyectos grandes. Revisa y ajusta lo existente.'
+            advice: 'No inicies proyectos grandes. Revisa y ajusta lo existente.',
+            mantra: `REVISO Y PERFECCIONO CON PACIENCIA.`
           }
         });
       });
@@ -229,7 +230,8 @@ const AgendaPersonalizada = () => {
           personalInterpretation: {
             meaning: `Eclipse poderoso que marca inicios y finales importantes.`,
             lifeAreas: ['Transformación', 'Cambios Profundos', 'Revelaciones'],
-            advice: 'Momento de cambios significativos. Mantén mente abierta.'
+            advice: 'Momento de cambios significativos. Mantén mente abierta.',
+            mantra: 'ABRAZO LA TRANSFORMACIÓN CON VALENTÍA.'
           }
         });
       });
@@ -249,7 +251,8 @@ const AgendaPersonalizada = () => {
           personalInterpretation: {
             meaning: `${ingress.planet} cambia su energía al entrar en ${ingress.newSign}.`,
             lifeAreas: ['Cambio de Energía', 'Nueva Fase'],
-            advice: 'Observa cómo cambia la energía en tu vida.'
+            advice: 'Observa cómo cambia la energía en tu vida.',
+            mantra: 'ME ADAPTO AL FLUJO DEL COSMOS.'
           }
         });
       });
@@ -269,7 +272,8 @@ const AgendaPersonalizada = () => {
           personalInterpretation: {
             meaning: seasonal.description || `Cambio estacional importante`,
             lifeAreas: ['Naturaleza', 'Ciclos', 'Energía Estacional'],
-            advice: 'Alinéate con los ciclos naturales de la Tierra.'
+            advice: 'Alinéate con los ciclos naturales de la Tierra.',
+            mantra: 'FLUYO CON LAS ESTACIONES DE LA VIDA.'
           }
         });
       });
