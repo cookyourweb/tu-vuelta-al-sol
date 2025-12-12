@@ -163,10 +163,10 @@ const AgendaPersonalizada = () => {
       // Marcar este mes como cargado
       setLoadedMonths(prev => new Set(prev).add(monthKey));
 
-      // Transformar eventos igual que en fetchSolarYearEvents
+      // 🌟 TRANSFORMACIÓN COMPLETA (igual que fetchSolarYearEvents)
       const transformedEvents: AstrologicalEvent[] = [];
 
-      // Lunar Phases
+      // 🌙 Lunar Phases - CON TODA LA INFORMACIÓN PERSONALIZADA
       result.data.events.lunarPhases?.forEach((phase: any) => {
         const isNewMoon = phase.phase.includes('Nueva');
         transformedEvents.push({
@@ -189,91 +189,163 @@ const AgendaPersonalizada = () => {
               : 'LIBERA lo que ya no sirve y celebra tus logros. Momento de cosecha emocional.',
             mantra: isNewMoon
               ? 'MANIFIESTO MIS DESEOS CON CLARIDAD Y PROPÓSITO.'
-              : 'LIBERO CON GRATITUD LO QUE YA CUMPLIÓ SU CICLO.'
+              : 'LIBERO CON GRATITUD LO QUE YA CUMPLIÓ SU CICLO.',
+            ritual: isNewMoon
+              ? '🌑 RITUAL LUNA NUEVA:\n1. Escribe 3 intenciones específicas en papel\n2. Léelas en voz alta bajo la luz de la luna (o visualizándola)\n3. Guarda el papel en un lugar especial\n4. Actúa en las próximas 48 horas hacia una de ellas'
+              : '🌕 RITUAL LUNA LLENA:\n1. Lista 3 cosas que quieres soltar\n2. Escríbelas en papel y quémalas (con seguridad)\n3. Lista 3 logros que celebras este mes\n4. Agradece en voz alta cada uno',
+            actionPlan: isNewMoon ? [
+              {
+                category: 'crecimiento',
+                action: 'Inicia UN proyecto nuevo que hayas estado postergando',
+                timing: 'inmediato',
+                difficulty: 'fácil',
+                impact: 'transformador'
+              },
+              {
+                category: 'creatividad',
+                action: 'Dedica 20 minutos a brainstorming de ideas sin filtros',
+                timing: 'esta_semana',
+                difficulty: 'fácil',
+                impact: 'medio'
+              },
+              {
+                category: 'relaciones',
+                action: 'Inicia una conversación importante que has estado evitando',
+                timing: 'esta_semana',
+                difficulty: 'moderado',
+                impact: 'alto'
+              }
+            ] : [
+              {
+                category: 'crecimiento',
+                action: 'Haz una lista de 10 logros del último mes (grandes y pequeños)',
+                timing: 'inmediato',
+                difficulty: 'fácil',
+                impact: 'medio'
+              },
+              {
+                category: 'salud',
+                action: 'Suelta un hábito que sabes que no te sirve',
+                timing: 'esta_semana',
+                difficulty: 'desafiante',
+                impact: 'transformador'
+              },
+              {
+                category: 'relaciones',
+                action: 'Perdona a alguien (aunque sea en tu mente) y libera esa energía',
+                timing: 'este_mes',
+                difficulty: 'moderado',
+                impact: 'alto'
+              }
+            ],
+            warningsAndOpportunities: {
+              warnings: isNewMoon ? [
+                '⚠️ No te sobrecargues con demasiadas intenciones - elige MÁXIMO 3 prioridades',
+                '⚠️ Evita tomar decisiones importantes sin reflexionar al menos 24 horas',
+                '⚠️ Cuidado con el exceso de entusiasmo que te haga prometer lo que no puedes cumplir'
+              ] : [
+                '⚠️ No fuerces conclusiones - algunas cosas necesitan más tiempo para resolverse',
+                '⚠️ Evita confrontaciones emocionales intensas - las emociones están amplificadas',
+                '⚠️ No tomes decisiones drásticas bajo el impulso de la luna llena'
+              ],
+              opportunities: isNewMoon ? [
+                '🌟 Ventana perfecta para manifestar cambios importantes en tu vida',
+                '🌟 Tu intuición está especialmente activa - confía en tus corazonadas',
+                '🌟 Excelente momento para networking y conocer gente nueva'
+              ] : [
+                '🌟 Claridad máxima sobre situaciones que has estado analizando',
+                '🌟 Momento ideal para completar proyectos y cerrar ciclos',
+                '🌟 Tu carisma y magnetismo personal están en el punto más alto'
+              ]
+            }
           }
         });
       });
 
-      // Retrogrades (igual que antes)
-      result.data.events.retrogrades?.forEach((retro: any) => {
+      // ⏪ Retrogrades - CON aiInterpretation
+      result.data.events.retrogrades?.forEach((retrograde: any) => {
         transformedEvents.push({
-          id: `retro-${retro.planet}-${retro.startDate}`,
-          date: retro.startDate,
-          title: `⏪ ${retro.planet} Retrógrado${retro.sign ? ` en ${retro.sign}` : ''}`,
-          description: `Período de retrogradación de ${retro.planet}`,
-          type: 'planetary_transit',
-          priority: 'medium',
-          importance: 'medium',
-          planet: retro.planet,
-          sign: retro.sign || 'N/A',
-          personalInterpretation: {
-            meaning: `${retro.planet} entra en retrogradación. Tiempo de revisar y revaluar en las áreas que ${retro.planet} gobierna.`,
-            lifeAreas: ['Revisión', 'Re-evaluación', 'Introspección'],
-            advice: 'No inicies proyectos grandes. Revisa y ajusta lo existente.',
-            mantra: `REVISO Y PERFECCIONO CON PACIENCIA.`
+          id: `retro-${retrograde.planet}-${retrograde.startDate}`,
+          date: retrograde.startDate,
+          title: `⏪ ${retrograde.planet} Retrógrado`,
+          description: `Período de revisión y reflexión en temas de ${retrograde.planet}`,
+          type: 'retrograde',
+          priority: retrograde.planet === 'Mercurio' ? 'high' : 'medium',
+          importance: retrograde.planet === 'Mercurio' ? 'high' : 'medium',
+          planet: retrograde.planet,
+          sign: retrograde.sign || 'N/A',
+          aiInterpretation: {
+            meaning: `MOMENTO DE REFLEXIÓN ${retrograde.planet.toUpperCase()}. Desde el ${new Date(retrograde.startDate).toLocaleDateString('es-ES')} hasta el ${new Date(retrograde.endDate).toLocaleDateString('es-ES')}.`,
+            advice: `REVISA y reorganiza temas relacionados con ${getPlanetTheme(retrograde.planet)}. No es momento de iniciar, sino de perfeccionar.`,
+            mantra: `ACEPTO EL TIEMPO DE REFLEXIÓN Y CRECIMIENTO INTERNO.`,
+            ritual: `Dedica tiempo diario a revisar proyectos pasados relacionados con ${getPlanetTheme(retrograde.planet)}.`,
+            lifeAreas: [getPlanetTheme(retrograde.planet), 'Reflexión', 'Revisión']
           }
         });
       });
 
-      // Eclipses
+      // 🌑 Eclipses - CON aiInterpretation
       result.data.events.eclipses?.forEach((eclipse: any) => {
         transformedEvents.push({
           id: `eclipse-${eclipse.date}`,
           date: eclipse.date,
-          title: `🌑 ${eclipse.type}${eclipse.zodiacSign ? ` en ${eclipse.zodiacSign}` : ''}`,
-          description: `Eclipse ${eclipse.type}`,
+          title: `🌑 Eclipse ${eclipse.type === 'solar' ? 'Solar' : 'Lunar'}`,
+          description: `Portal de transformación y cambios importantes`,
           type: 'eclipse',
           priority: 'high',
           importance: 'high',
-          planet: eclipse.type.includes('Solar') ? 'Sol' : 'Luna',
+          planet: eclipse.type === 'solar' ? 'Sol' : 'Luna',
           sign: eclipse.zodiacSign || 'N/A',
-          personalInterpretation: {
-            meaning: `Eclipse poderoso que marca inicios y finales importantes.`,
-            lifeAreas: ['Transformación', 'Cambios Profundos', 'Revelaciones'],
-            advice: 'Momento de cambios significativos. Mantén mente abierta.',
-            mantra: 'ABRAZO LA TRANSFORMACIÓN CON VALENTÍA.'
+          aiInterpretation: {
+            meaning: `¡PORTAL DE ECLIPSE TRANSFORMADOR! Los eclipses son puntos de inflexión que marcan cambios profundos en tu vida.`,
+            advice: `PREPÁRATE para cambios inevitables. Los eclipses revelan verdades ocultas y abren nuevos caminos.`,
+            mantra: 'ABRAZO LOS CAMBIOS QUE EL UNIVERSO TRAE PARA MI EVOLUCIÓN.',
+            ritual: 'Medita sobre qué necesitas soltar y qué nuevo capítulo está comenzando en tu vida.',
+            lifeAreas: ['Transformación', 'Cambios Mayores', 'Evolución']
           }
         });
       });
 
-      // Planetary Ingresses
+      // 🪐 Planetary Ingresses - CON aiInterpretation
       result.data.events.planetaryIngresses?.forEach((ingress: any) => {
         transformedEvents.push({
           id: `ingress-${ingress.planet}-${ingress.date}`,
           date: ingress.date,
           title: `🪐 ${ingress.planet} entra en ${ingress.newSign}`,
-          description: `${ingress.planet} cambia de signo`,
+          description: `Cambio de energía planetaria`,
           type: 'planetary_transit',
-          priority: 'low',
-          importance: 'low',
+          priority: ingress.planet === 'Sol' ? 'medium' : 'low',
+          importance: ingress.planet === 'Sol' ? 'medium' : 'low',
           planet: ingress.planet,
           sign: ingress.newSign,
-          personalInterpretation: {
-            meaning: `${ingress.planet} cambia su energía al entrar en ${ingress.newSign}.`,
-            lifeAreas: ['Cambio de Energía', 'Nueva Fase'],
-            advice: 'Observa cómo cambia la energía en tu vida.',
-            mantra: 'ME ADAPTO AL FLUJO DEL COSMOS.'
+          aiInterpretation: {
+            meaning: `${ingress.planet} cambia de ${ingress.previousSign || 'signo anterior'} a ${ingress.newSign}, modificando la energía de ${getPlanetTheme(ingress.planet)}.`,
+            advice: `Adapta tu enfoque en ${getPlanetTheme(ingress.planet)} según la nueva energía ${ingress.newSign}.`,
+            mantra: `FLUYO CON LOS CAMBIOS CÓSMICOS Y ME ADAPTO CONSCIENTEMENTE.`,
+            ritual: 'Observa cómo esta nueva energía influye en tu vida diaria durante los próximos días.',
+            lifeAreas: [getPlanetTheme(ingress.planet), 'Adaptación', 'Cambios']
           }
         });
       });
 
-      // Seasonal Events
+      // 🌸 Seasonal Events - CON aiInterpretation
       result.data.events.seasonalEvents?.forEach((seasonal: any) => {
         transformedEvents.push({
           id: `seasonal-${seasonal.date}`,
           date: seasonal.date,
-          title: `🌸 ${seasonal.name}`,
-          description: seasonal.description || `Evento estacional: ${seasonal.name}`,
+          title: `🌸 ${seasonal.type?.replace('_', ' ') || seasonal.name}`,
+          description: seasonal.description || 'Evento estacional importante',
           type: 'seasonal',
           priority: 'medium',
           importance: 'medium',
           planet: 'Sol',
-          sign: 'N/A',
-          personalInterpretation: {
-            meaning: seasonal.description || `Cambio estacional importante`,
-            lifeAreas: ['Naturaleza', 'Ciclos', 'Energía Estacional'],
-            advice: 'Alinéate con los ciclos naturales de la Tierra.',
-            mantra: 'FLUYO CON LAS ESTACIONES DE LA VIDA.'
+          sign: seasonal.zodiacSign || 'N/A',
+          aiInterpretation: {
+            meaning: `Cambio estacional que marca un nuevo ciclo natural y energético.`,
+            advice: 'Alinéate con los ciclos naturales de la Tierra para mayor armonía.',
+            mantra: 'ME SINCRONIZO CON LOS RITMOS NATURALES DEL UNIVERSO.',
+            ritual: 'Pasa tiempo en la naturaleza y observa los cambios estacionales.',
+            lifeAreas: ['Naturaleza', 'Ciclos', 'Equilibrio']
           }
         });
       });
