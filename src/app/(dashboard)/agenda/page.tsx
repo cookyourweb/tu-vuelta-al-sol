@@ -801,20 +801,38 @@ const AgendaPersonalizada = () => {
 
         console.log('📅 [AGENDA] Loading months:', {
           current: format(currentMonth, 'MMMM yyyy', { locale: es }),
-          next: format(nextMonth, 'MMMM yyyy', { locale: es })
+          currentMonthKey: format(currentMonth, 'yyyy-MM'),
+          next: format(nextMonth, 'MMMM yyyy', { locale: es }),
+          nextMonthKey: format(nextMonth, 'yyyy-MM'),
+          currentMonthNum: currentMonth.getMonth() + 1,
+          nextMonthNum: nextMonth.getMonth() + 1,
+          currentYear: currentMonth.getFullYear(),
+          nextYear: nextMonth.getFullYear()
         });
 
         // Cargar mes actual
         const currentMonthEvents = await fetchMonthlyEvents(currentMonth);
-        console.log(`✅ [AGENDA] Loaded ${currentMonthEvents.length} events for current month`);
+        console.log(`✅ [AGENDA] Loaded ${currentMonthEvents.length} events for current month (${format(currentMonth, 'MMMM yyyy', { locale: es })})`);
+        if (currentMonthEvents.length > 0) {
+          console.log('📋 [AGENDA] Current month first event:', currentMonthEvents[0]);
+        }
 
         // Cargar mes siguiente
         const nextMonthEvents = await fetchMonthlyEvents(nextMonth);
-        console.log(`✅ [AGENDA] Loaded ${nextMonthEvents.length} events for next month`);
+        console.log(`✅ [AGENDA] Loaded ${nextMonthEvents.length} events for next month (${format(nextMonth, 'MMMM yyyy', { locale: es })})`);
+        if (nextMonthEvents.length > 0) {
+          console.log('📋 [AGENDA] Next month first event:', nextMonthEvents[0]);
+        } else {
+          console.warn(`⚠️ [AGENDA] Next month (${format(nextMonth, 'MMMM yyyy', { locale: es })}) returned 0 events!`);
+        }
 
         // Combinar eventos de ambos meses
         const allEvents = [...currentMonthEvents, ...nextMonthEvents];
         console.log(`✅ [AGENDA] Total ${allEvents.length} events loaded (2 months)`);
+        console.log('📊 [AGENDA] Events by month:', {
+          currentMonth: currentMonthEvents.length,
+          nextMonth: nextMonthEvents.length
+        });
 
         setEvents(allEvents);
       } catch (error) {
@@ -902,22 +920,30 @@ const AgendaPersonalizada = () => {
   const goToPreviousMonth = async () => {
     const previousMonth = subMonths(currentMonth, 1);
     const monthKey = format(previousMonth, 'yyyy-MM');
+    const monthName = format(previousMonth, 'MMMM yyyy', { locale: es });
+
+    console.log(`⬅️ [NAV] Going to previous month: ${monthName} (${monthKey})`);
+    console.log(`📊 [NAV] Already loaded months:`, Array.from(loadedMonths));
 
     // Si el mes no está cargado, mostrar modal y cargar
     if (!loadedMonths.has(monthKey)) {
+      console.log(`🌙 [NAV] Month ${monthKey} NOT loaded yet. Showing modal...`);
       setLoadingMonthlyEvents(true);
-      setLoadingMonthName(format(previousMonth, 'MMMM yyyy', { locale: es }));
-
-      console.log(`🌙 [NAV] Loading previous month: ${monthKey}`);
+      setLoadingMonthName(monthName);
 
       const newEvents = await fetchMonthlyEvents(previousMonth);
 
       if (newEvents.length > 0) {
         setEvents(prev => [...prev, ...newEvents]);
         console.log(`✅ [NAV] Added ${newEvents.length} events for ${monthKey}`);
+      } else {
+        console.warn(`⚠️ [NAV] No events returned for ${monthKey}`);
       }
 
+      console.log(`✋ [NAV] Hiding modal...`);
       setLoadingMonthlyEvents(false);
+    } else {
+      console.log(`✅ [NAV] Month ${monthKey} already loaded, navigating instantly`);
     }
 
     // Cambiar al mes anterior
@@ -929,22 +955,30 @@ const AgendaPersonalizada = () => {
   const goToNextMonth = async () => {
     const nextMonth = addMonths(currentMonth, 1);
     const monthKey = format(nextMonth, 'yyyy-MM');
+    const monthName = format(nextMonth, 'MMMM yyyy', { locale: es });
+
+    console.log(`➡️ [NAV] Going to next month: ${monthName} (${monthKey})`);
+    console.log(`📊 [NAV] Already loaded months:`, Array.from(loadedMonths));
 
     // Si el mes no está cargado, mostrar modal y cargar
     if (!loadedMonths.has(monthKey)) {
+      console.log(`🌙 [NAV] Month ${monthKey} NOT loaded yet. Showing modal...`);
       setLoadingMonthlyEvents(true);
-      setLoadingMonthName(format(nextMonth, 'MMMM yyyy', { locale: es }));
-
-      console.log(`🌙 [NAV] Loading next month: ${monthKey}`);
+      setLoadingMonthName(monthName);
 
       const newEvents = await fetchMonthlyEvents(nextMonth);
 
       if (newEvents.length > 0) {
         setEvents(prev => [...prev, ...newEvents]);
         console.log(`✅ [NAV] Added ${newEvents.length} events for ${monthKey}`);
+      } else {
+        console.warn(`⚠️ [NAV] No events returned for ${monthKey}`);
       }
 
+      console.log(`✋ [NAV] Hiding modal...`);
       setLoadingMonthlyEvents(false);
+    } else {
+      console.log(`✅ [NAV] Month ${monthKey} already loaded, navigating instantly`);
     }
 
     // Cambiar al mes siguiente
