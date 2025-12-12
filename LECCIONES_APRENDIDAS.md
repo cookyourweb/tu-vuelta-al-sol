@@ -1,6 +1,63 @@
 # Lecciones Aprendidas - No Volver a Romper Producción
 
-## 🚨 INCIDENTE: Build fallando después de commit a512618
+## 🚨 INCIDENTE 1: Middleware causando 404 en APIs críticas (REVERTIDO)
+
+### 📅 Fecha
+Diciembre 11, 2025
+
+### ❌ Commits que causaron problemas
+- **da9b5d4:** "🔧 FIX: Remove /api/astrology and /api/interpretations from middleware"
+- **ac0d2a0:** "🔧 FIX: Remove /api/birth-data and /api/charts from middleware"
+
+### 🎯 Qué intentábamos solucionar
+- **504 Gateway Timeout** en `/api/astrology/interpret-solar-return`
+- **504 Gateway Timeout** en `/api/astrology/interpret-natal-complete`
+- Pensamos que el middleware estaba bloqueando las llamadas
+
+### ❌ Qué salió mal
+Al quitar rutas del middleware:
+1. **404 Not Found** en `/api/interpretations/save` (antes funcionaba)
+2. Los **504 timeouts persistieron** (no se solucionó nada)
+3. Las rutas SÍ necesitan protección de autenticación
+
+### 🔍 Causa raíz REAL
+Los **504 timeouts** NO son causados por el middleware, sino por:
+- **OpenAI tarda >60 segundos** en generar interpretaciones completas
+- Vercel Hobby tiene límite de **60 segundos** por función
+- Los prompts son muy largos (>3000 tokens)
+- Se usa GPT-4 que es más lento
+
+### ✅ Solución aplicada
+**REVERTIR** ambos commits del middleware:
+```bash
+git revert da9b5d4  # Commit 989aeba
+git revert ac0d2a0  # Commit de0b996
+```
+
+### 💡 Lección Aprendida
+**NO modificar el middleware para solucionar timeouts de OpenAI**
+
+**Soluciones correctas para 504 timeouts:**
+1. Dividir llamadas a OpenAI en chunks más pequeños
+2. Usar streaming de OpenAI para respuestas incrementales
+3. Cachear interpretaciones pre-calculadas
+4. Reducir tamaño de prompts y tokens
+5. Usar GPT-3.5-turbo en lugar de GPT-4
+
+**El middleware DEBE proteger:**
+- `/api/interpretations/*` - Contiene datos sensibles del usuario
+- `/api/astrology/*` - Cálculos personalizados que requieren autenticación
+- `/api/charts/*` - Datos de cartas natales del usuario
+- `/api/birth-data` - Información personal protegida
+
+### 📝 Archivos guardados para uso futuro
+Trabajo en progreso documentado en `TRABAJO_EN_PROGRESO_CARGA_LAZY.md`:
+- `src/app/api/astrology/monthly-events/route.ts` - Carga eventos por mes (útil después)
+- `src/components/astrology/EventsLoadingModal.tsx` - Modal de loading (reutilizable)
+
+---
+
+## 🚨 INCIDENTE 2: Build fallando después de commit a512618
 
 ### 📅 Fecha
 Diciembre 10, 2025
