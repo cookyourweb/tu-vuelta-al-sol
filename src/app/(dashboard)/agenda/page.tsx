@@ -136,6 +136,65 @@ const AgendaPersonalizada = () => {
     return themes[planet] || 'Crecimiento Personal';
   };
 
+  // 🎯 PERSONALIZACIÓN: Genera consejos basados en la carta natal del usuario
+  const getPersonalizedAdvice = (eventType: string, planet: string, sign: string): string => {
+    if (!userProfile?.astrological) {
+      return 'Observa cómo este evento influye en tu vida.';
+    }
+
+    const { challenges, strengths } = userProfile.astrological;
+    const planetTheme = getPlanetTheme(planet);
+
+    // PERSONALIZACIÓN BASADA EN DESAFÍOS
+    if (challenges && challenges.length > 0) {
+      // Venus/Amor → Si tiene aislamiento/relaciones difíciles
+      if ((planet === 'Venus' || planetTheme.includes('Amor')) &&
+          (challenges.some(c => c.toLowerCase().includes('aislamiento') ||
+                              c.toLowerCase().includes('relacion') ||
+                              c.toLowerCase().includes('social')))) {
+        return `${userProfile.name?.toUpperCase()}, este tránsito es PERFECTO para trabajar tu tendencia al aislamiento. ATRÉVETE a conectar con otros, es tu momento de vencer esa barrera.`;
+      }
+
+      // Mercurio/Comunicación → Si tiene problemas de comunicación
+      if ((planet === 'Mercurio' || planetTheme.includes('Comunicación')) &&
+          challenges.some(c => c.toLowerCase().includes('comunicación') ||
+                              c.toLowerCase().includes('expresión'))) {
+        return `Este es TU momento para trabajar la comunicación, ${userProfile.name?.toUpperCase()}. Sabes que es uno de tus puntos a mejorar - ¡ÚSALO para crecer!`;
+      }
+
+      // Marte/Acción → Si tiene falta de acción/procrastinación
+      if ((planet === 'Marte' || planetTheme.includes('Acción')) &&
+          challenges.some(c => c.toLowerCase().includes('acción') ||
+                              c.toLowerCase().includes('procrastin') ||
+                              c.toLowerCase().includes('iniciativa'))) {
+        return `${userProfile.name?.toUpperCase()}, es hora de ACTUAR. Sé que tiendes a postergar, pero esta energía de ${planet} te empuja a MOVERTE. ¡Aprovéchala!`;
+      }
+
+      // Saturno → Si tiene problemas de disciplina/estructura
+      if (planet === 'Saturno' &&
+          challenges.some(c => c.toLowerCase().includes('disciplin') ||
+                              c.toLowerCase().includes('estructur') ||
+                              c.toLowerCase().includes('organiz'))) {
+        return `Momento ideal para trabajar tu desafío con la estructura, ${userProfile.name?.toUpperCase()}. Saturno te ayuda a crear ORDEN en el caos.`;
+      }
+    }
+
+    // PERSONALIZACIÓN BASADA EN FORTALEZAS
+    if (strengths && strengths.length > 0) {
+      // Si el planeta coincide con una fortaleza, POTENCIARLA
+      if (planet === 'Júpiter' && strengths.some(s => s.toLowerCase().includes('optimis') || s.toLowerCase().includes('expansión'))) {
+        return `¡POTENCIA tu optimismo natural, ${userProfile.name?.toUpperCase()}! Júpiter amplifica tus fortalezas - usa esta energía para CRECER AÚN MÁS.`;
+      }
+
+      if (planet === 'Venus' && strengths.some(s => s.toLowerCase().includes('relacion') || s.toLowerCase().includes('amor') || s.toLowerCase().includes('armon'))) {
+        return `${userProfile.name?.toUpperCase()}, Venus activa tu don natural para las relaciones. ¡Brilla en lo que ya haces bien!`;
+      }
+    }
+
+    // Consejo genérico si no hay match específico
+    return `Adapta tu enfoque en ${planetTheme} según la nueva energía ${sign}. ${challenges && challenges.length > 0 ? 'Aprovecha para trabajar tus desafíos.' : 'Potencia tus fortalezas naturales.'}`;
+  };
+
   // 🌙 CARGA LAZY: Fetch Monthly Events (solo un mes específico)
   const fetchMonthlyEvents = async (targetMonth: Date): Promise<AstrologicalEvent[]> => {
     if (!userProfile || !userProfile.birthDate) {
@@ -277,8 +336,10 @@ const AgendaPersonalizada = () => {
         });
       });
 
-      // ⏪ Retrogrades - CON aiInterpretation
+      // ⏪ Retrogrades - CON aiInterpretation PERSONALIZADA
       result.data.events.retrogrades?.forEach((retrograde: any) => {
+        const personalizedAdvice = getPersonalizedAdvice('retrograde', retrograde.planet, retrograde.sign || 'N/A');
+
         transformedEvents.push({
           id: `retro-${retrograde.planet}-${retrograde.startDate}`,
           date: retrograde.startDate,
@@ -291,7 +352,7 @@ const AgendaPersonalizada = () => {
           sign: retrograde.sign || 'N/A',
           aiInterpretation: {
             meaning: `MOMENTO DE REFLEXIÓN ${retrograde.planet.toUpperCase()}. Desde el ${new Date(retrograde.startDate).toLocaleDateString('es-ES')} hasta el ${new Date(retrograde.endDate).toLocaleDateString('es-ES')}.`,
-            advice: `REVISA y reorganiza temas relacionados con ${getPlanetTheme(retrograde.planet)}. No es momento de iniciar, sino de perfeccionar.`,
+            advice: personalizedAdvice, // 🎯 CONSEJO PERSONALIZADO
             mantra: `ACEPTO EL TIEMPO DE REFLEXIÓN Y CRECIMIENTO INTERNO.`,
             ritual: `Dedica tiempo diario a revisar proyectos pasados relacionados con ${getPlanetTheme(retrograde.planet)}.`,
             lifeAreas: [getPlanetTheme(retrograde.planet), 'Reflexión', 'Revisión']
@@ -321,8 +382,10 @@ const AgendaPersonalizada = () => {
         });
       });
 
-      // 🪐 Planetary Ingresses - CON aiInterpretation
+      // 🪐 Planetary Ingresses - CON aiInterpretation PERSONALIZADA
       result.data.events.planetaryIngresses?.forEach((ingress: any) => {
+        const personalizedAdvice = getPersonalizedAdvice('planetary_transit', ingress.planet, ingress.newSign);
+
         transformedEvents.push({
           id: `ingress-${ingress.planet}-${ingress.date}`,
           date: ingress.date,
@@ -335,7 +398,7 @@ const AgendaPersonalizada = () => {
           sign: ingress.newSign,
           aiInterpretation: {
             meaning: `${ingress.planet} cambia de ${ingress.previousSign || 'signo anterior'} a ${ingress.newSign}, modificando la energía de ${getPlanetTheme(ingress.planet)}.`,
-            advice: `Adapta tu enfoque en ${getPlanetTheme(ingress.planet)} según la nueva energía ${ingress.newSign}.`,
+            advice: personalizedAdvice, // 🎯 CONSEJO PERSONALIZADO
             mantra: `FLUYO CON LOS CAMBIOS CÓSMICOS Y ME ADAPTO CONSCIENTEMENTE.`,
             ritual: 'Observa cómo esta nueva energía influye en tu vida diaria durante los próximos días.',
             lifeAreas: [getPlanetTheme(ingress.planet), 'Adaptación', 'Cambios']
