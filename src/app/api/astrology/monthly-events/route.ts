@@ -71,12 +71,41 @@ export async function POST(request: NextRequest) {
     // Calculate all events for the solar year
     const allEvents = await calculateSolarYearEvents(dateObj);
 
+    // ✅ DEBUG: Log all events before filtering
+    console.log('📊 [DEBUG] Total events calculated:', {
+      lunarPhases: allEvents.lunarPhases.length,
+      retrogrades: allEvents.retrogrades.length,
+      eclipses: allEvents.eclipses.length,
+      planetaryIngresses: allEvents.planetaryIngresses.length,
+      seasonalEvents: allEvents.seasonalEvents.length
+    });
+
+    // ✅ DEBUG: Show sample dates from each event type
+    if (allEvents.lunarPhases.length > 0) {
+      const first = allEvents.lunarPhases[0];
+      const last = allEvents.lunarPhases[allEvents.lunarPhases.length - 1];
+      console.log('📅 [DEBUG] Lunar phases date range:', {
+        first: first.date,
+        last: last.date
+      });
+    }
+
+    if (allEvents.planetaryIngresses.length > 0) {
+      const first = allEvents.planetaryIngresses[0];
+      const last = allEvents.planetaryIngresses[allEvents.planetaryIngresses.length - 1];
+      console.log('🪐 [DEBUG] Planetary ingresses date range:', {
+        first: first.date,
+        last: last.date
+      });
+    }
+
     // Filter events for the specific month
     const monthStart = startOfMonth(new Date(currentYear, targetMonth - 1, 1));
     const monthEnd = endOfMonth(monthStart);
 
     console.log('📆 Filtering events for month:', {
       month: targetMonth,
+      year: currentYear,
       start: monthStart.toISOString(),
       end: monthEnd.toISOString()
     });
@@ -84,17 +113,41 @@ export async function POST(request: NextRequest) {
     // Helper function to check if date is in month
     const isInMonth = (date: Date | string) => {
       const d = typeof date === 'string' ? new Date(date) : date;
-      return d >= monthStart && d <= monthEnd;
+      const result = d >= monthStart && d <= monthEnd;
+      return result;
     };
+
+    // ✅ DEBUG: Log filtering process
+    console.log('🔍 [DEBUG] Filtering lunar phases...');
+    const lunarPhasesFiltered = allEvents.lunarPhases.filter(p => {
+      const inMonth = isInMonth(p.date);
+      if (!inMonth && allEvents.lunarPhases.indexOf(p) < 3) {
+        console.log(`  ❌ Lunar phase excluded: ${p.date} (${p.type}) - outside range`);
+      } else if (inMonth) {
+        console.log(`  ✅ Lunar phase included: ${p.date} (${p.type})`);
+      }
+      return inMonth;
+    });
+
+    console.log('🔍 [DEBUG] Filtering planetary ingresses...');
+    const planetaryIngressesFiltered = allEvents.planetaryIngresses.filter(i => {
+      const inMonth = isInMonth(i.date);
+      if (!inMonth && allEvents.planetaryIngresses.indexOf(i) < 3) {
+        console.log(`  ❌ Ingress excluded: ${i.planet} → ${i.toSign} on ${i.date} - outside range`);
+      } else if (inMonth) {
+        console.log(`  ✅ Ingress included: ${i.planet} → ${i.toSign} on ${i.date}`);
+      }
+      return inMonth;
+    });
 
     // Filter each event type
     const monthlyEvents = {
-      lunarPhases: allEvents.lunarPhases.filter(p => isInMonth(p.date)),
+      lunarPhases: lunarPhasesFiltered,
       retrogrades: allEvents.retrogrades.filter(r =>
         isInMonth(r.startDate) || isInMonth(r.endDate)
       ),
       eclipses: allEvents.eclipses.filter(e => isInMonth(e.date)),
-      planetaryIngresses: allEvents.planetaryIngresses.filter(i => isInMonth(i.date)),
+      planetaryIngresses: planetaryIngressesFiltered,
       seasonalEvents: allEvents.seasonalEvents.filter(s => isInMonth(s.date))
     };
 
