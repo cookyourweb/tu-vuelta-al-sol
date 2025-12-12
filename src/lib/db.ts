@@ -14,7 +14,7 @@ if (!cached) {
 }
 
 async function connectDB() {
-  // Validar MONGODB_URI solo cuando se llama a la función, no al importar
+  // ✅ Only validate during runtime, not at module import time
   const MONGODB_URI = process.env.MONGODB_URI;
 
   if (!MONGODB_URI) {

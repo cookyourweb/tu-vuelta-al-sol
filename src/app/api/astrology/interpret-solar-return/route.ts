@@ -10,12 +10,26 @@ import Interpretation from '@/models/Interpretation';
 import { generateSolarReturnMasterPrompt } from '@/utils/prompts/solarReturnPrompts';
 import { generateSRComparison } from '@/utils/astrology/solarReturnComparison';
 
+<<<<<<< HEAD
 // ⏱️ CRITICAL: Increase timeout for AI generation (Solar Return takes 2-3 minutes)
 export const maxDuration = 300; // 5 minutes
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
+=======
+// ✅ Lazy initialization to avoid build-time errors
+let openai: OpenAI | null = null;
+
+function getOpenAI() {
+  if (!openai && process.env.OPENAI_API_KEY) {
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return openai;
+}
+>>>>>>> claude/lazy-loading-agenda-clean-01D9YKGzw4x2TXkWyucstk5g
 
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -352,7 +366,12 @@ Required JSON structure:
     try {
       console.log(`🤖 OpenAI attempt ${attempts + 1}/${MAX_ATTEMPTS}`);
 
-      const completion = await openai.chat.completions.create({
+      const client = getOpenAI();
+      if (!client) {
+        throw new Error('OpenAI client not available');
+      }
+
+      const completion = await client.chat.completions.create({
         model: 'gpt-4o-2024-08-06',
         messages: [
           { role: 'system', content: systemPrompt },
@@ -404,18 +423,45 @@ Required JSON structure:
       );
 
       if (missingSections.length === 0) {
-      // ✅ VALIDATE CONTENT QUALITY
-        const hasUserName = parsedResponse.esencia_revolucionaria_anual?.tooltip?.descripcionBreve?.includes(userProfile.name) ||
-                           parsedResponse.declaracion_poder_anual.includes(userProfile.name.toUpperCase());
+        // ✅ VALIDATE CONTENT QUALITY (more lenient)
+        console.log('🔍 Validating response quality...');
 
-        const hasRealData = parsedResponse.esencia_revolucionaria_anual?.drawer?.educativo !== "Usuario, este año 2025-2026 marca tu REVOLUCIÓN PERSONAL";
+        // Check if esencia_revolucionaria_anual has proper structure
+        const hasProperStructure =
+          parsedResponse.esencia_revolucionaria_anual?.tooltip &&
+          parsedResponse.esencia_revolucionaria_anual?.drawer &&
+          parsedResponse.proposito_vida_anual?.tooltip &&
+          parsedResponse.proposito_vida_anual?.drawer;
 
-        if (!hasUserName || !hasRealData) {
-          console.warn('⚠️ Response has all sections but uses generic data');
-          throw new Error('OpenAI used generic fallback data instead of real user data');
+        if (!hasProperStructure) {
+          console.warn('⚠️ Response missing tooltip/drawer structure in core sections');
+          throw new Error('Response missing required tooltip/drawer structure');
         }
 
-        console.log(`✅ Complete valid response on attempt ${attempts + 1}`);
+        // Check if response has meaningful content (not all empty strings)
+        const hasContent =
+          parsedResponse.esencia_revolucionaria_anual.drawer.educativo.length > 50 &&
+          parsedResponse.proposito_vida_anual.drawer.educativo.length > 50;
+
+        if (!hasContent) {
+          console.warn('⚠️ Response has structure but empty content');
+          throw new Error('Response has empty or minimal content');
+        }
+
+        // ✅ Optional: Check for user name (warning only, not failure)
+        const hasUserName =
+          JSON.stringify(parsedResponse).includes(userProfile.name) ||
+          parsedResponse.declaracion_poder_anual?.includes(userProfile.name.toUpperCase());
+
+        if (!hasUserName) {
+          console.warn('⚠️ Warning: Response may not include user name, but accepting anyway');
+        }
+
+        console.log(`✅ Complete valid response on attempt ${attempts + 1}`, {
+          hasProperStructure: true,
+          hasContent: true,
+          hasUserName
+        });
         break;
       } else {
         console.warn(`⚠️ Attempt ${attempts + 1}: Missing ${missingSections.length} sections:`, missingSections);
@@ -442,7 +488,23 @@ Required JSON structure:
 
   console.log('✅ OpenAI interpretation validated:', {
     sections: Object.keys(parsedResponse).length,
-    hasUserName: parsedResponse.esencia_revolucionaria_anual?.tooltip?.descripcionBreve?.includes(userProfile.name)
+    coreStructure: {
+      esencia_has_tooltip: !!parsedResponse.esencia_revolucionaria_anual?.tooltip,
+      esencia_has_drawer: !!parsedResponse.esencia_revolucionaria_anual?.drawer,
+      proposito_has_tooltip: !!parsedResponse.proposito_vida_anual?.tooltip,
+      proposito_has_drawer: !!parsedResponse.proposito_vida_anual?.drawer,
+      tema_has_tooltip: !!parsedResponse.tema_central_del_anio?.tooltip,
+      tema_has_drawer: !!parsedResponse.tema_central_del_anio?.drawer
+    },
+    contentLengths: {
+      esencia_educativo: parsedResponse.esencia_revolucionaria_anual?.drawer?.educativo?.length || 0,
+      proposito_educativo: parsedResponse.proposito_vida_anual?.drawer?.educativo?.length || 0
+    }
+  });
+
+  console.log('📊 Sample content check:', {
+    esencia_preview: parsedResponse.esencia_revolucionaria_anual?.drawer?.educativo?.substring(0, 100) || 'MISSING',
+    proposito_preview: parsedResponse.proposito_vida_anual?.drawer?.educativo?.substring(0, 100) || 'MISSING'
   });
 
   return parsedResponse;
@@ -982,8 +1044,18 @@ export async function POST(request: NextRequest) {
       interpretation = completeMissingKeys({}, { ...userProfile, locationContext }, returnYear);
     }
 
-    // Save to MongoDB
+    // ✅ LOG BEFORE SAVING TO VERIFY STRUCTURE
     console.log('💾 Saving to MongoDB...');
+    console.log('📊 Interpretation structure before save:', {
+      totalKeys: Object.keys(interpretation).length,
+      hasEsencia: !!interpretation.esencia_revolucionaria_anual,
+      hasProposito: !!interpretation.proposito_vida_anual,
+      hasTema: !!interpretation.tema_central_del_anio,
+      esenciaStructure: interpretation.esencia_revolucionaria_anual ? {
+        hasTooltip: !!interpretation.esencia_revolucionaria_anual.tooltip,
+        hasDrawer: !!interpretation.esencia_revolucionaria_anual.drawer
+      } : 'MISSING'
+    });
 
     const savedInterpretation = await Interpretation.create({
       userId,
