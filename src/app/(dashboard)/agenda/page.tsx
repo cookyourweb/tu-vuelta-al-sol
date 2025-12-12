@@ -1,4 +1,4 @@
-//src/app/(dashboard)/agenda/page.tsx - NUEVO UX DISRUPTIVO
+//src/app/(dashboard)/agenda/page.tsx - NUEVO UX DISRUPTIVO CON CARGA LAZY
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -7,6 +7,7 @@ import { es } from 'date-fns/locale';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { UserProfile, AstrologicalEvent, EventType } from '@/types/astrology/unified-types';
+import EventsLoadingModal from '@/components/astrology/EventsLoadingModal';
 
 interface AstronomicalDay {
   date: Date;
@@ -29,6 +30,10 @@ const AgendaPersonalizada = () => {
   const [hoveredEvent, setHoveredEvent] = useState<AstrologicalEvent | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showPersonalityModal, setShowPersonalityModal] = useState(false);
+  // Estados para carga lazy de eventos mensuales
+  const [loadingMonthlyEvents, setLoadingMonthlyEvents] = useState(false);
+  const [loadingMonthName, setLoadingMonthName] = useState('');
+  const [loadedMonths, setLoadedMonths] = useState<Set<string>>(new Set());
 
   // Perfil de usuario REAL (no datos de prueba)
   const [userProfile, setUserProfile] = React.useState<UserProfile | null>(null);
@@ -115,6 +120,172 @@ const AgendaPersonalizada = () => {
       }
     }
   }, []);
+
+  // 🌙 CARGA LAZY: Fetch Monthly Events (solo un mes específico)
+  const fetchMonthlyEvents = async (targetMonth: Date): Promise<AstrologicalEvent[]> => {
+    if (!userProfile || !userProfile.birthDate) {
+      console.log('⚠️ [MONTHLY-EVENTS] Cannot fetch - missing userProfile or birthDate');
+      return [];
+    }
+
+    // Generar key único para este mes (YYYY-MM)
+    const monthKey = format(targetMonth, 'yyyy-MM');
+
+    // Si ya cargamos este mes, no volver a cargarlo
+    if (loadedMonths.has(monthKey)) {
+      console.log(`✅ [MONTHLY-EVENTS] Month ${monthKey} already loaded, skipping`);
+      return [];
+    }
+
+    try {
+      console.log(`🌙 [MONTHLY-EVENTS] Fetching events for ${monthKey}...`);
+
+      const response = await fetch('/api/astrology/monthly-events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          birthDate: userProfile.birthDate,
+          birthTime: userProfile.birthTime,
+          birthPlace: userProfile.birthPlace,
+          month: targetMonth.getMonth() + 1, // 1-12
+          year: targetMonth.getFullYear()
+        })
+      });
+
+      if (!response.ok) {
+        console.error(`❌ [MONTHLY-EVENTS] Failed to fetch for ${monthKey}`);
+        return [];
+      }
+
+      const result = await response.json();
+      console.log(`✅ [MONTHLY-EVENTS] Loaded ${result.stats?.totalEvents || 0} events for ${monthKey}`);
+
+      // Marcar este mes como cargado
+      setLoadedMonths(prev => new Set(prev).add(monthKey));
+
+      // Transformar eventos igual que en fetchSolarYearEvents
+      const transformedEvents: AstrologicalEvent[] = [];
+
+      // Lunar Phases
+      result.data.events.lunarPhases?.forEach((phase: any) => {
+        const isNewMoon = phase.phase.includes('Nueva');
+        transformedEvents.push({
+          id: `lunar-${phase.date}`,
+          date: phase.date,
+          title: `🌙 ${phase.phase}${phase.zodiacSign ? ` en ${phase.zodiacSign}` : ''}`,
+          description: `Fase lunar importante para reflexión y manifestación`,
+          type: 'lunar_phase',
+          priority: 'high',
+          importance: 'high',
+          planet: 'Luna',
+          sign: phase.zodiacSign || 'N/A',
+          personalInterpretation: {
+            meaning: `¡ACTIVACIÓN LUNAR PODEROSA ${userProfile?.name?.toUpperCase()}! Esta ${phase.phase} es un momento clave para ${isNewMoon ? 'nuevos comienzos y manifestaciones' : 'culminaciones y liberaciones'}.`,
+            lifeAreas: isNewMoon
+              ? ['Manifestaciones', 'Nuevos Proyectos', 'Intenciones', 'Intuición']
+              : ['Liberación', 'Cosecha', 'Culminación', 'Gratitud'],
+            advice: isNewMoon
+              ? 'ESTABLECE intenciones claras y planta semillas para tus proyectos. Es momento de iniciar ciclos.'
+              : 'LIBERA lo que ya no sirve y celebra tus logros. Momento de cosecha emocional.',
+            mantra: isNewMoon
+              ? 'MANIFIESTO MIS DESEOS CON CLARIDAD Y PROPÓSITO.'
+              : 'LIBERO CON GRATITUD LO QUE YA CUMPLIÓ SU CICLO.'
+          }
+        });
+      });
+
+      // Retrogrades (igual que antes)
+      result.data.events.retrogrades?.forEach((retro: any) => {
+        transformedEvents.push({
+          id: `retro-${retro.planet}-${retro.startDate}`,
+          date: retro.startDate,
+          title: `⏪ ${retro.planet} Retrógrado${retro.sign ? ` en ${retro.sign}` : ''}`,
+          description: `Período de retrogradación de ${retro.planet}`,
+          type: 'planetary_transit',
+          priority: 'medium',
+          importance: 'medium',
+          planet: retro.planet,
+          sign: retro.sign || 'N/A',
+          personalInterpretation: {
+            meaning: `${retro.planet} entra en retrogradación. Tiempo de revisar y revaluar en las áreas que ${retro.planet} gobierna.`,
+            lifeAreas: ['Revisión', 'Re-evaluación', 'Introspección'],
+            advice: 'No inicies proyectos grandes. Revisa y ajusta lo existente.',
+            mantra: `REVISO Y PERFECCIONO CON PACIENCIA.`
+          }
+        });
+      });
+
+      // Eclipses
+      result.data.events.eclipses?.forEach((eclipse: any) => {
+        transformedEvents.push({
+          id: `eclipse-${eclipse.date}`,
+          date: eclipse.date,
+          title: `🌑 ${eclipse.type}${eclipse.zodiacSign ? ` en ${eclipse.zodiacSign}` : ''}`,
+          description: `Eclipse ${eclipse.type}`,
+          type: 'eclipse',
+          priority: 'high',
+          importance: 'high',
+          planet: eclipse.type.includes('Solar') ? 'Sol' : 'Luna',
+          sign: eclipse.zodiacSign || 'N/A',
+          personalInterpretation: {
+            meaning: `Eclipse poderoso que marca inicios y finales importantes.`,
+            lifeAreas: ['Transformación', 'Cambios Profundos', 'Revelaciones'],
+            advice: 'Momento de cambios significativos. Mantén mente abierta.',
+            mantra: 'ABRAZO LA TRANSFORMACIÓN CON VALENTÍA.'
+          }
+        });
+      });
+
+      // Planetary Ingresses
+      result.data.events.planetaryIngresses?.forEach((ingress: any) => {
+        transformedEvents.push({
+          id: `ingress-${ingress.planet}-${ingress.date}`,
+          date: ingress.date,
+          title: `🪐 ${ingress.planet} entra en ${ingress.newSign}`,
+          description: `${ingress.planet} cambia de signo`,
+          type: 'planetary_transit',
+          priority: 'low',
+          importance: 'low',
+          planet: ingress.planet,
+          sign: ingress.newSign,
+          personalInterpretation: {
+            meaning: `${ingress.planet} cambia su energía al entrar en ${ingress.newSign}.`,
+            lifeAreas: ['Cambio de Energía', 'Nueva Fase'],
+            advice: 'Observa cómo cambia la energía en tu vida.',
+            mantra: 'ME ADAPTO AL FLUJO DEL COSMOS.'
+          }
+        });
+      });
+
+      // Seasonal Events
+      result.data.events.seasonalEvents?.forEach((seasonal: any) => {
+        transformedEvents.push({
+          id: `seasonal-${seasonal.date}`,
+          date: seasonal.date,
+          title: `🌸 ${seasonal.name}`,
+          description: seasonal.description || `Evento estacional: ${seasonal.name}`,
+          type: 'seasonal',
+          priority: 'medium',
+          importance: 'medium',
+          planet: 'Sol',
+          sign: 'N/A',
+          personalInterpretation: {
+            meaning: seasonal.description || `Cambio estacional importante`,
+            lifeAreas: ['Naturaleza', 'Ciclos', 'Energía Estacional'],
+            advice: 'Alinéate con los ciclos naturales de la Tierra.',
+            mantra: 'FLUYO CON LAS ESTACIONES DE LA VIDA.'
+          }
+        });
+      });
+
+      console.log(`📦 [MONTHLY-EVENTS] Transformed ${transformedEvents.length} events for ${monthKey}`);
+      return transformedEvents;
+
+    } catch (error) {
+      console.error(`❌ [MONTHLY-EVENTS] Error fetching ${monthKey}:`, error);
+      return [];
+    }
+  };
 
   // 🔧 NEW: Fetch Solar Year Events from API
   const fetchSolarYearEvents = async (): Promise<AstrologicalEvent[]> => {
@@ -549,18 +720,31 @@ const AgendaPersonalizada = () => {
 
     const loadEvents = async () => {
       setLoading(true);
-      console.log('🌟 [AGENDA] Loading Solar Year Events...');
+      console.log('🌙 [AGENDA] Loading initial 2 months of events (LAZY LOAD)...');
 
       try {
-        // Fetch real Solar Year Events from API
-        const solarYearEvents = await fetchSolarYearEvents();
+        // 🌙 CARGA LAZY: Solo cargar 2 meses inicialmente (actual + siguiente)
+        const currentMonth = new Date();
+        const nextMonth = addMonths(currentMonth, 1);
 
-        console.log(`✅ [AGENDA] Loaded ${solarYearEvents.length} Solar Year Events`);
-        if (solarYearEvents.length > 0) {
-          console.log('📅 [AGENDA] First event:', solarYearEvents[0]);
-          console.log('📅 [AGENDA] Last event:', solarYearEvents[solarYearEvents.length - 1]);
-        }
-        setEvents(solarYearEvents);
+        console.log('📅 [AGENDA] Loading months:', {
+          current: format(currentMonth, 'MMMM yyyy', { locale: es }),
+          next: format(nextMonth, 'MMMM yyyy', { locale: es })
+        });
+
+        // Cargar mes actual
+        const currentMonthEvents = await fetchMonthlyEvents(currentMonth);
+        console.log(`✅ [AGENDA] Loaded ${currentMonthEvents.length} events for current month`);
+
+        // Cargar mes siguiente
+        const nextMonthEvents = await fetchMonthlyEvents(nextMonth);
+        console.log(`✅ [AGENDA] Loaded ${nextMonthEvents.length} events for next month`);
+
+        // Combinar eventos de ambos meses
+        const allEvents = [...currentMonthEvents, ...nextMonthEvents];
+        console.log(`✅ [AGENDA] Total ${allEvents.length} events loaded (2 months)`);
+
+        setEvents(allEvents);
       } catch (error) {
         console.error('❌ [AGENDA] Error loading events:', error);
         console.error('❌ [AGENDA] Error details:', error instanceof Error ? error.message : String(error));
@@ -568,7 +752,7 @@ const AgendaPersonalizada = () => {
         const exampleEvents = generateExampleEvents();
         console.log(`⚠️ [AGENDA] Using ${exampleEvents.length} fallback example events`);
         setEvents(exampleEvents);
-        setError('No se pudieron cargar los eventos del año. Mostrando eventos de ejemplo.');
+        setError('No se pudieron cargar los eventos. Mostrando eventos de ejemplo.');
       } finally {
         setLoading(false);
       }
@@ -643,14 +827,56 @@ const AgendaPersonalizada = () => {
     return daysWithEvents;
   };
 
-  const goToPreviousMonth = () => {
-    setCurrentMonth(prev => subMonths(prev, 1));
+  const goToPreviousMonth = async () => {
+    const previousMonth = subMonths(currentMonth, 1);
+    const monthKey = format(previousMonth, 'yyyy-MM');
+
+    // Si el mes no está cargado, mostrar modal y cargar
+    if (!loadedMonths.has(monthKey)) {
+      setLoadingMonthlyEvents(true);
+      setLoadingMonthName(format(previousMonth, 'MMMM yyyy', { locale: es }));
+
+      console.log(`🌙 [NAV] Loading previous month: ${monthKey}`);
+
+      const newEvents = await fetchMonthlyEvents(previousMonth);
+
+      if (newEvents.length > 0) {
+        setEvents(prev => [...prev, ...newEvents]);
+        console.log(`✅ [NAV] Added ${newEvents.length} events for ${monthKey}`);
+      }
+
+      setLoadingMonthlyEvents(false);
+    }
+
+    // Cambiar al mes anterior
+    setCurrentMonth(previousMonth);
     setSelectedDate(null);
     setSelectedDayEvents([]);
   };
 
-  const goToNextMonth = () => {
-    setCurrentMonth(prev => addMonths(prev, 1));
+  const goToNextMonth = async () => {
+    const nextMonth = addMonths(currentMonth, 1);
+    const monthKey = format(nextMonth, 'yyyy-MM');
+
+    // Si el mes no está cargado, mostrar modal y cargar
+    if (!loadedMonths.has(monthKey)) {
+      setLoadingMonthlyEvents(true);
+      setLoadingMonthName(format(nextMonth, 'MMMM yyyy', { locale: es }));
+
+      console.log(`🌙 [NAV] Loading next month: ${monthKey}`);
+
+      const newEvents = await fetchMonthlyEvents(nextMonth);
+
+      if (newEvents.length > 0) {
+        setEvents(prev => [...prev, ...newEvents]);
+        console.log(`✅ [NAV] Added ${newEvents.length} events for ${monthKey}`);
+      }
+
+      setLoadingMonthlyEvents(false);
+    }
+
+    // Cambiar al mes siguiente
+    setCurrentMonth(nextMonth);
     setSelectedDate(null);
     setSelectedDayEvents([]);
   };
@@ -1296,6 +1522,12 @@ const AgendaPersonalizada = () => {
             </div>
           </>
         )}
+
+        {/* 🌙 MODAL DE CARGA LAZY - Aparece al navegar a nuevos meses */}
+        <EventsLoadingModal
+          isOpen={loadingMonthlyEvents}
+          month={loadingMonthName}
+        />
       </div>
     </div>
   );
