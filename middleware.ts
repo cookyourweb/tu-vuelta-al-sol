@@ -4,13 +4,9 @@ import { NextResponse } from 'next/server';
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // 🔒 CHECK AUTHENTICATION for protected routes
-  // ⭕ Allow authenticated requests through, block unauthenticated ones
+  // 🔒 CHECK AUTHENTICATION for protected routes ONLY
+  // ⚠️ NOTE: /api/birth-data and /api/users are excluded because they handle their own userId validation
   if (pathname.startsWith('/api/interpretations') ||
-      pathname.startsWith('/api/astrology') ||
-      pathname.startsWith('/api/charts') ||
-      pathname.startsWith('/api/users') ||
-      pathname.startsWith('/api/birth-data') ||
       pathname.startsWith('/api/pdf') ||
       pathname.startsWith('/api/cache')) {
 
@@ -31,7 +27,7 @@ export async function middleware(request: NextRequest) {
     }, { status: 401 });
   }
 
-  // ✅ Allow all other requests (static assets, public pages, etc)
+  // ✅ Allow all other requests (including /api/birth-data, /api/users, /api/charts, /api/astrology)
   return NextResponse.next();
 }
 
