@@ -9,12 +9,8 @@ import User from '@/models/User';
 
 export const runtime = 'nodejs';
 
-// Deshabilitar el parsing automático del body
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+// Note: In App Router, body parsing is disabled by default for webhooks
+// No need to export config - it's handled automatically
 
 export async function POST(req: NextRequest) {
   const body = await req.text();

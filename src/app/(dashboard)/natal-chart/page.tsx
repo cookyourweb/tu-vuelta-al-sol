@@ -17,6 +17,59 @@ import ChartProgressModal from '@/components/astrology/ChartProgressModal';
 import EnergyProfileTooltip from '@/components/astrology/EnergyProfileTooltip';
 import { Sparkles, Edit, Star, RefreshCw, Brain } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import { auth } from '@/lib/firebase-client';
+
+// ✅ AUTHENTICATED API UTILITIES
+const authenticatedFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+
+  const token = await user.getIdToken();
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+    ...options.headers,
+  };
+
+  return fetch(url, {
+    ...options,
+    headers,
+  });
+};
+
+const authenticatedGet = async (url: string): Promise<any> => {
+  const response = await authenticatedFetch(url);
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(errorData.error || `HTTP ${response.status}`);
+  }
+  return response.json();
+};
+
+const authenticatedPost = async (url: string, data: any): Promise<any> => {
+  const response = await authenticatedFetch(url, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(errorData.error || `HTTP ${response.status}`);
+  }
+  return response.json();
+};
+
+const authenticatedDelete = async (url: string): Promise<any> => {
+  const response = await authenticatedFetch(url, {
+    method: 'DELETE',
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(errorData.error || `HTTP ${response.status}`);
+  }
+  return response.json();
+};
 
 // ✅ INTERFACES
 interface NatalChartData {
@@ -46,7 +99,7 @@ export default function NatalChartPage() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const { isOpen: drawerOpen, content: drawerContent, open: openDrawer, close: closeDrawer } = useInterpretationDrawer();
-  
+
   // Estados principales
   const [chartData, setChartData] = useState<NatalChartData | null>(null);
   const [birthData, setBirthData] = useState<BirthData | null>(null);
@@ -87,24 +140,20 @@ export default function NatalChartPage() {
   // ✅ FUNCIÓN: Cargar datos de nacimiento
   const loadBirthDataInfo = async () => {
     try {
-      const response = await fetch(`/api/birth-data?userId=${user?.uid}`);
-      
-      if (response.ok) {
-        const result = await response.json();
-        
-        console.log('🔍 API Response completa:', result.data);
-        
-        if (result.success && result.data) {
-          setBirthData({
-            birthDate: result.data.date || result.data.birthDate,
-            birthTime: result.data.time || result.data.birthTime,
-            birthPlace: result.data.location || result.data.birthPlace,
-            latitude: result.data.latitude,
-            longitude: result.data.longitude,
-            timezone: result.data.timezone,
-            fullName: result.data.fullName
-          });
-        }
+      const result = await authenticatedGet(`/api/birth-data?userId=${user?.uid}`);
+
+      console.log('🔍 API Response completa:', result.data);
+
+      if (result.success && result.data) {
+        setBirthData({
+          birthDate: result.data.date || result.data.birthDate,
+          birthTime: result.data.time || result.data.birthTime,
+          birthPlace: result.data.location || result.data.birthPlace,
+          latitude: result.data.latitude,
+          longitude: result.data.longitude,
+          timezone: result.data.timezone,
+          fullName: result.data.fullName
+        });
       }
     } catch (error) {
       console.log('⚠️ Error loading birth data:', error);
@@ -114,12 +163,11 @@ export default function NatalChartPage() {
   // ✅ NEW: Check if AI interpretations exist
   const checkInterpretations = async (): Promise<boolean> => {
     if (!user?.uid) return false;
-    
+
     try {
       console.log('🔍 Checking if interpretations exist...');
-      const response = await fetch(`/api/astrology/interpret-natal-complete?userId=${user.uid}`);
-      const result = await response.json();
-      
+      const result = await authenticatedGet(`/api/astrology/interpret-natal-complete?userId=${user.uid}`);
+
       if (result.success && result.data) {
         console.log('✅ Interpretations already exist');
         setHasInterpretations(true);
@@ -243,40 +291,34 @@ export default function NatalChartPage() {
       setLoading(true);
       setError(null);
       setDebugInfo('🔍 Cargando carta natal...');
-      
+
       console.log('🔍 Cargando carta natal para usuario:', user?.uid);
-      
+
       // Intentar cargar carta existente
-      const response = await fetch(`/api/charts/natal?userId=${user?.uid}`, {
-        method: 'GET'
-      });
-      
-      console.log('📡 Respuesta carta natal:', response.status);
-      
-      if (response.ok) {
-        const result = await response.json();
-        
-        if (result.success && result.natalChart) {
-          console.log('✅ Carta natal cargada correctamente');
-          setDebugInfo('✅ Carta natal cargada');
-          
-          const processedData = processChartData(result.natalChart);
-          setChartData(processedData);
+      const result = await authenticatedGet(`/api/charts/natal?userId=${user?.uid}`);
 
-          // 🔍 DIAGNOSE: Check planets count
-          console.log('📊 Planets in chartData:', processedData?.planets.length);
-          console.log('🪐 Names:', processedData?.planets.map(p => p.name));
+      console.log('📡 Respuesta carta natal:', result);
 
-          // Cargar datos de nacimiento
-          await loadBirthDataInfo();
-          return;
-        }
+      if (result.success && result.natalChart) {
+        console.log('✅ Carta natal cargada correctamente');
+        setDebugInfo('✅ Carta natal cargada');
+
+        const processedData = processChartData(result.natalChart);
+        setChartData(processedData);
+
+        // 🔍 DIAGNOSE: Check planets count
+        console.log('📊 Planets in chartData:', processedData?.planets.length);
+        console.log('🪐 Names:', processedData?.planets.map(p => p.name));
+
+        // Cargar datos de nacimiento
+        await loadBirthDataInfo();
+        return;
       }
-      
+
       // Si no existe, generar automáticamente
       setDebugInfo('📝 Generando carta natal automáticamente...');
       console.log('📝 No existe carta natal, generando...');
-      
+
       const generateResponse = await fetch('/api/charts/natal', {
         method: 'POST',
         headers: {
@@ -287,17 +329,17 @@ export default function NatalChartPage() {
           regenerate: false
         })
       });
-      
+
       if (generateResponse.ok) {
         const generateResult = await generateResponse.json();
-        
+
         if (generateResult.success) {
           console.log('✅ Carta natal generada correctamente');
           setDebugInfo('✅ Carta natal generada');
-          
+
           const processedData = processChartData(generateResult.natalChart);
           setChartData(processedData);
-          
+
           await loadBirthDataInfo();
         } else {
           throw new Error(generateResult.error || 'Error generando carta');
@@ -305,7 +347,7 @@ export default function NatalChartPage() {
       } else {
         throw new Error('Error en respuesta del servidor');
       }
-      
+
     } catch (error) {
       console.error('❌ Error cargando carta natal:', error);
       setError(error instanceof Error ? error.message : 'Error cargando carta');

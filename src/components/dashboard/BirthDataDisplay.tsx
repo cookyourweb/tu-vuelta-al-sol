@@ -35,7 +35,12 @@ export default function BirthDataDisplay({ className = '' }: BirthDataDisplayPro
       }
 
       try {
-        const response = await fetch(`/api/birth-data?userId=${user.uid}`);
+        const idToken = await user.getIdToken();
+        const response = await fetch(`/api/birth-data?userId=${user.uid}`, {
+          headers: {
+            'Authorization': `Bearer ${idToken}`
+          }
+        });
         if (response.ok) {
           const { data } = await response.json();
           if (data) {

@@ -49,7 +49,14 @@ export default function MobileBottomNav() {
     if (!user) return;
 
     try {
-      const res = await fetch(`/api/users?uid=${user.uid}`);
+      // Get Firebase ID token for authentication
+      const token = await user.getIdToken();
+
+      const res = await fetch(`/api/users?uid=${user.uid}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
       if (res.ok) {
         const userData = await res.json();
         setUserRole(userData.role);

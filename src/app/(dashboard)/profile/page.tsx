@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Alert from '@/components/ui/Alert';
+import { authenticatedFetch } from '@/lib/apiClient';
 
 export default function ProfilePage() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -35,14 +36,14 @@ export default function ProfilePage() {
       setLoading(true);
       
       // Cargar datos de nacimiento
-      const birthResponse = await fetch(`/api/birth-data?userId=${user?.uid}`);
+      const birthResponse = await authenticatedFetch(`/api/birth-data?userId=${user?.uid}`);
       if (birthResponse.ok) {
         const birthResult = await birthResponse.json();
         setBirthData(birthResult.data);
       }
-      
+
       // Verificar si tiene carta natal
-      const chartResponse = await fetch(`/api/charts/natal?userId=${user?.uid}`);
+      const chartResponse = await authenticatedFetch(`/api/charts/natal?userId=${user?.uid}`);
       setHasNatalChart(chartResponse.ok);
       
     } catch (err) {
@@ -58,11 +59,8 @@ export default function ProfilePage() {
     
     try {
       setLoading(true);
-      const response = await fetch('/api/charts/natal', {
+      const response = await authenticatedFetch('/api/charts/natal', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           userId: user.uid,
           regenerate: true

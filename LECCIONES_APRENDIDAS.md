@@ -1,6 +1,11 @@
 # Lecciones Aprendidas - No Volver a Romper Producción
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+## 🚨 INCIDENTE: Middleware causando 404 en APIs críticas (REVERTIDO)
+=======
 ## 🚨 INCIDENTE 1: Middleware causando 404 en APIs críticas (REVERTIDO)
+>>>>>>> claude/lazy-loading-agenda-clean-01D9YKGzw4x2TXkWyucstk5g
 
 ### 📅 Fecha
 Diciembre 11, 2025
@@ -57,7 +62,13 @@ Trabajo en progreso documentado en `TRABAJO_EN_PROGRESO_CARGA_LAZY.md`:
 
 ---
 
+<<<<<<< HEAD
+=======
+>>>>>>> claude/fix-solar-return-fixes-from-stable-018yVirvPCdaUMFpETP4HATz
+## 🚨 INCIDENTE: Build fallando después de commit a512618
+=======
 ## 🚨 INCIDENTE 2: Build fallando después de commit a512618
+>>>>>>> claude/lazy-loading-agenda-clean-01D9YKGzw4x2TXkWyucstk5g
 
 ### 📅 Fecha
 Diciembre 10, 2025

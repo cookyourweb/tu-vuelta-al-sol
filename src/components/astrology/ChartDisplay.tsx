@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 
 // ✅ IMPORTACIONES MODULARIZADAS
-import type { ChartDisplayProps } from '../../types/astrology/chartDisplay';
+import type { ChartDisplayProps } from '@/types/astrology/chartDisplay';
 import {
   ASPECTS,
   PLANET_SYMBOLS,
@@ -1772,7 +1772,14 @@ const ChartDisplay = ({
                 </div>
                 
                 <div className="text-gray-500 text-xs mb-2">
-                  Casa {planet.house} | {SIGN_SYMBOLS[planet.sign] || ''} {signMeanings[planet.sign as keyof typeof signMeanings]}
+                  <span className="font-semibold text-purple-400">
+                    Casa {planet.house} ({houseMeanings[planet.house as keyof typeof houseMeanings]?.name.split(' - ')[1]})
+                  </span>
+                  <span className="text-gray-600 mx-1">|</span>
+                  {SIGN_SYMBOLS[planet.sign] || ''} {signMeanings[planet.sign as keyof typeof signMeanings]}
+                </div>
+                <div className="text-gray-600 text-[10px] italic mb-2">
+                  {houseMeanings[planet.house as keyof typeof houseMeanings]?.meaning}
                 </div>
                 
                 <div className="text-cyan-200 text-xs leading-relaxed">

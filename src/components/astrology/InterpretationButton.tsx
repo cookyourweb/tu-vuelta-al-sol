@@ -6,6 +6,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Brain, Sparkles, RefreshCw, Eye, X, Star, Target, Zap, Copy, Check, Download, Clock, TrendingUp } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import { useAuth } from '@/context/AuthContext';
 
 interface InterpretationButtonProps {
   type: 'natal' | 'progressed' | 'solar-return';
@@ -50,6 +51,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
   className = "",
   isAdmin = false
 }) => {
+  const { user } = useAuth();
   const [interpretation, setInterpretation] = useState<InterpretationData | null>(null);
   const [loading, setLoading] = useState(false);
   const [checkingCache, setCheckingCache] = useState(true);
@@ -593,12 +595,20 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         generatedAt: saveData.generatedAt
       });
 
+      // ✅ Get authentication token
+      const token = await user?.getIdToken();
+      if (!token) {
+        console.error('❌ No authentication token available');
+        return;
+      }
+
       // ✅ FIX: Use PUT method to REPLACE existing interpretation (upsert)
       // POST creates duplicates, PUT replaces the existing one
       const response = await fetch('/api/interpretations/save', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(saveData)
       });
@@ -692,60 +702,6 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
     return `hace ${diffMinutes}m`;
   };
 
-  // ✅ HELPER: Extract text from new {tooltip, drawer} structure
-  const extractTextFromTooltipDrawer = (value: any): string => {
-    if (typeof value === 'string') {
-      return value;
-    }
-
-    if (typeof value === 'object' && value !== null) {
-      // ✅ New structure: {tooltip: {...}, drawer: {...}}
-      if (value.drawer && typeof value.drawer === 'object') {
-        const parts: string[] = [];
-
-        // Extract drawer content in order
-        if (value.drawer.educativo) parts.push(value.drawer.educativo);
-        if (value.drawer.poderoso) parts.push(value.drawer.poderoso);
-        if (value.drawer.poetico) parts.push(value.drawer.poetico);
-
-        // Add sintesis if available
-        if (value.drawer.sintesis?.frase) parts.push(`\n\n"${value.drawer.sintesis.frase}"`);
-        if (value.drawer.sintesis?.declaracion) parts.push(`\n${value.drawer.sintesis.declaracion}`);
-
-        if (parts.length > 0) {
-          return parts.join('\n\n');
-        }
-      }
-
-      // ✅ Fallback: try tooltip
-      if (value.tooltip && typeof value.tooltip === 'object') {
-        const tooltipParts: string[] = [];
-        if (value.tooltip.significado) tooltipParts.push(value.tooltip.significado);
-        if (value.tooltip.efecto) tooltipParts.push(value.tooltip.efecto);
-        if (tooltipParts.length > 0) {
-          return tooltipParts.join(' ');
-        }
-      }
-
-      // ✅ Fallback: check for nested interpretacion field (old structure)
-      if (value.interpretacion) {
-        return extractTextFromTooltipDrawer(value.interpretacion);
-      }
-
-      // ✅ If object has direct text fields, try to extract them
-      const textFields = ['descripcion', 'significado', 'efecto', 'texto', 'content'];
-      for (const field of textFields) {
-        if (value[field] && typeof value[field] === 'string') {
-          return value[field];
-        }
-      }
-    }
-
-    // ✅ Last resort: return empty string to avoid React errors
-    console.warn('⚠️ Could not extract text from value:', value);
-    return '';
-  };
-
   const renderInterpretationContent = () => {
     console.log('🎨 ===== RENDER INTERPRETATION CONTENT =====');
     console.log('🎨 interpretation:', interpretation);
@@ -770,6 +726,27 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
     console.log('🎨 data.planets:', data.planets ? 'EXISTS' : 'NOT FOUND');
     console.log('🎨 Full data:', data);
 
+    // ✅ Helper function to extract text from tooltip/drawer structure or return as-is
+    const extractTextFromTooltipDrawer = (data: any): string => {
+      if (typeof data === 'string') {
+        return data;
+      }
+      
+      if (data && typeof data === 'object') {
+        // Try different possible text fields
+        if (data.drawer) return data.drawer;
+        if (data.tooltip) return data.tooltip;
+        if (data.texto) return data.texto;
+        if (data.descripcion) return data.descripcion;
+        if (data.interpretacion) return data.interpretacion;
+        
+        // If it's an object but no recognized text fields, stringify it cleanly
+        return Object.values(data).join(' - ');
+      }
+      
+      // Fallback for any other type
+      return String(data || '');
+    };
     return (
       <div className="space-y-8">
         {data.esencia_revolucionaria && (
@@ -778,9 +755,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               <Star className="w-8 h-8 text-purple-300" />
               Tu Esencia Revolucionaria
             </h4>
-            <p className="text-purple-50 text-lg leading-relaxed font-medium whitespace-pre-line">
-              {extractTextFromTooltipDrawer(data.esencia_revolucionaria)}
-            </p>
+            <p className="text-purple-50 text-lg leading-relaxed font-medium">{data.esencia_revolucionaria}</p>
           </div>
         )}
 
@@ -790,9 +765,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               <Target className="w-8 h-8 text-blue-300" />
               Tu Propósito de Vida
             </h4>
-            <p className="text-blue-50 text-lg leading-relaxed font-medium whitespace-pre-line">
-              {extractTextFromTooltipDrawer(data.proposito_vida)}
-            </p>
+      <p className="text-blue-50 text-lg leading-relaxed font-medium">{data.proposito_vida}</p>
           </div>
         )}
 
@@ -815,7 +788,6 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                       {extractTextFromTooltipDrawer(data.formacion_temprana.casa_lunar)}
                     </p>
                   ) : (
-                    // ✅ Handle old object structure
                     <div className="space-y-2">
                       {data.formacion_temprana.casa_lunar.signo_casa && (
                         <p className="text-cyan-200 text-sm font-semibold">
@@ -824,7 +796,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                       )}
                       {data.formacion_temprana.casa_lunar.interpretacion && (
                         <p className="text-cyan-50 text-sm">
-                          {extractTextFromTooltipDrawer(data.formacion_temprana.casa_lunar.interpretacion)}
+                          {data.formacion_temprana.casa_lunar.interpretacion}
                         </p>
                       )}
                       {data.formacion_temprana.casa_lunar.influencia && (
@@ -833,7 +805,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                             🌟 Influencia:
                           </p>
                           <p className="text-cyan-50 text-xs">
-                            {extractTextFromTooltipDrawer(data.formacion_temprana.casa_lunar.influencia)}
+                            {data.formacion_temprana.casa_lunar.influencia}
                           </p>
                         </div>
                       )}
@@ -859,7 +831,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                       )}
                       {data.formacion_temprana.casa_saturnina.interpretacion && (
                         <p className="text-cyan-50 text-sm">
-                          {extractTextFromTooltipDrawer(data.formacion_temprana.casa_saturnina.interpretacion)}
+                          {data.formacion_temprana.casa_saturnina.interpretacion}
                         </p>
                       )}
                       {data.formacion_temprana.casa_saturnina.leccion && (
@@ -868,7 +840,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                             📚 Lección:
                           </p>
                           <p className="text-cyan-50 text-xs">
-                            {extractTextFromTooltipDrawer(data.formacion_temprana.casa_saturnina.leccion)}
+                            {data.formacion_temprana.casa_saturnina.leccion}
                           </p>
                         </div>
                       )}
@@ -881,10 +853,6 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                   <h5 className="text-cyan-200 font-semibold mb-2">💕 Casa Venusina (Amor y Valores)</h5>
                   {typeof data.formacion_temprana.casa_venusina === 'string' ? (
                     <p className="text-cyan-50 whitespace-pre-line">{extractTextFromTooltipDrawer(data.formacion_temprana.casa_venusina)}</p>
-                  ) : data.formacion_temprana.casa_venusina.drawer || data.formacion_temprana.casa_venusina.tooltip ? (
-                    <p className="text-cyan-50 whitespace-pre-line">
-                      {extractTextFromTooltipDrawer(data.formacion_temprana.casa_venusina)}
-                    </p>
                   ) : (
                     <div className="space-y-2">
                       {data.formacion_temprana.casa_venusina.signo_casa && (
@@ -894,7 +862,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                       )}
                       {data.formacion_temprana.casa_venusina.interpretacion && (
                         <p className="text-cyan-50 text-sm">
-                          {extractTextFromTooltipDrawer(data.formacion_temprana.casa_venusina.interpretacion)}
+                          {data.formacion_temprana.casa_venusina.interpretacion}
                         </p>
                       )}
                       {data.formacion_temprana.casa_venusina.valores && (
@@ -903,7 +871,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                             💎 Valores:
                           </p>
                           <p className="text-cyan-50 text-xs">
-                            {extractTextFromTooltipDrawer(data.formacion_temprana.casa_venusina.valores)}
+                            {data.formacion_temprana.casa_venusina.valores}
                           </p>
                         </div>
                       )}
@@ -927,25 +895,19 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                 data.patrones_psicologicos.map((patron: string | any, index: number) => (
                   <div key={index} className="bg-indigo-800/30 rounded-lg p-4">
                     {typeof patron === 'string' ? (
-                      <p className="text-indigo-50 leading-relaxed whitespace-pre-line">{patron}</p>
-                    ) : patron.drawer || patron.tooltip ? (
-                      <p className="text-indigo-50 leading-relaxed whitespace-pre-line">
-                        {extractTextFromTooltipDrawer(patron)}
-                      </p>
+                      <p className="text-indigo-50 leading-relaxed">{patron}</p>
                     ) : (
                       <div className="space-y-2">
                         {patron.planeta && <p className="text-indigo-200 font-semibold">🪐 {patron.planeta}</p>}
-                        {patron.infancia_emocional && <p className="text-indigo-50">👶 {extractTextFromTooltipDrawer(patron.infancia_emocional)}</p>}
-                        {patron.patron_formado && <p className="text-indigo-50">🔄 {extractTextFromTooltipDrawer(patron.patron_formado)}</p>}
-                        {patron.impacto_adulto && <p className="text-indigo-50">👤 {extractTextFromTooltipDrawer(patron.impacto_adulto)}</p>}
+                        {patron.infancia_emocional && <p className="text-indigo-50">👶 {patron.infancia_emocional}</p>}
+                        {patron.patron_formado && <p className="text-indigo-50">🔄 {patron.patron_formado}</p>}
+                        {patron.impacto_adulto && <p className="text-indigo-50">👤 {patron.impacto_adulto}</p>}
                       </div>
                     )}
                   </div>
                 ))
               ) : (
-                <p className="text-indigo-50 leading-relaxed whitespace-pre-line">
-                  {extractTextFromTooltipDrawer(data.patrones_psicologicos)}
-                </p>
+                <p className="text-indigo-50 leading-relaxed">{data.patrones_psicologicos}</p>
               )}
             </div>
           </div>
@@ -962,25 +924,19 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               {data.planetas_profundos.urano && (
                 <div className="bg-violet-800/30 rounded-lg p-4">
                   <h5 className="text-violet-200 font-semibold mb-2">⚡ Urano (Revolución e Innovación)</h5>
-                  <p className="text-violet-50 whitespace-pre-line">
-                    {extractTextFromTooltipDrawer(data.planetas_profundos.urano)}
-                  </p>
+                  <p className="text-violet-50">{data.planetas_profundos.urano}</p>
                 </div>
               )}
               {data.planetas_profundos.neptuno && (
                 <div className="bg-violet-800/30 rounded-lg p-4">
                   <h5 className="text-violet-200 font-semibold mb-2">🌊 Neptuno (Espiritualidad y Sueños)</h5>
-                  <p className="text-violet-50 whitespace-pre-line">
-                    {extractTextFromTooltipDrawer(data.planetas_profundos.neptuno)}
-                  </p>
+                  <p className="text-violet-50">{data.planetas_profundos.neptuno}</p>
                 </div>
               )}
               {data.planetas_profundos.pluton && (
                 <div className="bg-violet-800/30 rounded-lg p-4">
                   <h5 className="text-violet-200 font-semibold mb-2">🕳️ Plutón (Transformación y Poder)</h5>
-                  <p className="text-violet-50 whitespace-pre-line">
-                    {extractTextFromTooltipDrawer(data.planetas_profundos.pluton)}
-                  </p>
+                  <p className="text-violet-50">{data.planetas_profundos.pluton}</p>
                 </div>
               )}
             </div>
@@ -1000,13 +956,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                   <h5 className="text-green-200 font-semibold text-lg mb-3">⬆️ Nodo Norte (Destino y Crecimiento)</h5>
 
                   {typeof data.nodos_lunares.nodo_norte === 'string' ? (
-                    <p className="text-green-50 whitespace-pre-line">
-                      {extractTextFromTooltipDrawer(data.nodos_lunares.nodo_norte)}
-                    </p>
-                  ) : data.nodos_lunares.nodo_norte.drawer || data.nodos_lunares.nodo_norte.tooltip ? (
-                    <p className="text-green-50 whitespace-pre-line">
-                      {extractTextFromTooltipDrawer(data.nodos_lunares.nodo_norte)}
-                    </p>
+                    <p className="text-green-50">{data.nodos_lunares.nodo_norte}</p>
                   ) : (
                     <div className="space-y-3">
                       {data.nodos_lunares.nodo_norte.signo_casa && (
@@ -1021,7 +971,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                             🎯 Dirección Evolutiva:
                           </p>
                           <p className="text-green-50 text-sm">
-                            {extractTextFromTooltipDrawer(data.nodos_lunares.nodo_norte.direccion_evolutiva)}
+                            {data.nodos_lunares.nodo_norte.direccion_evolutiva}
                           </p>
                         </div>
                       )}
@@ -1032,7 +982,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                             🚀 Desafío:
                           </p>
                           <p className="text-green-50 text-sm">
-                            {extractTextFromTooltipDrawer(data.nodos_lunares.nodo_norte.desafio)}
+                            {data.nodos_lunares.nodo_norte.desafio}
                           </p>
                         </div>
                       )}
@@ -1046,13 +996,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                   <h5 className="text-orange-200 font-semibold text-lg mb-3">⬇️ Nodo Sur (Pasado y Lecciones)</h5>
 
                   {typeof data.nodos_lunares.nodo_sur === 'string' ? (
-                    <p className="text-orange-50 whitespace-pre-line">
-                      {extractTextFromTooltipDrawer(data.nodos_lunares.nodo_sur)}
-                    </p>
-                  ) : data.nodos_lunares.nodo_sur.drawer || data.nodos_lunares.nodo_sur.tooltip ? (
-                    <p className="text-orange-50 whitespace-pre-line">
-                      {extractTextFromTooltipDrawer(data.nodos_lunares.nodo_sur)}
-                    </p>
+                    <p className="text-orange-50">{data.nodos_lunares.nodo_sur}</p>
                   ) : (
                     <div className="space-y-3">
                       {data.nodos_lunares.nodo_sur.signo_casa && (
@@ -1067,7 +1011,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                             ✅ Zona de Confort:
                           </p>
                           <p className="text-orange-50 text-sm">
-                            {extractTextFromTooltipDrawer(data.nodos_lunares.nodo_sur.zona_comfort)}
+                            {data.nodos_lunares.nodo_sur.zona_comfort}
                           </p>
                         </div>
                       )}
@@ -1078,7 +1022,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                             ⚠️ Patrón Repetitivo:
                           </p>
                           <p className="text-red-50 text-sm">
-                            {extractTextFromTooltipDrawer(data.nodos_lunares.nodo_sur.patron_repetitivo)}
+                            {data.nodos_lunares.nodo_sur.patron_repetitivo}
                           </p>
                         </div>
                       )}
@@ -1097,8 +1041,8 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               <Sparkles className="w-8 h-8 text-amber-300" />
               Tema Central del Año
             </h4>
-            <p className="text-amber-50 text-2xl leading-relaxed font-bold text-center italic whitespace-pre-line">
-              "{extractTextFromTooltipDrawer(data.tema_anual)}"
+            <p className="text-amber-50 text-2xl leading-relaxed font-bold text-center italic">
+              "{data.tema_anual}"
             </p>
           </div>
         )}
@@ -1354,8 +1298,8 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               Declaración de Poder Personal
             </h4>
             <div className="bg-emerald-800/30 rounded-xl p-6 border border-emerald-400/20">
-              <p className="text-emerald-50 text-lg leading-relaxed font-bold italic whitespace-pre-line">
-                "{extractTextFromTooltipDrawer(data.declaracion_poder)}"
+              <p className="text-emerald-50 text-lg leading-relaxed font-bold italic">
+                "{data.declaracion_poder}"
               </p>
             </div>
           </div>
@@ -1472,8 +1416,8 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               Pregunta Final para tu Reflexión
             </h4>
             <div className="bg-pink-800/30 rounded-xl p-6 border border-pink-400/20">
-              <p className="text-pink-50 text-xl leading-relaxed font-medium italic text-center whitespace-pre-line">
-                "{extractTextFromTooltipDrawer(data.pregunta_final_reflexion)}"
+              <p className="text-pink-50 text-xl leading-relaxed font-medium italic text-center">
+                "{data.pregunta_final_reflexion}"
               </p>
             </div>
           </div>
