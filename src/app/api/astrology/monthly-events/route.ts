@@ -42,19 +42,6 @@ export async function POST(request: NextRequest) {
       dateObj.setHours(hours, minutes, 0, 0);
     }
 
-<<<<<<< HEAD
-    // Calculate events for the full year
-    const currentYear = parseInt(year, 10);
-    dateObj.setFullYear(currentYear);
-
-    console.log('📅 Calculating events for year:', currentYear);
-
-    // Calculate all events for the year
-    const allEvents = await calculateSolarYearEvents(dateObj);
-
-    // Filter events for the specific month
-    const targetMonth = parseInt(month, 10);
-=======
     // 🔧 CÁLCULO CORRECTO DEL AÑO SOLAR SEGÚN EL MES SOLICITADO
     const currentYear = parseInt(year, 10);
     const targetMonth = parseInt(month, 10);
@@ -113,16 +100,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Filter events for the specific month
->>>>>>> claude/lazy-loading-agenda-clean-01D9YKGzw4x2TXkWyucstk5g
     const monthStart = startOfMonth(new Date(currentYear, targetMonth - 1, 1));
     const monthEnd = endOfMonth(monthStart);
 
     console.log('📆 Filtering events for month:', {
       month: targetMonth,
-<<<<<<< HEAD
-=======
       year: currentYear,
->>>>>>> claude/lazy-loading-agenda-clean-01D9YKGzw4x2TXkWyucstk5g
       start: monthStart.toISOString(),
       end: monthEnd.toISOString()
     });
@@ -130,14 +113,6 @@ export async function POST(request: NextRequest) {
     // Helper function to check if date is in month
     const isInMonth = (date: Date | string) => {
       const d = typeof date === 'string' ? new Date(date) : date;
-<<<<<<< HEAD
-      return d >= monthStart && d <= monthEnd;
-    };
-
-    // Filter each event type
-    const monthlyEvents = {
-      lunarPhases: allEvents.lunarPhases.filter(p => isInMonth(p.date)),
-=======
       const result = d >= monthStart && d <= monthEnd;
       return result;
     };
@@ -168,16 +143,11 @@ export async function POST(request: NextRequest) {
     // Filter each event type
     const monthlyEvents = {
       lunarPhases: lunarPhasesFiltered,
->>>>>>> claude/lazy-loading-agenda-clean-01D9YKGzw4x2TXkWyucstk5g
       retrogrades: allEvents.retrogrades.filter(r =>
         isInMonth(r.startDate) || isInMonth(r.endDate)
       ),
       eclipses: allEvents.eclipses.filter(e => isInMonth(e.date)),
-<<<<<<< HEAD
-      planetaryIngresses: allEvents.planetaryIngresses.filter(i => isInMonth(i.date)),
-=======
       planetaryIngresses: planetaryIngressesFiltered,
->>>>>>> claude/lazy-loading-agenda-clean-01D9YKGzw4x2TXkWyucstk5g
       seasonalEvents: allEvents.seasonalEvents.filter(s => isInMonth(s.date))
     };
 
