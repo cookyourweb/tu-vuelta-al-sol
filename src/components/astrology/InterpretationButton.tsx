@@ -290,8 +290,8 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       console.log(`🤖 userId: ${userId}`);
       console.log(`🤖 userProfile:`, userProfile);
 
-      // ✅ CHUNKED GENERATION FOR FASTER RESULTS
-      if (forceRegenerate && type === 'natal') {
+      // ✅ CHUNKED GENERATION FOR FASTER RESULTS - ALWAYS for natal charts
+      if (type === 'natal') {
         console.log('🔄 ===== GENERANDO EN CHUNKS =====');
 
         const chunks: Record<string, any> = {};
