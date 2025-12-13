@@ -726,6 +726,27 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
     console.log('🎨 data.planets:', data.planets ? 'EXISTS' : 'NOT FOUND');
     console.log('🎨 Full data:', data);
 
+    // ✅ Helper function to extract text from tooltip/drawer structure or return as-is
+    const extractTextFromTooltipDrawer = (data: any): string => {
+      if (typeof data === 'string') {
+        return data;
+      }
+      
+      if (data && typeof data === 'object') {
+        // Try different possible text fields
+        if (data.drawer) return data.drawer;
+        if (data.tooltip) return data.tooltip;
+        if (data.texto) return data.texto;
+        if (data.descripcion) return data.descripcion;
+        if (data.interpretacion) return data.interpretacion;
+        
+        // If it's an object but no recognized text fields, stringify it cleanly
+        return Object.values(data).join(' - ');
+      }
+      
+      // Fallback for any other type
+      return String(data || '');
+    };
     return (
       <div className="space-y-8">
         {data.esencia_revolucionaria && (
@@ -760,12 +781,17 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                 <div className="bg-cyan-800/30 rounded-lg p-4">
                   <h5 className="text-cyan-200 font-semibold mb-2">🌙 Casa Lunar (Infancia y Raíces)</h5>
                   {typeof data.formacion_temprana.casa_lunar === 'string' ? (
-                    <p className="text-cyan-50">{data.formacion_temprana.casa_lunar}</p>
+                    <p className="text-cyan-50 whitespace-pre-line">{extractTextFromTooltipDrawer(data.formacion_temprana.casa_lunar)}</p>
+                  ) : data.formacion_temprana.casa_lunar.drawer || data.formacion_temprana.casa_lunar.tooltip ? (
+                    // ✅ Handle new {tooltip, drawer} structure
+                    <p className="text-cyan-50 whitespace-pre-line">
+                      {extractTextFromTooltipDrawer(data.formacion_temprana.casa_lunar)}
+                    </p>
                   ) : (
                     <div className="space-y-2">
                       {data.formacion_temprana.casa_lunar.signo_casa && (
                         <p className="text-cyan-200 text-sm font-semibold">
-                          📍 {data.formacion_temprana.casa_lunar.signo_casa}
+                          📍 {extractTextFromTooltipDrawer(data.formacion_temprana.casa_lunar.signo_casa)}
                         </p>
                       )}
                       {data.formacion_temprana.casa_lunar.interpretacion && (
@@ -791,12 +817,16 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                 <div className="bg-cyan-800/30 rounded-lg p-4">
                   <h5 className="text-cyan-200 font-semibold mb-2">🪐 Casa Saturnina (Lecciones y Disciplina)</h5>
                   {typeof data.formacion_temprana.casa_saturnina === 'string' ? (
-                    <p className="text-cyan-50">{data.formacion_temprana.casa_saturnina}</p>
+                    <p className="text-cyan-50 whitespace-pre-line">{extractTextFromTooltipDrawer(data.formacion_temprana.casa_saturnina)}</p>
+                  ) : data.formacion_temprana.casa_saturnina.drawer || data.formacion_temprana.casa_saturnina.tooltip ? (
+                    <p className="text-cyan-50 whitespace-pre-line">
+                      {extractTextFromTooltipDrawer(data.formacion_temprana.casa_saturnina)}
+                    </p>
                   ) : (
                     <div className="space-y-2">
                       {data.formacion_temprana.casa_saturnina.signo_casa && (
                         <p className="text-cyan-200 text-sm font-semibold">
-                          📍 {data.formacion_temprana.casa_saturnina.signo_casa}
+                          📍 {extractTextFromTooltipDrawer(data.formacion_temprana.casa_saturnina.signo_casa)}
                         </p>
                       )}
                       {data.formacion_temprana.casa_saturnina.interpretacion && (
@@ -822,12 +852,12 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                 <div className="bg-cyan-800/30 rounded-lg p-4">
                   <h5 className="text-cyan-200 font-semibold mb-2">💕 Casa Venusina (Amor y Valores)</h5>
                   {typeof data.formacion_temprana.casa_venusina === 'string' ? (
-                    <p className="text-cyan-50">{data.formacion_temprana.casa_venusina}</p>
+                    <p className="text-cyan-50 whitespace-pre-line">{extractTextFromTooltipDrawer(data.formacion_temprana.casa_venusina)}</p>
                   ) : (
                     <div className="space-y-2">
                       {data.formacion_temprana.casa_venusina.signo_casa && (
                         <p className="text-cyan-200 text-sm font-semibold">
-                          📍 {data.formacion_temprana.casa_venusina.signo_casa}
+                          📍 {extractTextFromTooltipDrawer(data.formacion_temprana.casa_venusina.signo_casa)}
                         </p>
                       )}
                       {data.formacion_temprana.casa_venusina.interpretacion && (
@@ -1340,13 +1370,13 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                     {data.angulos_vitales.ascendente.mascara_social && (
                       <div className="bg-amber-700/30 rounded-lg p-3">
                         <p className="text-amber-200 font-semibold text-sm mb-1">🎭 Máscara Social:</p>
-                        <p className="text-amber-50 text-sm">{data.angulos_vitales.ascendente.mascara_social}</p>
+                        <p className="text-amber-50 text-sm">{extractTextFromTooltipDrawer(data.angulos_vitales.ascendente.mascara_social)}</p>
                       </div>
                     )}
                     {data.angulos_vitales.ascendente.superpoder && (
                       <div className="bg-amber-700/30 rounded-lg p-3">
                         <p className="text-amber-200 font-semibold text-sm mb-1">⚡ Superpoder:</p>
-                        <p className="text-amber-50 text-sm">{data.angulos_vitales.ascendente.superpoder}</p>
+                        <p className="text-amber-50 text-sm">{extractTextFromTooltipDrawer(data.angulos_vitales.ascendente.superpoder)}</p>
                       </div>
                     )}
                   </div>
@@ -1362,13 +1392,13 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                     {data.angulos_vitales.medio_cielo.vocacion_soul && (
                       <div className="bg-amber-700/30 rounded-lg p-3">
                         <p className="text-amber-200 font-semibold text-sm mb-1">✨ Vocación del Alma:</p>
-                        <p className="text-amber-50 text-sm">{data.angulos_vitales.medio_cielo.vocacion_soul}</p>
+                        <p className="text-amber-50 text-sm">{extractTextFromTooltipDrawer(data.angulos_vitales.medio_cielo.vocacion_soul)}</p>
                       </div>
                     )}
                     {data.angulos_vitales.medio_cielo.legado && (
                       <div className="bg-amber-700/30 rounded-lg p-3">
                         <p className="text-amber-200 font-semibold text-sm mb-1">🌟 Legado:</p>
-                        <p className="text-amber-50 text-sm">{data.angulos_vitales.medio_cielo.legado}</p>
+                        <p className="text-amber-50 text-sm">{extractTextFromTooltipDrawer(data.angulos_vitales.medio_cielo.legado)}</p>
                       </div>
                     )}
                   </div>
