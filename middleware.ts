@@ -4,30 +4,11 @@ import { NextResponse } from 'next/server';
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // 🔒 CHECK AUTHENTICATION for protected routes ONLY
-  // ⚠️ NOTE: /api/birth-data and /api/users are excluded because they handle their own userId validation
-  if (pathname.startsWith('/api/interpretations') ||
-      pathname.startsWith('/api/pdf') ||
-      pathname.startsWith('/api/cache')) {
+  // 🔒 MIDDLEWARE AUTHENTICATION DISABLED
+  // ⚠️ All API routes handle their own authentication/authorization
+  // This middleware only handles non-API routing logic
 
-    // ✅ Check if request has authentication token
-    const authHeader = request.headers.get('authorization');
-    const hasBearerToken = authHeader?.startsWith('Bearer ');
-    const hasTokenParam = request.nextUrl.searchParams.has('token');
-
-    // 🟢 Allow through if has authentication
-    if (hasBearerToken || hasTokenParam) {
-      return NextResponse.next();
-    }
-
-    // 🚫 Block unauthenticated requests
-    return NextResponse.json({
-      success: false,
-      error: 'Authentication required'
-    }, { status: 401 });
-  }
-
-  // ✅ Allow all other requests (including /api/birth-data, /api/users, /api/charts, /api/astrology)
+  // ✅ Allow all requests through
   return NextResponse.next();
 }
 
