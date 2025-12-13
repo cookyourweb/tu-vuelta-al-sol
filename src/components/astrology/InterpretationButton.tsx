@@ -6,6 +6,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Brain, Sparkles, RefreshCw, Eye, X, Star, Target, Zap, Copy, Check, Download, Clock, TrendingUp } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import { useAuth } from '@/context/AuthContext';
 
 interface InterpretationButtonProps {
   type: 'natal' | 'progressed' | 'solar-return';
@@ -50,6 +51,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
   className = "",
   isAdmin = false
 }) => {
+  const { user } = useAuth();
   const [interpretation, setInterpretation] = useState<InterpretationData | null>(null);
   const [loading, setLoading] = useState(false);
   const [checkingCache, setCheckingCache] = useState(true);
@@ -593,12 +595,20 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         generatedAt: saveData.generatedAt
       });
 
+      // ✅ Get authentication token
+      const token = await user?.getIdToken();
+      if (!token) {
+        console.error('❌ No authentication token available');
+        return;
+      }
+
       // ✅ FIX: Use PUT method to REPLACE existing interpretation (upsert)
       // POST creates duplicates, PUT replaces the existing one
       const response = await fetch('/api/interpretations/save', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(saveData)
       });

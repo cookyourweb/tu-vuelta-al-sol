@@ -10,14 +10,6 @@ import Interpretation from '@/models/Interpretation';
 import { generateSolarReturnMasterPrompt } from '@/utils/prompts/solarReturnPrompts';
 import { generateSRComparison } from '@/utils/astrology/solarReturnComparison';
 
-<<<<<<< HEAD
-// ⏱️ CRITICAL: Increase timeout for AI generation (Solar Return takes 2-3 minutes)
-export const maxDuration = 300; // 5 minutes
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-=======
 // ✅ Lazy initialization to avoid build-time errors
 let openai: OpenAI | null = null;
 
@@ -29,7 +21,6 @@ function getOpenAI() {
   }
   return openai;
 }
->>>>>>> claude/lazy-loading-agenda-clean-01D9YKGzw4x2TXkWyucstk5g
 
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
