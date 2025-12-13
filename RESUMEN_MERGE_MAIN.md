@@ -141,14 +141,16 @@ La rama está ahora completamente sincronizada con `main` y contiene:
 
 ## ⚠️ Notas Importantes
 
-- **No hay conflictos** - El merge fue limpio
-- **Todos los fixes se mantienen** - Lazy init, validation, extractTextFromTooltipDrawer
-- **Autenticación integrada** - Middleware + Bearer tokens funcionando
-- **Build debería pasar** - Sin errores de env vars ni parsing
+- ✅ **Conflictos resueltos** - El merge inicial dejó conflictos en `monthly-events/route.ts`, resueltos con commit `d7f9d6b`
+- ✅ **Todos los fixes se mantienen** - Lazy init, validation, extractTextFromTooltipDrawer
+- ✅ **Autenticación integrada** - Middleware + Bearer tokens funcionando
+- ✅ **Build debería pasar** - Sin errores de env vars ni parsing, conflictos resueltos
 
 ## 📝 Commits en la Rama Ahora
 
 ```
+d7f9d6b - 🔧 FIX: Resolver conflictos de merge en monthly-events/route.ts (NUEVO)
+63dc54d - 📄 DOC: Resumen completo de merge con main
 50c04a9 - Merge remote-tracking branch 'origin/main' (MERGE)
 e940570 - 📄 DOC: Instrucciones para fix de merge conflicts en main
 5b0f638 - 🔧 FIX: Usar extractTextFromTooltipDrawer en todos los renderizados
