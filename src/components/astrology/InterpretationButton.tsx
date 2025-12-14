@@ -555,12 +555,6 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       console.log('💾 chartType:', type);
       console.log('💾 generatedAt:', interpretationData.generatedAt);
 
-      // Get Firebase ID token for authentication
-      let token = null;
-      if (user) {
-        token = await user.getIdToken();
-      }
-
       const saveData = {
         userId,
         chartType: type,
@@ -573,24 +567,24 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         userId: saveData.userId,
         chartType: saveData.chartType,
         interpretationKeys: Object.keys(saveData.interpretation),
-        generatedAt: saveData.generatedAt,
-        hasToken: !!token
+        generatedAt: saveData.generatedAt
       });
+
+      // ✅ Get authentication token
+      const token = await user?.getIdToken();
+      if (!token) {
+        console.error('❌ No authentication token available');
+        return;
+      }
 
       // ✅ FIX: Use PUT method to REPLACE existing interpretation (upsert)
       // POST creates duplicates, PUT replaces the existing one
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
-
-      // Add authorization header if token is available
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
       const response = await fetch('/api/interpretations/save', {
         method: 'PUT',
-        headers,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify(saveData)
       });
 
@@ -707,30 +701,51 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
     console.log('🎨 data.planets:', data.planets ? 'EXISTS' : 'NOT FOUND');
     console.log('🎨 Full data:', data);
 
+    // ✅ Helper function to extract text from tooltip/drawer structure or return as-is
+    const extractTextFromTooltipDrawer = (data: any): string => {
+      if (typeof data === 'string') {
+        return data;
+      }
+      
+      if (data && typeof data === 'object') {
+        // Try different possible text fields
+        if (data.drawer) return data.drawer;
+        if (data.tooltip) return data.tooltip;
+        if (data.texto) return data.texto;
+        if (data.descripcion) return data.descripcion;
+        if (data.interpretacion) return data.interpretacion;
+        
+        // If it's an object but no recognized text fields, stringify it cleanly
+        return Object.values(data).join(' - ');
+      }
+      
+      // Fallback for any other type
+      return String(data || '');
+    };
     return (
       <div className="space-y-8">
-        {typeof data.esencia_revolucionaria === 'string' && (
+        {data.esencia_revolucionaria && (
           <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 rounded-2xl p-8 border border-purple-400/30">
             <h4 className="text-purple-100 font-bold text-xl mb-4 flex items-center gap-3">
               <Star className="w-8 h-8 text-purple-300" />
               Tu Esencia Revolucionaria
             </h4>
-            <p className="text-purple-50 text-lg leading-relaxed font-medium">{typeof data.esencia_revolucionaria === 'string' ? data.esencia_revolucionaria : JSON.stringify(data.esencia_revolucionaria)}</p>
+            <p className="text-purple-50 text-lg leading-relaxed font-medium">{data.esencia_revolucionaria}</p>
           </div>
         )}
 
-        {typeof data.proposito_vida === 'string' && (
+        {data.proposito_vida && (
           <div className="bg-gradient-to-br from-blue-900/40 to-indigo-900/40 rounded-2xl p-8 border border-blue-400/30">
             <h4 className="text-blue-100 font-bold text-xl mb-4 flex items-center gap-3">
               <Target className="w-8 h-8 text-blue-300" />
               Tu Propósito de Vida
             </h4>
-      <p className="text-blue-50 text-lg leading-relaxed font-medium">{typeof data.proposito_vida === 'string' ? data.proposito_vida : JSON.stringify(data.proposito_vida)}</p>
+      <p className="text-blue-50 text-lg leading-relaxed font-medium">{data.proposito_vida}</p>
           </div>
         )}
 
         {/* ✅ NUEVA SECCIÓN: FORMACIÓN TEMPRANA */}
-        {typeof data.formacion_temprana === 'object' && !Array.isArray(data.formacion_temprana) && (
+        {data.formacion_temprana && (
           <div className="bg-gradient-to-br from-cyan-900/40 to-teal-900/40 rounded-2xl p-8 border border-cyan-400/30">
             <h4 className="text-cyan-100 font-bold text-xl mb-6 flex items-center gap-3">
               <Star className="w-8 h-8 text-cyan-300" />
@@ -741,12 +756,17 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                 <div className="bg-cyan-800/30 rounded-lg p-4">
                   <h5 className="text-cyan-200 font-semibold mb-2">🌙 Casa Lunar (Infancia y Raíces)</h5>
                   {typeof data.formacion_temprana.casa_lunar === 'string' ? (
-                    <p className="text-cyan-50">{data.formacion_temprana.casa_lunar}</p>
+                    <p className="text-cyan-50 whitespace-pre-line">{extractTextFromTooltipDrawer(data.formacion_temprana.casa_lunar)}</p>
+                  ) : data.formacion_temprana.casa_lunar.drawer || data.formacion_temprana.casa_lunar.tooltip ? (
+                    // ✅ Handle new {tooltip, drawer} structure
+                    <p className="text-cyan-50 whitespace-pre-line">
+                      {extractTextFromTooltipDrawer(data.formacion_temprana.casa_lunar)}
+                    </p>
                   ) : (
                     <div className="space-y-2">
                       {data.formacion_temprana.casa_lunar.signo_casa && (
                         <p className="text-cyan-200 text-sm font-semibold">
-                          📍 {data.formacion_temprana.casa_lunar.signo_casa}
+                          📍 {extractTextFromTooltipDrawer(data.formacion_temprana.casa_lunar.signo_casa)}
                         </p>
                       )}
                       {data.formacion_temprana.casa_lunar.interpretacion && (
@@ -772,12 +792,16 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                 <div className="bg-cyan-800/30 rounded-lg p-4">
                   <h5 className="text-cyan-200 font-semibold mb-2">🪐 Casa Saturnina (Lecciones y Disciplina)</h5>
                   {typeof data.formacion_temprana.casa_saturnina === 'string' ? (
-                    <p className="text-cyan-50">{data.formacion_temprana.casa_saturnina}</p>
+                    <p className="text-cyan-50 whitespace-pre-line">{extractTextFromTooltipDrawer(data.formacion_temprana.casa_saturnina)}</p>
+                  ) : data.formacion_temprana.casa_saturnina.drawer || data.formacion_temprana.casa_saturnina.tooltip ? (
+                    <p className="text-cyan-50 whitespace-pre-line">
+                      {extractTextFromTooltipDrawer(data.formacion_temprana.casa_saturnina)}
+                    </p>
                   ) : (
                     <div className="space-y-2">
                       {data.formacion_temprana.casa_saturnina.signo_casa && (
                         <p className="text-cyan-200 text-sm font-semibold">
-                          📍 {data.formacion_temprana.casa_saturnina.signo_casa}
+                          📍 {extractTextFromTooltipDrawer(data.formacion_temprana.casa_saturnina.signo_casa)}
                         </p>
                       )}
                       {data.formacion_temprana.casa_saturnina.interpretacion && (
@@ -803,12 +827,12 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                 <div className="bg-cyan-800/30 rounded-lg p-4">
                   <h5 className="text-cyan-200 font-semibold mb-2">💕 Casa Venusina (Amor y Valores)</h5>
                   {typeof data.formacion_temprana.casa_venusina === 'string' ? (
-                    <p className="text-cyan-50">{data.formacion_temprana.casa_venusina}</p>
+                    <p className="text-cyan-50 whitespace-pre-line">{extractTextFromTooltipDrawer(data.formacion_temprana.casa_venusina)}</p>
                   ) : (
                     <div className="space-y-2">
                       {data.formacion_temprana.casa_venusina.signo_casa && (
                         <p className="text-cyan-200 text-sm font-semibold">
-                          📍 {data.formacion_temprana.casa_venusina.signo_casa}
+                          📍 {extractTextFromTooltipDrawer(data.formacion_temprana.casa_venusina.signo_casa)}
                         </p>
                       )}
                       {data.formacion_temprana.casa_venusina.interpretacion && (
@@ -835,7 +859,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         )}
 
         {/* ✅ NUEVA SECCIÓN: PATRONES PSICOLÓGICOS */}
-        {(Array.isArray(data.patrones_psicologicos) || typeof data.patrones_psicologicos === 'string') && (
+        {data.patrones_psicologicos && (
           <div className="bg-gradient-to-br from-indigo-900/40 to-purple-900/40 rounded-2xl p-8 border border-indigo-400/30">
             <h4 className="text-indigo-100 font-bold text-xl mb-6 flex items-center gap-3">
               <Brain className="w-8 h-8 text-indigo-300" />
@@ -865,7 +889,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         )}
 
         {/* ✅ NUEVA SECCIÓN: PLANETAS PROFUNDOS */}
-        {typeof data.planetas_profundos === 'object' && !Array.isArray(data.planetas_profundos) && (
+        {data.planetas_profundos && (
           <div className="bg-gradient-to-br from-violet-900/40 to-purple-900/40 rounded-2xl p-8 border border-violet-400/30">
             <h4 className="text-violet-100 font-bold text-xl mb-6 flex items-center gap-3">
               <Sparkles className="w-8 h-8 text-violet-300" />
@@ -895,7 +919,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         )}
 
         {/* ✅ NUEVA SECCIÓN: NODOS LUNALES */}
-        {typeof data.nodos_lunares === 'object' && !Array.isArray(data.nodos_lunares) && (
+        {data.nodos_lunares && (
           <div className="bg-gradient-to-br from-slate-900/40 to-gray-900/40 rounded-2xl p-8 border border-slate-400/30">
             <h4 className="text-slate-100 font-bold text-xl mb-6 flex items-center gap-3">
               <Target className="w-8 h-8 text-slate-300" />
@@ -986,14 +1010,14 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         )}
 
         {/* ✅ SOLAR RETURN: TEMA CENTRAL DEL AÑO */}
-        {typeof data.tema_anual === 'string' && type === 'solar-return' && (
+        {data.tema_anual && type === 'solar-return' && (
           <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 rounded-2xl p-8 border border-amber-400/30">
             <h4 className="text-amber-100 font-bold text-xl mb-4 flex items-center gap-3">
               <Sparkles className="w-8 h-8 text-amber-300" />
               Tema Central del Año
             </h4>
             <p className="text-amber-50 text-2xl leading-relaxed font-bold text-center italic">
-              "{typeof data.tema_anual === 'string' ? data.tema_anual : JSON.stringify(data.tema_anual)}"
+              "{data.tema_anual}"
             </p>
           </div>
         )}
@@ -1191,14 +1215,14 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           </div>
         )}
 
-        {typeof data.plan_accion === 'object' && !Array.isArray(data.plan_accion) && (
+        {data.plan_accion && (
           <div className="bg-gradient-to-br from-orange-900/40 to-red-900/40 rounded-2xl p-8 border border-orange-400/30">
             <h4 className="text-orange-100 font-bold text-xl mb-6 flex items-center gap-3">
               <Zap className="w-8 h-8 text-orange-300" />
               Plan de Acción Inmediato
             </h4>
-
-            {data.plan_accion.hoy_mismo && Array.isArray(data.plan_accion.hoy_mismo) && (
+            
+            {data.plan_accion.hoy_mismo && (
               <div className="mb-6">
                 <h5 className="text-orange-200 font-bold text-lg mb-3">🔥 HOY MISMO:</h5>
                 <ul className="space-y-3">
@@ -1212,7 +1236,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               </div>
             )}
 
-            {data.plan_accion.esta_semana && Array.isArray(data.plan_accion.esta_semana) && (
+            {data.plan_accion.esta_semana && (
               <div className="mb-6">
                 <h5 className="text-orange-200 font-bold text-lg mb-3">⚡ ESTA SEMANA:</h5>
                 <ul className="space-y-3">
@@ -1226,7 +1250,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               </div>
             )}
 
-            {data.plan_accion.este_mes && Array.isArray(data.plan_accion.este_mes) && (
+            {data.plan_accion.este_mes && (
               <div>
                 <h5 className="text-orange-200 font-bold text-lg mb-3">🚀 ESTE MES:</h5>
                 <ul className="space-y-3">
@@ -1242,7 +1266,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           </div>
         )}
 
-        {typeof data.declaracion_poder === 'string' && (
+        {data.declaracion_poder && (
           <div className="bg-gradient-to-br from-emerald-900/40 to-green-900/40 rounded-2xl p-8 border border-emerald-400/30">
             <h4 className="text-emerald-100 font-bold text-xl mb-4 flex items-center gap-3">
               <TrendingUp className="w-8 h-8 text-emerald-300" />
@@ -1256,7 +1280,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           </div>
         )}
 
-        {Array.isArray(data.advertencias) && (
+        {data.advertencias && (
           <div className="bg-gradient-to-br from-red-900/40 to-rose-900/40 rounded-2xl p-8 border border-red-400/30">
             <h4 className="text-red-100 font-bold text-xl mb-4">⚠️ Advertencias Brutalmente Honestas</h4>
             <ul className="space-y-3">
@@ -1270,7 +1294,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           </div>
         )}
 
-        {Array.isArray(data.insights_transformacionales) && (
+        {data.insights_transformacionales && (
           <div className="bg-green-900/30 rounded-xl p-6">
             <h4 className="text-green-200 font-semibold mb-3 flex items-center gap-2">
               <Sparkles className="w-5 h-5" />
@@ -1287,7 +1311,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           </div>
         )}
 
-        {Array.isArray(data.rituales_recomendados) && (
+        {data.rituales_recomendados && (
           <div className="bg-violet-900/30 rounded-xl p-6">
             <h4 className="text-violet-200 font-semibold mb-3">
               🕯️ Rituales Recomendados
@@ -1321,13 +1345,13 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                     {data.angulos_vitales.ascendente.mascara_social && (
                       <div className="bg-amber-700/30 rounded-lg p-3">
                         <p className="text-amber-200 font-semibold text-sm mb-1">🎭 Máscara Social:</p>
-                        <p className="text-amber-50 text-sm">{data.angulos_vitales.ascendente.mascara_social}</p>
+                        <p className="text-amber-50 text-sm">{extractTextFromTooltipDrawer(data.angulos_vitales.ascendente.mascara_social)}</p>
                       </div>
                     )}
                     {data.angulos_vitales.ascendente.superpoder && (
                       <div className="bg-amber-700/30 rounded-lg p-3">
                         <p className="text-amber-200 font-semibold text-sm mb-1">⚡ Superpoder:</p>
-                        <p className="text-amber-50 text-sm">{data.angulos_vitales.ascendente.superpoder}</p>
+                        <p className="text-amber-50 text-sm">{extractTextFromTooltipDrawer(data.angulos_vitales.ascendente.superpoder)}</p>
                       </div>
                     )}
                   </div>
@@ -1343,13 +1367,13 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                     {data.angulos_vitales.medio_cielo.vocacion_soul && (
                       <div className="bg-amber-700/30 rounded-lg p-3">
                         <p className="text-amber-200 font-semibold text-sm mb-1">✨ Vocación del Alma:</p>
-                        <p className="text-amber-50 text-sm">{data.angulos_vitales.medio_cielo.vocacion_soul}</p>
+                        <p className="text-amber-50 text-sm">{extractTextFromTooltipDrawer(data.angulos_vitales.medio_cielo.vocacion_soul)}</p>
                       </div>
                     )}
                     {data.angulos_vitales.medio_cielo.legado && (
                       <div className="bg-amber-700/30 rounded-lg p-3">
                         <p className="text-amber-200 font-semibold text-sm mb-1">🌟 Legado:</p>
-                        <p className="text-amber-50 text-sm">{data.angulos_vitales.medio_cielo.legado}</p>
+                        <p className="text-amber-50 text-sm">{extractTextFromTooltipDrawer(data.angulos_vitales.medio_cielo.legado)}</p>
                       </div>
                     )}
                   </div>
@@ -1360,7 +1384,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         )}
 
         {/* ✅ NUEVA SECCIÓN: PREGUNTA FINAL DE REFLEXIÓN */}
-        {typeof data.pregunta_final_reflexion === 'string' && (
+        {data.pregunta_final_reflexion && (
           <div className="bg-gradient-to-br from-pink-900/40 to-rose-900/40 rounded-2xl p-8 border border-pink-400/30">
             <h4 className="text-pink-100 font-bold text-xl mb-4 flex items-center gap-3">
               <Sparkles className="w-8 h-8 text-pink-300" />
