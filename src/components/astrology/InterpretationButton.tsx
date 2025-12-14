@@ -290,8 +290,8 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       console.log(`🤖 userId: ${userId}`);
       console.log(`🤖 userProfile:`, userProfile);
 
-      // ✅ CHUNKED GENERATION FOR FASTER RESULTS
-      if (forceRegenerate && type === 'natal') {
+      // ✅ CHUNKED GENERATION FOR FASTER RESULTS - ALWAYS for natal charts
+      if (type === 'natal') {
         console.log('🔄 ===== GENERANDO EN CHUNKS =====');
 
         const chunks: Record<string, any> = {};
@@ -364,7 +364,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         await autoSaveInterpretation(newInterpretation);
 
       } else {
-        // ✅ ORIGINAL SINGLE REQUEST FOR NON-NATAL OR NON-FORCE REGENERATE
+        // ✅ SINGLE REQUEST FOR SOLAR-RETURN AND PROGRESSED (natal always uses chunks)
         // ✅ Simulate progress messages
         if (forceRegenerate) {
           setTimeout(() => setGenerationProgress('Conectando con los astros...'), 500);
@@ -374,15 +374,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           setTimeout(() => setGenerationProgress('Casi listo... Creando tu revolución personal...'), 10000);
         }
 
-        const requestBody = isNatal
-          ? {
-              userId,
-              natalChart: chartData,  // ✅ FIX: interpret-natal-clean expects 'natalChart'
-              userProfile,
-              regenerate: forceRegenerate,
-              disruptiveMode: true  // ✅ Activar modo disruptivo para usar el prompt completo
-            }
-          : isSolarReturn
+        const requestBody = isSolarReturn
           ? {
               userId,
               natalChart: natalChart || {},
@@ -485,25 +477,8 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
 
           let interpretationData;
 
-          if (type === 'natal') {
-            interpretationData = {
-              esencia_revolucionaria: rawInterpretation.esencia_revolucionaria,
-              proposito_vida: rawInterpretation.proposito_vida,
-              formacion_temprana: rawInterpretation.formacion_temprana,
-              patrones_psicologicos: rawInterpretation.patrones_psicologicos,
-              planetas_profundos: rawInterpretation.planetas_profundos,
-              angulos_vitales: rawInterpretation.angulos_vitales, // ✅ NUEVO: Ascendente y MC
-              nodos_lunares: rawInterpretation.nodos_lunares,
-              planetas: rawInterpretation.planetas,
-              plan_accion: rawInterpretation.plan_accion,
-              declaracion_poder: rawInterpretation.declaracion_poder,
-              advertencias: rawInterpretation.advertencias,
-              insights_transformacionales: rawInterpretation.insights_transformacionales,
-              rituales_recomendados: rawInterpretation.rituales_recomendados,
-              pregunta_final_reflexion: rawInterpretation.pregunta_final_reflexion, // ✅ NUEVO
-              integracion_carta: rawInterpretation.integracion_carta
-            };
-          } else if (type === 'solar-return') {
+          // ✅ Only solar-return and progressed reach this point (natal uses chunks)
+          if (type === 'solar-return') {
             interpretationData = {
               esencia_revolucionaria: rawInterpretation.esencia_revolucionaria_anual,
               proposito_vida: rawInterpretation.proposito_vida_anual,
