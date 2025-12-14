@@ -231,36 +231,56 @@ export default function NatalChartPage() {
         { message: '✨ Finalizando interpretaciones...', delay: 3000 },
       ];
 
-      let messageIndex = 0;
-      const messageInterval = setInterval(() => {
-        if (messageIndex < progressMessages.length) {
-          setInterpretationProgress(progressMessages[messageIndex].message);
-          messageIndex++;
+      // ✅ CHUNKED GENERATION FOR FASTER RESULTS - ALWAYS for natal charts
+      console.log('🔄 ===== GENERANDO EN CHUNKS =====');
+
+      const chunks: Record<string, any> = {};
+      const sections = [
+        { key: 'esencia', section: 'esencia_revolucionaria', label: 'Esencia Revolucionaria', progress: 20 },
+        { key: 'proposito', section: 'proposito_vida', label: 'Propósito de Vida', progress: 40 },
+        { key: 'formacion', section: 'formacion_temprana', label: 'Formación Temprana', progress: 60 },
+        { key: 'nodos', section: 'nodos_lunares', label: 'Nodos Lunares', progress: 80 },
+        { key: 'declaracion', section: 'declaracion_poder', label: 'Declaración de Poder', progress: 100 }
+      ];
+
+      let chunkSuccess = true;
+
+      for (const { key, section, label, progress } of sections) {
+        setInterpretationProgress(`🔮 Generando ${label}... (${progress}%)`);
+
+        const chunkResponse = await fetch('/api/astrology/interpret-chunk', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: user.uid,
+            chartData: dataToUse,
+            section,
+            userProfile: {
+              name: birthData.fullName || 'Usuario',
+              age: new Date().getFullYear() - new Date(birthData.birthDate).getFullYear(),
+              birthPlace: birthData.birthPlace,
+              birthDate: birthData.birthDate,
+              birthTime: birthData.birthTime
+            },
+            type: 'natal',
+            natalChart: dataToUse
+          })
+        });
+
+        const chunkData = await chunkResponse.json();
+
+        if (!chunkData.success) {
+          console.error(`❌ Error generating chunk ${key}:`, chunkData.error);
+          chunkSuccess = false;
+          break;
         }
-      }, 7000); // Cambiar mensaje cada 7 segundos
 
-      // 🚀 LLAMADA AL BACKEND (mientras mostramos progreso)
-      const response = await fetch('/api/astrology/interpret-natal-complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user.uid,
-          chartData: dataToUse,
-          userProfile: {
-            name: birthData.fullName || 'Usuario',
-            age: new Date().getFullYear() - new Date(birthData.birthDate).getFullYear(),
-            birthPlace: birthData.birthPlace,
-            birthDate: birthData.birthDate,
-            birthTime: birthData.birthTime
-          }
-        })
-      });
+        chunks[key] = chunkData.data;
+        console.log(`✅ Chunk ${key} completed (${progress}%)`);
+      }
 
-      clearInterval(messageInterval);
-      const result = await response.json();
-
-      if (result.success) {
-        console.log('✅ AI Interpretations generated successfully!');
+      if (chunkSuccess) {
+        console.log('✅ AI Interpretations generated successfully with chunks!');
         setHasInterpretations(true);
         setInterpretationProgress('🎉 ¡Interpretaciones completadas! Tu análisis profundo está listo.');
 
@@ -270,8 +290,8 @@ export default function NatalChartPage() {
           setGeneratingInterpretations(false);
         }, 5000);
       } else {
-        console.error('❌ Error generating interpretations:', result.error);
-        setInterpretationProgress('⚠️ Error generando interpretaciones: ' + (result.error || 'Error desconocido'));
+        console.error('❌ Error generating interpretations in chunks');
+        setInterpretationProgress('⚠️ Error generando interpretaciones. Por favor intenta de nuevo.');
         setTimeout(() => {
           setGeneratingInterpretations(false);
         }, 5000);
