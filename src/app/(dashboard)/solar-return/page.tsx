@@ -386,13 +386,29 @@ export default function SolarReturnPage() {
 
         {/* ✅ SECCIÓN 2: BOTÓN DE INTERPRETACIÓN */}
         {solarReturnData && natalChart && birthData && (() => {
+          // ✅ Helper function to extract text from objects (handles {tooltip, drawer} structure)
+          const extractText = (value: any): string => {
+            if (typeof value === 'string') return value;
+            if (typeof value === 'number') return value.toString();
+            if (value && typeof value === 'object') {
+              // Handle {tooltip, drawer} or similar structures
+              if (value.drawer) return value.drawer;
+              if (value.tooltip) return value.tooltip;
+              if (value.text) return value.text;
+              if (value.value) return value.value;
+              // Fallback: return empty string for objects
+              return '';
+            }
+            return '';
+          };
+
           const userProfile = {
-            name: birthData.fullName || 'Usuario',
+            name: extractText(birthData.fullName) || extractText(birthData.name) || 'Usuario',
             age: calculateAge(birthData.birthDate || birthData.date),
-            birthPlace: birthData.birthPlace || '',
-            currentLocation: birthData.currentPlace || birthData.currentLocation || birthData.birthPlace || '', // ✅ Add current location for SR
+            birthPlace: extractText(birthData.birthPlace) || '',
+            currentLocation: extractText(birthData.currentPlace || birthData.currentLocation || birthData.birthPlace) || '',
             birthDate: new Date(birthData.birthDate || birthData.date).toLocaleDateString('es-ES'),
-            birthTime: birthData.birthTime || birthData.time || ''
+            birthTime: extractText(birthData.birthTime || birthData.time) || ''
           };
 
           if (!userProfile.name || userProfile.name === 'Usuario') {

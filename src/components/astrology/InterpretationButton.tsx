@@ -17,6 +17,7 @@ interface InterpretationButtonProps {
     name: string;
     age: number;
     birthPlace: string;
+    currentLocation?: string; // ✅ Add optional currentLocation for Solar Return
     birthDate: string;
     birthTime: string;
   };
