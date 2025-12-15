@@ -141,16 +141,19 @@ async function callProkeralaSolarReturn(birthData: any, returnYear: number) {
       year: returnYear
     });
 
-    // 3. Llamar API natal-chart en la fecha del Solar Return
-    // ✅ CAMBIO CRÍTICO: Usar endpoint correcto para Solar Return
-    // El endpoint correcto es /v2/astrology/solar-return pero parece que no existe
-    // Usamos natal-chart con la fecha del Solar Return como hicimos originalmente
-    const url = new URL('https://api.prokerala.com/v2/astrology/natal-chart');
+    // 3. Llamar API para obtener posiciones planetarias del Solar Return
+    // ✅ CAMBIO CRÍTICO: Usar natal-planet-position (devuelve JSON), NO natal-chart (devuelve SVG)
+    // No existe /v2/astrology/solar-return en Prokerala, usamos natal-planet-position con la fecha del Solar Return
+    const url = new URL('https://api.prokerala.com/v2/astrology/natal-planet-position');
     url.searchParams.append('profile[datetime]', solarReturnDatetime);
     url.searchParams.append('profile[coordinates]', coordinates);
     url.searchParams.append('birth_time_unknown', 'false');
     url.searchParams.append('house_system', 'placidus');
+    url.searchParams.append('orb', 'default');
+    url.searchParams.append('birth_time_rectification', 'flat-chart');
+    url.searchParams.append('aspect_filter', 'all');
     url.searchParams.append('la', 'es');
+    url.searchParams.append('ayanamsa', '0');
 
     console.log('🔗 URL completa:', url.toString());
     console.log('📋 Parámetros URL:', {
@@ -158,7 +161,11 @@ async function callProkeralaSolarReturn(birthData: any, returnYear: number) {
       profile_coordinates: coordinates,
       birth_time_unknown: 'false',
       house_system: 'placidus',
-      la: 'es'
+      orb: 'default',
+      birth_time_rectification: 'flat-chart',
+      aspect_filter: 'all',
+      la: 'es',
+      ayanamsa: '0'
     });
 
     const response = await fetch(url.toString(), {
