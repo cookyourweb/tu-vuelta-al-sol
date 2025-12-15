@@ -17,6 +17,7 @@ interface InterpretationButtonProps {
     name: string;
     age: number;
     birthPlace: string;
+    currentLocation?: string; // ✅ Add optional currentLocation for Solar Return
     birthDate: string;
     birthTime: string;
   };
@@ -730,7 +731,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               <Star className="w-8 h-8 text-purple-300" />
               Tu Esencia Revolucionaria
             </h4>
-            <p className="text-purple-50 text-lg leading-relaxed font-medium">{data.esencia_revolucionaria}</p>
+            <p className="text-purple-50 text-lg leading-relaxed font-medium">{extractTextFromTooltipDrawer(data.esencia_revolucionaria)}</p>
           </div>
         )}
 
@@ -740,7 +741,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               <Target className="w-8 h-8 text-blue-300" />
               Tu Propósito de Vida
             </h4>
-      <p className="text-blue-50 text-lg leading-relaxed font-medium">{data.proposito_vida}</p>
+      <p className="text-blue-50 text-lg leading-relaxed font-medium">{extractTextFromTooltipDrawer(data.proposito_vida)}</p>
           </div>
         )}
 
@@ -771,7 +772,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                       )}
                       {data.formacion_temprana.casa_lunar.interpretacion && (
                         <p className="text-cyan-50 text-sm">
-                          {data.formacion_temprana.casa_lunar.interpretacion}
+                          {extractTextFromTooltipDrawer(data.formacion_temprana.casa_lunar.interpretacion)}
                         </p>
                       )}
                       {data.formacion_temprana.casa_lunar.influencia && (
@@ -780,7 +781,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                             🌟 Influencia:
                           </p>
                           <p className="text-cyan-50 text-xs">
-                            {data.formacion_temprana.casa_lunar.influencia}
+                            {extractTextFromTooltipDrawer(data.formacion_temprana.casa_lunar.influencia)}
                           </p>
                         </div>
                       )}
@@ -806,7 +807,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                       )}
                       {data.formacion_temprana.casa_saturnina.interpretacion && (
                         <p className="text-cyan-50 text-sm">
-                          {data.formacion_temprana.casa_saturnina.interpretacion}
+                          {extractTextFromTooltipDrawer(data.formacion_temprana.casa_saturnina.interpretacion)}
                         </p>
                       )}
                       {data.formacion_temprana.casa_saturnina.leccion && (
@@ -815,7 +816,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                             📚 Lección:
                           </p>
                           <p className="text-cyan-50 text-xs">
-                            {data.formacion_temprana.casa_saturnina.leccion}
+                            {extractTextFromTooltipDrawer(data.formacion_temprana.casa_saturnina.leccion)}
                           </p>
                         </div>
                       )}
@@ -837,7 +838,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                       )}
                       {data.formacion_temprana.casa_venusina.interpretacion && (
                         <p className="text-cyan-50 text-sm">
-                          {data.formacion_temprana.casa_venusina.interpretacion}
+                          {extractTextFromTooltipDrawer(data.formacion_temprana.casa_venusina.interpretacion)}
                         </p>
                       )}
                       {data.formacion_temprana.casa_venusina.valores && (
@@ -846,7 +847,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                             💎 Valores:
                           </p>
                           <p className="text-cyan-50 text-xs">
-                            {data.formacion_temprana.casa_venusina.valores}
+                            {extractTextFromTooltipDrawer(data.formacion_temprana.casa_venusina.valores)}
                           </p>
                         </div>
                       )}
@@ -1017,7 +1018,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               Tema Central del Año
             </h4>
             <p className="text-amber-50 text-2xl leading-relaxed font-bold text-center italic">
-              "{data.tema_anual}"
+              "{extractTextFromTooltipDrawer(data.tema_anual)}"
             </p>
           </div>
         )}
@@ -1036,10 +1037,10 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                   🎯 Ascendente Solar Return en Casa {data.analisis_tecnico.asc_sr_en_casa_natal.casa_natal} Natal
                 </h4>
                 <p className="text-indigo-200 text-sm mb-3">
-                  Signo: {data.analisis_tecnico.asc_sr_en_casa_natal.signo_asc_sr}
+                  Signo: {extractTextFromTooltipDrawer(data.analisis_tecnico.asc_sr_en_casa_natal.signo_asc_sr)}
                 </p>
                 <p className="text-indigo-50 text-lg leading-relaxed mb-4">
-                  {data.analisis_tecnico.asc_sr_en_casa_natal.interpretacion}
+                  {extractTextFromTooltipDrawer(data.analisis_tecnico.asc_sr_en_casa_natal.interpretacion)}
                 </p>
                 {data.analisis_tecnico.asc_sr_en_casa_natal.palabras_clave && (
                   <div className="flex flex-wrap gap-2 mt-4">
@@ -1064,12 +1065,12 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                   {data.analisis_tecnico.sol_en_casa_sr.cambio_de_casa ? ' ⚡ Casa cambió' : ' ✓ Misma casa'}
                 </p>
                 <p className="text-yellow-50 text-lg leading-relaxed mb-4">
-                  {data.analisis_tecnico.sol_en_casa_sr.interpretacion}
+                  {extractTextFromTooltipDrawer(data.analisis_tecnico.sol_en_casa_sr.interpretacion)}
                 </p>
                 {data.analisis_tecnico.sol_en_casa_sr.energia_disponible && (
                   <div className="bg-yellow-800/30 rounded-lg p-4 mt-4">
                     <p className="text-yellow-100 font-semibold">
-                      💪 Energía Disponible: {data.analisis_tecnico.sol_en_casa_sr.energia_disponible}
+                      💪 Energía Disponible: {extractTextFromTooltipDrawer(data.analisis_tecnico.sol_en_casa_sr.energia_disponible)}
                     </p>
                   </div>
                 )}
@@ -1086,9 +1087,9 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                   {data.analisis_tecnico.planetas_angulares_sr.map((planeta: any, i: number) => (
                     <div key={i} className="bg-purple-800/30 rounded-lg p-4">
                       <h5 className="text-purple-200 font-bold text-lg mb-2">
-                        {planeta.planeta} en {planeta.angulo}
+                        {extractTextFromTooltipDrawer(planeta.planeta)} en {extractTextFromTooltipDrawer(planeta.angulo)}
                       </h5>
-                      <p className="text-purple-50">{planeta.interpretacion}</p>
+                      <p className="text-purple-50">{extractTextFromTooltipDrawer(planeta.interpretacion)}</p>
                     </div>
                   ))}
                 </div>
@@ -1106,23 +1107,23 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {data.calendario_lunar.map((mes: any, i: number) => (
                 <div key={i} className="bg-slate-800/50 rounded-xl p-4 border border-slate-500/20">
-                  <h4 className="text-slate-100 font-bold text-lg mb-3">{mes.mes}</h4>
+                  <h4 className="text-slate-100 font-bold text-lg mb-3">{extractTextFromTooltipDrawer(mes.mes)}</h4>
 
                   {mes.luna_nueva && (
                     <div className="mb-3 p-3 bg-blue-900/30 rounded-lg">
                       <p className="text-blue-200 font-semibold text-sm">🌑 Luna Nueva</p>
-                      <p className="text-blue-100 text-xs">{mes.luna_nueva.fecha}</p>
-                      <p className="text-blue-100 text-sm">{mes.luna_nueva.signo}</p>
-                      <p className="text-blue-50 text-xs mt-2">{mes.luna_nueva.mensaje}</p>
+                      <p className="text-blue-100 text-xs">{extractTextFromTooltipDrawer(mes.luna_nueva.fecha)}</p>
+                      <p className="text-blue-100 text-sm">{extractTextFromTooltipDrawer(mes.luna_nueva.signo)}</p>
+                      <p className="text-blue-50 text-xs mt-2">{extractTextFromTooltipDrawer(mes.luna_nueva.mensaje)}</p>
                     </div>
                   )}
 
                   {mes.luna_llena && (
                     <div className="p-3 bg-yellow-900/30 rounded-lg">
                       <p className="text-yellow-200 font-semibold text-sm">🌕 Luna Llena</p>
-                      <p className="text-yellow-100 text-xs">{mes.luna_llena.fecha}</p>
-                      <p className="text-yellow-100 text-sm">{mes.luna_llena.signo}</p>
-                      <p className="text-yellow-50 text-xs mt-2">{mes.luna_llena.mensaje}</p>
+                      <p className="text-yellow-100 text-xs">{extractTextFromTooltipDrawer(mes.luna_llena.fecha)}</p>
+                      <p className="text-yellow-100 text-sm">{extractTextFromTooltipDrawer(mes.luna_llena.signo)}</p>
+                      <p className="text-yellow-50 text-xs mt-2">{extractTextFromTooltipDrawer(mes.luna_llena.mensaje)}</p>
                     </div>
                   )}
                 </div>
@@ -1141,17 +1142,17 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               {data.eventos_clave.map((evento: any, i: number) => (
                 <div key={i} className="bg-rose-800/30 rounded-xl p-6 border border-rose-500/20">
                   <div className="flex justify-between items-start mb-3">
-                    <h4 className="text-rose-100 font-bold text-lg">{evento.evento}</h4>
+                    <h4 className="text-rose-100 font-bold text-lg">{extractTextFromTooltipDrawer(evento.evento)}</h4>
                     <span className="bg-rose-600/40 text-rose-100 px-3 py-1 rounded-full text-xs">
-                      {evento.periodo}
+                      {extractTextFromTooltipDrawer(evento.periodo)}
                     </span>
                   </div>
-                  <p className="text-rose-200 text-sm mb-2">Tipo: {evento.tipo}</p>
-                  <p className="text-rose-50 leading-relaxed mb-4">{evento.descripcion}</p>
+                  <p className="text-rose-200 text-sm mb-2">Tipo: {extractTextFromTooltipDrawer(evento.tipo)}</p>
+                  <p className="text-rose-50 leading-relaxed mb-4">{extractTextFromTooltipDrawer(evento.descripcion)}</p>
                   {evento.accion_recomendada && (
                     <div className="bg-green-900/30 rounded-lg p-3">
                       <p className="text-green-200 font-semibold text-sm">🎯 Acción Recomendada:</p>
-                      <p className="text-green-50 text-sm">{evento.accion_recomendada}</p>
+                      <p className="text-green-50 text-sm">{extractTextFromTooltipDrawer(evento.accion_recomendada)}</p>
                     </div>
                   )}
                 </div>
@@ -1174,40 +1175,40 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               >
                 {planetData.titulo && (
                   <h4 className="text-indigo-100 font-bold text-xl mb-4">
-                    {planetData.titulo}
+                    {extractTextFromTooltipDrawer(planetData.titulo)}
                   </h4>
                 )}
 
                 {planetData.posicion_tecnica && (
                   <p className="text-indigo-300 text-sm mb-3 font-mono">
-                    📍 {planetData.posicion_tecnica}
+                    📍 {extractTextFromTooltipDrawer(planetData.posicion_tecnica)}
                   </p>
                 )}
 
                 {planetData.descripcion && (
                   <div className="text-indigo-50 leading-relaxed mb-4 whitespace-pre-line">
-                    {planetData.descripcion}
+                    {extractTextFromTooltipDrawer(planetData.descripcion)}
                   </div>
                 )}
 
                 {planetData.poder_especifico && (
                   <div className="bg-indigo-800/30 rounded-lg p-4 mb-3">
                     <p className="text-indigo-200 font-semibold text-sm mb-1">⚡ TU SUPERPODER:</p>
-                    <p className="text-indigo-50">{planetData.poder_especifico}</p>
+                    <p className="text-indigo-50">{extractTextFromTooltipDrawer(planetData.poder_especifico)}</p>
                   </div>
                 )}
 
                 {planetData.accion_inmediata && (
                   <div className="bg-green-900/30 rounded-lg p-4 mb-3">
                     <p className="text-green-200 font-semibold text-sm mb-1">🎯 ACCIÓN HOY:</p>
-                    <p className="text-green-50">{planetData.accion_inmediata}</p>
+                    <p className="text-green-50">{extractTextFromTooltipDrawer(planetData.accion_inmediata)}</p>
                   </div>
                 )}
 
                 {planetData.ritual && (
                   <div className="bg-purple-900/30 rounded-lg p-4">
                     <p className="text-purple-200 font-semibold text-sm mb-1">🕯️ RITUAL:</p>
-                    <p className="text-purple-50">{planetData.ritual}</p>
+                    <p className="text-purple-50">{extractTextFromTooltipDrawer(planetData.ritual)}</p>
                   </div>
                 )}
               </div>
@@ -1229,7 +1230,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                   {data.plan_accion.hoy_mismo.map((accion: string, index: number) => (
                     <li key={index} className="text-orange-50 flex items-start gap-3">
                       <span className="text-orange-400 font-bold text-lg">•</span>
-                      <span className="font-medium">{accion}</span>
+                      <span className="font-medium">{extractTextFromTooltipDrawer(accion)}</span>
                     </li>
                   ))}
                 </ul>
@@ -1243,7 +1244,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                   {data.plan_accion.esta_semana.map((accion: string, index: number) => (
                     <li key={index} className="text-orange-50 flex items-start gap-3">
                       <span className="text-orange-400 font-bold text-lg">•</span>
-                      <span className="font-medium">{accion}</span>
+                      <span className="font-medium">{extractTextFromTooltipDrawer(accion)}</span>
                     </li>
                   ))}
                 </ul>
@@ -1257,7 +1258,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                   {data.plan_accion.este_mes.map((accion: string, index: number) => (
                     <li key={index} className="text-orange-50 flex items-start gap-3">
                       <span className="text-orange-400 font-bold text-lg">•</span>
-                      <span className="font-medium">{accion}</span>
+                      <span className="font-medium">{extractTextFromTooltipDrawer(accion)}</span>
                     </li>
                   ))}
                 </ul>
@@ -1274,7 +1275,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
             </h4>
             <div className="bg-emerald-800/30 rounded-xl p-6 border border-emerald-400/20">
               <p className="text-emerald-50 text-lg leading-relaxed font-bold italic">
-                "{data.declaracion_poder}"
+                "{extractTextFromTooltipDrawer(data.declaracion_poder)}"
               </p>
             </div>
           </div>
@@ -1287,7 +1288,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               {data.advertencias.map((advertencia: string, index: number) => (
                 <li key={index} className="text-red-50 flex items-start gap-3">
                   <span className="text-red-400 font-bold text-lg">⚠️</span>
-                  <span className="font-medium">{advertencia}</span>
+                  <span className="font-medium">{extractTextFromTooltipDrawer(advertencia)}</span>
                 </li>
               ))}
             </ul>
@@ -1304,7 +1305,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               {data.insights_transformacionales.map((insight: string, index: number) => (
                 <li key={index} className="text-green-100 flex items-start gap-2">
                   <span className="text-green-400 mt-1">•</span>
-                  {insight}
+                  {extractTextFromTooltipDrawer(insight)}
                 </li>
               ))}
             </ul>
@@ -1320,7 +1321,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               {data.rituales_recomendados.map((ritual: string, index: number) => (
                 <li key={index} className="text-violet-100 flex items-start gap-2">
                   <span className="text-violet-400 mt-1">•</span>
-                  {ritual}
+                  {extractTextFromTooltipDrawer(ritual)}
                 </li>
               ))}
             </ul>
@@ -1340,7 +1341,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                   <h5 className="text-amber-200 font-semibold text-lg mb-4">⬆️ Tu Ascendente</h5>
                   <div className="space-y-3">
                     {data.angulos_vitales.ascendente.posicion && (
-                      <p className="text-amber-200 text-sm font-semibold">📍 {data.angulos_vitales.ascendente.posicion}</p>
+                      <p className="text-amber-200 text-sm font-semibold">📍 {extractTextFromTooltipDrawer(data.angulos_vitales.ascendente.posicion)}</p>
                     )}
                     {data.angulos_vitales.ascendente.mascara_social && (
                       <div className="bg-amber-700/30 rounded-lg p-3">
@@ -1362,7 +1363,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                   <h5 className="text-amber-200 font-semibold text-lg mb-4">🏔️ Tu Medio Cielo</h5>
                   <div className="space-y-3">
                     {data.angulos_vitales.medio_cielo.posicion && (
-                      <p className="text-amber-200 text-sm font-semibold">📍 {data.angulos_vitales.medio_cielo.posicion}</p>
+                      <p className="text-amber-200 text-sm font-semibold">📍 {extractTextFromTooltipDrawer(data.angulos_vitales.medio_cielo.posicion)}</p>
                     )}
                     {data.angulos_vitales.medio_cielo.vocacion_soul && (
                       <div className="bg-amber-700/30 rounded-lg p-3">
@@ -1392,7 +1393,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
             </h4>
             <div className="bg-pink-800/30 rounded-xl p-6 border border-pink-400/20">
               <p className="text-pink-50 text-xl leading-relaxed font-medium italic text-center">
-                "{data.pregunta_final_reflexion}"
+                "{extractTextFromTooltipDrawer(data.pregunta_final_reflexion)}"
               </p>
             </div>
           </div>
@@ -1409,7 +1410,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               <div className="mb-6">
                 <h4 className="text-emerald-200 font-bold text-xl mb-3">Síntesis del Año</h4>
                 <p className="text-emerald-50 text-lg leading-relaxed">
-                  {data.integracion_final.sintesis}
+                  {extractTextFromTooltipDrawer(data.integracion_final.sintesis)}
                 </p>
               </div>
             )}
@@ -1418,7 +1419,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               <div className="bg-emerald-800/30 rounded-xl p-6 border border-emerald-400/20">
                 <p className="text-emerald-200 font-semibold mb-2">💭 Pregunta para Reflexionar:</p>
                 <p className="text-emerald-50 text-lg italic">
-                  "{data.integracion_final.pregunta_reflexion}"
+                  "{extractTextFromTooltipDrawer(data.integracion_final.pregunta_reflexion)}"
                 </p>
               </div>
             )}
