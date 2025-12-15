@@ -152,15 +152,11 @@ async function callProkeralaSolarReturn(birthData: any, returnYear: number) {
     url.searchParams.append('house_system', 'placidus');
     url.searchParams.append('la', 'es');
 
-    // ✅ Forzar formato JSON explícitamente
-    url.searchParams.append('format', 'json');
-
     console.log('🔗 URL completa:', url.toString());
     console.log('📋 Parámetros URL:', {
       profile_datetime: solarReturnDatetime,
       profile_coordinates: coordinates,
       birth_time_unknown: 'false',
-      format: 'json',
       house_system: 'placidus',
       la: 'es'
     });
@@ -168,8 +164,7 @@ async function callProkeralaSolarReturn(birthData: any, returnYear: number) {
     const response = await fetch(url.toString(), {
       headers: {
         'Authorization': `Bearer ${access_token}`,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        'Accept': 'application/json'
       }
     });
 
