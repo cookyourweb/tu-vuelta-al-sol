@@ -133,16 +133,16 @@ export default function EventInterpretationButton({
         </div>
       )}
 
-      {/* MODAL */}
+      {/* MODAL FULLSCREEN */}
       {showModal && interpretation && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm overflow-y-auto">
           <div className="min-h-screen px-4 py-8">
-            <div className="max-w-4xl mx-auto bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 rounded-2xl shadow-2xl border border-purple-500/20">
+            <div className="max-w-5xl mx-auto bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 rounded-2xl shadow-2xl border border-purple-500/20 mb-8">
               {/* HEADER */}
-              <div className="sticky top-0 z-10 bg-gradient-to-r from-purple-900/90 to-pink-900/90 backdrop-blur-sm px-6 py-4 rounded-t-2xl border-b border-purple-400/30">
+              <div className="bg-gradient-to-r from-purple-900/90 to-pink-900/90 px-6 py-4 rounded-t-2xl border-b border-purple-400/30">
                 <div className="flex justify-between items-start gap-4">
                   <div className="flex-1">
-                    <h2 className="text-2xl font-bold text-white mb-1">
+                    <h2 className="text-2xl md:text-3xl font-bold text-white mb-1">
                       {interpretation.titulo_evento || 'Interpretación del Evento'}
                     </h2>
                     <p className="text-purple-200 text-sm">
@@ -173,8 +173,8 @@ export default function EventInterpretationButton({
                 </div>
               </div>
 
-              {/* CONTENT */}
-              <div className="p-8 space-y-8 max-h-[calc(100vh-200px)] overflow-y-auto">
+              {/* CONTENT - Sin restricciones de altura */}
+              <div className="p-6 md:p-8 space-y-8">
                 {/* Para Ti Específicamente */}
                 {interpretation.para_ti_especificamente && (
                   <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 rounded-2xl p-6 border border-purple-400/30">

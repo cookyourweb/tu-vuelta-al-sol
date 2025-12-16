@@ -776,6 +776,14 @@ const AgendaPersonalizada = () => {
     loadYearEvents();
   }, [userProfile]);
 
+  // 🎂 Inicializar currentMonth al mes del cumpleaños cuando se calcula yearRange
+  useEffect(() => {
+    if (yearRange && yearRange.start) {
+      console.log('🎂 [AGENDA] Setting currentMonth to birthday month:', yearRange.start);
+      setCurrentMonth(yearRange.start);
+    }
+  }, [yearRange]);
+
   // Funciones auxiliares
   const getRandomEventTitle = () => {
     const titles = [
@@ -804,6 +812,36 @@ const AgendaPersonalizada = () => {
   const getRandomSign = () => {
     const signs = ['Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'];
     return signs[Math.floor(Math.random() * signs.length)];
+  };
+
+  // 📅 Obtener días del mes actual con eventos (para vista mensual)
+  const getCurrentMonthDays = () => {
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(currentMonth);
+
+    // Incluir días del mes anterior/siguiente para completar semanas
+    const startDate = new Date(monthStart);
+    startDate.setDate(startDate.getDate() - monthStart.getDay() + 1);
+    const endDate = new Date(monthEnd);
+    endDate.setDate(endDate.getDate() + (7 - monthEnd.getDay()));
+
+    const days = eachDayOfInterval({ start: startDate, end: endDate });
+
+    const daysWithEvents = days.map(day => {
+      const dayEvents = events.filter(event => {
+        const eventDate = new Date(event.date);
+        return isSameDay(day, eventDate);
+      });
+
+      return {
+        date: day,
+        events: dayEvents,
+        isCurrentMonth: isSameMonth(day, currentMonth),
+        hasEvents: dayEvents.length > 0
+      };
+    });
+
+    return daysWithEvents;
   };
 
   // Vista completa del año - generar todos los meses
@@ -1110,30 +1148,21 @@ const AgendaPersonalizada = () => {
               </div>
             </div>
 
-            {/* Calendario completo del año */}
-            <div className="space-y-8">
-              {getYearView().map((monthData, monthIndex) => (
-                <div key={monthIndex} className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-sm rounded-2xl shadow-2xl border border-purple-400/20 overflow-hidden">
+            {/* Calendario mensual */}
+            <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-sm rounded-2xl shadow-2xl border border-purple-400/20 overflow-hidden">
 
-                  {/* Header del mes */}
-                  <div className="bg-gradient-to-r from-purple-700/50 to-indigo-700/50 p-4 border-b border-purple-400/20">
-                    <h3 className="text-xl font-bold text-white text-center capitalize">
-                      {monthData.monthName}
-                    </h3>
+              {/* Días de la semana */}
+              <div className="grid grid-cols-7 bg-gradient-to-r from-purple-700/30 to-indigo-700/30">
+                {weekDays.map((day, index) => (
+                  <div key={index} className="py-3 text-center text-sm font-bold text-purple-100 border-r border-purple-400/20 last:border-r-0">
+                    {day}
                   </div>
+                ))}
+              </div>
 
-                  {/* Días de la semana */}
-                  <div className="grid grid-cols-7 bg-gradient-to-r from-purple-700/30 to-indigo-700/30">
-                    {weekDays.map((day, index) => (
-                      <div key={index} className="py-3 text-center text-sm font-bold text-purple-100 border-r border-purple-400/20 last:border-r-0">
-                        {day}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Días del mes */}
-                  <div className="grid grid-cols-7">
-                    {monthData.days.map((day, index) => {
+              {/* Días del mes actual */}
+              <div className="grid grid-cols-7">
+                {getCurrentMonthDays().map((day, index) => {
                       const isToday = isSameDay(day.date, new Date());
                       const isSelected = selectedDate && isSameDay(day.date, selectedDate);
 
@@ -1200,9 +1229,7 @@ const AgendaPersonalizada = () => {
                         </div>
                       );
                     })}
-                  </div>
-                </div>
-              ))}
+              </div>
             </div>
 
             {/* CONTENIDO DE IMPRESIÓN OCULTO - Solo visible al imprimir */}
