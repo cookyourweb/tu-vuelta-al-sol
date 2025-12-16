@@ -168,92 +168,107 @@ ${transitosActuales}
 
 ---
 
-## 📋 ESTRUCTURA JSON REQUERIDA
+## 📋 ESTRUCTURA JSON REQUERIDA - METODOLOGÍA DE 2 CAPAS
+
+**ORDEN CRÍTICO:** Primero describe (CAPA 1), luego aplica (CAPA 2)
 
 Responde ÚNICAMENTE con JSON válido en español (sin markdown, sin backticks, sin comentarios):
 
 {
-  "titulo_evento": "String de 50-80 caracteres: Título memorable que incluya el nombre del usuario. Ejemplo: 'Luna Nueva en Tauro - Tu Portal de Materialización, ${data.userName}'",
+  "titulo_evento": "String de 50-80 caracteres: Título memorable que incluya el nombre del usuario. Ejemplo: 'Luna Llena en Géminis - Tu Portal de Conciencia, ${data.userName}'",
 
-  "para_ti_especificamente": "String de 100-150 palabras:
+  "capa_1_descriptivo": {
+    "datos_objetivos": {
+      "evento": "String: Tipo de evento (Luna Nueva, Luna Llena, Tránsito de Júpiter, Aspecto Sol-Marte, etc.)",
+      "fecha": "${data.event.date}",
+      "signo_principal": "${data.event.sign || 'Evento en signo'}",
+      "signo_opuesto": "String o null: Signo opuesto si aplica (para Luna Llena, oposiciones) o null",
+      "tipo_energia": "String 20-30 palabras: Describe el tipo de energía (ej: Culminación / conciencia / cierre, o Inicio / siembra / intención nueva)"
+    },
 
-    - EMPIEZA OBLIGATORIAMENTE con: 'Para TI, ${data.userName}, con tu [configuración natal específica]:'
-    - Menciona su Sol, Luna o Ascendente y en qué casa están
-    - Explica qué casa natal activa este evento (${data.event.house}) y QUÉ SIGNIFICA ESA CASA
-    - Conecta la energía del evento con su configuración natal específica
-    - Usa MAYÚSCULAS para énfasis en 2-3 palabras clave
-    - Usa la palabra 'PERO' para contrastar aspectos de su carta
+    "casas_activadas_en_tu_carta": {
+      "casa_principal": "String: Casa ${data.event.house} (${significadoCasa}) - describe brevemente qué área de vida del usuario se activa",
+      "casa_opuesta": "String o null: Si aplica, Casa opuesta + su significado entre paréntesis, o null si no hay eje activado",
+      "eje_activado": "String 40-60 palabras: Explica la tensión o diálogo entre ambas casas si aplica. Ejemplo: 'Expresión personal y creatividad (Casa 5) vs proyectos colectivos y visión de futuro (Casa 11)'. Si no hay eje, explica solo la casa principal."
+    },
 
-    Ejemplo:
-    'Para TI, ${data.userName}, con tu Sol en ${sol?.sign} Casa ${sol?.house} (${sol?.house ? getHouseMeaning(sol.house) : 'identidad'}) y tu Luna en ${luna?.sign} Casa ${luna?.house} (${luna?.house ? getHouseMeaning(luna.house) : 'emociones'}): Este ${descripcionEvento.tipo} activa tu Casa ${data.event.house} natal (${significadoCasa}). Tu naturaleza ${sol?.sign} te hace [característica], PERO tu ${luna?.sign} te da el poder de [superpoder]. Este evento te dice: [mensaje específico].'",
+    "planetas_natales_implicados": [
+      "${planetasActivados.length > 0 ? planetasActivados.map(p => `${p.planeta} natal en ${p.signo} Casa ${p.casa} (${getHouseMeaning(p.casa)})`).join('", "') : 'Array: Lista 2-5 planetas natales del usuario que este evento activa directamente. Formato: Planeta natal en Signo Casa X (significado casa). Ejemplo: Nodo Sur natal en Géminis Casa 5 (creatividad, autoexpresión). Solo mencionar los que REALMENTE están implicados'})"
+    ],
 
-  "tu_fortaleza_a_usar": {
-    "fortaleza": "String: UNA fortaleza ESPECÍFICA de su carta natal (extraída de la lista arriba) que sea RELEVANTE para este evento. Usa posición planetaria exacta. Ejemplo: 'Tu ${fortalezas[0]?.nombre || 'Mercurio en Casa 1 (identidad, presencia)'} - ${fortalezas[0]?.posicion || 'Tu Voz como Poder'}'",
-
-    "como_usarla": "String de 100-120 palabras: Instrucciones MUY ESPECÍFICAS de cómo ACTIVAR esa fortaleza durante este evento.
-
-    - Menciona la posición planetaria exacta CON significado de casa entre paréntesis
-    - Da ACCIÓN CONCRETA (no vaga)
-    - Conecta con el tipo de evento (${data.event.type})
-    - Conecta con la casa activada (Casa ${data.event.house} - ${significadoCasa})
-    - Menciona otro planeta de su carta que apoye esta fortaleza
-
-    Ejemplo:
-    'Tu ${fortalezas[0]?.posicion || 'Mercurio en Casa 1 (identidad, presencia)'} te da [superpoder específico]. Durante este ${descripcionEvento.tipo} en tu Casa ${data.event.house} (${significadoCasa}), ACTIVA esto haciendo [acción concreta 1]: [detalles]. Con tu [otro planeta de su carta], [cómo ese planeta apoya la acción]. Tu ${sol?.sign} te da [característica] - úsala para [resultado específico].'"
+    "descripcion_estructural": "String de 80-120 palabras: Descripción OBJETIVA del evento y su estructura astrológica, SIN dar consejos ni decir qué hacer. Solo explica QUÉ se activa, QUÉ áreas de vida entran en diálogo, QUÉ planetas natales se tocan. Usa términos como 'activa', 'pone en tensión', 'ilumina', 'conecta'. SIEMPRE menciona significados de casas entre paréntesis: 'Casa 5 (creatividad, romance, autoexpresión)'. NO digas 'deberías' ni 'te invita' ni 'es momento de'. Solo estructura objetiva. Como un arquitecto describiendo un edificio."
   },
 
-  "tu_bloqueo_a_trabajar": {
-    "bloqueo": "String: UN bloqueo ESPECÍFICO de su carta natal (extraído de la lista arriba) que este evento puede ayudar a TRANSFORMAR. Usa posición planetaria exacta CON significado de casa. Ejemplo: 'Tu Saturno en Casa 2 (dinero, valores, autoestima) - \"No merezco ganar dinero fácilmente\"'",
+  "capa_2_aplicado": {
+    "cruce_con_tu_estructura_natal": "String de 120-150 palabras: Explica QUÉ TIENES en tu carta natal que hace que este evento sea ÚNICO para ti, ${data.userName}. Menciona:
+      - Posiciones planetarias específicas: Sol en ${sol?.sign} Casa ${sol?.house}, Luna en ${luna?.sign} Casa ${luna?.house}
+      - Aspectos natales relevantes (usa los datos de arriba)
+      - Nodos Lunares si están implicados
+      - Cualquier planeta natal en el mismo signo del evento
 
-    "reframe": "String de 100-120 palabras: Reencuadre DISRUPTIVO y EMPODERADOR del bloqueo.
+      Formato: 'Tú tienes: [lista concreta de posiciones]. Esto hace que [conexión específica con el evento].'
 
-    - Empieza con 'NO.' para negar la creencia limitante
-    - Explica el ORIGEN del bloqueo (infancia/familia)
-    - Reencuadra como MAESTRÍA o ENTRENAMIENTO, no limitación
-    - Menciona tránsitos actuales del Solar Return que apoyan la transformación
-    - Conecta con el evento actual como 'permiso cósmico' para cambiar
+      Usa DATOS REALES de arriba. NO genérico. Si la interpretación sirve para otra persona, FALLA. Menciona casas con significado entre paréntesis.",
 
-    Ejemplo:
-    'NO. Tu [bloqueo] no es limitación, es [reframe positivo]. Ese mensaje de [creencia limitante] viene de [origen], pero ahora TÚ eres quien redefine [área de vida]. Con [tránsito actual del SR] activando tu Casa [X], el universo te está PIDIENDO que [acción transformadora]. Este ${descripcionEvento.tipo} es tu permiso cósmico para [resultado deseado] sin culpa.'"
-  },
+    "como_se_vive_en_ti": "String de 120-150 palabras: Describe concretamente CÓMO este evento se manifiesta en la vida diaria de ${data.userName}.
 
-  "mantra_personalizado": "String de 20-40 palabras: Mantra que INTEGRE posiciones planetarias ESPECÍFICAS de su carta con el evento.
+      - Empieza OBLIGATORIAMENTE con: 'Durante esos días es muy probable que:'
+      - Lista 3-5 manifestaciones CONCRETAS: sentimientos, situaciones, conversaciones que pueden aparecer
+      - Conecta cada manifestación con su configuración natal específica
+      - Usa su nombre ${data.userName} al menos 1 vez
+      - Menciona casas activadas con significado: 'Casa ${data.event.house} (${significadoCasa})'
 
-  - DEBE mencionar al menos 2 posiciones planetarias reales (ej: 'palabra escorpiana', 'dispersión geminiana')
-  - Debe ser en PRIMERA PERSONA
-  - Debe incluir MAYÚSCULAS en 1-2 palabras clave
-  - Debe ser accionable y empoderador
+      Ejemplo:
+      'Durante esos días es muy probable que: te sientas mentalmente saturada, tengas ganas de explicar o justificar algo, aparezca una conversación emocionalmente cargada, surja tensión entre lo que quieres expresar (Casa 5 - creatividad) y lo que es coherente con tu visión mayor (Casa 11 - propósito colectivo). Tu ${sol?.sign} en Casa ${sol?.house} amplifica [característica específica].'",
 
-  Ejemplo:
-  'Mi ${luna?.sign ? luna.sign.toLowerCase() : 'lunar'} [característica] tiene valor [área de Casa ${data.event.house}]. Mi ${sol?.sign ? sol.sign.toLowerCase() : 'solar'} [característica] se [acción] cuando mi [otro planeta] lo decide. ACTÚO con [cualidad].'",
+    "riesgo_si_vives_inconscientemente": "String de 80-100 palabras: Lista específica de RIESGOS si ${data.userName} no trabaja este evento conscientemente.
 
-  "ejercicio_para_ti": "String de 120-150 palabras: Ejercicio CONCRETO y ESPECÍFICO basado en su carta + el evento.
+      - Formato de lista corta, clara, directa
+      - 4-6 riesgos concretos y específicos
+      - Conecta con patrones natales del usuario (especialmente Nodo Sur si aplica, o aspectos tensos)
+      - NO uses lenguaje vago
 
-  - Empieza con acción específica: 'Esta semana, escribe/crea/conecta...'
-  - Da estructura numerada (1, 2, 3) de pasos concretos
-  - Cada paso debe mencionar UNA posición planetaria de su carta
-  - Conecta cada paso con el evento actual
-  - Termina con instrucción de timing: 'con este ${descripcionEvento.tipo}, [acción final]'
+      Ejemplo:
+      'Riesgos si lo vives inconscientemente: Decir más de lo necesario, entrar en debates estériles sin propósito, querer tener razón en vez de sostener tu verdad, dispersarte en opiniones ajenas, tomar decisiones desde la urgencia mental en lugar de la visión amplia, reaccionar verbalmente de forma impulsiva (tu ${sol?.sign} □ ${luna?.sign}).'
 
-  Ejemplo:
-  'Esta semana, escribe 3 [acciones específicas] (${fortalezas[0]?.posicion || 'tu fortaleza principal'}): 1) ¿Qué [pregunta] tienes que otros necesitan? (${luna?.sign} en Casa ${luna?.house}) 2) ¿Cómo puedes [acción 2]? (${sol?.sign} en Casa ${sol?.house}) 3) ¿Qué [acción 3] puedes crear? (${bloqueos[0]?.posicion || 'tu desafío'}). Luego, con este ${descripcionEvento.tipo} en ${data.event.sign || 'la casa'} ${data.event.house}, [acción final concreta]: [detalles]. Tu ${luna?.sign} sabe que [verdad sobre su carta].'",,
+      Esto conecta DIRECTAMENTE con su [menciona patrón natal específico del usuario].",
 
-  "consejo_especifico": "String de 120-150 palabras: Consejo basado en TRÁNSITOS ACTUALES del Solar Return + posiciones natales + el evento.
+    "uso_consciente_consejo_aplicado": "String de 120-150 palabras: Consejo APLICADO y CONCRETO para ${data.userName}.
 
-  - Menciona AL MENOS 2 tránsitos actuales del Solar Return
-  - Conecta esos tránsitos con planetas natales específicos
-  - Explica cómo el evento actual es el TIMING perfecto dado esos tránsitos
-  - Da acción concreta aprovechando la confluencia de tránsitos
-  - Usa palabras como 'timing perfecto', 'confluencia', 'simultáneamente'
+      - Empieza con acción clara: 'No tomes...', 'Observa...', 'Elige...', 'Pregúntate...', 'Posterga...'
+      - Da 3-4 consejos específicos ejecutables
+      - Usa su configuración natal para personalizar cada consejo
+      - Menciona casas, planetas, aspectos REALES de su carta
 
-  Ejemplo:
-  'Con [Tránsito 1 del SR] activando tu Casa [X] (${getHouseMeaning(data.event.house)}) y [Tránsito 2 del SR] en Casa [Y], ${descripcionEvento.tipo} es el TIMING PERFECTO para [acción específica]. Tu configuración ${sol?.sign}-${luna?.sign} en Casas ${sol?.house}-${luna?.house} = [interpretación única]. Este ${descripcionEvento.tipo} en tu Casa ${data.event.house} activa [área de vida]. [Tránsito 1] te [efecto], [Tránsito 2] te [efecto], ${descripcionEvento.tipo} te [efecto]. USA estos tres tránsitos SIMULTÁNEAMENTE: [acción 1], [acción 2], [acción 3].'"
-  },
+      Ejemplo:
+      'Consejo aplicado para ti: No tomes decisiones importantes desde la urgencia mental de tu ${luna?.sign} en Casa ${luna?.house}. Observa qué conversación te agota emocionalmente → ahí hay información sobre tu Nodo Sur. Elige callar o simplificar en lugar de explicar de más. Pregúntate: ¿Esto que quiero decir sirve a mi visión a largo plazo (Casa ${data.event.house})? Tu ${sol?.sign} en Casa ${sol?.house} te da [cualidad específica] - úsala para [acción concreta].'",
 
-  "timing_evolutivo": {
-    "que_sembrar": "String de 60-80 palabras: Qué sembrar ESPECÍFICAMENTE basado en su configuración natal + el evento. No genérico. Menciona planetas.",
-    "cuando_actuar": "String de 40-60 palabras: Cuándo actuar (fases lunares + posiciones en su carta específica). Ej: 'Durante los próximos 14 días (de ${descripcionEvento.tipo} a Luna Llena), [acción]. Tu ${luna?.sign} necesita [necesidad específica].'",
-    "resultado_esperado": "String de 60-80 palabras: Qué resultado esperar en X meses basado en su configuración + el evento. Menciona fecha futura y planetas que lo sostendrán."
+    "accion_practica_sugerida": "String de 80-120 palabras: UNA acción práctica CONCRETA que ${data.userName} puede hacer durante este evento.
+
+      - Debe ser EJECUTABLE, no vaga ni abstracta
+      - Formato: pasos numerados (1, 2, 3) o lista muy clara
+      - Conecta cada paso con posiciones de su carta natal
+      - Da timing específico si aplica (fecha, fase lunar, etc.)
+
+      Ejemplo:
+      'Acción concreta para estos días:
+
+      1) Posponer cualquier respuesta importante 24 horas (tu ${luna?.sign} necesita procesar emocionalmente)
+      2) Escribir lo que quieres decir en un documento privado, pero NO enviarlo inmediatamente (tu ${sol?.sign} en Casa ${sol?.house} tiende a [característica])
+      3) Elegir UNA idea clara en vez de muchas explicaciones (tu Nodo Norte pide síntesis)
+
+      Espera hasta [menciona fecha específica o fase lunar siguiente] para tomar la decisión final. Durante esos días, tu Casa ${data.event.house} (${significadoCasa}) estará especialmente activa.'",
+
+    "sintesis_final": "String de 40-60 palabras: Una frase-mantra personalizada que ${data.userName} puede usar para integrar el aprendizaje de este evento.
+
+      - OBLIGATORIO en PRIMERA PERSONA ('Esta Luna Llena me muestra...', 'Yo elijo...', 'Mi [planeta] sostiene...')
+      - Menciona posiciones planetarias ESPECÍFICAS de su carta
+      - Resume el mensaje transformador del evento
+      - Empoderador, concreto, accionable
+      - NO vago ni genérico
+
+      Ejemplo:
+      'Esta Luna Llena me muestra dónde mi mente geminiana se dispersa y me invita a elegir una verdad sagitariana más grande que mis reacciones inmediatas. Mi ${sol?.sign} en Casa ${sol?.house} sostiene mi visión mientras mi ${luna?.sign} en Casa ${luna?.house} integra la emoción. ELIJO la claridad sobre la complejidad.'"
   },
 
   "analisis_tecnico": {
@@ -261,62 +276,94 @@ Responde ÚNICAMENTE con JSON válido en español (sin markdown, sin backticks, 
     "significado_casa": "${significadoCasa}",
     "planetas_natales_activados": [
       ${planetasActivados.map(p => `"${p.planeta} en ${p.signo} Casa ${p.casa}"`).join(',\n      ')}
-    ],
-    "aspectos_cruzados": [
-      "String: Aspecto 1 del evento con planeta/casa natal - explicar cómo se manifiesta",
-      "String: Aspecto 2 - ser específico",
-      "String: Aspecto 3 - mencionar timing"
     ]
   }
 }
 
 ---
 
-## ⚠️ INSTRUCCIONES CRÍTICAS
+## ⚠️ INSTRUCCIONES CRÍTICAS - METODOLOGÍA 2 CAPAS
 
-1. **USA EL NOMBRE** ${data.userName} al menos 3-4 veces en toda la interpretación
+**ORDEN SAGRADO (NO NEGOCIABLE):**
+1. **Primero describe** (CAPA 1): estructura, qué se activa, datos objetivos, sin consejos
+2. **Luego cruza** con su carta natal específica
+3. **Identifica** el patrón que se activa en su vida
+4. **Solo al final** das decisiones concretas (CAPA 2)
+
+**ESTILO POR CAPA:**
+- **CAPA 1**: Neutral, educativo, estructural. Como un arquitecto describiendo un edificio. Usa: "activa", "pone en tensión", "ilumina", "conecta". NO uses: "deberías", "te invita", "es momento de".
+- **CAPA 2**: Directo, aplicado, transformador. Como un coach dando instrucciones. Usa: "No tomes...", "Observa...", "Elige...", "Pregúntate...".
+
+**PERSONALIZACIÓN:**
+1. **USA EL NOMBRE** ${data.userName} al menos 3 veces en CAPA 2
 2. **USA POSICIONES PLANETARIAS ESPECÍFICAS** - NO inventes, usa las reales de arriba
-3. **EXTRAE FORTALEZAS Y BLOQUEOS** de su interpretación natal guardada (listadas arriba)
-4. **SÉ ESPECÍFICO**: Siempre menciona signo + casa + grado cuando hables de planetas
-5. **EXPLICA CASAS SIEMPRE**: CADA VEZ que menciones "Casa X", DEBES incluir su significado entre paréntesis: "Casa 2 (dinero, valores, autoestima)", "Casa 7 (relaciones, pareja, asociaciones)", etc. NUNCA escribas solo "Casa X" sin explicar qué significa.
-6. **CONECTA INFANCIA → ADULTO** cuando hables de bloqueos
-7. **TONO**: Motivador + Disruptivo + Explicativo + Transformador (los 4 pilares)
-8. **NO GENÉRICO**: Si la interpretación podría servir para otra persona, FALLA
-9. **MAYÚSCULAS**: Usa para énfasis en 5-8 palabras clave por sección
-10. **JSON VÁLIDO**: Sin comentarios, sin markdown, cierra todas las llaves
-11. **NO INVENTES**: Si no tienes datos de tránsitos SR, usa los datos natales + evento
+3. **CAPA 1 es personalizada** a SU carta pero neutral
+4. **CAPA 2 es 100% única** para esta persona
+
+**CASAS - OBLIGATORIO:**
+5. **EXPLICA CASAS SIEMPRE**: CADA VEZ que menciones "Casa X", DEBES incluir su significado entre paréntesis:
+   - "Casa 2 (dinero, valores, autoestima)"
+   - "Casa 5 (creatividad, romance, autoexpresión)"
+   - "Casa 7 (relaciones, pareja, asociaciones)"
+   - "Casa 11 (proyectos colectivos, amistades, visión futuro)"
+   - etc. NUNCA escribas solo "Casa X" sin explicar qué significa.
+
+**DATOS REALES:**
+6. **SÉ ESPECÍFICO**: Siempre menciona signo + casa cuando hables de planetas
+7. **NO INVENTES**: Si no tienes datos, di "información no disponible" en lugar de inventar
+8. **EXTRAE de interpretación natal**: Usa fortalezas/bloqueos identificados arriba
+
+**TONO Y CALIDAD:**
+9. **NO GENÉRICO**: Si la interpretación podría servir para otra persona, FALLA
+10. **MAYÚSCULAS**: Usa para énfasis en 5-8 palabras clave en CAPA 2
+11. **JSON VÁLIDO**: Sin comentarios, sin markdown, cierra todas las llaves
 12. **TIMING**: Vincula acciones a fases lunares o fechas específicas
 
 ---
 
 ## 🚫 LO QUE NO DEBES HACER
 
-- ❌ No uses frases genéricas que sirvan para cualquier persona
-- ❌ No inventes posiciones planetarias que no están en los datos
-- ❌ No ignores las fortalezas/bloqueos identificados en su interpretación natal
+**CAPA 1 (Descriptivo):**
+- ❌ No des consejos en CAPA 1
+- ❌ No uses "deberías", "te invita", "es momento de" en CAPA 1
+- ❌ No hables en segunda persona en CAPA 1 (usa tercera: "activa", "pone en tensión")
+
+**CAPA 2 (Aplicado):**
 - ❌ No seas vago ("tal vez", "puede que", "quizás")
-- ❌ No des consejos superficiales
-- ❌ No olvides conectar con su propósito de vida
-- ❌ No uses lenguaje esotérico/críptico
+- ❌ No des consejos superficiales o genéricos
 - ❌ No escribas interpretaciones que podrían servir para otra persona
+
+**GENERAL:**
+- ❌ No inventes posiciones planetarias que no están en los datos
 - ❌ No omitas significados de casas entre paréntesis
+- ❌ No uses lenguaje esotérico/críptico
+- ❌ No ignores las fortalezas/bloqueos identificados en su interpretación natal
 
 ---
 
 ## ✅ CHECKLIST ANTES DE RESPONDER
 
-□ ¿Mencioné el nombre ${data.userName} al menos 3 veces?
-□ ¿Usé posiciones planetarias REALES (signo + casa)?
-□ ¿Extraje fortalezas de su interpretación natal guardada?
-□ ¿Extraje bloqueos de su interpretación natal guardada?
-□ ¿Expliqué qué significa Casa ${data.event.house}?
-□ ¿Conecté el evento con su propósito de vida?
-□ ¿Di acciones CONCRETAS (no vagas)?
-□ ¿El mantra incluye posiciones planetarias reales?
-□ ¿El ejercicio tiene pasos numerados y específicos?
-□ ¿Mencioné tránsitos actuales del Solar Return?
-□ ¿El JSON es válido y está completo?
+**CAPA 1 - Descriptivo:**
+□ ¿Describí el evento objetivamente SIN dar consejos?
+□ ¿Mencioné casas activadas con significado entre paréntesis?
+□ ¿Listé planetas natales implicados REALES?
+□ ¿La descripción estructural es neutral y educativa?
+□ ¿NO usé "deberías" ni "te invita" en CAPA 1?
+
+**CAPA 2 - Aplicado:**
+□ ¿Crucé con su estructura natal específica (Sol, Luna, aspectos)?
+□ ¿Describí cómo se VIVE en su vida diaria concretamente?
+□ ¿Di riesgos concretos si no se trabaja conscientemente?
+□ ¿Di consejo aplicado y acción práctica ejecutable?
+□ ¿La síntesis final es personalizada y en primera persona?
+□ ¿Mencioné ${data.userName} al menos 3 veces en CAPA 2?
+
+**GENERAL:**
+□ ¿Usé posiciones planetarias REALES (no inventadas)?
+□ ¿Expliqué qué significa Casa ${data.event.house} entre paréntesis?
+□ ¿El JSON es válido sin comentarios?
 □ ¿Esta interpretación es ÚNICA para ${data.userName}?
+□ ¿Seguí el ORDEN: describe → cruza → identifica → aconseja?
 
 ---
 

@@ -175,131 +175,182 @@ export default function EventInterpretationButton({
 
               {/* CONTENT - Sin restricciones de altura */}
               <div className="p-6 md:p-8 space-y-8">
-                {/* Para Ti Específicamente */}
-                {interpretation.para_ti_especificamente && (
-                  <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 rounded-2xl p-6 border border-purple-400/30">
-                    <h3 className="text-xl font-bold text-purple-100 mb-4">
-                      🌟 Para Ti Específicamente
-                    </h3>
-                    <p className="text-purple-50 text-lg leading-relaxed whitespace-pre-line">
-                      {interpretation.para_ti_especificamente}
-                    </p>
-                  </div>
-                )}
-
-                {/* Tu Fortaleza a Usar */}
-                {interpretation.tu_fortaleza_a_usar && (
-                  <div className="bg-gradient-to-br from-emerald-900/40 to-green-900/40 rounded-2xl p-6 border border-emerald-400/30">
-                    <h3 className="text-xl font-bold text-emerald-100 mb-4">
-                      ⚡ Tu Fortaleza a Usar
-                    </h3>
-                    <h4 className="text-emerald-200 font-semibold text-lg mb-3">
-                      {interpretation.tu_fortaleza_a_usar.fortaleza}
-                    </h4>
-                    <p className="text-emerald-50 leading-relaxed whitespace-pre-line">
-                      {interpretation.tu_fortaleza_a_usar.como_usarla}
-                    </p>
-                  </div>
-                )}
-
-                {/* Tu Bloqueo a Trabajar */}
-                {interpretation.tu_bloqueo_a_trabajar && (
-                  <div className="bg-gradient-to-br from-rose-900/40 to-red-900/40 rounded-2xl p-6 border border-rose-400/30">
-                    <h3 className="text-xl font-bold text-rose-100 mb-4">
-                      🔥 Tu Bloqueo a Transformar
-                    </h3>
-                    <h4 className="text-rose-200 font-semibold text-lg mb-3">
-                      {interpretation.tu_bloqueo_a_trabajar.bloqueo}
-                    </h4>
-                    <p className="text-rose-50 leading-relaxed whitespace-pre-line">
-                      {interpretation.tu_bloqueo_a_trabajar.reframe}
-                    </p>
-                  </div>
-                )}
-
-                {/* Mantra Personalizado */}
-                {interpretation.mantra_personalizado && (
-                  <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 rounded-2xl p-6 border border-amber-400/30">
-                    <h3 className="text-xl font-bold text-amber-100 mb-4">
-                      ✨ Tu Mantra Personalizado
-                    </h3>
-                    <p className="text-amber-50 text-xl font-bold italic text-center leading-relaxed">
-                      "{interpretation.mantra_personalizado}"
-                    </p>
-                  </div>
-                )}
-
-                {/* Ejercicio Para Ti */}
-                {interpretation.ejercicio_para_ti && (
-                  <div className="bg-gradient-to-br from-blue-900/40 to-indigo-900/40 rounded-2xl p-6 border border-blue-400/30">
-                    <h3 className="text-xl font-bold text-blue-100 mb-4">
-                      📝 Ejercicio Para Ti
-                    </h3>
-                    <p className="text-blue-50 leading-relaxed whitespace-pre-line">
-                      {interpretation.ejercicio_para_ti}
-                    </p>
-                  </div>
-                )}
-
-                {/* Consejo Específico */}
-                {interpretation.consejo_especifico && (
-                  <div className="bg-gradient-to-br from-violet-900/40 to-purple-900/40 rounded-2xl p-6 border border-violet-400/30">
-                    <h3 className="text-xl font-bold text-violet-100 mb-4">
-                      💡 Consejo Específico
-                    </h3>
-                    <p className="text-violet-50 leading-relaxed whitespace-pre-line">
-                      {interpretation.consejo_especifico}
-                    </p>
-                  </div>
-                )}
-
-                {/* Timing Evolutivo */}
-                {interpretation.timing_evolutivo && (
-                  <div className="bg-gradient-to-br from-cyan-900/40 to-teal-900/40 rounded-2xl p-6 border border-cyan-400/30">
-                    <h3 className="text-xl font-bold text-cyan-100 mb-6">
-                      ⏰ Timing Evolutivo
-                    </h3>
-
-                    <div className="space-y-4">
-                      {interpretation.timing_evolutivo.que_sembrar && (
-                        <div>
-                          <h4 className="text-cyan-200 font-semibold mb-2">
-                            🌱 Qué Sembrar:
-                          </h4>
-                          <p className="text-cyan-50 leading-relaxed whitespace-pre-line">
-                            {interpretation.timing_evolutivo.que_sembrar}
-                          </p>
-                        </div>
-                      )}
-
-                      {interpretation.timing_evolutivo.cuando_actuar && (
-                        <div>
-                          <h4 className="text-cyan-200 font-semibold mb-2">
-                            ⚡ Cuándo Actuar:
-                          </h4>
-                          <p className="text-cyan-50 leading-relaxed whitespace-pre-line">
-                            {interpretation.timing_evolutivo.cuando_actuar}
-                          </p>
-                        </div>
-                      )}
-
-                      {interpretation.timing_evolutivo.resultado_esperado && (
-                        <div>
-                          <h4 className="text-cyan-200 font-semibold mb-2">
-                            🎯 Resultado Esperado:
-                          </h4>
-                          <p className="text-cyan-50 leading-relaxed whitespace-pre-line">
-                            {interpretation.timing_evolutivo.resultado_esperado}
-                          </p>
-                        </div>
-                      )}
+                {/* ==========================================
+                    🧱 CAPA 1: ANÁLISIS DESCRIPTIVO (ESTRUCTURA)
+                    ========================================== */}
+                {interpretation.capa_1_descriptivo && (
+                  <div className="space-y-6">
+                    {/* Título de Capa 1 */}
+                    <div className="border-l-4 border-blue-400 pl-4 py-2 bg-blue-950/30">
+                      <h2 className="text-2xl font-bold text-blue-100">
+                        🧱 Análisis Descriptivo
+                      </h2>
+                      <p className="text-blue-300 text-sm mt-1">
+                        Estructura objetiva del evento y qué se activa en tu carta
+                      </p>
                     </div>
+
+                    {/* Datos Objetivos */}
+                    {interpretation.capa_1_descriptivo.datos_objetivos && (
+                      <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 rounded-xl p-5 border border-slate-600/40">
+                        <h3 className="text-lg font-bold text-slate-200 mb-3">
+                          📊 Datos Objetivos
+                        </h3>
+                        <div className="space-y-2 text-slate-300 text-sm">
+                          <p><span className="font-semibold">Evento:</span> {interpretation.capa_1_descriptivo.datos_objetivos.evento}</p>
+                          <p><span className="font-semibold">Fecha:</span> {interpretation.capa_1_descriptivo.datos_objetivos.fecha}</p>
+                          <p><span className="font-semibold">Signo Principal:</span> {interpretation.capa_1_descriptivo.datos_objetivos.signo_principal}</p>
+                          {interpretation.capa_1_descriptivo.datos_objetivos.signo_opuesto && (
+                            <p><span className="font-semibold">Signo Opuesto:</span> {interpretation.capa_1_descriptivo.datos_objetivos.signo_opuesto}</p>
+                          )}
+                          <p><span className="font-semibold">Tipo de Energía:</span> {interpretation.capa_1_descriptivo.datos_objetivos.tipo_energia}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Casas Activadas */}
+                    {interpretation.capa_1_descriptivo.casas_activadas_en_tu_carta && (
+                      <div className="bg-gradient-to-br from-indigo-900/40 to-blue-900/40 rounded-xl p-5 border border-indigo-400/30">
+                        <h3 className="text-lg font-bold text-indigo-100 mb-3">
+                          🏠 Casas Activadas en Tu Carta
+                        </h3>
+                        <div className="space-y-3 text-indigo-50">
+                          <p><span className="font-semibold text-indigo-200">Casa Principal:</span> {interpretation.capa_1_descriptivo.casas_activadas_en_tu_carta.casa_principal}</p>
+                          {interpretation.capa_1_descriptivo.casas_activadas_en_tu_carta.casa_opuesta && (
+                            <p><span className="font-semibold text-indigo-200">Casa Opuesta:</span> {interpretation.capa_1_descriptivo.casas_activadas_en_tu_carta.casa_opuesta}</p>
+                          )}
+                          {interpretation.capa_1_descriptivo.casas_activadas_en_tu_carta.eje_activado && (
+                            <p className="mt-3 pt-3 border-t border-indigo-400/30">
+                              <span className="font-semibold text-indigo-200">Eje Activado:</span> {interpretation.capa_1_descriptivo.casas_activadas_en_tu_carta.eje_activado}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Planetas Natales Implicados */}
+                    {interpretation.capa_1_descriptivo.planetas_natales_implicados && interpretation.capa_1_descriptivo.planetas_natales_implicados.length > 0 && (
+                      <div className="bg-gradient-to-br from-purple-900/40 to-indigo-900/40 rounded-xl p-5 border border-purple-400/30">
+                        <h3 className="text-lg font-bold text-purple-100 mb-3">
+                          🪐 Planetas Natales Implicados
+                        </h3>
+                        <ul className="space-y-2">
+                          {interpretation.capa_1_descriptivo.planetas_natales_implicados.map((planeta: string, i: number) => (
+                            <li key={i} className="text-purple-50 flex items-start gap-2">
+                              <span className="text-purple-300 mt-1">•</span>
+                              <span>{planeta}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Descripción Estructural */}
+                    {interpretation.capa_1_descriptivo.descripcion_estructural && (
+                      <div className="bg-gradient-to-br from-cyan-900/40 to-blue-900/40 rounded-xl p-5 border border-cyan-400/30">
+                        <h3 className="text-lg font-bold text-cyan-100 mb-3">
+                          🔍 Descripción Estructural
+                        </h3>
+                        <p className="text-cyan-50 leading-relaxed whitespace-pre-line">
+                          {interpretation.capa_1_descriptivo.descripcion_estructural}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
 
-                {/* Análisis Técnico (opcional, solo para admins o debug) */}
+                {/* ==========================================
+                    🛠️ CAPA 2: INTERPRETACIÓN APLICADA
+                    ========================================== */}
+                {interpretation.capa_2_aplicado && (
+                  <div className="space-y-6 mt-12">
+                    {/* Título de Capa 2 */}
+                    <div className="border-l-4 border-amber-400 pl-4 py-2 bg-amber-950/30">
+                      <h2 className="text-2xl font-bold text-amber-100">
+                        🛠️ Interpretación Aplicada a Tu Caso
+                      </h2>
+                      <p className="text-amber-300 text-sm mt-1">
+                        Cómo se vive este evento en tu vida y qué hacer con él
+                      </p>
+                    </div>
+
+                    {/* Cruce con Tu Estructura Natal */}
+                    {interpretation.capa_2_aplicado.cruce_con_tu_estructura_natal && (
+                      <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 rounded-xl p-6 border border-purple-400/30">
+                        <h3 className="text-xl font-bold text-purple-100 mb-4">
+                          🌟 Cruce con Tu Estructura Natal
+                        </h3>
+                        <p className="text-purple-50 text-lg leading-relaxed whitespace-pre-line">
+                          {interpretation.capa_2_aplicado.cruce_con_tu_estructura_natal}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Cómo Se Vive en Ti */}
+                    {interpretation.capa_2_aplicado.como_se_vive_en_ti && (
+                      <div className="bg-gradient-to-br from-violet-900/40 to-purple-900/40 rounded-xl p-6 border border-violet-400/30">
+                        <h3 className="text-xl font-bold text-violet-100 mb-4">
+                          💫 Cómo Se Vive en Ti
+                        </h3>
+                        <p className="text-violet-50 text-lg leading-relaxed whitespace-pre-line">
+                          {interpretation.capa_2_aplicado.como_se_vive_en_ti}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Riesgo Si Vives Inconscientemente */}
+                    {interpretation.capa_2_aplicado.riesgo_si_vives_inconscientemente && (
+                      <div className="bg-gradient-to-br from-rose-900/40 to-red-900/40 rounded-xl p-6 border border-rose-400/30">
+                        <h3 className="text-xl font-bold text-rose-100 mb-4">
+                          ⚠️ Riesgo Si Vives Inconscientemente
+                        </h3>
+                        <p className="text-rose-50 leading-relaxed whitespace-pre-line">
+                          {interpretation.capa_2_aplicado.riesgo_si_vives_inconscientemente}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Uso Consciente - Consejo Aplicado */}
+                    {interpretation.capa_2_aplicado.uso_consciente_consejo_aplicado && (
+                      <div className="bg-gradient-to-br from-emerald-900/40 to-green-900/40 rounded-xl p-6 border border-emerald-400/30">
+                        <h3 className="text-xl font-bold text-emerald-100 mb-4">
+                          ✅ Uso Consciente - Consejo Aplicado
+                        </h3>
+                        <p className="text-emerald-50 text-lg leading-relaxed whitespace-pre-line">
+                          {interpretation.capa_2_aplicado.uso_consciente_consejo_aplicado}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Acción Práctica Sugerida */}
+                    {interpretation.capa_2_aplicado.accion_practica_sugerida && (
+                      <div className="bg-gradient-to-br from-blue-900/40 to-indigo-900/40 rounded-xl p-6 border border-blue-400/30">
+                        <h3 className="text-xl font-bold text-blue-100 mb-4">
+                          🎯 Acción Práctica Sugerida
+                        </h3>
+                        <p className="text-blue-50 leading-relaxed whitespace-pre-line">
+                          {interpretation.capa_2_aplicado.accion_practica_sugerida}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Síntesis Final */}
+                    {interpretation.capa_2_aplicado.sintesis_final && (
+                      <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 rounded-xl p-6 border border-amber-400/30">
+                        <h3 className="text-xl font-bold text-amber-100 mb-4">
+                          ✨ Síntesis Final - Tu Mantra
+                        </h3>
+                        <p className="text-amber-50 text-xl font-bold italic text-center leading-relaxed">
+                          "{interpretation.capa_2_aplicado.sintesis_final}"
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Análisis Técnico (opcional, solo para debug) */}
                 {interpretation.analisis_tecnico && (
-                  <details className="bg-slate-800/50 rounded-xl p-4 border border-slate-600/30">
+                  <details className="bg-slate-800/50 rounded-xl p-4 border border-slate-600/30 mt-8">
                     <summary className="text-slate-300 font-semibold cursor-pointer hover:text-white">
                       🔍 Análisis Técnico (Detalles)
                     </summary>

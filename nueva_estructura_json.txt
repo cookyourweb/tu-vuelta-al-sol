@@ -1,0 +1,110 @@
+## 📋 ESTRUCTURA JSON REQUERIDA - METODOLOGÍA DE 2 CAPAS
+
+**ORDEN CRÍTICO:** Primero describe (CAPA 1), luego aplica (CAPA 2)
+
+Responde ÚNICAMENTE con JSON válido en español (sin markdown, sin backticks, sin comentarios):
+
+{
+  "titulo_evento": "String de 50-80 caracteres: Título memorable que incluya el nombre del usuario",
+
+  // ==========================================
+  // 🧱 CAPA 1: ANÁLISIS DESCRIPTIVO (NO APLICADO)
+  // ==========================================
+  // Solo datos objetivos, estructura, sin consejos ni acciones
+
+  "capa_1_descriptivo": {
+    "datos_objetivos": {
+      "evento": "String: Tipo (Luna Nueva/Llena/Tránsito de X/Aspecto Y)",
+      "fecha": "String: Fecha del evento",
+      "signo_principal": "String: Signo donde ocurre (ej: Géminis)",
+      "signo_opuesto": "String o null: Signo opuesto si aplica (ej: Sagitario para Luna Llena)",
+      "tipo_energia": "String 20-30 palabras: Tipo de energía (ej: Culminación/conciencia/cierre)"
+    },
+
+    "casas_activadas_en_tu_carta": {
+      "casa_principal": "String: Casa X (significado entre paréntesis) - describe área de vida",
+      "casa_opuesta": "String o null: Casa opuesta + significado si aplica",
+      "eje_activado": "String 40-60 palabras: Tensión/diálogo entre casas (ej: expresión personal vs proyectos colectivos)"
+    },
+
+    "planetas_natales_implicados": [
+      "Array de strings: 2-5 planetas natales que el evento activa",
+      "Formato: Planeta natal en Signo Casa X (significado)",
+      "Ejemplo: Nodo Sur natal en Géminis Casa 5 (creatividad, autoexpresión)",
+      "Solo los que REALMENTE están implicados"
+    ],
+
+    "descripcion_estructural": "String 80-120 palabras: Descripción OBJETIVA del evento. Solo QUÉ se activa, QUÉ áreas entran en diálogo, QUÉ planetas se tocan. Usa: activa/pone en tensión/ilumina/conecta. SIEMPRE menciona significados de casas entre paréntesis. NO digas deberías/te invita/es momento de. Solo estructura."
+  },
+
+  // ==========================================
+  // 🛠️ CAPA 2: INTERPRETACIÓN APLICADA A TU CASO
+  // ==========================================
+  // Aquí SÍ das consejos, acciones, decisiones concretas
+
+  "capa_2_aplicado": {
+    "cruce_con_tu_estructura_natal": "String 120-150 palabras: QUÉ TIENES en tu carta que hace este evento ÚNICO para ti. Menciona: posiciones planetarias (Sol Casa Y, Luna Casa W), aspectos natales (ej: Sol □ Marte), Nodos, planetas en mismo signo del evento. Formato: Tú tienes: [lista]. Esto hace que [conexión]. Usa datos reales. NO genérico.",
+
+    "como_se_vive_en_ti": "String 120-150 palabras: CÓMO se manifiesta en vida diaria. Empieza: Durante esos días es muy probable que: [3-5 manifestaciones CONCRETAS]. Conecta con su natal. Usa su nombre. Menciona casas con significado.",
+
+    "riesgo_si_vives_inconscientemente": "String 80-100 palabras: Lista de RIESGOS si no se trabaja conscientemente. 4-6 riesgos concretos. Conecta con patrones natales (Nodo Sur si aplica). Ejemplo: Decir más de lo necesario, entrar en debates estériles, querer tener razón...",
+
+    "uso_consciente_consejo_aplicado": "String 120-150 palabras: Consejo APLICADO. Empieza con acción: No tomes.../Observa.../Elige.../Pregúntate... Da 3-4 consejos específicos. Usa su natal. Menciona casas, planetas, aspectos reales.",
+
+    "accion_practica_sugerida": "String 80-120 palabras: UNA acción práctica CONCRETA ejecutable. Formato: pasos numerados o lista. Conecta con su carta. Da timing si aplica. Ejemplo: 1) Posponer respuesta 24h 2) Escribir sin enviar 3) Elegir UNA idea clara",
+
+    "sintesis_final": "String 40-60 palabras: Frase-mantra personalizada en PRIMERA PERSONA. Menciona posiciones planetarias. Resume mensaje transformador. Empoderador y concreto."
+  }
+}
+
+---
+
+## ⚠️ INSTRUCCIONES CRÍTICAS - METODOLOGÍA 2 CAPAS
+
+**ORDEN SAGRADO:**
+1. Primero describe (CAPA 1): estructura, qué se activa, datos objetivos
+2. Luego cruza con su natal
+3. Identifica el patrón que se activa
+4. Solo al final das decisiones concretas (CAPA 2)
+
+**ESTILO:**
+- CAPA 1: Neutral, educativo, estructural. Como un arquitecto describiendo un edificio.
+- CAPA 2: Directo, aplicado, transformador. Como un coach dando instrucciones.
+
+**PERSONALIZACIÓN:**
+- Usa el nombre al menos 3 veces en CAPA 2
+- CAPA 1 es más universal (pero personalizada a SU carta)
+- CAPA 2 es 100% única para esta persona
+
+**CASAS:**
+- SIEMPRE explica significado entre paréntesis
+- Casa 2 (dinero, valores, autoestima)
+- Casa 7 (relaciones, pareja, asociaciones)
+- etc.
+
+**NO GENÉRICO:**
+- Si la interpretación sirve para otra persona → FALLA
+- Usa posiciones planetarias REALES (no inventar)
+- Extrae fortalezas/bloqueos de interpretación natal guardada
+
+---
+
+## ✅ CHECKLIST ANTES DE RESPONDER
+
+CAPA 1:
+□ ¿Describí el evento objetivamente sin dar consejos?
+□ ¿Mencioné casas activadas con significado entre paréntesis?
+□ ¿Listé planetas natales implicados reales?
+□ ¿La descripción estructural es neutral y educativa?
+
+CAPA 2:
+□ ¿Crucé con su estructura natal específica?
+□ ¿Describí cómo se VIVE en su vida diaria?
+□ ¿Di riesgos concretos si no se trabaja?
+□ ¿Di consejo aplicado y acción práctica ejecutable?
+□ ¿La síntesis final es personalizada y en primera persona?
+
+GENERAL:
+□ ¿Usé posiciones planetarias REALES (no inventadas)?
+□ ¿El JSON es válido sin comentarios?
+□ ¿Esta interpretación es ÚNICA para este usuario?
