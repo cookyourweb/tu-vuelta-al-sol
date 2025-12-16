@@ -1083,7 +1083,34 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('❌ Error in Solar Return interpretation:', error);
-    
+
+    // Handle specific OpenAI errors
+    if (error instanceof Error) {
+      if (error.message.includes('429') || error.message.includes('quota') || error.message.includes('exceeded')) {
+        return NextResponse.json({
+          success: false,
+          error: 'Se ha excedido el límite de uso de la API de OpenAI. Por favor, contacta al administrador para actualizar el plan de facturación.',
+          errorType: 'quota_exceeded'
+        }, { status: 429 });
+      }
+
+      if (error.message.includes('401') || error.message.includes('unauthorized')) {
+        return NextResponse.json({
+          success: false,
+          error: 'Error de autenticación con OpenAI. La clave API puede ser inválida.',
+          errorType: 'auth_error'
+        }, { status: 503 });
+      }
+
+      if (error.message.includes('rate limit')) {
+        return NextResponse.json({
+          success: false,
+          error: 'Límite de velocidad excedido. Por favor, espera unos minutos antes de intentar nuevamente.',
+          errorType: 'rate_limit'
+        }, { status: 429 });
+      }
+    }
+
     return NextResponse.json({
       success: false,
       error: 'Failed to generate interpretation',
