@@ -49,7 +49,7 @@ export function generateEventInterpretationPrompt(
   const sol = data.natalChart.planets?.find((p: any) => p.name === 'Sol' || p.name === 'Sun');
   const luna = data.natalChart.planets?.find((p: any) => p.name === 'Luna' || p.name === 'Moon');
   const ascendente = data.natalChart.ascendant;
-  const medioC ielo = data.natalChart.midheaven;
+  const medioCielo = data.natalChart.midheaven;
 
   // ✅ Extraer tema del año del Solar Return
   const temaAnual = data.solarReturn?.tema_anual || data.solarReturn?.esencia_revolucionaria_anual || 'No disponible';
