@@ -188,22 +188,22 @@ Responde ÚNICAMENTE con JSON válido en español (sin markdown, sin backticks, 
     'Para TI, ${data.userName}, con tu Sol en ${sol?.sign} Casa ${sol?.house} (${sol?.house ? getHouseMeaning(sol.house) : 'identidad'}) y tu Luna en ${luna?.sign} Casa ${luna?.house} (${luna?.house ? getHouseMeaning(luna.house) : 'emociones'}): Este ${descripcionEvento.tipo} activa tu Casa ${data.event.house} natal (${significadoCasa}). Tu naturaleza ${sol?.sign} te hace [característica], PERO tu ${luna?.sign} te da el poder de [superpoder]. Este evento te dice: [mensaje específico].'",
 
   "tu_fortaleza_a_usar": {
-    "fortaleza": "String: UNA fortaleza ESPECÍFICA de su carta natal (extraída de la lista arriba) que sea RELEVANTE para este evento. Usa posición planetaria exacta. Ejemplo: 'Tu ${fortalezas[0]?.nombre || 'Mercurio en Casa 1'} - ${fortalezas[0]?.posicion || 'Tu Voz como Poder'}'",
+    "fortaleza": "String: UNA fortaleza ESPECÍFICA de su carta natal (extraída de la lista arriba) que sea RELEVANTE para este evento. Usa posición planetaria exacta. Ejemplo: 'Tu ${fortalezas[0]?.nombre || 'Mercurio en Casa 1 (identidad, presencia)'} - ${fortalezas[0]?.posicion || 'Tu Voz como Poder'}'",
 
     "como_usarla": "String de 100-120 palabras: Instrucciones MUY ESPECÍFICAS de cómo ACTIVAR esa fortaleza durante este evento.
 
-    - Menciona la posición planetaria exacta
+    - Menciona la posición planetaria exacta CON significado de casa entre paréntesis
     - Da ACCIÓN CONCRETA (no vaga)
     - Conecta con el tipo de evento (${data.event.type})
-    - Conecta con la casa activada (Casa ${data.event.house})
+    - Conecta con la casa activada (Casa ${data.event.house} - ${significadoCasa})
     - Menciona otro planeta de su carta que apoye esta fortaleza
 
     Ejemplo:
-    'Tu ${fortalezas[0]?.posicion || 'Mercurio en Casa 1'} te da [superpoder específico]. Durante este ${descripcionEvento.tipo} en tu Casa ${data.event.house}, ACTIVA esto haciendo [acción concreta 1]: [detalles]. Con tu [otro planeta de su carta], [cómo ese planeta apoya la acción]. Tu ${sol?.sign} te da [característica] - úsala para [resultado específico].'"
+    'Tu ${fortalezas[0]?.posicion || 'Mercurio en Casa 1 (identidad, presencia)'} te da [superpoder específico]. Durante este ${descripcionEvento.tipo} en tu Casa ${data.event.house} (${significadoCasa}), ACTIVA esto haciendo [acción concreta 1]: [detalles]. Con tu [otro planeta de su carta], [cómo ese planeta apoya la acción]. Tu ${sol?.sign} te da [característica] - úsala para [resultado específico].'"
   },
 
   "tu_bloqueo_a_trabajar": {
-    "bloqueo": "String: UN bloqueo ESPECÍFICO de su carta natal (extraído de la lista arriba) que este evento puede ayudar a TRANSFORMAR. Usa posición planetaria exacta. Ejemplo: 'Tu Saturno en Casa 2 - \"No merezco ganar dinero fácilmente\"'",
+    "bloqueo": "String: UN bloqueo ESPECÍFICO de su carta natal (extraído de la lista arriba) que este evento puede ayudar a TRANSFORMAR. Usa posición planetaria exacta CON significado de casa. Ejemplo: 'Tu Saturno en Casa 2 (dinero, valores, autoestima) - \"No merezco ganar dinero fácilmente\"'",
 
     "reframe": "String de 100-120 palabras: Reencuadre DISRUPTIVO y EMPODERADOR del bloqueo.
 
@@ -278,7 +278,7 @@ Responde ÚNICAMENTE con JSON válido en español (sin markdown, sin backticks, 
 2. **USA POSICIONES PLANETARIAS ESPECÍFICAS** - NO inventes, usa las reales de arriba
 3. **EXTRAE FORTALEZAS Y BLOQUEOS** de su interpretación natal guardada (listadas arriba)
 4. **SÉ ESPECÍFICO**: Siempre menciona signo + casa + grado cuando hables de planetas
-5. **EXPLICA CASAS**: SIEMPRE entre paréntesis la primera vez: "Casa X (significado)"
+5. **EXPLICA CASAS SIEMPRE**: CADA VEZ que menciones "Casa X", DEBES incluir su significado entre paréntesis: "Casa 2 (dinero, valores, autoestima)", "Casa 7 (relaciones, pareja, asociaciones)", etc. NUNCA escribas solo "Casa X" sin explicar qué significa.
 6. **CONECTA INFANCIA → ADULTO** cuando hables de bloqueos
 7. **TONO**: Motivador + Disruptivo + Explicativo + Transformador (los 4 pilares)
 8. **NO GENÉRICO**: Si la interpretación podría servir para otra persona, FALLA
