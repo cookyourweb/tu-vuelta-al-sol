@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Sparkles, X, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 interface EventData {
   type: 'luna_nueva' | 'luna_llena' | 'transito' | 'aspecto';
@@ -25,6 +26,7 @@ export default function EventInterpretationButton({
   event,
   className = ''
 }: EventInterpretationButtonProps) {
+  const { user } = useAuth();
   const [interpretation, setInterpretation] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,10 +37,28 @@ export default function EventInterpretationButton({
     setError(null);
 
     try {
+      // ✅ Obtener token de Firebase
+      if (!user) {
+        setError('Debes estar autenticado');
+        setLoading(false);
+        return;
+      }
+
+      let token: string;
+      try {
+        token = await user.getIdToken();
+      } catch (tokenError) {
+        console.error('❌ Error getting token:', tokenError);
+        setError('Error de autenticación. Intenta refrescar la página.');
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch('/api/interpretations/event', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           event,

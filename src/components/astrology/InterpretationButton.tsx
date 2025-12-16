@@ -731,19 +731,48 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       if (typeof data === 'string') {
         return data;
       }
-      
+
       if (data && typeof data === 'object') {
-        // Try different possible text fields
-        if (data.drawer) return data.drawer;
-        if (data.tooltip) return data.tooltip;
+        // ✅ Handle Solar Return nested structure: {tooltip: {...}, drawer: {...}}
+        if (data.drawer && typeof data.drawer === 'object') {
+          // Extract text fields from drawer object
+          const drawer = data.drawer;
+          const parts = [];
+          if (drawer.titulo) parts.push(drawer.titulo);
+          if (drawer.educativo) parts.push(drawer.educativo);
+          if (drawer.poderoso) parts.push(drawer.poderoso);
+          if (drawer.poetico) parts.push(drawer.poetico);
+          if (drawer.sintesis?.frase) parts.push(drawer.sintesis.frase);
+          if (drawer.sintesis?.declaracion) parts.push(drawer.sintesis.declaracion);
+          return parts.join('\n\n');
+        }
+
+        // ✅ Handle tooltip if it's an object
+        if (data.tooltip && typeof data.tooltip === 'object') {
+          const tooltip = data.tooltip;
+          const parts = [];
+          if (tooltip.titulo) parts.push(tooltip.titulo);
+          if (tooltip.descripcionBreve) parts.push(tooltip.descripcionBreve);
+          if (tooltip.significado) parts.push(tooltip.significado);
+          if (tooltip.efecto) parts.push(tooltip.efecto);
+          return parts.join('\n\n');
+        }
+
+        // Try different possible text fields (for simpler structures)
         if (data.texto) return data.texto;
         if (data.descripcion) return data.descripcion;
         if (data.interpretacion) return data.interpretacion;
-        
-        // If it's an object but no recognized text fields, stringify it cleanly
-        return Object.values(data).join(' - ');
+
+        // If it's an object but no recognized text fields, try to extract strings
+        const stringValues = Object.values(data).filter(v => typeof v === 'string');
+        if (stringValues.length > 0) {
+          return stringValues.join(' - ');
+        }
+
+        // Last resort: return a safe placeholder
+        return '[Contenido complejo - ver detalles]';
       }
-      
+
       // Fallback for any other type
       return String(data || '');
     };
