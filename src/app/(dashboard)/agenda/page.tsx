@@ -135,17 +135,27 @@ const AgendaPersonalizada = () => {
     try {
       console.log('📅 [YEAR-EVENTS] Fetching complete year events from birthday to next birthday...');
 
-      // Calcular el rango del año astrológico (cumpleaños actual al próximo)
+      // Calcular el rango del año astrológico (último cumpleaños → próximo cumpleaños)
       const birthDate = new Date(userProfile.birthDate);
       const currentYear = new Date().getFullYear();
+      const now = new Date();
 
       // Fecha de cumpleaños de este año
       const currentBirthday = new Date(currentYear, birthDate.getMonth(), birthDate.getDate());
 
-      // Si ya pasó el cumpleaños este año, usar el del próximo año
-      const now = new Date();
-      const startDate = currentBirthday < now ? new Date(currentYear + 1, birthDate.getMonth(), birthDate.getDate()) : currentBirthday;
-      const endDate = new Date(startDate.getFullYear() + 1, birthDate.getMonth(), birthDate.getDate());
+      // Determinar el rango: siempre desde el ÚLTIMO cumpleaños hasta el PRÓXIMO
+      let startDate: Date;
+      let endDate: Date;
+
+      if (currentBirthday <= now) {
+        // El cumpleaños ya pasó este año
+        startDate = currentBirthday; // Último cumpleaños (este año)
+        endDate = new Date(currentYear + 1, birthDate.getMonth(), birthDate.getDate()); // Próximo cumpleaños (año que viene)
+      } else {
+        // El cumpleaños todavía no llegó este año
+        startDate = new Date(currentYear - 1, birthDate.getMonth(), birthDate.getDate()); // Último cumpleaños (año pasado)
+        endDate = currentBirthday; // Próximo cumpleaños (este año)
+      }
 
       setYearRange({ start: startDate, end: endDate });
 
@@ -776,11 +786,13 @@ const AgendaPersonalizada = () => {
     loadYearEvents();
   }, [userProfile]);
 
-  // 🎂 Inicializar currentMonth al mes del cumpleaños cuando se calcula yearRange
+  // 📅 Inicializar currentMonth al mes actual (no al cumpleaños)
   useEffect(() => {
-    if (yearRange && yearRange.start) {
-      console.log('🎂 [AGENDA] Setting currentMonth to birthday month:', yearRange.start);
-      setCurrentMonth(yearRange.start);
+    if (yearRange) {
+      const now = new Date();
+      console.log('📅 [AGENDA] Setting currentMonth to current month:', now);
+      // Ya está inicializado en useState con new Date(), pero lo reforzamos
+      setCurrentMonth(now);
     }
   }, [yearRange]);
 
@@ -962,7 +974,7 @@ const AgendaPersonalizada = () => {
     house: number;
   } => {
     let type: 'luna_nueva' | 'luna_llena' | 'transito' | 'aspecto';
-    let house = 1; // Default casa 1 (TODO: calcular casa real basado en carta natal)
+    let house: number;
 
     // Mapear tipo de evento
     if (event.type === 'lunar_phase') {
@@ -976,7 +988,31 @@ const AgendaPersonalizada = () => {
       type = 'aspecto'; // Default
     }
 
+    // ✅ Calcular casa: usar la del evento si existe, o calcular basándose en el signo
+    if (event.house && event.house >= 1 && event.house <= 12) {
+      house = event.house;
+    } else if (event.sign && userProfile?.astrological?.ascendant) {
+      // Calcular casa aproximada basándose en el signo del evento y el ascendente
+      house = calculateHouseFromSign(event.sign, userProfile.astrological.ascendant);
+    } else {
+      // Default: usar casa 1
+      house = 1;
+    }
+
     return { type, house };
+  };
+
+  // Helper para calcular casa aproximada desde signo (simple: asume casas enteras)
+  const calculateHouseFromSign = (eventSign: string, ascendantSign: string): number => {
+    const signs = ['Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'];
+    const eventIndex = signs.findIndex(s => s.toLowerCase() === eventSign.toLowerCase());
+    const ascIndex = signs.findIndex(s => s.toLowerCase() === ascendantSign.toLowerCase());
+
+    if (eventIndex === -1 || ascIndex === -1) return 1;
+
+    // Casa = distancia desde el ascendente + 1
+    let house = ((eventIndex - ascIndex + 12) % 12) + 1;
+    return house;
   };
 
   return (
