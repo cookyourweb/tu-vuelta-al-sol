@@ -8,6 +8,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { UserProfile, AstrologicalEvent, EventType } from '@/types/astrology/unified-types';
 
+import EventsLoadingModal from '@/components/astrology/EventsLoadingModal';
+import EventInterpretationButton from '@/components/agenda/EventInterpretationButton';
 
 interface AstronomicalDay {
   date: Date;
@@ -916,6 +918,29 @@ const AgendaPersonalizada = () => {
 
 
 
+  // ✅ HELPER: Mapear tipo de evento a formato de EventInterpretationButton
+  const mapEventTypeToInterpretation = (event: AstrologicalEvent): {
+    type: 'luna_nueva' | 'luna_llena' | 'transito' | 'aspecto';
+    house: number;
+  } => {
+    let type: 'luna_nueva' | 'luna_llena' | 'transito' | 'aspecto';
+    let house = 1; // Default casa 1 (TODO: calcular casa real basado en carta natal)
+
+    // Mapear tipo de evento
+    if (event.type === 'lunar_phase') {
+      // Determinar si es Luna Nueva o Llena basado en el título
+      type = event.title.toLowerCase().includes('nueva') ? 'luna_nueva' : 'luna_llena';
+    } else if (event.type === 'retrograde' || event.type === 'planetary_transit') {
+      type = 'transito';
+    } else if (event.type === 'eclipse' || event.type === 'aspect') {
+      type = 'aspecto';
+    } else {
+      type = 'aspecto'; // Default
+    }
+
+    return { type, house };
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 relative overflow-hidden">
 
@@ -1576,6 +1601,33 @@ const AgendaPersonalizada = () => {
                               </span>
                             ))}
                           </div>
+                        </div>
+                      )}
+
+                      {/* 🌟 INTERPRETACIÓN PERSONALIZADA PROFUNDA (NUEVO) */}
+                      {user?.uid && modalEvent && (
+                        <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-2 border-purple-400/30 rounded-2xl p-6">
+                          <div className="mb-4">
+                            <h3 className="text-lg font-semibold text-purple-300 mb-2 flex items-center">
+                              <span className="mr-2">✨</span>
+                              ¿Quieres una interpretación ULTRA PERSONALIZADA?
+                            </h3>
+                            <p className="text-purple-200 text-sm mb-4">
+                              Genera una interpretación única basada en TU carta natal + Solar Return que analiza cómo este evento te afecta específicamente, incluyendo tus fortalezas a usar, bloqueos a transformar, mantras personalizados y ejercicios concretos.
+                            </p>
+                          </div>
+
+                          <EventInterpretationButton
+                            userId={user.uid}
+                            event={{
+                              type: mapEventTypeToInterpretation(modalEvent).type,
+                              date: modalEvent.date,
+                              sign: modalEvent.sign || 'Desconocido',
+                              house: mapEventTypeToInterpretation(modalEvent).house,
+                              planetsInvolved: modalEvent.planet ? [modalEvent.planet] : []
+                            }}
+                            className="w-full"
+                          />
                         </div>
                       )}
                     </div>
