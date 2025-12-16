@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
     console.log('🔄 Generating new interpretation...');
 
     // 1. Buscar carta natal del usuario
-    const natalChart = await NatalChart.findOne({ userId }).lean().exec();
+    const natalChart = await NatalChart.findOne({ userId }).lean().exec() as any;
     if (!natalChart) {
       return NextResponse.json({
         success: false,
@@ -109,7 +109,10 @@ export async function POST(request: NextRequest) {
 
     console.log('📊 Found natal chart');
 
-    // 2. Buscar Solar Return actual
+    // 2. Buscar datos de nacimiento asociados
+    const birthData = await require('@/models/BirthData').default.findById(natalChart.birthDataId).lean().exec() as any;
+
+    // 3. Buscar Solar Return actual
     const currentYear = new Date().getFullYear();
     const solarReturn = await Interpretation.findOne({
       userId,
@@ -118,7 +121,7 @@ export async function POST(request: NextRequest) {
     })
     .sort({ generatedAt: -1 })
     .lean()
-    .exec();
+    .exec() as any;
 
     if (!solarReturn) {
       console.warn('⚠️ No Solar Return found, proceeding without it');
@@ -126,7 +129,7 @@ export async function POST(request: NextRequest) {
       console.log('🌅 Found Solar Return');
     }
 
-    // 3. Buscar interpretación natal guardada (KEY: contiene fortalezas/bloqueos)
+    // 4. Buscar interpretación natal guardada (KEY: contiene fortalezas/bloqueos)
     const natalInterpretation = await Interpretation.findOne({
       userId,
       chartType: 'natal',
@@ -134,7 +137,7 @@ export async function POST(request: NextRequest) {
     })
     .sort({ generatedAt: -1 })
     .lean()
-    .exec();
+    .exec() as any;
 
     if (!natalInterpretation) {
       return NextResponse.json({
@@ -145,21 +148,21 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Found natal interpretation with fortalezas/bloqueos');
 
-    // 4. Buscar datos del usuario
-    const user = await User.findOne({ userId }).lean().exec();
+    // 5. Buscar datos del usuario
+    const user = await User.findOne({ userId }).lean().exec() as any;
     const userName = user?.fullName || user?.name || 'Usuario';
-    const userAge = user?.age || calculateAge(user?.birthDate || natalChart.birthData?.birthDate);
-    const userBirthPlace = user?.birthPlace || natalChart.birthData?.birthPlace || 'Desconocido';
+    const userAge = user?.age || calculateAge(user?.birthDate || birthData?.birthDate);
+    const userBirthPlace = user?.birthPlace || birthData?.birthPlace || 'Desconocido';
 
     console.log(`👤 User: ${userName}, ${userAge} años`);
 
-    // 5. Generar prompt
+    // 6. Generar prompt
     const prompt = generateEventInterpretationPrompt({
       userName,
       userAge,
       userBirthPlace,
       event,
-      natalChart: natalChart.chartData || natalChart,
+      natalChart: natalChart.natalChart || natalChart,
       solarReturn: solarReturn?.interpretation || {},
       natalInterpretation: natalInterpretation.interpretation || {}
     });
@@ -238,7 +241,7 @@ export async function POST(request: NextRequest) {
         new: true,
         runValidators: false
       }
-    );
+    ) as any;
 
     console.log('✅ Event interpretation saved:', eventInterpretation._id);
 

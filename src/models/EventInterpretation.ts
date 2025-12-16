@@ -46,6 +46,10 @@ export interface IEventInterpretation extends Document {
   method: string;
   cached: boolean;
   lastModified?: Date;
+
+  // ✅ Instance methods
+  isExpired(): boolean;
+  getEventTypeName(): string;
 }
 
 // ✅ SCHEMA MONGOOSE

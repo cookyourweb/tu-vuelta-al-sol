@@ -495,7 +495,7 @@ function identificarPlanetasActivados(
   if (event.type === 'transito' && event.natalPlanet) {
     const planetaNatal = natalChart.planets.find((p: any) =>
       p.name === event.natalPlanet ||
-      p.name.toLowerCase() === event.natalPlanet.toLowerCase()
+      p.name.toLowerCase() === event.natalPlanet!.toLowerCase()
     );
 
     if (planetaNatal) {

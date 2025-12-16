@@ -10,7 +10,7 @@ import {
   LogOut,
   ChevronDown,
   Star,
-  Sunrise,
+  Sun,
   Sparkles,
   Calendar,
   Settings,
@@ -54,7 +54,7 @@ const navItems = [
   {
     href: '/solar-return',
     label: 'Retorno Solar',
-    icon: Sunrise,
+    icon: Sun,
     description: 'Tu evolucion astrologica anual'
   },
   { 

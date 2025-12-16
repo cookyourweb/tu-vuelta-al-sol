@@ -179,8 +179,7 @@ async function callProkeralaSolarReturn(birthData: any, returnYear: number) {
     const response = await fetch(url.toString(), {
       headers: {
         'Authorization': `Bearer ${access_token}`,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        'Accept': 'application/json'
       }
     });
 

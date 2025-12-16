@@ -315,25 +315,33 @@ export default function NatalChartPage() {
       console.log('🔍 Cargando carta natal para usuario:', user?.uid);
 
       // Intentar cargar carta existente
-      const result = await authenticatedGet(`/api/charts/natal?userId=${user?.uid}`);
+      let chartExists = false;
+      try {
+        const result = await authenticatedGet(`/api/charts/natal?userId=${user?.uid}`);
 
-      console.log('📡 Respuesta carta natal:', result);
+        console.log('📡 Respuesta carta natal:', result);
 
-      if (result.success && result.natalChart) {
-        console.log('✅ Carta natal cargada correctamente');
-        setDebugInfo('✅ Carta natal cargada');
+        if (result.success && result.natalChart) {
+          console.log('✅ Carta natal cargada correctamente');
+          setDebugInfo('✅ Carta natal cargada');
 
-        const processedData = processChartData(result.natalChart);
-        setChartData(processedData);
+          const processedData = processChartData(result.natalChart);
+          setChartData(processedData);
 
-        // 🔍 DIAGNOSE: Check planets count
-        console.log('📊 Planets in chartData:', processedData?.planets.length);
-        console.log('🪐 Names:', processedData?.planets.map(p => p.name));
+          // 🔍 DIAGNOSE: Check planets count
+          console.log('📊 Planets in chartData:', processedData?.planets.length);
+          console.log('🪐 Names:', processedData?.planets.map(p => p.name));
 
-        // Cargar datos de nacimiento
-        await loadBirthDataInfo();
-        return;
+          // Cargar datos de nacimiento
+          await loadBirthDataInfo();
+          chartExists = true;
+        }
+      } catch (error) {
+        // 404 es esperado para usuarios nuevos, continuar con generación automática
+        console.log('📝 Carta no encontrada (404), generando automáticamente...');
       }
+
+      if (chartExists) return;
 
       // Si no existe, generar automáticamente
       setDebugInfo('📝 Generando carta natal automáticamente...');

@@ -555,6 +555,14 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       console.log('💾 userId:', userId);
       console.log('💾 chartType:', type);
       console.log('💾 generatedAt:', interpretationData.generatedAt);
+      console.log('💾 user authenticated:', !!user);
+      console.log('💾 user email:', user?.email);
+
+      // ✅ Check if user is authenticated first
+      if (!user) {
+        console.error('❌ User not authenticated, cannot save interpretation');
+        return;
+      }
 
       const saveData = {
         userId,
@@ -571,10 +579,26 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         generatedAt: saveData.generatedAt
       });
 
-      // ✅ Get authentication token
-      const token = await user?.getIdToken();
+      // ✅ Get authentication token with retry logic
+      let token;
+      try {
+        token = await user.getIdToken();
+        console.log('✅ Token obtained successfully');
+      } catch (tokenError) {
+        console.error('❌ Error getting ID token:', tokenError);
+        // Try to refresh the token
+        try {
+          await user.getIdToken(true); // Force refresh
+          token = await user.getIdToken();
+          console.log('✅ Token refreshed and obtained successfully');
+        } catch (refreshError) {
+          console.error('❌ Failed to refresh token:', refreshError);
+          return;
+        }
+      }
+
       if (!token) {
-        console.error('❌ No authentication token available');
+        console.error('❌ No authentication token available after retry');
         return;
       }
 

@@ -1,7 +1,7 @@
 // src/components/layout/MobileBottomNav.tsx
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -36,8 +36,11 @@ const baseNavItems = [
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const { user } = useAuth();
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -81,6 +84,54 @@ export default function MobileBottomNav() {
 
   const isActiveRoute = (href: string) => {
     return pathname === href;
+  };
+
+  // Minimum swipe distance (in px)
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null); // otherwise the swipe is fired even with usual touch events
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => setTouchEnd(e.targetTouches[0].clientX);
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe || isRightSwipe) {
+      handleSwipe(isLeftSwipe ? 'left' : 'right');
+    }
+  };
+
+  const handleSwipe = (direction: 'left' | 'right') => {
+    const currentIndex = navItems.findIndex(item => isActiveRoute(item.href));
+
+    if (currentIndex === -1) return;
+
+    let nextIndex;
+    if (direction === 'left') {
+      // Swipe left: go to next item (right in navigation)
+      nextIndex = currentIndex + 1;
+    } else {
+      // Swipe right: go to previous item (left in navigation)
+      nextIndex = currentIndex - 1;
+    }
+
+    // Wrap around if needed
+    if (nextIndex < 0) {
+      nextIndex = navItems.length - 1;
+    } else if (nextIndex >= navItems.length) {
+      nextIndex = 0;
+    }
+
+    const nextItem = navItems[nextIndex];
+    if (nextItem) {
+      router.push(nextItem.href);
+    }
   };
 
   return (

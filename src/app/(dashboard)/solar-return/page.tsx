@@ -6,11 +6,10 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import ChartDisplay from '@/components/astrology/ChartDisplay';
 import InterpretationButton from '@/components/astrology/InterpretationButton';
-import SectionNavigation from '@/components/solar-return/SectionNavigation';
 import { useInterpretationDrawer } from '@/hooks/useInterpretationDrawer';
 import { InterpretationDrawer } from '@/components/astrology/InterpretationDrawer';
 import {
-  Sun, RefreshCw, Sparkles, AlertTriangle
+  Sun, RefreshCw, Sparkles, AlertTriangle, ArrowUp
 } from 'lucide-react';
 
 // Helper function to get month name in Spanish from birthday
@@ -58,7 +57,7 @@ export default function SolarReturnPage() {
   const [regenerating, setRegenerating] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('☀️ Iniciando tu Vuelta al Sol...');
   const [loadingProgress, setLoadingProgress] = useState(0);
-  const [currentSection, setCurrentSection] = useState('carta');
+
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -96,22 +95,7 @@ export default function SolarReturnPage() {
     }
   }, [loading]);
 
-  // Handle section navigation from URL hash
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '');
-      if (hash && ['carta', 'aspectos', 'planetas', 'linea-tiempo', 'integracion'].includes(hash)) {
-        setCurrentSection(hash);
-      }
-    };
 
-    // Check initial hash
-    handleHashChange();
-
-    // Listen for hash changes
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
 
   const loadAllData = async () => {
     console.log('🚀 ===== INICIO loadAllData =====');
@@ -372,19 +356,46 @@ export default function SolarReturnPage() {
       <div className="container mx-auto px-4 py-8">
 
         {/* ✅ SECCIÓN 1: HEADER */}
-        <div className="mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-300 mb-2 text-center">
-            ☀️ Tu Vuelta al Sol {new Date().getFullYear()}
+        <div className="text-center mb-16">
+          <div className="flex justify-center items-center mb-8">
+            <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 border border-yellow-400/30 rounded-full p-8 backdrop-blur-sm relative">
+              <div className="absolute -top-2 -right-2 w-4 h-4 bg-yellow-400 rounded-full animate-pulse"></div>
+              <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-orange-400 rounded-full animate-bounce"></div>
+              <Sun className="w-12 h-12 text-yellow-400" />
+            </div>
+          </div>
+
+          <h1 className="text-4xl md:text-6xl font-black mb-6 leading-tight">
+            Revolución Solar
+            <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent"> {new Date().getFullYear()} al {new Date().getFullYear() + 1}</span>
           </h1>
-          <p className="text-purple-200 text-center text-lg">
-            Revolución Solar • Ciclo Anual Personalizado
-          </p>
+
+          <div className="max-w-3xl mx-auto">
+            <p className="text-xl text-gray-300 mb-6 leading-relaxed">
+              {user?.displayName ? `✨ ${user.displayName}, ` : '✨ Explorador cósmico, '}
+              descubre las energías transformadoras que te esperan en tu revolución solar anual.
+            </p>
+
+            <div className="flex justify-center items-center space-x-6 text-sm">
+              <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+                <Sun className="w-4 h-4 text-yellow-400 mr-2" />
+                <span className="text-yellow-300">Revolución Solar</span>
+              </div>
+              <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+                <Sparkles className="w-4 h-4 text-purple-400 mr-2" />
+                <span className="text-purple-300">Ciclo Anual</span>
+              </div>
+              <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+                <RefreshCw className="w-4 h-4 text-pink-400 mr-2" />
+                <span className="text-pink-300">Transformación</span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* ✅ SECCIÓN 1.5: NAVEGACIÓN DE SECCIONES */}
-        <SectionNavigation currentSection={currentSection} onSectionChange={setCurrentSection} />
 
-        {/* ✅ SECCIÓN 2: BOTÓN DE INTERPRETACIÓN */}
+
+        {/* ✅ SECCIÓN 2: BOTONES PRINCIPALES */}
         {solarReturnData && natalChart && birthData && (() => {
           // ✅ Helper function to extract text from objects (handles {tooltip, drawer} structure)
           const extractText = (value: any): string => {
@@ -421,15 +432,43 @@ export default function SolarReturnPage() {
 
           return (
             <div className="mb-8">
-              <InterpretationButton
-                type="solar-return"
-                userId={user?.uid || ''}
-                chartData={solarReturnData}
-                natalChart={natalChart}
-                userProfile={userProfile}
-                isAdmin={user?.email?.includes('admin') || false}
-                className="max-w-2xl mx-auto"
-              />
+              <div className="flex flex-col md:flex-row gap-4 justify-center items-center max-w-4xl mx-auto">
+                <InterpretationButton
+                  type="solar-return"
+                  userId={user?.uid || ''}
+                  chartData={solarReturnData}
+                  natalChart={natalChart}
+                  userProfile={userProfile}
+                  isAdmin={user?.email?.includes('admin') || false}
+                  className="flex-1 max-w-md"
+                />
+
+                <button
+                  onClick={() => {
+                    const timelineSection = document.getElementById('linea-tiempo');
+                    if (timelineSection) {
+                      timelineSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }}
+                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600/30 to-pink-600/30 border border-purple-400/50 text-purple-200 rounded-xl font-semibold text-sm hover:bg-purple-600/40 hover:text-white transition-all duration-300"
+                >
+                  <span className="text-lg">📅</span>
+                  Línea de Tiempo
+                </button>
+
+                <button
+                  onClick={() => {
+                    const integrationSection = document.getElementById('integracion');
+                    if (integrationSection) {
+                      integrationSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }}
+                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600/30 to-teal-600/30 border border-emerald-400/50 text-emerald-200 rounded-xl font-semibold text-sm hover:bg-emerald-600/40 hover:text-white transition-all duration-300"
+                >
+                  <span className="text-lg">💫</span>
+                  Integración
+                </button>
+              </div>
             </div>
           );
         })()}
@@ -439,7 +478,7 @@ export default function SolarReturnPage() {
           <div id="carta" className="max-w-5xl mx-auto mb-12 scroll-mt-24">
             <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 border border-purple-500/30">
               <h2 className="text-2xl font-bold text-purple-100 mb-6 text-center">
-                🌟 Tu Rueda Solar Return {new Date().getFullYear()}
+                🌟 Tu Rueda Solar Return {new Date().getFullYear()} - {new Date().getFullYear() + 1}
               </h2>
               <div className="flex justify-center">
                 <ChartDisplay
@@ -679,6 +718,17 @@ export default function SolarReturnPage() {
                 </div>
               </div>
             </div>
+
+            {/* Botón Subir Arriba */}
+            <div className="mt-8 text-center">
+              <button
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600/30 to-pink-600/30 border border-purple-400/50 text-purple-200 rounded-xl font-semibold text-sm hover:bg-purple-600/40 hover:text-white transition-all duration-300 hover:scale-105"
+              >
+                <ArrowUp className="w-4 h-4" />
+                Subir Arriba
+              </button>
+            </div>
           </div>
         </div>
         {/* ✅ SECCIÓN 7: INTEGRACIÓN FINAL */}
@@ -743,6 +793,17 @@ export default function SolarReturnPage() {
                   ✨ Tu revolución personal ya comenzó ✨
                 </p>
               </div>
+            </div>
+
+            {/* Botón Subir Arriba */}
+            <div className="mt-8 text-center">
+              <button
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600/30 to-teal-600/30 border border-emerald-400/50 text-emerald-200 rounded-xl font-semibold text-sm hover:bg-emerald-600/40 hover:text-white transition-all duration-300 hover:scale-105"
+              >
+                <ArrowUp className="w-4 h-4" />
+                Subir Arriba
+              </button>
             </div>
 
           </div>
