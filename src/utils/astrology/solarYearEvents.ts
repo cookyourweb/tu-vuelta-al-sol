@@ -75,6 +75,9 @@ function eclipticLongitudeToZodiac(longitude: number): { sign: string; degree: n
   const signIndex = Math.floor(normalizedLon / 30);
   const degree = normalizedLon % 30;
 
+  // 🔍 DEBUG: Log para verificar que usamos TROPICAL
+  console.log(`🔍 [TROPICAL] Longitud eclíptica: ${normalizedLon.toFixed(2)}° → ${ZODIAC_SIGNS[signIndex]} ${degree.toFixed(1)}°`);
+
   return {
     sign: ZODIAC_SIGNS[signIndex],
     degree: degree
