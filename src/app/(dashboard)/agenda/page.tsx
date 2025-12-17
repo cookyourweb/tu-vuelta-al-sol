@@ -228,6 +228,26 @@ const AgendaPersonalizada = () => {
       console.log('📊 [YEAR-EVENTS] Stats:', result.stats);
       console.log('📊 [YEAR-EVENTS] API returned period:', result.period);
 
+      // 🔍 DEBUG: Log sample events to verify zodiac signs (tropical vs vedic)
+      console.log('🔍 [DEBUG] Sample Lunar Phases:', result.data.events.lunarPhases?.slice(0, 3).map((p: any) => ({
+        date: p.date,
+        phase: p.phase,
+        sign: p.zodiacSign,
+        type: p.type
+      })));
+      console.log('🔍 [DEBUG] Sample Retrogrades:', result.data.events.retrogrades?.slice(0, 2).map((r: any) => ({
+        planet: r.planet,
+        startDate: r.startDate,
+        endDate: r.endDate,
+        sign: r.sign || r.startSign
+      })));
+      console.log('🔍 [DEBUG] Sample Planetary Ingresses:', result.data.events.planetaryIngresses?.slice(0, 3).map((i: any) => ({
+        planet: i.planet,
+        date: i.date,
+        fromSign: i.fromSign,
+        toSign: i.toSign || i.newSign
+      })));
+
       // Transform API events to AstrologicalEvent format (igual que antes)
       const transformedEvents: AstrologicalEvent[] = [];
 
@@ -1193,37 +1213,66 @@ const AgendaPersonalizada = () => {
 
             {/* Header del calendario */}
             <div className="bg-gradient-to-r from-purple-600/30 to-indigo-600/30 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-purple-400/30">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
                 <h2 className="text-2xl lg:text-3xl font-bold text-white capitalize flex items-center">
                   <span className="mr-3">🗓️</span>
                   Agenda Cósmica
                 </h2>
 
-                {/* Navegación de meses */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 flex-wrap justify-center">
+                  {/* Botón regenerar eventos */}
                   <button
-                    onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                    className="p-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 transition-all duration-200 border border-purple-400/30 hover:border-purple-400/50"
-                    title="Mes anterior"
+                    onClick={async () => {
+                      console.log('🔄 [REGENERATE] User requested to regenerate events');
+                      setLoading(true);
+                      setLoadingYearEvents(true);
+                      try {
+                        const yearEvents = await fetchYearEvents();
+                        console.log(`✅ [REGENERATE] Regenerated ${yearEvents.length} events`);
+                        setEvents(yearEvents);
+                      } catch (error) {
+                        console.error('❌ [REGENERATE] Error:', error);
+                      } finally {
+                        setLoading(false);
+                        setLoadingYearEvents(false);
+                      }
+                    }}
+                    disabled={loading}
+                    className="px-4 py-2 rounded-lg bg-green-500/20 hover:bg-green-500/30 transition-all duration-200 border border-green-400/30 hover:border-green-400/50 text-white text-sm font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Regenerar eventos del año"
                   >
-                    <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    <svg className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
+                    {loading ? 'Regenerando...' : 'Regenerar'}
                   </button>
 
-                  <span className="text-white font-semibold min-w-[120px] text-center">
-                    {format(currentMonth, 'MMMM yyyy', { locale: es })}
-                  </span>
+                  {/* Navegación de meses */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+                      className="p-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 transition-all duration-200 border border-purple-400/30 hover:border-purple-400/50"
+                      title="Mes anterior"
+                    >
+                      <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
 
-                  <button
-                    onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                    className="p-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 transition-all duration-200 border border-purple-400/30 hover:border-purple-400/50"
-                    title="Mes siguiente"
-                  >
-                    <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
+                    <span className="text-white font-semibold min-w-[120px] text-center text-sm lg:text-base">
+                      {format(currentMonth, 'MMMM yyyy', { locale: es })}
+                    </span>
+
+                    <button
+                      onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+                      className="p-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 transition-all duration-200 border border-purple-400/30 hover:border-purple-400/50"
+                      title="Mes siguiente"
+                    >
+                      <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
