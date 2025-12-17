@@ -87,7 +87,7 @@ export async function POST(request: Request) {
       const planetUrl = new URL(`${PROKERALA_API_BASE_URL}/astrology/planet-position`);
       planetUrl.searchParams.append('datetime', `${birthDate}T${birthTime}Z`);
       planetUrl.searchParams.append('coordinates', `${latitude},${longitude}`);
-      planetUrl.searchParams.append('ayanamsa', 'lahiri');
+      planetUrl.searchParams.append('ayanamsa', '0'); // ✅ CORREGIDO: 0=Tropical, NO lahiri (védico)
       
       console.log('URL de solicitud de planetas:', planetUrl.toString());
       
