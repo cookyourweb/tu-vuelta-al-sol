@@ -512,6 +512,20 @@ function getKnownPlanetaryIngresses(startDate: Date, endDate: Date): PlanetaryIn
           searchStart.setDate(searchStart.getDate() - planetInfo.sampleDays);
           let searchEnd = new Date(currentDate);
 
+          // Get longitudes before and after to detect retrograde
+          const posBeforeIngress = Astronomy.Ecliptic(Astronomy.GeoVector(planetInfo.body, searchStart, false));
+          const posAfterIngress = Astronomy.Ecliptic(Astronomy.GeoVector(planetInfo.body, searchEnd, false));
+
+          let lonBefore = ((posBeforeIngress.elon % 360) + 360) % 360;
+          let lonAfter = ((posAfterIngress.elon % 360) + 360) % 360;
+
+          // Handle 360° wrap-around (e.g., 359° → 1°)
+          let lonDiff = lonAfter - lonBefore;
+          if (lonDiff > 180) lonDiff -= 360;
+          if (lonDiff < -180) lonDiff += 360;
+
+          const isRetrograde = lonDiff < 0; // Longitude decreasing = retrograde
+
           for (let i = 0; i < 10; i++) { // 10 iterations = ~1 hour precision
             const midDate = new Date((searchStart.getTime() + searchEnd.getTime()) / 2);
             const midPos = Astronomy.Ecliptic(Astronomy.GeoVector(planetInfo.body, midDate, false));
@@ -526,7 +540,10 @@ function getKnownPlanetaryIngresses(startDate: Date, endDate: Date): PlanetaryIn
 
           refinedDate = searchEnd;
 
-          if (refinedDate >= startDate && refinedDate <= endDate) {
+          // 🔧 FIX: Only include DIRECT ingresses (skip retrograde re-entries)
+          // Retrograde ingresses are confusing and not typically used in western astrology
+          if (refinedDate >= startDate && refinedDate <= endDate && !isRetrograde) {
+            console.log(`✅ [INGRESS] ${planetInfo.name} entra en ${currentSign} (directo) el ${refinedDate.toISOString()}`);
             ingresses.push({
               planet: planetInfo.name,
               date: refinedDate,
@@ -534,6 +551,8 @@ function getKnownPlanetaryIngresses(startDate: Date, endDate: Date): PlanetaryIn
               toSign: currentSign,
               description: `♈ ${planetInfo.name} ingresa en ${currentSign}`
             });
+          } else if (isRetrograde) {
+            console.log(`⏪ [INGRESS-RETROGRADE] ${planetInfo.name} RE-ENTRA en ${currentSign} (retrógrado) el ${refinedDate.toISOString()} - OMITIDO`);
           }
         }
 
