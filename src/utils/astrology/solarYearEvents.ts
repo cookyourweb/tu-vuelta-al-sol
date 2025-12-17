@@ -523,7 +523,27 @@ function getKnownPlanetaryIngresses(startDate: Date, endDate: Date): PlanetaryIn
 
           refinedDate = searchEnd;
 
-          if (refinedDate >= startDate && refinedDate <= endDate) {
+          // ✅ DETECT RETROGRADE MOTION
+          // Check ecliptic longitude before and after ingress to determine if retrograde
+          const dateBeforeIngress = new Date(refinedDate.getTime() - 6 * 60 * 60 * 1000); // 6 hours before
+          const dateAfterIngress = new Date(refinedDate.getTime() + 6 * 60 * 60 * 1000); // 6 hours after
+
+          const posBeforeIngress = Astronomy.Ecliptic(Astronomy.GeoVector(planetInfo.body, dateBeforeIngress, false));
+          const posAfterIngress = Astronomy.Ecliptic(Astronomy.GeoVector(planetInfo.body, dateAfterIngress, false));
+
+          const lonBefore = posBeforeIngress.elon;
+          const lonAfter = posAfterIngress.elon;
+
+          // Calculate longitude difference (handle 360° wrap-around)
+          let lonDiff = lonAfter - lonBefore;
+          if (lonDiff > 180) lonDiff -= 360;
+          if (lonDiff < -180) lonDiff += 360;
+
+          const isRetrograde = lonDiff < 0; // Longitude decreasing = retrograde motion
+
+          if (refinedDate >= startDate && refinedDate <= endDate && !isRetrograde) {
+            // ✅ ONLY INCLUDE DIRECT INGRESSES
+            console.log(`✅ [INGRESS] ${planetInfo.name} entra en ${currentSign} (directo) el ${refinedDate.toISOString()}`);
             ingresses.push({
               planet: planetInfo.name,
               date: refinedDate,
@@ -531,6 +551,9 @@ function getKnownPlanetaryIngresses(startDate: Date, endDate: Date): PlanetaryIn
               toSign: currentSign,
               description: `♈ ${planetInfo.name} ingresa en ${currentSign}`
             });
+          } else if (isRetrograde) {
+            // ⏪ LOG RETROGRADE INGRESSES (but don't include them)
+            console.log(`⏪ [INGRESS-RETROGRADE] ${planetInfo.name} RE-ENTRA en ${currentSign} (retrógrado) el ${refinedDate.toISOString()} - OMITIDO`);
           }
         }
 
