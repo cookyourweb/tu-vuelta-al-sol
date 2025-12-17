@@ -135,13 +135,36 @@ const AgendaPersonalizada = () => {
     try {
       console.log('📅 [YEAR-EVENTS] Fetching complete year events from birthday to next birthday...');
 
-      // Calcular el rango del año astrológico (último cumpleaños → próximo cumpleaños)
+      // 🔧 FIX: Parse birth date carefully to avoid timezone issues
       const birthDate = new Date(userProfile.birthDate);
-      const currentYear = new Date().getFullYear();
-      const now = new Date();
+      const birthMonth = birthDate.getMonth(); // 0-indexed (0=Jan, 1=Feb, etc)
+      const birthDay = birthDate.getDate();
 
-      // Fecha de cumpleaños de este año
-      const currentBirthday = new Date(currentYear, birthDate.getMonth(), birthDate.getDate());
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth();
+      const currentDay = now.getDate();
+
+      // 📊 DEBUG: Log current state
+      console.log('📊 [DEBUG] Current state:', {
+        now: now.toISOString(),
+        currentYear,
+        currentMonth,
+        currentDay,
+        birthMonth,
+        birthDay,
+        userProfileBirthDate: userProfile.birthDate
+      });
+
+      // Fecha de cumpleaños de este año (en hora local para evitar problemas de timezone)
+      const currentBirthday = new Date(currentYear, birthMonth, birthDay, 0, 0, 0, 0);
+
+      // 📊 DEBUG: Log comparison values
+      console.log('📊 [DEBUG] Birthday comparison:', {
+        currentBirthday: currentBirthday.toISOString(),
+        now: now.toISOString(),
+        hasBirthdayPassedThisYear: currentBirthday <= now
+      });
 
       // Determinar el rango: siempre desde el ÚLTIMO cumpleaños hasta el PRÓXIMO
       let startDate: Date;
@@ -149,19 +172,37 @@ const AgendaPersonalizada = () => {
 
       if (currentBirthday <= now) {
         // El cumpleaños ya pasó este año
-        startDate = currentBirthday; // Último cumpleaños (este año)
-        endDate = new Date(currentYear + 1, birthDate.getMonth(), birthDate.getDate()); // Próximo cumpleaños (año que viene)
+        startDate = new Date(currentYear, birthMonth, birthDay, 0, 0, 0, 0); // Último cumpleaños (este año)
+        endDate = new Date(currentYear + 1, birthMonth, birthDay, 0, 0, 0, 0); // Próximo cumpleaños (año que viene)
+        console.log('✅ [YEAR-EVENTS] Birthday has passed this year');
       } else {
         // El cumpleaños todavía no llegó este año
-        startDate = new Date(currentYear - 1, birthDate.getMonth(), birthDate.getDate()); // Último cumpleaños (año pasado)
-        endDate = currentBirthday; // Próximo cumpleaños (este año)
+        startDate = new Date(currentYear - 1, birthMonth, birthDay, 0, 0, 0, 0); // Último cumpleaños (año pasado)
+        endDate = new Date(currentYear, birthMonth, birthDay, 0, 0, 0, 0); // Próximo cumpleaños (este año)
+        console.log('✅ [YEAR-EVENTS] Birthday has NOT passed yet this year');
       }
 
       setYearRange({ start: startDate, end: endDate });
 
-      console.log('📅 [YEAR-EVENTS] Year range:', {
-        start: startDate.toISOString().split('T')[0],
-        end: endDate.toISOString().split('T')[0]
+      // 🔧 FIX: Use date-fns format to avoid timezone conversion issues
+      const startDateStr = format(startDate, 'yyyy-MM-dd');
+      const endDateStr = format(endDate, 'yyyy-MM-dd');
+
+      console.log('📅 [YEAR-EVENTS] Year range (LOCAL):', {
+        start: startDateStr,
+        end: endDateStr,
+        startYear: startDate.getFullYear(),
+        endYear: endDate.getFullYear()
+      });
+
+      const yearToFetch = startDate.getFullYear();
+
+      console.log('📤 [YEAR-EVENTS] Sending request to API:', {
+        birthDate: userProfile.birthDate,
+        birthTime: userProfile.birthTime,
+        birthPlace: userProfile.birthPlace,
+        currentYear: yearToFetch,
+        expectedRange: `${startDateStr} to ${endDateStr}`
       });
 
       const response = await fetch('/api/astrology/solar-year-events', {
@@ -171,18 +212,21 @@ const AgendaPersonalizada = () => {
           birthDate: userProfile.birthDate,
           birthTime: userProfile.birthTime,
           birthPlace: userProfile.birthPlace,
-          currentYear: startDate.getFullYear()
+          currentYear: yearToFetch
         })
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
         console.error('❌ [YEAR-EVENTS] Failed to fetch solar year events');
+        console.error('❌ [YEAR-EVENTS] Error response:', errorText);
         return generateExampleEvents();
       }
 
       const result = await response.json();
       console.log('✅ [YEAR-EVENTS] Solar year events fetched successfully');
       console.log('📊 [YEAR-EVENTS] Stats:', result.stats);
+      console.log('📊 [YEAR-EVENTS] API returned period:', result.period);
 
       // Transform API events to AstrologicalEvent format (igual que antes)
       const transformedEvents: AstrologicalEvent[] = [];
