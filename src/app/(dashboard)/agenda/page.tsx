@@ -1220,31 +1220,54 @@ const AgendaPersonalizada = () => {
                 </h2>
 
                 <div className="flex items-center gap-4 flex-wrap justify-center">
-                  {/* Botón regenerar eventos */}
+                  {/* Botón regenerar eventos DEL MES ACTUAL */}
                   <button
                     onClick={async () => {
-                      console.log('🔄 [REGENERATE] User requested to regenerate events');
-                      setLoading(true);
-                      setLoadingYearEvents(true);
+                      const monthName = format(currentMonth, 'MMMM yyyy', { locale: es });
+                      console.log(`🔄 [REGENERATE-MONTH] Regenerating events for ${monthName}`);
+                      setLoadingMonthlyEvents(true);
+                      setLoadingMonthName(monthName);
+
                       try {
+                        // Re-fetch todos los eventos del año
                         const yearEvents = await fetchYearEvents();
-                        console.log(`✅ [REGENERATE] Regenerated ${yearEvents.length} events`);
+                        console.log(`✅ [REGENERATE-MONTH] Fetched ${yearEvents.length} total events`);
+
+                        // Filtrar solo los del mes actual
+                        const monthStart = startOfMonth(currentMonth);
+                        const monthEnd = endOfMonth(currentMonth);
+                        const monthEvents = yearEvents.filter(event => {
+                          const eventDate = new Date(event.date);
+                          return eventDate >= monthStart && eventDate <= monthEnd;
+                        });
+
+                        console.log(`✅ [REGENERATE-MONTH] Found ${monthEvents.length} events for ${monthName}`);
+                        console.log('🔍 [REGENERATE-MONTH] Month events sample:', monthEvents.slice(0, 5).map(e => ({
+                          date: e.date,
+                          title: e.title,
+                          sign: e.sign,
+                          planet: e.planet,
+                          type: e.type
+                        })));
+
+                        // Actualizar todos los eventos (para mantener consistencia)
                         setEvents(yearEvents);
                       } catch (error) {
-                        console.error('❌ [REGENERATE] Error:', error);
+                        console.error('❌ [REGENERATE-MONTH] Error:', error);
                       } finally {
-                        setLoading(false);
-                        setLoadingYearEvents(false);
+                        setLoadingMonthlyEvents(false);
+                        setLoadingMonthName('');
                       }
                     }}
-                    disabled={loading}
-                    className="px-4 py-2 rounded-lg bg-green-500/20 hover:bg-green-500/30 transition-all duration-200 border border-green-400/30 hover:border-green-400/50 text-white text-sm font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    title="Regenerar eventos del año"
+                    disabled={loading || loadingMonthlyEvents}
+                    className="px-3 py-2 rounded-lg bg-green-500/20 hover:bg-green-500/30 transition-all duration-200 border border-green-400/30 hover:border-green-400/50 text-white text-xs lg:text-sm font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Regenerar eventos de este mes"
                   >
-                    <svg className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className={`h-4 w-4 ${(loading || loadingMonthlyEvents) ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
-                    {loading ? 'Regenerando...' : 'Regenerar'}
+                    <span className="hidden sm:inline">{loadingMonthlyEvents ? `Cargando...` : 'Regenerar Mes'}</span>
+                    <span className="sm:hidden">🔄</span>
                   </button>
 
                   {/* Navegación de meses */}
