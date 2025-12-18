@@ -110,13 +110,44 @@ export async function POST(request: NextRequest) {
 
     console.log(`📅 Calculating events from ${startDate.toISOString()} to ${endDate.toISOString()}`);
 
-    const yearEvents = await calculateSolarYearEvents(
-      userId,
-      birthData,
-      natalChart.natalChart || natalChart,
-      startDate,
-      endDate
-    );
+    // calculateSolarYearEvents solo necesita la fecha de inicio (cumpleaños)
+    const solarEvents = await calculateSolarYearEvents(startDate);
+
+    // Convertir eventos a formato plano para facilitar el procesamiento
+    const yearEvents = [
+      ...solarEvents.lunarPhases.map(phase => ({
+        type: phase.type === 'new_moon' ? 'luna-nueva' : 'luna-llena',
+        date: phase.date,
+        sign: phase.zodiacSign || phase.sign,
+        house: 1, // TODO: calcular casa real
+        description: phase.description,
+        degree: phase.degree
+      })),
+      ...solarEvents.eclipses.map(eclipse => ({
+        type: eclipse.type === 'solar' ? 'eclipse-solar' : 'eclipse-lunar',
+        date: eclipse.date,
+        sign: eclipse.zodiacSign || eclipse.sign,
+        house: 1, // TODO: calcular casa real
+        description: eclipse.description,
+        degree: eclipse.degree
+      })),
+      ...solarEvents.planetaryIngresses.map(ingress => ({
+        type: 'ingreso-planetario',
+        date: ingress.date,
+        sign: ingress.toSign || ingress.sign,
+        planet: ingress.planet,
+        house: 1, // TODO: calcular casa real
+        description: ingress.description
+      })),
+      ...solarEvents.retrogrades.map(retro => ({
+        type: retro.isRetrograde ? 'retrogrado-inicio' : 'retrogrado-fin',
+        date: retro.startDate,
+        sign: retro.startSign || retro.sign,
+        planet: retro.planet,
+        house: 1, // TODO: calcular casa real
+        description: retro.description
+      }))
+    ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     console.log(`✅ Events calculated: ${yearEvents.length} total events`);
 
