@@ -294,7 +294,7 @@ export default function MesPage({
 <div className="space-y-8">
               {/* Eclipses */}
               {monthData.eclipses.map((eclipse, idx) => {
-                const eventDate = format(new Date(eclipse.date), 'yyyy-MM-dd');
+                const eventDate = format(new Date(eclipse.fecha), 'yyyy-MM-dd');
                 const eventId = `eclipse-${eventDate}`;
                 const eventInterp = eventInterpretations[eventId];
 
@@ -306,14 +306,14 @@ export default function MesPage({
                         <span className="text-2xl text-cosmic-gold mr-3">●</span>
                         <div>
                           <h4 className="font-display text-xl text-gray-800 mb-2">
-                            Eclipse en {eclipse.sign || eclipse.signo || 'signo'}
+                            Eclipse en {eclipse.signo || 'signo'}
                           </h4>
                           <p className="font-body text-sm text-gray-600 mb-2">
-                            {format(new Date(eclipse.date), "d 'de' MMMM", { locale: es })}
+                            {format(new Date(eclipse.fecha), "d 'de' MMMM", { locale: es })}
                           </p>
-                          {eclipse.description && (
+                          {eclipse.descripcion && (
                             <p className="font-body text-base text-gray-700 leading-relaxed">
-                              {eclipse.description}
+                              {eclipse.descripcion}
                             </p>
                           )}
                         </div>
@@ -324,11 +324,11 @@ export default function MesPage({
                     {eventInterp && (
                       <EventInterpretationPrint
                         event={{
-                          type: eclipse.type || 'eclipse',
+                          type: eclipse.tipo || 'eclipse',
                           date: eventDate,
-                          sign: eclipse.sign || eclipse.signo,
-                          house: eclipse.house,
-                          description: eclipse.description
+                          sign: eclipse.signo,
+                          house: eclipse.casa,
+                          description: eclipse.descripcion
                         }}
                         interpretation={eventInterp}
                         userName={userName}
@@ -340,7 +340,7 @@ export default function MesPage({
 
               {/* Lunas Nuevas */}
               {monthData.lunas_nuevas.map((luna, idx) => {
-                const eventDate = format(new Date(luna.date), 'yyyy-MM-dd');
+                const eventDate = format(new Date(luna.fecha), 'yyyy-MM-dd');
                 // Generar eventId igual que en el modelo: luna_nueva_YYYY-MM-DD_signo
                 const eventId = `luna_nueva_${eventDate}_${luna.signo?.toLowerCase()}`;
                 const eventInterp = eventInterpretations[eventId];
@@ -353,14 +353,14 @@ export default function MesPage({
                         <span className="text-2xl text-gray-600 mr-3">☽</span>
                         <div>
                           <h4 className="font-display text-lg text-gray-800 mb-1">
-                            Luna Nueva en {luna.sign || luna.signo || 'signo'}
+                            Luna Nueva en {luna.signo || 'signo'}
                           </h4>
                           <p className="font-body text-sm text-gray-600 mb-2">
-                            {format(new Date(luna.date), "d 'de' MMMM", { locale: es })}
+                            {format(new Date(luna.fecha), "d 'de' MMMM", { locale: es })}
                           </p>
-                          {luna.description && (
+                          {luna.descripcion && (
                             <p className="font-body text-sm text-gray-700">
-                              {luna.description}
+                              {luna.descripcion}
                             </p>
                           )}
                         </div>
@@ -373,9 +373,9 @@ export default function MesPage({
                         event={{
                           type: 'luna_nueva',
                           date: eventDate,
-                          sign: luna.sign || luna.signo,
-                          house: luna.house,
-                          description: luna.description
+                          sign: luna.signo,
+                          house: luna.casa,
+                          description: luna.descripcion
                         }}
                         interpretation={eventInterp}
                         userName={userName}
@@ -387,7 +387,7 @@ export default function MesPage({
 
               {/* Lunas Llenas */}
               {monthData.lunas_llenas.map((luna, idx) => {
-                const eventDate = format(new Date(luna.date), 'yyyy-MM-dd');
+                const eventDate = format(new Date(luna.fecha), 'yyyy-MM-dd');
                 // Generar eventId igual que en el modelo: luna_llena_YYYY-MM-DD_signo
                 const eventId = `luna_llena_${eventDate}_${luna.signo?.toLowerCase()}`;
                 const eventInterp = eventInterpretations[eventId];
@@ -400,14 +400,14 @@ export default function MesPage({
                         <span className="text-2xl text-cosmic-amber mr-3">○</span>
                         <div>
                           <h4 className="font-display text-lg text-gray-800 mb-1">
-                            Luna Llena en {luna.sign || luna.signo || 'signo'}
+                            Luna Llena en {luna.signo || 'signo'}
                           </h4>
                           <p className="font-body text-sm text-gray-600 mb-2">
-                            {format(new Date(luna.date), "d 'de' MMMM", { locale: es })}
+                            {format(new Date(luna.fecha), "d 'de' MMMM", { locale: es })}
                           </p>
-                          {luna.description && (
+                          {luna.descripcion && (
                             <p className="font-body text-sm text-gray-700">
-                              {luna.description}
+                              {luna.descripcion}
                             </p>
                           )}
                         </div>
@@ -420,9 +420,9 @@ export default function MesPage({
                         event={{
                           type: 'luna_llena',
                           date: eventDate,
-                          sign: luna.sign || luna.signo,
-                          house: luna.house,
-                          description: luna.description
+                          sign: luna.signo,
+                          house: luna.casa,
+                          description: luna.descripcion
                         }}
                         interpretation={eventInterp}
                         userName={userName}

@@ -182,46 +182,53 @@ export async function POST(request: NextRequest) {
 
     console.log(`📌 Key events to interpret: ${keyEvents.length}`);
 
-    // Para cada evento clave, buscar o generar interpretación
-    for (const event of keyEvents) {
-      try {
-        // Normalizar tipo de evento para generateEventId (usar underscore)
-        const eventType = event.type.replace('-', '_') as 'luna_nueva' | 'luna_llena';
-        const eventDate = format(new Date(event.date), 'yyyy-MM-dd');
+    // Obtener natalInterpretation una sola vez (fuera del loop)
+    const natalInterpretation = await Interpretation.findOne({
+      userId,
+      chartType: 'natal',
+      expiresAt: { $gt: new Date() }
+    })
+    .sort({ generatedAt: -1 })
+    .lean()
+    .exec() as any;
 
-        // Generar ID del evento
-        const eventId = generateEventId({
-          type: eventType,
-          date: eventDate,
-          sign: event.sign
-        });
+    if (!natalInterpretation) {
+      console.warn('⚠️ No natal interpretation found, skipping event interpretations');
+    } else {
+      // Cargar dependencias una sola vez
+      const { generateEventInterpretationPrompt } = require('@/utils/prompts/eventInterpretationPrompt');
+      const { calculateExpirationDate } = require('@/models/EventInterpretation');
 
-        console.log(`🔎 Checking event: ${eventId}`);
+      // Para cada evento clave, buscar o generar interpretación
+      for (const event of keyEvents) {
+        try {
+          // Normalizar tipo de evento para generateEventId (usar underscore)
+          const eventType = event.type.replace('-', '_') as 'luna_nueva' | 'luna_llena';
+          const eventDate = format(new Date(event.date), 'yyyy-MM-dd');
 
-        // Buscar interpretación existente en BD
-        const existingInterp = await EventInterpretation.findByUserAndEvent(userId, eventId);
+          // Generar ID del evento
+          const eventId = generateEventId({
+            type: eventType,
+            date: eventDate,
+            sign: event.sign
+          });
 
-        if (existingInterp && !existingInterp.isExpired()) {
-          // ✅ Usar interpretación de caché
-          eventInterpretations[eventId] = existingInterp.interpretation;
-          console.log(`✅ Cached: ${eventId}`);
-        } else {
-          // 🤖 Generar nueva interpretación con OpenAI
-          console.log(`🤖 Generating new: ${eventId}`);
+          // Verificar si ya lo procesamos en esta ejecución
+          if (eventInterpretations[eventId]) {
+            console.log(`⏭️  Skip (already processed): ${eventId}`);
+            continue;
+          }
 
-          // Necesitamos natal interpretation para generar eventos
-          const natalInterpretation = await Interpretation.findOne({
-            userId,
-            chartType: 'natal',
-            expiresAt: { $gt: new Date() }
-          })
-          .sort({ generatedAt: -1 })
-          .lean()
-          .exec() as any;
+          // Buscar interpretación existente en BD
+          const existingInterp = await EventInterpretation.findByUserAndEvent(userId, eventId);
 
-          if (natalInterpretation) {
-            // Generar prompt y llamar a OpenAI
-            const { generateEventInterpretationPrompt } = require('@/utils/prompts/eventInterpretationPrompt');
+          if (existingInterp && !existingInterp.isExpired()) {
+            // ✅ Usar interpretación de caché
+            eventInterpretations[eventId] = existingInterp.interpretation;
+            console.log(`✅ Cached: ${eventId}`);
+          } else {
+            // 🤖 Generar nueva interpretación con OpenAI
+            console.log(`🤖 Generating: ${eventId}`);
 
             const eventPrompt = generateEventInterpretationPrompt({
               userName,
@@ -260,7 +267,6 @@ export async function POST(request: NextRequest) {
               const parsedInterp = JSON.parse(responseText);
 
               // Guardar en BD para futuros usos
-              const { calculateExpirationDate } = require('@/models/EventInterpretation');
               await EventInterpretation.findOneAndUpdate(
                 { userId, eventId },
                 {
@@ -284,15 +290,13 @@ export async function POST(request: NextRequest) {
               );
 
               eventInterpretations[eventId] = parsedInterp;
-              console.log(`✅ Generated and saved: ${eventId}`);
+              console.log(`✅ Saved: ${eventId}`);
             }
-          } else {
-            console.warn(`⚠️ No natal interpretation found for ${eventId}, skipping`);
           }
+        } catch (eventError) {
+          console.error(`❌ Error processing ${event.type} on ${event.date}:`, eventError);
+          // Continuar con el siguiente evento
         }
-      } catch (eventError) {
-        console.error(`❌ Error processing event ${event.type} on ${event.date}:`, eventError);
-        // Continuar con el siguiente evento
       }
     }
 
