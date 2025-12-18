@@ -376,7 +376,7 @@ Responde ÚNICAMENTE con JSON válido en español (sin markdown, sin backticks, 
 // ============================================================================
 
 // ✅ Extraer fortalezas de la interpretación natal guardada
-function extractFortalezas(natalInterpretation: any): Array<{
+export function extractFortalezas(natalInterpretation: any): Array<{
   nombre: string;
   posicion: string;
   descripcion: string;
@@ -431,7 +431,7 @@ function extractFortalezas(natalInterpretation: any): Array<{
 }
 
 // ✅ Extraer bloqueos de la interpretación natal guardada
-function extractBloqueos(natalInterpretation: any): Array<{
+export function extractBloqueos(natalInterpretation: any): Array<{
   nombre: string;
   posicion: string;
   descripcion: string;

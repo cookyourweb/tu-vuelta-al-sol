@@ -109,7 +109,26 @@ export async function POST(request: NextRequest): Promise<NextResponse<APIRespon
     console.log('🤖 Generating new interpretation...');
 
     const returnYear = solarReturnChart?.solarReturnInfo?.year || new Date().getFullYear();
-    
+
+    // ✅ BUSCAR INTERPRETACIÓN NATAL (para conectar con SR)
+    console.log('🔍 Buscando interpretación natal guardada...');
+    let natalInterpretation = null;
+    try {
+      const natalDoc = await Interpretation.findOne({
+        userId,
+        chartType: 'natal'
+      }).sort({ generatedAt: -1 });
+
+      if (natalDoc && natalDoc.interpretation) {
+        natalInterpretation = natalDoc.interpretation;
+        console.log('✅ Interpretación natal encontrada');
+      } else {
+        console.log('⚠️ No se encontró interpretación natal guardada');
+      }
+    } catch (natalError) {
+      console.warn('⚠️ Error al buscar interpretación natal:', natalError);
+    }
+
     const srComparison = generateSRComparison(natalChart, solarReturnChart);
 
     let interpretation;
@@ -118,13 +137,14 @@ export async function POST(request: NextRequest): Promise<NextResponse<APIRespon
     if (process.env.OPENAI_API_KEY) {
       try {
         console.log('🤖 Using OpenAI for generation...');
-        
+
         const prompt = generateSolarReturnMasterPrompt({
           natalChart,
           solarReturnChart,
           userProfile,
           returnYear,
-          srComparison
+          srComparison,
+          natalInterpretation
         });
 
         console.log('📏 Prompt stats:', {

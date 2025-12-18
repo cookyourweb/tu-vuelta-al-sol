@@ -205,7 +205,8 @@ async function generateCompleteWithOpenAI(
   solarReturnChart: any,
   userProfile: any,
   returnYear: number,
-  srComparison?: any
+  srComparison?: any,
+  natalInterpretation?: any
 ): Promise<CompleteSolarReturnInterpretation> {
 
   console.log('🤖 ===== GENERATING WITH OPENAI =====');
@@ -214,7 +215,8 @@ async function generateCompleteWithOpenAI(
     userAge: userProfile?.age,
     natalPlanets: natalChart?.planets?.length,
     srPlanets: solarReturnChart?.planets?.length,
-    returnYear
+    returnYear,
+    hasNatalInterpretation: !!natalInterpretation
   });
 
   // ✅ GENERATE PROMPT
@@ -223,7 +225,8 @@ async function generateCompleteWithOpenAI(
     solarReturnChart,
     userProfile,
     returnYear,
-    srComparison
+    srComparison,
+    natalInterpretation
   });
 
   console.log('📏 Prompt stats:', {
@@ -1009,6 +1012,28 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // ✅ BUSCAR INTERPRETACIÓN NATAL (para conectar con SR)
+    console.log('🔍 Buscando interpretación natal guardada...');
+    let natalInterpretation = null;
+    try {
+      const natalDoc = await Interpretation.findOne({
+        userId,
+        chartType: 'natal'
+      }).sort({ generatedAt: -1 });
+
+      if (natalDoc && natalDoc.interpretation) {
+        natalInterpretation = natalDoc.interpretation;
+        console.log('✅ Interpretación natal encontrada:', {
+          hasFortalezas: !!natalInterpretation.planetas_profundos,
+          hasProposito: !!natalInterpretation.proposito_vida
+        });
+      } else {
+        console.log('⚠️ No se encontró interpretación natal guardada');
+      }
+    } catch (natalError) {
+      console.warn('⚠️ Error al buscar interpretación natal:', natalError);
+    }
+
     // ✅ GENERAR COMPARACIÓN NATAL vs SR
     const srComparison = generateSRComparison(natalChart, solarReturnChart);
 
@@ -1024,7 +1049,8 @@ export async function POST(request: NextRequest) {
           solarReturnChart,
           { ...userProfile, locationContext }, // Pass location data
           returnYear,
-          srComparison // ✅ PASAR COMPARACIÓN
+          srComparison, // ✅ PASAR COMPARACIÓN
+          natalInterpretation // ✅ PASAR INTERPRETACIÓN NATAL
         );
       } catch (openaiError) {
         console.warn('⚠️ OpenAI failed, using complete fallback:', openaiError);

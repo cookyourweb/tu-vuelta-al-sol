@@ -1,11 +1,19 @@
+import { extractFortalezas, extractBloqueos } from './eventInterpretationPrompt';
+
 export function generateSolarReturnMasterPrompt(data: {
   natalChart: any;
   solarReturnChart: any;
   userProfile: any;
   returnYear: number;
   srComparison?: any;
+  natalInterpretation?: any;
 }): string {
-  const { natalChart, solarReturnChart, userProfile, returnYear, srComparison } = data;
+  const { natalChart, solarReturnChart, userProfile, returnYear, srComparison, natalInterpretation } = data;
+
+  // ✅ EXTRAER FORTALEZAS Y BLOQUEOS DE LA INTERPRETACIÓN NATAL
+  const fortalezasNatales = extractFortalezas(natalInterpretation);
+  const bloqueosNatales = extractBloqueos(natalInterpretation);
+  const propositoVidaNatal = natalInterpretation?.proposito_vida || 'No disponible';
 
   // ✅ EXTRAER DATOS CLAVE
   const natalSol = natalChart.planets?.find((p: any) => p.name === 'Sol' || p.name === 'Sun');
@@ -166,6 +174,50 @@ ${stelliumsNatal.length > 0 ? stelliumsNatal.map(s => `
 ${natalChart.planets?.map((p: any) => `
 - ${p.name}: ${p.sign} ${Math.floor(p.longitude % 30)}° Casa ${p.house || 'N/A'}
 `).join('\n')}
+
+---
+
+## 🌱 QUIÉN ES ${userProfile.name} (CONTEXTO NATAL):
+
+⚠️ **IMPORTANTE:** Esta interpretación natal describe LA IDENTIDAD de ${userProfile.name}.
+El Solar Return NO cambia quién es: ACTIVA áreas específicas de su carta natal.
+
+### 🔥 FORTALEZAS NATALES (Recursos disponibles):
+${fortalezasNatales.map((f, i) => `
+**${i + 1}. ${f.nombre}** (${f.posicion})
+- Esencia: ${f.descripcion}
+- Superpoder: ${f.superpoder}
+`).join('\n')}
+
+### ⚡ BLOQUEOS/SOMBRAS NATALES (Áreas de trabajo):
+${bloqueosNatales.map((b, i) => `
+**${i + 1}. ${b.nombre}** (${b.posicion})
+- Patrón: ${b.descripcion}
+- Origen: ${b.origen}
+`).join('\n')}
+
+### 🎯 PROPÓSITO DE VIDA NATAL:
+${propositoVidaNatal}
+
+---
+
+## 🔗 CÓMO CONECTAR NATAL CON SOLAR RETURN:
+
+**METODOLOGÍA OBLIGATORIA:**
+
+Cuando analices el Solar Return, DEBES conectar con la identidad natal:
+
+✅ **Si el SR activa una FORTALEZA natal:**
+"Tu carta natal muestra que [fortaleza X]. Este año, el SR activa DIRECTAMENTE esa área mediante [configuración SR]. Es tiempo de EXPRESAR plenamente [fortaleza]."
+
+✅ **Si el SR trabaja un BLOQUEO natal:**
+"Tu natal indica que [bloqueo X] es un área de trabajo. Este año, el SR te ofrece la oportunidad de transformar este patrón mediante [configuración SR]. El universo te está dando las herramientas."
+
+✅ **Si el SR alinea con el PROPÓSITO NATAL:**
+"Tu propósito de vida es [propósito]. El SR de este año SINCRONIZA perfectamente con esto al [explicar sincronización]. No es casualidad."
+
+**NUNCA** analices el SR como si fuera una carta aislada.
+**SIEMPRE** conecta SR → Natal → Identidad → Evolución.
 
 ---
 
