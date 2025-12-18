@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     // 1. Obtener datos del usuario
-    const user = await User.findOne({ userId }).lean().exec() as any;
+    const user = await User.findOne({ uid: userId }).lean().exec() as any;
     const birthData = await require('@/models/BirthData').default.findOne({ userId }).lean().exec() as any;
 
     if (!birthData) {
@@ -59,7 +59,11 @@ export async function POST(request: NextRequest) {
       }, { status: 404 });
     }
 
-    const userName = user?.fullName || user?.name || birthData?.name || 'Usuario';
+    // Debug: ver qué campos están disponibles
+    console.log('🔍 User object:', JSON.stringify(user, null, 2));
+    console.log('🔍 BirthData object:', JSON.stringify(birthData, null, 2));
+
+    const userName = user?.fullName || user?.name || user?.displayName || birthData?.name || birthData?.fullName || 'Usuario';
     const userAge = calculateAge(birthData.birthDate);
 
     console.log(`📊 User data: ${userName}, ${userAge} años`);

@@ -1,0 +1,587 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { Loader2, ArrowLeft } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+
+interface MonthData {
+  nombre: string;
+  nombreCorto: string;
+  inicio: string;
+  fin: string;
+  lunas_nuevas: Array<{
+    fecha: string;
+    signo: string;
+    casa: number;
+    descripcion: string;
+  }>;
+  lunas_llenas: Array<{
+    fecha: string;
+    signo: string;
+    casa: number;
+    descripcion: string;
+  }>;
+  eclipses: Array<{
+    fecha: string;
+    tipo: string;
+    signo: string;
+    casa: number;
+    descripcion: string;
+  }>;
+  ingresos_destacados: Array<{
+    fecha: string;
+    planeta: string;
+    signo: string;
+    descripcion: string;
+  }>;
+  total_eventos: number;
+}
+
+interface MonthInterpretation {
+  mes: string;
+  portada_mes: string;
+  interpretacion_mensual: string;
+  ritual_del_mes: string;
+  mantra_mensual: string;
+}
+
+interface BookContent {
+  portada: {
+    titulo: string;
+    subtitulo: string;
+    dedicatoria: string;
+  };
+  apertura_del_viaje: {
+    antes_de_empezar: string;
+    carta_de_bienvenida: string;
+    tema_central_del_año: string;
+    ritual_de_inicio: string;
+  };
+  tu_mapa_interior: {
+    carta_natal_explicada: string;
+    soul_chart: {
+      nodo_sur: string;
+      nodo_norte: string;
+      patrones_inconscientes: string;
+    };
+    integrar_proposito: string;
+  };
+  tu_año_astrologico: {
+    retorno_solar: {
+      ascendente_del_año: string;
+      tema_principal: string;
+      ritual_de_cumpleaños: string;
+      mantra_del_año: string;
+    };
+  };
+  calendario_personalizado: {
+    descripcion: string;
+    lunas_nuevas_intro: string;
+    lunas_llenas_intro: string;
+    eclipses_intro: string;
+  };
+  mes_a_mes?: MonthInterpretation[];
+  monthsData?: MonthData[];
+  cierre_del_ciclo: {
+    integrar_lo_vivido: string;
+    carta_de_cierre: string;
+    preparar_proxima_vuelta: string;
+  };
+  frase_final: string;
+}
+
+export default function LibroAgendaPage() {
+  const { user } = useAuth();
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [bookContent, setBookContent] = useState<BookContent | null>(null);
+
+  useEffect(() => {
+    const generateBook = async () => {
+      if (!user) {
+        router.push('/agenda');
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const token = await user.getIdToken();
+
+        const response = await fetch('/api/agenda/generate-book', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          setBookContent(data.book);
+        } else {
+          setError(data.error || 'Error generando el libro');
+        }
+      } catch (err) {
+        console.error('Error:', err);
+        setError('Error de conexión. Intenta de nuevo.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    generateBook();
+  }, [user, router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-16 w-16 text-purple-400 animate-spin mx-auto mb-4" />
+          <p className="text-white text-xl">Generando tu libro astrológico personalizado...</p>
+          <p className="text-purple-300 text-sm mt-2">Esto puede tomar unos momentos</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-red-900/30 border border-red-400/30 rounded-lg p-6">
+          <h2 className="text-red-200 text-xl font-semibold mb-3">Error</h2>
+          <p className="text-red-300 mb-4">{error}</p>
+          <button
+            onClick={() => router.push('/agenda')}
+            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4 inline mr-2" />
+            Volver a Agenda
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!bookContent) {
+    return null;
+  }
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* BARRA SUPERIOR (solo en pantalla) */}
+      <div className="sticky top-0 z-50 bg-purple-900 border-b border-purple-700 shadow-lg print:hidden">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+          <button
+            onClick={() => router.push('/agenda')}
+            className="px-4 py-2 bg-purple-700 hover:bg-purple-600 text-white rounded-lg transition-colors flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Volver a Agenda
+          </button>
+
+          <button
+            onClick={() => window.print()}
+            className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            Imprimir Libro
+          </button>
+        </div>
+      </div>
+
+      {/* CONTENIDO DEL LIBRO */}
+      <div className="book-content max-w-4xl mx-auto bg-white print:max-w-none">
+
+        {/* PORTADA */}
+        <div className="portada p-16 text-center flex flex-col justify-center items-center min-h-screen border-b-4 border-purple-200 print:page-break-after-always">
+          <h1 className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 mb-8">
+            {bookContent.portada.titulo}
+          </h1>
+          <p className="text-2xl text-gray-700 italic max-w-2xl mb-12">
+            "{bookContent.portada.subtitulo}"
+          </p>
+          <p className="text-xl text-gray-600">
+            {bookContent.portada.dedicatoria}
+          </p>
+        </div>
+
+        {/* APERTURA DEL VIAJE */}
+        <div className="seccion p-12 print:page-break-after-always">
+          <h2 className="text-4xl font-bold text-purple-900 mb-8 border-b-2 border-purple-200 pb-4">
+            ✨ Apertura del Viaje
+          </h2>
+
+          <div className="espacio mb-10">
+            <h3 className="text-2xl font-semibold text-purple-700 mb-4">Antes de empezar</h3>
+            <p className="text-gray-800 leading-relaxed whitespace-pre-line">
+              {bookContent.apertura_del_viaje.antes_de_empezar}
+            </p>
+          </div>
+
+          <div className="espacio mb-10">
+            <h3 className="text-2xl font-semibold text-purple-700 mb-4">Carta de bienvenida</h3>
+            <p className="text-gray-800 leading-relaxed whitespace-pre-line">
+              {bookContent.apertura_del_viaje.carta_de_bienvenida}
+            </p>
+          </div>
+
+          <div className="espacio mb-10">
+            <h3 className="text-2xl font-semibold text-purple-700 mb-4">El tema central de tu año</h3>
+            <p className="text-gray-800 leading-relaxed whitespace-pre-line">
+              {bookContent.apertura_del_viaje.tema_central_del_año}
+            </p>
+          </div>
+
+          <div className="espacio">
+            <h3 className="text-2xl font-semibold text-purple-700 mb-4">Ritual de inicio</h3>
+            <p className="text-gray-800 leading-relaxed whitespace-pre-line">
+              {bookContent.apertura_del_viaje.ritual_de_inicio}
+            </p>
+          </div>
+        </div>
+
+        {/* TU MAPA INTERIOR */}
+        <div className="seccion p-12 print:page-break-after-always">
+          <h2 className="text-4xl font-bold text-indigo-900 mb-8 border-b-2 border-indigo-200 pb-4">
+            🌌 Tu Mapa Interior
+          </h2>
+
+          <div className="espacio mb-10">
+            <h3 className="text-2xl font-semibold text-indigo-700 mb-4">Tu carta natal, explicada para vivirla</h3>
+            <p className="text-gray-800 leading-relaxed whitespace-pre-line">
+              {bookContent.tu_mapa_interior.carta_natal_explicada}
+            </p>
+          </div>
+
+          <div className="espacio mb-10">
+            <h3 className="text-2xl font-semibold text-indigo-700 mb-4">Soul Chart - El camino del alma</h3>
+
+            <div className="ml-6 space-y-6">
+              <div>
+                <h4 className="text-lg font-semibold text-indigo-600 mb-2">De dónde vienes (Nodo Sur)</h4>
+                <p className="text-gray-800 leading-relaxed whitespace-pre-line">
+                  {bookContent.tu_mapa_interior.soul_chart.nodo_sur}
+                </p>
+              </div>
+
+              <div>
+                <h4 className="text-lg font-semibold text-indigo-600 mb-2">Hacia dónde creces (Nodo Norte)</h4>
+                <p className="text-gray-800 leading-relaxed whitespace-pre-line">
+                  {bookContent.tu_mapa_interior.soul_chart.nodo_norte}
+                </p>
+              </div>
+
+              <div>
+                <h4 className="text-lg font-semibold text-indigo-600 mb-2">Patrones inconscientes</h4>
+                <p className="text-gray-800 leading-relaxed whitespace-pre-line">
+                  {bookContent.tu_mapa_interior.soul_chart.patrones_inconscientes}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="espacio">
+            <h3 className="text-2xl font-semibold text-indigo-700 mb-4">Integrar tu propósito en la vida real</h3>
+            <p className="text-gray-800 leading-relaxed whitespace-pre-line">
+              {bookContent.tu_mapa_interior.integrar_proposito}
+            </p>
+          </div>
+        </div>
+
+        {/* TU AÑO ASTROLÓGICO */}
+        <div className="seccion p-12 print:page-break-after-always">
+          <h2 className="text-4xl font-bold text-amber-900 mb-8 border-b-2 border-amber-200 pb-4">
+            ☀️ Tu Año Astrológico
+          </h2>
+
+          <div className="espacio mb-10">
+            <h3 className="text-2xl font-semibold text-amber-700 mb-4">Retorno Solar - La foto de tu año</h3>
+
+            <div className="ml-6 space-y-6">
+              <div>
+                <h4 className="text-lg font-semibold text-amber-600 mb-2">Ascendente del año</h4>
+                <p className="text-gray-800 leading-relaxed whitespace-pre-line">
+                  {bookContent.tu_año_astrologico.retorno_solar.ascendente_del_año}
+                </p>
+              </div>
+
+              <div>
+                <h4 className="text-lg font-semibold text-amber-600 mb-2">Tema principal</h4>
+                <p className="text-gray-800 leading-relaxed whitespace-pre-line">
+                  {bookContent.tu_año_astrologico.retorno_solar.tema_principal}
+                </p>
+              </div>
+
+              <div>
+                <h4 className="text-lg font-semibold text-amber-600 mb-2">Ritual de cumpleaños</h4>
+                <p className="text-gray-800 leading-relaxed whitespace-pre-line">
+                  {bookContent.tu_año_astrologico.retorno_solar.ritual_de_cumpleaños}
+                </p>
+              </div>
+
+              <div className="bg-amber-50 p-6 rounded-lg border-l-4 border-amber-400">
+                <h4 className="text-lg font-bold text-amber-700 mb-2">✨ Mantra del año</h4>
+                <p className="text-amber-900 italic text-xl leading-relaxed">
+                  "{bookContent.tu_año_astrologico.retorno_solar.mantra_del_año}"
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* CALENDARIO PERSONALIZADO */}
+        <div className="seccion p-12 print:page-break-after-always">
+          <h2 className="text-4xl font-bold text-blue-900 mb-8 border-b-2 border-blue-200 pb-4">
+            🌙 El Calendario de Tu Proceso
+          </h2>
+
+          <div className="espacio mb-10">
+            <p className="text-gray-800 leading-relaxed whitespace-pre-line mb-8">
+              {bookContent.calendario_personalizado.descripcion}
+            </p>
+          </div>
+
+          <div className="espacio mb-8">
+            <h3 className="text-2xl font-semibold text-blue-700 mb-4">🌑 Lunas Nuevas - Sembrar conciencia</h3>
+            <p className="text-gray-800 leading-relaxed whitespace-pre-line">
+              {bookContent.calendario_personalizado.lunas_nuevas_intro}
+            </p>
+          </div>
+
+          <div className="espacio mb-8">
+            <h3 className="text-2xl font-semibold text-blue-700 mb-4">🌕 Lunas Llenas - Iluminar y soltar</h3>
+            <p className="text-gray-800 leading-relaxed whitespace-pre-line">
+              {bookContent.calendario_personalizado.lunas_llenas_intro}
+            </p>
+          </div>
+
+          <div className="espacio">
+            <h3 className="text-2xl font-semibold text-blue-700 mb-4">🌘 Eclipses - Cambios que no negocian</h3>
+            <p className="text-gray-800 leading-relaxed whitespace-pre-line">
+              {bookContent.calendario_personalizado.eclipses_intro}
+            </p>
+          </div>
+        </div>
+
+        {/* MES A MES */}
+        {bookContent.mes_a_mes && bookContent.monthsData && (
+          <>
+            {bookContent.mes_a_mes.map((monthInterp, index) => {
+              const monthData = bookContent.monthsData?.[index];
+              if (!monthData) return null;
+
+              return (
+                <div key={index} className="seccion p-12 print:page-break-after-always">
+                  {/* Portada del mes */}
+                  <div className="mb-10 text-center bg-gradient-to-r from-purple-50 to-pink-50 p-8 rounded-lg border-2 border-purple-200">
+                    <h2 className="text-5xl font-bold text-purple-900 mb-4">
+                      {monthData.nombre}
+                    </h2>
+                    <p className="text-lg text-purple-700 italic">
+                      {monthInterp.portada_mes}
+                    </p>
+                  </div>
+
+                  {/* Calendario mensual con eventos */}
+                  <div className="espacio mb-10 bg-blue-50 p-6 rounded-lg border-l-4 border-blue-400">
+                    <h3 className="text-2xl font-semibold text-blue-900 mb-6">📅 Eventos del mes</h3>
+
+                    {/* Lunas Nuevas */}
+                    {monthData.lunas_nuevas.length > 0 && (
+                      <div className="mb-4">
+                        <h4 className="text-lg font-semibold text-blue-700 mb-2">🌑 Lunas Nuevas</h4>
+                        <ul className="space-y-2 ml-4">
+                          {monthData.lunas_nuevas.map((luna, i) => (
+                            <li key={i} className="text-gray-800">
+                              <span className="font-semibold">{luna.fecha}</span> - {luna.signo} en Casa {luna.casa}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Lunas Llenas */}
+                    {monthData.lunas_llenas.length > 0 && (
+                      <div className="mb-4">
+                        <h4 className="text-lg font-semibold text-blue-700 mb-2">🌕 Lunas Llenas</h4>
+                        <ul className="space-y-2 ml-4">
+                          {monthData.lunas_llenas.map((luna, i) => (
+                            <li key={i} className="text-gray-800">
+                              <span className="font-semibold">{luna.fecha}</span> - {luna.signo} en Casa {luna.casa}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Eclipses */}
+                    {monthData.eclipses.length > 0 && (
+                      <div className="mb-4">
+                        <h4 className="text-lg font-semibold text-red-700 mb-2">🌘 Eclipses</h4>
+                        <ul className="space-y-2 ml-4">
+                          {monthData.eclipses.map((eclipse, i) => (
+                            <li key={i} className="text-gray-800 font-semibold">
+                              <span className="font-bold">{eclipse.fecha}</span> - {eclipse.tipo} en {eclipse.signo}, Casa {eclipse.casa}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Ingresos destacados */}
+                    {monthData.ingresos_destacados.length > 0 && (
+                      <div className="mb-4">
+                        <h4 className="text-lg font-semibold text-blue-700 mb-2">✨ Ingresos planetarios</h4>
+                        <ul className="space-y-2 ml-4">
+                          {monthData.ingresos_destacados.map((ingreso, i) => (
+                            <li key={i} className="text-gray-800">
+                              <span className="font-semibold">{ingreso.fecha}</span> - {ingreso.descripcion}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    <p className="text-sm text-blue-600 mt-4">
+                      Total de eventos: {monthData.total_eventos}
+                    </p>
+                  </div>
+
+                  {/* Interpretación mensual */}
+                  <div className="espacio mb-8">
+                    <h3 className="text-2xl font-semibold text-purple-700 mb-4">🔮 Qué se mueve en ti</h3>
+                    <p className="text-gray-800 leading-relaxed whitespace-pre-line">
+                      {monthInterp.interpretacion_mensual}
+                    </p>
+                  </div>
+
+                  {/* Ritual del mes */}
+                  <div className="espacio mb-8">
+                    <h3 className="text-2xl font-semibold text-purple-700 mb-4">🕯️ Ritual del mes</h3>
+                    <p className="text-gray-800 leading-relaxed whitespace-pre-line">
+                      {monthInterp.ritual_del_mes}
+                    </p>
+                  </div>
+
+                  {/* Mantra mensual */}
+                  <div className="bg-purple-50 p-6 rounded-lg border-l-4 border-purple-400">
+                    <h4 className="text-lg font-bold text-purple-700 mb-2">✨ Mantra de {monthData.nombreCorto}</h4>
+                    <p className="text-purple-900 italic text-xl leading-relaxed">
+                      "{monthInterp.mantra_mensual}"
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </>
+        )}
+
+        {/* CIERRE DEL CICLO */}
+        <div className="seccion p-12 print:page-break-after-always">
+          <h2 className="text-4xl font-bold text-rose-900 mb-8 border-b-2 border-rose-200 pb-4">
+            🕯️ Cierre del Ciclo
+          </h2>
+
+          <div className="espacio mb-10">
+            <h3 className="text-2xl font-semibold text-rose-700 mb-4">Integrar lo vivido</h3>
+            <p className="text-gray-800 leading-relaxed whitespace-pre-line">
+              {bookContent.cierre_del_ciclo.integrar_lo_vivido}
+            </p>
+          </div>
+
+          <div className="espacio mb-10">
+            <h3 className="text-2xl font-semibold text-rose-700 mb-4">Carta de cierre</h3>
+            <p className="text-gray-800 leading-relaxed whitespace-pre-line">
+              {bookContent.cierre_del_ciclo.carta_de_cierre}
+            </p>
+          </div>
+
+          <div className="espacio">
+            <h3 className="text-2xl font-semibold text-rose-700 mb-4">Preparar la próxima vuelta al Sol</h3>
+            <p className="text-gray-800 leading-relaxed whitespace-pre-line">
+              {bookContent.cierre_del_ciclo.preparar_proxima_vuelta}
+            </p>
+          </div>
+        </div>
+
+        {/* CONTRAPORTADA */}
+        <div className="portada p-16 text-center flex flex-col justify-center items-center min-h-screen">
+          <p className="text-3xl text-gray-700 italic max-w-2xl leading-relaxed">
+            "{bookContent.frase_final}"
+          </p>
+        </div>
+      </div>
+
+      {/* ESTILOS DE IMPRESIÓN */}
+      <style jsx global>{`
+        @media print {
+          @page {
+            size: A5;
+            margin: 1.5cm;
+          }
+
+          body {
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+          }
+
+          .book-content {
+            background: white !important;
+            box-shadow: none !important;
+          }
+
+          .portada,
+          .seccion {
+            page-break-inside: avoid;
+            page-break-before: always;
+          }
+
+          .espacio {
+            page-break-inside: avoid;
+          }
+
+          h1, h2, h3, h4 {
+            page-break-after: avoid;
+          }
+
+          p {
+            orphans: 3;
+            widows: 3;
+          }
+
+          /* Estilos específicos para secciones mensuales */
+          .seccion ul {
+            page-break-inside: avoid;
+          }
+
+          .seccion li {
+            orphans: 2;
+            widows: 2;
+          }
+
+          /* Mantener juntos los bloques de contenido */
+          .bg-blue-50,
+          .bg-purple-50,
+          .bg-gradient-to-r {
+            page-break-inside: avoid;
+          }
+
+          /* Asegurar que los bordes y fondos se impriman */
+          .border-l-4,
+          .border-2,
+          .border-b-2 {
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+          }
+        }
+      `}</style>
+    </div>
+  );
+}
