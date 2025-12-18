@@ -182,16 +182,7 @@ export async function POST(request: NextRequest) {
 
     console.log(`📌 Key events to interpret: ${keyEvents.length}`);
 
-    // Obtener natalInterpretation una sola vez (fuera del loop)
-    const natalInterpretation = await Interpretation.findOne({
-      userId,
-      chartType: 'natal',
-      expiresAt: { $gt: new Date() }
-    })
-    .sort({ generatedAt: -1 })
-    .lean()
-    .exec() as any;
-
+    // Verificar que tengamos natal interpretation (ya fue consultada arriba en línea 81)
     if (!natalInterpretation) {
       console.warn('⚠️ No natal interpretation found, skipping event interpretations');
     } else {
