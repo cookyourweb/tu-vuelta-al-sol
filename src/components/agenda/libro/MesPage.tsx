@@ -195,7 +195,7 @@ export default function MesPage({
                               className="text-xs"
                               title={event.description || event.type}
                             >
-                              {getEventIcon(event.type)}
+                              {getEventIcon(event.type, event)}
                             </span>
                           ))}
                         </div>
@@ -497,17 +497,69 @@ export default function MesPage({
   );
 }
 
+// Helper: Obtener icono del planeta
+function getPlanetIcon(planet?: string): string {
+  if (!planet) return '';
+
+  const planetIcons: { [key: string]: string } = {
+    'Sol': '☉',
+    'Luna': '☽',
+    'Mercurio': '☿',
+    'Venus': '♀',
+    'Marte': '♂',
+    'Júpiter': '♃',
+    'Jupiter': '♃',
+    'Saturno': '♄',
+    'Urano': '♅',
+    'Neptuno': '♆',
+    'Plutón': '♇',
+    'Pluto': '♇',
+  };
+
+  return planetIcons[planet] || '';
+}
+
+// Helper: Obtener icono del signo zodiacal
+function getSignIcon(sign?: string): string {
+  if (!sign) return '';
+
+  const signIcons: { [key: string]: string } = {
+    'Aries': '♈',
+    'Tauro': '♉',
+    'Géminis': '♊',
+    'Geminis': '♊',
+    'Cáncer': '♋',
+    'Cancer': '♋',
+    'Leo': '♌',
+    'Virgo': '♍',
+    'Libra': '♎',
+    'Escorpio': '♏',
+    'Sagitario': '♐',
+    'Capricornio': '♑',
+    'Acuario': '♒',
+    'Piscis': '♓',
+  };
+
+  return signIcons[sign] || '';
+}
+
 // Helper: Obtener icono según tipo de evento
-function getEventIcon(type: string): string {
+function getEventIcon(type: string, event?: any): string {
   const icons: { [key: string]: string } = {
     'luna-nueva': '☽',
     'luna-llena': '○',
     'eclipse-solar': '●',
     'eclipse-lunar': '●',
-    'ingreso': '↗',
     'retrogrado-inicio': '℞',
     'retrogrado-fin': 'D',
   };
+
+  // Para ingresos planetarios: mostrar icono del planeta + icono del signo
+  if (type === 'ingreso' || type === 'ingreso-planetario') {
+    const planetIcon = getPlanetIcon(event?.planet);
+    const signIcon = getSignIcon(event?.sign);
+    return planetIcon && signIcon ? `${planetIcon}${signIcon}` : '↗';
+  }
 
   return icons[type] || '•';
 }
