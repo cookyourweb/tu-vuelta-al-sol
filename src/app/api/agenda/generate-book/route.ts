@@ -166,6 +166,138 @@ export async function POST(request: NextRequest) {
     const monthsData = groupEventsByMonth(yearEvents, startDate, endDate);
     console.log(`📅 Months grouped: ${monthsData.length} months`);
 
+    // 5.6. ✨ CARGAR/GENERAR INTERPRETACIONES DE EVENTOS (Estrategia Híbrida)
+    console.log('🔍 Loading event interpretations (hybrid strategy)...');
+
+    const EventInterpretation = require('@/models/EventInterpretation').default;
+    const { generateEventId } = require('@/models/EventInterpretation');
+    const eventInterpretations: { [eventId: string]: any } = {};
+
+    // Extraer solo eventos clave (lunas nuevas, lunas llenas)
+    // TODO: Agregar eclipses cuando EventInterpretation model soporte esos tipos
+    const keyEvents = yearEvents.filter(e =>
+      e.type === 'luna-nueva' ||
+      e.type === 'luna-llena'
+    );
+
+    console.log(`📌 Key events to interpret: ${keyEvents.length}`);
+
+    // Para cada evento clave, buscar o generar interpretación
+    for (const event of keyEvents) {
+      try {
+        // Normalizar tipo de evento para generateEventId (usar underscore)
+        const eventType = event.type.replace('-', '_') as 'luna_nueva' | 'luna_llena';
+        const eventDate = format(new Date(event.date), 'yyyy-MM-dd');
+
+        // Generar ID del evento
+        const eventId = generateEventId({
+          type: eventType,
+          date: eventDate,
+          sign: event.sign
+        });
+
+        console.log(`🔎 Checking event: ${eventId}`);
+
+        // Buscar interpretación existente en BD
+        const existingInterp = await EventInterpretation.findByUserAndEvent(userId, eventId);
+
+        if (existingInterp && !existingInterp.isExpired()) {
+          // ✅ Usar interpretación de caché
+          eventInterpretations[eventId] = existingInterp.interpretation;
+          console.log(`✅ Cached: ${eventId}`);
+        } else {
+          // 🤖 Generar nueva interpretación con OpenAI
+          console.log(`🤖 Generating new: ${eventId}`);
+
+          // Necesitamos natal interpretation para generar eventos
+          const natalInterpretation = await Interpretation.findOne({
+            userId,
+            chartType: 'natal',
+            expiresAt: { $gt: new Date() }
+          })
+          .sort({ generatedAt: -1 })
+          .lean()
+          .exec() as any;
+
+          if (natalInterpretation) {
+            // Generar prompt y llamar a OpenAI
+            const { generateEventInterpretationPrompt } = require('@/utils/prompts/eventInterpretationPrompt');
+
+            const eventPrompt = generateEventInterpretationPrompt({
+              userName,
+              userAge,
+              userBirthPlace: birthData.city || birthData.birthPlace || 'Desconocido',
+              event: {
+                type: eventType,
+                date: eventDate,
+                sign: event.sign,
+                house: event.house || 1
+              },
+              natalChart: natalChart.natalChart || natalChart,
+              solarReturn: solarReturn?.interpretation || {},
+              natalInterpretation: natalInterpretation.interpretation || {}
+            });
+
+            const completion = await openai.chat.completions.create({
+              model: 'gpt-4o',
+              messages: [
+                {
+                  role: 'system',
+                  content: 'Eres un astrólogo evolutivo experto. Respondes ÚNICAMENTE con JSON válido en español, sin markdown ni comentarios.'
+                },
+                {
+                  role: 'user',
+                  content: eventPrompt
+                }
+              ],
+              temperature: 0.8,
+              max_tokens: 3000,
+              response_format: { type: 'json_object' }
+            });
+
+            const responseText = completion.choices[0].message.content;
+            if (responseText) {
+              const parsedInterp = JSON.parse(responseText);
+
+              // Guardar en BD para futuros usos
+              const { calculateExpirationDate } = require('@/models/EventInterpretation');
+              await EventInterpretation.findOneAndUpdate(
+                { userId, eventId },
+                {
+                  $set: {
+                    userId,
+                    eventId,
+                    eventType,
+                    eventDate: new Date(eventDate),
+                    eventDetails: {
+                      sign: event.sign,
+                      house: event.house || 1
+                    },
+                    interpretation: parsedInterp,
+                    generatedAt: new Date(),
+                    expiresAt: calculateExpirationDate(),
+                    method: 'openai',
+                    cached: false
+                  }
+                },
+                { upsert: true, new: true }
+              );
+
+              eventInterpretations[eventId] = parsedInterp;
+              console.log(`✅ Generated and saved: ${eventId}`);
+            }
+          } else {
+            console.warn(`⚠️ No natal interpretation found for ${eventId}, skipping`);
+          }
+        }
+      } catch (eventError) {
+        console.error(`❌ Error processing event ${event.type} on ${event.date}:`, eventError);
+        // Continuar con el siguiente evento
+      }
+    }
+
+    console.log(`✅ Event interpretations ready: ${Object.keys(eventInterpretations).length}/${keyEvents.length}`);
+
     // 6. Generar contenido del libro con OpenAI
     console.log('🤖 Generating book content with OpenAI...');
 
@@ -224,6 +356,8 @@ export async function POST(request: NextRequest) {
         ...bookContent,
         yearEvents: yearEvents.slice(0, 100), // Primeros 100 eventos
         monthsData,
+        eventInterpretations, // ✨ Interpretaciones de eventos
+        userName, // Para EventInterpretationPrint
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString()
       },

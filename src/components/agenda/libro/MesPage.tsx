@@ -1,13 +1,17 @@
 'use client';
 
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameDay } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addDays, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
+import EventInterpretationPrint from './EventInterpretationPrint';
 
 interface MonthEvent {
   date: string | Date;
   type: string;
   sign?: string;
+  signo?: string;
   description?: string;
+  house?: number;
+  interpretation?: any; // Interpretación personalizada del evento
 }
 
 interface MonthInterpretation {
@@ -31,30 +35,19 @@ interface MesPageProps {
   };
   interpretation?: MonthInterpretation;
   allEvents?: MonthEvent[];
+  userName?: string; // Para personalizar interpretaciones
+  eventInterpretations?: { [eventId: string]: any }; // Mapa de interpretaciones por evento
 }
 
 const DAYS_OF_WEEK = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-
-// Helper functions for safe date handling
-const isValidDate = (date: string | Date): boolean => {
-  const d = new Date(date);
-  return !isNaN(d.getTime()) && d.getTime() > 0;
-};
-
-const safeFormatDate = (date: string | Date, formatStr: string, fallback: string = 'Fecha no disponible'): string => {
-  if (!isValidDate(date)) return fallback;
-  try {
-    return format(new Date(date), formatStr, { locale: es });
-  } catch {
-    return fallback;
-  }
-};
 
 export default function MesPage({
   monthDate,
   monthData,
   interpretation,
-  allEvents = []
+  allEvents = [],
+  userName,
+  eventInterpretations = {}
 }: MesPageProps) {
   const monthStart = startOfMonth(monthDate);
   const monthEnd = endOfMonth(monthDate);
@@ -298,72 +291,146 @@ export default function MesPage({
               <div className="w-24 h-1 bg-gradient-to-r from-transparent via-cosmic-gold to-transparent mx-auto"></div>
             </div>
 
-            <div className="space-y-6">
+<div className="space-y-8">
               {/* Eclipses */}
-              {monthData.eclipses.map((eclipse, idx) => (
-                <div key={`eclipse-${idx}`} className="border-l-4 border-cosmic-gold pl-6 py-4 bg-cosmic-gold/5">
-                  <div className="flex items-start">
-                    <span className="text-2xl text-cosmic-gold mr-3">●</span>
-                    <div>
-                      <h4 className="font-display text-xl text-gray-800 mb-2">
-                        Eclipse en {eclipse.sign || 'signo'}
-                      </h4>
-                      <p className="font-body text-sm text-gray-600 mb-2">
-                        {safeFormatDate(eclipse.date, "d 'de' MMMM")}
-                      </p>
-                      {eclipse.description && (
-                        <p className="font-body text-base text-gray-700 leading-relaxed">
-                          {eclipse.description}
-                        </p>
-                      )}
+              {monthData.eclipses.map((eclipse, idx) => {
+                const eventDate = format(new Date(eclipse.date), 'yyyy-MM-dd');
+                const eventId = `eclipse-${eventDate}`;
+                const eventInterp = eventInterpretations[eventId];
+
+                return (
+                  <div key={`eclipse-${idx}`}>
+                    {/* Resumen del Evento */}
+                    <div className="border-l-4 border-cosmic-gold pl-6 py-4 bg-cosmic-gold/5">
+                      <div className="flex items-start">
+                        <span className="text-2xl text-cosmic-gold mr-3">●</span>
+                        <div>
+                          <h4 className="font-display text-xl text-gray-800 mb-2">
+                            Eclipse en {eclipse.sign || eclipse.signo || 'signo'}
+                          </h4>
+                          <p className="font-body text-sm text-gray-600 mb-2">
+                            {format(new Date(eclipse.date), "d 'de' MMMM", { locale: es })}
+                          </p>
+                          {eclipse.description && (
+                            <p className="font-body text-base text-gray-700 leading-relaxed">
+                              {eclipse.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </div>
+
+                    {/* Interpretación Personalizada (si existe) */}
+                    {eventInterp && (
+                      <EventInterpretationPrint
+                        event={{
+                          type: eclipse.type || 'eclipse',
+                          date: eventDate,
+                          sign: eclipse.sign || eclipse.signo,
+                          house: eclipse.house,
+                          description: eclipse.description
+                        }}
+                        interpretation={eventInterp}
+                        userName={userName}
+                      />
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
 
               {/* Lunas Nuevas */}
-              {monthData.lunas_nuevas.map((luna, idx) => (
-                <div key={`ln-${idx}`} className="border-l-4 border-gray-400 pl-6 py-3">
-                  <div className="flex items-start">
-                    <span className="text-2xl text-gray-600 mr-3">☽</span>
-                    <div>
-                      <h4 className="font-display text-lg text-gray-800 mb-1">
-                        Luna Nueva en {luna.sign || 'signo'}
-                      </h4>
-                      <p className="font-body text-sm text-gray-600 mb-2">
-                        {safeFormatDate(luna.date, "d 'de' MMMM")}
-                      </p>
-                      {luna.description && (
-                        <p className="font-body text-sm text-gray-700">
-                          {luna.description}
-                        </p>
-                      )}
+              {monthData.lunas_nuevas.map((luna, idx) => {
+                const eventDate = format(new Date(luna.date), 'yyyy-MM-dd');
+                // Generar eventId igual que en el modelo: luna_nueva_YYYY-MM-DD_signo
+                const eventId = `luna_nueva_${eventDate}_${luna.signo?.toLowerCase()}`;
+                const eventInterp = eventInterpretations[eventId];
+
+                return (
+                  <div key={`ln-${idx}`}>
+                    {/* Resumen del Evento */}
+                    <div className="border-l-4 border-gray-400 pl-6 py-3">
+                      <div className="flex items-start">
+                        <span className="text-2xl text-gray-600 mr-3">☽</span>
+                        <div>
+                          <h4 className="font-display text-lg text-gray-800 mb-1">
+                            Luna Nueva en {luna.sign || luna.signo || 'signo'}
+                          </h4>
+                          <p className="font-body text-sm text-gray-600 mb-2">
+                            {format(new Date(luna.date), "d 'de' MMMM", { locale: es })}
+                          </p>
+                          {luna.description && (
+                            <p className="font-body text-sm text-gray-700">
+                              {luna.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </div>
+
+                    {/* Interpretación Personalizada (si existe) */}
+                    {eventInterp && (
+                      <EventInterpretationPrint
+                        event={{
+                          type: 'luna_nueva',
+                          date: eventDate,
+                          sign: luna.sign || luna.signo,
+                          house: luna.house,
+                          description: luna.description
+                        }}
+                        interpretation={eventInterp}
+                        userName={userName}
+                      />
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
 
               {/* Lunas Llenas */}
-              {monthData.lunas_llenas.map((luna, idx) => (
-                <div key={`ll-${idx}`} className="border-l-4 border-cosmic-gold pl-6 py-3">
-                  <div className="flex items-start">
-                    <span className="text-2xl text-cosmic-gold mr-3">○</span>
-                    <div>
-                      <h4 className="font-display text-lg text-gray-800 mb-1">
-                        Luna Llena en {luna.sign || 'signo'}
-                      </h4>
-                      <p className="font-body text-sm text-gray-600 mb-2">
-                        {safeFormatDate(luna.date, "d 'de' MMMM")}
-                      </p>
-                      {luna.description && (
-                        <p className="font-body text-sm text-gray-700">
-                          {luna.description}
-                        </p>
-                      )}
+              {monthData.lunas_llenas.map((luna, idx) => {
+                const eventDate = format(new Date(luna.date), 'yyyy-MM-dd');
+                // Generar eventId igual que en el modelo: luna_llena_YYYY-MM-DD_signo
+                const eventId = `luna_llena_${eventDate}_${luna.signo?.toLowerCase()}`;
+                const eventInterp = eventInterpretations[eventId];
+
+                return (
+                  <div key={`ll-${idx}`}>
+                    {/* Resumen del Evento */}
+                    <div className="border-l-4 border-cosmic-amber pl-6 py-3">
+                      <div className="flex items-start">
+                        <span className="text-2xl text-cosmic-amber mr-3">○</span>
+                        <div>
+                          <h4 className="font-display text-lg text-gray-800 mb-1">
+                            Luna Llena en {luna.sign || luna.signo || 'signo'}
+                          </h4>
+                          <p className="font-body text-sm text-gray-600 mb-2">
+                            {format(new Date(luna.date), "d 'de' MMMM", { locale: es })}
+                          </p>
+                          {luna.description && (
+                            <p className="font-body text-sm text-gray-700">
+                              {luna.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </div>
+
+                    {/* Interpretación Personalizada (si existe) */}
+                    {eventInterp && (
+                      <EventInterpretationPrint
+                        event={{
+                          type: 'luna_llena',
+                          date: eventDate,
+                          sign: luna.sign || luna.signo,
+                          house: luna.house,
+                          description: luna.description
+                        }}
+                        interpretation={eventInterp}
+                        userName={userName}
+                      />
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

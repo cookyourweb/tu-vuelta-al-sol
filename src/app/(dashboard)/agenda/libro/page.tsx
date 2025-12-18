@@ -75,6 +75,7 @@ interface BookContent {
     location?: string;
   };
   yearEvents?: any[];
+  eventInterpretations?: { [eventId: string]: any }; // ✨ Interpretaciones de eventos por eventId
   portada?: {
     titulo?: string;
     subtitulo?: string;
@@ -305,6 +306,8 @@ export default function LibroAgendaPage() {
                   monthData={monthData}
                   interpretation={monthInterp}
                   allEvents={allMonthEvents}
+                  userName={bookContent.userName}
+                  eventInterpretations={bookContent.eventInterpretations || {}}
                 />
               );
             })}
