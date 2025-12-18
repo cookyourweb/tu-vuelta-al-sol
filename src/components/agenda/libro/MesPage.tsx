@@ -1,6 +1,6 @@
 'use client';
 
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addDays, isSameDay } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 interface MonthEvent {
@@ -34,6 +34,21 @@ interface MesPageProps {
 }
 
 const DAYS_OF_WEEK = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+
+// Helper functions for safe date handling
+const isValidDate = (date: string | Date): boolean => {
+  const d = new Date(date);
+  return !isNaN(d.getTime()) && d.getTime() > 0;
+};
+
+const safeFormatDate = (date: string | Date, formatStr: string, fallback: string = 'Fecha no disponible'): string => {
+  if (!isValidDate(date)) return fallback;
+  try {
+    return format(new Date(date), formatStr, { locale: es });
+  } catch {
+    return fallback;
+  }
+};
 
 export default function MesPage({
   monthDate,
@@ -294,7 +309,7 @@ export default function MesPage({
                         Eclipse en {eclipse.sign || 'signo'}
                       </h4>
                       <p className="font-body text-sm text-gray-600 mb-2">
-                        {format(new Date(eclipse.date), "d 'de' MMMM", { locale: es })}
+                        {safeFormatDate(eclipse.date, "d 'de' MMMM")}
                       </p>
                       {eclipse.description && (
                         <p className="font-body text-base text-gray-700 leading-relaxed">
@@ -316,7 +331,7 @@ export default function MesPage({
                         Luna Nueva en {luna.sign || 'signo'}
                       </h4>
                       <p className="font-body text-sm text-gray-600 mb-2">
-                        {format(new Date(luna.date), "d 'de' MMMM", { locale: es })}
+                        {safeFormatDate(luna.date, "d 'de' MMMM")}
                       </p>
                       {luna.description && (
                         <p className="font-body text-sm text-gray-700">
@@ -330,15 +345,15 @@ export default function MesPage({
 
               {/* Lunas Llenas */}
               {monthData.lunas_llenas.map((luna, idx) => (
-                <div key={`ll-${idx}`} className="border-l-4 border-cosmic-amber pl-6 py-3">
+                <div key={`ll-${idx}`} className="border-l-4 border-cosmic-gold pl-6 py-3">
                   <div className="flex items-start">
-                    <span className="text-2xl text-cosmic-amber mr-3">○</span>
+                    <span className="text-2xl text-cosmic-gold mr-3">○</span>
                     <div>
                       <h4 className="font-display text-lg text-gray-800 mb-1">
                         Luna Llena en {luna.sign || 'signo'}
                       </h4>
                       <p className="font-body text-sm text-gray-600 mb-2">
-                        {format(new Date(luna.date), "d 'de' MMMM", { locale: es })}
+                        {safeFormatDate(luna.date, "d 'de' MMMM")}
                       </p>
                       {luna.description && (
                         <p className="font-body text-sm text-gray-700">

@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
       ...solarEvents.lunarPhases.map(phase => ({
         type: phase.type === 'new_moon' ? 'luna-nueva' : 'luna-llena',
         date: phase.date,
-        sign: phase.zodiacSign || phase.sign,
+        sign: phase.sign,
         house: 1, // TODO: calcular casa real
         description: phase.description,
         degree: phase.degree
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
       ...solarEvents.eclipses.map(eclipse => ({
         type: eclipse.type === 'solar' ? 'eclipse-solar' : 'eclipse-lunar',
         date: eclipse.date,
-        sign: eclipse.zodiacSign || eclipse.sign,
+        sign: eclipse.sign,
         house: 1, // TODO: calcular casa real
         description: eclipse.description,
         degree: eclipse.degree
@@ -138,15 +138,15 @@ export async function POST(request: NextRequest) {
       ...solarEvents.planetaryIngresses.map(ingress => ({
         type: 'ingreso-planetario',
         date: ingress.date,
-        sign: ingress.toSign || ingress.sign,
+        sign: ingress.toSign,
         planet: ingress.planet,
         house: 1, // TODO: calcular casa real
         description: ingress.description
       })),
       ...solarEvents.retrogrades.map(retro => ({
-        type: retro.isRetrograde ? 'retrogrado-inicio' : 'retrogrado-fin',
+        type: 'retrogrado-inicio',
         date: retro.startDate,
-        sign: retro.startSign || retro.sign,
+        sign: retro.startSign,
         planet: retro.planet,
         house: 1, // TODO: calcular casa real
         description: retro.description
@@ -154,6 +154,13 @@ export async function POST(request: NextRequest) {
     ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     console.log(`✅ Events calculated: ${yearEvents.length} total events`);
+
+    // Debug: check date formats
+    if (yearEvents.length > 0) {
+      console.log('🔍 Sample event dates:');
+      console.log('First event date:', yearEvents[0].date, 'type:', typeof yearEvents[0].date);
+      console.log('First event date toISOString:', yearEvents[0].date.toISOString());
+    }
 
     // 5.5. Agrupar eventos por mes
     const monthsData = groupEventsByMonth(yearEvents, startDate, endDate);
@@ -278,19 +285,19 @@ function groupEventsByMonth(events: any[], startDate: Date, endDate: Date): any[
       inicio: monthStart.toISOString(),
       fin: monthEnd.toISOString(),
       lunas_nuevas: lunas_nuevas.map(e => ({
-        fecha: format(new Date(e.date), 'dd MMM', { locale: es }),
+        fecha: e.date instanceof Date ? e.date.toISOString() : new Date(e.date).toISOString(),
         signo: e.sign,
         casa: e.house,
         descripcion: e.description
       })),
       lunas_llenas: lunas_llenas.map(e => ({
-        fecha: format(new Date(e.date), 'dd MMM', { locale: es }),
+        fecha: e.date instanceof Date ? e.date.toISOString() : new Date(e.date).toISOString(),
         signo: e.sign,
         casa: e.house,
         descripcion: e.description
       })),
       eclipses: eclipses.map(e => ({
-        fecha: format(new Date(e.date), 'dd MMM', { locale: es }),
+        fecha: e.date instanceof Date ? e.date.toISOString() : new Date(e.date).toISOString(),
         tipo: e.type,
         signo: e.sign,
         casa: e.house,
