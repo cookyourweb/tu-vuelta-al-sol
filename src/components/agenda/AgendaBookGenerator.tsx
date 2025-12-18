@@ -4,6 +4,47 @@ import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Loader2, BookOpen, X } from 'lucide-react';
 
+interface MonthData {
+  nombre: string;
+  nombreCorto: string;
+  inicio: string;
+  fin: string;
+  lunas_nuevas: Array<{
+    fecha: string;
+    signo: string;
+    casa: number;
+    descripcion: string;
+  }>;
+  lunas_llenas: Array<{
+    fecha: string;
+    signo: string;
+    casa: number;
+    descripcion: string;
+  }>;
+  eclipses: Array<{
+    fecha: string;
+    tipo: string;
+    signo: string;
+    casa: number;
+    descripcion: string;
+  }>;
+  ingresos_destacados: Array<{
+    fecha: string;
+    planeta: string;
+    signo: string;
+    descripcion: string;
+  }>;
+  total_eventos: number;
+}
+
+interface MonthInterpretation {
+  mes: string;
+  portada_mes: string;
+  interpretacion_mensual: string;
+  ritual_del_mes: string;
+  mantra_mensual: string;
+}
+
 interface BookContent {
   portada: {
     titulo: string;
@@ -39,6 +80,8 @@ interface BookContent {
     lunas_llenas_intro: string;
     eclipses_intro: string;
   };
+  mes_a_mes?: MonthInterpretation[];
+  monthsData?: MonthData[];
   cierre_del_ciclo: {
     integrar_lo_vivido: string;
     carta_de_cierre: string;
@@ -314,6 +357,119 @@ export default function AgendaBookGenerator() {
                 </div>
               </div>
 
+              {/* MES A MES */}
+              {bookContent.mes_a_mes && bookContent.monthsData && (
+                <>
+                  {bookContent.mes_a_mes.map((monthInterp, index) => {
+                    const monthData = bookContent.monthsData?.[index];
+                    if (!monthData) return null;
+
+                    return (
+                      <div key={index} className="seccion p-12 print:page-break-after-always">
+                        {/* Portada del mes */}
+                        <div className="mb-10 text-center bg-gradient-to-r from-purple-50 to-pink-50 p-8 rounded-lg border-2 border-purple-200">
+                          <h2 className="text-5xl font-bold text-purple-900 mb-4">
+                            {monthData.nombre}
+                          </h2>
+                          <p className="text-lg text-purple-700 italic">
+                            {monthInterp.portada_mes}
+                          </p>
+                        </div>
+
+                        {/* Calendario mensual con eventos */}
+                        <div className="espacio mb-10 bg-blue-50 p-6 rounded-lg border-l-4 border-blue-400">
+                          <h3 className="text-2xl font-semibold text-blue-900 mb-6">📅 Eventos del mes</h3>
+
+                          {/* Lunas Nuevas */}
+                          {monthData.lunas_nuevas.length > 0 && (
+                            <div className="mb-4">
+                              <h4 className="text-lg font-semibold text-blue-700 mb-2">🌑 Lunas Nuevas</h4>
+                              <ul className="space-y-2 ml-4">
+                                {monthData.lunas_nuevas.map((luna, i) => (
+                                  <li key={i} className="text-gray-800">
+                                    <span className="font-semibold">{luna.fecha}</span> - {luna.signo} en Casa {luna.casa}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {/* Lunas Llenas */}
+                          {monthData.lunas_llenas.length > 0 && (
+                            <div className="mb-4">
+                              <h4 className="text-lg font-semibold text-blue-700 mb-2">🌕 Lunas Llenas</h4>
+                              <ul className="space-y-2 ml-4">
+                                {monthData.lunas_llenas.map((luna, i) => (
+                                  <li key={i} className="text-gray-800">
+                                    <span className="font-semibold">{luna.fecha}</span> - {luna.signo} en Casa {luna.casa}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {/* Eclipses */}
+                          {monthData.eclipses.length > 0 && (
+                            <div className="mb-4">
+                              <h4 className="text-lg font-semibold text-red-700 mb-2">🌘 Eclipses</h4>
+                              <ul className="space-y-2 ml-4">
+                                {monthData.eclipses.map((eclipse, i) => (
+                                  <li key={i} className="text-gray-800 font-semibold">
+                                    <span className="font-bold">{eclipse.fecha}</span> - {eclipse.tipo} en {eclipse.signo}, Casa {eclipse.casa}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {/* Ingresos destacados */}
+                          {monthData.ingresos_destacados.length > 0 && (
+                            <div className="mb-4">
+                              <h4 className="text-lg font-semibold text-blue-700 mb-2">✨ Ingresos planetarios</h4>
+                              <ul className="space-y-2 ml-4">
+                                {monthData.ingresos_destacados.map((ingreso, i) => (
+                                  <li key={i} className="text-gray-800">
+                                    <span className="font-semibold">{ingreso.fecha}</span> - {ingreso.descripcion}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          <p className="text-sm text-blue-600 mt-4">
+                            Total de eventos: {monthData.total_eventos}
+                          </p>
+                        </div>
+
+                        {/* Interpretación mensual */}
+                        <div className="espacio mb-8">
+                          <h3 className="text-2xl font-semibold text-purple-700 mb-4">🔮 Qué se mueve en ti</h3>
+                          <p className="text-gray-800 leading-relaxed whitespace-pre-line">
+                            {monthInterp.interpretacion_mensual}
+                          </p>
+                        </div>
+
+                        {/* Ritual del mes */}
+                        <div className="espacio mb-8">
+                          <h3 className="text-2xl font-semibold text-purple-700 mb-4">🕯️ Ritual del mes</h3>
+                          <p className="text-gray-800 leading-relaxed whitespace-pre-line">
+                            {monthInterp.ritual_del_mes}
+                          </p>
+                        </div>
+
+                        {/* Mantra mensual */}
+                        <div className="bg-purple-50 p-6 rounded-lg border-l-4 border-purple-400">
+                          <h4 className="text-lg font-bold text-purple-700 mb-2">✨ Mantra de {monthData.nombreCorto}</h4>
+                          <p className="text-purple-900 italic text-xl leading-relaxed">
+                            "{monthInterp.mantra_mensual}"
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </>
+              )}
+
               {/* CIERRE DEL CICLO */}
               <div className="seccion p-12 print:page-break-after-always">
                 <h2 className="text-4xl font-bold text-rose-900 mb-8 border-b-2 border-rose-200 pb-4">
@@ -374,6 +530,7 @@ export default function AgendaBookGenerator() {
           .portada,
           .seccion {
             page-break-inside: avoid;
+            page-break-before: always;
           }
 
           .espacio {
@@ -387,6 +544,31 @@ export default function AgendaBookGenerator() {
           p {
             orphans: 3;
             widows: 3;
+          }
+
+          /* Estilos específicos para secciones mensuales */
+          .seccion ul {
+            page-break-inside: avoid;
+          }
+
+          .seccion li {
+            orphans: 2;
+            widows: 2;
+          }
+
+          /* Mantener juntos los bloques de contenido */
+          .bg-blue-50,
+          .bg-purple-50,
+          .bg-gradient-to-r {
+            page-break-inside: avoid;
+          }
+
+          /* Asegurar que los bordes y fondos se impriman */
+          .border-l-4,
+          .border-2,
+          .border-b-2 {
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
           }
         }
       `}</style>

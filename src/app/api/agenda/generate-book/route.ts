@@ -120,6 +120,10 @@ export async function POST(request: NextRequest) {
 
     console.log(`✅ Events calculated: ${yearEvents.length} total events`);
 
+    // 5.5. Agrupar eventos por mes
+    const monthsData = groupEventsByMonth(yearEvents, startDate, endDate);
+    console.log(`📅 Months grouped: ${monthsData.length} months`);
+
     // 6. Generar contenido del libro con OpenAI
     console.log('🤖 Generating book content with OpenAI...');
 
@@ -131,6 +135,7 @@ export async function POST(request: NextRequest) {
       natalInterpretation: natalInterpretation?.interpretation || {},
       solarReturn: solarReturn.interpretation || {},
       yearEvents,
+      monthsData,
       startDate,
       endDate
     });
@@ -148,7 +153,7 @@ export async function POST(request: NextRequest) {
         }
       ],
       temperature: 0.85,
-      max_tokens: 4000,
+      max_tokens: 8000,
       response_format: { type: 'json_object' }
     });
 
@@ -176,6 +181,7 @@ export async function POST(request: NextRequest) {
       book: {
         ...bookContent,
         yearEvents: yearEvents.slice(0, 100), // Primeros 100 eventos
+        monthsData,
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString()
       },
@@ -207,6 +213,70 @@ function calculateAge(birthDate: string | Date): number {
   return age || 30;
 }
 
+// ✅ HELPER: Agrupar eventos por mes
+function groupEventsByMonth(events: any[], startDate: Date, endDate: Date): any[] {
+  const monthsData: any[] = [];
+
+  // Crear array de 12 meses desde startDate
+  const currentMonth = new Date(startDate);
+
+  for (let i = 0; i < 12; i++) {
+    const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+    const monthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+
+    // Filtrar eventos de este mes
+    const monthEvents = events.filter(event => {
+      const eventDate = new Date(event.date);
+      return eventDate >= monthStart && eventDate <= monthEnd;
+    });
+
+    // Categorizar eventos por tipo
+    const lunas_nuevas = monthEvents.filter(e => e.type === 'luna-nueva');
+    const lunas_llenas = monthEvents.filter(e => e.type === 'luna-llena');
+    const eclipses = monthEvents.filter(e => e.type === 'eclipse-solar' || e.type === 'eclipse-lunar');
+    const ingresos = monthEvents.filter(e => e.type === 'ingreso-planetario');
+    const retrogrados = monthEvents.filter(e => e.type?.includes('retrogrado'));
+
+    monthsData.push({
+      nombre: format(monthStart, 'MMMM yyyy', { locale: es }),
+      nombreCorto: format(monthStart, 'MMMM', { locale: es }),
+      inicio: monthStart.toISOString(),
+      fin: monthEnd.toISOString(),
+      lunas_nuevas: lunas_nuevas.map(e => ({
+        fecha: format(new Date(e.date), 'dd MMM', { locale: es }),
+        signo: e.sign,
+        casa: e.house,
+        descripcion: e.description
+      })),
+      lunas_llenas: lunas_llenas.map(e => ({
+        fecha: format(new Date(e.date), 'dd MMM', { locale: es }),
+        signo: e.sign,
+        casa: e.house,
+        descripcion: e.description
+      })),
+      eclipses: eclipses.map(e => ({
+        fecha: format(new Date(e.date), 'dd MMM', { locale: es }),
+        tipo: e.type,
+        signo: e.sign,
+        casa: e.house,
+        descripcion: e.description
+      })),
+      ingresos_destacados: ingresos.slice(0, 3).map(e => ({
+        fecha: format(new Date(e.date), 'dd MMM', { locale: es }),
+        planeta: e.planet || e.description?.split(' ')[0],
+        signo: e.sign,
+        descripcion: e.description
+      })),
+      total_eventos: monthEvents.length
+    });
+
+    // Avanzar al siguiente mes
+    currentMonth.setMonth(currentMonth.getMonth() + 1);
+  }
+
+  return monthsData;
+}
+
 // ✅ GENERAR PROMPT COMPLETO DEL LIBRO
 function generateBookPrompt(data: {
   userName: string;
@@ -216,6 +286,7 @@ function generateBookPrompt(data: {
   natalInterpretation: any;
   solarReturn: any;
   yearEvents: any[];
+  monthsData: any[];
   startDate: Date;
   endDate: Date;
 }): string {
@@ -295,6 +366,16 @@ Responde ÚNICAMENTE con JSON válido (sin markdown, sin backticks):
 
     "eclipses_intro": "String 60-80 palabras: Qué son los eclipses. Cambios que no negocian. Qué se mueve, qué se transforma."
   },
+
+  "mes_a_mes": [
+    ${data.monthsData.map((month, index) => `{
+      "mes": "${month.nombreCorto}",
+      "portada_mes": "String 40-60 palabras: Frase de apertura del mes. ¿Qué energía trae ${month.nombreCorto}?",
+      "interpretacion_mensual": "String 120-150 palabras: Qué se mueve en ${month.nombreCorto} para ${data.userName}. Considera los eventos: ${month.lunas_nuevas.length} Lunas Nuevas, ${month.lunas_llenas.length} Lunas Llenas, ${month.eclipses.length} Eclipses, ${month.ingresos_destacados.length} ingresos planetarios.",
+      "ritual_del_mes": "String 60-80 palabras: Práctica o ritual específico para ${month.nombreCorto}. Anclar la intención del mes.",
+      "mantra_mensual": "String 20-30 palabras en PRIMERA PERSONA: Mantra personal para ${month.nombreCorto}."
+    }`).join(',\n    ')}
+  ],
 
   "cierre_del_ciclo": {
     "integrar_lo_vivido": "String 100-120 palabras: Preguntas guía para integrar: Qué aprendiste, qué soltaste, qué se transformó.",
