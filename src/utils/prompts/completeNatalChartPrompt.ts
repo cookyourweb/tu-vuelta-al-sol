@@ -361,18 +361,20 @@ Responde ÚNICAMENTE con un JSON válido:
 
   "patrones_sanacion": {
     "heridas": [
-      { "nombre": "[Herida 1 - nombre directo]", "origen_astrologico": "[Posición]", "patron": "[Patrón limitante que desarrollaste]", "origen_infancia": "[Qué aprendiste que limitó tu desarrollo]", "sanacion": "[TRANSFORMATIONAL: 'Tu sanación viene de DESARROLLAR capacidad para estar con [situación] de forma progresiva hasta que tu sistema se FORTALEZCA. Práctica: [acción específica con compromiso real (real commitment)]']" },
-      { "nombre": "[Herida 2]", "origen_astrologico": "[Posición]", "patron": "[Patrón limitante]", "origen_infancia": "[Origen]", "sanacion": "[TRANSFORMATIONAL: práctica de exposición consciente y progresiva]" }
-    ],
-    "ciclos_sanacion_lunar": {
-      "luna_nueva": "[Ritual TRANSFORMATIONAL: 'Siembra INTENCIONES con compromiso real (real commitment) - compromisos que tengan consecuencias tangibles']",
-      "luna_creciente": "[Práctica: 'Exponerte progresivamente a [situación desafiante relacionada con tu carta] de forma consciente']",
-      "luna_llena": "[Ritual: 'Cosecha RETROALIMENTACIÓN del sistema - qué funcionó, qué te desafió, qué te fortaleció. Observación honesta y sin juicio.']",
-      "luna_menguante": "[Práctica: 'Soltar estrategias limitantes que ya no te sirven - identificar qué te mantiene en zona de fragilidad y TRANSFORMARLO']"
-    },
-    "practicas_integracion": [
-      { "practica": "[Práctica TRANSFORMATIONAL 1 - con real commitment]", "duracion": "[Tiempo]", "beneficio": "[Beneficio: 'Sistema más ROBUSTO en [área]']", "fase_lunar": "[Mejor fase]" },
-      { "practica": "[Práctica 2 - exposición controlada]", "duracion": "[Tiempo]", "beneficio": "[Beneficio TRANSFORMATIONAL]", "fase_lunar": "[Fase]" }
+      {
+        "nombre": "[Herida 1 - nombre claro y directo]",
+        "origen_astrologico": "[Posición planetaria]",
+        "patron": "[Patrón limitante que desarrollaste]",
+        "origen_infancia": "[Qué aprendiste que limitó tu desarrollo]",
+        "descripcion_psicologica": "[Cómo se manifiesta este patrón en tu vida adulta. Tono claro, sin dramatismo.]"
+      },
+      {
+        "nombre": "[Herida 2]",
+        "origen_astrologico": "[Posición]",
+        "patron": "[Patrón limitante]",
+        "origen_infancia": "[Origen]",
+        "descripcion_psicologica": "[Manifestación actual del patrón]"
+      }
     ]
   },
 
