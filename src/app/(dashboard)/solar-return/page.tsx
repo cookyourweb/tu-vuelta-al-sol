@@ -539,10 +539,7 @@ export default function SolarReturnPage() {
           </div>
         )}
 
-   ∫
-
-      
-  {/* ✅ SECCIÓN 6: LÍNEA DE TIEMPO SOLAR RETURN */}
+        {/* ✅ SECCIÓN 6: LÍNEA DE TIEMPO SOLAR RETURN */}
         <div id="linea-tiempo" className="max-w-7xl mx-auto mb-12 scroll-mt-24">
           <div className="bg-gradient-to-br from-slate-900/95 to-purple-900/95 backdrop-blur-sm rounded-3xl p-8 md:p-12 border-2 border-purple-400/40 shadow-2xl">
 
@@ -943,7 +940,7 @@ export default function SolarReturnPage() {
         isOpen={drawerOpen}
         content={drawerContent}
         onClose={closeDrawer}
-        chartType="solar-return"  {/* ✅ Especificamos que es Retorno Solar */}
+        chartType="solar-return"
       />
     </div>
   );

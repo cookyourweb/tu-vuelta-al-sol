@@ -831,3 +831,85 @@ function getSignoElement(signo: string): string {
   };
   return elementos[signo] || 'energía específica';
 }
+
+export function generateSolarReturnSimplifiedPrompt(data: {
+  natalChart: any;
+  solarReturnChart: any;
+  userProfile: any;
+  returnYear: number;
+  srComparison?: any;
+  natalInterpretation?: any;
+}): string {
+  const { natalChart, solarReturnChart, userProfile, returnYear, srComparison, natalInterpretation } = data;
+
+  // Extraer fortalezas y bloqueos de la interpretación natal
+  const fortalezasNatales = extractFortalezas(natalInterpretation);
+  const bloqueosNatales = extractBloqueos(natalInterpretation);
+  const propositoVidaNatal = natalInterpretation?.proposito_vida || 'No disponible';
+
+  // Extraer datos clave
+  const natalSol = natalChart.planets?.find((p: any) => p.name === 'Sol' || p.name === 'Sun');
+  const natalLuna = natalChart.planets?.find((p: any) => p.name === 'Luna' || p.name === 'Moon');
+  const natalAsc = natalChart.ascendant;
+
+  const srSol = solarReturnChart.planets?.find((p: any) => p.name === 'Sol' || p.name === 'Sun');
+  const srLuna = solarReturnChart.planets?.find((p: any) => p.name === 'Luna' || p.name === 'Moon');
+  const srAsc = solarReturnChart.ascendant;
+  const srMC = solarReturnChart.midheaven;
+
+  // Calcular ASC SR en casa natal
+  const ascSRenCasaNatal = calculateHousePosition(srAsc?.longitude, natalChart.houses);
+
+  // Identificar planetas angulares SR
+  const planetasAngularesSR = identificarPlanetasAngulares(solarReturnChart);
+
+  // Detectar stelliums
+  const stelliumsNatal = detectarStelliums(natalChart);
+  const stelliumsSR = detectarStelliums(solarReturnChart);
+
+  // Aspectos cruzados SR-Natal
+  const aspectosCruzados = calcularAspectosCruzados(natalChart, solarReturnChart);
+
+  return `
+Eres un astrólogo profesional especializado en Solar Return (Revolución Solar).
+
+INSTRUCCIONES:
+- Describe el CLIMA DEL AÑO basado en el Solar Return
+- Conecta con la identidad natal (fortalezas y bloqueos)
+- NO des acciones concretas - solo activa patrones
+- Usa metodología Shea/Teal/Louis
+- Responde en español con JSON válido
+
+DATOS PERSONALES:
+- Nombre: ${userProfile.name}
+- Edad: ${userProfile.age}
+- Año SR: ${returnYear}-${returnYear + 1}
+
+CARTA NATAL:
+- Sol: ${natalSol?.sign} Casa ${natalSol?.house}
+- Luna: ${natalLuna?.sign} Casa ${natalLuna?.house}
+- Asc: ${natalAsc?.sign}
+
+SOLAR RETURN:
+- Sol SR: ${srSol?.sign} Casa ${srSol?.house}
+- Luna SR: ${srLuna?.sign} Casa ${srLuna?.house}
+- Asc SR: ${srAsc?.sign} (cae en Casa ${ascSRenCasaNatal} natal)
+
+FORTALEZAS NATALES: ${fortalezasNatales.map(f => f.nombre).join(', ')}
+BLOQUEOS NATALES: ${bloqueosNatales.map(b => b.nombre).join(', ')}
+
+PROMPT SIMPLIFICADO:
+Genera un JSON con:
+- esencia_revolucionaria_anual: Tema central del año (200 palabras)
+- tema_central_del_anio: Frase resumen (10-15 palabras)
+- analisis_tecnico_profesional: Análisis detallado
+- activacion_evolutiva_anual: Patrón natal activado
+- calendario_lunar_anual: Meses con lunas nuevas/llenas
+- advertencias: 3 advertencias
+- eventos_clave_del_anio: 2-3 eventos importantes
+- insights_transformacionales: 4 insights
+- integracion_final: Síntesis y pregunta reflexión
+
+El ASC SR en Casa ${ascSRenCasaNatal} natal es el indicador #1.
+`;
+}

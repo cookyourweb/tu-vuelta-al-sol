@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import connectDB from '@/lib/db';
 import Interpretation from '@/models/Interpretation';
-import { generateSolarReturnMasterPrompt } from '@/utils/prompts/solarReturnPrompts';
+import { generateSolarReturnSimplifiedPrompt } from '@/utils/prompts/solarReturnPrompts';
 import { generateSRComparison } from '@/utils/astrology/solarReturnComparison';
 
 // ✅ Lazy initialization to avoid build-time errors
@@ -25,174 +25,49 @@ function getOpenAI() {
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
 // ==========================================
-// 📊 COMPLETE SOLAR RETURN INTERFACE
+// 📊 NEW SIMPLIFIED SOLAR RETURN INTERFACE
 // ==========================================
 
-interface SolarReturnInterpretationSection {
-  tooltip: {
-    titulo: string;
-    descripcionBreve: string;
-    significado: string;
-    efecto: string;
-    tipo: string;
-  };
-  drawer: {
-    titulo: string;
-    educativo: string;
-    poderoso: string;
-    poetico: string;
-    sombras: Array<{
-      nombre: string;
-      descripcion: string;
-      trampa: string;
-      regalo: string;
-    }>;
-    sintesis: {
-      frase: string;
-      declaracion: string;
-    };
-  };
-}
+interface SimplifiedSolarReturnInterpretation {
+  // ✅ STAYS: FUNCTIONAL ANNUAL THEME
+  tema_anual_funcional: string;
 
-interface CompleteSolarReturnInterpretation {
-  // CORE ESSENCE (matching natal structure with tooltip/drawer)
-  esencia_revolucionaria_anual: SolarReturnInterpretationSection;
-  proposito_vida_anual: SolarReturnInterpretationSection;
-  tema_central_del_anio: SolarReturnInterpretationSection;
-
-  // FORMATION TEMPRANA (adapted for annual context)
-  formacion_temprana: {
-    casa_lunar: {
-      signo_casa: string;
-      interpretacion: string;
-      influencia: string;
-    };
-    casa_saturnina: {
-      signo_casa: string;
-      interpretacion: string;
-      leccion: string;
-    };
-    casa_venusina: {
-      signo_casa: string;
-      interpretacion: string;
-      valores: string;
-    };
+  // ✅ STAYS: NATAL CHART ACTIVATION
+  activacion_natal_del_anio: {
+    planetas_natales_activados: string[];
+    casas_natales_protagonistas: string[];
   };
 
-  // PATRONES PSICOLOGICOS (annual psychological patterns)
-  patrones_psicologicos: Array<{
-    planeta: string;
-    infancia_emocional: string;
-    patron_formado: string;
-    impacto_adulto: string;
-  }>;
-
-  // PLANETAS PROFUNDOS (Urano, Neptuno, Plutón annual activation)
-  planetas_profundos: {
-    urano: string;
-    neptuno: string;
-    pluton: string;
-  };
-
-  // ANGULOS VITALES (Ascendente y Medio Cielo annual)
-  angulos_vitales: {
-    ascendente: {
-      posicion: string;
-      mascara_social: string;
-      superpoder: string;
-    };
-    medio_cielo: {
-      posicion: string;
-      vocacion_soul: string;
-      legado: string;
-    };
-  };
-
-  // NODOS LUNALES (annual nodal activation)
-  nodos_lunares: {
-    nodo_norte: {
-      signo_casa: string;
-      direccion_evolutiva: string;
-      desafio: string;
-    };
-    nodo_sur: {
-      signo_casa: string;
-      zona_comfort: string;
-      patron_repetitivo: string;
-    };
-  };
-
-  // TECHNICAL ANALYSIS (professional methodology)
-  analisis_tecnico_profesional: {
-    asc_sr_en_casa_natal: {
-      casa: number;
-      signo_asc_sr: string;
-      significado: string;
-      area_vida_dominante: string;
-    };
-    sol_en_casa_sr: {
-      casa: number;
-      significado: string;
-    };
-    planetas_angulares_sr: Array<{
-      planeta: string;
-      posicion: string;
-      impacto: string;
-    }>;
-    aspectos_cruzados_natal_sr: Array<{
-      planeta_natal: string;
-      planeta_sr: string;
-      aspecto: string;
-      orbe: number;
-      significado: string;
-    }>;
-    configuraciones_especiales: string[];
-  };
-
-  // ACTION PLAN (quarterly breakdown)
-  plan_accion: {
-    trimestre_1: { foco: string; acciones: string[] };
-    trimestre_2: { foco: string; acciones: string[] };
-    trimestre_3: { foco: string; acciones: string[] };
-    trimestre_4: { foco: string; acciones: string[] };
-  };
-
-  // LUNAR CALENDAR (12 months)
-  calendario_lunar_anual: Array<{
-    mes: string;
-    luna_nueva: { fecha: string; signo: string; mensaje: string };
-    luna_llena: { fecha: string; signo: string; mensaje: string };
-  }>;
-
-  // POWER DECLARATION
-  declaracion_poder_anual: string;
-
-  // WARNINGS
-  advertencias: string[];
-
-  // KEY EVENTS (timeline)
-  eventos_clave_del_anio: Array<{
-    periodo: string;
-    evento: string;
-    tipo: string;
+  // ✅ STAYS: PSYCHOLOGICAL PATTERN FROM NATAL
+  patron_natal_que_se_despierta: {
     descripcion: string;
-    planetas_involucrados?: string[];
-    accion_recomendada: string;
-  }>;
+    origen_natal: string;
+    como_se_manifiesta_este_anio: string;
+  };
 
-  // INSIGHTS
-  insights_transformacionales: string[];
+  // ✅ STAYS: EVOLUTIONARY CLIMATE
+  clima_evolutivo_del_anio: {
+    tipo_de_experiencias: string;
+    areas_de_vida_activadas: string;
+    sensacion_interna_predominante: string;
+  };
 
-  // RITUALS
-  rituales_recomendados: string[];
+  // ✅ STAYS: EVOLUTIONARY RISK
+  riesgo_evolutivo_del_anio: {
+    descripcion: string;
+    conductas_reactivas_probables: string[];
+  };
 
-  // FINAL REFLECTION QUESTION
-  pregunta_final_reflexion: string;
+  // ✅ STAYS: EVOLUTIONARY KEY
+  llave_evolutiva_del_anio: {
+    criterio_de_decision: string;
+    direccion_consciente: string;
+  };
 
-  // INTEGRATION
-  integracion_final: {
-    sintesis: string;
-    pregunta_reflexion: string;
+  // ✅ STAYS: TEMPORAL FRAMEWORK
+  marco_temporal: {
+    vigencia: string;
+    nota: string;
   };
 }
 
@@ -200,14 +75,14 @@ interface CompleteSolarReturnInterpretation {
 // 🤖 GENERATE WITH OPENAI
 // ==========================================
 
-async function generateCompleteWithOpenAI(
+async function generateSimplifiedWithOpenAI(
   natalChart: any,
   solarReturnChart: any,
   userProfile: any,
   returnYear: number,
   srComparison?: any,
   natalInterpretation?: any
-): Promise<CompleteSolarReturnInterpretation> {
+): Promise<SimplifiedSolarReturnInterpretation> {
 
   console.log('🤖 ===== GENERATING WITH OPENAI =====');
   console.log('🤖 Input validation:', {
@@ -219,8 +94,8 @@ async function generateCompleteWithOpenAI(
     hasNatalInterpretation: !!natalInterpretation
   });
 
-  // ✅ GENERATE PROMPT
-  const prompt = generateSolarReturnMasterPrompt({
+  // ✅ GENERATE PROMPT FOR SIMPLIFIED STRUCTURE
+  const prompt = generateSolarReturnSimplifiedPrompt({
     natalChart,
     solarReturnChart,
     userProfile,
@@ -235,117 +110,61 @@ async function generateCompleteWithOpenAI(
     containsReturnYear: prompt.includes(returnYear.toString())
   });
 
-  // ✅ SYSTEM PROMPT WITH STRICT REQUIREMENTS
+  // ✅ SYSTEM PROMPT WITH STRICT REQUIREMENTS FOR SIMPLIFIED STRUCTURE
   let systemPrompt = `You are a PROFESSIONAL astrologer specializing in Solar Return (Annual Revolution) following Shea, Teal, and Louis methodology.
 
 ⚠️ CRITICAL REQUIREMENTS:
-1. You MUST respond with VALID JSON containing ALL 17 required sections
+1. You MUST respond with VALID JSON containing ALL 7 required sections
 2. Use the REAL astronomical data provided (planets, houses, signs, degrees)
 3. Use the REAL user data: ${userProfile.name}, age ${userProfile.age}, from ${userProfile.birthPlace}
 4. Reference SPECIFIC positions like "Sol en ${solarReturnChart?.planets?.find((p: any) => p.name === 'Sol')?.sign} Casa ${solarReturnChart?.planets?.find((p: any) => p.name === 'Sol')?.house}"
 5. Calculate ASC SR position in NATAL houses using the comparison data provided
 6. Use disruptive Spanish language but BE SPECIFIC with astronomical data
-7. NO generic placeholders like "Libra" or "Casa 1" - use REAL data
+7. NO generic placeholders - use REAL astronomical data
 
 Required JSON structure:
 {
-  "esencia_revolucionaria_anual": {
-    "tooltip": {
-      "titulo": "string",
-      "descripcionBreve": "string",
-      "significado": "string",
-      "efecto": "string",
-      "tipo": "string"
-    },
-    "drawer": {
-      "titulo": "string",
-      "educativo": "string",
-      "poderoso": "string",
-      "poetico": "string",
-      "sombras": [{"nombre": "string", "descripcion": "string", "trampa": "string", "regalo": "string"}],
-      "sintesis": {"frase": "string", "declaracion": "string"}
-    }
+  "tema_anual_funcional": "Frase clara y operativa. Ej: Reafirmación de identidad y autonomía personal",
+
+  "activacion_natal_del_anio": {
+    "planetas_natales_activados": [
+      "Sol natal en Acuario Casa 1 (identidad, presencia)",
+      "Saturno natal en Casa 7 (relaciones, límites)"
+    ],
+    "casas_natales_protagonistas": [
+      "Casa 1 (yo, identidad)",
+      "Casa 7 (vínculos, acuerdos)"
+    ]
   },
-  "proposito_vida_anual": {
-    "tooltip": {
-      "titulo": "string",
-      "descripcionBreve": "string",
-      "significado": "string",
-      "efecto": "string",
-      "tipo": "string"
-    },
-    "drawer": {
-      "titulo": "string",
-      "educativo": "string",
-      "poderoso": "string",
-      "poetico": "string",
-      "sombras": [{"nombre": "string", "descripcion": "string", "trampa": "string", "regalo": "string"}],
-      "sintesis": {"frase": "string", "declaracion": "string"}
-    }
+
+  "patron_natal_que_se_despierta": {
+    "descripcion": "Patrón psicológico-conductual específico que ya existe en la carta natal",
+    "origen_natal": "Dónde se ve este patrón en la carta natal",
+    "como_se_manifiesta_este_anio": "Cómo aparece este patrón en situaciones reales durante este año"
   },
-  "tema_central_del_anio": {
-    "tooltip": {
-      "titulo": "string",
-      "descripcionBreve": "string",
-      "significado": "string",
-      "efecto": "string",
-      "tipo": "string"
-    },
-    "drawer": {
-      "titulo": "string",
-      "educativo": "string",
-      "poderoso": "string",
-      "poetico": "string",
-      "sombras": [{"nombre": "string", "descripcion": "string", "trampa": "string", "regalo": "string"}],
-      "sintesis": {"frase": "string", "declaracion": "string"}
-    }
+
+  "clima_evolutivo_del_anio": {
+    "tipo_de_experiencias": "Qué tipo de situaciones se repiten",
+    "areas_de_vida_activadas": "Ámbitos donde se siente con más fuerza",
+    "sensacion_interna_predominante": "Cómo se vive internamente este año"
   },
-  "formacion_temprana": {
-    "casa_lunar": {"signo_casa": "string", "interpretacion": "string", "influencia": "string"},
-    "casa_saturnina": {"signo_casa": "string", "interpretacion": "string", "leccion": "string"},
-    "casa_venusina": {"signo_casa": "string", "interpretacion": "string", "valores": "string"}
+
+  "riesgo_evolutivo_del_anio": {
+    "descripcion": "Qué pasa si se vive este año en automático",
+    "conductas_reactivas_probables": [
+      "Conducta concreta 1",
+      "Conducta concreta 2"
+    ]
   },
-  "patrones_psicologicos": [{"planeta": "string", "infancia_emocional": "string", "patron_formado": "string", "impacto_adulto": "string"}],
-  "planetas_profundos": {"urano": "string", "neptuno": "string", "pluton": "string"},
-  "angulos_vitales": {
-    "ascendente": {"posicion": "string", "mascara_social": "string", "superpoder": "string"},
-    "medio_cielo": {"posicion": "string", "vocacion_soul": "string", "legado": "string"}
+
+  "llave_evolutiva_del_anio": {
+    "criterio_de_decision": "Frase tipo: Este año evolucionas cuando…",
+    "direccion_consciente": "Hacia dónde empuja este retorno solar"
   },
-  "nodos_lunares": {
-    "nodo_norte": {"signo_casa": "string", "direccion_evolutiva": "string", "desafio": "string"},
-    "nodo_sur": {"signo_casa": "string", "zona_comfort": "string", "patron_repetitivo": "string"}
-  },
-  "analisis_tecnico_profesional": {
-    "asc_sr_en_casa_natal": {
-      "casa": number (from comparison data),
-      "signo_asc_sr": "string (${solarReturnChart?.ascendant?.sign})",
-      "significado": "string with REAL data",
-      "area_vida_dominante": "string"
-    },
-    "sol_en_casa_sr": {
-      "casa": number,
-      "significado": "string"
-    },
-    "planetas_angulares_sr": [],
-    "aspectos_cruzados_natal_sr": [],
-    "configuraciones_especiales": []
-  },
-  "plan_accion": {
-    "trimestre_1": {"foco": "string", "acciones": []},
-    "trimestre_2": {"foco": "string", "acciones": []},
-    "trimestre_3": {"foco": "string", "acciones": []},
-    "trimestre_4": {"foco": "string", "acciones": []}
-  },
-  "calendario_lunar_anual": [...12 months with REAL 2025-2026 dates...],
-  "declaracion_poder_anual": "string with ${userProfile.name.toUpperCase()}",
-  "advertencias": [...],
-  "eventos_clave_del_anio": [...],
-  "insights_transformacionales": [...],
-  "rituales_recomendados": [...],
-  "pregunta_final_reflexion": "string",
-  "integracion_final": {
-    "sintesis": "string mentioning ${userProfile.name}",
-    "pregunta_reflexion": "string"
+
+  "marco_temporal": {
+    "vigencia": "De cumpleaños YYYY a cumpleaños YYYY+1",
+    "nota": "Este retorno no predice eventos, activa procesos"
   }
 }
 
@@ -354,7 +173,7 @@ Required JSON structure:
   // ✅ CALL OPENAI WITH RETRIES
   let attempts = 0;
   const MAX_ATTEMPTS = 2;
-  let parsedResponse: any;
+  let parsedResponse: SimplifiedSolarReturnInterpretation | null = null;
 
   while (attempts < MAX_ATTEMPTS) {
     try {
@@ -372,7 +191,7 @@ Required JSON structure:
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,
-        max_tokens: 16000, // ✅ INCREASED: Needed for complete Solar Return interpretation with all sections
+        max_tokens: 8000, // ✅ REDUCED: Simplified structure needs less tokens
         response_format: { type: "json_object" }
       });
 
@@ -390,52 +209,30 @@ Required JSON structure:
       // ✅ PARSE & VALIDATE
       parsedResponse = JSON.parse(rawResponse);
 
-      // Required sections
+      // Required sections for simplified structure
       const requiredSections = [
-        'esencia_revolucionaria_anual',
-        'proposito_vida_anual',
-        'tema_central_del_anio',
-        'formacion_temprana',
-        'patrones_psicologicos',
-        'planetas_profundos',
-        'angulos_vitales',
-        'nodos_lunares',
-        'analisis_tecnico_profesional',
-        'plan_accion',
-        'calendario_lunar_anual',
-        'declaracion_poder_anual',
-        'advertencias',
-        'eventos_clave_del_anio',
-        'insights_transformacionales',
-        'rituales_recomendados',
-        'pregunta_final_reflexion',
-        'integracion_final'
+        'tema_anual_funcional',
+        'activacion_natal_del_anio',
+        'patron_natal_que_se_despierta',
+        'clima_evolutivo_del_anio',
+        'riesgo_evolutivo_del_anio',
+        'llave_evolutiva_del_anio',
+        'marco_temporal'
       ];
 
       const missingSections = requiredSections.filter(
-        section => !parsedResponse[section]
+        section => !(parsedResponse as any)[section]
       );
 
       if (missingSections.length === 0) {
-        // ✅ VALIDATE CONTENT QUALITY (more lenient)
-        console.log('🔍 Validating response quality...');
+        // ✅ VALIDATE CONTENT QUALITY
+        console.log('🔍 Validating simplified response quality...');
 
-        // Check if esencia_revolucionaria_anual has proper structure
-        const hasProperStructure =
-          parsedResponse.esencia_revolucionaria_anual?.tooltip &&
-          parsedResponse.esencia_revolucionaria_anual?.drawer &&
-          parsedResponse.proposito_vida_anual?.tooltip &&
-          parsedResponse.proposito_vida_anual?.drawer;
-
-        if (!hasProperStructure) {
-          console.warn('⚠️ Response missing tooltip/drawer structure in core sections');
-          throw new Error('Response missing required tooltip/drawer structure');
-        }
-
-        // Check if response has meaningful content (not all empty strings)
+        // Check if response has meaningful content
         const hasContent =
-          parsedResponse.esencia_revolucionaria_anual.drawer.educativo.length > 50 &&
-          parsedResponse.proposito_vida_anual.drawer.educativo.length > 50;
+          (parsedResponse as any).tema_anual_funcional?.length > 10 &&
+          (parsedResponse as any).activacion_natal_del_anio?.planetas_natales_activados?.length > 0 &&
+          (parsedResponse as any).patron_natal_que_se_despierta?.descripcion?.length > 20;
 
         if (!hasContent) {
           console.warn('⚠️ Response has structure but empty content');
@@ -443,16 +240,13 @@ Required JSON structure:
         }
 
         // ✅ Optional: Check for user name (warning only, not failure)
-        const hasUserName =
-          JSON.stringify(parsedResponse).includes(userProfile.name) ||
-          parsedResponse.declaracion_poder_anual?.includes(userProfile.name.toUpperCase());
+        const hasUserName = JSON.stringify(parsedResponse).includes(userProfile.name);
 
         if (!hasUserName) {
           console.warn('⚠️ Warning: Response may not include user name, but accepting anyway');
         }
 
-        console.log(`✅ Complete valid response on attempt ${attempts + 1}`, {
-          hasProperStructure: true,
+        console.log(`✅ Valid simplified response on attempt ${attempts + 1}`, {
           hasContent: true,
           hasUserName
         });
@@ -462,7 +256,7 @@ Required JSON structure:
         attempts++;
 
         if (attempts < MAX_ATTEMPTS) {
-          systemPrompt += `\n\n🚨 RETRY: Previous response missing: ${missingSections.join(', ')}. Include them NOW with REAL data.`;
+          systemPrompt += `\n\n🚨 RETRY: Previous response missing: ${missingSections.join(', ')}. Include them NOW with REAL astronomical data.`;
         }
       }
 
@@ -476,30 +270,12 @@ Required JSON structure:
     }
   }
 
-  if (!parsedResponse || attempts >= MAX_ATTEMPTS) {
-    throw new Error('Failed to generate valid interpretation after retries');
+  if (!parsedResponse) {
+    throw new Error('Failed to generate valid response after all attempts');
   }
 
-  console.log('✅ OpenAI interpretation validated:', {
-    sections: Object.keys(parsedResponse).length,
-    coreStructure: {
-      esencia_has_tooltip: !!parsedResponse.esencia_revolucionaria_anual?.tooltip,
-      esencia_has_drawer: !!parsedResponse.esencia_revolucionaria_anual?.drawer,
-      proposito_has_tooltip: !!parsedResponse.proposito_vida_anual?.tooltip,
-      proposito_has_drawer: !!parsedResponse.proposito_vida_anual?.drawer,
-      tema_has_tooltip: !!parsedResponse.tema_central_del_anio?.tooltip,
-      tema_has_drawer: !!parsedResponse.tema_central_del_anio?.drawer
-    },
-    contentLengths: {
-      esencia_educativo: parsedResponse.esencia_revolucionaria_anual?.drawer?.educativo?.length || 0,
-      proposito_educativo: parsedResponse.proposito_vida_anual?.drawer?.educativo?.length || 0
-    }
-  });
-
-  console.log('📊 Sample content check:', {
-    esencia_preview: parsedResponse.esencia_revolucionaria_anual?.drawer?.educativo?.substring(0, 100) || 'MISSING',
-    proposito_preview: parsedResponse.proposito_vida_anual?.drawer?.educativo?.substring(0, 100) || 'MISSING'
-  });
+  // ✅ RETURN VALIDATED RESPONSE
+  console.log('✅ Simplified interpretation validated');
 
   return parsedResponse;
 }
@@ -979,7 +755,7 @@ export async function POST(request: NextRequest) {
     console.log('🤖 Generating new complete interpretation...');
 
     const returnYear = solarReturnChart?.solarReturnInfo?.year || new Date().getFullYear();
-    let interpretation: CompleteSolarReturnInterpretation;
+    let interpretation: SimplifiedSolarReturnInterpretation;
 
     // ✅ PREPARE LOCATION DATA FOR INTERPRETATION
     const locationContext = birthData ? {
@@ -1044,7 +820,7 @@ export async function POST(request: NextRequest) {
 
     if (process.env.OPENAI_API_KEY) {
       try {
-        interpretation = await generateCompleteWithOpenAI(
+        interpretation = await generateSimplifiedWithOpenAI(
           natalChart,
           solarReturnChart,
           { ...userProfile, locationContext }, // Pass location data
