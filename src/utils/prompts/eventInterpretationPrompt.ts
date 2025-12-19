@@ -26,6 +26,9 @@ export interface EventInterpretationPromptData {
 
   // ✅ KEY: Interpretación natal guardada (contiene fortalezas/bloqueos)
   natalInterpretation: any;
+
+  // ✅ Interpretación Solar Return (contiene tema del año)
+  solarReturnInterpretation?: any;
 }
 
 // ✅ FUNCIÓN PRINCIPAL
@@ -41,6 +44,11 @@ export function generateEventInterpretationPrompt(
 
   // ✅ Extraer propósito de vida
   const proposito = data.natalInterpretation?.proposito_vida || 'No disponible';
+
+  // ✅ Extraer tema del año desde Solar Return
+  const temaDelAnio = data.solarReturnInterpretation?.tema_central_del_anio
+    || data.solarReturnInterpretation?.proposito_vida_anual
+    || 'Evolución y transformación personal';
 
   // ✅ Identificar planetas natales que este evento activa
   const planetasActivados = identificarPlanetasActivados(data.event, data.natalChart);
@@ -233,6 +241,26 @@ Responde ÚNICAMENTE con JSON válido en español (sin markdown, sin backticks, 
 
       Esto conecta DIRECTAMENTE con su [menciona patrón natal específico del usuario].",
 
+    "activacion_evolutiva_del_evento": {
+      "patron_base_que_traes": "String de 60-80 palabras: Describe el patrón natal ESPECÍFICO que este evento toca. Debe estar extraído de los bloqueos o fortalezas natales de ${data.userName}. Puede ser un miedo, bloqueo, tendencia repetida, o talento no expresado.
+
+      Ejemplo: 'En tu carta natal existe una tendencia a [patrón específico]. Esto no es [interpretación negativa], sino [reframe como mecanismo aprendido].'
+
+      Conecta con: ${bloqueosTexto || fortalezasTexto}",
+
+      "por_que_este_evento_es_clave_este_ano": "String de 60-80 palabras: Explica por qué este evento NO es casual dentro del tema del año del Solar Return. Conecta EXPLÍCITAMENTE con el tema anual.
+
+      Formato: 'Este evento ocurre dentro de un año cuyo tema central es [Tema del Año]. Por eso, no se limita a [descripción superficial]: activa directamente [conexión profunda con tema anual].'
+
+      Tema del año: ${temaDelAnio}",
+
+      "decision_clave_que_se_te_pide": "String de 40-60 palabras: Decisión CONCRETA que este evento pide a ${data.userName} tomar AHORA. Lenguaje claro, directo, accionable. NO abstracto.
+
+      Formato: 'Este evento no te pide [acción superficial], sino [DECISIÓN REAL]. [Acción específica] es la acción que alinea este tránsito con tu evolución.'
+
+      Debe ser una decisión que se pueda tomar en los próximos días, no un proceso largo."
+    },
+
     "uso_consciente_consejo_aplicado": "String de 120-150 palabras: Consejo APLICADO y CONCRETO para ${data.userName}.
 
       - Empieza con acción clara: 'No tomes...', 'Observa...', 'Elige...', 'Pregúntate...', 'Posterga...'
@@ -288,7 +316,8 @@ Responde ÚNICAMENTE con JSON válido en español (sin markdown, sin backticks, 
 1. **Primero describe** (CAPA 1): estructura, qué se activa, datos objetivos, sin consejos
 2. **Luego cruza** con su carta natal específica
 3. **Identifica** el patrón que se activa en su vida
-4. **Solo al final** das decisiones concretas (CAPA 2)
+4. **NUEVA - Activación Evolutiva**: Conecta NATAL → SR → EVENTO (patrón base → por qué este año → decisión concreta)
+5. **Solo al final** das decisiones concretas (CAPA 2)
 
 **ESTILO POR CAPA:**
 - **CAPA 1**: Neutral, educativo, estructural. Como un arquitecto describiendo un edificio. Usa: "activa", "pone en tensión", "ilumina", "conecta". NO uses: "deberías", "te invita", "es momento de".
@@ -349,6 +378,12 @@ Responde ÚNICAMENTE con JSON válido en español (sin markdown, sin backticks, 
 □ ¿Listé planetas natales implicados REALES?
 □ ¿La descripción estructural es neutral y educativa?
 □ ¿NO usé "deberías" ni "te invita" en CAPA 1?
+
+**ACTIVACIÓN EVOLUTIVA (NUEVA):**
+□ ¿Identifiqué el patrón natal BASE que este evento toca?
+□ ¿Expliqué por qué este evento es CLAVE dentro del tema del año SR?
+□ ¿Di una decisión CONCRETA ejecutable en los próximos días?
+□ ¿La conexión NATAL → SR → EVENTO es clara y explícita?
 
 **CAPA 2 - Aplicado:**
 □ ¿Crucé con su estructura natal específica (Sol, Luna, aspectos)?
