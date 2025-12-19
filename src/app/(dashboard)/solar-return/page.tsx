@@ -943,6 +943,7 @@ export default function SolarReturnPage() {
         isOpen={drawerOpen}
         content={drawerContent}
         onClose={closeDrawer}
+        chartType="solar-return"  {/* ✅ Especificamos que es Retorno Solar */}
       />
     </div>
   );

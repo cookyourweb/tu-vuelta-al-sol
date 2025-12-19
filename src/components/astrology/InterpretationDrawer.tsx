@@ -31,12 +31,27 @@ interface DrawerContent {
     frase: string;
     declaracion: string;
   };
+  // ✅ NEW: Metadatos técnicos del aspecto/planeta
+  metadata?: {
+    type: 'planet' | 'aspect' | 'angle';
+    name?: string;           // Para planetas: "Sol", para aspectos: "Oposición"
+    planet1?: string;        // Para aspectos
+    planet2?: string;        // Para aspectos
+    sign?: string;           // Para planetas/ángulos
+    house?: number;          // Para planetas
+    degree?: number;         // Grado exacto
+    aspectType?: string;     // Para aspectos: "opposition", "trine", etc.
+    angle?: number;          // Para aspectos: ángulo en grados
+    orb?: number;            // Orbe del aspecto
+    isExact?: boolean;       // Si el aspecto es exacto (orbe < 1°)
+  };
 }
 
 interface InterpretationDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   content: DrawerContent | null;
+  chartType?: 'natal' | 'progressed' | 'solar-return';  // ✅ NEW
 }
 
 // =============================================================================
@@ -46,14 +61,49 @@ interface InterpretationDrawerProps {
 export const InterpretationDrawer: React.FC<InterpretationDrawerProps> = ({
   isOpen,
   onClose,
-  content
+  content,
+  chartType = 'natal'  // ✅ DEFAULT: natal
 }) => {
 
   console.log('=== DRAWER COMPONENT RENDER ===');
   console.log('isOpen:', isOpen);
   console.log('content:', content);
+  console.log('chartType:', chartType);
   console.log('content?.titulo:', content?.titulo);
   console.log('¿Debería renderizarse el drawer?', isOpen && content);
+
+  // ✅ CONFIGURACIÓN DE ESTILOS SEGÚN TIPO DE CARTA
+  const chartConfig = {
+    'natal': {
+      badge: '🌟 Carta Natal',
+      badgeBg: 'bg-purple-600',
+      headerGradient: 'from-purple-900 via-indigo-900 to-purple-900',
+      headerBg: 'bg-purple-900/90',
+      headerBorder: 'border-purple-700/50',
+      dividerColor: 'via-purple-500',
+      description: 'Tu estructura base'
+    },
+    'solar-return': {
+      badge: '☀️ Retorno Solar',
+      badgeBg: 'bg-orange-600',
+      headerGradient: 'from-orange-900 via-yellow-900 to-orange-900',
+      headerBg: 'bg-orange-900/90',
+      headerBorder: 'border-orange-700/50',
+      dividerColor: 'via-orange-500',
+      description: 'Clima del año'
+    },
+    'progressed': {
+      badge: '🌙 Carta Progresada',
+      badgeBg: 'bg-blue-600',
+      headerGradient: 'from-blue-900 via-indigo-900 to-blue-900',
+      headerBg: 'bg-blue-900/90',
+      headerBorder: 'border-blue-700/50',
+      dividerColor: 'via-blue-500',
+      description: 'Tu evolución'
+    }
+  };
+
+  const config = chartConfig[chartType];
 
   // =========================================================================
   // ⌨️ CERRAR CON TECLA ESC
@@ -94,20 +144,86 @@ export const InterpretationDrawer: React.FC<InterpretationDrawerProps> = ({
       />
 
       {/* Drawer - animación desde la derecha */}
-      <div className="absolute right-0 top-0 h-full w-full md:w-[45%] lg:w-[40%] bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-900 shadow-2xl overflow-y-auto animate-slide-in-right">
-        {/* Header fijo con efecto glassmorphism */}
-        <div className="sticky top-0 bg-purple-900/90 backdrop-blur-md p-4 md:p-6 border-b border-purple-700/50 flex justify-between items-center z-10 shadow-lg">
-          <h2 className="text-xl md:text-2xl font-bold text-white">{content.titulo}</h2>
-          <button
-            onClick={() => {
-              onClose();
-              // Reset tooltip when drawer closes - handled by page-level state
-            }}
-            className="text-white hover:text-purple-300 text-2xl transition-colors flex-shrink-0 ml-4"
-            aria-label="Cerrar"
-          >
-            ✕
-          </button>
+      <div className={`absolute right-0 top-0 h-full w-full md:w-[45%] lg:w-[40%] bg-gradient-to-br ${config.headerGradient} shadow-2xl overflow-y-auto animate-slide-in-right`}>
+
+        {/* Header fijo con efecto glassmorphism - MEJORADO */}
+        <div className={`sticky top-0 ${config.headerBg} backdrop-blur-md border-b ${config.headerBorder} z-10 shadow-lg`}>
+
+          {/* Badge del tipo de carta */}
+          <div className="px-4 md:px-6 pt-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className={`${config.badgeBg} text-white text-xs font-semibold px-3 py-1 rounded-full inline-flex items-center gap-1`}>
+                {config.badge}
+              </span>
+              <button
+                onClick={onClose}
+                className="text-white hover:text-gray-300 text-2xl transition-colors flex-shrink-0"
+                aria-label="Cerrar"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+
+          {/* Información técnica del aspecto/planeta */}
+          {content.metadata && (
+            <div className="px-4 md:px-6 pb-2">
+              {/* ASPECTO */}
+              {content.metadata.type === 'aspect' && (
+                <div className="space-y-1">
+                  <div className="text-sm text-gray-300 uppercase tracking-wide font-semibold">
+                    {content.metadata.name || content.metadata.aspectType}
+                  </div>
+                  <div className="text-lg md:text-xl text-white font-bold">
+                    {content.metadata.planet1} ↔ {content.metadata.planet2}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-gray-400">
+                    <span>Ángulo: {content.metadata.angle}°</span>
+                    <span>•</span>
+                    <span>Orbe: {content.metadata.orb?.toFixed(2)}° {content.metadata.isExact && '⭐ EXACTO'}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* PLANETA */}
+              {content.metadata.type === 'planet' && (
+                <div className="space-y-1">
+                  <div className="text-lg md:text-xl text-white font-bold">
+                    {content.metadata.name}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-gray-300">
+                    {content.metadata.sign && <span>{content.metadata.degree}° {content.metadata.sign}</span>}
+                    {content.metadata.house && (
+                      <>
+                        <span>•</span>
+                        <span>Casa {content.metadata.house}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* ÁNGULO (ASC/MC) */}
+              {content.metadata.type === 'angle' && (
+                <div className="space-y-1">
+                  <div className="text-lg md:text-xl text-white font-bold">
+                    {content.metadata.name}
+                  </div>
+                  <div className="text-sm text-gray-300">
+                    {content.metadata.degree}° {content.metadata.sign}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Título de la interpretación */}
+          <div className={`px-4 md:px-6 py-3 border-t ${config.headerBorder} bg-black/20`}>
+            <h2 className="text-base md:text-lg font-bold text-white leading-tight">
+              {content.titulo}
+            </h2>
+          </div>
+
         </div>
 
         {/* Contenido seguido (sin tabs) */}
@@ -135,7 +251,7 @@ export const InterpretationDrawer: React.FC<InterpretationDrawerProps> = ({
             </div>
           </section>
 
-          <div className="h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent" />
+          <div className={`h-px bg-gradient-to-r from-transparent ${config.dividerColor} to-transparent`} />
 
           {/* SECCIÓN PODEROSA */}
           <section>
@@ -159,7 +275,7 @@ export const InterpretationDrawer: React.FC<InterpretationDrawerProps> = ({
             </div>
           </section>
 
-          <div className="h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent" />
+          <div className={`h-px bg-gradient-to-r from-transparent ${config.dividerColor} to-transparent`} />
 
           {/* SECCIÓN POÉTICA */}
           <section>
@@ -183,7 +299,7 @@ export const InterpretationDrawer: React.FC<InterpretationDrawerProps> = ({
             </div>
           </section>
 
-          <div className="h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent" />
+          <div className={`h-px bg-gradient-to-r from-transparent ${config.dividerColor} to-transparent`} />
 
           {/* SOMBRAS */}
           {content.sombras && content.sombras.length > 0 && (
@@ -213,7 +329,7 @@ export const InterpretationDrawer: React.FC<InterpretationDrawerProps> = ({
             </section>
           )}
 
-          <div className="h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent" />
+          <div className={`h-px bg-gradient-to-r from-transparent ${config.dividerColor} to-transparent`} />
 
           {/* SÍNTESIS */}
           <section className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-4 md:p-6 shadow-xl">

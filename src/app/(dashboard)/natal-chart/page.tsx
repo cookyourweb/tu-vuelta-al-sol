@@ -752,6 +752,7 @@ export default function NatalChartPage() {
           closeDrawer();
         }}
         content={drawerContent}
+        chartType="natal"  {/* ✅ Especificamos que es Carta Natal */}
       />
     </div>
   );
