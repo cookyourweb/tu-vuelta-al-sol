@@ -379,61 +379,67 @@ Responde ÚNICAMENTE con un JSON válido:
   },
 
   "manifestacion_amor": {
-    "patron_amoroso": "[Párrafo POÉTICO-TRANSFORMATIONAL: 'Tu patrón relacional es único y tiene su propia sabiduría. Con Venus en ${venus?.sign}, Marte en ${mars?.sign}, y Luna en ${moon?.sign}, atraes [tipo de dinámica específica] porque tu alma busca CRECER a través del amor. Tu forma de amar se profundiza con [tipo de experiencia relacional]. No es casual: es tu configuración pidiendo evolución a través de la intimidad...']",
-    "que_atrae": "[POÉTICO Y HONESTO: 'Atraes personas que te desafían e inspiran en [área]. No es casualidad: es tu carta buscando crecimiento a través de las relaciones. Los vínculos que te transforman son los que te llevan a [proceso]...']",
-    "que_necesita": "[POÉTICO Y HONESTO: 'Tu corazón necesita vínculos donde ambos estén comprometidos con crecer. Necesitas alguien que esté PRESENTE en [área] - alguien que camine contigo, no que solo observe desde la barrera...']",
-    "trampa_amorosa": "[POÉTICO Y HONESTO: 'A veces puedes buscar [comportamiento de seguridad] en pareja. Este patrón te mantiene cómodo/a pero no te hace crecer. Tus relaciones evolucionan cuando hay profundidad e intensidad en [área]. Tu crecimiento viene de permitir [tipo de vulnerabilidad]...']",
-    "ritual_luna_nueva_venus": {
-      "preparacion": "[POÉTICO: 'Durante Luna Nueva en ${venus?.sign} o en tu signo de Venus, prepara un espacio sagrado. Lista: compromisos relacionales que quieres cultivar - con consecuencias reales, no solo palabras...']",
-      "activacion_28_dias": "[Práctica: 'Una vez por semana, participa conscientemente en [situación relacional que te desafía]. Registra en tu diario: qué sentiste, qué aprendiste, qué te fortaleció. Ajusta tu enfoque según lo que descubras...']",
-      "entrega_luna_llena": "[Ritual: 'Luna Llena - momento de verdad. Revisa: ¿Qué te comprometiste a cultivar? ¿Qué realmente hiciste? Honestidad sin crueldad. Si no cumpliste, pregúntate por qué, sin juicio, solo curiosidad...']"
-    },
-    "declaracion_amor": "[POÉTICA Y EMPODERADORA: 'Merezco un amor que me inspire a crecer en [área], no solo que me acompañe. Merezco presencia real, no observación pasiva. Abrazo la profundidad relacional porque ahí es donde mi corazón evoluciona.']"
-  },
-
-  "visualizacion_guiada": {
-    "titulo": "Encuentro con tu Carta Natal",
-    "duracion": "10-15 minutos",
-    "mejor_momento": "Luna Llena (momento de claridad)",
-    "preparacion": ["Espacio tranquilo sin distracciones", "Tu carta natal visible", "Cuaderno para reflexiones honestas"],
-    "texto": "[Texto POÉTICO-TRANSFORMATIONAL de 200-250 palabras: 'Cierra los ojos. Respira profundo tres veces. Tu carta natal no es un destino fijo: es un mapa de cómo creces mejor. Visualiza tu Sol en ${sun?.sign}: esta parte de ti se fortalece cuando [situación específica]. Tu luz brilla más intensamente en [área]. Ahora tu Luna en ${moon?.sign}: tu mundo emocional se nutre con [tipo de experiencia emocional]. No lo evites: permítelo. Tu Ascendente ${chartData.ascendant.sign} es tu puerta al mundo - proyectas [característica] y el mundo responde con [feedback]. Esto es información valiosa. Ahora pregúntate con honestidad amorosa: ¿Dónde estoy creciendo realmente? ¿Qué experiencias estoy evitando que podrían ser mis mejores maestras? ¿Dónde necesito más compromiso conmigo mismo/a? Respira. Siente. No juzgues. Solo observa. Tu carta no te pide perfección: te invita a ser consciente. Abre los ojos cuando estés listo/a. Escribe lo que descubriste.']"
-  },
-
-  "datos_para_agenda": {
-    "eventos_lunares_personalizados": [
-      { "evento": "Luna Nueva en ${sun?.sign}", "significado": "[Significado personal]", "ritual": "[Ritual]", "intencion": "[Intención a sembrar]" },
-      { "evento": "Luna Llena en ${moon?.sign}", "significado": "[Significado]", "ritual": "[Ritual]", "intencion": "[Intención]" }
-    ],
-    "practicas_por_fase": {
-      "luna_nueva": ["[Práctica 1]", "[Práctica 2]"],
-      "cuarto_creciente": ["[Práctica 1]", "[Práctica 2]"],
-      "luna_llena": ["[Práctica 1]", "[Práctica 2]"],
-      "cuarto_menguante": ["[Práctica 1]", "[Práctica 2]"]
-    },
-    "dias_poder": [
-      { "cuando": "Luna transita ${sun?.sign}", "que_hacer": "[Actividades de poder]", "que_evitar": "[Qué evitar]" },
-      { "cuando": "Luna transita ${chartData.ascendant.sign}", "que_hacer": "[Actividades]", "que_evitar": "[Evitar]" }
-    ],
-    "advertencias_cosmicas": [
-      { "situacion": "Mercurio Retrógrado", "como_afecta": "[Específico para Mercurio en ${mercury?.sign}]", "precauciones": "[Cuidar]" }
-    ]
-  },
-
-  "declaracion_poder_final": "[Declaración POÉTICA Y EMPODERADORA de 5-6 líneas en primera persona: 'Mi carta natal no me limita: me revela. Con Sol en ${sun?.sign}, Luna en ${moon?.sign}, y Ascendente ${chartData.ascendant.sign}, mi sistema está diseñado para crecer a través de [tipo de experiencias]. Busco conscientemente experiencias que me desafían y fortalecen. Los desafíos en [área] me enseñan y me construyen. Estoy comprometido/a con mi propia evolución. Este es mi mapa de crecimiento. Soy [metáfora] que se fortalece con cada experiencia consciente.']",
-
-  "mantra_personal": "[Mantra POÉTICO Y EMPODERADOR - inspirador y práctico: 'Crezco a través de [experiencia específica del área]. Los desafíos en [contexto] me fortalecen. Abrazo el cambio porque es mi forma de evolucionar.']"
+    "patron_amoroso": "[Párrafo POÉTICO-TRANSFORMATIONAL: 'Tu patrón relacional es único y tiene su propia sabiduría. Con Venus en ${venus?.sign}, Marte en ${mars?.sign}, y Luna en ${moon?.sign}, atraes [tipo de dinámica específica] porque tu estructura psicológica busca experiencias que te lleven a evolucionar. Tu forma de vincularte tiene su propia lógica interna. No es casual: es coherente con tu configuración natal...']",
+    "que_atrae": "[DESCRIPCIÓN PSICOLÓGICA: 'Atraes personas que activan [patrón específico de tu carta]. Esta atracción no es accidental: responde a tu necesidad de procesar [tema natal]. Los vínculos que generan más resonancia son aquellos que tocan [área de la carta]...']",
+    "que_necesita": "[DESCRIPCIÓN PSICOLÓGICA: 'Tu estructura relacional necesita vínculos donde haya [cualidad específica]. Esta necesidad viene de [posición natal]. No es capricho: es coherencia con tu configuración emocional base...']",
+    "patron_repetitivo": "[DESCRIPCIÓN PSICOLÓGICA (si aplica): 'Si detectas un patrón repetitivo en tus relaciones, probablemente esté vinculado a [posición natal]. Este patrón se manifiesta como [comportamiento observable]. No es un defecto: es información sobre qué parte de tu carta está pidiendo ser vista e integrada...']"
+  }
 }
 
+═══════════════════════════════════════════════
+🔒 CONTRATO DE INTERPRETACIÓN (NO NEGOCIABLE)
+═══════════════════════════════════════════════
+
+Esta carta natal tiene UNA SOLA FUNCIÓN: Describir QUIÉN ES ${userProfile.name}.
+
+❌ PROHIBIDO EN ESTE PROMPT:
+- Dar consejos prácticos o acciones concretas
+- Mencionar "este año", "este mes", fechas específicas o timing
+- Proponer rituales, prácticas o ejercicios
+- Usar lenguaje de urgencia ("es momento de...", "deberías...", "tienes que...")
+- Mencionar tránsitos, eventos futuros o predicciones
+- Incluir fases lunares, días de poder o timing astrológico
+- Dar declaraciones, mantras o afirmaciones
+
+✅ PERMITIDO EN ESTE PROMPT:
+- Describir estructura psicológica base
+- Explicar patrones de comportamiento natal
+- Mostrar luz y sombra de cada posición
+- Describir necesidades emocionales y relacionales
+- Explicar formación temprana de patrones
+- Mostrar polaridades y tensiones internas
+- Describir dones naturales y áreas de desafío
+
+🎯 REGLAS TÉCNICAS ANTI-ALUCINACIÓN:
+- Las Casas son SOLO 1-12 (NUNCA "Casa 21.139")
+- Los grados son SOLO 0-29° (NUNCA "grado 47.8")
+- Las metáforas van FUERA de campos técnicos (posicion, grado, casa)
+- Si un planeta no está disponible, usa "No disponible" - NUNCA inventes datos
+
+═══════════════════════════════════════════════
 IMPORTANT INSTRUCTIONS:
+═══════════════════════════════════════════════
+
 1. All fields must contain REAL and PERSONALIZED content for ${userProfile.name} - NO placeholders
-2. Use a direct, honest, transformative and practical tone that emphasizes personal growth through challenges
-3. Use empowering second-person language: "Your development comes from...", "Your growth requires...", "Your evolution involves..."
-4. Practices should ALWAYS be linked to LUNAR PHASES (New Moon, Waxing Moon, Full Moon, Waning Moon) - NEVER weekdays
-5. Use SPECIFIC DATA from the positions (signs, houses, degrees) in each interpretation
-6. Valid and complete JSON without [...] or internal comments
-7. Each planetary interpretation should have an archetypal title focused on transformation
-8. Integrate concepts naturally that emphasize: personal commitment, resilience, adaptability, calculated risk-taking, learning from feedback, balanced strategies, enduring value
-9. Use practical, action-oriented language - be HONEST AND DIRECT without being aggressive`;
+2. Use a DESCRIPTIVE tone focused on psychological structure, NOT action-oriented advice
+3. Use empowering language: "Tu estructura...", "Tu patrón...", "Tu configuración..."
+4. Use SPECIFIC DATA from the positions (signs, houses, degrees) in each interpretation
+5. Valid and complete JSON without [...] or internal comments
+6. Each planetary interpretation should describe the psychological pattern, not what to do about it
+7. Integrate concepts naturally that describe: core identity, emotional patterns, psychological structure, relational tendencies, natural gifts, areas of challenge
+8. Be HONEST AND CLEAR without being negative - reframe challenges as information, not problems
+
+═══════════════════════════════════════════════
+🌅 CIERRE OBLIGATORIO (para el usuario)
+═══════════════════════════════════════════════
+
+Después de generar el JSON completo, el sistema mostrará al usuario:
+
+"Esta es tu estructura base. No cambia con el tiempo.
+A partir de aquí, el clima de cada año activará distintas partes de esta identidad."
+
+═══════════════════════════════════════════════`;
+
 }
 
 export default generateCompleteNatalChartPrompt;
