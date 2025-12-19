@@ -57,6 +57,47 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 }) => {
 
   // =============================================================================
+  // ✅ HELPER: ENRIQUECER DRAWER CON METADATOS
+  // =============================================================================
+
+  const openDrawerWithMetadata = (drawerContent: any, metadata: any) => {
+    if (!onOpenDrawer) return;
+
+    // Enriquecer el drawer content con metadatos técnicos
+    const enrichedContent = {
+      ...drawerContent,
+      metadata
+    };
+
+    console.log('📊 Opening drawer with metadata:', metadata);
+    onOpenDrawer(enrichedContent);
+  };
+
+  // ✅ HELPER: Obtener nombre legible del aspecto
+  const getAspectName = (aspectType: string): string => {
+    const names: Record<string, string> = {
+      'conjunction': 'Conjunción',
+      'opposition': 'Oposición',
+      'trine': 'Trígono',
+      'square': 'Cuadratura',
+      'sextile': 'Sextil'
+    };
+    return names[aspectType] || aspectType;
+  };
+
+  // ✅ HELPER: Calcular ángulo del aspecto
+  const getAspectAngle = (aspectType: string): number => {
+    const angles: Record<string, number> = {
+      'conjunction': 0,
+      'opposition': 180,
+      'trine': 120,
+      'square': 90,
+      'sextile': 60
+    };
+    return angles[aspectType] || 0;
+  };
+
+  // =============================================================================
   // ✅ ESTADO PARA INTERPRETACIONES AI
   // =============================================================================
   
@@ -239,7 +280,13 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
           {/* ✅ BUTTON TO OPEN DRAWER */}
           {onOpenDrawer && aiInterpretation.drawer && (
             <button
-              onClick={() => onOpenDrawer(aiInterpretation.drawer)}
+              onClick={() => openDrawerWithMetadata(aiInterpretation.drawer, {
+                type: 'planet',
+                name: planet.name,
+                sign: planet.sign,
+                house: planet.house,
+                degree: planet.degree
+              })}
               className="w-full bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
             >
               📖 Ver interpretación completa
@@ -330,7 +377,12 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
           {onOpenDrawer && aiInterpretation.drawer && (
             <button
-              onClick={() => onOpenDrawer(aiInterpretation.drawer)}
+              onClick={() => openDrawerWithMetadata(aiInterpretation.drawer, {
+                type: 'angle',
+                name: 'Ascendente',
+                sign: ascendant.sign,
+                degree: ascendant.degree
+              })}
               className="w-full bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
             >
               📖 Ver interpretación completa
@@ -342,7 +394,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
     // Fallback
     return (
-      <div 
+      <div
         className={`${tooltipBaseClasses} bg-gradient-to-r from-green-500/95 to-emerald-500/95`}
         style={getTooltipStyle(tooltipPosition.x + 25, tooltipPosition.y - 50)}
       >
@@ -358,7 +410,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
             </div>
           </div>
         </div>
-        
+
         <div className="text-gray-200 text-xs">
           Tu máscara social y cómo te presentas al mundo.
         </div>
@@ -403,7 +455,12 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
           {onOpenDrawer && aiInterpretation.drawer && (
             <button
-              onClick={() => onOpenDrawer(aiInterpretation.drawer)}
+              onClick={() => openDrawerWithMetadata(aiInterpretation.drawer, {
+                type: 'angle',
+                name: 'Medio Cielo',
+                sign: midheaven.sign,
+                degree: midheaven.degree
+              })}
               className="w-full bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
             >
               📖 Ver interpretación completa
@@ -415,7 +472,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
     // Fallback
     return (
-      <div 
+      <div
         className={`${tooltipBaseClasses} bg-gradient-to-r from-purple-500/95 to-violet-500/95`}
         style={getTooltipStyle(tooltipPosition.x + 25, tooltipPosition.y - 50)}
       >
@@ -431,7 +488,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
             </div>
           </div>
         </div>
-        
+
         <div className="text-gray-200 text-xs">
           Tu vocación y propósito profesional.
         </div>
@@ -489,7 +546,16 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
 
           {onOpenDrawer && aiInterpretation.drawer && (
             <button
-              onClick={() => onOpenDrawer(aiInterpretation.drawer)}
+              onClick={() => openDrawerWithMetadata(aiInterpretation.drawer, {
+                type: 'aspect',
+                name: getAspectName(currentAspect.type),
+                planet1: currentAspect.planet1,
+                planet2: currentAspect.planet2,
+                aspectType: currentAspect.type,
+                angle: getAspectAngle(currentAspect.type),
+                orb: currentAspect.orb,
+                isExact: currentAspect.orb < 1
+              })}
               className="w-full bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
             >
               📖 Ver interpretación completa
