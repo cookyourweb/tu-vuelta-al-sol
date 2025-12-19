@@ -1055,9 +1055,9 @@ const AgendaPersonalizada = () => {
     // ✅ Calcular casa: usar la del evento si existe, o calcular basándose en el signo
     if (event.house && event.house >= 1 && event.house <= 12) {
       house = event.house;
-    } else if (event.sign && userProfile?.astrological?.ascendant) {
+    } else if (event.sign && userProfile?.astrological?.signs?.ascendant) {
       // Calcular casa aproximada basándose en el signo del evento y el ascendente
-      house = calculateHouseFromSign(event.sign, userProfile.astrological.ascendant);
+      house = calculateHouseFromSign(event.sign, userProfile.astrological.signs.ascendant);
     } else {
       // Default: usar casa 1
       house = 1;
