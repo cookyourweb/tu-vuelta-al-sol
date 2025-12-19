@@ -105,6 +105,25 @@ export const InterpretationDrawer: React.FC<InterpretationDrawerProps> = ({
 
   const config = chartConfig[chartType];
 
+  // ✅ Helper para describir el significado de cada casa
+  const getHouseDescription = (house: number): string => {
+    const descriptions: Record<number, string> = {
+      1: 'Identidad y autopercepción',
+      2: 'Recursos y valores personales',
+      3: 'Comunicación y entorno cercano',
+      4: 'Hogar y raíces emocionales',
+      5: 'Creatividad y expresión personal',
+      6: 'Trabajo y salud cotidiana',
+      7: 'Relaciones y asociaciones',
+      8: 'Transformación y recursos compartidos',
+      9: 'Filosofía y expansión',
+      10: 'Carrera y reconocimiento público',
+      11: 'Comunidad y visión futura',
+      12: 'Espiritualidad y lo inconsciente'
+    };
+    return descriptions[house] || 'Área de vida';
+  };
+
   // =========================================================================
   // ⌨️ CERRAR CON TECLA ESC
   // =========================================================================
@@ -187,30 +206,28 @@ export const InterpretationDrawer: React.FC<InterpretationDrawerProps> = ({
 
               {/* PLANETA */}
               {content.metadata.type === 'planet' && (
-                <div className="space-y-1">
+                <div className="space-y-2">
                   <div className="text-lg md:text-xl text-white font-bold">
-                    {content.metadata.name}
+                    {content.metadata.name} en {content.metadata.sign} {content.metadata.degree?.toFixed(2)}°
+                    {content.metadata.house && ` en Casa ${content.metadata.house}`}
                   </div>
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-gray-300">
-                    {content.metadata.sign && <span>{content.metadata.degree}° {content.metadata.sign}</span>}
-                    {content.metadata.house && (
-                      <>
-                        <span>•</span>
-                        <span>Casa {content.metadata.house}</span>
-                      </>
-                    )}
-                  </div>
+                  {content.metadata.house && (
+                    <div className="text-sm text-gray-400 italic">
+                      Casa {content.metadata.house}: {getHouseDescription(content.metadata.house)}
+                    </div>
+                  )}
                 </div>
               )}
 
               {/* ÁNGULO (ASC/MC) */}
               {content.metadata.type === 'angle' && (
-                <div className="space-y-1">
+                <div className="space-y-2">
                   <div className="text-lg md:text-xl text-white font-bold">
-                    {content.metadata.name}
+                    {content.metadata.name} en {content.metadata.sign} {content.metadata.degree?.toFixed(2)}°
                   </div>
-                  <div className="text-sm text-gray-300">
-                    {content.metadata.degree}° {content.metadata.sign}
+                  <div className="text-sm text-gray-400 italic">
+                    {content.metadata.name === 'Ascendente' && 'Tu manera de presentarte al mundo'}
+                    {content.metadata.name === 'Medio Cielo' && 'Tu vocación y propósito público'}
                   </div>
                 </div>
               )}
