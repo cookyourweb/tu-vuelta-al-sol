@@ -1095,7 +1095,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                 <p className="text-indigo-50 text-lg leading-relaxed mb-4">
                   {extractTextFromTooltipDrawer(data.analisis_tecnico.asc_sr_en_casa_natal.interpretacion)}
                 </p>
-                {data.analisis_tecnico.asc_sr_en_casa_natal.palabras_clave && (
+                {data.analisis_tecnico.asc_sr_en_casa_natal.palabras_clave && Array.isArray(data.analisis_tecnico.asc_sr_en_casa_natal.palabras_clave) && (
                   <div className="flex flex-wrap gap-2 mt-4">
                     {data.analisis_tecnico.asc_sr_en_casa_natal.palabras_clave.map((palabra: string, i: number) => (
                       <span key={i} className="bg-indigo-600/40 text-indigo-100 px-3 py-1 rounded-full text-sm font-semibold">
@@ -1152,7 +1152,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         )}
 
         {/* ✅ SOLAR RETURN: CALENDARIO LUNAR ANUAL */}
-        {data.calendario_lunar && type === 'solar-return' && (
+        {data.calendario_lunar && Array.isArray(data.calendario_lunar) && type === 'solar-return' && (
           <div className="bg-gradient-to-br from-slate-900/60 to-slate-800/60 rounded-2xl p-8 border border-slate-400/30">
             <h3 className="text-3xl font-bold text-white text-center mb-8">
               🌙 Calendario Lunar Anual 2025-2026
@@ -1186,7 +1186,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         )}
 
         {/* ✅ SOLAR RETURN: EVENTOS CLAVE DEL AÑO */}
-        {data.eventos_clave && type === 'solar-return' && (
+        {data.eventos_clave && Array.isArray(data.eventos_clave) && type === 'solar-return' && (
           <div className="bg-gradient-to-br from-rose-900/40 to-red-900/40 rounded-2xl p-8 border border-rose-400/30">
             <h3 className="text-3xl font-bold text-white text-center mb-8">
               📅 Eventos Clave del Año
@@ -1276,7 +1276,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               Plan de Acción Inmediato
             </h4>
             
-            {data.plan_accion.hoy_mismo && (
+            {data.plan_accion.hoy_mismo && Array.isArray(data.plan_accion.hoy_mismo) && (
               <div className="mb-6">
                 <h5 className="text-orange-200 font-bold text-lg mb-3">🔥 HOY MISMO:</h5>
                 <ul className="space-y-3">
@@ -1290,7 +1290,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               </div>
             )}
 
-            {data.plan_accion.esta_semana && (
+            {data.plan_accion.esta_semana && Array.isArray(data.plan_accion.esta_semana) && (
               <div className="mb-6">
                 <h5 className="text-orange-200 font-bold text-lg mb-3">⚡ ESTA SEMANA:</h5>
                 <ul className="space-y-3">
@@ -1304,7 +1304,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               </div>
             )}
 
-            {data.plan_accion.este_mes && (
+            {data.plan_accion.este_mes && Array.isArray(data.plan_accion.este_mes) && (
               <div>
                 <h5 className="text-orange-200 font-bold text-lg mb-3">🚀 ESTE MES:</h5>
                 <ul className="space-y-3">
@@ -1334,7 +1334,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           </div>
         )}
 
-        {data.advertencias && (
+        {data.advertencias && Array.isArray(data.advertencias) && (
           <div className="bg-gradient-to-br from-red-900/40 to-rose-900/40 rounded-2xl p-8 border border-red-400/30">
             <h4 className="text-red-100 font-bold text-xl mb-4">⚠️ Advertencias Brutalmente Honestas</h4>
             <ul className="space-y-3">
@@ -1348,7 +1348,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           </div>
         )}
 
-        {data.insights_transformacionales && (
+        {data.insights_transformacionales && Array.isArray(data.insights_transformacionales) && (
           <div className="bg-green-900/30 rounded-xl p-6">
             <h4 className="text-green-200 font-semibold mb-3 flex items-center gap-2">
               <Sparkles className="w-5 h-5" />
@@ -1365,7 +1365,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           </div>
         )}
 
-        {data.rituales_recomendados && (
+        {data.rituales_recomendados && Array.isArray(data.rituales_recomendados) && (
           <div className="bg-violet-900/30 rounded-xl p-6">
             <h4 className="text-violet-200 font-semibold mb-3">
               🕯️ Rituales Recomendados
