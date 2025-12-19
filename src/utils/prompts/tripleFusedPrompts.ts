@@ -5,49 +5,48 @@
 // Este ejemplo muestra el estilo y profundidad esperada para todas las interpretaciones
 
 const REFERENCE_EXAMPLE = `
-**EJEMPLO DE LENGUAJE TRIPLE FUSIONADO:**
+**EJEMPLO DE ESTRUCTURA NATAL CORRECTA:**
 
-🌟 **Sol en Acuario Casa 1: El Visionario Auténtico**
+☉ **Sol en Acuario — Casa 1**
+21.13° Acuario
 
-📚 **QUÉ SIGNIFICA (Educativo):**
+**Función psicológica:**
 
-Tu Sol representa tu ESENCIA VITAL - el núcleo de quién eres cuando estás siendo completamente auténtico. Es tu propósito de vida, tu identidad fundamental, lo que viniste a SER en esta encarnación.
+El Sol representa tu identidad consciente, tu sentido de individualidad, tu forma de afirmarte y de sentirte válida en el mundo. Es el núcleo de quién eres cuando actúas desde tu autenticidad.
 
-Acuario es el signo del VISIONARIO INNOVADOR. Rige la originalidad y el pensamiento revolucionario, la libertad individual y colectiva, la conexión con el futuro y las posibilidades, la autenticidad radical y la ruptura de moldes, la mente científica combinada con intuición, y los grupos, comunidades y causas sociales.
+**Cómo funciona en ti:**
 
-Casa 1 es tu IDENTIDAD EXTERNA - cómo te presentas al mundo, tu personalidad visible, tu forma de iniciar las cosas. Es tu "primera impresión" y tu forma natural de SER sin esfuerzo.
+Con el Sol en Acuario en Casa 1 (identidad, personalidad, forma de presentarte), tu identidad se construye desde la diferencia. Necesitas sentirte auténtica, libre y mentalmente independiente para reconocerte a ti misma.
 
-Tu Sol en Acuario en Casa 1 significa que tu identidad COMPLETA está construida desde la autenticidad radical. No es que "tengas" rasgos acuarianos - es que TU ESENCIA ES acuariana.
+No te defines por lo convencional ni por lo esperado, sino por tu forma única de pensar y estar en el mundo. Tu manera de presentarte naturalmente tiende hacia lo original, lo poco predecible.
 
-🔥 **CÓMO USARLO COMO SUPERPODER (Poderoso):**
+**Patrón automático:**
 
-Probablemente has vivido momentos donde sentiste que tu "rareza" era un problema. Quizás intentaste "encajar" y te sentiste asfixiado. Quizás te rechazaron por ser "demasiado diferente".
+Tiendes a presentarte como alguien autosuficiente, original y poco predecible. De manera inconsciente puedes marcar distancia emocional para proteger tu libertad personal.
 
-AQUÍ ESTÁ LA VERDAD CÓSMICA: Esa sensación de "no pertenecer" NO es tu debilidad. Es tu antena cósmica.
+En situaciones nuevas, tu primer impulso es evaluar si el espacio permite o limita tu autenticidad. Si detectas restricciones, automáticamente te separas mentalmente.
 
-Tu sistema nervioso está literalmente sintonizado con frecuencias del FUTURO que otros aún no pueden percibir. Cuando te sientes "fuera de lugar" en situaciones convencionales, no es que algo esté mal contigo - es que estás captando la LIMITACIÓN de ese espacio.
+**Origen del patrón:**
 
-🌙 **LA METÁFORA (Poético):**
+Desde etapas tempranas aprendiste que ser distinta, no encajar del todo o pensar diferente era una forma de mantener tu integridad y tu espacio propio.
 
-Imagina que naciste con GAFAS DE VER FUTUROS. Mientras la mayoría de las personas caminan mirando al suelo, calculando el siguiente paso seguro en el camino conocido, tú levantas la vista automáticamente y ves CONSTELACIONES DE POSIBILIDADES flotando en el aire que aún no se han manifestado en el plano físico.
+Probablemente recibiste mensajes contradictorios: admiración por tu originalidad, pero también presión para "ser más normal". Esto consolidó tu identidad como alguien que necesita diferenciarse para existir.
 
-No viniste a ser vela. Viniste a ser TORMENTA ELÉCTRICA.
+**Luz integrada:**
 
-⚠️ **SOMBRAS A TRABAJAR:**
+Capacidad para liderar desde la autenticidad, inspirar cambios, abrir nuevas perspectivas y sostener tu individualidad sin aislarte.
 
-1. **Rebeldía sin Causa**: Ser diferente SOLO por ser diferente, sin propósito real.
-   - ❌ Trampa: Rechazar todo lo establecido por principio, sin discernimiento
-   - ✅ Regalo: Ser auténtico porque es tu naturaleza, y elegir conscientemente qué apoyar
+Cuando está integrado, este patrón te permite ser innovadora sin ser reactiva, auténtica sin ser distante, y libre sin rechazar toda estructura.
 
-2. **Desapego Emocional Excesivo**: Usar tu mente acuariana como ESCUDO contra la vulnerabilidad emocional.
-   - ❌ Trampa: Usar tu 'rareza' como excusa para no conectar profundamente
-   - ✅ Regalo: Ser único Y vulnerable - la verdadera revolución
+**Sombra:**
 
-✨ **SÍNTESIS:**
+Sensación de no pertenecer, desapego emocional, resistencia a depender de otros incluso cuando el vínculo lo requiere.
 
-"Tu rareza es tu revolución. No la escondas, actívala."
+En su expresión bloqueada, puedes usar tu diferencia como escudo para evitar vulnerabilidad, o rechazar automáticamente cualquier cosa convencional sin discernimiento real.
 
-YO SOY el Visionario Auténtico, y mi autenticidad acuariana es mi propósito. No vine a este mundo a encajar en identidades limitantes. Vine a expandir los límites de lo que significa ser humano. Mi diferencia no es mi problema - es mi MISIÓN.
+**Necesidad psicológica:**
+
+"Necesito sentir que soy libre para ser quien soy."
 `;
 
 // =============================================================================
@@ -59,27 +58,21 @@ export interface TripleFusedInterpretation {
   tooltip: {
     titulo: string;
     descripcionBreve: string;
-    significado: string;      // 2-3 líneas con lenguaje triple
+    significado: string;      // 2-3 líneas
     efecto: string;           // 1 línea
     tipo: string;             // 1 línea
   };
-  
-  // Drawer (contenido completo)
+
+  // Drawer (contenido completo para NATAL)
   drawer: {
-    titulo: string;
-    educativo: string;        // Varios párrafos educativos
-    poderoso: string;         // Varios párrafos empoderadores
-    poetico: string;          // Varios párrafos poéticos/metafóricos
-    sombras: {
-      nombre: string;
-      descripcion: string;
-      trampa: string;
-      regalo: string;
-    }[];
-    sintesis: {
-      frase: string;
-      declaracion: string;
-    };
+    titulo: string;                    // Título técnico claro
+    funcion_psicologica: string;       // Qué representa el planeta
+    como_funciona: string;             // Signo + Casa + manifestación
+    patron_automatico: string;         // Conductas observables
+    origen_patron: string;             // Aprendizaje temprano
+    luz_integrada: string;             // Cuando está equilibrado
+    sombra: string;                    // Cuando está bloqueado
+    necesidad_psicologica: string;     // Frase en primera persona
   };
 }
 
@@ -134,88 +127,104 @@ Debes responder SOLO con JSON válido en este formato:
   },
   
   "drawer": {
-    "titulo": "String: Título expandido y memorable (más poético que el del tooltip)",
-    
-    "educativo": "String largo (múltiples párrafos separados por \\n\\n):
-    - Explica qué representa ${planetName} (su arquetipos, función psicológica)
-    - Explica qué representa ${sign} (elemento, modalidad, características)
-    - Explica qué representa Casa ${house} (área de vida, significado)
-    - Conecta los tres: planeta + signo + casa
-    - Explica cómo se manifiesta en la vida práctica
-    - Da ejemplos concretos de comportamientos/situaciones
-    - Usa lenguaje claro, sin jerga excesiva
-    - Longitud: 6-8 párrafos completos",
-    
-    "poderoso": "String largo (múltiples párrafos separados por \\n\\n):
-    - Conecta con la experiencia vivida de ${userName}
-    - Reencuadra 'problemas' como superpoderes
-    - Explica por qué esta configuración es FORTALEZA
-    - Nombra el don específico que emerge
-    - Da herramientas prácticas para activarlo
-    - Habla directo al corazón, no solo a la mente
-    - Usa MAYÚSCULAS para énfasis en palabras clave
-    - Incluye validación emocional ('Probablemente has sentido...')
-    - Longitud: 6-8 párrafos completos",
-    
-    "poetico": "String largo (múltiples párrafos separados por \\n\\n):
-    - Usa metáforas poderosas y memorables
-    - Crea imágenes visuales evocativas
-    - Conecta con arquetipos universales
-    - Usa lenguaje simbólico y poético
-    - Evoca la ESENCIA de esta posición
-    - Debe ser inspirador y memorable
-    - Longitud: 4-6 párrafos completos",
-    
-    "sombras": [
-      {
-        "nombre": "String: Nombre memorable de la sombra (Ej: 'Rebeldía sin Causa')",
-        "descripcion": "String: Explicación de cómo se manifiesta esta sombra en la vida real",
-        "trampa": "String que empieza con ❌: La trampa de esta sombra",
-        "regalo": "String que empieza con ✅: El regalo cuando se integra"
-      },
-      // Incluir 2-3 sombras principales
-    ],
-    
-    "sintesis": {
-      "frase": "String: Una frase memorable y poderosa que resume todo (como un mantra)",
-      "declaracion": "String: Declaración en primera persona que ${userName} puede usar como afirmación personal. Debe empezar con 'Yo soy...' o 'Yo, ${userName},...'"
-    }
+    "titulo": "String: Título técnico claro (Ej: '${planetName} en ${sign} — Casa ${house}')",
+
+    "funcion_psicologica": "String de 2-3 párrafos:
+    - Explica qué representa ${planetName} en la psique humana
+    - Lenguaje pedagógico, claro y simple
+    - SIN metáforas largas, SIN lenguaje místico
+    - Ejemplo: 'El Sol representa tu identidad consciente, tu sentido de individualidad...'",
+
+    "como_funciona": "String de 3-4 párrafos:
+    - Describe cómo se expresa este planeta por el signo y por la casa
+    - SIEMPRE explica la casa entre paréntesis la primera vez
+    - Ejemplo: 'Casa 1 (identidad, personalidad, forma de presentarte)'
+    - Conecta planeta + signo + casa de forma clara
+    - SIN consejos, SIN acciones, SIN 'deberías'",
+
+    "patron_automatico": "String de 2-3 párrafos:
+    - Qué hace ${userName} sin darse cuenta cuando esta energía se activa
+    - Conductas observables, NO ideas abstractas
+    - Ejemplo: 'Tiendes a presentarte como alguien autosuficiente...'",
+
+    "origen_patron": "String de 2-3 párrafos:
+    - Cómo se formó este patrón (aprendizaje temprano, clima emocional)
+    - Mensajes recibidos en la infancia/adolescencia
+    - Lenguaje comprensivo, NO culpabilizador",
+
+    "luz_integrada": "String de 2-3 párrafos:
+    - Cómo se manifiesta esta energía cuando está consciente y equilibrada
+    - Talentos y capacidades que emergen
+    - SIN rituales, SIN acciones concretas, SIN 'debes hacer'",
+
+    "sombra": "String de 2-3 párrafos:
+    - Cómo se manifiesta cuando se reprime, exagera o se vive desde el miedo
+    - Riesgos y bloqueos recurrentes
+    - Tono constructivo, NO alarmista",
+
+    "necesidad_psicologica": "String: UNA frase clara en primera persona.
+    - Formato: 'Necesito [verbo] para [propósito]'
+    - Ejemplo: 'Necesito sentir que soy libre para ser quien soy.'
+    - SIN mantras largos, SIN declaraciones épicas"
   }
 }
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚡ INSTRUCCIONES CRÍTICAS
+⚡ INSTRUCCIONES CRÍTICAS - CARTA NATAL
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+🚫 PROHIBIDO EN CARTA NATAL (SIN EXCEPCIÓN):
+   ❌ Rituales, prácticas, ejercicios
+   ❌ Mantras o declaraciones motivacionales
+   ❌ Metáforas largas o lenguaje épico/místico
+   ❌ "Cómo usarlo como superpoder"
+   ❌ Consejos prácticos o acciones ("deberías...", "haz...")
+   ❌ Mencionar "este año", fechas específicas, timing
+   ❌ Predicciones o eventos futuros
+   ❌ Lenguaje de coaching espiritual
+   ❌ Usar palabras como "misión del alma", "destino cósmico"
+
+✅ PERMITIDO EN CARTA NATAL:
+   ✓ Explicación psicológica clara de patrones
+   ✓ Descripción de cómo funciona la energía
+   ✓ Origen del patrón (aprendizaje temprano)
+   ✓ Luz y sombra del patrón
+   ✓ Necesidad psicológica base
+   ✓ Lenguaje pedagógico y accesible
+   ✓ Ejemplos de comportamientos observables
+
 1. **LENGUAJE:**
-   - Claro y accesible para personas sin conocimientos astrológicos
-   - Profundo pero NO críptico
-   - Usa ejemplos de vida real
-   - Evita jerga técnica excesiva (pero explica cuando uses términos)
-   - Balancea lo académico con lo emocional y lo poético
+   - Pedagógico, claro y directo
+   - SIN metáforas extensas o lenguaje poético
+   - Estructura psicológica, NO narrativa espiritual
+   - Ejemplos concretos de vida real
+   - Tono informativo y comprensivo
 
 2. **TONO:**
-   - Empoderador, no predictivo
-   - Honesto sobre sombras, pero constructivo
-   - Inspirador sin ser superficial
-   - Personal y directo
+   - Diagnóstico psicológico (QUIÉN ERES)
+   - Explicativo, NO prescriptivo
+   - Honesto sobre sombras, constructivo
+   - Neutro temporalmente (sin fechas ni timing)
 
 3. **LONGITUD:**
-   - Educativo: 6-8 párrafos densos
-    - Poderoso: 6-8 párrafos transformadores
-    - Poético: 4-6 párrafos evocativos
-    - Cada párrafo debe tener 4-6 líneas mínimo
+   - Cada campo: 2-4 párrafos concisos
+   - Párrafos de 3-5 líneas máximo
+   - Total drawer: lectura de 3-5 minutos
 
 4. **PERSONALIZACIÓN:**
-   - Usa el nombre ${userName} SOLO 2-3 veces en momentos clave
+   - Usa el nombre ${userName} SOLO 1-2 veces
    - Resto del tiempo usa "tú", "tu", "tienes"
-   - Conecta con SU vida específica (edad, contexto)
+   - Segunda persona directa
 
 5. **FORMATO:**
    - Responde SOLO con JSON válido
    - NO incluyas markdown
    - NO incluyas comentarios fuera del JSON
    - Usa \\n\\n para separar párrafos dentro de strings
+
+6. **REGLA DE ORO:**
+   Si un texto natal puede emocionar → está mal colocado (va en Solar Return/Agenda)
+   Si un texto natal no explica un patrón → está incompleto
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

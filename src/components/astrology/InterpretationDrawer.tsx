@@ -11,6 +11,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import { Brain, Zap, Activity, Sunrise, Lightbulb, AlertTriangle, Heart } from 'lucide-react';
 
 // =============================================================================
 // 📚 INTERFACES
@@ -18,32 +19,41 @@ import React, { useEffect } from 'react';
 
 interface DrawerContent {
   titulo: string;
-  educativo: string;
-  poderoso: string;
-  poetico: string;
-  sombras: {
+  // ✅ NUEVA ESTRUCTURA NATAL
+  funcion_psicologica?: string;
+  como_funciona?: string;
+  patron_automatico?: string;
+  origen_patron?: string;
+  luz_integrada?: string;
+  sombra?: string;
+  necesidad_psicologica?: string;
+  // ❌ ESTRUCTURA ANTIGUA (mantener por compatibilidad temporal)
+  educativo?: string;
+  poderoso?: string;
+  poetico?: string;
+  sombras?: {
     nombre: string;
     descripcion: string;
     trampa: string;
     regalo: string;
   }[];
-  sintesis: {
+  sintesis?: {
     frase: string;
     declaracion: string;
   };
-  // ✅ NEW: Metadatos técnicos del aspecto/planeta
+  // ✅ Metadatos técnicos del aspecto/planeta
   metadata?: {
     type: 'planet' | 'aspect' | 'angle';
-    name?: string;           // Para planetas: "Sol", para aspectos: "Oposición"
-    planet1?: string;        // Para aspectos
-    planet2?: string;        // Para aspectos
-    sign?: string;           // Para planetas/ángulos
-    house?: number;          // Para planetas
-    degree?: number;         // Grado exacto
-    aspectType?: string;     // Para aspectos: "opposition", "trine", etc.
-    angle?: number;          // Para aspectos: ángulo en grados
-    orb?: number;            // Orbe del aspecto
-    isExact?: boolean;       // Si el aspecto es exacto (orbe < 1°)
+    name?: string;
+    planet1?: string;
+    planet2?: string;
+    sign?: string;
+    house?: number;
+    degree?: number;
+    aspectType?: string;
+    angle?: number;
+    orb?: number;
+    isExact?: boolean;
   };
 }
 
@@ -246,121 +256,253 @@ export const InterpretationDrawer: React.FC<InterpretationDrawerProps> = ({
         {/* Contenido seguido (sin tabs) */}
         <div className="p-4 md:p-6 space-y-8">
 
-          {/* SECCIÓN EDUCATIVA */}
-          <section>
-            <h3 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2 text-white">
-              <span className="text-2xl">📚</span> QUÉ SIGNIFICA
-            </h3>
-            <div className="prose prose-invert max-w-none">
-              {content.educativo.split('\n\n').map((parrafo: string, i: number) => {
-                const cleanParrafo = parrafo.trim();
-                if (!cleanParrafo) return null;
+          {/* ✅ NUEVA ESTRUCTURA NATAL */}
+          {content.funcion_psicologica && (
+            <>
+              {/* FUNCIÓN PSICOLÓGICA */}
+              <section>
+                <h3 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2 text-white">
+                  <Brain className="w-5 h-5" /> Función psicológica
+                </h3>
+                <div className="prose prose-invert max-w-none">
+                  {content.funcion_psicologica.split('\n\n').map((parrafo: string, i: number) => {
+                    const cleanParrafo = parrafo.trim();
+                    if (!cleanParrafo) return null;
+                    return (
+                      <p key={i} className="mb-4 text-sm md:text-base text-gray-200 leading-relaxed">
+                        {cleanParrafo}
+                      </p>
+                    );
+                  })}
+                </div>
+              </section>
 
-                return (
-                  <p
-                    key={i}
-                    className="mb-4 text-sm md:text-base text-gray-200 leading-relaxed"
-                  >
-                    {cleanParrafo}
-                  </p>
-                );
-              })}
-            </div>
-          </section>
+              <div className={`h-px bg-gradient-to-r from-transparent ${config.dividerColor} to-transparent`} />
 
-          <div className={`h-px bg-gradient-to-r from-transparent ${config.dividerColor} to-transparent`} />
+              {/* CÓMO FUNCIONA */}
+              <section>
+                <h3 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2 text-white">
+                  <Zap className="w-5 h-5" /> Cómo funciona en ti
+                </h3>
+                <div className="prose prose-invert max-w-none">
+                  {content.como_funciona && content.como_funciona.split('\n\n').map((parrafo: string, i: number) => {
+                    const cleanParrafo = parrafo.trim();
+                    if (!cleanParrafo) return null;
+                    return (
+                      <p key={i} className="mb-4 text-sm md:text-base text-gray-200 leading-relaxed">
+                        {cleanParrafo}
+                      </p>
+                    );
+                  })}
+                </div>
+              </section>
 
-          {/* SECCIÓN PODEROSA */}
-          <section>
-            <h3 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2 text-white">
-              <span className="text-2xl">🔥</span> CÓMO USARLO COMO SUPERPODER
-            </h3>
-            <div className="prose prose-invert max-w-none">
-              {content.poderoso.split('\n\n').map((parrafo: string, i: number) => {
-                const cleanParrafo = parrafo.trim();
-                if (!cleanParrafo) return null;
+              <div className={`h-px bg-gradient-to-r from-transparent ${config.dividerColor} to-transparent`} />
 
-                return (
-                  <p
-                    key={i}
-                    className="mb-4 text-sm md:text-base text-gray-200 leading-relaxed"
-                  >
-                    {cleanParrafo}
-                  </p>
-                );
-              })}
-            </div>
-          </section>
+              {/* PATRÓN AUTOMÁTICO */}
+              <section>
+                <h3 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2 text-white">
+                  <Activity className="w-5 h-5" /> Patrón automático
+                </h3>
+                <div className="prose prose-invert max-w-none">
+                  {content.patron_automatico && content.patron_automatico.split('\n\n').map((parrafo: string, i: number) => {
+                    const cleanParrafo = parrafo.trim();
+                    if (!cleanParrafo) return null;
+                    return (
+                      <p key={i} className="mb-4 text-sm md:text-base text-gray-200 leading-relaxed">
+                        {cleanParrafo}
+                      </p>
+                    );
+                  })}
+                </div>
+              </section>
 
-          <div className={`h-px bg-gradient-to-r from-transparent ${config.dividerColor} to-transparent`} />
+              <div className={`h-px bg-gradient-to-r from-transparent ${config.dividerColor} to-transparent`} />
 
-          {/* SECCIÓN POÉTICA */}
-          <section>
-            <h3 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2 text-white">
-              <span className="text-2xl">🌙</span> LA METÁFORA
-            </h3>
-            <div className="prose prose-invert max-w-none">
-              {content.poetico.split('\n\n').map((parrafo: string, i: number) => {
-                const cleanParrafo = parrafo.trim();
-                if (!cleanParrafo) return null;
+              {/* ORIGEN DEL PATRÓN */}
+              <section>
+                <h3 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2 text-white">
+                  <Sunrise className="w-5 h-5" /> Origen del patrón
+                </h3>
+                <div className="prose prose-invert max-w-none">
+                  {content.origen_patron && content.origen_patron.split('\n\n').map((parrafo: string, i: number) => {
+                    const cleanParrafo = parrafo.trim();
+                    if (!cleanParrafo) return null;
+                    return (
+                      <p key={i} className="mb-4 text-sm md:text-base text-gray-200 leading-relaxed">
+                        {cleanParrafo}
+                      </p>
+                    );
+                  })}
+                </div>
+              </section>
 
-                return (
-                  <p
-                    key={i}
-                    className="mb-4 text-sm md:text-base text-gray-200 leading-relaxed italic"
-                  >
-                    {cleanParrafo}
-                  </p>
-                );
-              })}
-            </div>
-          </section>
+              <div className={`h-px bg-gradient-to-r from-transparent ${config.dividerColor} to-transparent`} />
 
-          <div className={`h-px bg-gradient-to-r from-transparent ${config.dividerColor} to-transparent`} />
+              {/* LUZ INTEGRADA */}
+              <section>
+                <h3 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2 text-white">
+                  <Lightbulb className="w-5 h-5" /> Luz integrada
+                </h3>
+                <div className="prose prose-invert max-w-none">
+                  {content.luz_integrada && content.luz_integrada.split('\n\n').map((parrafo: string, i: number) => {
+                    const cleanParrafo = parrafo.trim();
+                    if (!cleanParrafo) return null;
+                    return (
+                      <p key={i} className="mb-4 text-sm md:text-base text-gray-200 leading-relaxed">
+                        {cleanParrafo}
+                      </p>
+                    );
+                  })}
+                </div>
+              </section>
 
-          {/* SOMBRAS */}
-          {content.sombras && content.sombras.length > 0 && (
-            <section>
-              <h3 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2 text-white">
-                <span className="text-2xl">⚠️</span> SOMBRAS A TRABAJAR
-              </h3>
-              <div className="space-y-4">
-                {content.sombras.map((sombra, i) => (
-                  <div
-                    key={i}
-                    className="bg-purple-800/30 rounded-lg p-4 border border-purple-700/50 hover:border-purple-600 hover:bg-purple-800/40 transition-all duration-200"
-                  >
-                    <h4 className="font-bold text-base md:text-lg mb-2 text-purple-200">
-                      {sombra.nombre}
-                    </h4>
-                    <p className="text-gray-300 mb-3 text-sm md:text-base">
-                      {sombra.descripcion}
-                    </p>
-                    <div className="space-y-1 text-sm">
-                      <p className="text-red-300">{sombra.trampa}</p>
-                      <p className="text-green-300">{sombra.regalo}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
+              <div className={`h-px bg-gradient-to-r from-transparent ${config.dividerColor} to-transparent`} />
+
+              {/* SOMBRA */}
+              <section>
+                <h3 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2 text-white">
+                  <AlertTriangle className="w-5 h-5" /> Sombra
+                </h3>
+                <div className="prose prose-invert max-w-none">
+                  {content.sombra && content.sombra.split('\n\n').map((parrafo: string, i: number) => {
+                    const cleanParrafo = parrafo.trim();
+                    if (!cleanParrafo) return null;
+                    return (
+                      <p key={i} className="mb-4 text-sm md:text-base text-gray-200 leading-relaxed">
+                        {cleanParrafo}
+                      </p>
+                    );
+                  })}
+                </div>
+              </section>
+
+              <div className={`h-px bg-gradient-to-r from-transparent ${config.dividerColor} to-transparent`} />
+
+              {/* NECESIDAD PSICOLÓGICA */}
+              <section className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg p-4 md:p-6 shadow-xl">
+                <h3 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2 text-white">
+                  <Heart className="w-5 h-5" /> Necesidad psicológica
+                </h3>
+                <blockquote className="text-xl md:text-2xl font-bold italic text-white leading-tight">
+                  {content.necesidad_psicologica}
+                </blockquote>
+              </section>
+            </>
           )}
 
-          <div className={`h-px bg-gradient-to-r from-transparent ${config.dividerColor} to-transparent`} />
+          {/* ❌ ESTRUCTURA ANTIGUA (mantener por compatibilidad) */}
+          {!content.funcion_psicologica && content.educativo && (
+            <>
+              <section>
+                <h3 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2 text-white">
+                  <Brain className="w-5 h-5" /> QUÉ SIGNIFICA
+                </h3>
+                <div className="prose prose-invert max-w-none">
+                  {content.educativo.split('\n\n').map((parrafo: string, i: number) => {
+                    const cleanParrafo = parrafo.trim();
+                    if (!cleanParrafo) return null;
+                    return (
+                      <p key={i} className="mb-4 text-sm md:text-base text-gray-200 leading-relaxed">
+                        {cleanParrafo}
+                      </p>
+                    );
+                  })}
+                </div>
+              </section>
 
-          {/* SÍNTESIS */}
-          <section className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-4 md:p-6 shadow-xl">
-            <h3 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2 text-white">
-              <span className="text-2xl">✨</span> SÍNTESIS
-            </h3>
-            <blockquote className="text-xl md:text-2xl font-bold mb-4 italic text-white leading-tight">
-              "{content.sintesis.frase}"
-            </blockquote>
-            <div className="h-px bg-white/30 my-4" />
-            <p className="text-base md:text-lg leading-relaxed text-white/95 font-medium whitespace-pre-wrap">
-              {content.sintesis.declaracion}
-            </p>
-          </section>
+              <div className={`h-px bg-gradient-to-r from-transparent ${config.dividerColor} to-transparent`} />
+
+              {content.poderoso && (
+                <>
+                  <section>
+                    <h3 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2 text-white">
+                      <Zap className="w-5 h-5" /> CÓMO USARLO COMO SUPERPODER
+                    </h3>
+                    <div className="prose prose-invert max-w-none">
+                      {content.poderoso.split('\n\n').map((parrafo: string, i: number) => {
+                        const cleanParrafo = parrafo.trim();
+                        if (!cleanParrafo) return null;
+                        return (
+                          <p key={i} className="mb-4 text-sm md:text-base text-gray-200 leading-relaxed">
+                            {cleanParrafo}
+                          </p>
+                        );
+                      })}
+                    </div>
+                  </section>
+                  <div className={`h-px bg-gradient-to-r from-transparent ${config.dividerColor} to-transparent`} />
+                </>
+              )}
+
+              {content.poetico && (
+                <>
+                  <section>
+                    <h3 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2 text-white">
+                      <Lightbulb className="w-5 h-5" /> LA METÁFORA
+                    </h3>
+                    <div className="prose prose-invert max-w-none">
+                      {content.poetico.split('\n\n').map((parrafo: string, i: number) => {
+                        const cleanParrafo = parrafo.trim();
+                        if (!cleanParrafo) return null;
+                        return (
+                          <p key={i} className="mb-4 text-sm md:text-base text-gray-200 leading-relaxed italic">
+                            {cleanParrafo}
+                          </p>
+                        );
+                      })}
+                    </div>
+                  </section>
+                  <div className={`h-px bg-gradient-to-r from-transparent ${config.dividerColor} to-transparent`} />
+                </>
+              )}
+
+              {content.sombras && content.sombras.length > 0 && (
+                <>
+                  <section>
+                    <h3 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2 text-white">
+                      <AlertTriangle className="w-5 h-5" /> SOMBRAS A TRABAJAR
+                    </h3>
+                    <div className="space-y-4">
+                      {content.sombras.map((sombra, i) => (
+                        <div
+                          key={i}
+                          className="bg-purple-800/30 rounded-lg p-4 border border-purple-700/50 hover:border-purple-600 hover:bg-purple-800/40 transition-all duration-200"
+                        >
+                          <h4 className="font-bold text-base md:text-lg mb-2 text-purple-200">
+                            {sombra.nombre}
+                          </h4>
+                          <p className="text-gray-300 mb-3 text-sm md:text-base">
+                            {sombra.descripcion}
+                          </p>
+                          <div className="space-y-1 text-sm">
+                            <p className="text-red-300">{sombra.trampa}</p>
+                            <p className="text-green-300">{sombra.regalo}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                  <div className={`h-px bg-gradient-to-r from-transparent ${config.dividerColor} to-transparent`} />
+                </>
+              )}
+
+              {content.sintesis && (
+                <section className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-4 md:p-6 shadow-xl">
+                  <h3 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2 text-white">
+                    <Heart className="w-5 h-5" /> SÍNTESIS
+                  </h3>
+                  <blockquote className="text-xl md:text-2xl font-bold mb-4 italic text-white leading-tight">
+                    "{content.sintesis.frase}"
+                  </blockquote>
+                  <div className="h-px bg-white/30 my-4" />
+                  <p className="text-base md:text-lg leading-relaxed text-white/95 font-medium whitespace-pre-wrap">
+                    {content.sintesis.declaracion}
+                  </p>
+                </section>
+              )}
+            </>
+          )}
 
           {/* Espacio al final para scroll cómodo */}
           <div className="h-16" />
