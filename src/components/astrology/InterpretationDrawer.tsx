@@ -216,28 +216,27 @@ export const InterpretationDrawer: React.FC<InterpretationDrawerProps> = ({
 
               {/* PLANETA */}
               {content.metadata.type === 'planet' && (
-                <div className="space-y-2">
-                  <div className="text-lg md:text-xl text-white font-bold">
-                    {content.metadata.name} en {content.metadata.sign} {content.metadata.degree?.toFixed(2)}°
-                    {content.metadata.house && ` en Casa ${content.metadata.house}`}
-                  </div>
+                <div className="space-y-1">
                   {content.metadata.house && (
-                    <div className="text-sm text-gray-400 italic">
-                      Casa {content.metadata.house}: {getHouseDescription(content.metadata.house)}
+                    <div className="text-sm text-gray-300">
+                      Casa {content.metadata.house} ({getHouseDescription(content.metadata.house)})
                     </div>
                   )}
+                  <div className="text-lg md:text-xl text-white font-bold">
+                    {content.metadata.name} en {content.metadata.sign} {Math.floor(content.metadata.degree || 0)}°
+                  </div>
                 </div>
               )}
 
               {/* ÁNGULO (ASC/MC) */}
               {content.metadata.type === 'angle' && (
-                <div className="space-y-2">
-                  <div className="text-lg md:text-xl text-white font-bold">
-                    {content.metadata.name} en {content.metadata.sign} {content.metadata.degree?.toFixed(2)}°
-                  </div>
-                  <div className="text-sm text-gray-400 italic">
+                <div className="space-y-1">
+                  <div className="text-sm text-gray-300">
                     {content.metadata.name === 'Ascendente' && 'Tu manera de presentarte al mundo'}
                     {content.metadata.name === 'Medio Cielo' && 'Tu vocación y propósito público'}
+                  </div>
+                  <div className="text-lg md:text-xl text-white font-bold">
+                    {content.metadata.name} en {content.metadata.sign} {Math.floor(content.metadata.degree || 0)}°
                   </div>
                 </div>
               )}

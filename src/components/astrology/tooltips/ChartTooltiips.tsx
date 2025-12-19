@@ -56,7 +56,25 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
   onOpenDrawer
 }) => {
 
-  // =============================================================================
+  // ✅ Helper para obtener descripción de casas
+  const getHouseDescription = (house: number): string => {
+    const descriptions: Record<number, string> = {
+      1: 'Identidad y autopercepción',
+      2: 'Recursos y valores personales',
+      3: 'Comunicación y entorno cercano',
+      4: 'Hogar y raíces emocionales',
+      5: 'Creatividad y expresión personal',
+      6: 'Trabajo y salud cotidiana',
+      7: 'Relaciones y asociaciones',
+      8: 'Transformación y recursos compartidos',
+      9: 'Filosofía y expansión',
+      10: 'Carrera y reconocimiento público',
+      11: 'Comunidad y visión futura',
+      12: 'Espiritualidad y lo inconsciente'
+    };
+    return descriptions[house] || 'Área de vida';
+  };
+
   // ✅ HELPER: ENRIQUECER DRAWER CON METADATOS
   // =============================================================================
 
@@ -261,8 +279,9 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
             </span>
             <div>
               <div className="text-white font-bold text-lg">{aiInterpretation.tooltip.titulo}</div>
-              <div className="text-gray-200 text-sm">
-                {planet.degree}° {planet.sign} • Casa {planet.house}
+              <div className="text-gray-200 text-sm space-y-0.5">
+                <div>Casa {planet.house} ({getHouseDescription(planet.house)})</div>
+                <div>{planet.name} en {planet.sign} {Math.floor(planet.degree)}°</div>
               </div>
             </div>
           </div>
@@ -363,7 +382,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
             <div>
               <div className="text-white font-bold text-lg">{aiInterpretation.tooltip.titulo}</div>
               <div className="text-gray-200 text-sm">
-                {ascendant.degree}° {ascendant.sign}
+                Ascendente en {ascendant.sign} {Math.floor(ascendant.degree)}°
               </div>
             </div>
           </div>
@@ -441,7 +460,7 @@ const ChartTooltips: React.FC<ChartTooltipsProps> = ({
             <div>
               <div className="text-white font-bold text-lg">{aiInterpretation.tooltip.titulo}</div>
               <div className="text-gray-200 text-sm">
-                {midheaven.degree}° {midheaven.sign}
+                Medio Cielo en {midheaven.sign} {Math.floor(midheaven.degree)}°
               </div>
             </div>
           </div>
