@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import EventInterpretation from '@/models/EventInterpretation';
 import Interpretation from '@/models/Interpretation';
 import Chart from '@/models/Chart';
-import { connectDB } from '@/lib/mongodb';
+import connectDB from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   try {

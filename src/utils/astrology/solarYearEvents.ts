@@ -584,7 +584,7 @@ export function calculateSeasonalEvents(startDate: Date, endDate: Date): Seasona
           events.push({
             type: 'spring_equinox',
             date: marEquinoxDate,
-            description: '🌸 Equinoccio de Primavera (Sol ingresa en Aries)'
+            description: 'Equinoccio de Primavera (Sol ingresa en Aries)'
           });
         }
 
@@ -594,7 +594,7 @@ export function calculateSeasonalEvents(startDate: Date, endDate: Date): Seasona
           events.push({
             type: 'summer_solstice',
             date: junSolsticeDate,
-            description: '☀️ Solsticio de Verano (Sol ingresa en Cáncer)'
+            description: 'Solsticio de Verano (Sol ingresa en Cancer)'
           });
         }
 
@@ -604,7 +604,7 @@ export function calculateSeasonalEvents(startDate: Date, endDate: Date): Seasona
           events.push({
             type: 'autumn_equinox',
             date: sepEquinoxDate,
-            description: '🍂 Equinoccio de Otoño (Sol ingresa en Libra)'
+            description: 'Equinoccio de Otono (Sol ingresa en Libra)'
           });
         }
 
@@ -614,7 +614,7 @@ export function calculateSeasonalEvents(startDate: Date, endDate: Date): Seasona
           events.push({
             type: 'winter_solstice',
             date: decSolsticeDate,
-            description: '❄️ Solsticio de Invierno (Sol ingresa en Capricornio)'
+            description: 'Solsticio de Invierno (Sol ingresa en Capricornio)'
           });
         }
       } catch (error) {
