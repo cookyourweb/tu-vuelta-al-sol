@@ -11,7 +11,7 @@ import {
   generateCompleteNatalInterpretationChunked,
   type CartaNatalCompleta,
 } from '@/services/completeNatalInterpretationService';
-import type { ChartData, UserProfile } from '@/utils/prompts/completeNatalChartPrompt';
+import type { ChartData, UserProfile } from '@/utils/prompts/natalChartLayer1Prompt';
 
 // =============================================================================
 // GET - Retrieve existing complete interpretation
