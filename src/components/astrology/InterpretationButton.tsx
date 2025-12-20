@@ -832,6 +832,35 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
 
       // Render objects
       if (typeof obj === 'object') {
+        // ✅ Special handling: If object has "titulo", use it as the main heading
+        if (obj.titulo && typeof obj.titulo === 'string') {
+          const otherFields = Object.entries(obj).filter(([key]) => key !== 'titulo');
+
+          return (
+            <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 rounded-xl p-5 border border-purple-500/30">
+              {/* Show titulo as main heading */}
+              <h4 className="text-purple-100 font-bold text-lg mb-4">
+                {obj.titulo}
+              </h4>
+
+              {/* Render other fields without showing their keys */}
+              <div className="space-y-3">
+                {otherFields.map(([key, value]: [string, any]) => {
+                  // Skip internal fields
+                  if (key.startsWith('_')) return null;
+
+                  return (
+                    <div key={key}>
+                      {renderSection(value, depth + 1)}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        }
+
+        // ✅ Default object rendering (when no "titulo" field)
         return (
           <div className="space-y-3">
             {Object.entries(obj).map(([key, value]: [string, any]) => {
