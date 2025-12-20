@@ -114,7 +114,7 @@ export function calculateLunarPhases(startDate: Date, endDate: Date): LunarPhase
             date: newMoonDate,
             sign: zodiacInfo.sign,
             degree: zodiacInfo.degree,
-            description: `🌑 Luna Nueva en ${zodiacInfo.sign} ${zodiacInfo.degree.toFixed(1)}°`
+            description: `Luna Nueva en ${zodiacInfo.sign} ${zodiacInfo.degree.toFixed(1)}°`
           });
         }
 
@@ -134,7 +134,7 @@ export function calculateLunarPhases(startDate: Date, endDate: Date): LunarPhase
               date: fullMoonDate,
               sign: zodiacInfoFull.sign,
               degree: zodiacInfoFull.degree,
-              description: `🌕 Luna Llena en ${zodiacInfoFull.sign} ${zodiacInfoFull.degree.toFixed(1)}°`
+              description: `Luna Llena en ${zodiacInfoFull.sign} ${zodiacInfoFull.degree.toFixed(1)}°`
             });
           }
         }
@@ -250,7 +250,7 @@ export function calculateRetrogrades(startDate: Date, endDate: Date): Retrograde
                 endDate: retrogradeEnd,
                 startSign: retrogradeStartSign,
                 endSign: retrogradeEndSign,
-                description: `☿️ ${planetName} Retrógrado en ${retrogradeStartSign}`
+                description: `${planetName} Retrógrado en ${retrogradeStartSign}`
               });
             }
 
@@ -277,7 +277,7 @@ export function calculateRetrogrades(startDate: Date, endDate: Date): Retrograde
             endDate: retrogradeEnd,
             startSign: retrogradeStartSign,
             endSign: retrogradeEndSign,
-            description: `☿️ ${planetName} Retrógrado en ${retrogradeStartSign}`
+            description: `${planetName} Retrógrado en ${retrogradeStartSign}`
           });
         }
       }
@@ -319,7 +319,7 @@ export function calculateEclipses(startDate: Date, endDate: Date): Eclipse[] {
               sign: zodiacInfo.sign,
               degree: zodiacInfo.degree,
               magnitude: solarEclipse.obscuration || 0.5,
-              description: `☀️🌑 Eclipse Solar en ${zodiacInfo.sign} ${zodiacInfo.degree.toFixed(1)}°`
+              description: `Eclipse Solar en ${zodiacInfo.sign} ${zodiacInfo.degree.toFixed(1)}°`
             });
           }
 
@@ -355,7 +355,7 @@ export function calculateEclipses(startDate: Date, endDate: Date): Eclipse[] {
               sign: zodiacInfo.sign,
               degree: zodiacInfo.degree,
               magnitude: lunarEclipse.obscuration || 0.5,
-              description: `🌑🌕 Eclipse Lunar en ${zodiacInfo.sign} ${zodiacInfo.degree.toFixed(1)}°`
+              description: `Eclipse Lunar en ${zodiacInfo.sign} ${zodiacInfo.degree.toFixed(1)}°`
             });
           }
 
@@ -426,7 +426,7 @@ function calculateSunIngresses(startDate: Date, endDate: Date): PlanetaryIngress
             date: marEquinoxDate,
             fromSign: 'Piscis',
             toSign: 'Aries',
-            description: '♈ Sol ingresa en Aries'
+            description: 'Sol ingresa en Aries'
           });
         }
 
@@ -438,7 +438,7 @@ function calculateSunIngresses(startDate: Date, endDate: Date): PlanetaryIngress
             date: junSolsticeDate,
             fromSign: 'Géminis',
             toSign: 'Cáncer',
-            description: '♋ Sol ingresa en Cáncer'
+            description: 'Sol ingresa en Cáncer'
           });
         }
 
@@ -450,7 +450,7 @@ function calculateSunIngresses(startDate: Date, endDate: Date): PlanetaryIngress
             date: sepEquinoxDate,
             fromSign: 'Virgo',
             toSign: 'Libra',
-            description: '♎ Sol ingresa en Libra'
+            description: 'Sol ingresa en Libra'
           });
         }
 
@@ -462,7 +462,7 @@ function calculateSunIngresses(startDate: Date, endDate: Date): PlanetaryIngress
             date: decSolsticeDate,
             fromSign: 'Sagitario',
             toSign: 'Capricornio',
-            description: '♑ Sol ingresa en Capricornio'
+            description: 'Sol ingresa en Capricornio'
           });
         }
       } catch (error) {
@@ -546,7 +546,7 @@ function getKnownPlanetaryIngresses(startDate: Date, endDate: Date): PlanetaryIn
               date: refinedDate,
               fromSign: lastSign,
               toSign: currentSign,
-              description: `♈ ${planetInfo.name} ingresa en ${currentSign}`
+              description: `${planetInfo.name} ingresa en ${currentSign}`
             });
           }
         }
@@ -654,9 +654,9 @@ export async function calculateSolarYearEvents(birthDate: Date): Promise<SolarYe
 
     console.log('✅ Solar Year Events calculated:');
     console.log(`  🌙 ${lunarPhases.length} lunar phases`);
-    console.log(`  ☿️ ${retrogrades.length} retrogrades`);
+    console.log(`  ${retrogrades.length} retrogrades`);
     console.log(`  🌑 ${eclipses.length} eclipses`);
-    console.log(`  ♈ ${planetaryIngresses.length} planetary ingresses`);
+    console.log(`  ${planetaryIngresses.length} planetary ingresses`);
     console.log(`  🌸 ${seasonalEvents.length} seasonal events`);
 
     return {
