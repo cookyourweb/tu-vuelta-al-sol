@@ -738,6 +738,123 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       // Fallback for any other type
       return String(data || '');
     };
+
+    // ✅ DETECT NEW "LAYER 1" STRUCTURE (Natal Chart Complete)
+    const isLayer1Structure = Boolean(
+      data.planetas_en_casas ||
+      data.planetas_transpersonales ||
+      data.momento_evolutivo_actual ||
+      data.configuracion_elemental ||
+      data.modalidades_astrologicas
+    );
+
+    console.log('🔍 Is Layer 1 Structure?', isLayer1Structure);
+    console.log('🔍 Available keys:', Object.keys(data));
+
+    // ✅ RENDER LAYER 1 STRUCTURE (New Natal Chart Format)
+    if (isLayer1Structure) {
+      return (
+        <div className="space-y-6 text-white">
+          <div className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-xl p-4 border border-purple-400/30 mb-6">
+            <p className="text-purple-100 text-sm">
+              ✨ Interpretación completa generada con nueva estructura "Capa 1" - Identidad Psicológica
+            </p>
+          </div>
+
+          {/* Render each main section as a collapsible card */}
+          {Object.entries(data).map(([sectionKey, sectionData]: [string, any]) => {
+            if (!sectionData || typeof sectionData !== 'object') return null;
+
+            // Section title mapping
+            const sectionTitles: Record<string, string> = {
+              planetas_en_casas: '🪐 Planetas en Casas',
+              planetas_transpersonales: '⚡ Planetas Transpersonales',
+              puntos_sensibles: '🩹 Puntos Sensibles',
+              momento_evolutivo_actual: '🌟 Momento Evolutivo Actual',
+              configuracion_elemental: '🔥 Configuración Elemental',
+              modalidades_astrologicas: '🔄 Modalidades Astrológicas',
+              aspectos_principales: '🔗 Aspectos Principales',
+              planetas_retrogrados_natales: '🔄 Planetas Retrógrados Natales',
+              integracion_carta_natal: '🌈 Integración de la Carta Natal',
+            };
+
+            const sectionTitle = sectionTitles[sectionKey] || sectionKey.replace(/_/g, ' ').toUpperCase();
+
+            return (
+              <div
+                key={sectionKey}
+                className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 rounded-xl p-6 border border-slate-600/30"
+              >
+                <h3 className="text-2xl font-bold text-purple-300 mb-4">{sectionTitle}</h3>
+                <div className="space-y-4">
+                  {/* Recursively render section content */}
+                  {renderSection(sectionData)}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    // Helper function to render any section recursively
+    function renderSection(obj: any, depth: number = 0): React.ReactNode {
+      if (!obj) return null;
+
+      // Render strings directly
+      if (typeof obj === 'string') {
+        return (
+          <p className="text-slate-100 leading-relaxed whitespace-pre-wrap">
+            {obj}
+          </p>
+        );
+      }
+
+      // Render numbers
+      if (typeof obj === 'number') {
+        return <span className="text-slate-200">{obj}</span>;
+      }
+
+      // Render arrays
+      if (Array.isArray(obj)) {
+        if (obj.length === 0) return <p className="text-slate-400 italic">Sin datos</p>;
+
+        return (
+          <div className="space-y-3">
+            {obj.map((item, idx) => (
+              <div key={idx} className={`${depth > 0 ? 'pl-4 border-l-2 border-purple-500/30' : ''}`}>
+                {renderSection(item, depth + 1)}
+              </div>
+            ))}
+          </div>
+        );
+      }
+
+      // Render objects
+      if (typeof obj === 'object') {
+        return (
+          <div className="space-y-3">
+            {Object.entries(obj).map(([key, value]: [string, any]) => {
+              // Skip internal fields
+              if (key.startsWith('_')) return null;
+
+              const label = key.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+
+              return (
+                <div key={key} className="bg-slate-700/20 rounded-lg p-3">
+                  <h4 className="text-purple-200 font-semibold text-sm mb-2">{label}</h4>
+                  {renderSection(value, depth + 1)}
+                </div>
+              );
+            })}
+          </div>
+        );
+      }
+
+      return null;
+    }
+
+    // ✅ ORIGINAL RENDERING (For old structure + Solar Return)
     return (
       <div className="space-y-8">
         {data.esencia_revolucionaria && (
