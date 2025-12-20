@@ -88,9 +88,9 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
 
   const isNatal = type === 'natal';
   const isSolarReturn = type === 'solar-return';
-  // ✅ FIX: Usar interpret-natal-clean para la interpretación revolucionaria completa
-  // interpret-natal-clean usa el prompt disruptivo con advertencias, insights, rituales, etc.
-  const endpoint = isNatal ? '/api/astrology/interpret-natal-clean' :
+  // ✅ ENDPOINT ACTUALIZADO: Usar interpret-natal-complete con nuevo prompt Capa 1 expandido
+  // Incluye 50+ subsecciones: transpersonales, puntos sensibles, modalidades, aspectos, retrógrados
+  const endpoint = isNatal ? '/api/astrology/interpret-natal-complete' :
                 isSolarReturn ? '/api/astrology/interpret-solar-return' :
                 '/api/astrology/interpret-progressed';
 
@@ -291,91 +291,30 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       console.log(`🤖 userId: ${userId}`);
       console.log(`🤖 userProfile:`, userProfile);
 
-      // ✅ CHUNKED GENERATION FOR FASTER RESULTS - ALWAYS for natal charts
-      if (type === 'natal') {
-        console.log('🔄 ===== GENERANDO EN CHUNKS =====');
-
-        const chunks: Record<string, any> = {};
-        const sections = [
-          { key: 'esencia', section: 'esencia_revolucionaria', label: 'Esencia Revolucionaria', progress: 20 },
-          { key: 'proposito', section: 'proposito_vida', label: 'Propósito de Vida', progress: 40 },
-          { key: 'formacion', section: 'formacion_temprana', label: 'Formación Temprana', progress: 60 },
-          { key: 'nodos', section: 'nodos_lunares', label: 'Nodos Lunares', progress: 80 },
-          { key: 'declaracion', section: 'declaracion_poder', label: 'Declaración de Poder', progress: 100 }
-        ];
-
-        for (const { key, section, label, progress } of sections) {
-          setCurrentChunk(`Generando ${label}...`);
-          setGenerationProgress(`Consultando los astros para ${label.toLowerCase()}...`);
-
-          const chunkResponse = await fetch('/api/astrology/interpret-chunk', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              userId,
-              chartData,
-              section,
-              userProfile,
-              type,
-              natalChart
-            })
-          });
-
-          if (!chunkResponse.ok) {
-            throw new Error(`Error generando ${label}`);
-          }
-
-          const chunkData = await chunkResponse.json();
-          chunks[key] = chunkData.data;
-          setChunkProgress(progress);
-
-          console.log(`✅ Chunk ${label} completado`);
-        }
-
-        // Combine chunks
-        const interpretationData = {
-          esencia_revolucionaria: chunks['esencia'],
-          proposito_vida: chunks['proposito'],
-          formacion_temprana: chunks['formacion'],
-          nodos_lunares: chunks['nodos'],
-          declaracion_poder: chunks['declaracion'],
-          planetas: [],
-          plan_accion: [],
-          advertencias: [],
-          insights_transformacionales: [],
-          rituales_recomendados: [],
-          integracion_carta: ''
-        };
-
-        const newInterpretation = {
-          interpretation: interpretationData,
-          cached: false,
-          generatedAt: new Date().toISOString(),
-          method: 'chunked'
-        };
-
-        console.log('✅ ===== INTERPRETACIÓN EN CHUNKS COMPLETADA =====');
-
-        setInterpretation(newInterpretation);
-        setHasRecentInterpretation(true);
-        setGenerationProgress('¡Revolución completada! 🎉');
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setShowModal(true);
-
-        await autoSaveInterpretation(newInterpretation);
-
-      } else {
-        // ✅ SINGLE REQUEST FOR SOLAR-RETURN AND PROGRESSED (natal always uses chunks)
+      // ✅ USAR ENDPOINT UNIFICADO PARA TODOS LOS TIPOS (incluyendo natal)
+      {
         // ✅ Simulate progress messages
         if (forceRegenerate) {
           setTimeout(() => setGenerationProgress('Conectando con los astros...'), 500);
           setTimeout(() => setGenerationProgress('Analizando tu carta natal...'), 2000);
-          setTimeout(() => setGenerationProgress('Calculando posiciones planetarias...'), 4000);
-          setTimeout(() => setGenerationProgress('Generando interpretación disruptiva con IA...'), 6000);
-          setTimeout(() => setGenerationProgress('Casi listo... Creando tu revolución personal...'), 10000);
+          setTimeout(() => setGenerationProgress('Interpretando planetas personales...'), 4000);
+          setTimeout(() => setGenerationProgress('Analizando planetas transpersonales...'), 7000);
+          setTimeout(() => setGenerationProgress('Procesando puntos sensibles (Quirón, Lilith)...'), 10000);
+          setTimeout(() => setGenerationProgress('Calculando elementos y modalidades...'), 13000);
+          setTimeout(() => setGenerationProgress('Generando aspectos principales...'), 16000);
+          setTimeout(() => setGenerationProgress('Integrando tu sinfonía cósmica...'), 20000);
+          setTimeout(() => setGenerationProgress('Casi listo... Creando tu mapa completo...'), 23000);
         }
 
-        const requestBody = isSolarReturn
+        const requestBody = isNatal
+          ? {
+              userId,
+              chartData,
+              userProfile,
+              regenerate: forceRegenerate,
+              useChunked: false // Usar generación completa en una llamada
+            }
+          : isSolarReturn
           ? {
               userId,
               natalChart: natalChart || {},
@@ -408,19 +347,42 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
             progressPercentage += 2; // Incremento más rápido para mejor UX
             setChunkProgress(progressPercentage); // ✅ FIX: Actualizar la barra de progreso
 
-            // Actualizar mensaje según progreso
-            if (progressPercentage < 10) {
-              setGenerationProgress('🌟 Iniciando generación de interpretaciones...');
-            } else if (progressPercentage < 20) {
-              setGenerationProgress('✨ Generando Ascendente y Medio Cielo...');
-            } else if (progressPercentage < 50) {
-              setGenerationProgress('🪐 Interpretando planetas principales...');
-            } else if (progressPercentage < 70) {
-              setGenerationProgress('🌙 Generando nodos lunares y asteroides...');
-            } else if (progressPercentage < 90) {
-              setGenerationProgress('🔥 Analizando elementos y modalidades...');
+            // Actualizar mensaje según progreso (adaptado para carta natal completa)
+            if (isNatal) {
+              if (progressPercentage < 10) {
+                setGenerationProgress('🌟 Iniciando análisis de tu carta natal...');
+              } else if (progressPercentage < 20) {
+                setGenerationProgress('☀️ Interpretando planetas personales (Sol-Saturno)...');
+              } else if (progressPercentage < 35) {
+                setGenerationProgress('⚡ Analizando planetas transpersonales (Urano-Plutón)...');
+              } else if (progressPercentage < 50) {
+                setGenerationProgress('🩹 Procesando puntos sensibles (Quirón, Lilith)...');
+              } else if (progressPercentage < 65) {
+                setGenerationProgress('🔥 Calculando configuración elemental...');
+              } else if (progressPercentage < 75) {
+                setGenerationProgress('🚀 Analizando modalidades astrológicas...');
+              } else if (progressPercentage < 85) {
+                setGenerationProgress('🔗 Interpretando aspectos principales...');
+              } else if (progressPercentage < 95) {
+                setGenerationProgress('🌟 Integrando tu sinfonía cósmica...');
+              } else {
+                setGenerationProgress('✨ Finalizando tu mapa completo de personalidad...');
+              }
             } else {
-              setGenerationProgress('🔗 Procesando aspectos planetarios...');
+              // Mensajes para Solar Return y Progresada
+              if (progressPercentage < 10) {
+                setGenerationProgress('🌟 Iniciando generación de interpretaciones...');
+              } else if (progressPercentage < 20) {
+                setGenerationProgress('✨ Generando Ascendente y Medio Cielo...');
+              } else if (progressPercentage < 50) {
+                setGenerationProgress('🪐 Interpretando planetas principales...');
+              } else if (progressPercentage < 70) {
+                setGenerationProgress('🌙 Generando nodos lunares y asteroides...');
+              } else if (progressPercentage < 90) {
+                setGenerationProgress('🔥 Analizando elementos y modalidades...');
+              } else {
+                setGenerationProgress('🔗 Procesando aspectos planetarios...');
+              }
             }
           }
         }, 1000); // ✅ FIX: Cada 1 segundo para actualización más fluida
