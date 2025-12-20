@@ -125,6 +125,7 @@ export function generateNatalChartLayer1Prompt(
   const southNode = findPlanet(chartData.planets, 'Nodo Sur', 'South Node');
 
   const elements = calculateElementDistribution(chartData.planets);
+  const modalities = calculateModalityDistribution(chartData.planets);
 
   return `Eres un astrólogo evolutivo EXPERTO con estilo DISRUPTIVO, TRANSFORMACIONAL y PSICOLÓGICAMENTE PROFUNDO.
 
@@ -402,21 +403,21 @@ Medio Cielo: ${chartData.midheaven.sign} ${chartData.midheaven.degree}°
 
   "modalidades_astrologicas": {
     "cardinal": {
-      "porcentaje": "[Calcular % de planetas en signos Cardinales: Aries, Cáncer, Libra, Capricornio]",
-      "planetas": "[Lista de planetas en signos Cardinales]",
-      "explicacion": "[2-3 párrafos: 'Tienes [X]% de energía CARDINAL. ${porcentaje > 40 ? '¡MUCHA ENERGÍA CARDINAL! Eres INICIADOR nato. No esperas que las cosas pasen: las HACES pasar. Tu don es arrancar proyectos, abrir caminos, liderar cambios. El peligro: empezar mil cosas sin terminarlas. No eres impaciente: eres CATALIZADOR.' : porcentaje < 20 ? 'POCA energía Cardinal significa que prefieres sostener o adaptar antes que iniciar. No eres pasivo: simplemente tu fuerza está en otras fases. Tu desafío: activar tu capacidad de COMENZAR cuando la vida lo requiere.' : 'Tu energía Cardinal está BALANCEADA. Puedes iniciar cuando es necesario sin vivir en arranque constante. Sabes cuándo empezar y cuándo dejar que otros lideren.'}']"
+      "porcentaje": ${modalities.cardinal.percentage},
+      "planetas": "${modalities.cardinal.planets.join(', ') || 'Ninguno'}",
+      "explicacion": "[2-3 párrafos: 'Tienes ${modalities.cardinal.percentage}% de energía CARDINAL (${modalities.cardinal.count} planetas). ${modalities.cardinal.percentage > 40 ? '¡MUCHA ENERGÍA CARDINAL! Eres INICIADOR nato. No esperas que las cosas pasen: las HACES pasar. Tu don es arrancar proyectos, abrir caminos, liderar cambios. El peligro: empezar mil cosas sin terminarlas. No eres impaciente: eres CATALIZADOR.' : modalities.cardinal.percentage < 20 ? 'POCA energía Cardinal significa que prefieres sostener o adaptar antes que iniciar. No eres pasivo: simplemente tu fuerza está en otras fases. Tu desafío: activar tu capacidad de COMENZAR cuando la vida lo requiere.' : 'Tu energía Cardinal está BALANCEADA. Puedes iniciar cuando es necesario sin vivir en arranque constante. Sabes cuándo empezar y cuándo dejar que otros lideren.'}']"
     },
     "fijo": {
-      "porcentaje": "[Calcular % de planetas en signos Fijos: Tauro, Leo, Escorpio, Acuario]",
-      "planetas": "[Lista de planetas en signos Fijos]",
-      "explicacion": "[2-3 párrafos: 'Tienes [X]% de energía FIJA. ${porcentaje > 40 ? '¡MUCHA ENERGÍA FIJA! Eres ROCA INQUEBRANTABLE. Cuando te comprometes, NADA te mueve. Tu don es sostener, construir, resistir tormentas. El peligro: rigidez extrema. No eres terco: eres LEAL a tu visión.' : porcentaje < 20 ? 'POCA energía Fija significa que fluyes y cambias fácilmente. No eres inestable: simplemente tu fuerza está en la flexibilidad. Tu desafío: desarrollar PERSEVERANCIA cuando algo realmente importa.' : 'Tu energía Fija está BALANCEADA. Puedes sostener compromisos sin volverte rígido. Sabes cuándo mantenerte firme y cuándo soltar.'}']"
+      "porcentaje": ${modalities.fixed.percentage},
+      "planetas": "${modalities.fixed.planets.join(', ') || 'Ninguno'}",
+      "explicacion": "[2-3 párrafos: 'Tienes ${modalities.fixed.percentage}% de energía FIJA (${modalities.fixed.count} planetas). ${modalities.fixed.percentage > 40 ? '¡MUCHA ENERGÍA FIJA! Eres ROCA INQUEBRANTABLE. Cuando te comprometes, NADA te mueve. Tu don es sostener, construir, resistir tormentas. El peligro: rigidez extrema. No eres terco: eres LEAL a tu visión.' : modalities.fixed.percentage < 20 ? 'POCA energía Fija significa que fluyes y cambias fácilmente. No eres inestable: simplemente tu fuerza está en la flexibilidad. Tu desafío: desarrollar PERSEVERANCIA cuando algo realmente importa.' : 'Tu energía Fija está BALANCEADA. Puedes sostener compromisos sin volverte rígido. Sabes cuándo mantenerte firme y cuándo soltar.'}']"
     },
     "mutable": {
-      "porcentaje": "[Calcular % de planetas en signos Mutables: Géminis, Virgo, Sagitario, Piscis]",
-      "planetas": "[Lista de planetas en signos Mutables]",
-      "explicacion": "[2-3 párrafos: 'Tienes [X]% de energía MUTABLE. ${porcentaje > 40 ? '¡MUCHA ENERGÍA MUTABLE! Eres CAMALEÓN MAESTRO. Te adaptas a todo. Tu don es flexibilidad, versatilidad, capacidad de fluir con los cambios. El peligro: dispersión total. No eres inestable: eres ADAPTABLE.' : porcentaje < 20 ? 'POCA energía Mutable significa que los cambios te cuestan. No eres inflexible: simplemente tu fuerza está en la estabilidad o iniciativa. Tu desafío: desarrollar ADAPTABILIDAD cuando la vida cambia rápido.' : 'Tu energía Mutable está BALANCEADA. Puedes adaptarte sin perder tu centro. Sabes cuándo fluir y cuándo mantener estructura.'}']"
+      "porcentaje": ${modalities.mutable.percentage},
+      "planetas": "${modalities.mutable.planets.join(', ') || 'Ninguno'}",
+      "explicacion": "[2-3 párrafos: 'Tienes ${modalities.mutable.percentage}% de energía MUTABLE (${modalities.mutable.count} planetas). ${modalities.mutable.percentage > 40 ? '¡MUCHA ENERGÍA MUTABLE! Eres CAMALEÓN MAESTRO. Te adaptas a todo. Tu don es flexibilidad, versatilidad, capacidad de fluir con los cambios. El peligro: dispersión total. No eres inestable: eres ADAPTABLE.' : modalities.mutable.percentage < 20 ? 'POCA energía Mutable significa que los cambios te cuestan. No eres inflexible: simplemente tu fuerza está en la estabilidad o iniciativa. Tu desafío: desarrollar ADAPTABILIDAD cuando la vida cambia rápido.' : 'Tu energía Mutable está BALANCEADA. Puedes adaptarte sin perder tu centro. Sabes cuándo fluir y cuándo mantener estructura.'}']"
     },
-    "analisis_balance_modalidades": "[3-4 párrafos INTEGRATIVOS: 'Tu balance de modalidades revela tu RITMO ÚNICO de acción. ${porcentaje_cardinal > 40 ? 'Con dominancia Cardinal,' : porcentaje_fijo > 40 ? 'Con dominancia Fija,' : porcentaje_mutable > 40 ? 'Con dominancia Mutable,' : 'Con tu balance modal,'} tu forma de moverte en la vida es [descripción]. Tu modalidad más baja es [modalidad], lo que significa que [fase de acción] requiere esfuerzo consciente. Esto NO es debilidad: es invitación a desarrollar [capacidad]. Los elementos te dicen QUÉ eres (fuego/tierra/aire/agua). Las modalidades te dicen CÓMO actúas (inicias/sostienes/adaptas). Juntos forman tu ESTRATEGIA COMPLETA. Cuando integras todas tus modalidades, te conviertes en [arquetipo completo de acción]...']"
+    "analisis_balance_modalidades": "[3-4 párrafos INTEGRATIVOS: 'Tu balance de modalidades revela tu RITMO ÚNICO de acción. ${modalities.cardinal.percentage > 40 ? 'Con dominancia Cardinal,' : modalities.fixed.percentage > 40 ? 'Con dominancia Fija,' : modalities.mutable.percentage > 40 ? 'Con dominancia Mutable,' : 'Con tu balance modal,'} tu forma de moverte en la vida es [descripción]. Tu modalidad más baja es [modalidad], lo que significa que [fase de acción] requiere esfuerzo consciente. Esto NO es debilidad: es invitación a desarrollar [capacidad]. Los elementos te dicen QUÉ eres (fuego/tierra/aire/agua). Las modalidades te dicen CÓMO actúas (inicias/sostienes/adaptas). Juntos forman tu ESTRATEGIA COMPLETA. Cuando integras todas tus modalidades, te conviertes en [arquetipo completo de acción]...']"
   },
 
   "aspectos_principales": {
