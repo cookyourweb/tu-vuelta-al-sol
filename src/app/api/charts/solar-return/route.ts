@@ -141,35 +141,45 @@ async function callProkeralaSolarReturn(birthData: any, returnYear: number) {
       year: returnYear
     });
 
-    // 3. Llamar API natal-chart en la fecha del Solar Return
-    // ✅ CAMBIO CRÍTICO: Usar endpoint correcto para Solar Return
-    // El endpoint correcto es /v2/astrology/solar-return pero parece que no existe
-    // Usamos natal-chart con la fecha del Solar Return como hicimos originalmente
-    const url = new URL('https://api.prokerala.com/v2/astrology/natal-chart');
-    url.searchParams.append('profile[datetime]', solarReturnDatetime);
-    url.searchParams.append('profile[coordinates]', coordinates);
-    url.searchParams.append('birth_time_unknown', 'false');
-    url.searchParams.append('house_system', 'placidus');
-    url.searchParams.append('la', 'es');
+    // 3. Llamar API Solar Return correcta
+    // ✅ CORRECCIÓN: Usar endpoint específico de Solar Return según documentación de Prokerala
+    // Endpoint: GET /v2/astrology/solar-return
+    // Requiere: profile (con datetime de nacimiento original), solar_return_year, current_coordinates
 
-    // ✅ Forzar formato JSON explícitamente
-    url.searchParams.append('format', 'json');
+    // Preparar datos de perfil natal (fecha de nacimiento ORIGINAL)
+    const birthDateStr = new Date(birthData.birthDate).toISOString().split('T')[0];
+    const birthOffset = calculateTimezoneOffset(birthDateStr, birthData.timezone || 'Europe/Madrid');
+    const birthDatetime = `${birthDateStr}T${formattedBirthTime}${birthOffset}`;
+
+    const url = new URL('https://api.prokerala.com/v2/astrology/solar-return');
+    url.searchParams.append('profile[datetime]', birthDatetime); // ✅ Fecha de nacimiento ORIGINAL
+    url.searchParams.append('profile[coordinates]', `${birthData.latitude},${birthData.longitude}`); // ✅ Coordenadas natales
+    url.searchParams.append('solar_return_year', returnYear.toString()); // ✅ Año del Solar Return
+    url.searchParams.append('current_coordinates', coordinates); // ✅ Ubicación actual
+    url.searchParams.append('house_system', 'placidus');
+    url.searchParams.append('orb', 'default');
+    url.searchParams.append('birth_time_rectification', 'flat-chart');
+    url.searchParams.append('aspect_filter', 'major');
+    url.searchParams.append('la', 'es');
+    url.searchParams.append('ayanamsa', '0');
 
     console.log('🔗 URL completa:', url.toString());
     console.log('📋 Parámetros URL:', {
-      profile_datetime: solarReturnDatetime,
-      profile_coordinates: coordinates,
-      birth_time_unknown: 'false',
-      format: 'json',
+      profile_datetime: birthDatetime, // ✅ Fecha natal original
+      profile_coordinates: `${birthData.latitude},${birthData.longitude}`, // ✅ Coordenadas natales
+      solar_return_year: returnYear,
+      current_coordinates: coordinates, // ✅ Ubicación actual
       house_system: 'placidus',
-      la: 'es'
+      orb: 'default',
+      aspect_filter: 'major',
+      la: 'es',
+      ayanamsa: '0'
     });
 
     const response = await fetch(url.toString(), {
       headers: {
         'Authorization': `Bearer ${access_token}`,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        'Accept': 'application/json'
       }
     });
 

@@ -85,6 +85,12 @@ const ChartDisplay = ({
   // ✅ Track mouse down state for aspect lines to prevent tooltip hiding on click
   const [aspectMouseDown, setAspectMouseDown] = useState(false);
 
+  // ✅ ZOOM AND PAN FUNCTIONALITY
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
   // ✅ FUNCIONES UTILITARIAS
   const handleMouseMove = (event: React.MouseEvent) => {
     setTooltipPosition({ 
@@ -99,6 +105,63 @@ const ChartDisplay = ({
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setActiveSection(sectionId);
     }
+  };
+
+  // ✅ ZOOM FUNCTIONS
+  const handleZoomIn = () => {
+    setZoom(prev => Math.min(prev * 1.2, 3));
+  };
+
+  const handleZoomOut = () => {
+    setZoom(prev => Math.max(prev / 1.2, 0.5));
+  };
+
+  const handleResetZoom = () => {
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  };
+
+  // ✅ MAGNIFYING GLASS TOGGLE FUNCTION
+  const handleMagnifyingGlassClick = () => {
+    if (zoom > 1) {
+      // If zoomed in, reset to normal view
+      handleResetZoom();
+    } else {
+      // If at normal zoom, zoom in to 2x
+      setZoom(2);
+      setPan({ x: 0, y: 0 });
+    }
+  };
+
+  // ✅ PAN FUNCTIONS
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button === 0) { // Left click only
+      setIsDragging(true);
+      setDragStart({
+        x: e.clientX - pan.x,
+        y: e.clientY - pan.y
+      });
+    }
+  };
+
+  const handleMouseMovePan = (e: React.MouseEvent) => {
+    if (isDragging) {
+      setPan({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  // ✅ WHEEL ZOOM
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+    setZoom(prev => Math.max(0.5, Math.min(3, prev * zoomFactor)));
   };
 
   // ✅ INTERSECTION OBSERVER PARA NAVEGACIÓN
@@ -139,6 +202,7 @@ const ChartDisplay = ({
     };
 
     const signBase = signPositions[sign] || 0;
+  // ✅ WHEEL ZOOM
     return signBase + degree;
   };
 
@@ -1450,17 +1514,91 @@ const ChartDisplay = ({
           )}
         </div>
 
+        {/* 🎨 CONTROLES DE ZOOM */}
+        <div className="flex justify-center items-center gap-4 mb-6">
+          <div className="bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-xl p-3 flex items-center gap-3">
+            {/* 🔍 MAGNIFYING GLASS ICON - TOGGLE ZOOM */}
+            <button
+              onClick={handleMagnifyingGlassClick}
+              className={`flex items-center gap-2 mr-2 hover:bg-blue-500/20 rounded-lg px-2 py-1 transition-all duration-200 ${zoom > 1 ? 'bg-blue-500/30' : ''}`}
+              title={zoom > 1 ? "Hacer clic para restablecer vista" : "Hacer clic para ampliar"}
+            >
+              <svg className={`w-5 h-5 transition-colors duration-200 ${zoom > 1 ? 'text-blue-300' : 'text-blue-400 hover:text-blue-300'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.35-4.35"/>
+              </svg>
+              <span className="text-white font-semibold text-sm">Zoom</span>
+            </button>
+
+            <button
+              onClick={handleZoomOut}
+              className="w-10 h-10 bg-slate-700/50 hover:bg-slate-600/50 border border-slate-500/30 rounded-lg flex items-center justify-center text-white hover:text-blue-300 transition-all duration-200"
+              title="Alejar"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+            </button>
+
+            <div className="text-white font-semibold text-sm min-w-[60px] text-center">
+              {Math.round(zoom * 100)}%
+            </div>
+
+            <button
+              onClick={handleZoomIn}
+              className="w-10 h-10 bg-slate-700/50 hover:bg-slate-600/50 border border-slate-500/30 rounded-lg flex items-center justify-center text-white hover:text-blue-300 transition-all duration-200"
+              title="Acercar"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+            </button>
+
+            <div className="w-px h-8 bg-slate-500/30"></div>
+
+            <button
+              onClick={handleResetZoom}
+              className="w-10 h-10 bg-slate-700/50 hover:bg-slate-600/50 border border-slate-500/30 rounded-lg flex items-center justify-center text-white hover:text-green-300 transition-all duration-200"
+              title="Restablecer vista"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                <path d="M21 3v5h-5"/>
+                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                <path d="M8 16H3v5"/>
+              </svg>
+            </button>
+
+            <div className="text-xs text-slate-400 ml-2">
+              Usa la rueda del mouse para zoom • Arrastra para mover
+            </div>
+          </div>
+        </div>
+
         {/* 🎨 CARTA NATAL PRINCIPAL */}
-        <div className="bg-gradient-to-br from-black/50 to-purple-900/30 backdrop-blur-sm border border-white/20 rounded-3xl p-8 relative overflow-hidden">
-          <div className="absolute top-4 right-4 w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></div>
-          <div className="absolute bottom-4 left-4 w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
-          
-          <div className="flex justify-center">
+        <div className="bg-gradient-to-br from-black/50 to-purple-900/30 backdrop-blur-sm border border-white/20 rounded-3xl p-4 md:p-8 relative overflow-hidden">
+          <div className="absolute top-2 right-2 md:top-4 md:right-4 w-2 h-2 md:w-3 md:h-3 bg-yellow-400 rounded-full animate-pulse"></div>
+          <div className="absolute bottom-2 left-2 md:bottom-4 md:left-4 w-1.5 h-1.5 md:w-2 md:h-2 bg-purple-400 rounded-full animate-bounce"></div>
+
+          <div
+            className="flex justify-center cursor-move"
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMovePan}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onWheel={handleWheel}
+            style={{
+              transform: `scale(${zoom}) translate(${pan.x}px, ${pan.y}px)`,
+              transformOrigin: 'center',
+              transition: isDragging ? 'none' : 'transform 0.3s ease-out'
+            }}
+          >
             <svg
-              width="600"
-              height="600"
+              width="100%"
+              height="100%"
               viewBox="0 0 500 500"
-              className="border border-white/20 rounded-full bg-gradient-to-br from-indigo-950/50 via-purple-900/30 to-black/50 backdrop-blur-sm"
+              className="max-w-[300px] md:max-w-[400px] lg:max-w-[500px] xl:max-w-[600px] w-full h-auto border border-white/20 rounded-full bg-gradient-to-br from-indigo-950/50 via-purple-900/30 to-black/50 backdrop-blur-sm"
             >
               <circle cx="250" cy="250" r="130" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
               <circle cx="250" cy="250" r="170" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2" />

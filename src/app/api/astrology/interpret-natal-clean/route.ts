@@ -78,6 +78,22 @@ async function generateDisruptiveInterpretation(
 
   } catch (error) {
     console.error('Error en OpenAI:', error);
+
+    // Handle specific OpenAI errors
+    if (error instanceof Error) {
+      if (error.message.includes('429') || error.message.includes('quota') || error.message.includes('exceeded')) {
+        throw new Error('Se ha excedido el límite de uso de la API de OpenAI. Por favor, contacta al administrador para actualizar el plan de facturación.');
+      }
+
+      if (error.message.includes('401') || error.message.includes('unauthorized')) {
+        throw new Error('Error de autenticación con OpenAI. La clave API puede ser inválida.');
+      }
+
+      if (error.message.includes('rate limit')) {
+        throw new Error('Límite de velocidad excedido. Por favor, espera unos minutos antes de intentar nuevamente.');
+      }
+    }
+
     throw error;
   }
 }

@@ -7,7 +7,10 @@ import { es } from 'date-fns/locale';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { UserProfile, AstrologicalEvent, EventType } from '@/types/astrology/unified-types';
+
 import EventsLoadingModal from '@/components/astrology/EventsLoadingModal';
+import EventInterpretationButton from '@/components/agenda/EventInterpretationButton';
+import AgendaBookGenerator from '@/components/agenda/AgendaBookGenerator';
 
 interface AstronomicalDay {
   date: Date;
@@ -30,10 +33,12 @@ const AgendaPersonalizada = () => {
   const [hoveredEvent, setHoveredEvent] = useState<AstrologicalEvent | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showPersonalityModal, setShowPersonalityModal] = useState(false);
-  // Estados para carga lazy de eventos mensuales
-  const [loadingMonthlyEvents, setLoadingMonthlyEvents] = useState(false);
-  const [loadingMonthName, setLoadingMonthName] = useState('');
+  // Estados para carga de agenda completa (birthday to next birthday)
+  const [loadingYearEvents, setLoadingYearEvents] = useState(false);
+  const [yearRange, setYearRange] = useState<{start: Date, end: Date} | null>(null);
   const [loadedMonths, setLoadedMonths] = useState<Set<string>>(new Set());
+  const [loadingMonthlyEvents, setLoadingMonthlyEvents] = useState(false);
+  const [loadingMonthName, setLoadingMonthName] = useState<string>('');
 
   // Perfil de usuario REAL (no datos de prueba)
   const [userProfile, setUserProfile] = React.useState<UserProfile | null>(null);
@@ -121,169 +126,270 @@ const AgendaPersonalizada = () => {
     }
   }, []);
 
-  // 🌙 CARGA LAZY: Fetch Monthly Events (solo un mes específico)
-  const fetchMonthlyEvents = async (targetMonth: Date): Promise<AstrologicalEvent[]> => {
+  // 📅 CARGA COMPLETA: Fetch Year Events (birthday to next birthday)
+  const fetchYearEvents = async (): Promise<AstrologicalEvent[]> => {
     if (!userProfile || !userProfile.birthDate) {
-      console.log('⚠️ [MONTHLY-EVENTS] Cannot fetch - missing userProfile or birthDate');
-      return [];
-    }
-
-    // Generar key único para este mes (YYYY-MM)
-    const monthKey = format(targetMonth, 'yyyy-MM');
-
-    // Si ya cargamos este mes, no volver a cargarlo
-    if (loadedMonths.has(monthKey)) {
-      console.log(`✅ [MONTHLY-EVENTS] Month ${monthKey} already loaded, skipping`);
+      console.log('⚠️ [YEAR-EVENTS] Cannot fetch - missing userProfile or birthDate');
       return [];
     }
 
     try {
-      console.log(`🌙 [MONTHLY-EVENTS] Fetching events for ${monthKey}...`);
+      console.log('📅 [YEAR-EVENTS] Fetching complete year events from birthday to next birthday...');
 
-      const response = await fetch('/api/astrology/monthly-events', {
+      // 🔧 FIX: Parse birth date carefully to avoid timezone issues
+      const birthDate = new Date(userProfile.birthDate);
+      const birthMonth = birthDate.getMonth(); // 0-indexed (0=Jan, 1=Feb, etc)
+      const birthDay = birthDate.getDate();
+
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth();
+      const currentDay = now.getDate();
+
+      // 📊 DEBUG: Log current state
+      console.log('📊 [DEBUG] Current state:', {
+        now: now.toISOString(),
+        currentYear,
+        currentMonth,
+        currentDay,
+        birthMonth,
+        birthDay,
+        userProfileBirthDate: userProfile.birthDate
+      });
+
+      // Fecha de cumpleaños de este año (en hora local para evitar problemas de timezone)
+      const currentBirthday = new Date(currentYear, birthMonth, birthDay, 0, 0, 0, 0);
+
+      // 📊 DEBUG: Log comparison values
+      console.log('📊 [DEBUG] Birthday comparison:', {
+        currentBirthday: currentBirthday.toISOString(),
+        now: now.toISOString(),
+        hasBirthdayPassedThisYear: currentBirthday <= now
+      });
+
+      // Determinar el rango: siempre desde el ÚLTIMO cumpleaños hasta el PRÓXIMO
+      let startDate: Date;
+      let endDate: Date;
+
+      if (currentBirthday <= now) {
+        // El cumpleaños ya pasó este año
+        startDate = new Date(currentYear, birthMonth, birthDay, 0, 0, 0, 0); // Último cumpleaños (este año)
+        endDate = new Date(currentYear + 1, birthMonth, birthDay, 0, 0, 0, 0); // Próximo cumpleaños (año que viene)
+        console.log('✅ [YEAR-EVENTS] Birthday has passed this year');
+      } else {
+        // El cumpleaños todavía no llegó este año
+        startDate = new Date(currentYear - 1, birthMonth, birthDay, 0, 0, 0, 0); // Último cumpleaños (año pasado)
+        endDate = new Date(currentYear, birthMonth, birthDay, 0, 0, 0, 0); // Próximo cumpleaños (este año)
+        console.log('✅ [YEAR-EVENTS] Birthday has NOT passed yet this year');
+      }
+
+      setYearRange({ start: startDate, end: endDate });
+
+      // 🔧 FIX: Use date-fns format to avoid timezone conversion issues
+      const startDateStr = format(startDate, 'yyyy-MM-dd');
+      const endDateStr = format(endDate, 'yyyy-MM-dd');
+
+      console.log('📅 [YEAR-EVENTS] Year range (LOCAL):', {
+        start: startDateStr,
+        end: endDateStr,
+        startYear: startDate.getFullYear(),
+        endYear: endDate.getFullYear()
+      });
+
+      const yearToFetch = startDate.getFullYear();
+
+      console.log('📤 [YEAR-EVENTS] Sending request to API:', {
+        birthDate: userProfile.birthDate,
+        birthTime: userProfile.birthTime,
+        birthPlace: userProfile.birthPlace,
+        currentYear: yearToFetch,
+        expectedRange: `${startDateStr} to ${endDateStr}`
+      });
+
+      const response = await fetch('/api/astrology/solar-year-events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           birthDate: userProfile.birthDate,
           birthTime: userProfile.birthTime,
           birthPlace: userProfile.birthPlace,
-          month: targetMonth.getMonth() + 1, // 1-12
-          year: targetMonth.getFullYear()
+          currentYear: yearToFetch
         })
       });
 
       if (!response.ok) {
-        console.error(`❌ [MONTHLY-EVENTS] Failed to fetch for ${monthKey}`);
-        return [];
+        const errorText = await response.text();
+        console.error('❌ [YEAR-EVENTS] Failed to fetch solar year events');
+        console.error('❌ [YEAR-EVENTS] Error response:', errorText);
+        return generateExampleEvents();
       }
 
       const result = await response.json();
-      console.log(`✅ [MONTHLY-EVENTS] Loaded ${result.stats?.totalEvents || 0} events for ${monthKey}`);
+      console.log('✅ [YEAR-EVENTS] Solar year events fetched successfully');
+      console.log('📊 [YEAR-EVENTS] Stats:', result.stats);
+      console.log('📊 [YEAR-EVENTS] API returned period:', result.period);
 
-      // Marcar este mes como cargado
-      setLoadedMonths(prev => new Set(prev).add(monthKey));
+      // 🔍 DEBUG: Log sample events to verify zodiac signs (tropical vs vedic)
+      console.log('🔍 [DEBUG] Sample Lunar Phases:', result.data.events.lunarPhases?.slice(0, 3).map((p: any) => ({
+        date: p.date,
+        phase: p.phase,
+        sign: p.zodiacSign,
+        type: p.type
+      })));
+      console.log('🔍 [DEBUG] Sample Retrogrades:', result.data.events.retrogrades?.slice(0, 2).map((r: any) => ({
+        planet: r.planet,
+        startDate: r.startDate,
+        endDate: r.endDate,
+        sign: r.sign || r.startSign
+      })));
+      console.log('🔍 [DEBUG] Sample Planetary Ingresses:', result.data.events.planetaryIngresses?.slice(0, 3).map((i: any) => ({
+        planet: i.planet,
+        date: i.date,
+        fromSign: i.fromSign,
+        toSign: i.toSign || i.newSign
+      })));
 
-      // Transformar eventos igual que en fetchSolarYearEvents
+      // Transform API events to AstrologicalEvent format (igual que antes)
       const transformedEvents: AstrologicalEvent[] = [];
 
       // Lunar Phases
       result.data.events.lunarPhases?.forEach((phase: any) => {
-        const isNewMoon = phase.phase.includes('Nueva');
-        transformedEvents.push({
-          id: `lunar-${phase.date}`,
-          date: phase.date,
-          title: `🌙 ${phase.phase}${phase.zodiacSign ? ` en ${phase.zodiacSign}` : ''}`,
-          description: `Fase lunar importante para reflexión y manifestación`,
-          type: 'lunar_phase',
-          priority: 'high',
-          importance: 'high',
-          planet: 'Luna',
-          sign: phase.zodiacSign || 'N/A',
-          personalInterpretation: {
-            meaning: `¡ACTIVACIÓN LUNAR PODEROSA ${userProfile?.name?.toUpperCase()}! Esta ${phase.phase} es un momento clave para ${isNewMoon ? 'nuevos comienzos y manifestaciones' : 'culminaciones y liberaciones'}.`,
-            lifeAreas: isNewMoon
-              ? ['Manifestaciones', 'Nuevos Proyectos', 'Intenciones', 'Intuición']
-              : ['Liberación', 'Cosecha', 'Culminación', 'Gratitud'],
-            advice: isNewMoon
-              ? 'ESTABLECE intenciones claras y planta semillas para tus proyectos. Es momento de iniciar ciclos.'
-              : 'LIBERA lo que ya no sirve y celebra tus logros. Momento de cosecha emocional.',
-            mantra: isNewMoon
-              ? 'MANIFIESTO MIS DESEOS CON CLARIDAD Y PROPÓSITO.'
-              : 'LIBERO CON GRATITUD LO QUE YA CUMPLIÓ SU CICLO.'
-          }
-        });
+        const eventDate = new Date(phase.date);
+        // Solo incluir eventos dentro del rango del año astrológico
+        if (eventDate >= startDate && eventDate < endDate) {
+          const isNewMoon = phase.phase.includes('Nueva');
+          transformedEvents.push({
+            id: `lunar-${phase.date}`,
+            date: phase.date,
+            title: `🌙 ${phase.phase}${phase.zodiacSign ? ` en ${phase.zodiacSign}` : ''}`,
+            description: `Fase lunar importante para reflexión y manifestación`,
+            type: 'lunar_phase',
+            priority: 'high',
+            importance: 'high',
+            planet: 'Luna',
+            sign: phase.zodiacSign || 'N/A',
+            personalInterpretation: {
+              meaning: `¡ACTIVACIÓN LUNAR PODEROSA ${userProfile?.name?.toUpperCase()}! Esta ${phase.phase} es un momento clave para ${isNewMoon ? 'nuevos comienzos y manifestaciones' : 'culminaciones y liberaciones'}.`,
+              lifeAreas: isNewMoon
+                ? ['Manifestaciones', 'Nuevos Proyectos', 'Intenciones', 'Intuición']
+                : ['Liberación', 'Cosecha', 'Culminación', 'Gratitud'],
+              advice: isNewMoon
+                ? 'ESTABLECE intenciones claras y planta semillas para tus proyectos. Es momento de iniciar ciclos.'
+                : 'LIBERA lo que ya no sirve y celebra tus logros. Momento de cosecha emocional.',
+              mantra: isNewMoon
+                ? 'MANIFIESTO MIS DESEOS CON CLARIDAD Y PROPÓSITO.'
+                : 'LIBERO CON GRATITUD LO QUE YA CUMPLIÓ SU CICLO.'
+            }
+          });
+        }
       });
 
-      // Retrogrades (igual que antes)
-      result.data.events.retrogrades?.forEach((retro: any) => {
-        transformedEvents.push({
-          id: `retro-${retro.planet}-${retro.startDate}`,
-          date: retro.startDate,
-          title: `⏪ ${retro.planet} Retrógrado${retro.sign ? ` en ${retro.sign}` : ''}`,
-          description: `Período de retrogradación de ${retro.planet}`,
-          type: 'planetary_transit',
-          priority: 'medium',
-          importance: 'medium',
-          planet: retro.planet,
-          sign: retro.sign || 'N/A',
-          personalInterpretation: {
-            meaning: `${retro.planet} entra en retrogradación. Tiempo de revisar y revaluar en las áreas que ${retro.planet} gobierna.`,
-            lifeAreas: ['Revisión', 'Re-evaluación', 'Introspección'],
-            advice: 'No inicies proyectos grandes. Revisa y ajusta lo existente.',
-            mantra: `REVISO Y PERFECCIONO CON PACIENCIA.`
-          }
-        });
+      // Retrogrades
+      result.data.events.retrogrades?.forEach((retrograde: any) => {
+        const eventDate = new Date(retrograde.startDate);
+        if (eventDate >= startDate && eventDate < endDate) {
+          transformedEvents.push({
+            id: `retro-${retrograde.planet}-${retrograde.startDate}`,
+            date: retrograde.startDate,
+            title: `⏪ ${retrograde.planet} Retrógrado`,
+            description: `Período de revisión y reflexión en temas de ${retrograde.planet}`,
+            type: 'retrograde',
+            priority: retrograde.planet === 'Mercurio' ? 'high' : 'medium',
+            importance: retrograde.planet === 'Mercurio' ? 'high' : 'medium',
+            planet: retrograde.planet,
+            sign: retrograde.sign || 'N/A',
+            aiInterpretation: {
+              meaning: `MOMENTO DE REFLEXIÓN ${retrograde.planet.toUpperCase()}. Desde el ${new Date(retrograde.startDate).toLocaleDateString('es-ES')} hasta el ${new Date(retrograde.endDate).toLocaleDateString('es-ES')}.`,
+              advice: `REVISA y reorganiza temas relacionados con ${getPlanetTheme(retrograde.planet)}. No es momento de iniciar, sino de perfeccionar.`,
+              mantra: `ACEPTO EL TIEMPO DE REFLEXIÓN Y CRECIMIENTO INTERNO.`,
+              ritual: `Dedica tiempo diario a revisar proyectos pasados relacionados con ${getPlanetTheme(retrograde.planet)}.`,
+              lifeAreas: [getPlanetTheme(retrograde.planet), 'Reflexión', 'Revisión']
+            }
+          });
+        }
       });
 
       // Eclipses
       result.data.events.eclipses?.forEach((eclipse: any) => {
-        transformedEvents.push({
-          id: `eclipse-${eclipse.date}`,
-          date: eclipse.date,
-          title: `🌑 ${eclipse.type}${eclipse.zodiacSign ? ` en ${eclipse.zodiacSign}` : ''}`,
-          description: `Eclipse ${eclipse.type}`,
-          type: 'eclipse',
-          priority: 'high',
-          importance: 'high',
-          planet: eclipse.type.includes('Solar') ? 'Sol' : 'Luna',
-          sign: eclipse.zodiacSign || 'N/A',
-          personalInterpretation: {
-            meaning: `Eclipse poderoso que marca inicios y finales importantes.`,
-            lifeAreas: ['Transformación', 'Cambios Profundos', 'Revelaciones'],
-            advice: 'Momento de cambios significativos. Mantén mente abierta.',
-            mantra: 'ABRAZO LA TRANSFORMACIÓN CON VALENTÍA.'
-          }
-        });
+        const eventDate = new Date(eclipse.date);
+        if (eventDate >= startDate && eventDate < endDate) {
+          transformedEvents.push({
+            id: `eclipse-${eclipse.date}`,
+            date: eclipse.date,
+            title: `🌑 Eclipse ${eclipse.type === 'solar' ? 'Solar' : 'Lunar'}`,
+            description: `Portal de transformación y cambios importantes`,
+            type: 'eclipse',
+            priority: 'high',
+            importance: 'high',
+            planet: eclipse.type === 'solar' ? 'Sol' : 'Luna',
+            sign: eclipse.zodiacSign || 'N/A',
+            aiInterpretation: {
+              meaning: `¡PORTAL DE ECLIPSE TRANSFORMADOR! Los eclipses son puntos de inflexión que marcan cambios profundos en tu vida.`,
+              advice: `PREPÁRATE para cambios inevitables. Los eclipses revelan verdades ocultas y abren nuevos caminos.`,
+              mantra: 'ABRAZO LOS CAMBIOS QUE EL UNIVERSO TRAE PARA MI EVOLUCIÓN.',
+              ritual: 'Medita sobre qué necesitas soltar y qué nuevo capítulo está comenzando en tu vida.',
+              lifeAreas: ['Transformación', 'Cambios Mayores', 'Evolución']
+            }
+          });
+        }
       });
 
       // Planetary Ingresses
       result.data.events.planetaryIngresses?.forEach((ingress: any) => {
-        transformedEvents.push({
-          id: `ingress-${ingress.planet}-${ingress.date}`,
-          date: ingress.date,
-          title: `🪐 ${ingress.planet} entra en ${ingress.newSign}`,
-          description: `${ingress.planet} cambia de signo`,
-          type: 'planetary_transit',
-          priority: 'low',
-          importance: 'low',
-          planet: ingress.planet,
-          sign: ingress.newSign,
-          personalInterpretation: {
-            meaning: `${ingress.planet} cambia su energía al entrar en ${ingress.newSign}.`,
-            lifeAreas: ['Cambio de Energía', 'Nueva Fase'],
-            advice: 'Observa cómo cambia la energía en tu vida.',
-            mantra: 'ME ADAPTO AL FLUJO DEL COSMOS.'
-          }
-        });
+        const eventDate = new Date(ingress.date);
+        if (eventDate >= startDate && eventDate < endDate) {
+          transformedEvents.push({
+            id: `ingress-${ingress.planet}-${ingress.date}`,
+            date: ingress.date,
+            title: `🪐 ${ingress.planet} entra en ${ingress.newSign}`,
+            description: `Cambio de energía planetaria`,
+            type: 'planetary_transit',
+            priority: ingress.planet === 'Sol' ? 'medium' : 'low',
+            importance: ingress.planet === 'Sol' ? 'medium' : 'low',
+            planet: ingress.planet,
+            sign: ingress.newSign,
+            aiInterpretation: {
+              meaning: `${ingress.planet} cambia de ${ingress.previousSign} a ${ingress.newSign}, modificando la energía de ${getPlanetTheme(ingress.planet)}.`,
+              advice: `Adapta tu enfoque en ${getPlanetTheme(ingress.planet)} según la nueva energía ${ingress.newSign}.`,
+              mantra: `FLUYO CON LOS CAMBIOS CÓSMICOS Y ME ADAPTO CONSCIENTEMENTE.`,
+              ritual: 'Observa cómo esta nueva energía influye en tu vida diaria durante los próximos días.',
+              lifeAreas: [getPlanetTheme(ingress.planet), 'Adaptación', 'Cambios']
+            }
+          });
+        }
       });
 
       // Seasonal Events
       result.data.events.seasonalEvents?.forEach((seasonal: any) => {
-        transformedEvents.push({
-          id: `seasonal-${seasonal.date}`,
-          date: seasonal.date,
-          title: `🌸 ${seasonal.name}`,
-          description: seasonal.description || `Evento estacional: ${seasonal.name}`,
-          type: 'seasonal',
-          priority: 'medium',
-          importance: 'medium',
-          planet: 'Sol',
-          sign: 'N/A',
-          personalInterpretation: {
-            meaning: seasonal.description || `Cambio estacional importante`,
-            lifeAreas: ['Naturaleza', 'Ciclos', 'Energía Estacional'],
-            advice: 'Alinéate con los ciclos naturales de la Tierra.',
-            mantra: 'FLUYO CON LAS ESTACIONES DE LA VIDA.'
-          }
-        });
+        const eventDate = new Date(seasonal.date);
+        if (eventDate >= startDate && eventDate < endDate) {
+          transformedEvents.push({
+            id: `seasonal-${seasonal.date}`,
+            date: seasonal.date,
+            title: `🌸 ${seasonal.type.replace('_', ' ')}`,
+            description: seasonal.description || 'Evento estacional importante',
+            type: 'seasonal',
+            priority: 'medium',
+            importance: 'medium',
+            planet: 'Sol',
+            sign: seasonal.zodiacSign || 'N/A',
+            aiInterpretation: {
+              meaning: `Cambio estacional que marca un nuevo ciclo natural y energético.`,
+              advice: 'Alinéate con los ciclos naturales de la Tierra para mayor armonía.',
+              mantra: 'ME SINCRONIZO CON LOS RITMOS NATURALES DEL UNIVERSO.',
+              ritual: 'Pasa tiempo en la naturaleza y observa los cambios estacionales.',
+              lifeAreas: ['Naturaleza', 'Ciclos', 'Equilibrio']
+            }
+          });
+        }
       });
 
-      console.log(`📦 [MONTHLY-EVENTS] Transformed ${transformedEvents.length} events for ${monthKey}`);
+      console.log(`✅ [YEAR-EVENTS] Loaded ${transformedEvents.length} events for the complete year`);
       return transformedEvents;
 
     } catch (error) {
-      console.error(`❌ [MONTHLY-EVENTS] Error fetching ${monthKey}:`, error);
-      return [];
+      console.error('❌ [YEAR-EVENTS] Error fetching year events:', error);
+      return generateExampleEvents();
     }
   };
 
@@ -705,7 +811,7 @@ const AgendaPersonalizada = () => {
     ];
   };
 
-  // Cargar eventos al iniciar
+  // Cargar eventos del año completo al iniciar
   useEffect(() => {
     if (!userProfile) {
       console.log('⚠️ [AGENDA] No userProfile available yet');
@@ -718,35 +824,18 @@ const AgendaPersonalizada = () => {
       birthDate: userProfile.birthDate
     });
 
-    const loadEvents = async () => {
+    const loadYearEvents = async () => {
       setLoading(true);
-      console.log('🌙 [AGENDA] Loading initial 2 months of events (LAZY LOAD)...');
+      setLoadingYearEvents(true);
+      console.log('📅 [AGENDA] Loading complete year events (birthday to birthday)...');
 
       try {
-        // 🌙 CARGA LAZY: Solo cargar 2 meses inicialmente (actual + siguiente)
-        const currentMonth = new Date();
-        const nextMonth = addMonths(currentMonth, 1);
+        const yearEvents = await fetchYearEvents();
+        console.log(`✅ [AGENDA] Loaded ${yearEvents.length} events for the complete year`);
 
-        console.log('📅 [AGENDA] Loading months:', {
-          current: format(currentMonth, 'MMMM yyyy', { locale: es }),
-          next: format(nextMonth, 'MMMM yyyy', { locale: es })
-        });
-
-        // Cargar mes actual
-        const currentMonthEvents = await fetchMonthlyEvents(currentMonth);
-        console.log(`✅ [AGENDA] Loaded ${currentMonthEvents.length} events for current month`);
-
-        // Cargar mes siguiente
-        const nextMonthEvents = await fetchMonthlyEvents(nextMonth);
-        console.log(`✅ [AGENDA] Loaded ${nextMonthEvents.length} events for next month`);
-
-        // Combinar eventos de ambos meses
-        const allEvents = [...currentMonthEvents, ...nextMonthEvents];
-        console.log(`✅ [AGENDA] Total ${allEvents.length} events loaded (2 months)`);
-
-        setEvents(allEvents);
+        setEvents(yearEvents);
       } catch (error) {
-        console.error('❌ [AGENDA] Error loading events:', error);
+        console.error('❌ [AGENDA] Error loading year events:', error);
         console.error('❌ [AGENDA] Error details:', error instanceof Error ? error.message : String(error));
         // Fallback to example events
         const exampleEvents = generateExampleEvents();
@@ -755,11 +844,22 @@ const AgendaPersonalizada = () => {
         setError('No se pudieron cargar los eventos. Mostrando eventos de ejemplo.');
       } finally {
         setLoading(false);
+        setLoadingYearEvents(false);
       }
     };
 
-    loadEvents();
+    loadYearEvents();
   }, [userProfile]);
+
+  // 📅 Inicializar currentMonth al mes actual (no al cumpleaños)
+  useEffect(() => {
+    if (yearRange) {
+      const now = new Date();
+      console.log('📅 [AGENDA] Setting currentMonth to current month:', now);
+      // Ya está inicializado en useState con new Date(), pero lo reforzamos
+      setCurrentMonth(now);
+    }
+  }, [yearRange]);
 
   // Funciones auxiliares
   const getRandomEventTitle = () => {
@@ -791,10 +891,12 @@ const AgendaPersonalizada = () => {
     return signs[Math.floor(Math.random() * signs.length)];
   };
 
-  // Navegación del calendario
-  const getDaysWithEvents = () => {
+  // 📅 Obtener días del mes actual con eventos (para vista mensual)
+  const getCurrentMonthDays = () => {
     const monthStart = startOfMonth(currentMonth);
-    const monthEnd = endOfMonth(monthStart);
+    const monthEnd = endOfMonth(currentMonth);
+
+    // Incluir días del mes anterior/siguiente para completar semanas
     const startDate = new Date(monthStart);
     startDate.setDate(startDate.getDate() - monthStart.getDay() + 1);
     const endDate = new Date(monthEnd);
@@ -816,74 +918,56 @@ const AgendaPersonalizada = () => {
       };
     });
 
-    // Debug logging
-    const totalDaysWithEvents = daysWithEvents.filter(d => d.hasEvents).length;
-    if (totalDaysWithEvents > 0) {
-      console.log('📆 [CALENDAR] Rendering month:', format(currentMonth, 'MMMM yyyy', { locale: es }));
-      console.log('📆 [CALENDAR] Days with events in this view:', totalDaysWithEvents);
-      console.log('📆 [CALENDAR] Total events in memory:', events.length);
-    }
-
     return daysWithEvents;
   };
 
-  const goToPreviousMonth = async () => {
-    const previousMonth = subMonths(currentMonth, 1);
-    const monthKey = format(previousMonth, 'yyyy-MM');
+  // Vista completa del año - generar todos los meses
+  const getYearView = () => {
+    if (!yearRange) return [];
 
-    // Si el mes no está cargado, mostrar modal y cargar
-    if (!loadedMonths.has(monthKey)) {
-      setLoadingMonthlyEvents(true);
-      setLoadingMonthName(format(previousMonth, 'MMMM yyyy', { locale: es }));
+    const months = [];
+    let currentDate = new Date(yearRange.start);
 
-      console.log(`🌙 [NAV] Loading previous month: ${monthKey}`);
+    while (currentDate < yearRange.end) {
+      const monthStart = startOfMonth(currentDate);
+      const monthEnd = endOfMonth(currentDate);
+      const startDate = new Date(monthStart);
+      startDate.setDate(startDate.getDate() - monthStart.getDay() + 1);
+      const endDate = new Date(monthEnd);
+      endDate.setDate(endDate.getDate() + (7 - monthEnd.getDay()));
 
-      const newEvents = await fetchMonthlyEvents(previousMonth);
+      const days = eachDayOfInterval({ start: startDate, end: endDate });
 
-      if (newEvents.length > 0) {
-        setEvents(prev => [...prev, ...newEvents]);
-        console.log(`✅ [NAV] Added ${newEvents.length} events for ${monthKey}`);
-      }
+      const daysWithEvents = days.map(day => {
+        const dayEvents = events.filter(event => {
+          const eventDate = new Date(event.date);
+          return isSameDay(day, eventDate);
+        });
 
-      setLoadingMonthlyEvents(false);
+        return {
+          date: day,
+          events: dayEvents,
+          isCurrentMonth: isSameMonth(day, currentDate),
+          hasEvents: dayEvents.length > 0
+        };
+      });
+
+      months.push({
+        month: currentDate,
+        monthName: format(currentDate, 'MMMM yyyy', { locale: es }),
+        days: daysWithEvents
+      });
+
+      currentDate = addMonths(currentDate, 1);
     }
 
-    // Cambiar al mes anterior
-    setCurrentMonth(previousMonth);
-    setSelectedDate(null);
-    setSelectedDayEvents([]);
+    console.log('📅 [YEAR-VIEW] Generated view for', months.length, 'months');
+    return months;
   };
 
-  const goToNextMonth = async () => {
-    const nextMonth = addMonths(currentMonth, 1);
-    const monthKey = format(nextMonth, 'yyyy-MM');
+  // No necesitamos navegación mensual - mostramos el año completo
 
-    // Si el mes no está cargado, mostrar modal y cargar
-    if (!loadedMonths.has(monthKey)) {
-      setLoadingMonthlyEvents(true);
-      setLoadingMonthName(format(nextMonth, 'MMMM yyyy', { locale: es }));
 
-      console.log(`🌙 [NAV] Loading next month: ${monthKey}`);
-
-      const newEvents = await fetchMonthlyEvents(nextMonth);
-
-      if (newEvents.length > 0) {
-        setEvents(prev => [...prev, ...newEvents]);
-        console.log(`✅ [NAV] Added ${newEvents.length} events for ${monthKey}`);
-      }
-
-      setLoadingMonthlyEvents(false);
-    }
-
-    // Cambiar al mes siguiente
-    setCurrentMonth(nextMonth);
-    setSelectedDate(null);
-    setSelectedDayEvents([]);
-  };
-
-  const getCurrentMonthName = () => {
-    return format(currentMonth, 'MMMM yyyy', { locale: es });
-  };
 
   const handleDayClick = (day: AstronomicalDay) => {
     setSelectedDate(day.date);
@@ -946,20 +1030,166 @@ const AgendaPersonalizada = () => {
   };
 
   const weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-  const days = getDaysWithEvents();
+
+
+
+  // ✅ HELPER: Mapear tipo de evento a formato de EventInterpretationButton
+  const mapEventTypeToInterpretation = (event: AstrologicalEvent): {
+    type: 'luna_nueva' | 'luna_llena' | 'transito' | 'aspecto';
+    date: string;
+    sign?: string;
+    house: number;
+    planetsInvolved?: string[];
+    transitingPlanet?: string;
+    natalPlanet?: string;
+    aspectType?: string;
+  } => {
+    let type: 'luna_nueva' | 'luna_llena' | 'transito' | 'aspecto';
+    let sign = event.sign;
+    let planetsInvolved: string[] = [];
+    let transitingPlanet: string | undefined;
+    let natalPlanet: string | undefined;
+    let aspectType: string | undefined;
+
+    // Mapear tipo de evento y extraer información específica
+    if (event.type === 'lunar_phase') {
+      // Determinar si es Luna Nueva o Llena basado en el título o descripción
+      type = event.title.toLowerCase().includes('nueva') || event.phase?.toLowerCase().includes('nueva') ? 'luna_nueva' : 'luna_llena';
+      planetsInvolved = ['Luna'];
+      if (event.planet && event.planet !== 'Luna') {
+        planetsInvolved.push(event.planet);
+      }
+    } else if (event.type === 'retrograde') {
+      type = 'transito';
+      transitingPlanet = event.planet;
+      natalPlanet = event.planet; // Para retrógrados, el planeta natal es el mismo
+      aspectType = 'retrógrado';
+    } else if (event.type === 'planetary_transit') {
+      type = 'transito';
+      transitingPlanet = event.planet;
+      // Para tránsitos, intentar identificar el planeta natal basado en el contexto
+      if (event.description) {
+        // Buscar menciones de planetas en la descripción
+        const planetMatches = event.description.match(/(Sol|Luna|Mercurio|Venus|Marte|Júpiter|Saturno|Urano|Neptuno|Plutón)/g);
+        if (planetMatches && planetMatches.length > 0) {
+          natalPlanet = planetMatches[0];
+        }
+      }
+      aspectType = 'tránsito';
+    } else if (event.type === 'aspect') {
+      type = 'aspecto';
+      transitingPlanet = event.planet;
+      aspectType = 'aspecto';
+    } else if (event.type === 'eclipse') {
+      type = 'aspecto'; // Los eclipses se tratan como aspectos especiales
+      planetsInvolved = ['Sol', 'Luna'];
+      aspectType = event.title.toLowerCase().includes('solar') ? 'eclipse_solar' : 'eclipse_lunar';
+    } else {
+      type = 'aspecto'; // Default
+    }
+
+    // ✅ Calcular casa: usar la del evento si existe, o calcular basándose en el signo
+    let house: number;
+    if (event.house && event.house >= 1 && event.house <= 12) {
+      house = event.house;
+    } else if (event.sign && userProfile?.astrological?.signs?.ascendant) {
+      // Calcular casa aproximada basándose en el signo del evento y el ascendente
+      house = calculateHouseFromSign(event.sign, userProfile.astrological.signs.ascendant);
+    } else {
+      // Default: usar casa 1
+      house = 1;
+    }
+
+    return {
+      type,
+      date: event.date,
+      sign,
+      house,
+      planetsInvolved: planetsInvolved.length > 0 ? planetsInvolved : undefined,
+      transitingPlanet,
+      natalPlanet,
+      aspectType
+    };
+  };
+
+  // Helper para calcular casa aproximada desde signo (simple: asume casas enteras)
+  const calculateHouseFromSign = (eventSign: string, ascendantSign: string): number => {
+    const signs = ['Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'];
+    const eventIndex = signs.findIndex(s => s.toLowerCase() === eventSign.toLowerCase());
+    const ascIndex = signs.findIndex(s => s.toLowerCase() === ascendantSign.toLowerCase());
+
+    if (eventIndex === -1 || ascIndex === -1) return 1;
+
+    // Casa = distancia desde el ascendente + 1
+    let house = ((eventIndex - ascIndex + 12) % 12) + 1;
+    return house;
+  };
+
+  const generatePages = () => {
+    const allDays = getYearView().flatMap(month => month.days.filter(day => day.isCurrentMonth && day.hasEvents));
+    const daysPerPage = 3; // 3 días por página
+    const pages = [];
+
+    for (let i = 0; i < allDays.length; i += daysPerPage) {
+      const pageDays = allDays.slice(i, i + daysPerPage);
+      pages.push(
+        <div key={i} className="print-day-page">
+          <div className="print-days-grid">
+            {pageDays.map((day) => (
+              <div key={day.date.getTime()} className="print-day-card">
+                <div className="print-day-header">
+                  {day.date.getDate()} de {format(day.date, 'MMMM', { locale: es })}
+                </div>
+
+                {day.hasEvents && (
+                  <div className="print-day-events">
+                    {day.events.map((event, eventIndex) => (
+                      <div key={eventIndex} className="print-day-event">
+                        <div className="font-semibold text-purple-800">
+                          {getEventIcon(event.type, event.priority)} {event.title}
+                        </div>
+                        <div className="text-gray-600 text-xs mt-1">
+                          {event.description}
+                        </div>
+                        {event.planet && event.sign && (
+                          <div className="text-purple-600 text-xs mt-1">
+                            {event.planet} en {event.sign}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="print-exercises-space">
+                  <div className="print-exercises-title">
+                    📝 Ejercicios y tareas para hoy:
+                  </div>
+                  <div className="print-exercises-lines">
+                    1. ________________________________________________________________<br/>
+                    2. ________________________________________________________________<br/>
+                    3. ________________________________________________________________<br/>
+                    4. ________________________________________________________________<br/>
+                    5. ________________________________________________________________<br/>
+                    <br/>
+                    Notas adicionales:<br/>
+                    ________________________________________________________________<br/>
+                    ________________________________________________________________<br/>
+                    ________________________________________________________________<br/>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    return pages;
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 relative overflow-hidden">
-
-      {/* Partículas mágicas de fondo */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-10 w-2 h-2 bg-yellow-400 rounded-full animate-pulse opacity-60"></div>
-        <div className="absolute top-20 right-20 w-1 h-1 bg-pink-400 rounded-full animate-ping opacity-40"></div>
-        <div className="absolute bottom-20 left-20 w-3 h-3 bg-purple-400 rounded-full animate-pulse opacity-50"></div>
-        <div className="absolute bottom-10 right-10 w-2 h-2 bg-cyan-400 rounded-full animate-ping opacity-60"></div>
-      </div>
-
-      <div className="relative z-10 max-w-7xl mx-auto p-4 lg:p-8">
+    <div className="relative max-w-7xl mx-auto p-4 lg:p-8">
 
         {/* HEADER ÉPICO INSPIRADO EN DASHBOARD */}
         <div className="text-center mb-16">
@@ -1077,122 +1307,207 @@ const AgendaPersonalizada = () => {
         {/* LAYOUT DESKTOP/MOBILE */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-          {/* CALENDARIO PRINCIPAL - 2/3 en desktop */}
+            {/* CALENDARIO PRINCIPAL - 2/3 en desktop */}
           <div className="lg:col-span-2">
 
             {/* Header del calendario */}
             <div className="bg-gradient-to-r from-purple-600/30 to-indigo-600/30 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-purple-400/30">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
                 <h2 className="text-2xl lg:text-3xl font-bold text-white capitalize flex items-center">
                   <span className="mr-3">🗓️</span>
-                  {getCurrentMonthName()}
+                  Agenda Cósmica
                 </h2>
 
-                {/* Navegación */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4 flex-wrap justify-center">
+                  {/* Botón regenerar eventos DEL MES ACTUAL */}
                   <button
-                    onClick={goToPreviousMonth}
-                    className="p-3 rounded-xl bg-gradient-to-r from-purple-500/80 to-indigo-500/80 hover:from-purple-400/90 hover:to-indigo-400/90 transition-all duration-200 shadow-lg hover:shadow-purple-500/25 border border-white/10 group"
+                    onClick={async () => {
+                      const monthName = format(currentMonth, 'MMMM yyyy', { locale: es });
+                      console.log(`🔄 [REGENERATE-MONTH] Regenerating events for ${monthName}`);
+                      setLoadingMonthlyEvents(true);
+                      setLoadingMonthName(monthName);
+
+                      try {
+                        // Re-fetch todos los eventos del año
+                        const yearEvents = await fetchYearEvents();
+                        console.log(`✅ [REGENERATE-MONTH] Fetched ${yearEvents.length} total events`);
+
+                        // Filtrar solo los del mes actual
+                        const monthStart = startOfMonth(currentMonth);
+                        const monthEnd = endOfMonth(currentMonth);
+                        const monthEvents = yearEvents.filter(event => {
+                          const eventDate = new Date(event.date);
+                          return eventDate >= monthStart && eventDate <= monthEnd;
+                        });
+
+                        console.log(`✅ [REGENERATE-MONTH] Found ${monthEvents.length} events for ${monthName}`);
+                        console.log('🔍 [REGENERATE-MONTH] Month events sample:', monthEvents.slice(0, 5).map(e => ({
+                          date: e.date,
+                          title: e.title,
+                          sign: e.sign,
+                          planet: e.planet,
+                          type: e.type
+                        })));
+
+                        // Actualizar todos los eventos (para mantener consistencia)
+                        setEvents(yearEvents);
+                      } catch (error) {
+                        console.error('❌ [REGENERATE-MONTH] Error:', error);
+                      } finally {
+                        setLoadingMonthlyEvents(false);
+                        setLoadingMonthName('');
+                      }
+                    }}
+                    disabled={loading || loadingMonthlyEvents}
+                    className="px-3 py-2 rounded-lg bg-green-500/20 hover:bg-green-500/30 transition-all duration-200 border border-green-400/30 hover:border-green-400/50 text-white text-xs lg:text-sm font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Regenerar eventos de este mes"
                   >
-                    <svg className="h-5 w-5 text-white group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    <svg className={`h-4 w-4 ${(loading || loadingMonthlyEvents) ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
+                    <span className="hidden sm:inline">{loadingMonthlyEvents ? `Cargando...` : 'Regenerar Mes'}</span>
+                    <span className="sm:hidden">🔄</span>
                   </button>
 
-                  <button
-                    onClick={goToNextMonth}
-                    className="p-3 rounded-xl bg-gradient-to-r from-purple-500/80 to-indigo-500/80 hover:from-purple-400/90 hover:to-indigo-400/90 transition-all duration-200 shadow-lg hover:shadow-purple-500/25 border border-white/10 group"
-                  >
-                    <svg className="h-5 w-5 text-white group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
+                  {/* Navegación de meses */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+                      className="p-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 transition-all duration-200 border border-purple-400/30 hover:border-purple-400/50"
+                      title="Mes anterior"
+                    >
+                      <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+
+                    <span className="text-white font-semibold min-w-[120px] text-center text-sm lg:text-base">
+                      {format(currentMonth, 'MMMM yyyy', { locale: es })}
+                    </span>
+
+                    <button
+                      onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+                      className="p-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 transition-all duration-200 border border-purple-400/30 hover:border-purple-400/50"
+                      title="Mes siguiente"
+                    >
+                      <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Calendario grid */}
+            {/* Calendario mensual */}
             <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-sm rounded-2xl shadow-2xl border border-purple-400/20 overflow-hidden">
 
               {/* Días de la semana */}
-              <div className="grid grid-cols-7 bg-gradient-to-r from-purple-700/50 to-indigo-700/50">
+              <div className="grid grid-cols-7 bg-gradient-to-r from-purple-700/30 to-indigo-700/30">
                 {weekDays.map((day, index) => (
-                  <div key={index} className="py-4 text-center text-sm font-bold text-purple-100 border-r border-purple-400/20 last:border-r-0">
+                  <div key={index} className="py-3 text-center text-sm font-bold text-purple-100 border-r border-purple-400/20 last:border-r-0">
                     {day}
                   </div>
                 ))}
               </div>
 
-              {/* Días del mes */}
+              {/* Días del mes actual */}
               <div className="grid grid-cols-7">
-                {days.map((day, index) => {
-                  const isToday = isSameDay(day.date, new Date());
-                  const isSelected = selectedDate && isSameDay(day.date, selectedDate);
+                {getCurrentMonthDays().map((day, index) => {
+                      const isToday = isSameDay(day.date, new Date());
+                      const isSelected = selectedDate && isSameDay(day.date, selectedDate);
 
-                  return (
-                    <div
-                      key={index}
-                      onClick={() => handleDayClick(day)}
-                      className={`
-                        relative min-h-[100px] lg:min-h-[120px] p-2 lg:p-3 cursor-pointer transition-all duration-300 border-r border-b border-purple-400/20 last:border-r-0 group
-                        ${day.isCurrentMonth
-                          ? isToday
-                            ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-2 border-yellow-400/50 shadow-lg shadow-yellow-500/20'
-                            : isSelected
-                            ? 'bg-gradient-to-br from-purple-500/30 to-pink-500/30 border-2 border-purple-400/60'
-                            : 'bg-gradient-to-br from-purple-800/10 to-indigo-800/10 hover:from-purple-600/20 hover:to-indigo-600/20'
-                          : 'bg-gradient-to-br from-gray-800/20 to-slate-800/20 text-gray-500'
-                        }
-                      `}
-                    >
-                      {/* Número del día */}
-                      <div className={`
-                        text-sm lg:text-base font-bold mb-2
-                        ${isToday ? 'text-yellow-300' : day.isCurrentMonth ? 'text-white' : 'text-gray-500'}
-                      `}>
-                        {day.date.getDate()}
-                      </div>
+                      return (
+                        <div
+                          key={index}
+                          onClick={() => handleDayClick(day)}
+                          className={`
+                            relative min-h-[80px] lg:min-h-[100px] p-2 cursor-pointer transition-all duration-300 border-r border-b border-purple-400/20 last:border-r-0 group
+                            ${day.isCurrentMonth
+                              ? isToday
+                                ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-2 border-yellow-400/50 shadow-lg shadow-yellow-500/20'
+                                : isSelected
+                                ? 'bg-gradient-to-br from-purple-500/30 to-pink-500/30 border-2 border-purple-400/60'
+                                : 'bg-gradient-to-br from-purple-800/10 to-indigo-800/10 hover:from-purple-600/20 hover:to-indigo-600/20'
+                              : 'bg-gradient-to-br from-gray-800/20 to-slate-800/20 text-gray-500'
+                            }
+                          `}
+                        >
+                          {/* Número del día */}
+                          <div className={`
+                            text-sm font-bold mb-1
+                            ${isToday ? 'text-yellow-300' : day.isCurrentMonth ? 'text-white' : 'text-gray-500'}
+                          `}>
+                            {day.date.getDate()}
+                          </div>
 
-                      {/* Eventos del día con iconos */}
-                      {day.hasEvents && (
-                        <div className="space-y-1">
-                          {day.events.slice(0, 2).map((event, eventIndex) => (
-                            <div
-                              key={eventIndex}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleEventClick(event);
-                              }}
-                              className={`
-                                flex items-center gap-1 p-1 rounded-lg cursor-pointer transition-all duration-200 group-hover:scale-105
-                                bg-gradient-to-r ${getEventColor(event.type, event.priority)} bg-opacity-80 backdrop-blur-sm
-                                hover:shadow-lg hover:shadow-purple-500/30
-                              `}
-                            >
-                              <span className="text-xs lg:text-sm">{getEventIcon(event.type, event.priority)}</span>
-                              <span className="text-white text-xs font-medium truncate flex-1">
-                                {event.title}
-                              </span>
-                              {event.priority === 'high' && (
-                                <span className="text-yellow-300 text-xs animate-pulse">!</span>
+                          {/* Eventos del día con iconos */}
+                          {day.hasEvents && (
+                            <div className="space-y-1">
+                              {day.events.slice(0, 2).map((event, eventIndex) => (
+                                <div
+                                  key={eventIndex}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEventClick(event);
+                                  }}
+                                  className={`
+                                    p-1.5 rounded cursor-pointer transition-all duration-200 group-hover:scale-105
+                                    bg-gradient-to-r ${getEventColor(event.type, event.priority)} bg-opacity-80 backdrop-blur-sm
+                                    hover:shadow-lg hover:shadow-purple-500/30
+                                  `}
+                                >
+                                  <div className="flex items-start gap-1">
+                                    <span className="text-xs flex-shrink-0">{getEventIcon(event.type, event.priority)}</span>
+                                    <div className="flex-1 min-w-0">
+                                      <span className="text-white text-xs font-medium leading-tight block">
+                                        {event.title}
+                                      </span>
+                                      {event.priority === 'high' && (
+                                        <span className="text-yellow-300 text-xs animate-pulse block">!</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+
+                              {day.events.length > 2 && (
+                                <div className="text-purple-300 text-xs font-medium text-center bg-purple-600/20 rounded px-1 py-0.5">
+                                  +{day.events.length - 2}
+                                </div>
                               )}
                             </div>
-                          ))}
-
-                          {day.events.length > 2 && (
-                            <div className="text-purple-300 text-xs font-medium text-center bg-purple-600/20 rounded px-2 py-1">
-                              +{day.events.length - 2} más
-                            </div>
                           )}
-                        </div>
-                      )}
 
-                      {/* Efecto hover */}
-                      <div className="absolute inset-0 border-2 border-transparent group-hover:border-purple-400/40 rounded-lg transition-colors duration-200 pointer-events-none"></div>
-                    </div>
-                  );
-                })}
+                          {/* Efecto hover */}
+                          <div className="absolute inset-0 border-2 border-transparent group-hover:border-purple-400/40 rounded-lg transition-colors duration-200 pointer-events-none"></div>
+                        </div>
+                      );
+                    })}
               </div>
+            </div>
+
+            {/* CONTENIDO DE IMPRESIÓN OCULTO - Solo visible al imprimir */}
+            <div className="print-only hidden">
+              {/* Página 1: Vista anual completa */}
+              <div className="print-month-overview">
+                <h1 className="text-center text-3xl font-bold mb-8 text-black">
+                  Agenda Astrológica Completa
+                </h1>
+
+                {/* Calendario anual para impresión */}
+                <div className="bg-white border-2 border-purple-300 rounded-lg p-6">
+                  <p className="text-center text-purple-800 mb-4">
+                    Vista completa del año astrológico (cumpleaños a cumpleaños)
+                  </p>
+                  <div className="text-center text-gray-600">
+                    {yearRange ? `Del ${yearRange.start.toLocaleDateString('es-ES')} al ${yearRange.end.toLocaleDateString('es-ES')}` : 'Cargando rango...'}
+                  </div>
+                </div>
+              </div>
+
+                  {/* Páginas de días individuales - Vista completa del año */}
+                  {generatePages()}
             </div>
           </div>
 
@@ -1310,19 +1625,28 @@ const AgendaPersonalizada = () => {
                 <p className="text-purple-200 text-sm mb-4">
                   Descubre interpretaciones aún más profundas de tu carta natal
                 </p>
-                <button className="bg<execute_command>
-<command>tail -20 src/app/\(dashboard\)/agenda/page.tsx</command>
-</execute_command>
--gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-full font-semibold hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg hover:shadow-xl">
-                  Explorar más ✨
-                </button>
+                <div className="flex flex-col gap-3">
+                  {/* Botón Generar Libro Completo */}
+                  <AgendaBookGenerator />
+
+                  <button
+                    onClick={() => window.print()}
+                    className="bg-gradient-to-r from-green-500/80 to-emerald-500/80 hover:from-green-400/90 hover:to-emerald-400/90 transition-all duration-200 shadow-lg hover:shadow-green-500/25 border border-white/10 p-3 rounded-full group"
+                    title="Imprimir agenda actual"
+                  >
+                    <svg className="h-5 w-5 text-white group-hover:scale-110 transition-transform inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                    Imprimir Vista Actual
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {/* TOOLTIP ÉPICO */}
-        {hoveredEvent && hoveredEvent.aiInterpretation && (
+        {hoveredEvent && hoveredEvent?.aiInterpretation && (
           <div
             className="fixed bg-gradient-to-r from-purple-900/95 to-pink-900/95 backdrop-blur-sm border border-purple-400/40 rounded-2xl p-6 shadow-2xl max-w-sm pointer-events-none z-50"
             style={{
@@ -1333,11 +1657,11 @@ const AgendaPersonalizada = () => {
           >
             {/* Header */}
             <div className="flex items-center mb-4">
-              <span className="text-2xl mr-3">{getEventIcon(hoveredEvent.type, hoveredEvent.priority)}</span>
+              <span className="text-2xl mr-3">{getEventIcon(hoveredEvent!.type, hoveredEvent!.priority)}</span>
               <div>
-                <div className="text-white font-bold">{hoveredEvent.title}</div>
+                <div className="text-white font-bold">{hoveredEvent!.title}</div>
                 <div className="text-purple-200 text-sm">
-                  {hoveredEvent.planet && hoveredEvent.sign && `${hoveredEvent.planet} en ${hoveredEvent.sign}`}
+                  {hoveredEvent!.planet && hoveredEvent!.sign && `${hoveredEvent!.planet} en ${hoveredEvent!.sign}`}
                 </div>
               </div>
             </div>
@@ -1349,7 +1673,7 @@ const AgendaPersonalizada = () => {
                   <span className="mr-2">🔥</span>SIGNIFICADO:
                 </div>
                 <div className="text-white text-sm leading-relaxed">
-                  {hoveredEvent.aiInterpretation.meaning}
+                  {hoveredEvent?.aiInterpretation?.meaning}
                 </div>
               </div>
 
@@ -1358,15 +1682,15 @@ const AgendaPersonalizada = () => {
                   <span className="mr-2">⚡</span>CONSEJO:
                 </div>
                 <div className="text-white text-sm leading-relaxed">
-                  {hoveredEvent.aiInterpretation.advice}
+                  {hoveredEvent?.aiInterpretation?.advice}
                 </div>
               </div>
 
-              {hoveredEvent.aiInterpretation.mantra && (
+              {hoveredEvent?.aiInterpretation?.mantra && (
                 <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-400/30 rounded-lg p-3 text-center">
                   <div className="text-yellow-300 font-semibold text-sm mb-1">✨ MANTRA:</div>
                   <div className="text-white text-sm font-medium italic">
-                    "{hoveredEvent.aiInterpretation.mantra}"
+                    "{hoveredEvent?.aiInterpretation?.mantra}"
                   </div>
                 </div>
               )}
@@ -1379,18 +1703,18 @@ const AgendaPersonalizada = () => {
           <>
             {/* Overlay */}
             <div
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
               onClick={closeEventModal}
             />
 
             {/* Modal centrado */}
-            <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+            <div className="fixed inset-0 flex items-center justify-center z-[101] p-4">
               <div className="bg-gradient-to-br from-purple-900/95 to-pink-900/95 backdrop-blur-sm border border-purple-400/40 rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
                 {/* Header del modal */}
                 <div className="bg-gradient-to-r from-purple-600/80 to-pink-600/80 p-6 border-b border-white/20">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <span className="text-4xl">{getEventIcon(modalEvent.type, modalEvent.priority)}</span>
+                      <span className="text-4xl">{modalEvent ? getEventIcon(modalEvent.type, modalEvent.priority) : ''}</span>
                       <div>
                         <h2 className="text-2xl font-bold text-white">{modalEvent.title}</h2>
                         <p className="text-purple-200 text-sm">
@@ -1500,6 +1824,33 @@ const AgendaPersonalizada = () => {
                           </div>
                         </div>
                       )}
+
+                      {/* 🌟 INTERPRETACIÓN PERSONALIZADA PROFUNDA (NUEVO) */}
+                      {user?.uid && modalEvent && (
+                        <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-2 border-purple-400/30 rounded-2xl p-6">
+                          <div className="mb-4">
+                            <h3 className="text-lg font-semibold text-purple-300 mb-2 flex items-center">
+                              <span className="mr-2">✨</span>
+                              ¿Quieres una interpretación ULTRA PERSONALIZADA?
+                            </h3>
+                            <p className="text-purple-200 text-sm mb-4">
+                              Genera una interpretación única basada en TU carta natal + Solar Return que analiza cómo este evento te afecta específicamente, incluyendo tus fortalezas a usar, bloqueos a transformar, mantras personalizados y ejercicios concretos.
+                            </p>
+                          </div>
+
+                          <EventInterpretationButton
+                            userId={user.uid}
+                            event={{
+                              type: mapEventTypeToInterpretation(modalEvent).type,
+                              date: modalEvent.date,
+                              sign: modalEvent.sign || 'Desconocido',
+                              house: mapEventTypeToInterpretation(modalEvent).house,
+                              planetsInvolved: modalEvent.planet ? [modalEvent.planet] : []
+                            }}
+                            className="w-full"
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1523,13 +1874,7 @@ const AgendaPersonalizada = () => {
           </>
         )}
 
-        {/* 🌙 MODAL DE CARGA LAZY - Aparece al navegar a nuevos meses */}
-        <EventsLoadingModal
-          isOpen={loadingMonthlyEvents}
-          month={loadingMonthName}
-        />
       </div>
-    </div>
   );
 };
 
