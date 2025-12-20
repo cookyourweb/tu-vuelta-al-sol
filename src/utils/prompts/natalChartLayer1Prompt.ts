@@ -229,7 +229,7 @@ Medio Cielo: ${chartData.midheaven.sign} ${chartData.midheaven.degree}°
       "superpoder_integrado": "[2 líneas: 'Tu superpoder marciano: [Capacidad de acción]. Esto te hace imparable en [área]...']"
     },
     "jupiter": {
-      "titulo": "🍀 TU SUERTE Y CRECIMIENTO",
+      "titulo": "🍀 TU SUERTE Y GANANCIAS",
       "posicion": "${jupiter?.sign} Casa ${jupiter?.house}",
       "que_significa_casa": "[1 línea: Casa ${jupiter?.house} es donde se expande tu vida naturalmente]",
       "expansion_natural": "[3-4 párrafos DISRUPTIVOS: 'Tu suerte NO es azar: es resonancia cósmica. Júpiter en ${jupiter?.sign} en Casa ${jupiter?.house} atrae [tipo de abundancia]. Donde otros ven escasez, tú ves [posibilidad]. Tu optimismo no es ingenuidad: es [fe en proceso específico]. Creces cuando [condición]. Desde niño, probablemente tenías facilidad para [área]. Hoy, tu expansión viene de [fuente]...']",
