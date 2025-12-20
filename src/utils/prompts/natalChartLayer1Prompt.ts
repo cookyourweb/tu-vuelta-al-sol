@@ -441,17 +441,8 @@ Medio Cielo: ${chartData.midheaven.sign} ${chartData.midheaven.degree}°
   "planetas_retrogrados_natales": {
     "titulo": "🔄 TUS PLANETAS RETRÓGRADOS NATALES",
     "explicacion_retrogradacion": "[2 párrafos introductorios: 'Un planeta retrógrado natal NO está roto: está INTERNALIZADO. Naciste con esta energía dirigida HACIA ADENTRO en lugar de hacia afuera. Esto no es debilidad: es PROFUNDIDAD. Donde otros expresan ese planeta externamente, tú lo procesas internamente primero. Es como tener un laboratorio interno para esa función psicológica...']",
-    "planetas_retrogrados": [
-      {
-        "planeta": "[Nombre del planeta retrógrado: ej. Mercurio]",
-        "signo_casa": "${planeta?.sign} Casa ${planeta?.house}",
-        "significado_retrogrado": "[3 párrafos: 'Tu [Planeta] retrógrado significa que [función del planeta] opera de forma NO CONVENCIONAL. Mientras otros [expresión externa típica], tú [expresión internalizada]. Esto NO es defecto: es ESPECIFICIDAD. Desde niño, probablemente sentías que tu forma de [función] era "diferente". La gente no entendía por qué [patrón]. Hoy, ese procesamiento interno es tu FORTALEZA en [área]...']",
-        "patron_psicologico": "[2 líneas: 'Patrón natal: [Descripción de cómo este planeta retrógrado moldeó tu psicología desde el nacimiento]. Esto crea [característica única]...']",
-        "desafio": "[2 líneas: 'Desafío: [Área donde la retrogradación crea fricción o malentendidos]. Aprender a [necesidad de integración]...']",
-        "regalo": "[2 líneas: 'Regalo: [Capacidad especial que solo da la retrogradación]. Tu [Planeta] retrógrado te hace [don único]...']"
-      }
-    ],
-    "nota_retrogrados": "[1 párrafo: 'Si NO tienes planetas retrógrados natales, significa que tu expresión planetaria es más DIRECTA y EXTERNA. No es mejor ni peor: es tu configuración. Los planetas directos se expresan hacia afuera naturalmente. Los retrógrados procesan hacia adentro primero...']"
+    "planetas_retrogrados": "[Array de objetos - SOLO incluye planetas que estén retrógrados en la carta natal. Si NO hay planetas retrógrados, devuelve array vacío []. Cada objeto debe tener: { planeta: '[Nombre]', signo_casa: '[Signo] Casa [Número]', significado_retrogrado: '[3 párrafos explicando cómo este planeta retrógrado opera internamente]', patron_psicologico: '[Patrón desde nacimiento]', desafio: '[Área de fricción]', regalo: '[Don único de la retrogradación]' }]",
+    "nota_retrogrados": "[1 párrafo: Si NO hay planetas retrógrados: 'No tienes planetas retrógrados natales, lo que significa que tu expresión planetaria es más DIRECTA y EXTERNA. Los planetas directos se expresan hacia afuera naturalmente sin el procesamiento interno de los retrógrados.' Si HAY planetas retrógrados: 'Estos planetas retrógrados son tus laboratorios internos. Cada uno procesa su función hacia adentro primero antes de expresarla. Esto te da PROFUNDIDAD única en esas áreas.']"
   },
 
   "integracion_carta_natal": {
