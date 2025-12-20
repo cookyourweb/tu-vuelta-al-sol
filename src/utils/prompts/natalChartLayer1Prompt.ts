@@ -250,6 +250,62 @@ Medio Cielo: ${chartData.midheaven.sign} ${chartData.midheaven.degree}°
     }
   },
 
+  "planetas_transpersonales": {
+    "urano": {
+      "titulo": "⚡ Urano en ${uranus?.sign} Casa ${uranus?.house} → TU REBELDÍA Y GENIALIDAD",
+      "posicion": "${uranus?.sign} Casa ${uranus?.house}",
+      "que_significa_casa": "[1 línea: Casa ${uranus?.house} es donde revolucionas y rompes moldes]",
+      "revolucion_interna": "[3-4 párrafos DISRUPTIVOS: '¡Tu Urano NO es caos: es INNOVACIÓN PURA! Urano en ${uranus?.sign} en Casa ${uranus?.house} es donde eres DIFERENTE por diseño cósmico. No necesitas encajar: necesitas [ruptura específica]. Tu rareza en [área] no es defecto: es tu antena captando frecuencias futuras. Donde otros ven "imposible", tú ves [visión]. Desde niño, probablemente te sentías "raro" en [área]. Hoy, esa rareza es tu GENIALIDAD...']",
+      "patron_formativo": "[2-3 líneas: 'Tu Urano se activó cuando [experiencia de exclusión/diferencia]. Aprendiste que ser diferente significaba [creencia]. Ese patrón ahora te impulsa a [manifestación]...']",
+      "sombra_reactiva": "[2-3 líneas con ❌: 'Urano reactivo: Puedes [rebelarte sin causa/aislar/cambiar por cambiar]. Esto no es libertad: es tu sistema huyendo de [necesidad profunda]...']",
+      "luz_consciente": "[2-3 líneas con ✨: 'Urano integrado: Tu capacidad de [innovar/liberar] en ${uranus?.sign} es visionaria. En Casa ${uranus?.house}, esto se traduce en [revolución específica]...']",
+      "superpoder_integrado": "[2 líneas: 'Tu superpoder uraniano: [Capacidad de ruptura consciente]. Esto te convierte en catalizador de evolución...']"
+    },
+    "neptuno": {
+      "titulo": "🌊 Neptuno en ${neptune?.sign} Casa ${neptune?.house} → TU ESPIRITUALIDAD E INTUICIÓN",
+      "posicion": "${neptune?.sign} Casa ${neptune?.house}",
+      "que_significa_casa": "[1 línea: Casa ${neptune?.house} es donde te disuelves y trasciendes]",
+      "conexion_invisible": "[3-4 párrafos DISRUPTIVOS: '¡Tu Neptuno NO es escapismo: es PORTAL A LO INVISIBLE! Neptuno en ${neptune?.sign} en Casa ${neptune?.house} es donde captas lo que otros no ven. Tu sensibilidad en [área] no es debilidad: es tu ANTENA MÍSTICA. No necesitas "evidencia": necesitas [conexión con lo sutil]. Desde niño, probablemente sentías cosas que no podías explicar en [área]. Hoy, esa conexión es tu acceso a [dimensión]...']",
+      "patron_formativo": "[2-3 líneas: 'Tu Neptuno se despertó cuando [experiencia mística/confusa]. Aprendiste que lo invisible era [creencia]. Internalizaste que tu sensibilidad era [interpretación]...']",
+      "sombra_reactiva": "[2-3 líneas con ❌: 'Neptuno reactivo: Puedes [escapar/idealizar/victimizarte]. Esto no es espiritualidad: es tu sistema evitando [realidad incómoda]...']",
+      "luz_consciente": "[2-3 líneas con ✨: 'Neptuno integrado: Tu capacidad de [canalizar/sanar/crear arte] en ${neptune?.sign} es mágica. En Casa ${neptune?.house}, esto se manifiesta como [don específico]...']",
+      "superpoder_integrado": "[2 líneas: 'Tu superpoder neptuniano: [Capacidad de trascendencia]. Esto te conecta con lo divino en [forma]...']"
+    },
+    "pluton": {
+      "titulo": "🔥 Plutón en ${pluto?.sign} Casa ${pluto?.house} → TU PODER TRANSFORMADOR",
+      "posicion": "${pluto?.sign} Casa ${pluto?.house}",
+      "que_significa_casa": "[1 línea: Casa ${pluto?.house} es donde mueres y renaces constantemente]",
+      "poder_transformador": "[3-4 párrafos DISRUPTIVOS: '¡Tu Plutón NO es destrucción: es ALQUIMIA PURA! Plutón en ${pluto?.sign} en Casa ${pluto?.house} es donde tienes PODER REAL. Tu intensidad en [área] no es exageración: es tu acceso a profundidades. Donde otros huyen, tú ENTRAS. Tu capacidad de [transformación] asusta a algunos, pero es tu VERDADERO PODER. Desde niño, probablemente experimentaste [crisis/intensidad] en [área]. Hoy, esa capacidad de atravesar abismos es tu FUERZA...']",
+      "patron_formativo": "[2-3 líneas: 'Tu Plutón se forjó cuando [experiencia de poder/pérdida/crisis]. Aprendiste que el poder significaba [creencia]. Internalizaste que transformar requería [proceso]...']",
+      "sombra_reactiva": "[2-3 líneas con ❌: 'Plutón reactivo: Puedes [controlar/manipular/obsesionarte]. Esto no es poder: es tu sistema intentando [evitar vulnerabilidad]...']",
+      "luz_consciente": "[2-3 líneas con ✨: 'Plutón integrado: Tu capacidad de [regenerar/empoderar] en ${pluto?.sign} es imparable. En Casa ${pluto?.house}, esto se convierte en [transformación profunda]...']",
+      "superpoder_integrado": "[2 líneas: 'Tu superpoder plutoniano: [Capacidad de renacer]. La muerte NO te destruye: te FORTALECE...']"
+    }
+  },
+
+  "puntos_sensibles": {
+    "quiron": {
+      "titulo": "🩹 Quirón en ${chiron?.sign} Casa ${chiron?.house} → TU HERIDA SANADORA",
+      "posicion": "${chiron?.sign} Casa ${chiron?.house}",
+      "que_significa_casa": "[1 línea: Casa ${chiron?.house} es donde llevas tu herida más profunda y tu mayor don de sanación]",
+      "herida_maestra": "[3-4 párrafos DISRUPTIVOS: '¡Tu Quirón NO es solo dolor: es tu PORTAL DE SANACIÓN! Quirón en ${chiron?.sign} en Casa ${chiron?.house} marca tu herida MÁS profunda y tu capacidad MÁS poderosa de sanar. Donde más has sufrido es donde más puedes ayudar. Tu dolor en [área] no es castigo: es tu INICIACIÓN como sanador. Lo que te hizo llorar te convirtió en quien puede secar lágrimas ajenas. Desde niño, probablemente sentiste [herida específica] en [área]. Hoy, esa herida integrada es tu MEDICINA...']",
+      "patron_formativo": "[2-3 líneas: 'Tu herida quirónica se abrió cuando [experiencia dolorosa temprana]. Internalizaste que eras [creencia sobre defecto]. Ese dolor se convirtió en [mecanismo]...']",
+      "sombra_reactiva": "[2-3 líneas con ❌: 'Quirón reactivo: Puedes [identificarte con el dolor/rescatar compulsivamente]. Esto no es sanación: es tu herida sin integrar controlándote...']",
+      "luz_consciente": "[2-3 líneas con ✨: 'Quirón integrado: Tu capacidad de [sanar/guiar] en ${chiron?.sign} es única. En Casa ${chiron?.house}, tu dolor transformado se convierte en [don de sanación]...']",
+      "superpoder_integrado": "[2 líneas: 'Tu superpoder quironico: [Herida convertida en medicina]. Tu mayor dolor es tu mayor regalo para el mundo...']"
+    },
+    "lilith": {
+      "titulo": "🌑 Lilith en ${lilith?.sign} Casa ${lilith?.house} → TU PODER REPRIMIDO",
+      "posicion": "${lilith?.sign} Casa ${lilith?.house}",
+      "que_significa_casa": "[1 línea: Casa ${lilith?.house} es donde has reprimido tu poder salvaje y auténtico]",
+      "poder_salvaje": "[3-4 párrafos DISRUPTIVOS: '¡Tu Lilith NO es maldad: es tu PODER SIN DOMESTICAR! Lilith en ${lilith?.sign} en Casa ${lilith?.house} marca donde te dijeron que eras "demasiado". Tu intensidad en [área] no necesita disculpas: necesita EXPRESIÓN. Lo que la sociedad llama "inapropiado" en ti es exactamente tu AUTENTICIDAD CRUDA. Desde niña/niño, probablemente te castigaron por [expresión auténtica] en [área]. Te dijeron que eras "demasiado [cualidad]". Hoy, recuperar esa Lilith es recuperar tu PODER COMPLETO...']",
+      "patron_formativo": "[2-3 líneas: 'Tu Lilith fue reprimida cuando [experiencia de rechazo por autenticidad]. Aprendiste que tu poder salvaje era [creencia negativa]. Internalizaste que para ser aceptado debías [comportamiento represivo]...']",
+      "sombra_reactiva": "[2-3 líneas con ❌: 'Lilith reactiva: Puedes [explotar destructivamente/reprimir totalmente]. Esto no es liberación: es tu poder sin integración consciente...']",
+      "luz_consciente": "[2-3 líneas con ✨: 'Lilith integrada: Tu capacidad de [expresar poder auténtico] en ${lilith?.sign} es liberadora. En Casa ${lilith?.house}, tu rebeldía se convierte en [fuerza revolucionaria]...']",
+      "superpoder_integrado": "[2 líneas: 'Tu superpoder lilithiano: [Poder sin domesticar conscientemente dirigido]. Tu "demasiado" es EXACTAMENTE suficiente...']"
+    }
+  },
+
   "momento_evolutivo_actual": {
     "puntos_fundamentales": {
       "sol_en_signo": {
@@ -324,6 +380,59 @@ Medio Cielo: ${chartData.midheaven.sign} ${chartData.midheaven.degree}°
       "explicacion": "[2-3 párrafos: 'Tienes ${elements.water.percentage}% de Agua (${elements.water.count} planetas). ${elements.water.percentage > 30 ? '¡MUCHA AGUA! Tu sistema emocional es tu RADAR. Sientes lo invisible. No eres "demasiado sensible": eres ANTENA EMOCIONAL. Tu don es percibir corrientes subterráneas que otros ignoran.' : elements.water.percentage < 15 ? 'POCA agua significa que tus emociones no te inundan fácilmente. No eres frío: simplemente tu acceso emocional es más mental/racional. Tu desafío: permitir sentir sin necesitar entender todo primero.' : 'Tu agua está balanceada. Sientes profundamente pero no te ahogas. Puedes navegar emociones sin perder objetividad.'}']"
     },
     "analisis_balance": "[3-4 párrafos INTEGRATIVOS: 'Tu balance elemental revela tu ESTRATEGIA ÚNICA de estar en el mundo. ${elements.fire.percentage > 30 ? 'Con tu dominancia de Fuego,' : elements.earth.percentage > 30 ? 'Con tu dominancia de Tierra,' : elements.air.percentage > 30 ? 'Con tu dominancia de Aire,' : elements.water.percentage > 30 ? 'Con tu dominancia de Agua,' : 'Con tu balance elemental,'} tu forma de navegar la vida es [descripción]. Tu elemento más bajo es [elemento], lo que significa que [área] requiere esfuerzo consciente. Esto NO es defecto: es invitación a desarrollar [cualidad]. Cuando integras todos tus elementos, te conviertes en [arquetipo completo]. La clave no es "balancear" forzadamente: es HONRAR tu configuración única mientras desarrollas conscientemente lo que falta...']"
+  },
+
+  "modalidades_astrologicas": {
+    "cardinal": {
+      "porcentaje": "[Calcular % de planetas en signos Cardinales: Aries, Cáncer, Libra, Capricornio]",
+      "planetas": "[Lista de planetas en signos Cardinales]",
+      "explicacion": "[2-3 párrafos: 'Tienes [X]% de energía CARDINAL. ${porcentaje > 40 ? '¡MUCHA ENERGÍA CARDINAL! Eres INICIADOR nato. No esperas que las cosas pasen: las HACES pasar. Tu don es arrancar proyectos, abrir caminos, liderar cambios. El peligro: empezar mil cosas sin terminarlas. No eres impaciente: eres CATALIZADOR.' : porcentaje < 20 ? 'POCA energía Cardinal significa que prefieres sostener o adaptar antes que iniciar. No eres pasivo: simplemente tu fuerza está en otras fases. Tu desafío: activar tu capacidad de COMENZAR cuando la vida lo requiere.' : 'Tu energía Cardinal está BALANCEADA. Puedes iniciar cuando es necesario sin vivir en arranque constante. Sabes cuándo empezar y cuándo dejar que otros lideren.'}']"
+    },
+    "fijo": {
+      "porcentaje": "[Calcular % de planetas en signos Fijos: Tauro, Leo, Escorpio, Acuario]",
+      "planetas": "[Lista de planetas en signos Fijos]",
+      "explicacion": "[2-3 párrafos: 'Tienes [X]% de energía FIJA. ${porcentaje > 40 ? '¡MUCHA ENERGÍA FIJA! Eres ROCA INQUEBRANTABLE. Cuando te comprometes, NADA te mueve. Tu don es sostener, construir, resistir tormentas. El peligro: rigidez extrema. No eres terco: eres LEAL a tu visión.' : porcentaje < 20 ? 'POCA energía Fija significa que fluyes y cambias fácilmente. No eres inestable: simplemente tu fuerza está en la flexibilidad. Tu desafío: desarrollar PERSEVERANCIA cuando algo realmente importa.' : 'Tu energía Fija está BALANCEADA. Puedes sostener compromisos sin volverte rígido. Sabes cuándo mantenerte firme y cuándo soltar.'}']"
+    },
+    "mutable": {
+      "porcentaje": "[Calcular % de planetas en signos Mutables: Géminis, Virgo, Sagitario, Piscis]",
+      "planetas": "[Lista de planetas en signos Mutables]",
+      "explicacion": "[2-3 párrafos: 'Tienes [X]% de energía MUTABLE. ${porcentaje > 40 ? '¡MUCHA ENERGÍA MUTABLE! Eres CAMALEÓN MAESTRO. Te adaptas a todo. Tu don es flexibilidad, versatilidad, capacidad de fluir con los cambios. El peligro: dispersión total. No eres inestable: eres ADAPTABLE.' : porcentaje < 20 ? 'POCA energía Mutable significa que los cambios te cuestan. No eres inflexible: simplemente tu fuerza está en la estabilidad o iniciativa. Tu desafío: desarrollar ADAPTABILIDAD cuando la vida cambia rápido.' : 'Tu energía Mutable está BALANCEADA. Puedes adaptarte sin perder tu centro. Sabes cuándo fluir y cuándo mantener estructura.'}']"
+    },
+    "analisis_balance_modalidades": "[3-4 párrafos INTEGRATIVOS: 'Tu balance de modalidades revela tu RITMO ÚNICO de acción. ${porcentaje_cardinal > 40 ? 'Con dominancia Cardinal,' : porcentaje_fijo > 40 ? 'Con dominancia Fija,' : porcentaje_mutable > 40 ? 'Con dominancia Mutable,' : 'Con tu balance modal,'} tu forma de moverte en la vida es [descripción]. Tu modalidad más baja es [modalidad], lo que significa que [fase de acción] requiere esfuerzo consciente. Esto NO es debilidad: es invitación a desarrollar [capacidad]. Los elementos te dicen QUÉ eres (fuego/tierra/aire/agua). Las modalidades te dicen CÓMO actúas (inicias/sostienes/adaptas). Juntos forman tu ESTRATEGIA COMPLETA. Cuando integras todas tus modalidades, te conviertes en [arquetipo completo de acción]...']"
+  },
+
+  "aspectos_principales": {
+    "titulo": "🔗 TUS DIÁLOGOS INTERNOS - ASPECTOS CLAVE",
+    "explicacion_aspectos": "[2 párrafos introductorios: 'Los aspectos son CONVERSACIONES entre planetas dentro de ti. No son "buenos" o "malos": son DINÁMICAS. Un trígono (120°) es diálogo fluido. Una cuadratura (90°) es tensión creativa. Una oposición (180°) es polaridad que pide integración. Cada aspecto revela cómo diferentes partes de ti interactúan...']",
+    "aspectos": [
+      {
+        "aspecto": "[Nombre del aspecto: ej. Sol Cuadratura Luna]",
+        "planetas": "[Planeta1] [tipo: Conjunción/Oposición/Cuadratura/Trígono/Sextil] [Planeta2]",
+        "orbe": "[X]°",
+        "tipo_energia": "[Tenso/Armónico/Neutral]",
+        "dialogo_interno": "[2-3 párrafos: 'Tu [Planeta1] en [Signo] quiere [necesidad del planeta1]. Pero tu [Planeta2] en [Signo] necesita [necesidad del planeta2]. Este [aspecto] crea [dinámica específica]. NO es contradicción: es COMPLEJIDAD. Cuando tu [Planeta1] [acción], tu [Planeta2] responde [reacción]. Este diálogo interno ha estado activo desde niño...']",
+        "sombra_aspecto": "[2 líneas con ❌: 'Cuando este aspecto opera inconscientemente: [patrón reactivo]. Esto crea [conflicto/estancamiento]...']",
+        "luz_aspecto": "[2 líneas con ✨: 'Cuando integras conscientemente este aspecto: [sinergia]. Esto te convierte en [capacidad única]...']",
+        "integracion": "[2 líneas: 'Clave de integración: [Estrategia específica para armonizar ambas energías]. Cuando [Planeta1] y [Planeta2] colaboran, [resultado transformacional]...']"
+      }
+    ],
+    "nota_aspectos": "[1 párrafo: 'Estos son tus 5-10 aspectos MÁS significativos. Hay más aspectos en tu carta, pero estos son los que más moldean tu psicología. Cada uno es un HILO en el tapiz de tu ser. No intentes "resolver" las tensiones: ÚSALAS como combustible creativo...']"
+  },
+
+  "planetas_retrogrados_natales": {
+    "titulo": "🔄 TUS PLANETAS RETRÓGRADOS NATALES",
+    "explicacion_retrogradacion": "[2 párrafos introductorios: 'Un planeta retrógrado natal NO está roto: está INTERNALIZADO. Naciste con esta energía dirigida HACIA ADENTRO en lugar de hacia afuera. Esto no es debilidad: es PROFUNDIDAD. Donde otros expresan ese planeta externamente, tú lo procesas internamente primero. Es como tener un laboratorio interno para esa función psicológica...']",
+    "planetas_retrogrados": [
+      {
+        "planeta": "[Nombre del planeta retrógrado: ej. Mercurio]",
+        "signo_casa": "${planeta?.sign} Casa ${planeta?.house}",
+        "significado_retrogrado": "[3 párrafos: 'Tu [Planeta] retrógrado significa que [función del planeta] opera de forma NO CONVENCIONAL. Mientras otros [expresión externa típica], tú [expresión internalizada]. Esto NO es defecto: es ESPECIFICIDAD. Desde niño, probablemente sentías que tu forma de [función] era "diferente". La gente no entendía por qué [patrón]. Hoy, ese procesamiento interno es tu FORTALEZA en [área]...']",
+        "patron_psicologico": "[2 líneas: 'Patrón natal: [Descripción de cómo este planeta retrógrado moldeó tu psicología desde el nacimiento]. Esto crea [característica única]...']",
+        "desafio": "[2 líneas: 'Desafío: [Área donde la retrogradación crea fricción o malentendidos]. Aprender a [necesidad de integración]...']",
+        "regalo": "[2 líneas: 'Regalo: [Capacidad especial que solo da la retrogradación]. Tu [Planeta] retrógrado te hace [don único]...']"
+      }
+    ],
+    "nota_retrogrados": "[1 párrafo: 'Si NO tienes planetas retrógrados natales, significa que tu expresión planetaria es más DIRECTA y EXTERNA. No es mejor ni peor: es tu configuración. Los planetas directos se expresan hacia afuera naturalmente. Los retrógrados procesan hacia adentro primero...']"
   },
 
   "integracion_carta_natal": {
