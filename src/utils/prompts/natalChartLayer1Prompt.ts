@@ -154,7 +154,7 @@ Medio Cielo: ${chartData.midheaven.sign} ${chartData.midheaven.degree}°
       "mascara_autentica": "[2-3 párrafos profesionales con 1 frase disruptiva máximo: 'Tu Ascendente en ${chartData.ascendant.sign} hace que proyectes [energía característica]. Antes de que hables, la gente percibe [primera impresión]. Tu Ascendente NO es mentira: es tu filtro cósmico auténtico. La gente te ve como [percepción externa], mientras que tú te experimentas internamente como [vivencia del Sol]...']",
       "patron_formativo": "[2-3 líneas profesionales: 'Este filtro se activó desde tu primer respiro. De bebé, el mundo respondió a tu energía ${chartData.ascendant.sign} con [respuesta del entorno], moldeando cómo te presentas.']",
       "sombra_reactiva": "[2-3 líneas con 1 frase disruptiva: 'Cuando te sobre-identificas con tu Ascendente, puedes [exceso del signo]. Cuando lo rechazas, puedes [rechazo o negación]. Ninguno es real: son extremos sin integración.']",
-      "luz_consciente": "[2-3 líneas profesionales: 'Cuando usas tu ${chartData.ascendent.sign} conscientemente, abres puertas a [tipo de experiencias]. Tu presencia genera [efecto positivo] de forma natural.']",
+      "luz_consciente": "[2-3 líneas profesionales: 'Cuando usas tu ${chartData.ascendant.sign} conscientemente, abres puertas a [tipo de experiencias]. Tu presencia genera [efecto positivo] de forma natural.']",
       "superpoder_integrado": "[1 frase disruptiva: Tu superpoder de presencia es [capacidad de impacto que magnetiza]]"
     },
 
