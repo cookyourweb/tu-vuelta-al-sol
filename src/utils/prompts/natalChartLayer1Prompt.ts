@@ -174,8 +174,7 @@ Medio Cielo: ${chartData.midheaven.sign} ${chartData.midheaven.degree}°
 {
   "planetas_en_casas": {
     "sol": {
-      "titulo": "☀️ TU PROPÓSITO DE VIDA",
-      "posicion": "${sun?.sign} Casa ${sun?.house}",
+      "titulo": "☀️ Sol en ${sun?.sign} Casa ${sun?.house} → TU PROPÓSITO DE VIDA",
       "que_significa_casa": "[Explica en 1 línea qué representa Casa ${sun?.house} - el área de vida donde brilla tu identidad]",
       "identidad_esencial": "[3-4 párrafos DISRUPTIVOS: '¡NO VINISTE a ser invisible! Con tu Sol en ${sun?.sign} en Casa ${sun?.house}, tu esencia es [característica única]. Donde otros ven [limitación], tú ves [posibilidad]. Tu propósito se activa en [área de vida de la casa]. Desde niño, probablemente sentías que [experiencia formativa]. Hoy, esa energía se traduce en [manifestación adulta]...']",
       "patron_formativo": "[2-3 líneas: '¿Cómo se formó este patrón? En tu infancia, cuando [situación], internalizaste que [creencia]. Ese patrón ahora te impulsa a [comportamiento actual]...']",
@@ -184,8 +183,7 @@ Medio Cielo: ${chartData.midheaven.sign} ${chartData.midheaven.degree}°
       "superpoder_integrado": "[2 líneas: 'Tu superpoder solar: [Capacidad específica]. Cuando vives alineado con esto, [resultado transformacional]...']"
     },
     "luna": {
-      "titulo": "🌙 TUS EMOCIONES Y NECESIDADES",
-      "posicion": "${moon?.sign} Casa ${moon?.house}",
+      "titulo": "🌙 Luna en ${moon?.sign} Casa ${moon?.house} → TUS EMOCIONES Y NECESIDADES",
       "que_significa_casa": "[1 línea: Qué representa Casa ${moon?.house} para la vida emocional]",
       "mundo_emocional": "[3-4 párrafos DISRUPTIVOS: 'Tu sistema emocional NO es débil: es tu GPS interno. Luna en ${moon?.sign} en Casa ${moon?.house} significa que tus emociones [característica]. No necesitas explicar lo que sientes: necesitas [necesidad emocional específica]. Desde niño, tu seguridad emocional vino de [experiencia]. Hoy, tu sistema nervioso se calma cuando [situación/contexto]...']",
       "patron_formativo": "[2-3 líneas: 'Formación emocional: De niño, aprendiste que [creencia sobre emociones] cuando [situación familiar]. Internalizaste que para estar seguro necesitabas [comportamiento]. Ese patrón sigue activo...']",
@@ -194,8 +192,7 @@ Medio Cielo: ${chartData.midheaven.sign} ${chartData.midheaven.degree}°
       "superpoder_integrado": "[2 líneas: 'Tu superpoder lunar: [Capacidad emocional única]. Esto te convierte en [arquetipo]...']"
     },
     "ascendente": {
-      "titulo": "🎭 TU PERSONALIDAD VISIBLE",
-      "posicion": "${chartData.ascendant.sign} (Casa 1)",
+      "titulo": "🎭 Ascendente en ${chartData.ascendant.sign} → TU PERSONALIDAD VISIBLE",
       "que_significa_casa": "[1 línea: El Ascendente es tu interfaz con el mundo - cómo impactas antes de hablar]",
       "mascara_autentica": "[3-4 párrafos DISRUPTIVOS: '¡Tu Ascendente NO es mentira: es tu FILTRO cósmico! Con Ascendente en ${chartData.ascendant.sign}, proyectas [energía]. Antes de que abras la boca, la gente percibe [primera impresión]. Esto no es casualidad: tu alma eligió esta puerta de entrada porque [razón evolutiva]. La gente te ve como [percepción externa], pero TÚ te experimentas como [vivencia interna del Sol]...']",
       "patron_formativo": "[2-3 líneas: 'Este filtro se activó desde tu primer respiro. De bebé, el mundo respondió a tu energía ${chartData.ascendant.sign} con [respuesta del entorno], moldeando cómo te presentas...']",
@@ -204,8 +201,7 @@ Medio Cielo: ${chartData.midheaven.sign} ${chartData.midheaven.degree}°
       "superpoder_integrado": "[2 líneas: 'Tu superpoder ascendente: [Capacidad de impacto]. Esto magnetiza [tipo de oportunidades]...']"
     },
     "mercurio": {
-      "titulo": "🧠 CÓMO PIENSAS Y TE COMUNICAS",
-      "posicion": "${mercury?.sign} Casa ${mercury?.house}",
+      "titulo": "🧠 Mercurio en ${mercury?.sign} Casa ${mercury?.house} → CÓMO PIENSAS Y TE COMUNICAS",
       "que_significa_casa": "[1 línea: Casa ${mercury?.house} es donde se activa tu mente y comunicación]",
       "estilo_mental": "[3-4 párrafos DISRUPTIVOS: 'Tu mente NO procesa como las demás: tiene su propio algoritmo. Mercurio en ${mercury?.sign} en Casa ${mercury?.house} significa que piensas [forma específica]. No necesitas pensar más rápido/lento: necesitas pensar [a tu manera]. Tu claridad mental llega cuando [condición]. Desde niño, probablemente destacabas en [área mental] pero te confundías con [área opuesta]...']",
       "patron_formativo": "[2-3 líneas: 'Tu estilo mental se formó cuando [experiencia educativa temprana]. Aprendiste que [creencia sobre inteligencia]...']",
@@ -214,8 +210,7 @@ Medio Cielo: ${chartData.midheaven.sign} ${chartData.midheaven.degree}°
       "superpoder_integrado": "[2 líneas: 'Tu superpoder mercurial: [Capacidad comunicativa/mental]. Esto te permite [resultado]...']"
     },
     "venus": {
-      "titulo": "💎 CÓMO AMAS Y QUÉ VALORAS",
-      "posicion": "${venus?.sign} Casa ${venus?.house}",
+      "titulo": "💎 Venus en ${venus?.sign} Casa ${venus?.house} → CÓMO AMAS Y QUÉ VALORAS",
       "que_significa_casa": "[1 línea: Casa ${venus?.house} es donde se activa tu amor y valores]",
       "forma_de_amar": "[3-4 párrafos DISRUPTIVOS: '¡Tu forma de amar NO está rota: solo es específica! Venus en ${venus?.sign} en Casa ${venus?.house} no busca amor genérico: busca [tipo específico de conexión]. Tu corazón no se abre con palabras bonitas: se abre con [acción/cualidad específica]. Lo que realmente valoras no es lo obvio: es [valor profundo]. Desde niño, viste que el amor era [modelo observado]. Hoy buscas [necesidad venusina]...']",
       "patron_formativo": "[2-3 líneas: 'Tu Venus se programó cuando observaste que [modelo de amor/valor]. Internalizaste que para ser amado necesitabas [creencia]...']",
