@@ -67,6 +67,24 @@ export function calculateElementDistribution(planets: ChartData['planets']) {
   };
 }
 
+export function calculateModalityDistribution(planets: ChartData['planets']) {
+  const modalities = { cardinal: [] as string[], fixed: [] as string[], mutable: [] as string[] };
+
+  planets.forEach(p => {
+    const sign = p.sign;
+    if (CARDINAL_SIGNS.some(s => sign.toLowerCase().includes(s.toLowerCase()))) modalities.cardinal.push(p.name);
+    else if (FIXED_SIGNS.some(s => sign.toLowerCase().includes(s.toLowerCase()))) modalities.fixed.push(p.name);
+    else if (MUTABLE_SIGNS.some(s => sign.toLowerCase().includes(s.toLowerCase()))) modalities.mutable.push(p.name);
+  });
+
+  const total = planets.length || 1;
+  return {
+    cardinal: { count: modalities.cardinal.length, percentage: Math.round((modalities.cardinal.length / total) * 100), planets: modalities.cardinal },
+    fixed: { count: modalities.fixed.length, percentage: Math.round((modalities.fixed.length / total) * 100), planets: modalities.fixed },
+    mutable: { count: modalities.mutable.length, percentage: Math.round((modalities.mutable.length / total) * 100), planets: modalities.mutable },
+  };
+}
+
 // =============================================================================
 // HELPER FUNCTIONS
 // =============================================================================
