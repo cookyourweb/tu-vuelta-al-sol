@@ -90,8 +90,8 @@ export interface TripleFusedInterpretation {
 export function generatePlanetTripleFusedPrompt(
   planetName: string,
   sign: string,
-  degree: number,
-  house: number,
+  house: number,     // ← Corregido: house primero
+  degree: number,    // ← Corregido: degree después
   userProfile: any
 ): string {
   const userName = userProfile.name || 'la persona';
