@@ -7,6 +7,8 @@
 // ✅ PERMITIDO: Iconos astrológicos, lenguaje claro, profundidad psicológica
 // =============================================================================
 
+import { houseMeanings } from '@/constants/astrology';
+
 export interface UserProfile {
   name: string;
   age: number;
@@ -48,22 +50,9 @@ function formatPlanetsForPrompt(planets: ChartData['planets']): string {
   ).join('\n');
 }
 
+// Helper to get house meaning from constants
 function getHouseMeaning(houseNumber: number): string {
-  const houseMeanings: Record<number, string> = {
-    1: 'Identidad, apariencia, cómo te presentas al mundo',
-    2: 'Recursos, valores, dinero, autoestima',
-    3: 'Comunicación, aprendizaje, hermanos, entorno cercano',
-    4: 'Hogar, familia, raíces, mundo emocional interno',
-    5: 'Creatividad, romance, hijos, autexpresión',
-    6: 'Trabajo diario, salud, servicio, rutinas',
-    7: 'Relaciones, pareja, asociaciones, el otro',
-    8: 'Transformación, sexualidad, recursos compartidos, muerte y renacimiento',
-    9: 'Filosofía, viajes largos, educación superior, expansión mental',
-    10: 'Carrera, vocación, imagen pública, legado',
-    11: 'Amistades, comunidad, sueños, visión de futuro',
-    12: 'Espiritualidad, subconsciente, karma, sacrificio, retiro'
-  };
-  return houseMeanings[houseNumber] || 'área de vida';
+  return houseMeanings[houseNumber]?.meaning || 'área de vida';
 }
 
 // =============================================================================
