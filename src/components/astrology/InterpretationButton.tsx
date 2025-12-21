@@ -4,7 +4,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Brain, Sparkles, RefreshCw, Eye, X, Star, Target, Zap, Copy, Check, Download, Clock, TrendingUp, Sun, Moon, Compass, Rainbow } from 'lucide-react';
+import { Brain, Sparkles, RefreshCw, Eye, X, Star, Target, Zap, Copy, Check, Download, Clock, TrendingUp, Sun, Moon, Compass } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/context/AuthContext';
 
@@ -769,7 +769,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               {/* Main Title and Subtitle */}
               <div className="mb-10">
                 <h2 className="text-4xl font-bold text-purple-300 mb-3 flex items-center gap-3">
-                  <Star className="w-10 h-10" />
+                  <Sun className="w-10 h-10" />
                   {data.capa_1_identidad_psicologica.titulo ?
                     extractTextFromTooltipDrawer(data.capa_1_identidad_psicologica.titulo) :
                     'CAPA 1 — IDENTIDAD PSICOLÓGICA'}
@@ -883,7 +883,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               {/* Main Title and Subtitle */}
               <div className="mb-10">
                 <h2 className="text-4xl font-bold text-yellow-300 mb-3 flex items-center gap-3">
-                  <Rainbow className="w-10 h-10" />
+                  <Sparkles className="w-10 h-10" />
                   {data.integracion_final.titulo ?
                     extractTextFromTooltipDrawer(data.integracion_final.titulo) :
                     'CAPA 3 — INTEGRACIÓN FINAL'}
