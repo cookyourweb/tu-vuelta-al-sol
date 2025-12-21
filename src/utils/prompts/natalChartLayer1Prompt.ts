@@ -75,12 +75,22 @@ export function generateNatalChartLayer1Prompt(
   const northNode = findPlanet(chartData.planets, 'Nodo Norte', 'North Node', 'True Node', 'Node');
   const southNode = findPlanet(chartData.planets, 'Nodo Sur', 'South Node', 'Mean Node');
 
-  // Debug: log if nodes are not found
+  // Debug: log if nodes are not found or missing house
   if (!northNode) {
     console.warn('⚠️ Nodo Norte no encontrado. Planetas disponibles:', chartData.planets.map(p => p.name));
+  } else {
+    console.log('✅ Nodo Norte encontrado:', { name: northNode.name, sign: northNode.sign, house: northNode.house });
+    if (!northNode.house) {
+      console.warn('⚠️ Nodo Norte NO TIENE propiedad house:', northNode);
+    }
   }
   if (!southNode) {
     console.warn('⚠️ Nodo Sur no encontrado. Planetas disponibles:', chartData.planets.map(p => p.name));
+  } else {
+    console.log('✅ Nodo Sur encontrado:', { name: southNode.name, sign: southNode.sign, house: southNode.house });
+    if (!southNode.house) {
+      console.warn('⚠️ Nodo Sur NO TIENE propiedad house:', southNode);
+    }
   }
 
   return `🧭 PROMPT MAESTRO — INTERPRETACIÓN NATAL COMPLETA (3 CAPAS)
