@@ -759,200 +759,148 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
     console.log('🔍 Is Layer 1 Structure?', isLayer1Structure);
     console.log('🔍 Available keys:', Object.keys(data));
 
-    // ✅ RENDER NEW HYBRID LAYER 1 STRUCTURE (Natal Chart with strategic disruption)
+    // ✅ RENDER NEW HYBRID LAYER 1 STRUCTURE (Simplified, No Emojis, Astrological Icons)
     if (isLayer1HybridStructure) {
       return (
-        <div className="space-y-8 text-white">
-          <div className="bg-gradient-to-r from-purple-600/30 to-pink-600/30 rounded-xl p-5 border border-purple-400/40 mb-6">
-            <p className="text-purple-100 text-sm font-medium">
-              ✨ Interpretación Natal - Enfoque Híbrido: Profesional + Disruptivo Estratégico
-            </p>
-          </div>
-
+        <div className="space-y-10 text-white">
           {/* CAPA 1: IDENTIDAD PSICOLÓGICA */}
           {data.capa_1_identidad_psicologica && (
-            <div className="space-y-6">
-              <h2 className="text-3xl font-bold text-purple-300 mb-6 flex items-center gap-3">
-                <Star className="w-8 h-8" />
-                Capa 1: Identidad Psicológica
-              </h2>
+            <div className="space-y-8">
+              {/* Main Title and Subtitle */}
+              {data.capa_1_identidad_psicologica.titulo && (
+                <div className="mb-10">
+                  <h2 className="text-4xl font-bold text-purple-300 mb-3">
+                    {extractTextFromTooltipDrawer(data.capa_1_identidad_psicologica.titulo)}
+                  </h2>
+                  {data.capa_1_identidad_psicologica.subtitulo && (
+                    <p className="text-purple-200/80 text-lg">
+                      {extractTextFromTooltipDrawer(data.capa_1_identidad_psicologica.subtitulo)}
+                    </p>
+                  )}
+                </div>
+              )}
 
-              {/* Render each planet */}
-              {Object.entries(data.capa_1_identidad_psicologica).map(([planetKey, planetData]: [string, any]) => {
-                if (!planetData || typeof planetData !== 'object') return null;
+              {/* Render each planet with simplified structure */}
+              {Object.entries(data.capa_1_identidad_psicologica)
+                .filter(([key]) => !['titulo', 'subtitulo'].includes(key))
+                .map(([planetKey, planetData]: [string, any]) => {
+                  if (!planetData || typeof planetData !== 'object') return null;
 
-                return (
-                  <div
-                    key={planetKey}
-                    className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl p-8 border border-purple-500/30 shadow-xl"
-                  >
-                    {/* Planet Title */}
-                    {planetData.titulo && (
-                      <h3 className="text-2xl font-bold text-purple-200 mb-2">
-                        {extractTextFromTooltipDrawer(planetData.titulo)}
-                      </h3>
-                    )}
-
-                    {/* Planet Subtitle */}
-                    {planetData.subtitulo && (
-                      <p className="text-purple-300/80 text-sm mb-6 italic">
-                        {extractTextFromTooltipDrawer(planetData.subtitulo)}
-                      </p>
-                    )}
-
-                    <div className="space-y-6">
-                      {/* Qué significa casa (Educational) */}
-                      {planetData.que_significa_casa && (
-                        <div className="bg-blue-900/20 rounded-xl p-5 border border-blue-500/20">
-                          <h4 className="text-blue-300 font-semibold mb-3 flex items-center gap-2">
-                            <span className="text-lg">📚</span> ¿Qué significa esta Casa?
-                          </h4>
-                          <p className="text-blue-100/90 leading-relaxed whitespace-pre-wrap">
-                            {extractTextFromTooltipDrawer(planetData.que_significa_casa)}
-                          </p>
-                        </div>
+                  return (
+                    <div
+                      key={planetKey}
+                      className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl p-8 border border-purple-500/30 shadow-xl"
+                    >
+                      {/* Planet Title (with astrological icons) */}
+                      {planetData.titulo && (
+                        <h3 className="text-2xl font-bold text-purple-200 mb-2">
+                          {extractTextFromTooltipDrawer(planetData.titulo)}
+                        </h3>
                       )}
 
-                      {/* Main Content (varies by planet: identidad_esencial, mundo_emocional, etc.) */}
-                      {Object.entries(planetData).map(([key, value]: [string, any]) => {
-                        // Skip already rendered fields
-                        if (['titulo', 'subtitulo', 'que_significa_casa', 'patron_formativo', 'sombra_reactiva', 'luz_consciente', 'superpoder_integrado'].includes(key)) {
-                          return null;
-                        }
+                      {/* Planet Subtitle */}
+                      {planetData.subtitulo && (
+                        <p className="text-purple-300/70 text-base mb-6 italic font-medium">
+                          {extractTextFromTooltipDrawer(planetData.subtitulo)}
+                        </p>
+                      )}
 
-                        // Render main content sections
-                        const label = key.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
-
-                        return (
-                          <div key={key} className="bg-purple-900/20 rounded-xl p-5 border border-purple-500/20">
-                            <h4 className="text-purple-300 font-semibold mb-3">{label}</h4>
-                            <p className="text-purple-100/90 leading-relaxed whitespace-pre-wrap">
-                              {extractTextFromTooltipDrawer(value)}
-                            </p>
+                      {/* Main Interpretation (single flowing text) */}
+                      {planetData.interpretacion && (
+                        <div className="prose prose-invert prose-lg max-w-none">
+                          <div className="text-purple-50 text-lg leading-relaxed whitespace-pre-wrap">
+                            {extractTextFromTooltipDrawer(planetData.interpretacion)}
                           </div>
-                        );
-                      })}
-
-                      {/* Patrón Formativo */}
-                      {planetData.patron_formativo && (
-                        <div className="bg-cyan-900/20 rounded-xl p-5 border border-cyan-500/20">
-                          <h4 className="text-cyan-300 font-semibold mb-3 flex items-center gap-2">
-                            <span className="text-lg">🌱</span> Patrón Formativo
-                          </h4>
-                          <p className="text-cyan-100/90 leading-relaxed whitespace-pre-wrap">
-                            {extractTextFromTooltipDrawer(planetData.patron_formativo)}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Sombra Reactiva */}
-                      {planetData.sombra_reactiva && (
-                        <div className="bg-red-900/20 rounded-xl p-5 border border-red-500/30">
-                          <h4 className="text-red-300 font-semibold mb-3 flex items-center gap-2">
-                            <span className="text-lg">🌑</span> Sombra Reactiva
-                          </h4>
-                          <p className="text-red-100/90 leading-relaxed whitespace-pre-wrap">
-                            {extractTextFromTooltipDrawer(planetData.sombra_reactiva)}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Luz Consciente */}
-                      {planetData.luz_consciente && (
-                        <div className="bg-yellow-900/20 rounded-xl p-5 border border-yellow-500/30">
-                          <h4 className="text-yellow-300 font-semibold mb-3 flex items-center gap-2">
-                            <span className="text-lg">✨</span> Luz Consciente
-                          </h4>
-                          <p className="text-yellow-100/90 leading-relaxed whitespace-pre-wrap">
-                            {extractTextFromTooltipDrawer(planetData.luz_consciente)}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Superpoder Integrado */}
-                      {planetData.superpoder_integrado && (
-                        <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 rounded-xl p-6 border border-purple-400/40">
-                          <h4 className="text-purple-200 font-bold mb-3 flex items-center gap-2">
-                            <span className="text-xl">⚡</span> Superpoder Integrado
-                          </h4>
-                          <p className="text-purple-100 leading-relaxed whitespace-pre-wrap font-medium">
-                            {extractTextFromTooltipDrawer(planetData.superpoder_integrado)}
-                          </p>
                         </div>
                       )}
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
             </div>
           )}
 
           {/* CAPA 2: DIRECCIÓN EVOLUTIVA */}
           {data.capa_2_direccion_evolutiva && (
-            <div className="space-y-6 mt-12">
-              <h2 className="text-3xl font-bold text-pink-300 mb-6 flex items-center gap-3">
-                <Target className="w-8 h-8" />
-                Capa 2: Dirección Evolutiva
-              </h2>
-
-              <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl p-8 border border-pink-500/30 shadow-xl">
-                <div className="space-y-6">
-                  {Object.entries(data.capa_2_direccion_evolutiva).map(([key, value]: [string, any]) => {
-                    const label = key.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
-
-                    return (
-                      <div key={key} className="bg-pink-900/20 rounded-xl p-5 border border-pink-500/20">
-                        <h4 className="text-pink-300 font-semibold mb-3">{label}</h4>
-                        {typeof value === 'object' && value !== null ? (
-                          <div className="space-y-3">
-                            {Object.entries(value).map(([subKey, subValue]: [string, any]) => {
-                              const subLabel = subKey.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
-                              return (
-                                <div key={subKey} className="bg-pink-800/20 rounded-lg p-4">
-                                  <h5 className="text-pink-200 font-medium mb-2 text-sm">{subLabel}</h5>
-                                  <p className="text-pink-100/90 leading-relaxed whitespace-pre-wrap text-sm">
-                                    {extractTextFromTooltipDrawer(subValue)}
-                                  </p>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        ) : (
-                          <p className="text-pink-100/90 leading-relaxed whitespace-pre-wrap">
-                            {extractTextFromTooltipDrawer(value)}
-                          </p>
-                        )}
-                      </div>
-                    );
-                  })}
+            <div className="space-y-8 mt-16">
+              {/* Main Title and Subtitle */}
+              {data.capa_2_direccion_evolutiva.titulo && (
+                <div className="mb-10">
+                  <h2 className="text-4xl font-bold text-pink-300 mb-3">
+                    {extractTextFromTooltipDrawer(data.capa_2_direccion_evolutiva.titulo)}
+                  </h2>
+                  {data.capa_2_direccion_evolutiva.subtitulo && (
+                    <p className="text-pink-200/80 text-lg">
+                      {extractTextFromTooltipDrawer(data.capa_2_direccion_evolutiva.subtitulo)}
+                    </p>
+                  )}
                 </div>
-              </div>
+              )}
+
+              {/* Render nodos */}
+              {Object.entries(data.capa_2_direccion_evolutiva)
+                .filter(([key]) => !['titulo', 'subtitulo'].includes(key))
+                .map(([key, value]: [string, any]) => {
+                  if (!value || typeof value !== 'object') return null;
+
+                  return (
+                    <div
+                      key={key}
+                      className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-2xl p-8 border border-pink-500/30 shadow-xl"
+                    >
+                      {/* Node Title */}
+                      {value.titulo && (
+                        <h3 className="text-2xl font-bold text-pink-200 mb-2">
+                          {extractTextFromTooltipDrawer(value.titulo)}
+                        </h3>
+                      )}
+
+                      {/* Node Subtitle */}
+                      {value.subtitulo && (
+                        <p className="text-pink-300/70 text-base mb-6 italic font-medium">
+                          {extractTextFromTooltipDrawer(value.subtitulo)}
+                        </p>
+                      )}
+
+                      {/* Node Interpretation */}
+                      {value.interpretacion && (
+                        <div className="prose prose-invert prose-lg max-w-none">
+                          <div className="text-pink-50 text-lg leading-relaxed whitespace-pre-wrap">
+                            {extractTextFromTooltipDrawer(value.interpretacion)}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
             </div>
           )}
 
-          {/* INTEGRACIÓN FINAL */}
+          {/* CAPA 3: INTEGRACIÓN FINAL */}
           {data.integracion_final && (
-            <div className="space-y-6 mt-12">
-              <h2 className="text-3xl font-bold text-yellow-300 mb-6 flex items-center gap-3">
-                <Star className="w-8 h-8" />
-                Integración Final
-              </h2>
-
-              <div className="bg-gradient-to-br from-yellow-900/40 to-orange-900/40 rounded-2xl p-8 border border-yellow-400/40 shadow-xl">
-                <div className="space-y-6">
-                  {Object.entries(data.integracion_final).map(([key, value]: [string, any]) => {
-                    const label = key.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
-
-                    return (
-                      <div key={key}>
-                        <h4 className="text-yellow-300 font-semibold mb-3">{label}</h4>
-                        <p className="text-yellow-100 text-lg leading-relaxed whitespace-pre-wrap font-medium">
-                          {extractTextFromTooltipDrawer(value)}
-                        </p>
-                      </div>
-                    );
-                  })}
+            <div className="space-y-8 mt-16">
+              {/* Main Title and Subtitle */}
+              {data.integracion_final.titulo && (
+                <div className="mb-10">
+                  <h2 className="text-4xl font-bold text-yellow-300 mb-3">
+                    {extractTextFromTooltipDrawer(data.integracion_final.titulo)}
+                  </h2>
+                  {data.integracion_final.subtitulo && (
+                    <p className="text-yellow-200/80 text-lg">
+                      {extractTextFromTooltipDrawer(data.integracion_final.subtitulo)}
+                    </p>
+                  )}
                 </div>
+              )}
+
+              {/* Synthesis */}
+              <div className="bg-gradient-to-br from-yellow-900/40 to-orange-900/40 rounded-2xl p-10 border border-yellow-400/40 shadow-xl">
+                {data.integracion_final.sintesis && (
+                  <div className="prose prose-invert prose-xl max-w-none">
+                    <div className="text-yellow-50 text-xl leading-relaxed whitespace-pre-wrap font-medium">
+                      {extractTextFromTooltipDrawer(data.integracion_final.sintesis)}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
