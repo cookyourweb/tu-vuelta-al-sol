@@ -17,13 +17,21 @@ import * as admin from 'firebase-admin';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userId, planetName, sign, house, degree } = body;
+    const { userId, planetName, sign, house, degree, chartType = 'natal', year } = body;
 
-    console.log('🪐 [PLANET] Generating interpretation for:', planetName);
+    console.log('🪐 [PLANET] Generating interpretation for:', planetName, 'chartType:', chartType);
 
     if (!userId || !planetName || !sign || !house) {
       return NextResponse.json(
         { success: false, error: 'Missing required fields: userId, planetName, sign, house' },
+        { status: 400 }
+      );
+    }
+
+    // Para Solar Return, el año es obligatorio
+    if (chartType === 'solar-return' && !year) {
+      return NextResponse.json(
+        { success: false, error: 'Year is required for Solar Return interpretations' },
         { status: 400 }
       );
     }
@@ -37,7 +45,9 @@ export async function POST(request: NextRequest) {
       sign,
       house,
       degree || 0,
-      {} as any // TODO: Add proper userProfile parameter
+      {} as any, // TODO: Add proper userProfile parameter
+      chartType,
+      year
     );
 
     if (!interpretation) {
@@ -64,10 +74,12 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`📝 [PLANET] Guardando en sección: ${section}`);
+    console.log(`📝 [PLANET] chartType: ${chartType}`);
     console.log(`📝 [PLANET] Key completo: ${section}.${planetKey}`);
 
+    // Guardar con el chartType correcto
     await db.collection('interpretations').updateOne(
-      { userId, chartType: 'natal' },
+      { userId, chartType: chartType },
       {
         $set: {
           [`interpretations.${section}.${planetKey}`]: interpretation,
@@ -77,13 +89,14 @@ export async function POST(request: NextRequest) {
       { upsert: true }
     );
 
-    console.log('✅ [PLANET] Saved to MongoDB:', `${section}.${planetKey}`);
+    console.log('✅ [PLANET] Saved to MongoDB:', `${section}.${planetKey}`, 'chartType:', chartType);
 
     return NextResponse.json({
       success: true,
       interpretation,
       planetKey,
-      message: `Interpretación de ${planetName} generada correctamente`,
+      chartType,
+      message: `Interpretación de ${planetName} ${chartType === 'solar-return' ? `SR ${year}` : ''} generada correctamente`,
     });
 
   } catch (error) {

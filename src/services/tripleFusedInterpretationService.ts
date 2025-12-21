@@ -8,7 +8,7 @@
 // (educativo + poderoso + poético)
 // =============================================================================
 
-import { generateAscendantTripleFusedPrompt, generateAspectTripleFusedPrompt, generateMidheavenTripleFusedPrompt, generatePlanetTripleFusedPrompt, TripleFusedInterpretation } from '@/utils/prompts/tripleFusedPrompts';
+import { generateAscendantTripleFusedPrompt, generateAspectTripleFusedPrompt, generateMidheavenTripleFusedPrompt, generatePlanetTripleFusedPrompt, generateSolarReturnPlanetPrompt, TripleFusedInterpretation } from '@/utils/prompts/tripleFusedPrompts';
 import OpenAI from 'openai';
 
 // =============================================================================
@@ -48,20 +48,32 @@ export async function generatePlanetInterpretation(
   sign: string,
   house: number,
   degree: number,
-  userProfile: UserProfile
+  userProfile: UserProfile,
+  chartType: string = 'natal',
+  year?: number
 ): Promise<TripleFusedInterpretation> {
   try {
-    console.log(`🎨 Generando interpretación para ${planetName} en ${sign} Casa ${house}...`);
+    const chartLabel = chartType === 'solar-return' ? `SR ${year}` : 'Natal';
+    console.log(`🎨 Generando interpretación ${chartLabel} para ${planetName} en ${sign} Casa ${house}...`);
 
     const openai = getOpenAIClient();
-    const prompt = generatePlanetTripleFusedPrompt(planetName, sign, house, degree, userProfile);
+
+    // Usar el prompt apropiado según el tipo de carta
+    const prompt = chartType === 'solar-return'
+      ? generateSolarReturnPlanetPrompt(planetName, sign, house, degree, year!, undefined, userProfile)
+      : generatePlanetTripleFusedPrompt(planetName, sign, house, degree, userProfile);
+
+    // Mensaje de sistema específico según el tipo de carta
+    const systemMessage = chartType === 'solar-return'
+      ? 'Eres un astrólogo evolutivo experto en Solar Return. Respondes ÚNICAMENTE con JSON válido, sin markdown, sin backticks, sin comentarios. Usas lenguaje TEMPORAL específico del año (este año, durante 2025, etc.).'
+      : 'Eres un astrólogo evolutivo experto en crear interpretaciones transformacionales con lenguaje triple fusionado (educativo + poderoso + poético). Respondes SOLO con JSON válido.';
 
     const response = await openai.chat.completions.create({
       model: 'gpt-4-turbo-preview',
       messages: [
         {
           role: 'system',
-          content: 'Eres un astrólogo evolutivo experto en crear interpretaciones transformacionales con lenguaje triple fusionado (educativo + poderoso + poético). Respondes SOLO con JSON válido.'
+          content: systemMessage
         },
         {
           role: 'user',
@@ -79,13 +91,13 @@ export async function generatePlanetInterpretation(
     }
 
     const interpretation = JSON.parse(content) as TripleFusedInterpretation;
-    
-    console.log(`✅ Interpretación generada exitosamente para ${planetName}`);
+
+    console.log(`✅ Interpretación ${chartLabel} generada exitosamente para ${planetName}`);
     return interpretation;
 
   } catch (error) {
     console.error(`❌ Error generando interpretación para ${planetName}:`, error);
-    
+
     // Fallback: interpretación genérica
     return generateFallbackPlanetInterpretation(planetName, sign, house);
   }
