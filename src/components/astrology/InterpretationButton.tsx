@@ -4,7 +4,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Brain, Sparkles, RefreshCw, Eye, X, Star, Target, Zap, Copy, Check, Download, Clock, TrendingUp } from 'lucide-react';
+import { Brain, Sparkles, RefreshCw, Eye, X, Star, Target, Zap, Copy, Check, Download, Clock, TrendingUp, Sun, Moon, Compass, Rainbow } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/context/AuthContext';
 
@@ -767,18 +767,19 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           {data.capa_1_identidad_psicologica && (
             <div className="space-y-8">
               {/* Main Title and Subtitle */}
-              {data.capa_1_identidad_psicologica.titulo && (
-                <div className="mb-10">
-                  <h2 className="text-4xl font-bold text-purple-300 mb-3">
-                    {extractTextFromTooltipDrawer(data.capa_1_identidad_psicologica.titulo)}
-                  </h2>
-                  {data.capa_1_identidad_psicologica.subtitulo && (
-                    <p className="text-purple-200/80 text-lg">
-                      {extractTextFromTooltipDrawer(data.capa_1_identidad_psicologica.subtitulo)}
-                    </p>
-                  )}
-                </div>
-              )}
+              <div className="mb-10">
+                <h2 className="text-4xl font-bold text-purple-300 mb-3 flex items-center gap-3">
+                  <Star className="w-10 h-10" />
+                  {data.capa_1_identidad_psicologica.titulo ?
+                    extractTextFromTooltipDrawer(data.capa_1_identidad_psicologica.titulo) :
+                    'CAPA 1 — IDENTIDAD PSICOLÓGICA'}
+                </h2>
+                {data.capa_1_identidad_psicologica.subtitulo && (
+                  <p className="text-purple-200/80 text-lg ml-13">
+                    {extractTextFromTooltipDrawer(data.capa_1_identidad_psicologica.subtitulo)}
+                  </p>
+                )}
+              </div>
 
               {/* Render each planet with simplified structure */}
               {Object.entries(data.capa_1_identidad_psicologica)
@@ -823,18 +824,19 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           {data.capa_2_direccion_evolutiva && (
             <div className="space-y-8 mt-16">
               {/* Main Title and Subtitle */}
-              {data.capa_2_direccion_evolutiva.titulo && (
-                <div className="mb-10">
-                  <h2 className="text-4xl font-bold text-pink-300 mb-3">
-                    {extractTextFromTooltipDrawer(data.capa_2_direccion_evolutiva.titulo)}
-                  </h2>
-                  {data.capa_2_direccion_evolutiva.subtitulo && (
-                    <p className="text-pink-200/80 text-lg">
-                      {extractTextFromTooltipDrawer(data.capa_2_direccion_evolutiva.subtitulo)}
-                    </p>
-                  )}
-                </div>
-              )}
+              <div className="mb-10">
+                <h2 className="text-4xl font-bold text-pink-300 mb-3 flex items-center gap-3">
+                  <Compass className="w-10 h-10" />
+                  {data.capa_2_direccion_evolutiva.titulo ?
+                    extractTextFromTooltipDrawer(data.capa_2_direccion_evolutiva.titulo) :
+                    'CAPA 2 — DIRECCIÓN EVOLUTIVA'}
+                </h2>
+                {data.capa_2_direccion_evolutiva.subtitulo && (
+                  <p className="text-pink-200/80 text-lg ml-13">
+                    {extractTextFromTooltipDrawer(data.capa_2_direccion_evolutiva.subtitulo)}
+                  </p>
+                )}
+              </div>
 
               {/* Render nodos */}
               {Object.entries(data.capa_2_direccion_evolutiva)
@@ -879,18 +881,19 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           {data.integracion_final && (
             <div className="space-y-8 mt-16">
               {/* Main Title and Subtitle */}
-              {data.integracion_final.titulo && (
-                <div className="mb-10">
-                  <h2 className="text-4xl font-bold text-yellow-300 mb-3">
-                    {extractTextFromTooltipDrawer(data.integracion_final.titulo)}
-                  </h2>
-                  {data.integracion_final.subtitulo && (
-                    <p className="text-yellow-200/80 text-lg">
-                      {extractTextFromTooltipDrawer(data.integracion_final.subtitulo)}
-                    </p>
-                  )}
-                </div>
-              )}
+              <div className="mb-10">
+                <h2 className="text-4xl font-bold text-yellow-300 mb-3 flex items-center gap-3">
+                  <Rainbow className="w-10 h-10" />
+                  {data.integracion_final.titulo ?
+                    extractTextFromTooltipDrawer(data.integracion_final.titulo) :
+                    'CAPA 3 — INTEGRACIÓN FINAL'}
+                </h2>
+                {data.integracion_final.subtitulo && (
+                  <p className="text-yellow-200/80 text-lg ml-13">
+                    {extractTextFromTooltipDrawer(data.integracion_final.subtitulo)}
+                  </p>
+                )}
+              </div>
 
               {/* Synthesis */}
               <div className="bg-gradient-to-br from-yellow-900/40 to-orange-900/40 rounded-2xl p-10 border border-yellow-400/40 shadow-xl">

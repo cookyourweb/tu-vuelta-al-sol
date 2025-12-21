@@ -119,7 +119,7 @@ Medio Cielo: ${chartData.midheaven.sign} ${chartData.midheaven.degree}°
 
 {
   "capa_1_identidad_psicologica": {
-    "titulo": "🪐 CAPA 1 — IDENTIDAD PSICOLÓGICA",
+    "titulo": "CAPA 1 — IDENTIDAD PSICOLÓGICA",
     "subtitulo": "Quién eres, cómo funcionas, cómo vives",
 
     "sol": {
@@ -228,7 +228,7 @@ Incluye detalles específicos del signo ${saturn?.sign} y de la Casa ${saturn?.h
   },
 
   "capa_2_direccion_evolutiva": {
-    "titulo": "🧭 CAPA 2 — DIRECCIÓN EVOLUTIVA",
+    "titulo": "CAPA 2 — DIRECCIÓN EVOLUTIVA",
     "subtitulo": "Hacia dónde creces y qué dejas atrás",
 
     "nodo_norte": {
@@ -259,7 +259,7 @@ Incluye detalles específicos del signo ${southNode?.sign} y de la Casa ${southN
   },
 
   "integracion_final": {
-    "titulo": "🌈 CAPA 3 — INTEGRACIÓN FINAL",
+    "titulo": "CAPA 3 — INTEGRACIÓN FINAL",
     "subtitulo": "Cómo se une todo",
     "sintesis": "[Escribe 4-5 párrafos de síntesis final, profundos, motivadores y coherentes que integren:
 
