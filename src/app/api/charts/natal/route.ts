@@ -251,31 +251,48 @@ function processProkeralaData(apiResponse: any, latitude: number, longitude: num
     };
     return translations[englishName] || englishName;
   };
-  
-  // Procesar planetas
-  const planetData = apiResponse.planet_positions || apiResponse.planets || [];
-  console.log('🪐 Procesando planetas:', planetData.length);
 
-  const planets = planetData.map((planet: any) => {
-    const houseValue = planet.house_number || planet.house || planet.housePosition || 1; // ← Obtener valor de casa
+  /**
+   * ✅ Calcular casa basándose en longitud eclíptica
+   * Compara la longitud del planeta con las cúspides de las casas
+   */
+  const calculateHouseFromLongitude = (planetLongitude: number, houses: any[]): number => {
+    if (!houses || houses.length < 12) {
+      console.warn('⚠️ No hay suficientes casas para calcular posición');
+      return 1;
+    }
 
-    const result = {
-      name: translatePlanet(planet.name || 'Unknown'),
-      sign: getSignFromLongitude(planet.longitude || 0),
-      degree: planet.degree || Math.floor((planet.longitude || 0) % 30),
-      minutes: planet.minutes || Math.floor(((planet.longitude || 0) % 1) * 60),
-      retrograde: planet.is_retrograde || planet.retrograde || false,
-      housePosition: houseValue,  // ← Para el servicio
-      houseNumber: houseValue,    // ← Para los prompts (NUEVO)
-      house: houseValue,          // ← Para compatibilidad (NUEVO)
-      longitude: planet.longitude || 0
-    };
+    // Normalizar longitud a 0-360
+    const normLong = ((planetLongitude % 360) + 360) % 360;
 
-    console.log(`🪐 ${result.name}: ${result.sign} ${result.degree}°${result.minutes}' (Casa ${result.housePosition})`);
-    return result;
-  });
+    // Para cada casa, verificar si el planeta está entre su cúspide y la siguiente
+    for (let i = 0; i < 12; i++) {
+      const currentHouse = houses[i];
+      const nextHouse = houses[(i + 1) % 12];
 
-  // Procesar casas
+      const currentCusp = ((currentHouse.longitude % 360) + 360) % 360;
+      const nextCusp = ((nextHouse.longitude % 360) + 360) % 360;
+
+      // Caso normal: cúspide actual < cúspide siguiente
+      if (currentCusp < nextCusp) {
+        if (normLong >= currentCusp && normLong < nextCusp) {
+          return i + 1;
+        }
+      }
+      // Caso especial: la casa cruza el punto 0° (ej: de 350° a 10°)
+      else {
+        if (normLong >= currentCusp || normLong < nextCusp) {
+          return i + 1;
+        }
+      }
+    }
+
+    // Fallback: retornar casa 1
+    console.warn('⚠️ No se pudo calcular casa para longitud', planetLongitude);
+    return 1;
+  };
+
+  // ✅ PRIMERO: Procesar casas (necesarias para calcular posiciones de planetas)
   const houseData = apiResponse.houses || [];
   const houses = houseData.map((house: any, index: number) => ({
     number: house.number || (index + 1),
@@ -284,6 +301,42 @@ function processProkeralaData(apiResponse: any, latitude: number, longitude: num
     minutes: house.start_cusp?.minutes || house.minutes || Math.floor(((house.start_cusp?.longitude || house.longitude || 0) % 1) * 60),
     longitude: house.start_cusp?.longitude || house.longitude || 0
   }));
+
+  console.log('🏠 Casas procesadas:', houses.length);
+
+  // ✅ SEGUNDO: Procesar planetas (usando casas para calcular posición si es necesario)
+  const planetData = apiResponse.planet_positions || apiResponse.planets || [];
+  console.log('🪐 Procesando planetas:', planetData.length);
+
+  const planets = planetData.map((planet: any) => {
+    // Intentar obtener casa desde la API
+    let houseValue = planet.house_number || planet.house || planet.housePosition;
+
+    // ✅ Si no tiene casa (común en nodos), calcularla desde longitud
+    if (!houseValue && planet.longitude != null) {
+      houseValue = calculateHouseFromLongitude(planet.longitude, houses);
+      const planetName = translatePlanet(planet.name || 'Unknown');
+      console.log(`🔄 ${planetName}: Casa calculada desde longitud ${planet.longitude}° → Casa ${houseValue}`);
+    }
+
+    // Fallback final
+    if (!houseValue) houseValue = 1;
+
+    const result = {
+      name: translatePlanet(planet.name || 'Unknown'),
+      sign: getSignFromLongitude(planet.longitude || 0),
+      degree: planet.degree || Math.floor((planet.longitude || 0) % 30),
+      minutes: planet.minutes || Math.floor(((planet.longitude || 0) % 1) * 60),
+      retrograde: planet.is_retrograde || planet.retrograde || false,
+      housePosition: houseValue,  // ← Para el servicio
+      houseNumber: houseValue,    // ← Para los prompts
+      house: houseValue,          // ← Para compatibilidad
+      longitude: planet.longitude || 0
+    };
+
+    console.log(`🪐 ${result.name}: ${result.sign} ${result.degree}°${result.minutes}' (Casa ${result.housePosition})`);
+    return result;
+  });
   
   // Procesar aspectos
   const aspectData = apiResponse.aspects || [];
