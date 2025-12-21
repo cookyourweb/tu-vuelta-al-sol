@@ -486,7 +486,7 @@ function generateFallbackChart(birthDate: string, birthTime: string, latitude: n
   };
 
   const SIGNS = ['Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'];
-  const PLANETS = ['Sol', 'Luna', 'Mercurio', 'Venus', 'Marte', 'Júpiter', 'Saturno', 'Urano', 'Neptuno', 'Plutón'];
+  const PLANETS = ['Sol', 'Luna', 'Mercurio', 'Venus', 'Marte', 'Júpiter', 'Saturno', 'Urano', 'Neptuno', 'Plutón', 'Nodo Norte', 'Nodo Sur'];
 
   // Generar posiciones de planetas más realistas
   const planets = PLANETS.map((name, index) => {
@@ -500,8 +500,9 @@ function generateFallbackChart(birthDate: string, birthTime: string, latitude: n
       sign: SIGNS[signIndex],
       degree,
       minutes,
-      retrograde: name !== 'Sol' && name !== 'Luna' && seededRandom(4, index * 400) === 0,
+      retrograde: name !== 'Sol' && name !== 'Luna' && name !== 'Nodo Norte' && name !== 'Nodo Sur' && seededRandom(4, index * 400) === 0,
       housePosition: (seededRandom(12, index * 500) + 1),
+      house: (seededRandom(12, index * 500) + 1),
       longitude: (signIndex * 30) + degree + (minutes / 60)
     };
   });
