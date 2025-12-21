@@ -48,6 +48,24 @@ function formatPlanetsForPrompt(planets: ChartData['planets']): string {
   ).join('\n');
 }
 
+function getHouseMeaning(houseNumber: number): string {
+  const houseMeanings: Record<number, string> = {
+    1: 'Identidad, apariencia, cómo te presentas al mundo',
+    2: 'Recursos, valores, dinero, autoestima',
+    3: 'Comunicación, aprendizaje, hermanos, entorno cercano',
+    4: 'Hogar, familia, raíces, mundo emocional interno',
+    5: 'Creatividad, romance, hijos, autexpresión',
+    6: 'Trabajo diario, salud, servicio, rutinas',
+    7: 'Relaciones, pareja, asociaciones, el otro',
+    8: 'Transformación, sexualidad, recursos compartidos, muerte y renacimiento',
+    9: 'Filosofía, viajes largos, educación superior, expansión mental',
+    10: 'Carrera, vocación, imagen pública, legado',
+    11: 'Amistades, comunidad, sueños, visión de futuro',
+    12: 'Espiritualidad, subconsciente, karma, sacrificio, retiro'
+  };
+  return houseMeanings[houseNumber] || 'área de vida';
+}
+
 // =============================================================================
 // MAIN PROMPT GENERATOR
 // =============================================================================
@@ -65,8 +83,16 @@ export function generateNatalChartLayer1Prompt(
   const mars = findPlanet(chartData.planets, 'Marte', 'Mars');
   const jupiter = findPlanet(chartData.planets, 'Jupiter', 'Júpiter');
   const saturn = findPlanet(chartData.planets, 'Saturno', 'Saturn');
-  const northNode = findPlanet(chartData.planets, 'Nodo Norte', 'North Node', 'True Node');
-  const southNode = findPlanet(chartData.planets, 'Nodo Sur', 'South Node');
+  const northNode = findPlanet(chartData.planets, 'Nodo Norte', 'North Node', 'True Node', 'Node');
+  const southNode = findPlanet(chartData.planets, 'Nodo Sur', 'South Node', 'Mean Node');
+
+  // Debug: log if nodes are not found
+  if (!northNode) {
+    console.warn('⚠️ Nodo Norte no encontrado. Planetas disponibles:', chartData.planets.map(p => p.name));
+  }
+  if (!southNode) {
+    console.warn('⚠️ Nodo Sur no encontrado. Planetas disponibles:', chartData.planets.map(p => p.name));
+  }
 
   return `🧭 PROMPT MAESTRO — INTERPRETACIÓN NATAL COMPLETA (3 CAPAS)
 
@@ -123,7 +149,7 @@ Medio Cielo: ${chartData.midheaven.sign} ${chartData.midheaven.degree}°
     "subtitulo": "Quién eres, cómo funcionas, cómo vives",
 
     "sol": {
-      "titulo": "☉ Sol en ${sun?.sign} en Casa ${sun?.house} (área de vida donde se expresa tu identidad)",
+      "titulo": "☉ Sol en ${sun?.sign} en Casa ${sun?.house} (${getHouseMeaning(sun?.house || 1)})",
       "subtitulo": "Tu propósito de vida",
       "interpretacion": "[Escribe 3-4 párrafos fluidos, profundos y motivacionales explicando:
 
@@ -136,7 +162,7 @@ Incluye detalles específicos del signo ${sun?.sign} y de la Casa ${sun?.house}.
     },
 
     "luna": {
-      "titulo": "☽ Luna en ${moon?.sign} en Casa ${moon?.house} (área emocional donde buscas seguridad)",
+      "titulo": "☽ Luna en ${moon?.sign} en Casa ${moon?.house} (${getHouseMeaning(moon?.house || 1)})",
       "subtitulo": "Tus emociones",
       "interpretacion": "[Escribe 3-4 párrafos fluidos, profundos y motivacionales explicando:
 
@@ -162,7 +188,7 @@ Incluye detalles específicos del signo ${chartData.ascendant.sign}. Profesional
     },
 
     "mercurio": {
-      "titulo": "☿ Mercurio en ${mercury?.sign} en Casa ${mercury?.house} (área donde piensas y te expresas)",
+      "titulo": "☿ Mercurio en ${mercury?.sign} en Casa ${mercury?.house} (${getHouseMeaning(mercury?.house || 1)})",
       "subtitulo": "Cómo piensas y hablas",
       "interpretacion": "[Escribe 3-4 párrafos fluidos, profundos y motivacionales explicando:
 
@@ -175,7 +201,7 @@ Incluye detalles específicos del signo ${mercury?.sign} y de la Casa ${mercury?
     },
 
     "venus": {
-      "titulo": "♀ Venus en ${venus?.sign} en Casa ${venus?.house} (área donde amas y valoras)",
+      "titulo": "♀ Venus en ${venus?.sign} en Casa ${venus?.house} (${getHouseMeaning(venus?.house || 1)})",
       "subtitulo": "Cómo amas",
       "interpretacion": "[Escribe 3-4 párrafos fluidos, profundos y motivacionales explicando:
 
@@ -188,7 +214,7 @@ Incluye detalles específicos del signo ${venus?.sign} y de la Casa ${venus?.hou
     },
 
     "marte": {
-      "titulo": "♂ Marte en ${mars?.sign} en Casa ${mars?.house} (área donde actúas y te afirmas)",
+      "titulo": "♂ Marte en ${mars?.sign} en Casa ${mars?.house} (${getHouseMeaning(mars?.house || 1)})",
       "subtitulo": "Cómo enfrentas la vida",
       "interpretacion": "[Escribe 3-4 párrafos fluidos, profundos y motivacionales explicando:
 
@@ -201,7 +227,7 @@ Incluye detalles específicos del signo ${mars?.sign} y de la Casa ${mars?.house
     },
 
     "jupiter": {
-      "titulo": "♃ Júpiter en ${jupiter?.sign} en Casa ${jupiter?.house} (área donde creces y te expandes)",
+      "titulo": "♃ Júpiter en ${jupiter?.sign} en Casa ${jupiter?.house} (${getHouseMeaning(jupiter?.house || 1)})",
       "subtitulo": "Tu suerte y tus oportunidades",
       "interpretacion": "[Escribe 3-4 párrafos fluidos, profundos y motivacionales explicando:
 
@@ -214,7 +240,7 @@ Incluye detalles específicos del signo ${jupiter?.sign} y de la Casa ${jupiter?
     },
 
     "saturno": {
-      "titulo": "♄ Saturno en ${saturn?.sign} en Casa ${saturn?.house} (área de responsabilidad y maduración)",
+      "titulo": "♄ Saturno en ${saturn?.sign} en Casa ${saturn?.house} (${getHouseMeaning(saturn?.house || 1)})",
       "subtitulo": "Tu karma y responsabilidades",
       "interpretacion": "[Escribe 3-4 párrafos fluidos, profundos y motivacionales explicando:
 
@@ -232,7 +258,7 @@ Incluye detalles específicos del signo ${saturn?.sign} y de la Casa ${saturn?.h
     "subtitulo": "Hacia dónde creces y qué dejas atrás",
 
     "nodo_norte": {
-      "titulo": "☊ Nodo Norte en ${northNode?.sign} en Casa ${northNode?.house} (dirección de crecimiento)",
+      "titulo": "☊ Nodo Norte en ${northNode?.sign || 'calculando...'} en Casa ${northNode?.house || '?'} (${northNode?.house ? getHouseMeaning(northNode.house) : 'dirección de crecimiento'})",
       "subtitulo": "Hacia dónde creces",
       "interpretacion": "[Escribe 3-4 párrafos fluidos, profundos y motivacionales explicando:
 
@@ -245,7 +271,7 @@ Incluye detalles específicos del signo ${northNode?.sign} y de la Casa ${northN
     },
 
     "nodo_sur": {
-      "titulo": "☋ Nodo Sur en ${southNode?.sign} en Casa ${southNode?.house} (zona de confort conocida)",
+      "titulo": "☋ Nodo Sur en ${southNode?.sign || 'calculando...'} en Casa ${southNode?.house || '?'} (${southNode?.house ? getHouseMeaning(southNode.house) : 'zona de confort conocida'})",
       "subtitulo": "Zona de confort que debes trascender",
       "interpretacion": "[Escribe 3-4 párrafos fluidos, profundos y motivacionales explicando:
 
