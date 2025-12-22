@@ -265,6 +265,31 @@ Casa 12: Espiritualidad, subconsciente, karma, retiro, lo oculto
 - SÍ explica CÓMO se formó cada patrón
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚡ REGLA DE ORO: CARTA NATAL ES IDENTIDAD PERMANENTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**Carta Natal** = Mapa de tu esencia permanente
+**SÍ** defines quién ES la persona en su núcleo
+**NO** describes eventos temporales o ciclos anuales
+
+OBLIGATORIO:
+✅ "Eres..."
+✅ "Tu esencia es..."
+✅ "YO, [NOMBRE], SOY..."
+✅ Lenguaje de identidad permanente
+✅ "Naciste para..."
+✅ "Tu alma vino a..."
+✅ "En tu núcleo eres..."
+
+PROHIBIDO:
+❌ "Este año..."
+❌ "Durante 2025..."
+❌ "Este ciclo..."
+❌ Lenguaje temporal o anual
+❌ Acciones con fecha ("haz esto hoy/semana/mes")
+❌ Referencias a períodos específicos
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚡ ÃNGULOS VITALES - INTERPRETACIÃ"N OBLIGATORIA
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -290,9 +315,9 @@ NO los omitas. Son OBLIGATORIOS en la respuesta JSON.
 Debes responder SOLO con JSON válido en este formato exacto:
 
 {
-  "esencia_revolucionaria": "String épico sobre quién es ${userName} en su núcleo",
-  
-  "proposito_vida": "String sobre su misión evolutiva en esta vida",
+  "esencia_revolucionaria": "String épico sobre quién ES ${userName} en su núcleo. LENGUAJE DE IDENTIDAD PERMANENTE: 'Eres...', 'Tu esencia es...', 'En tu núcleo eres...'. SIN lenguaje temporal, SIN 'este año', SIN 'durante 2025'. Define su naturaleza permanente.",
+
+  "proposito_vida": "String sobre su misión evolutiva en ESTA VIDA (no este año). LENGUAJE PERMANENTE: 'Naciste para...', 'Tu alma vino a...', 'Tu propósito es...'. SIN referencias temporales. Define su misión de alma.",
   
   "formacion_temprana": {
     "casa_lunar": {
@@ -387,7 +412,7 @@ Debes responder SOLO con JSON válido en este formato exacto:
     "eje_completo": "String: Explicación del balance entre ambos nodos. Su GPS evolutivo."
   },
 
-  "declaracion_poder": "String: Declaración poderosa en primera persona como si ${userName} la dijera. Ejemplo: 'YO, ${userName.toUpperCase()}, SOY...'",
+  "declaracion_poder": "String: Declaración de IDENTIDAD poderosa en primera persona como si ${userName} la dijera. OBLIGATORIO usar 'YO SOY...', 'SOY...'. Ejemplo: 'YO, ${userName.toUpperCase()}, SOY...' Define su ESENCIA permanente, NO acciones temporales. SIN 'este año haré...', SÍ 'SOY...'",
   
   "advertencias": [
     "String: Advertencia honesta 1 sobre patrones autodestructivos",
@@ -429,6 +454,19 @@ Debes responder SOLO con JSON válido en este formato exacto:
 9. CIERRA TODAS las llaves, corchetes y comillas correctamente
 10. Si llegas al límite de tokens, PRIORIZA completar el JSON correctamente
 11. NUNCA incluyas acciones temporales, rituales o mantras (eso NO va aquí)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ CHECKLIST ANTES DE RESPONDER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+□ ¿Usé LENGUAJE DE IDENTIDAD PERMANENTE? ("Eres...", "Tu esencia es...", "Naciste para...")
+□ ¿EVITÉ lenguaje temporal? ("este año", "durante 2025", "este ciclo")
+□ ¿La declaración_poder usa "YO SOY..." definiendo IDENTIDAD, no acciones temporales?
+□ ¿Conecté infancia → patrón adulto en formación_temprana?
+□ ¿Incluí todos los campos obligatorios del JSON?
+□ ¿El JSON es válido y está completo?
+
+**AHORA GENERA LA INTERPRETACIÓN NATAL CON LENGUAJE DE IDENTIDAD PERMANENTE.**
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🎨 EJEMPLOS DE LENGUAJE CORRECTO
