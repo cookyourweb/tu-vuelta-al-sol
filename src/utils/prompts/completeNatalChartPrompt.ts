@@ -196,6 +196,33 @@ DISTRIBUCIÓN MODAL (calculada):
 🌊 Mutable: ${modalidades.mutable.percentage}% (${modalidades.mutable.planets.join(', ') || 'ninguno'})
 
 ═══════════════════════════════════════════════
+⚡ REGLA DE ORO: CARTA NATAL ES IDENTIDAD PERMANENTE
+═══════════════════════════════════════════════
+
+**Carta Natal** = Mapa de esencia permanente e identidad
+**SÍ** defines quién ES la persona en su núcleo
+**NO** describes eventos temporales o ciclos anuales
+
+LENGUAJE OBLIGATORIO:
+✅ "Eres..."
+✅ "Tu esencia es..."
+✅ "Naciste para..."
+✅ "YO SOY..." (en declaraciones)
+✅ Lenguaje de identidad permanente y atemporal
+✅ "En tu núcleo eres..."
+✅ "Tu alma vino a..."
+
+LENGUAJE PROHIBIDO:
+❌ "Este año..."
+❌ "Durante 2025..."
+❌ "Este ciclo..."
+❌ "En este momento..."
+❌ Referencias a períodos temporales específicos
+❌ Lenguaje transitorio o anual
+
+RECUERDA: Natal define QUIÉN ERES, no qué harás este año.
+
+═══════════════════════════════════════════════
 GENERA LA INTERPRETACIÓN COMPLETA EN JSON
 ═══════════════════════════════════════════════
 
@@ -226,7 +253,7 @@ Responde ÚNICAMENTE con un JSON válido:
     "ritmo_accion": "[Párrafo: CÓMO ${userProfile.name} toma acción en la vida según su distribución modal]"
   },
 
-  "esencia_revolucionaria": "[4-5 líneas TRANSFORMATIONAL Y TRANSFORMATIONAL: 'La verdad sobre tu carta natal: Tienes Sol en ${sun?.sign} y Luna en ${moon?.sign} - esta combinación representa un camino de TRANSFORMACIÓN. Tu propósito aquí es EVOLUCIONAR a través de [área específica]. Tu crecimiento viene de enfrentar los desafíos que [área específica] te presenta. La pregunta no es si encontrarás obstáculos - es cómo los usarás para STRENGTHENSRTE y crecer...']",
+  "esencia_revolucionaria": "[4-5 líneas con LENGUAJE DE IDENTIDAD PERMANENTE: 'ERES [arquetipo/esencia]. Con Sol en ${sun?.sign} y Luna en ${moon?.sign}, tu naturaleza es [característica permanente]. Naciste para [propósito de vida]. Tu alma vino a [misión evolutiva]. En tu núcleo eres [esencia profunda]...' SIN lenguaje temporal, SIN 'este año', SIN 'durante 2025'. Define quién ES, no qué hará temporalmente.]",
 
   "interpretaciones_planetarias": {
     "sol": {
@@ -444,9 +471,9 @@ Responde ÚNICAMENTE con un JSON válido:
     ]
   },
 
-  "declaracion_poder_final": "[Declaración POÉTICA Y EMPODERADORA de 5-6 líneas en primera persona: 'Mi carta natal no me limita: me revela. Con Sol en ${sun?.sign}, Luna en ${moon?.sign}, y Ascendente ${chartData.ascendant.sign}, mi sistema está diseñado para crecer a través de [tipo de experiencias]. Busco conscientemente experiencias que me desafían y fortalecen. Los desafíos en [área] me enseñan y me construyen. Estoy comprometido/a con mi propia evolución. Este es mi mapa de crecimiento. Soy [metáfora] que se fortalece con cada experiencia consciente.']",
+  "declaracion_poder_final": "[Declaración de IDENTIDAD PERMANENTE POÉTICA en primera persona con 'YO SOY': 'YO SOY [esencia/arquetipo]. Con Sol en ${sun?.sign}, Luna en ${moon?.sign}, y Ascendente ${chartData.ascendent.sign}, mi naturaleza es [característica permanente]. Nací para [propósito de vida]. Mi alma vino a [misión evolutiva]. SOY [metáfora de identidad permanente]. Esta es mi esencia, no mi acción temporal.' SIN 'este año', SIN 'durante 2025', SÍ 'YO SOY', SÍ 'Nací para'.]",
 
-  "mantra_personal": "[Mantra POÉTICO Y EMPODERADOR - inspirador y práctico: 'Crezco a través de [experiencia específica del área]. Los desafíos en [contexto] me fortalecen. Abrazo el cambio porque es mi forma de evolucionar.']"
+  "mantra_personal": "[Mantra de IDENTIDAD PERMANENTE POÉTICO Y EMPODERADOR: 'SOY [esencia/arquetipo]. Mi naturaleza es [característica permanente]. Nací para [propósito]. Mi alma es [cualidad esencial].' SIN lenguaje temporal como 'crezco', 'este año', 'durante este ciclo'. SÍ lenguaje de SER: 'SOY', 'Mi esencia es', 'Nací para'.]"
 }
 
 IMPORTANT INSTRUCTIONS:
@@ -458,7 +485,21 @@ IMPORTANT INSTRUCTIONS:
 6. Valid and complete JSON without [...] or internal comments
 7. Each planetary interpretation should have an archetypal title focused on transformation
 8. Integrate concepts naturally that emphasize: personal commitment, resilience, adaptability, calculated risk-taking, learning from feedback, balanced strategies, enduring value
-9. Use practical, action-oriented language - be HONEST AND DIRECT without being aggressive`;
+9. Use practical, action-oriented language - be HONEST AND DIRECT without being aggressive
+
+═══════════════════════════════════════════════
+✅ CHECKLIST ANTES DE RESPONDER
+═══════════════════════════════════════════════
+
+□ ¿Usé LENGUAJE DE IDENTIDAD PERMANENTE? ("Eres...", "Tu esencia es...", "Naciste para...", "YO SOY...")
+□ ¿EVITÉ lenguaje temporal? ("este año", "durante 2025", "este ciclo", "en este momento")
+□ ¿La esencia_revolucionaria define QUIÉN ES, no qué hará temporalmente?
+□ ¿La declaracion_poder_final usa "YO SOY..." definiendo IDENTIDAD permanente?
+□ ¿El mantra_personal es de SER ("SOY..."), no de hacer temporal ("Crezco...")?
+□ ¿Todos los campos están completos sin [...] ni placeholders?
+□ ¿El JSON es válido y está completo?
+
+**AHORA GENERA LA INTERPRETACIÓN NATAL CON LENGUAJE DE IDENTIDAD PERMANENTE.**`;
 }
 
 export default generateCompleteNatalChartPrompt;
