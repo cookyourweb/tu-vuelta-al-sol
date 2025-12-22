@@ -13,6 +13,7 @@ import {
   debugListPlanets,
   verifyExpectedPlanets,
 } from '@/utils/planetNameUtils';
+import { generateSolarReturnAspectPrompt } from '@/utils/prompts/tripleFusedPrompts';
 
 // =============================================================================
 // TYPES
@@ -218,7 +219,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userId, planet1, planet2, aspectType, orb } = body;
+    const { userId, planet1, planet2, aspectType, orb, chartType = 'natal', year } = body;
 
     if (!userId || !planet1 || !planet2 || !aspectType) {
       return NextResponse.json(
@@ -227,7 +228,8 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    console.log('🎯 [PUT] Generating aspect interpretation:', { userId, planet1, planet2, aspectType, orb });
+    const chartLabel = chartType === 'solar-return' ? `SR ${year}` : 'Natal';
+    console.log(`🎯 [PUT] Generating ${chartLabel} aspect interpretation:`, { userId, planet1, planet2, aspectType, orb });
 
     const mongoose = await connectToDatabase();
     const db = (mongoose as any).connection?.db ?? (mongoose as any).db;
@@ -235,12 +237,12 @@ export async function PUT(request: NextRequest) {
     // Check if interpretation already exists
     const existing = await db.collection('interpretations').findOne({
       userId,
-      chartType: 'natal',
+      chartType,
     });
 
     if (!existing) {
       return NextResponse.json(
-        { success: false, error: 'No natal interpretations found. Generate them first.' },
+        { success: false, error: `No ${chartType} interpretations found. Generate them first.` },
         { status: 404 }
       );
     }
@@ -249,7 +251,7 @@ export async function PUT(request: NextRequest) {
 
     // Check if aspect interpretation already exists
     if (existing.interpretations.aspects?.[aspectKey]) {
-      console.log('✅ [PUT] Aspect interpretation already exists');
+      console.log(`✅ [PUT] ${chartLabel} aspect interpretation already exists`);
       return NextResponse.json({
         success: true,
         data: existing.interpretations.aspects[aspectKey],
@@ -257,12 +259,55 @@ export async function PUT(request: NextRequest) {
       });
     }
 
+    // ⭐ CRÍTICO: Para Solar Return, buscar el aspecto NATAL del mismo par de planetas
+    let natalAspect = undefined;
+
+    if (chartType === 'solar-return' && userId) {
+      try {
+        console.log(`🔍 [ASPECT] Buscando aspecto natal de ${planet1}-${planet2} para comparación...`);
+
+        // Buscar la interpretación natal guardada
+        const natalInterpretation = await db.collection('interpretations').findOne({
+          userId,
+          chartType: 'natal'
+        });
+
+        if (natalInterpretation && natalInterpretation.natalChart) {
+          // Buscar si existe el aspecto natal entre los mismos planetas
+          const natalAspectFound = natalInterpretation.natalChart.aspects?.find(
+            (a: any) =>
+              (a.planet1 === planet1 && a.planet2 === planet2) ||
+              (a.planet1 === planet2 && a.planet2 === planet1)
+          );
+
+          if (natalAspectFound) {
+            natalAspect = {
+              exists: true,
+              type: natalAspectFound.type,
+              orb: natalAspectFound.orb
+            };
+            console.log(`✅ [ASPECT] Aspecto natal encontrado: ${planet1} ${natalAspectFound.type} ${planet2} (orb: ${natalAspectFound.orb}°)`);
+            console.log(`📊 [ASPECT] Comparación: Natal ${natalAspectFound.type} → SR ${aspectType}`);
+          } else {
+            natalAspect = { exists: false };
+            console.log(`📌 [ASPECT] Aspecto NO existe en carta natal - aparece SOLO en SR ${year}`);
+          }
+        }
+      } catch (error) {
+        console.error(`❌ [ASPECT] Error buscando aspecto natal:`, error);
+        // Continuar sin aspecto natal (el prompt funcionará igual pero sin comparación)
+      }
+    }
+
     // Generate new aspect interpretation
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const aspectInterpretation = await generateAspectInterpretation(
       { planet1, planet2, type: aspectType, orb },
       { name: 'User', age: 30 }, // Default user profile
-      openai
+      openai,
+      chartType,
+      year,
+      natalAspect  // ⭐ Pasar aspecto natal para comparación
     );
 
     // Update the interpretations with the new aspect
@@ -276,7 +321,7 @@ export async function PUT(request: NextRequest) {
 
     // Save back to database
     await db.collection('interpretations').updateOne(
-      { userId, chartType: 'natal' },
+      { userId, chartType },
       {
         $set: {
           interpretations: updatedInterpretations,
@@ -285,7 +330,7 @@ export async function PUT(request: NextRequest) {
       }
     );
 
-    console.log('✅ [PUT] Aspect interpretation generated and saved');
+    console.log(`✅ [PUT] ${chartLabel} aspect interpretation generated and saved`);
 
     return NextResponse.json({
       success: true,
@@ -1036,10 +1081,24 @@ ${modality.name === 'Mutable' ? '- Mutable: "¡NO VINISTE A QUEDARTE!", "Tu supe
 async function generateAspectInterpretation(
   aspect: any,
   userProfile: any,
-  openai: OpenAI
+  openai: OpenAI,
+  chartType: string = 'natal',
+  year?: number,
+  natalAspect?: { exists: boolean; type?: string; orb?: number }
 ): Promise<PlanetInterpretation> {
 
-  const prompt = `Eres un astrólogo evolutivo experto. Genera una interpretación DISRUPTIVA para:
+  // ⭐ Usar prompt de Solar Return si chartType = 'solar-return'
+  const prompt = chartType === 'solar-return' && year
+    ? generateSolarReturnAspectPrompt(
+        aspect.planet1,
+        aspect.planet2,
+        aspect.type,
+        aspect.orb,
+        year,
+        natalAspect,
+        userProfile
+      )
+    : `Eres un astrólogo evolutivo experto. Genera una interpretación DISRUPTIVA para:
 
 **ASPECTO:** ${aspect.planet1} ${aspect.type} ${aspect.planet2}
 **GRADO:** ${aspect.orb}° de separación
@@ -1087,13 +1146,18 @@ ${aspect.type === 'Oposición' ? '- Oposición: "¡NO VINISTE A IGNORAR LA DICOT
 ${aspect.type === 'Trígono' ? '- Trígono: "¡NO VINISTE A DESPERDICIAR TU TALENTO!", "Tu superpoder es fluir con facilidad"' : ''}
 ${aspect.type === 'Sextil' ? '- Sextil: "¡NO VINISTE A PERDER OPORTUNIDADES!", "Tu superpoder es crear oportunidades"' : ''}`;
 
+  // ⭐ System message específico según chart type
+  const systemMessage = chartType === 'solar-return'
+    ? 'Eres un astrólogo evolutivo experto en Solar Return. Respondes ÚNICAMENTE con JSON válido, sin markdown, sin backticks, sin comentarios. Usas lenguaje TEMPORAL específico del año (este año, durante ' + year + ', etc.).'
+    : 'Eres un astrólogo evolutivo experto. Respondes EXCLUSIVAMENTE con JSON válido sin texto adicional ni markdown.';
+
   try {
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
         {
           role: 'system',
-          content: 'Eres un astrólogo evolutivo experto. Respondes EXCLUSIVAMENTE con JSON válido sin texto adicional ni markdown.',
+          content: systemMessage,
         },
         {
           role: 'user',

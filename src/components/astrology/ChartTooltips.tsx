@@ -357,7 +357,8 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
     }, 5000); // Después de 5 segundos
 
     try {
-      console.log(`🎯 Generating aspect: ${planet1} ${aspectType} ${planet2}`);
+      const chartLabel = chartType === 'solar-return' ? `SR ${solarReturnYear}` : 'Natal';
+      console.log(`🎯 Generating ${chartLabel} aspect: ${planet1} ${aspectType} ${planet2}`);
 
       const response = await fetch('/api/astrology/interpret-natal', {
         method: 'PUT',
@@ -367,7 +368,9 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           planet1,
           planet2,
           aspectType,
-          orb
+          orb,
+          chartType,  // ⭐ Enviar tipo de carta
+          year: solarReturnYear  // ⭐ Enviar año SR
         })
       });
 
