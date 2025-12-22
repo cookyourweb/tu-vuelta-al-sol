@@ -50,17 +50,22 @@ export async function generatePlanetInterpretation(
   degree: number,
   userProfile: UserProfile,
   chartType: string = 'natal',
-  year?: number
+  year?: number,
+  natalPlanetPosition?: { sign: string; house: number }
 ): Promise<TripleFusedInterpretation> {
   try {
     const chartLabel = chartType === 'solar-return' ? `SR ${year}` : 'Natal';
     console.log(`🎨 Generando interpretación ${chartLabel} para ${planetName} en ${sign} Casa ${house}...`);
 
+    if (natalPlanetPosition) {
+      console.log(`📊 Con comparación natal: ${planetName} Natal en ${natalPlanetPosition.sign} Casa ${natalPlanetPosition.house}`);
+    }
+
     const openai = getOpenAIClient();
 
     // Usar el prompt apropiado según el tipo de carta
     const prompt = chartType === 'solar-return'
-      ? generateSolarReturnPlanetPrompt(planetName, sign, house, degree, year!, undefined, userProfile)
+      ? generateSolarReturnPlanetPrompt(planetName, sign, house, degree, year!, natalPlanetPosition, userProfile)
       : generatePlanetTripleFusedPrompt(planetName, sign, house, degree, userProfile);
 
     // Mensaje de sistema específico según el tipo de carta

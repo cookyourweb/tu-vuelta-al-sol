@@ -39,6 +39,44 @@ export async function POST(request: NextRequest) {
     const mongoose = await connectToDatabase();
     const db = (mongoose as any).connection?.db ?? (mongoose as any).db;
 
+    // ⭐ CRÍTICO: Para Solar Return, buscar la posición NATAL del mismo planeta
+    let natalPlanetPosition = undefined;
+
+    if (chartType === 'solar-return' && userId) {
+      try {
+        console.log(`🔍 [PLANET] Buscando posición natal de ${planetName} para comparación...`);
+
+        // Buscar la interpretación natal guardada que contiene la carta completa
+        const natalInterpretation = await db.collection('interpretations').findOne({
+          userId,
+          chartType: 'natal'
+        });
+
+        if (natalInterpretation && natalInterpretation.natalChart) {
+          // Buscar el planeta en la carta natal
+          const natalPlanet = natalInterpretation.natalChart.planets?.find(
+            (p: any) => p.name === planetName
+          );
+
+          if (natalPlanet) {
+            natalPlanetPosition = {
+              sign: natalPlanet.sign,
+              house: natalPlanet.house
+            };
+            console.log(`✅ [PLANET] Posición natal encontrada: ${planetName} en ${natalPlanet.sign} Casa ${natalPlanet.house}`);
+            console.log(`📊 [PLANET] Comparación: Natal ${natalPlanet.sign} Casa ${natalPlanet.house} → SR ${sign} Casa ${house}`);
+          } else {
+            console.warn(`⚠️ [PLANET] ${planetName} no encontrado en carta natal`);
+          }
+        } else {
+          console.warn(`⚠️ [PLANET] No se encontró carta natal para userId ${userId}`);
+        }
+      } catch (error) {
+        console.error(`❌ [PLANET] Error buscando posición natal:`, error);
+        // Continuar sin posición natal (el prompt funcionará igual pero sin comparación)
+      }
+    }
+
     // Generate planet interpretation
     const interpretation = await generatePlanetInterpretation(
       planetName,
@@ -47,7 +85,8 @@ export async function POST(request: NextRequest) {
       degree || 0,
       {} as any, // TODO: Add proper userProfile parameter
       chartType,
-      year
+      year,
+      natalPlanetPosition  // ⭐ Pasar posición natal para comparación
     );
 
     if (!interpretation) {
