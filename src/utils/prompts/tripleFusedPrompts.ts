@@ -184,6 +184,33 @@ Debes responder SOLO con JSON válido en este formato:
 }
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚡ REGLA DE ORO: CARTA NATAL ES IDENTIDAD PERMANENTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**Carta Natal** = Mapa de esencia permanente e identidad
+**SÍ** defines quién ES la persona en su núcleo
+**NO** describes eventos temporales o ciclos anuales
+
+LENGUAJE OBLIGATORIO:
+✅ "Eres..."
+✅ "Tu esencia es..."
+✅ "Naciste para..."
+✅ "YO SOY..." / "Yo, ${userName}, SOY..." (en declaraciones)
+✅ Lenguaje de identidad permanente y atemporal
+✅ "En tu núcleo eres..."
+✅ "Tu naturaleza es..."
+
+LENGUAJE PROHIBIDO:
+❌ "Este año..."
+❌ "Durante 2025..."
+❌ "Este ciclo..."
+❌ "En este momento..."
+❌ Referencias a períodos temporales específicos
+❌ Lenguaje transitorio o anual
+
+IMPORTANTE: Usa "Eres...", NO "Este año eres...". La carta natal define identidad permanente.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚡ INSTRUCCIONES CRÍTICAS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -262,6 +289,21 @@ El Ascendente es:
 - Tu INSTINTO AUTOMÁTICO: tu forma natural de responder a nuevas situaciones
 
 NO es tu esencia (eso es el Sol), pero SÍ es tu forma de ESTAR en el mundo.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚡ REGLA DE ORO: CARTA NATAL ES IDENTIDAD PERMANENTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+LENGUAJE OBLIGATORIO:
+✅ "Eres...", "Tu presencia es...", "Naciste con..."
+✅ "YO SOY..." (en declaraciones)
+✅ Lenguaje de identidad permanente
+
+LENGUAJE PROHIBIDO:
+❌ "Este año...", "Durante 2025...", "Este ciclo..."
+❌ Referencias temporales
+
+El Ascendente define cómo ERES en tu presencia, no cómo estás este año.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📋 ESTRUCTURA JSON REQUERIDA
@@ -369,6 +411,21 @@ El Medio Cielo (MC) es:
 - Tu REALIZACIÓN: cómo te sientes satisfecho en lo público
 
 Es el punto más alto del cielo en tu carta - simboliza tu culminación.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚡ REGLA DE ORO: CARTA NATAL ES IDENTIDAD PERMANENTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+LENGUAJE OBLIGATORIO:
+✅ "Tu vocación es...", "Naciste para...", "Eres llamado/a a..."
+✅ "YO SOY..." (en declaraciones)
+✅ Lenguaje de identidad permanente
+
+LENGUAJE PROHIBIDO:
+❌ "Este año...", "Durante 2025...", "Este ciclo..."
+❌ Referencias temporales
+
+El Medio Cielo define tu VOCACIÓN DE ALMA permanente, no qué harás este año.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📋 ESTRUCTURA JSON REQUERIDA
@@ -481,6 +538,21 @@ Los aspectos son "conversaciones" entre planetas. Representan cómo diferentes p
 
 ${aspectName}:
 ${getAspectDescription(aspectName)}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚡ REGLA DE ORO: CARTA NATAL ES IDENTIDAD PERMANENTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+LENGUAJE OBLIGATORIO:
+✅ "Este diálogo ES...", "Eres alguien que...", "Tu naturaleza incluye..."
+✅ "YO SOY..." (en declaraciones)
+✅ Lenguaje de identidad permanente
+
+LENGUAJE PROHIBIDO:
+❌ "Este año...", "Durante 2025...", "Este ciclo..."
+❌ Referencias temporales
+
+Los aspectos natales definen diálogos PERMANENTES en tu psique, no temporales.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📋 ESTRUCTURA JSON REQUERIDA
