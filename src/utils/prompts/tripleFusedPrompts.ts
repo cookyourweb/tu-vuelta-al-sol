@@ -563,109 +563,166 @@ export function generateSolarReturnPlanetPrompt(
   const userName = userProfile?.name || 'la persona';
   const age = userProfile?.age || 'X';
 
+  // Mapeo de casas a significados
+  const houseKeywords: Record<number, string> = {
+    1: 'identidad, cuerpo, iniciativa personal',
+    2: 'dinero, recursos, valores, autoestima',
+    3: 'comunicación, aprendizaje, entorno cercano',
+    4: 'hogar, familia, raíces, vida privada',
+    5: 'creatividad, romance, placer, hijos',
+    6: 'salud, trabajo diario, hábitos',
+    7: 'relaciones, asociaciones, pareja',
+    8: 'transformación, recursos compartidos, intimidad',
+    9: 'expansión, viajes, estudios, filosofía',
+    10: 'carrera, imagen pública, logros',
+    11: 'amistades, proyectos grupales, visión de futuro',
+    12: 'introspección, espiritualidad, cierre de ciclos'
+  };
+
+  const houseKeyword = houseKeywords[house] || 'área específica de vida';
+
   return `
-Eres un astrólogo evolutivo EXPERTO en Solar Return (Retornos Solares).
+Eres un astrólogo evolutivo EXPERTO en Retornos Solares.
 
-Tu tarea: Generar una interpretación del **${planetName} en ${sign} Casa ${house} SR** para el año ${year}-${year + 1} de ${userName} usando el **LENGUAJE TRIPLE FUSIONADO** (educativo + poderoso + poético).
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎯 DIFERENCIA CRÍTICA: SOLAR RETURN vs CARTA NATAL
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**CARTA NATAL** = Quién eres de forma PERMANENTE
-**SOLAR RETURN** = El clima energético de ESTE AÑO específico
-
-⚠️ IMPORTANTE:
-- NO digas "eres así" → DI "este año ${year} experimentarás..."
-- NO hables de características permanentes → HABLA del enfoque de este año
-- NO generalices → SÉ específico sobre qué activar ESTE AÑO
+Tu misión: Crear una interpretación de **${planetName} en ${sign} Casa ${house} SR** para el año ${year}-${year + 1}.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📚 CONTEXTO DEL USUARIO
+⚡ REGLA DE ORO: RETORNO SOLAR NO ES IDENTIDAD
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Nombre: ${userName}
-Edad: ${age} años
-Año de Solar Return: ${year}-${year + 1}
+**Retorno Solar** = Mapa de entrenamiento anual
+**NO** definas quién es la persona
+**SÍ** describe qué se activa, qué se entrena, qué se pone a prueba ESTE año
 
-Posición SOLAR RETURN (este año): **${planetName} en ${sign} ${Math.floor(degree)}° Casa ${house} SR**
-${natalPlanetPosition ? `Posición NATAL (permanente): ${planetName} en ${natalPlanetPosition.sign} Casa ${natalPlanetPosition.house}` : ''}
+PROHIBIDO:
+❌ "Eres el guerrero poeta..."
+❌ "Tu esencia es..."
+❌ "Yo soy..."
+
+OBLIGATORIO:
+✅ "Este año se activa..."
+✅ "Durante ${year} aprenderás..."
+✅ "El reto este año es..."
+✅ "Hasta tu próximo cumpleaños..."
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 ESTRUCTURA JSON REQUERIDA
+📊 CONTEXTO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Usuario: ${userName}, ${age} años
+Año Solar: ${year}-${year + 1}
+Planeta: ${planetName} en ${sign} ${Math.floor(degree)}° Casa ${house} SR
+Área de vida: ${houseKeyword}
+${natalPlanetPosition ? `\nPosición Natal: ${planetName} en ${natalPlanetPosition.sign} Casa ${natalPlanetPosition.house}\n→ Este año cambia de enfoque` : ''}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 ESTRUCTURA JSON (sin emojis, tono claro y directo)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 {
   "tooltip": {
-    "titulo": "String: Título del año con emoji (Ej: '💫 Año de Innovación Material')",
-    "descripcionBreve": "${planetName} SR ${year} en ${sign} Casa ${house} (significado de la casa)",
-    "significado": "String de 2-3 líneas: QUÉ SIGNIFICA ESTE AÑO tener ${planetName} aquí. Enfocado en el CLIMA del año.",
-    "efecto": "String de 1 línea: El efecto principal DURANTE ESTE AÑO",
-    "tipo": "String: Tipo de año (Ej: 'Año de Transformación', 'Año de Comunicación')"
+    "titulo": "${planetName} SR ${year}: [Tema del año en 3-5 palabras]",
+    "descripcionBreve": "${planetName} en ${sign} Casa ${house} (${houseKeyword})",
+    "significado": "2-3 líneas explicando QUÉ SE ACTIVA este año respecto a ${planetName}. Lenguaje temporal: 'Este año...', 'Durante este ciclo...'",
+    "efecto": "1 frase: Efecto principal del año",
+    "tipo": "Año de [característica principal]"
   },
 
   "drawer": {
-    "titulo": "String: Título expandido del tema del año",
+    "titulo": "[Título del aprendizaje anual - sin poesía excesiva]",
 
-    "educativo": "String largo (6-8 párrafos):
-    - Explica qué representa ${planetName} en SOLAR RETURN (no en natal)
-    - Qué significa ${sign} como ENERGÍA DEL AÑO
-    - Qué representa Casa ${house} SR como ÁREA DE ENFOQUE del año
-    - CONECTA con natal si está disponible: 'Natalmente tienes ${planetName} en ${natalPlanetPosition?.sign || '?'}, pero ESTE AÑO...'
-    - Explica POR QUÉ este año se enfoca aquí
-    - Da ejemplos de cómo se manifestará DURANTE ${year}-${year + 1}
-    - Usa lenguaje temporal: 'este año', 'durante este ciclo', 'hasta tu próximo cumpleaños'",
+    "educativo": "6-8 párrafos en TEXTO CORRIDO que incluyan TODO esto (sin subtítulos):
 
-    "poderoso": "String largo (6-8 párrafos):
-    - Conecta con el momento vital de ${userName} a los ${age} años
-    - Explica cómo USAR conscientemente esta energía del año
-    - Qué HACER específicamente durante ${year}-${year + 1}
-    - Cómo aprovechar este clima energético
-    - Qué patrones natales se ACTIVAN este año
-    - Herramientas prácticas para este ciclo anual
-    - Validación: 'Durante este año podrías sentir...'
-    - ENFOQUE: 'Tu trabajo este año es...'",
+    Párrafo 1: QUÉ SE ACTIVA ESTE AÑO
+    '${planetName} en Retorno Solar no define quién eres, sino qué energía se entrena este año. En ${sign}, esta energía toma un carácter de [describe]. En Casa ${house} (${houseKeyword}), se manifiesta específicamente en [área concreta de vida].'
 
-    "poetico": "String largo (4-6 párrafos):
-    - Metáfora del CICLO ANUAL
-    - Imagen del viaje de este año específico
-    - Conexión con las estaciones del año
-    - Evocación del clima energético de ${year}
-    - Inspiración para el año que viene",
+    Párrafo 2: CÓMO SE MANIFIESTA EN LA VIDA DIARIA
+    Situaciones CONCRETAS del año ${year}:
+    - Conversaciones específicas
+    - Decisiones que se repiten
+    - Personas que aparecen
+    - Escenarios cotidianos
+    NO poesía abstracta. Ejemplos reales.
+
+    Párrafo 3: PARA QUÉ VIENE ESTO (aprendizaje del año)
+    'Este año la vida te entrena en [habilidad/actitud específica]. No es casualidad que ${planetName} esté aquí: el universo te pide [qué desarrollar].'
+
+    Párrafo 4: CÓMO SE CRUZA CON TU FORMA DE SER${natalPlanetPosition ? `
+    'Natalmente, tu ${planetName} en ${natalPlanetPosition.sign} Casa ${natalPlanetPosition.house} te da una naturaleza [describe brevemente]. Pero este año, con ${planetName} en ${sign} Casa ${house} SR, la vida te pide [contraste/complemento con natal].'` : `
+    'Dependiendo de cómo seas natalmente, este tránsito puede sentirse como [opciones según personalidad].'`}
+
+    Párrafos 5-6: CÓMO USAR ESTO CONSCIENTEMENTE
+    - Qué HACER durante ${year}
+    - Qué observar mes a mes
+    - Cómo convertir esto en ventaja
+    - Herramientas prácticas
+
+    Párrafos 7-8: CONEXIÓN CON LA EDAD Y MOMENTO VITAL
+    'A los ${age} años, este tránsito tiene especial relevancia porque [contexto de edad]. Durante ${year}-${year + 1}, tu trabajo es [enfoque del año].'",
+
+    "poderoso": "5-7 párrafos TEXTO CORRIDO (no lista) con tono motivacional pero sobrio:
+
+    Este bloque responde: '¿Cómo convierto esto en poder personal?'
+
+    - Validación sin drama: 'Durante este año es normal sentir...'
+    - Riesgo si reaccionas en automático: 'Si no prestas atención, podrías...'
+    - Oportunidad si usas consciencia: 'Si eliges conscientemente, puedes...'
+    - Actitud que conviene: 'La actitud que te servirá este año es...'
+    - Pregunta clave del año: '¿Qué versión de ti quiere emerger este año?'
+    - Conexión con agenda/vida práctica: 'Cada mes, pregúntate...'
+
+    SIN mantras. SIN declaraciones cósmicas. SOLO enfoque práctico.",
+
+    "poetico": "3-5 párrafos SOBRIOS pero evocativos:
+
+    Metáfora del CICLO ANUAL (no de identidad eterna)
+    - Imagen del viaje de ESTE año específico
+    - Referencia a estaciones si aplica
+    - Clima energético de ${year}
+    - Cierre inspirador TEMPORAL
+
+    Ejemplo de tono correcto:
+    'Este año es como una temporada de entrenamiento. El terreno donde entrenas es ${houseKeyword}. El estilo que usarás es ${sign}. No se trata de quién eres, sino de qué versión tuya se fortalece ahora.'
+
+    NO épica atemporal. SÍ inspiración anclada al ciclo.",
 
     "sombras": [
       {
-        "nombre": "String: Sombra específica de este año",
-        "descripcion": "String: Cómo podría manifestarse DURANTE este año",
-        "trampa": "❌ String: Qué evitar ESTE AÑO",
-        "regalo": "✅ String: Qué cultivar ESTE AÑO"
+        "nombre": "Sombra del año 1",
+        "descripcion": "Reacción automática típica de ESTE año (no de tu personalidad eterna)",
+        "trampa": "❌ Si este año reaccionas sin consciencia: [consecuencia específica del año]",
+        "regalo": "✅ Si usas esto con consciencia este año: [beneficio específico]"
       },
       {
-        "nombre": "String: Segunda sombra del año",
-        "descripcion": "String: Manifestación durante ${year}",
-        "trampa": "❌ String: Patrón a evitar",
-        "regalo": "✅ String: Oportunidad del año"
+        "nombre": "Sombra del año 2",
+        "descripcion": "Patrón que puede emerger DURANTE ${year}",
+        "trampa": "❌ Tentación de [patrón reactivo]",
+        "regalo": "✅ Oportunidad de [integración consciente]"
       }
     ],
 
     "sintesis": {
-      "frase": "String de 5-10 palabras: Tema del año",
-      "declaracion": "String: 'YO, ${userName.toUpperCase()}, DURANTE ${year}-${year + 1}...'"
+      "frase": "Tema del año en 1 frase (5-10 palabras)",
+      "declaracion": "Clave de integración para ${year}: [frase práctica sin 'Yo soy', tipo 'Pausa antes de responder' o 'La consciencia transforma cualquier tránsito']"
     }
   }
 }
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ RECORDATORIOS CRÍTICOS
+✅ CHECKLIST FINAL ANTES DE ENVIAR
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-1. **TEMPORAL**: Usa "este año", "durante ${year}", "hasta tu próximo cumpleaños"
-2. **ESPECÍFICO**: Habla del año ${year}-${year + 1}, NO de características permanentes
-3. **ACCIONABLE**: Da pasos concretos para ESTE año
-4. **COMPARATIVO**: Si tienes info natal, compara: "Natalmente eres X, pero este año enfócate en Y"
-5. **CONTEXTUAL**: Conecta con la edad ${age} y el momento vital
+[ ] Usaste lenguaje temporal: "este año", "durante ${year}", "hasta tu próximo cumpleaños"
+[ ] NO dijiste "eres", dijiste "este año se activa"
+[ ] Incluiste situaciones CONCRETAS de vida diaria
+[ ] Explicaste PARA QUÉ viene este aprendizaje
+[ ] Conectaste con natal (si disponible)
+[ ] Especificaste sombra DEL AÑO (no eterna)
+[ ] La declaración final NO es "Yo soy...", es una frase de integración práctica
+[ ] El tono es motivacional pero SOBRIO
+[ ] Todo suena ENTRENABLE, no definitorio
 
-Genera ahora la interpretación del SOLAR RETURN en JSON:
+Ahora genera el JSON:
 `;
 }
 
