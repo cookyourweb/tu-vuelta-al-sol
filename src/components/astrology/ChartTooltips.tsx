@@ -624,15 +624,9 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
                     if (newInterpretation?.drawer && onOpenDrawer) {
                       console.log('✅ Abriendo drawer para:', planet.name, 'chartType:', chartType);
-                        onOpenDrawer(newInterpretation.drawer);
-                      } else {
-                        console.error('❌ No se encontró interpretación para:', newKey);
-                        console.error('   - Secciones disponibles:', Object.keys(refreshedData || {}));
-                        console.error('   - Nodes keys:', Object.keys(refreshedData?.nodes || {}));
-                        console.error('   - Asteroids keys:', Object.keys(refreshedData?.asteroids || {}));
-                      }
+                      onOpenDrawer(newInterpretation.drawer);
                     } else {
-                      console.error('❌ Refresh failed:', refreshResult);
+                      console.error('❌ No se encontró interpretación en el drawer');
                     }
                   } else {
                     throw new Error(result.error || 'Error generando interpretación');
