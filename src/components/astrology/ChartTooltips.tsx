@@ -591,52 +591,39 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
                   const result = await response.json();
 
-                  if (result.success) {
+                  if (result.success && result.interpretation) {
                     console.log('✅ Planeta generado:', planet.name);
 
-                    // Get Firebase ID token for authentication
-                    const token = await user!.getIdToken();
+                    // ⭐ SOLUCIÓN: Usar directamente la interpretación devuelta por el endpoint
+                    // El endpoint ya devuelve { success: true, interpretation: {...} }
+                    const newInterpretation = result.interpretation;
 
-                    // ⭐ Refrescar interpretaciones - usar URL correcta según chartType
-                    let refreshUrl = `/api/astrology/interpret-natal?userId=${userId}`;
-                    if (chartType === 'solar-return') {
-                      refreshUrl = `/api/interpretations/save?userId=${userId}&chartType=solar-return`;
+                    console.log('📖 Interpretación recibida:', !!newInterpretation);
+
+                    // Actualizar el estado de interpretaciones
+                    if (natalInterpretations) {
+                      const newKey = `${planet.name}-${planet.sign}-${planet.house}`;
+
+                      // Determinar la sección correcta
+                      let section = 'planets';
+                      if (planet.name.includes('Nodo')) {
+                        section = 'nodes';
+                      } else if (['Quirón', 'Lilith', 'Ceres', 'Pallas', 'Juno', 'Vesta'].includes(planet.name)) {
+                        section = 'asteroids';
+                      }
+
+                      // Actualizar el estado con la nueva interpretación
+                      setNatalInterpretations({
+                        ...natalInterpretations,
+                        [section]: {
+                          ...natalInterpretations[section],
+                          [newKey]: newInterpretation
+                        }
+                      });
                     }
 
-                    const refreshResponse = await fetch(refreshUrl, {
-                      headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                      }
-                    });
-                    const refreshResult = await refreshResponse.json();
-
-                    // ⭐ CRÍTICO: Manejar ambas estructuras de respuesta
-                    const refreshedData = refreshResult.data || refreshResult.interpretation;
-
-                    // ⭐ DEBUGGING: Ver qué devuelve la API
-                    console.log('📦 Refresh result completo:', refreshResult);
-                    console.log('📦 refreshResult.success:', refreshResult.success);
-                    console.log('📦 chartType:', chartType);
-                    console.log('📦 refreshedData?.planets:', refreshedData?.planets);
-
-                    if (refreshResult.success && refreshedData) {
-                      console.log('🔄 Actualizando estado con:', refreshedData);
-                      setNatalInterpretations(refreshedData);
-
-                      const newKey = `${planet.name}-${planet.sign}-${planet.house}`;
-                      console.log('🔍 Buscando interpretación con key:', newKey);
-
-                      // ⭐ CRÍTICO: Buscar en refreshedData (NO en estado)
-                      let newInterpretation =
-                        refreshedData?.planets?.[newKey] ||
-                        refreshedData?.asteroids?.[newKey] ||
-                        refreshedData?.nodes?.[newKey];
-
-                      console.log('📖 Interpretación encontrada:', !!newInterpretation);
-
-                      if (newInterpretation?.drawer && onOpenDrawer) {
-                        console.log('✅ Abriendo drawer para:', planet.name, 'chartType:', chartType);
+                    if (newInterpretation?.drawer && onOpenDrawer) {
+                      console.log('✅ Abriendo drawer para:', planet.name, 'chartType:', chartType);
                         onOpenDrawer(newInterpretation.drawer);
                       } else {
                         console.error('❌ No se encontró interpretación para:', newKey);
