@@ -216,17 +216,37 @@ ${srComparisonData.houseOverlays?.slice(0, 4).map((overlay: any) => `
 El ASC SR en Casa ${srComparisonData.ascSRInNatalHouse || ascSRenCasaNatal} natal es LA CLAVE de todo el año.
 DEDICA AL MENOS 200 PALABRAS a explicar POR QUÉ esta casa marca el tema del año.
 
+## ⚡ REGLA DE ORO: SOLAR RETURN NO ES IDENTIDAD
+
+**Solar Return** = Mapa de entrenamiento anual
+**NO** defines quién es la persona
+**SÍ** describes qué se activa, qué se entrena ESTE año
+
+PROHIBIDO:
+❌ "Eres el guerrero poeta..."
+❌ "Tu esencia es..."
+❌ "YO, [NOMBRE], SOY..."
+❌ Lenguaje épico o atemporal
+❌ "Tu revolución personal..."
+
+OBLIGATORIO:
+✅ "Este año ${returnYear}-${returnYear + 1}..."
+✅ "Durante este ciclo solar..."
+✅ "El reto este año es..."
+✅ Lenguaje temporal y práctico
+✅ Comparación con natal cuando sea relevante
+
 ## 🎯 ESTRUCTURA DE RESPUESTA OBLIGATORIA:
 
 Responde ÚNICAMENTE con un objeto JSON válido en español (sin markdown, sin backticks):
 
 \`\`\`json
 {
-  "esencia_revolucionaria_anual": "Máximo 200 palabras. Tono DISRUPTIVO y EMOCIONAL. Explica el tema central del año basándote en ASC SR en Casa Natal + Sol en Casa SR + planetas angulares. Usa el nombre de la persona. Lenguaje directo, sin eufemismos.",
-  
-  "proposito_vida_anual": "Máximo 150 palabras. ¿Cuál es la MISIÓN específica de este año? ¿Qué debe lograr/aprender/transformar? Basado en metodología profesional.",
-  
-  "tema_central_del_anio": "Una frase de 10-15 palabras que resuma el año. Ejemplo: 'Revolución de identidad y espiritualidad profunda'",
+  "esencia_revolucionaria_anual": "Máximo 200 palabras. LENGUAJE TEMPORAL: 'Este año ${returnYear}-${returnYear + 1} se activa...', 'Durante este ciclo solar...'. Explica QUÉ SE ACTIVA basándote en ASC SR en Casa Natal + Sol en Casa SR + planetas angulares. Usa el nombre de la persona pero NO digas 'Eres...'. SIN lenguaje épico, SIN 'Tu revolución personal...', SIN 'YO SOY...'.",
+
+  "proposito_vida_anual": "Máximo 150 palabras. ¿Qué aprendizaje específico trae ESTE AÑO? ¿Qué habilidad se entrena? ¿Qué área se desarrolla? LENGUAJE: 'Este año te toca...', 'Durante ${returnYear} desarrollarás...'. Basado en metodología profesional. SIN misión épica, SÍ entrenamiento práctico del año.",
+
+  "tema_central_del_anio": "Una frase de 10-15 palabras que resuma QUÉ SE ACTIVA este año. Ejemplo: 'Año de desarrollo profesional y reestructuración de relaciones'",
   
   "analisis_tecnico_profesional": {
     "asc_sr_en_casa_natal": {
@@ -317,7 +337,7 @@ Responde ÚNICAMENTE con un objeto JSON válido en español (sin markdown, sin b
     // Repetir para los 12 meses
   ],
   
-  "declaracion_poder_anual": "Una declaración poderosa en primera persona, 30-50 palabras. Ejemplo: 'YO, [NOMBRE], abrazo mi revolución interior. Este año manifiesto mi autenticidad sin disculpas...'",
+  "declaracion_poder_anual": "Una clave práctica para el año, 20-40 palabras. LENGUAJE TEMPORAL: 'Durante ${returnYear}, enfócate en...', 'Este año recuerda...', 'La clave de este ciclo es...'. SIN 'YO SOY...', SIN 'YO, [NOMBRE]...'. Práctica y orientada a la acción.",
   
   "advertencias": [
     "Advertencia 1: Sombra o desafío potencial basado en aspectos difíciles",
@@ -392,9 +412,12 @@ Responde ÚNICAMENTE con un objeto JSON válido en español (sin markdown, sin b
 □ ¿Proporcioné calendario lunar completo?
 □ ¿El JSON es válido?
 □ ¿Todo está en español?
-□ ¿El tono es disruptivo pero profesional?
+□ **¿Usé LENGUAJE TEMPORAL? ("este año", "durante ${returnYear}")**
+□ **¿EVITÉ "Eres...", "Tu esencia...", "YO SOY..."?**
+□ **¿La declaración es PRÁCTICA, no un mantra de identidad?**
+□ **¿Comparé con natal cuando fue relevante?**
 
-**AHORA GENERA LA INTERPRETACIÓN PROFESIONAL.**
+**AHORA GENERA LA INTERPRETACIÓN PROFESIONAL CON LENGUAJE TEMPORAL.**
 `;
 }
 
