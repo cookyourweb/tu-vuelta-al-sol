@@ -727,6 +727,172 @@ Ahora genera el JSON:
 }
 
 // =============================================================================
+// ⚡ PROMPT PARA ASPECTOS DE SOLAR RETURN
+// =============================================================================
+
+export function generateSolarReturnAspectPrompt(
+  planet1: string,
+  planet2: string,
+  aspectType: string,
+  orb: number,
+  year: number,
+  natalAspect?: { exists: boolean; type?: string; orb?: number },
+  userProfile?: any
+): string {
+  const userName = userProfile?.name || 'la persona';
+  const age = userProfile?.age || 'X';
+
+  // Traducir tipos de aspectos
+  const aspectTypeSpanish: Record<string, string> = {
+    'conjunction': 'Conjunción',
+    'opposition': 'Oposición',
+    'trine': 'Trígono',
+    'square': 'Cuadratura',
+    'sextile': 'Sextil'
+  };
+
+  const aspectName = aspectTypeSpanish[aspectType] || aspectType;
+  const isExact = orb < 1;
+
+  return `
+Eres un astrólogo evolutivo EXPERTO en Retornos Solares.
+
+Tu misión: Crear una interpretación del aspecto **${planet1} ${aspectName} ${planet2} SR** para el año ${year}-${year + 1}.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚡ REGLA DE ORO: ASPECTOS EN SOLAR RETURN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**Aspecto Natal** = Diálogo interno permanente
+**Aspecto SR** = Qué parte de ese diálogo se ACTIVA este año
+
+PROHIBIDO:
+❌ "Esta tensión define tu personalidad..."
+❌ "Siempre tendrás este conflicto..."
+❌ "Eres el resultado de este aspecto..."
+
+OBLIGATORIO:
+✅ "Este año se activa..."
+✅ "Durante ${year} este diálogo se intensifica..."
+✅ "Hasta tu próximo cumpleaños..."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 CONTEXTO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Usuario: ${userName}, ${age} años
+Año Solar: ${year}-${year + 1}
+Aspecto SR: ${planet1} ${aspectName} ${planet2}
+Orbe: ${orb.toFixed(2)}°${isExact ? ' (EXACTO - máxima potencia este año)' : ''}
+${natalAspect?.exists ? `\nAspecto Natal: ${natalAspect.type ? `${planet1} ${aspectTypeSpanish[natalAspect.type]} ${planet2} (${natalAspect.orb?.toFixed(1)}°)` : 'Existe en carta natal'}\n→ Este año REACTIVA un patrón natal` : '\n→ NUEVO aspecto este año (no existe en natal)'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 NATURALEZA DEL ASPECTO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${aspectName}: ${getAspectDescription(aspectName)}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 ESTRUCTURA JSON (tono claro y directo)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+{
+  "tooltip": {
+    "titulo": "${planet1} ${aspectName} ${planet2} SR ${year}",
+    "descripcionBreve": "${aspectName} anual entre ${planet1} y ${planet2}",
+    "significado": "2-3 líneas explicando QUÉ DIÁLOGO se activa este año entre estos planetas",
+    "efecto": "1 frase: Efecto principal durante ${year}",
+    "tipo": "${aspectName === 'Trígono' || aspectName === 'Sextil' ? 'Flujo del año' : aspectName === 'Cuadratura' || aspectName === 'Oposición' ? 'Tensión del año' : 'Fusión del año'}"
+  },
+
+  "drawer": {
+    "titulo": "[Título del diálogo anual - sin poesía excesiva]",
+
+    "educativo": "6-8 párrafos en TEXTO CORRIDO:
+
+    Párrafo 1: QUÉ DIÁLOGO SE ACTIVA ESTE AÑO
+    '${planet1} y ${planet2} en Retorno Solar crean un diálogo específico durante ${year}-${year + 1}. ${aspectName} indica [naturaleza del diálogo: tensión/armonía/fusión].'
+
+    Párrafo 2: CÓMO SE MANIFIESTA EN LA VIDA DIARIA
+    Situaciones CONCRETAS donde se nota este diálogo:
+    - Decisiones específicas
+    - Conflictos internos que aparecen
+    - Escenarios donde ${planet1} choca/fluye con ${planet2}
+    NO abstracto. Ejemplos reales del año.
+
+    Párrafo 3: PARA QUÉ VIENE ESTE DIÁLOGO${natalAspect?.exists ? `
+    'Natalmente, ya tienes este diálogo ${natalAspect.type ? `como ${aspectTypeSpanish[natalAspect.type]}` : 'activo'}. Pero este año, en Solar Return, se REACTIVA con ${aspectName} para que [qué aprendizaje específico del año].'` : `
+    'Este aspecto NO existe en tu carta natal. Aparece SOLO este año para que [qué aprendizaje temporal].'`}
+
+    Párrafos 4-5: CÓMO TRABAJAR CON ESTE DIÁLOGO
+    - Qué hacer cuando ${planet1} y ${planet2} entren en conflicto/armonía
+    - Cómo usar esta tensión/fluidez conscientemente
+    - Herramientas prácticas para este año
+
+    Párrafos 6-7: CONEXIÓN CON LA EDAD
+    'A los ${age} años, este diálogo tiene relevancia porque [contexto de edad]. Durante ${year}, tu trabajo es [enfoque anual].'",
+
+    "poderoso": "5-7 párrafos TEXTO CORRIDO motivacional pero sobrio:
+
+    - Validación: 'Durante este año es normal sentir este tira y afloja...'
+    - Riesgo si no integras: 'Si ignoras este diálogo, puede que...'
+    - Oportunidad si integras: 'Si trabajas conscientemente con esto, puedes...'
+    - Actitud del año: 'La actitud que te servirá es...'
+    - Pregunta clave: '¿Cómo puedes hacer que ${planet1} y ${planet2} trabajen juntos este año?'
+
+    SIN mantras eternos. SOLO enfoque del año.",
+
+    "poetico": "3-5 párrafos SOBRIOS pero evocativos:
+
+    Metáfora del DIÁLOGO ANUAL (no eterno):
+    'Este año, ${planet1} y ${planet2} son como [metáfora del diálogo temporal]. No se trata de quién gana, sino de qué emerge cuando [imagen del proceso].'
+
+    Referencia al ciclo de ${year}
+    Cierre inspirador TEMPORAL
+
+    NO épica atemporal. SÍ inspiración anclada al año.",
+
+    "sombras": [
+      {
+        "nombre": "Sombra del diálogo anual 1",
+        "descripcion": "Cómo puede manifestarse MAL este año si no hay consciencia",
+        "trampa": "❌ Si este año ${planet1} domina a ${planet2} sin integración...",
+        "regalo": "✅ Si integras ambos conscientemente durante ${year}..."
+      },
+      {
+        "nombre": "Sombra del diálogo anual 2",
+        "descripcion": "Patrón reactivo típico de ESTE año",
+        "trampa": "❌ Tentación de [patrón del año]",
+        "regalo": "✅ Oportunidad de [integración del año]"
+      }
+    ],
+
+    "sintesis": {
+      "frase": "Tema del diálogo anual en 1 frase (5-10 palabras)",
+      "declaracion": "Clave de integración para ${year}: [frase práctica tipo 'Escucho ambas voces sin elegir bando']"
+    }
+  }
+}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ CHECKLIST FINAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[ ] Lenguaje temporal: "este año", "durante ${year}"
+[ ] NO "eres así", SÍ "este año este diálogo..."
+[ ] Situaciones concretas de vida diaria
+[ ] Explicaste PARA QUÉ viene este aspecto
+[ ] Comparaste con natal (si existe)
+[ ] Sombra DEL AÑO (no eterna)
+[ ] Declaración final práctica, no mantra
+[ ] Tono motivacional pero SOBRIO
+[ ] Todo suena ENTRENABLE
+
+Genera el JSON:
+`;
+}
+
+// =============================================================================
 // 🔧 FUNCIONES AUXILIARES
 // =============================================================================
 
