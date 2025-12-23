@@ -10,7 +10,7 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Planet, Aspect } from '@/types/astrology/chartDisplay';
-import { planetMeanings, signMeanings, houseMeanings, aspectMeanings, PLANET_SYMBOLS, PLANET_COLORS } from '@/constants/astrology';
+import { planetMeanings, signMeanings, houseMeanings, aspectMeanings, PLANET_SYMBOLS, PLANET_COLORS, SIGN_SYMBOLS } from '@/constants/astrology';
 import { getPersonalizedPlanetInterpretation, getPersonalizedAspectInterpretation } from '@/services/chartInterpretationsService';
 import { getExampleInterpretation } from '@/data/interpretations/ExampleInterpretations';
 import { useAuth } from '@/context/AuthContext';
@@ -83,6 +83,24 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
     ascSRInNatalHouse,
     natalChart // ⭐ Carta natal para referencia
   } = props;
+
+  // =============================================================================
+  // CONSTANTS - Significados de casas para fallback
+  // =============================================================================
+  const HOUSE_MEANINGS_SHORT: Record<number, string> = {
+    1: "Identidad, apariencia, primeras impresiones",
+    2: "Recursos, dinero, valores personales",
+    3: "Comunicación, hermanos, aprendizaje",
+    4: "Hogar, familia, raíces",
+    5: "Creatividad, romance, hijos",
+    6: "Trabajo diario, salud, rutinas",
+    7: "Pareja, matrimonio, socios",
+    8: "Transformación, sexualidad, recursos compartidos",
+    9: "Filosofía, viajes, estudios superiores",
+    10: "Carrera, reputación, imagen pública",
+    11: "Amistades, grupos, ideales",
+    12: "Espiritualidad, subconsciente, karma, sacrificio"
+  };
 
   // =============================================================================
   // STATE
@@ -470,21 +488,27 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
         }}
       >
         <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center">
-            <span
-              className="text-4xl mr-3"
-              style={{ color: PLANET_COLORS[planet.name] || '#ffffff' }}
-            >
-              {PLANET_SYMBOLS[planet.name] || planet.name.charAt(0)}
-            </span>
-            <div>
-            <div className="text-white font-bold text-lg">
-              {typeof interpretation?.tooltip?.titulo === 'string' ? interpretation.tooltip.titulo : planet.name}
+          <div className="flex items-center flex-1">
+            <div className="flex flex-col items-start flex-1">
+              {/* Título principal con iconos y descripción */}
+              <div className="flex items-center gap-2 text-white font-bold text-base mb-1">
+                <span className="text-2xl" style={{ color: PLANET_COLORS[planet.name] || '#ffffff' }}>
+                  {PLANET_SYMBOLS[planet.name] || planet.name.charAt(0)}
+                </span>
+                <span className="text-2xl">
+                  {SIGN_SYMBOLS[planet.sign] || ''}
+                </span>
+                <span>
+                  {planet.name} en {planet.sign} en Casa {planet.house} ({HOUSE_MEANINGS_SHORT[planet.house] || `Casa ${planet.house}`}) {planet.degree.toFixed(1)}°
+                </span>
+              </div>
+              {/* Subtítulo */}
+              <div className="text-gray-200 text-sm ml-20">
+                {typeof interpretation?.tooltip?.titulo === 'string'
+                  ? `✨ ${interpretation.tooltip.titulo}`
+                  : '✨ Interpretación Personalizada'}
+              </div>
             </div>
-            <div className="text-gray-200 text-sm">
-              {planet.degree.toFixed(1)}° {planet.sign}
-            </div>
-          </div>
           </div>
           <button
             onClick={() => {
@@ -501,15 +525,6 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           >
             <X className="w-5 h-5 text-white" />
           </button>
-        </div>
-
-        <div className="text-gray-300 text-sm mb-3">
-          <strong style={{ color: PLANET_COLORS[planet.name] || '#ffffff', fontSize: '1.125rem' }}>
-            {typeof interpretation?.tooltip?.descripcionBreve === 'string'
-              ? interpretation.tooltip.descripcionBreve
-              : `${planet.name} en ${planet.sign} en Casa ${planet.house}`
-            }
-          </strong>
         </div>
 
         <div className="mb-3">
