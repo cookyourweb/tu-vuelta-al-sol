@@ -291,81 +291,95 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       console.log(`🤖 userId: ${userId}`);
       console.log(`🤖 userProfile:`, userProfile);
 
-      // ✅ CHUNKED GENERATION FOR FASTER RESULTS - ALWAYS for natal charts
+      // ✅ SINGLE REQUEST FOR NATAL CHART WITH EDUCATIONAL FORMAT
       if (type === 'natal') {
-        console.log('🔄 ===== GENERANDO EN CHUNKS =====');
+        console.log('📚 ===== GENERANDO CARTA NATAL CON FORMATO EDUCATIVO =====');
 
-        const chunks: Record<string, any> = {};
-        const sections = [
-          { key: 'esencia', section: 'esencia_revolucionaria', label: 'Esencia Revolucionaria', progress: 20 },
-          { key: 'proposito', section: 'proposito_vida', label: 'Propósito de Vida', progress: 40 },
-          { key: 'formacion', section: 'formacion_temprana', label: 'Formación Temprana', progress: 60 },
-          { key: 'nodos', section: 'nodos_lunares', label: 'Nodos Lunares', progress: 80 },
-          { key: 'declaracion', section: 'declaracion_poder', label: 'Declaración de Poder', progress: 100 }
+        // Simulate progress messages
+        const progressMessages = [
+          { message: '🔮 Conectando con GPT-4o para análisis educativo completo...', delay: 500 },
+          { message: '☀️ Generando interpretación del Sol (Tu propósito de vida)...', delay: 15000 },
+          { message: '🌙 Generando interpretación de la Luna (Tu mundo emocional)...', delay: 15000 },
+          { message: '🌅 Generando Ascendente (Tu forma de ser)...', delay: 15000 },
+          { message: '☿️ Generando Mercurio (Tu forma de comunicar)...', delay: 12000 },
+          { message: '💎 Generando Venus (Tu forma de amar)...', delay: 12000 },
+          { message: '⚔️ Generando Marte (Tu forma de actuar)...', delay: 12000 },
+          { message: '🎯 Generando Júpiter (Tu forma de expandirte)...', delay: 12000 },
+          { message: '⏳ Generando Saturno (Tus límites y estructura)...', delay: 12000 },
+          { message: '🔄 Generando Nodos Lunares (Tu dirección evolutiva)...', delay: 15000 },
+          { message: '✨ Creando integración final...', delay: 5000 },
         ];
 
-        for (const { key, section, label, progress } of sections) {
-          setCurrentChunk(`Generando ${label}...`);
-          setGenerationProgress(`Consultando los astros para ${label.toLowerCase()}...`);
-
-          const chunkResponse = await fetch('/api/astrology/interpret-chunk', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              userId,
-              chartData,
-              section,
-              userProfile,
-              type,
-              natalChart
-            })
-          });
-
-          if (!chunkResponse.ok) {
-            throw new Error(`Error generando ${label}`);
+        let progressIndex = 0;
+        const progressInterval = setInterval(() => {
+          if (progressIndex < progressMessages.length) {
+            setGenerationProgress(progressMessages[progressIndex].message);
+            setChunkProgress((progressIndex / progressMessages.length) * 100);
+            progressIndex++;
           }
+        }, 8000);
 
-          const chunkData = await chunkResponse.json();
-          chunks[key] = chunkData.data;
-          setChunkProgress(progress);
+        const endpoint = '/api/astrology/interpret-natal-complete';
 
-          console.log(`✅ Chunk ${label} completado`);
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId,
+            chartData,
+            userProfile,
+            regenerate: forceRegenerate,
+            useChunked: false  // ✅ Use educational prompt, not epic chunked
+          })
+        });
+
+        clearInterval(progressInterval);
+
+        console.log(`📡 Response status: ${response.status}`);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`❌ API Error Response:`, errorText);
+          throw new Error(`Error ${response.status}: ${errorText}`);
         }
 
-        // Combine chunks
-        const interpretationData = {
-          esencia_revolucionaria: chunks['esencia'],
-          proposito_vida: chunks['proposito'],
-          formacion_temprana: chunks['formacion'],
-          nodos_lunares: chunks['nodos'],
-          declaracion_poder: chunks['declaracion'],
-          planetas: [],
-          plan_accion: [],
-          advertencias: [],
-          insights_transformacionales: [],
-          rituales_recomendados: [],
-          integracion_carta: ''
-        };
+        const result = await response.json();
 
-        const newInterpretation = {
-          interpretation: interpretationData,
-          cached: false,
-          generatedAt: new Date().toISOString(),
-          method: 'chunked'
-        };
+        console.log('📦 ===== RESULTADO RECIBIDO =====');
+        console.log('📦 success:', result.success);
+        console.log('📦 has interpretation:', !!result.interpretation);
+        console.log('📦 interpretation keys:', result.interpretation ? Object.keys(result.interpretation) : []);
 
-        console.log('✅ ===== INTERPRETACIÓN EN CHUNKS COMPLETADA =====');
+        if (result.success && result.interpretation) {
+          const newInterpretation = {
+            interpretation: result.interpretation,
+            cached: result.cached || false,
+            generatedAt: result.generatedAt || new Date().toISOString(),
+            method: 'educational-complete'
+          };
 
-        setInterpretation(newInterpretation);
-        setHasRecentInterpretation(true);
-        setGenerationProgress('¡Revolución completada! 🎉');
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setShowModal(true);
+          console.log('✅ ===== INTERPRETACIÓN NATAL EDUCATIVA COMPLETADA =====');
 
-        await autoSaveInterpretation(newInterpretation);
+          setInterpretation(newInterpretation);
+          setHasRecentInterpretation(true);
+          setGenerationProgress('🎉 ¡Interpretación completa lista! Tu análisis educativo está disponible.');
+          setChunkProgress(100);
 
-      } else {
-        // ✅ SINGLE REQUEST FOR SOLAR-RETURN AND PROGRESSED (natal always uses chunks)
+          // Show modal after brief delay
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          setShowModal(true);
+
+          await autoSaveInterpretation(newInterpretation);
+
+          console.log('✅ ===== INTERPRETACIÓN NATAL COMPLETADA =====');
+        } else {
+          throw new Error(result.error || 'Error desconocido');
+        }
+
+      } else if (type === 'solar-return' || type === 'progressed') {
+        // ✅ SINGLE REQUEST FOR SOLAR-RETURN AND PROGRESSED
         // ✅ Simulate progress messages
         if (forceRegenerate) {
           setTimeout(() => setGenerationProgress('Conectando con los astros...'), 500);
