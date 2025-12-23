@@ -498,6 +498,7 @@ export default function SolarReturnPage() {
                   solarReturnYear={new Date().getFullYear()}
                   solarReturnTheme="Revolución de Identidad y Empoderamiento Profesional"
                   ascSRInNatalHouse={10}
+                  natalChart={natalChart} // ⭐ CRITICAL: Pasar carta natal para conectar SR con natal
                   onOpenDrawer={openDrawer}
                   onCloseDrawer={closeDrawer}
                   drawerOpen={drawerOpen}

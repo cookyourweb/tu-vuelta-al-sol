@@ -52,6 +52,7 @@ const ChartDisplay = ({
   solarReturnYear,
   solarReturnTheme,
   ascSRInNatalHouse,
+  natalChart, // ⭐ Carta natal para conectar SR
   onCloseDrawer,
   // ✅ ADDED: For drawer functionality
   onOpenDrawer,
@@ -2142,6 +2143,7 @@ const ChartDisplay = ({
         solarReturnYear={solarReturnYear}
         solarReturnTheme={solarReturnTheme}
         ascSRInNatalHouse={ascSRInNatalHouse}
+        natalChart={natalChart} // ⭐ CRITICAL: Pasar carta natal para conectar SR
         // ✅ FIX: Pass card timer props for tooltip to cancel close timer
         cardHoverTimer={cardHoverTimer}
         setCardHoverTimer={setCardHoverTimer}
