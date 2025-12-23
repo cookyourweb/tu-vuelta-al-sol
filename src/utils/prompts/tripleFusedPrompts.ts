@@ -778,6 +778,211 @@ Genera ahora la interpretación completa en JSON:
 }
 
 // =============================================================================
+// ☀️ PROMPT PARA ASPECTOS DE SOLAR RETURN - DIÁLOGOS ANUALES
+// =============================================================================
+
+export function generateSolarReturnAspectPrompt(
+  planet1: string,
+  planet2: string,
+  aspectType: string,
+  orb: number,
+  year: number,
+  userProfile: any
+): string {
+  const userName = userProfile.name || 'la persona';
+  const userAge = userProfile.age || 0;
+
+  // Traducir tipos de aspectos
+  const aspectTypeSpanish: Record<string, string> = {
+    'conjunction': 'Conjunción',
+    'opposition': 'Oposición',
+    'trine': 'Trígono',
+    'square': 'Cuadratura',
+    'sextile': 'Sextil',
+    'semisextile': 'Semisextil',
+    'semisquare': 'Semicuadratura',
+    'sesquiquadrate': 'Sesquicuadratura',
+    'quincunx': 'Quincuncio'
+  };
+
+  const aspectName = aspectTypeSpanish[aspectType] || aspectType;
+  const isExact = orb < 1;
+
+  return `
+Eres un astrólogo evolutivo EXPERTO en interpretar ASPECTOS en RETORNOS SOLARES.
+
+Tu tarea: Generar una interpretación del aspecto **${planet1} ${aspectName} ${planet2}** en el RETORNO SOLAR ${year}-${year + 1} de ${userName}.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ PRINCIPIO FUNDAMENTAL - ASPECTOS EN SOLAR RETURN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**CARTA NATAL = Cómo conversan SIEMPRE estas energías (patrón permanente)**
+**SOLAR RETURN = Qué DIÁLOGO se activa/entrena ESTE AÑO (temporal)**
+
+En aspectos de Solar Return:
+- NO describes patrones psicológicos permanentes
+- NO hablas de "tu forma de ser" o "tu personalidad"
+- NO mencionas infancia, heridas del pasado, o dinámicas profundas
+
+SÍ explicas:
+- Qué conversación/tensión/armonía se ACTIVA durante ${year}
+- Cómo se manifiesta en la vida cotidiana este año
+- Qué aprendizaje/entrenamiento ofrece este diálogo anual
+- Ejemplos concretos de situaciones durante ${year}-${year + 1}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📚 CONTEXTO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Usuario: ${userName}
+Edad: ${userAge} años
+Año del Retorno Solar: ${year}-${year + 1}
+
+**Aspecto SR a interpretar:**
+${planet1} ${aspectName} ${planet2}
+Orbe: ${orb.toFixed(2)}°${isExact ? ' (EXACTO - máxima intensidad este año)' : ''}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 FÓRMULA DE LECTURA - ASPECTOS SR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. **FUNCIÓN DE ${planet1}** (qué representa)
+   Breve recordatorio: ${planet1} = [función psicológica]
+
+2. **FUNCIÓN DE ${planet2}** (qué representa)
+   Breve recordatorio: ${planet2} = [función psicológica]
+
+3. **TIPO DE DIÁLOGO (${aspectName})**
+   ${getAspectDescription(aspectName)}
+
+4. **QUÉ SE ACTIVA ESTE AÑO**
+   "Durante ${year}, estas dos funciones ${aspectName === 'Conjunción' ? 'se fusionan' : aspectName === 'Oposición' ? 'buscan balance' : aspectName === 'Cuadratura' ? 'generan tensión creativa' : aspectName === 'Trígono' ? 'fluyen con facilidad' : 'dialogan'} en tu vida de [manera específica]."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 ESTRUCTURA JSON REQUERIDA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Responde SOLO con JSON válido:
+
+{
+  "tooltip": {
+    "titulo": "[Título corto sobre QUÉ DIÁLOGO se activa - max 5 palabras]",
+    "descripcionBreve": "${aspectName} entre ${planet1} y ${planet2} (${year})",
+    "significado": "String de 2-3 líneas: QUÉ conversación/tensión/armonía se ACTIVA entre estas dos funciones durante ${year}, NO tu patrón psicológico permanente.",
+    "efecto": "String de 1 línea: Cómo se manifiesta en la vida cotidiana este año",
+    "tipo": "String: Tipo de diálogo anual (Ej: 'Tensión creativa', 'Armonía fluida', 'Fusión intensa')"
+  },
+
+  "drawer": {
+    "titulo": "[Título memorable sobre el diálogo del año]",
+
+    "educativo": "String largo (6-8 párrafos):
+
+    ESTRUCTURA OBLIGATORIA:
+
+    Párrafo 1: '${planet1} representa [función]. ${planet2} representa [función]. Cuando forman ${aspectName} en Solar Return, NO estamos hablando de tu psicología permanente, sino del DIÁLOGO que se activa entre estas funciones durante ${year}.'
+
+    Párrafo 2-3: 'Este año ${year}, es probable que vivas situaciones donde: [ejemplos concretos de cómo se manifiesta este aspecto en la vida cotidiana]. No es casualidad que estas dos energías ${aspectName === 'Conjunción' ? 'trabajen juntas' : 'dialoguen así'} ahora.'
+
+    Párrafo 4: 'El ${aspectName} te entrena en [habilidad específica que desarrolla este aspecto durante el año]. Este tipo de aspecto ${aspectName === 'Cuadratura' || aspectName === 'Oposición' ? 'genera fricción productiva' : 'facilita el flujo'}, y durante ${year} aprenderás [qué se aprende].'
+
+    Párrafo 5: 'Dependiendo de cómo seas natalmente, este aspecto puede manifestarse como [opciones de vivencia]. La clave durante ${year} es [estrategia práctica para trabajar con este aspecto].'
+
+    Párrafo 6: 'A los ${userAge} años, este diálogo ${planet1}-${planet2} tiene especial relevancia porque [conexión con edad/etapa vital].'
+
+    Párrafo 7-8: 'Durante ${year}-${year + 1}, tu trabajo con este aspecto es [objetivo del entrenamiento]. [Consecuencias de trabajarlo consciente vs reactivamente].'",
+
+    "poderoso": "String largo (4-6 párrafos):
+
+    ENFOQUE: Cómo usar este diálogo conscientemente durante ${year}.
+
+    - Validar lo que puede estar experimentando con este aspecto
+    - Explicar qué pasa si lo vive en automático vs conscientemente
+    - Dar herramientas PRÁCTICAS específicas para este año
+    - Preguntas poderosas para cada trimestre del año
+    - Actitud que sirve durante ${year}
+
+    EVITAR: Hablar de patrones permanentes, heridas profundas, o dinámicas de toda la vida.",
+
+    "poetico": "String (3-4 párrafos):
+
+    Metáfora específica del DIÁLOGO ANUAL.
+
+    - 'Este año, ${planet1} y ${planet2} ${aspectName === 'Conjunción' ? 'danzan juntos' : aspectName === 'Oposición' ? 'tiran de los extremos' : 'conversan'} como...'
+    - 'El clima energético de ${year} con este aspecto es como...'
+    - 'Al final del ciclo, habrás aprendido...'
+
+    NO usar metáforas de identidad o patrones permanentes.",
+
+    "sombras": [
+      {
+        "nombre": "Sombra del diálogo anual 1",
+        "descripcion": "Cómo se manifiesta SI NO prestas atención este año",
+        "trampa": "❌ Si este año reaccionas sin consciencia a este aspecto: [consecuencia específica de ${year}]",
+        "regalo": "✅ Si trabajas este aspecto conscientemente durante ${year}: [beneficio específico]"
+      },
+      {
+        "nombre": "Sombra del diálogo anual 2",
+        "descripcion": "...",
+        "trampa": "❌ Tentación de [patrón reactivo con este aspecto durante ${year}]",
+        "regalo": "✅ Oportunidad de [aprendizaje del aspecto en ${year}]"
+      }
+    ],
+
+    "sintesis": {
+      "frase": "String de 3-6 palabras: Frase-clave del DIÁLOGO DEL AÑO (NO patrón permanente)",
+      "declaracion": "String de 20-40 palabras: Declaración sobre el aprendizaje/integración de este aspecto durante ${year}. Debe reflejar el entrenamiento temporal, NO un patrón de toda la vida.",
+      "teActivasCuando": "String de 1-2 líneas: Qué circunstancias o momentos durante ${year} activarán más intensamente este diálogo ${planet1}-${planet2}."
+    }
+  }
+}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚡ INSTRUCCIONES CRÍTICAS - ASPECTOS SOLAR RETURN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+0. **LENGUAJE TEMPORAL OBLIGATORIO:**
+   ✅ "Este año ${year}..."
+   ✅ "Durante ${year}-${year + 1}..."
+   ✅ "Se activa un diálogo entre..."
+   ✅ "La vida te entrena en..."
+
+   ❌ NUNCA: "Tu psicología...", "Tu patrón interno...", "Siempre has..."
+
+1. **NO HABLES DE:**
+   - Patrones psicológicos permanentes
+   - Dinámicas profundas de personalidad
+   - Heridas del pasado o infancia
+   - "Cómo eres"
+
+2. **SÍ HABLA DE:**
+   - Qué diálogo se activa durante ${year}
+   - Cómo se manifiesta en situaciones concretas del año
+   - Qué entrenamiento ofrece este aspecto
+   - Herramientas prácticas para ${year}
+
+3. **EJEMPLOS CONCRETOS:**
+   - Conversaciones, decisiones, personas, situaciones
+   - Que puedan ocurrir específicamente durante ${year}
+
+4. **SOMBRAS = SOMBRAS DEL DIÁLOGO ANUAL**
+   - NO sombras psicológicas profundas
+   - SÍ patrones reactivos que pueden surgir con este aspecto durante ${year}
+
+5. **SÍNTESIS = FRASE-CLAVE DEL DIÁLOGO DEL AÑO**
+   - Describe el PROCESO/ENTRENAMIENTO del año
+   - NO describe un patrón interno permanente
+
+6. **FORMATO:**
+   - JSON válido, sin markdown, sin comentarios
+   - Párrafos separados con \\n\\n
+
+Genera ahora la interpretación completa en JSON:
+`;
+}
+
+// =============================================================================
 // 🔧 FUNCIONES AUXILIARES
 // =============================================================================
 
@@ -789,6 +994,6 @@ function getAspectDescription(aspectName: string): string {
     'Cuadratura': 'Ángulo 90° - Tensión creativa. Fricción que genera crecimiento. El desafío forja maestría.',
     'Sextil': 'Ángulo 60° - Oportunidad fácil. Talento que requiere activación consciente. Potencial disponible.'
   };
-  
+
   return descriptions[aspectName] || 'Aspecto que conecta estas energías planetarias.';
 }
