@@ -87,6 +87,25 @@ export interface TripleFusedInterpretation {
 // 🌟 PROMPT PARA PLANETAS (Sol, Luna, Mercurio, etc.)
 // =============================================================================
 
+// =============================================================================
+// 🏠 SIGNIFICADOS DE CASAS PARA USAR EN PROMPTS
+// =============================================================================
+
+const HOUSE_MEANINGS_SHORT: Record<number, string> = {
+  1: "Identidad, apariencia, primeras impresiones",
+  2: "Recursos, dinero, valores personales",
+  3: "Comunicación, hermanos, aprendizaje",
+  4: "Hogar, familia, raíces",
+  5: "Creatividad, romance, hijos",
+  6: "Trabajo diario, salud, rutinas",
+  7: "Pareja, matrimonio, socios",
+  8: "Transformación, sexualidad, recursos compartidos",
+  9: "Filosofía, viajes, estudios superiores",
+  10: "Carrera, reputación, imagen pública",
+  11: "Amistades, grupos, ideales",
+  12: "Espiritualidad, subconsciente, karma, sacrificio"
+};
+
 export function generatePlanetTripleFusedPrompt(
   planetName: string,
   sign: string,
@@ -95,7 +114,8 @@ export function generatePlanetTripleFusedPrompt(
   userProfile: any
 ): string {
   const userName = userProfile.name || 'la persona';
-  
+  const houseMeaning = HOUSE_MEANINGS_SHORT[house] || `Casa ${house}`;
+
   return `
 Eres un astrólogo evolutivo EXPERTO en crear interpretaciones transformacionales.
 
@@ -127,7 +147,7 @@ Debes responder SOLO con JSON válido en este formato:
 {
   "tooltip": {
     "titulo": "String: Título memorable con emoji (Ej: '🌟 El Visionario Auténtico')",
-    "descripcionBreve": "${planetName} en ${sign} en Casa ${house} (Significado de la casa)",
+    "descripcionBreve": "${planetName} en ${sign} en Casa ${house} (${houseMeaning})",
     "significado": "String de 2-3 líneas: Resumen poderoso que fusiona educativo + transformador. Debe capturar la esencia de forma memorable.",
     "efecto": "String de 1 línea: El efecto principal de esta posición",
     "tipo": "String de 1 línea: El tipo/categoría de energía (Ej: 'Revolucionario', 'Sanador', 'Comunicador')"
@@ -186,6 +206,14 @@ Debes responder SOLO con JSON válido en este formato:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚡ INSTRUCCIONES CRÍTICAS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+0. **FORMATO DESCRIPCIÓN BREVE - MUY IMPORTANTE:**
+   - El campo "descripcionBreve" DEBE seguir EXACTAMENTE este formato:
+     "${planetName} en ${sign} en Casa ${house} (${houseMeaning})"
+   - Ejemplo correcto: "Venus en Capricornio en Casa 12 (Espiritualidad, subconsciente, karma, sacrificio)"
+   - NO inventes tu propio significado de casa
+   - NO uses frases como "área donde..." o "lugar de..."
+   - USA EXACTAMENTE el significado de casa proporcionado: "${houseMeaning}"
 
 1. **LENGUAJE:**
    - Claro y accesible para personas sin conocimientos astrológicos
