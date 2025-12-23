@@ -7,11 +7,13 @@
 import OpenAI from 'openai';
 import {
   generateNatalChartLayer1Prompt,
-  calculateElementDistribution,
-  calculateModalityDistribution,
   type ChartData,
   type UserProfile,
 } from '@/utils/prompts/natalChartLayer1Prompt';
+import {
+  calculateElementDistribution,
+  calculateModalityDistribution,
+} from '@/utils/prompts/completeNatalChartPrompt';
 
 // =============================================================================
 // TYPES - Estructura flexible que coincide con el nuevo prompt
