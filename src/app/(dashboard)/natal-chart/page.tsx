@@ -123,8 +123,27 @@ export default function NatalChartPage() {
       throw new Error('No hay datos para procesar');
     }
 
+    // ✅ Filtrar planetas: excluir Nodos Norte/Sur con datos incompletos
+    const validPlanets = (rawData.planets || []).filter((planet: any) => {
+      // Si NO es un nodo, incluirlo siempre
+      if (!planet.name?.includes('Nodo')) {
+        return true;
+      }
+
+      // Si ES un nodo, solo incluirlo si tiene casa válida (número entre 1-12)
+      const hasValidHouse = typeof planet.house === 'number' && planet.house >= 1 && planet.house <= 12;
+      const hasValidSign = planet.sign && planet.sign !== 'Desconocido';
+
+      if (!hasValidHouse || !hasValidSign) {
+        console.log(`⚠️ [FILTER] Excluido ${planet.name}: casa=${planet.house}, signo=${planet.sign}`);
+        return false;
+      }
+
+      return true;
+    });
+
     return {
-      planets: rawData.planets || [],
+      planets: validPlanets,
       houses: rawData.houses || [],
       aspects: rawData.aspects || [],
       keyAspects: rawData.keyAspects || [],
