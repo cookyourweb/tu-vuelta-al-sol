@@ -479,12 +479,12 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
             </span>
             <div>
             <div className="text-white font-bold text-lg">
-              {PLANET_SYMBOLS[planet.name] || planet.name.charAt(0)} {typeof interpretation?.tooltip?.titulo === 'string' ? interpretation.tooltip.titulo : planet.name}
+              {typeof interpretation?.tooltip?.titulo === 'string' ? interpretation.tooltip.titulo : planet.name}
             </div>
-              <div className="text-gray-200 text-sm">
-                {planet.degree}° {planet.sign}
-              </div>
+            <div className="text-gray-200 text-sm">
+              {planet.degree.toFixed(1)}° {planet.sign}
             </div>
+          </div>
           </div>
           <button
             onClick={() => {
@@ -505,15 +505,16 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
         <div className="text-gray-300 text-sm mb-3">
           <strong style={{ color: PLANET_COLORS[planet.name] || '#ffffff', fontSize: '1.125rem' }}>
-            {planet.name} en {planet.sign} en Casa {planet.house} ({planet.degree}°)
+            {typeof interpretation?.tooltip?.descripcionBreve === 'string'
+              ? interpretation.tooltip.descripcionBreve
+              : `${planet.name} en ${planet.sign} en Casa ${planet.house}`
+            }
           </strong>
         </div>
 
         <div className="mb-3">
           <div className="text-white text-sm font-semibold mb-2">
-            <span style={{ color: PLANET_COLORS[planet.name] || '#ffffff' }}>
-              {PLANET_SYMBOLS[planet.name] || planet.name.charAt(0)}
-            </span> Significado:
+            Significado:
           </div>
           <div className="text-gray-200 text-sm leading-relaxed">
             {typeof interpretation?.tooltip?.significado === 'string' ? interpretation.tooltip.significado : getPersonalizedPlanetInterpretation(planet)}
