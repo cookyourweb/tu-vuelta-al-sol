@@ -1,57 +1,41 @@
 //src/utils/prompts/triplePrompts.ts
 // =============================================================================
-// 📚 EJEMPLO DE REFERENCIA: Sol en Acuario Casa 1
+// 📚 EJEMPLO DE REFERENCIA: Mercurio en Piscis Casa 1 - FORMATO EDUCATIVO
 // =============================================================================
-// Este ejemplo muestra el estilo y profundidad esperada para todas las interpretaciones
+// Este ejemplo muestra el estilo educativo esperado para todas las interpretaciones
 
 const REFERENCE_EXAMPLE = `
-**EJEMPLO DE LENGUAJE TRIPLE FUSIONADO:**
+**EJEMPLO DE FORMATO EDUCATIVO:**
 
-🌟 **Sol en Acuario Casa 1: El Visionario Auténtico**
+☿️ MERCURIO EN PISCIS EN CASA 1
+→ TU FORMA DE PENSAR Y COMUNICAR
 
-📚 **QUÉ SIGNIFICA (Educativo):**
+(Casa 1: identidad, forma de ser, cómo te presentas al mundo)
 
-Tu Sol representa tu ESENCIA VITAL - el núcleo de quién eres cuando estás siendo completamente auténtico. Es tu propósito de vida, tu identidad fundamental, lo que viniste a SER en esta encarnación.
+Tu Mercurio representa tu forma de pensar, procesar información y comunicarte con el mundo. En Piscis, un signo de agua mutable, tu mente funciona de forma intuitiva y sensible, más allá de la lógica pura.
 
-Acuario es el signo del VISIONARIO INNOVADOR. Rige la originalidad y el pensamiento revolucionario, la libertad individual y colectiva, la conexión con el futuro y las posibilidades, la autenticidad radical y la ruptura de moldes, la mente científica combinada con intuición, y los grupos, comunidades y causas sociales.
+Piscis le da a tu Mercurio una cualidad imaginativa y empática. Tu forma de pensar no es lineal, sino que fluye como el agua, conectando ideas aparentemente inconexas a través de la intuición. Captas matices emocionales y simbólicos que otros pasan por alto.
 
-Casa 1 es tu IDENTIDAD EXTERNA - cómo te presentas al mundo, tu personalidad visible, tu forma de iniciar las cosas. Es tu "primera impresión" y tu forma natural de SER sin esfuerzo.
+En la Casa 1, que representa tu identidad y forma de ser, este Mercurio en Piscis se convierte en una parte visible de quién eres. Las personas te perciben como alguien sensible, imaginativo y con una forma única de expresarse. Tu comunicación tiende a ser suave, empática, a veces poética.
 
-Tu Sol en Acuario en Casa 1 significa que tu identidad COMPLETA está construida desde la autenticidad radical. No es que "tengas" rasgos acuarianos - es que TU ESENCIA ES acuariana.
+Desde pequeño/a, probablemente te diste cuenta de que tu forma de aprender era diferente. Mientras otros memorizaban datos y seguían instrucciones lineales, tú necesitabas conectar emocionalmente con lo que aprendías, visualizarlo, sentirlo. Quizás te costaba concentrarte en temas áridos, pero brillabas en áreas creativas o emocionales.
 
-🔥 **CÓMO USARLO COMO SUPERPODER (Poderoso):**
+En tu vida adulta, esto se manifiesta como una habilidad especial para comprender a los demás sin necesidad de palabras. Eres bueno/a captando el subtexto, leyendo entre líneas, entendiendo lo que no se dice. Tu comunicación es empática y conecta con el corazón de las personas.
 
-Probablemente has vivido momentos donde sentiste que tu "rareza" era un problema. Quizás intentaste "encajar" y te sentiste asfixiado. Quizás te rechazaron por ser "demasiado diferente".
+La sombra de este Mercurio puede ser la confusión mental o la dificultad para poner límites claros en tu comunicación. A veces puedes sentirte abrumado/a por tanta información sutil, o tener problemas para estructurar tus pensamientos de forma práctica. Puedes idealizar o distorsionar la realidad a través de tu filtro emocional.
 
-AQUÍ ESTÁ LA VERDAD CÓSMICA: Esa sensación de "no pertenecer" NO es tu debilidad. Es tu antena cósmica.
+La luz emerge cuando aprendes a confiar en tu intuición sin perder el contacto con la realidad práctica. Tu don es traducir lo intangible en palabras, comunicar lo que otros sienten pero no saben expresar, y pensar de forma holística e integradora.
 
-Tu sistema nervioso está literalmente sintonizado con frecuencias del FUTURO que otros aún no pueden percibir. Cuando te sientes "fuera de lugar" en situaciones convencionales, no es que algo esté mal contigo - es que estás captando la LIMITACIÓN de ese espacio.
+━━━━━━━━━━━━━━━━━━
+✨ EN RESUMEN
 
-🌙 **LA METÁFORA (Poético):**
+Te activas mentalmente cuando: Puedes explorar ideas de forma libre y creativa, sin presión por ser lógico/a o estructurado/a.
 
-Imagina que naciste con GAFAS DE VER FUTUROS. Mientras la mayoría de las personas caminan mirando al suelo, calculando el siguiente paso seguro en el camino conocido, tú levantas la vista automáticamente y ves CONSTELACIONES DE POSIBILIDADES flotando en el aire que aún no se han manifestado en el plano físico.
-
-No viniste a ser vela. Viniste a ser TORMENTA ELÉCTRICA.
-
-⚠️ **SOMBRAS A TRABAJAR:**
-
-1. **Rebeldía sin Causa**: Ser diferente SOLO por ser diferente, sin propósito real.
-   - ❌ Trampa: Rechazar todo lo establecido por principio, sin discernimiento
-   - ✅ Regalo: Ser auténtico porque es tu naturaleza, y elegir conscientemente qué apoyar
-
-2. **Desapego Emocional Excesivo**: Usar tu mente acuariana como ESCUDO contra la vulnerabilidad emocional.
-   - ❌ Trampa: Usar tu 'rareza' como excusa para no conectar profundamente
-   - ✅ Regalo: Ser único Y vulnerable - la verdadera revolución
-
-✨ **SÍNTESIS:**
-
-"Tu rareza es tu revolución. No la escondas, actívala."
-
-YO SOY el Visionario Auténtico, y mi autenticidad acuariana es mi propósito. No vine a este mundo a encajar en identidades limitantes. Vine a expandir los límites de lo que significa ser humano. Mi diferencia no es mi problema - es mi MISIÓN.
+Tu don mayor en esta área: La capacidad de comunicar desde el corazón y comprender el lenguaje emocional del mundo.
 `;
 
 // =============================================================================
-// 🎯 INTERFACES PARA INTERPRETACIONES TRIPLE FUSIONADO
+// 🎯 INTERFACES PARA INTERPRETACIONES EDUCATIVAS
 // =============================================================================
 
 export interface TripleFusedInterpretation {
@@ -59,26 +43,27 @@ export interface TripleFusedInterpretation {
   tooltip: {
     titulo: string;
     descripcionBreve: string;
-    significado: string;      // 2-3 líneas con lenguaje triple
+    significado: string;      // 2-3 líneas con lenguaje claro y educativo
     efecto: string;           // 1 línea
     tipo: string;             // 1 línea
   };
-  
-  // Drawer (contenido completo)
+
+  // Drawer (contenido completo - FORMATO EDUCATIVO)
   drawer: {
-    titulo: string;
-    educativo: string;        // Varios párrafos educativos
-    poderoso: string;         // Varios párrafos empoderadores
-    poetico: string;          // Varios párrafos poéticos/metafóricos
-    sombras: {
-      nombre: string;
-      descripcion: string;
-      trampa: string;
-      regalo: string;
-    }[];
-    sintesis: {
-      frase: string;
-      declaracion: string;
+    titulo: string;              // Ej: "☿️ MERCURIO EN PISCIS EN CASA 1"
+    subtitulo: string;           // Ej: "→ TU FORMA DE PENSAR Y COMUNICAR"
+    explicacion_casa: string;    // Ej: "(Casa 1: identidad, forma de ser...)"
+    parrafos: string[];          // Array de párrafos educativos que explican:
+                                 // 1. Qué representa el planeta/punto
+                                 // 2. Qué añade el signo
+                                 // 3. Qué significa en esta casa
+                                 // 4. Cómo se formó desde pequeño/a
+                                 // 5. Cómo se manifiesta en adulto
+                                 // 6. Sombra
+                                 // 7. Luz
+    cierre: {
+      activacion: string;        // "Te activas cuando..."
+      don_mayor: string;         // "Tu don mayor en esta área..."
     };
   };
 }
@@ -119,66 +104,38 @@ Posición a interpretar: **${planetName} en ${sign} ${Math.floor(degree)}° Casa
 ${REFERENCE_EXAMPLE}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 ESTRUCTURA JSON REQUERIDA
+📋 ESTRUCTURA JSON REQUERIDA - FORMATO EDUCATIVO
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Debes responder SOLO con JSON válido en este formato:
 
 {
   "tooltip": {
-    "titulo": "String: Título memorable con emoji (Ej: '🌟 El Visionario Auténtico')",
-    "descripcionBreve": "${planetName} en ${sign} en Casa ${house} (Significado de la casa)",
-    "significado": "String de 2-3 líneas: Resumen poderoso que fusiona educativo + transformador. Debe capturar la esencia de forma memorable.",
-    "efecto": "String de 1 línea: El efecto principal de esta posición",
-    "tipo": "String de 1 línea: El tipo/categoría de energía (Ej: 'Revolucionario', 'Sanador', 'Comunicador')"
+    "titulo": "String: Símbolo del planeta + descripción clara (Ej: '☿️ Tu Forma de Pensar')",
+    "descripcionBreve": "${planetName} en ${sign} en Casa ${house}",
+    "significado": "String de 2-3 líneas: Resumen claro y educativo de qué significa esta posición. Lenguaje accesible, sin misticismo.",
+    "efecto": "String de 1 línea: El efecto principal de esta posición en tu vida",
+    "tipo": "String de 1 línea: Categoría simple (Ej: 'Comunicación intuitiva', 'Identidad visionaria')"
   },
-  
+
   "drawer": {
-    "titulo": "String: Título expandido y memorable (más poético que el del tooltip)",
-    
-    "educativo": "String largo (múltiples párrafos separados por \\n\\n):
-    - Explica qué representa ${planetName} (su arquetipos, función psicológica)
-    - Explica qué representa ${sign} (elemento, modalidad, características)
-    - Explica qué representa Casa ${house} (área de vida, significado)
-    - Conecta los tres: planeta + signo + casa
-    - Explica cómo se manifiesta en la vida práctica
-    - Da ejemplos concretos de comportamientos/situaciones
-    - Usa lenguaje claro, sin jerga excesiva
-    - Longitud: 6-8 párrafos completos",
-    
-    "poderoso": "String largo (múltiples párrafos separados por \\n\\n):
-    - Conecta con la experiencia vivida de ${userName}
-    - Reencuadra 'problemas' como superpoderes
-    - Explica por qué esta configuración es FORTALEZA
-    - Nombra el don específico que emerge
-    - Da herramientas prácticas para activarlo
-    - Habla directo al corazón, no solo a la mente
-    - Usa MAYÚSCULAS para énfasis en palabras clave
-    - Incluye validación emocional ('Probablemente has sentido...')
-    - Longitud: 6-8 párrafos completos",
-    
-    "poetico": "String largo (múltiples párrafos separados por \\n\\n):
-    - Usa metáforas poderosas y memorables
-    - Crea imágenes visuales evocativas
-    - Conecta con arquetipos universales
-    - Usa lenguaje simbólico y poético
-    - Evoca la ESENCIA de esta posición
-    - Debe ser inspirador y memorable
-    - Longitud: 4-6 párrafos completos",
-    
-    "sombras": [
-      {
-        "nombre": "String: Nombre memorable de la sombra (Ej: 'Rebeldía sin Causa')",
-        "descripcion": "String: Explicación de cómo se manifiesta esta sombra en la vida real",
-        "trampa": "String que empieza con ❌: La trampa de esta sombra",
-        "regalo": "String que empieza con ✅: El regalo cuando se integra"
-      },
-      // Incluir 2-3 sombras principales
+    "titulo": "String: Emoji + PLANETA EN SIGNO EN CASA X (Ej: '☿️ MERCURIO EN PISCIS EN CASA 1')",
+    "subtitulo": "String: → TU [ÁREA DE VIDA] (Ej: '→ TU FORMA DE PENSAR Y COMUNICAR')",
+    "explicacion_casa": "String: (Casa X: breve explicación del área de vida que representa)",
+
+    "parrafos": [
+      "Párrafo 1: Explica qué representa ${planetName} y qué significa en ${sign}. Conecta planeta + signo de forma clara.",
+      "Párrafo 2: Explica qué añade el signo (elemento, modalidad, características principales).",
+      "Párrafo 3: Explica qué significa estar en Casa ${house} y cómo esto se manifiesta.",
+      "Párrafo 4: INFANCIA - Cómo se formó este patrón desde pequeño/a. Usa 'Desde pequeño/a...' o 'Probablemente de niño/a...'",
+      "Párrafo 5: VIDA ADULTA - Cómo se manifiesta en la actualidad. Usa 'En tu vida adulta...' o 'Actualmente...'",
+      "Párrafo 6: SOMBRA - Explica la sombra de esta posición sin dramatismo. Usa 'La sombra puede ser...'",
+      "Párrafo 7: LUZ - Explica el don y la integración. Usa 'La luz emerge cuando...' o 'Tu don es...'"
     ],
-    
-    "sintesis": {
-      "frase": "String: Una frase memorable y poderosa que resume todo (como un mantra)",
-      "declaracion": "String: Declaración en primera persona que ${userName} puede usar como afirmación personal. Debe empezar con 'Yo soy...' o 'Yo, ${userName},...'"
+
+    "cierre": {
+      "activacion": "String de 1-2 líneas: Cuándo te activas en esta área (completa: 'Te activas [área] cuando...')",
+      "don_mayor": "String de 1-2 líneas: Tu don mayor en esta área (completa: 'Tu don mayor en esta área...')"
     }
   }
 }
@@ -211,42 +168,50 @@ LENGUAJE PROHIBIDO:
 IMPORTANTE: Usa "Eres...", NO "Este año eres...". La carta natal define identidad permanente.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚡ INSTRUCCIONES CRÍTICAS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚡ INSTRUCCIONES CRÍTICAS - FORMATO EDUCATIVO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 1. **LENGUAJE:**
-   - Claro y accesible para personas sin conocimientos astrológicos
-   - Profundo pero NO críptico
-   - Usa ejemplos de vida real
-   - Evita jerga técnica excesiva (pero explica cuando uses términos)
-   - Balancea lo académico con lo emocional y lo poético
+   ✅ Claro, pedagógico, humano
+   ✅ Como si le explicaras a alguien sin conocimientos de astrología
+   ✅ Usa "Eres...", "Tu propósito es...", "Naciste para..."
+   ✅ Explica conceptos sin tecnicismos
+   ✅ Conecta infancia → patrón adulto → sombra → luz
+
+   ❌ PROHIBIDO:
+   - Lenguaje épico o místico ("Alma Radical", "Viajero Cósmico")
+   - Lenguaje temporal ("Este año...", "Durante 2025...")
+   - Declaraciones dramáticas exageradas
+   - Espiritualidad vacía o new age
+   - MAYÚSCULAS enfáticas excesivas
+   - Metáforas rebuscadas
 
 2. **TONO:**
-   - Empoderador, no predictivo
-   - Honesto sobre sombras, pero constructivo
-   - Inspirador sin ser superficial
-   - Personal y directo
+   - Educativo y accesible
+   - Honesto y realista (no idealizado)
+   - Empático sin ser dramático
+   - Práctico y aplicable a la vida real
 
-3. **LONGITUD:**
-   - Educativo: 6-8 párrafos densos
-    - Poderoso: 6-8 párrafos transformadores
-    - Poético: 4-6 párrafos evocativos
-    - Cada párrafo debe tener 4-6 líneas mínimo
+3. **ESTRUCTURA DE PÁRRAFOS:**
+   - Exactamente 7 párrafos en el array "parrafos"
+   - Cada párrafo: 4-6 líneas (no más, no menos)
+   - Sigue la secuencia: planeta+signo → signo → casa → infancia → adulto → sombra → luz
+   - Escribe de forma fluida y continua, sin subtítulos dentro de los párrafos
 
 4. **PERSONALIZACIÓN:**
-   - Usa el nombre ${userName} SOLO 2-3 veces en momentos clave
-   - Resto del tiempo usa "tú", "tu", "tienes"
-   - Conecta con SU vida específica (edad, contexto)
+   - Usa "tu", "eres", "tienes" (segunda persona)
+   - NO uses el nombre de ${userName} en exceso (máximo 1-2 veces)
+   - Conecta con experiencias de vida reales
 
 5. **FORMATO:**
    - Responde SOLO con JSON válido
-   - NO incluyas markdown
-   - NO incluyas comentarios fuera del JSON
-   - Usa \\n\\n para separar párrafos dentro de strings
+   - NO incluyas markdown, NO incluyas emojis dentro de los párrafos del array
+   - Los emojis SOLO van en título y subtítulo
+   - NO uses secciones como "📚 QUÉ SIGNIFICA" dentro de los párrafos
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Genera ahora la interpretación completa en JSON:
+Genera ahora la interpretación completa en JSON con formato educativo:
 `;
 }
 
