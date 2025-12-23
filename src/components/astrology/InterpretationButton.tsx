@@ -735,6 +735,145 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
     }
 
     console.log('🎨 data keys:', Object.keys(data));
+
+    // ✅ DETECT FORMAT: Educational (new) vs Epic (old)
+    const isEducationalFormat = 'sol' in data || 'luna' in data || 'ascendente' in data;
+    console.log('🎨 Format detected:', isEducationalFormat ? 'EDUCATIONAL' : 'EPIC (legacy)');
+
+    // ═════════════════════════════════════════════════════════════════
+    // EDUCATIONAL FORMAT RENDERING (NEW)
+    // ═════════════════════════════════════════════════════════════════
+    if (isEducationalFormat) {
+      console.log('🎨 Rendering EDUCATIONAL format');
+
+      const renderPlanetSection = (key: string, planetData: any, emoji: string, title: string, colorClass: string) => {
+        if (!planetData) return null;
+
+        return (
+          <div key={key} className={`bg-gradient-to-br ${colorClass} rounded-2xl p-6 md:p-8 border border-opacity-30`}>
+            <h4 className="text-white font-bold text-lg md:text-xl mb-2">
+              {planetData.titulo || `${emoji} ${title}`}
+            </h4>
+            {planetData.subtitulo && (
+              <h5 className="text-purple-200 text-base md:text-lg mb-3">{planetData.subtitulo}</h5>
+            )}
+            {planetData.explicacion_casa && (
+              <p className="text-purple-300 text-sm italic mb-4">{planetData.explicacion_casa}</p>
+            )}
+            <div className="space-y-3">
+              {planetData.parrafos && Array.isArray(planetData.parrafos) && planetData.parrafos.map((parrafo: string, i: number) => (
+                <p key={i} className="text-gray-100 text-sm md:text-base leading-relaxed">{parrafo}</p>
+              ))}
+            </div>
+            {planetData.cierre && (
+              <div className="mt-6 bg-white/10 rounded-lg p-4">
+                <p className="text-sm text-purple-200 mb-2">
+                  <strong>Te activas cuando:</strong> {planetData.cierre.energia_vital || planetData.cierre.activacion}
+                </p>
+                <p className="text-sm text-purple-200">
+                  <strong>Tu don mayor:</strong> {planetData.cierre.don_mayor}
+                </p>
+              </div>
+            )}
+          </div>
+        );
+      };
+
+      return (
+        <div className="space-y-6">
+          {/* Sol */}
+          {renderPlanetSection('sol', data.sol, '☀️', 'SOL', 'from-yellow-900/40 to-orange-900/40')}
+
+          {/* Luna */}
+          {renderPlanetSection('luna', data.luna, '🌙', 'LUNA', 'from-blue-900/40 to-indigo-900/40')}
+
+          {/* Ascendente */}
+          {renderPlanetSection('ascendente', data.ascendente, '🌅', 'ASCENDENTE', 'from-pink-900/40 to-rose-900/40')}
+
+          {/* Mercurio */}
+          {renderPlanetSection('mercurio', data.mercurio, '☿️', 'MERCURIO', 'from-green-900/40 to-emerald-900/40')}
+
+          {/* Venus */}
+          {renderPlanetSection('venus', data.venus, '💎', 'VENUS', 'from-pink-900/40 to-fuchsia-900/40')}
+
+          {/* Marte */}
+          {renderPlanetSection('marte', data.marte, '⚔️', 'MARTE', 'from-red-900/40 to-orange-900/40')}
+
+          {/* Júpiter */}
+          {renderPlanetSection('jupiter', data.jupiter, '🎯', 'JÚPITER', 'from-purple-900/40 to-violet-900/40')}
+
+          {/* Saturno */}
+          {renderPlanetSection('saturno', data.saturno, '⏳', 'SATURNO', 'from-gray-900/40 to-slate-900/40')}
+
+          {/* Nodos Lunares */}
+          {data.nodos_lunares && (
+            <div className="bg-gradient-to-br from-slate-900/40 to-gray-900/40 rounded-2xl p-6 md:p-8 border border-slate-400/30">
+              <h4 className="text-white font-bold text-lg md:text-xl mb-4">
+                {data.nodos_lunares.titulo || '🌟 DIRECCIÓN EVOLUTIVA DEL ALMA'}
+              </h4>
+
+              {/* Nodo Norte */}
+              {data.nodos_lunares.nodo_norte && (
+                <div className="bg-green-900/30 rounded-lg p-4 md:p-6 mb-4">
+                  <h5 className="text-green-200 font-semibold text-base md:text-lg mb-3">
+                    {data.nodos_lunares.nodo_norte.titulo_seccion || '⬆️ Nodo Norte'}
+                  </h5>
+                  {data.nodos_lunares.nodo_norte.explicacion_casa && (
+                    <p className="text-green-300 text-sm italic mb-3">
+                      {data.nodos_lunares.nodo_norte.explicacion_casa}
+                    </p>
+                  )}
+                  <div className="space-y-3">
+                    {data.nodos_lunares.nodo_norte.parrafos && Array.isArray(data.nodos_lunares.nodo_norte.parrafos) &&
+                      data.nodos_lunares.nodo_norte.parrafos.map((parrafo: string, i: number) => (
+                        <p key={i} className="text-green-50 text-sm md:text-base leading-relaxed">{parrafo}</p>
+                      ))
+                    }
+                  </div>
+                </div>
+              )}
+
+              {/* Nodo Sur */}
+              {data.nodos_lunares.nodo_sur && (
+                <div className="bg-orange-900/30 rounded-lg p-4 md:p-6">
+                  <h5 className="text-orange-200 font-semibold text-base md:text-lg mb-3">
+                    {data.nodos_lunares.nodo_sur.titulo_seccion || '⬇️ Nodo Sur'}
+                  </h5>
+                  <div className="space-y-3">
+                    {data.nodos_lunares.nodo_sur.parrafos && Array.isArray(data.nodos_lunares.nodo_sur.parrafos) &&
+                      data.nodos_lunares.nodo_sur.parrafos.map((parrafo: string, i: number) => (
+                        <p key={i} className="text-orange-50 text-sm md:text-base leading-relaxed">{parrafo}</p>
+                      ))
+                    }
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Integración Final */}
+          {data.integracion_final && (
+            <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 rounded-2xl p-6 md:p-8 border border-purple-400/30">
+              <h4 className="text-white font-bold text-lg md:text-xl mb-4">
+                {data.integracion_final.titulo || '🌈 INTEGRACIÓN FINAL'}
+              </h4>
+              <div className="space-y-3">
+                {data.integracion_final.parrafos && Array.isArray(data.integracion_final.parrafos) &&
+                  data.integracion_final.parrafos.map((parrafo: string, i: number) => (
+                    <p key={i} className="text-purple-50 text-sm md:text-base leading-relaxed">{parrafo}</p>
+                  ))
+                }
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ═════════════════════════════════════════════════════════════════
+    // EPIC FORMAT RENDERING (LEGACY)
+    // ═════════════════════════════════════════════════════════════════
+    console.log('🎨 Rendering EPIC (legacy) format');
     console.log('🎨 data.esencia_revolucionaria:', data.esencia_revolucionaria ? 'EXISTS' : 'NOT FOUND');
     console.log('🎨 data.proposito_vida:', data.proposito_vida ? 'EXISTS' : 'NOT FOUND');
     console.log('🎨 data.planets:', data.planets ? 'EXISTS' : 'NOT FOUND');
