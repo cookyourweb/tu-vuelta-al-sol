@@ -63,7 +63,7 @@ export interface TripleFusedInterpretation {
     efecto: string;           // 1 línea
     tipo: string;             // 1 línea
   };
-  
+
   // Drawer (contenido completo)
   drawer: {
     titulo: string;
@@ -79,6 +79,8 @@ export interface TripleFusedInterpretation {
     sintesis: {
       frase: string;
       declaracion: string;
+      donMayor?: string;         // ⭐ NATAL: Talento permanente
+      teActivasCuando?: string;  // ⭐ SOLAR RETURN: Triggers del año
     };
   };
 }
@@ -198,7 +200,8 @@ Debes responder SOLO con JSON válido en este formato:
     
     "sintesis": {
       "frase": "String: Una frase memorable y poderosa que resume todo (como un mantra)",
-      "declaracion": "String: Declaración en primera persona que ${userName} puede usar como afirmación personal. Debe empezar con 'Yo soy...' o 'Yo, ${userName},...'"
+      "declaracion": "String: Declaración en primera persona que ${userName} puede usar como afirmación personal. Debe empezar con 'Yo soy...' o 'Yo, ${userName},...'",
+      "donMayor": "String de 1-2 líneas: El talento o poder PERMANENTE que emerge de esta posición. Este es tu don innato, tu habilidad natural, tu superpoder que llevas desde siempre."
     }
   }
 }
@@ -397,7 +400,8 @@ Responde SOLO con JSON válido:
 
     "sintesis": {
       "frase": "String de 3-6 palabras: Frase-clave del AÑO (NO identidad permanente)",
-      "declaracion": "String de 20-40 palabras: [Declaración sobre el aprendizaje/entrenamiento del año]. Debe incluir: 'La [cualidad] transforma cualquier tránsito.'"
+      "declaracion": "String de 20-40 palabras: [Declaración sobre el aprendizaje/entrenamiento del año]. Debe incluir: 'La [cualidad] transforma cualquier tránsito.'",
+      "teActivasCuando": "String de 1-2 líneas: Qué circunstancias, situaciones o momentos ACTIVAN este entrenamiento durante ${year}. Describe los triggers o catalizadores específicos del año que pondrán en marcha esta energía."
     }
   }
 }
