@@ -45,6 +45,7 @@ interface ChartTooltipsProps {
   solarReturnYear?: number;
   solarReturnTheme?: string;
   ascSRInNatalHouse?: number;
+  natalChart?: any; // ⭐ Carta natal para conectar con SR
   cardHoverTimer?: NodeJS.Timeout | null;
   setCardHoverTimer?: (timer: NodeJS.Timeout | null) => void;
 }
@@ -79,7 +80,8 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
     modalityDistribution,
     solarReturnYear,
     solarReturnTheme,
-    ascSRInNatalHouse
+    ascSRInNatalHouse,
+    natalChart // ⭐ Carta natal para referencia
   } = props;
 
   // =============================================================================
@@ -557,6 +559,19 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                 try {
                   console.log('🎯 Generando planeta individual:', planet.name);
 
+                  // ⭐ Si es SR, buscar posición natal del mismo planeta
+                  let natalPosition = undefined;
+                  if (chartType === 'solar-return' && natalChart?.planets) {
+                    const natalPlanet = natalChart.planets.find((p: any) => p.name === planet.name);
+                    if (natalPlanet) {
+                      natalPosition = {
+                        sign: natalPlanet.sign,
+                        house: natalPlanet.house
+                      };
+                      console.log(`  └─ Posición natal: ${natalPlanet.sign} Casa ${natalPlanet.house}`);
+                    }
+                  }
+
                   // ⭐ LLAMAR AL NUEVO ENDPOINT
                   const response = await fetch('/api/astrology/interpret-planet', {
                     method: 'POST',
@@ -568,7 +583,8 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                       house: planet.house,
                       degree: planet.degree,
                       chartType,  // ⭐ Incluye chartType
-                      year: solarReturnYear
+                      year: solarReturnYear,
+                      natalPosition // ⭐ Posición natal para conectar
                     })
                   });
 

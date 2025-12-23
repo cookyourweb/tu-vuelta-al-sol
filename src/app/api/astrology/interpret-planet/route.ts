@@ -17,9 +17,12 @@ import * as admin from 'firebase-admin';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userId, planetName, sign, house, degree } = body;
+    const { userId, planetName, sign, house, degree, chartType, year, natalPosition } = body;
 
-    console.log('🪐 [PLANET] Generating interpretation for:', planetName);
+    const type = chartType || 'natal';
+    const typeLabel = type === 'solar-return' ? `SR ${year || ''}` : 'Natal';
+
+    console.log(`🪐 [PLANET] Generating ${typeLabel} interpretation for:`, planetName);
 
     if (!userId || !planetName || !sign || !house) {
       return NextResponse.json(
@@ -28,8 +31,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validar que si es solar-return, tenga year
+    if (type === 'solar-return' && !year) {
+      return NextResponse.json(
+        { success: false, error: 'Year is required for solar-return interpretations' },
+        { status: 400 }
+      );
+    }
+
     const mongoose = await connectToDatabase();
     const db = (mongoose as any).connection?.db ?? (mongoose as any).db;
+
+    // Obtener perfil del usuario para la interpretación
+    const userDoc = await db.collection('users').findOne({ userId });
+    const userProfile = userDoc
+      ? {
+          name: userDoc.name || 'Usuario',
+          age: userDoc.age || 0,
+          birthDate: userDoc.birthDate || '',
+          birthTime: userDoc.birthTime || '',
+          birthPlace: userDoc.birthPlace || '',
+        }
+      : {
+          name: 'Usuario',
+          age: 0,
+          birthDate: '',
+          birthTime: '',
+          birthPlace: '',
+        };
 
     // Generate planet interpretation
     const interpretation = await generatePlanetInterpretation(
@@ -37,14 +66,17 @@ export async function POST(request: NextRequest) {
       sign,
       house,
       degree || 0,
-      {} as any // TODO: Add proper userProfile parameter
+      userProfile,
+      type as 'natal' | 'solar-return',
+      year,
+      natalPosition
     );
 
     if (!interpretation) {
       throw new Error('Failed to generate planet interpretation');
     }
 
-    console.log('✅ [PLANET] Generated interpretation for:', planetName);
+    console.log(`✅ [PLANET] Generated ${typeLabel} interpretation for:`, planetName);
 
     // Save to MongoDB
     const planetKey = `${planetName}-${sign}-${house}`;
@@ -65,9 +97,16 @@ export async function POST(request: NextRequest) {
 
     console.log(`📝 [PLANET] Guardando en sección: ${section}`);
     console.log(`📝 [PLANET] Key completo: ${section}.${planetKey}`);
+    console.log(`📝 [PLANET] ChartType: ${type}${type === 'solar-return' ? ` (año ${year})` : ''}`);
+
+    // Guardar con el chartType correcto
+    const filter: any = { userId, chartType: type };
+    if (type === 'solar-return') {
+      filter.year = year;
+    }
 
     await db.collection('interpretations').updateOne(
-      { userId, chartType: 'natal' },
+      filter,
       {
         $set: {
           [`interpretations.${section}.${planetKey}`]: interpretation,
@@ -77,13 +116,15 @@ export async function POST(request: NextRequest) {
       { upsert: true }
     );
 
-    console.log('✅ [PLANET] Saved to MongoDB:', `${section}.${planetKey}`);
+    console.log(`✅ [PLANET] Saved to MongoDB: ${section}.${planetKey} (${type}${type === 'solar-return' ? ` ${year}` : ''})`);
 
     return NextResponse.json({
       success: true,
       interpretation,
       planetKey,
-      message: `Interpretación de ${planetName} generada correctamente`,
+      chartType: type,
+      year: year || null,
+      message: `Interpretación ${typeLabel} de ${planetName} generada correctamente`,
     });
 
   } catch (error) {
