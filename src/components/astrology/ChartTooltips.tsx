@@ -445,8 +445,20 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
       interpretation = natalInterpretations.asteroids[interpretationKey];
       console.log('✅ Using AI interpretation for asteroid', interpretationKey);
     } else {
-      interpretation = getExampleInterpretation(interpretationKey);
-      console.log('⚠️ Using fallback for', interpretationKey);
+      // ⭐ FIX: Usar fallback diferente según chartType
+      const fallbackText = chartType === 'solar-return'
+        ? `Este año ${solarReturnYear || 'actual'}, este posicionamiento activa un entrenamiento específico en tu vida. Haz click para generar tu interpretación personalizada del año.`
+        : 'Esta configuración astrológica tiene un significado especial en tu carta natal. Haz click para descubrir tu interpretación completa personalizada.';
+
+      interpretation = {
+        tooltip: {
+          titulo: 'Interpretación Personalizada',
+          significado: fallbackText,
+          efecto: chartType === 'solar-return' ? 'Activación anual específica' : 'Influencia única en tu personalidad',
+          tipo: chartType === 'solar-return' ? 'Entrenamiento del año' : 'Energía transformadora'
+        }
+      };
+      console.log('⚠️ Using fallback for', interpretationKey, 'chartType:', chartType);
       console.log('   - Interpretation:', interpretation);
       console.log('   - Has drawer?', !!interpretation?.drawer);
       console.log('   - onOpenDrawer exists?', !!onOpenDrawer);
@@ -614,7 +626,7 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
                     // ⭐ FIX: Usar endpoint correcto según chartType
                     const refreshEndpoint = chartType === 'solar-return'
-                      ? `/api/astrology/interpret-solar-return?userId=${userId}`
+                      ? `/api/astrology/interpret-solar-return?userId=${userId}&year=${solarReturnYear || new Date().getFullYear()}`
                       : `/api/astrology/interpret-natal?userId=${userId}`;
 
                     console.log('🔄 Refrescando desde:', refreshEndpoint);

@@ -1127,6 +1127,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
+    const year = searchParams.get('year'); // ⭐ FIX: Obtener año para filtrar
 
     if (!userId) {
       return NextResponse.json(
@@ -1137,11 +1138,19 @@ export async function GET(request: NextRequest) {
 
     await connectDB();
 
-    const interpretationDoc = await Interpretation.findOne({
+    // ⭐ FIX: Filtrar por año si se proporciona
+    const filter: any = {
       userId,
       chartType: 'solar-return',
       expiresAt: { $gt: new Date() }
-    })
+    };
+
+    if (year) {
+      filter.year = parseInt(year);
+      console.log(`🔍 [GET SR] Filtering by year: ${year}`);
+    }
+
+    const interpretationDoc = await Interpretation.findOne(filter)
     .sort({ generatedAt: -1 })
     .lean()
     .exec();
