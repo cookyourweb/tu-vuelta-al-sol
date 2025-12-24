@@ -7,7 +7,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import connectDB from '@/lib/db';
 import Interpretation from '@/models/Interpretation';
-import { generateSolarReturnMasterPrompt } from '@/utils/prompts/solarReturnPrompts';
+// ✅ Importar nuevo prompt profesional y sutil
+import { generateSolarReturnProfessionalPrompt } from '@/utils/prompts/solarReturnPrompts_v2';
 import { generateSRComparison } from '@/utils/astrology/solarReturnComparison';
 
 // ✅ Lazy initialization to avoid build-time errors
@@ -217,8 +218,8 @@ async function generateCompleteWithOpenAI(
     returnYear
   });
 
-  // ✅ GENERATE PROMPT
-  const prompt = generateSolarReturnMasterPrompt({
+  // ✅ GENERATE PROMPT (usando versión profesional y sutil)
+  const prompt = generateSolarReturnProfessionalPrompt({
     natalChart,
     solarReturnChart,
     userProfile,
