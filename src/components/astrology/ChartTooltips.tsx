@@ -683,14 +683,18 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
   }
 
   // =============================================================================
-  // 🌅 TOOLTIP FOR ASCENDANT
+  // 🌅 TOOLTIP FOR ASCENDANT (✅ ADAPTADO PARA NATAL Y SOLAR RETURN)
   // =============================================================================
 
   if (hoveredPlanet === 'Ascendente' && ascendant) {
     let interpretation = null;
+    let solarReturnData = null;
 
-    if (natalInterpretations?.angles?.Ascendente) {
+    // ✅ Detectar estructura según chartType
+    if (chartType === 'natal' && natalInterpretations?.angles?.Ascendente) {
       interpretation = natalInterpretations.angles.Ascendente;
+    } else if (chartType === 'solar-return' && natalInterpretations?.angulos_vitales?.ascendente) {
+      solarReturnData = natalInterpretations.angulos_vitales.ascendente;
     }
 
     return (
@@ -748,29 +752,61 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           </svg>
           <div>
             <div className="text-white font-bold text-lg">
-              {typeof interpretation?.tooltip?.titulo === 'string' ? interpretation.tooltip.titulo : 'Ascendente'}
+              {interpretation?.tooltip?.titulo ||
+               (solarReturnData ? `Ascendente SR en ${ascendant.sign}` : 'Ascendente')}
             </div>
             <div className="text-gray-200 text-sm">
               {ascendant.degree}° {ascendant.sign}
+              {chartType === 'solar-return' && solarReturnYear && (
+                <span className="ml-2 text-yellow-300 text-xs">• SR {solarReturnYear}</span>
+              )}
             </div>
           </div>
         </div>
 
         <div className="text-white text-sm font-semibold mb-1">🎯 Significado:</div>
         <div className="text-gray-200 text-xs mb-2">
-          {typeof interpretation?.tooltip?.significado === 'string' ? interpretation.tooltip.significado :
-            `Tu máscara social, cómo te presentas al mundo y tu apariencia física.`}
+          {interpretation?.tooltip?.significado ||
+           solarReturnData?.mascara_social ||
+           `Tu máscara social, cómo te presentas al mundo y tu apariencia física.`}
         </div>
 
-        <div className="space-y-1 mb-3">
-          <div className="text-cyan-200 text-xs">
-            <strong>Efecto:</strong> {typeof interpretation?.tooltip?.efecto === 'string' ? interpretation.tooltip.efecto : 'Influencia angular significativa'}
+        {/* ✅ Contenido adaptado según tipo de carta */}
+        {interpretation ? (
+          // NATAL: Muestra estructura tooltip completa
+          <div className="space-y-1 mb-3">
+            <div className="text-cyan-200 text-xs">
+              <strong>Efecto:</strong> {interpretation.tooltip.efecto || 'Influencia angular significativa'}
+            </div>
+            <div className="text-purple-200 text-xs">
+              <strong>Tipo:</strong> {interpretation.tooltip.tipo || 'Energía directiva'}
+            </div>
           </div>
-          <div className="text-purple-200 text-xs">
-            <strong>Tipo:</strong> {typeof interpretation?.tooltip?.tipo === 'string' ? interpretation.tooltip.tipo : 'Energía directiva'}
+        ) : solarReturnData ? (
+          // SOLAR RETURN: Muestra estructura de solar return
+          <div className="space-y-2 mb-3">
+            <div className="text-cyan-200 text-xs">
+              <strong>🎭 Máscara Anual:</strong> {solarReturnData.mascara_social}
+            </div>
+            <div className="text-purple-200 text-xs">
+              <strong>⚡ Superpoder:</strong> {solarReturnData.superpoder}
+            </div>
+            {solarReturnData.posicion && (
+              <div className="text-yellow-200 text-xs">
+                <strong>📍 Posición:</strong> {solarReturnData.posicion}
+              </div>
+            )}
           </div>
-        </div>
+        ) : (
+          // FALLBACK: Sin interpretación
+          <div className="bg-yellow-500/20 border border-yellow-400/30 rounded-lg p-2 mb-3">
+            <p className="text-yellow-200 text-xs">
+              💡 No hay interpretación generada para el Ascendente. Genera una interpretación para ver contenido personalizado.
+            </p>
+          </div>
+        )}
 
+        {/* ✅ Botón para abrir drawer (solo natal tiene drawer) */}
         {interpretation?.drawer && (
           <button
             onMouseDown={(e) => {
@@ -817,14 +853,18 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
   }
 
   // =============================================================================
-  // 🎯 TOOLTIP FOR MIDHEAVEN
+  // 🎯 TOOLTIP FOR MIDHEAVEN (✅ ADAPTADO PARA NATAL Y SOLAR RETURN)
   // =============================================================================
 
   if (hoveredPlanet === 'Medio Cielo' && midheaven) {
     let interpretation = null;
+    let solarReturnData = null;
 
-    if (natalInterpretations?.angles?.MedioCielo) {
+    // ✅ Detectar estructura según chartType
+    if (chartType === 'natal' && natalInterpretations?.angles?.MedioCielo) {
       interpretation = natalInterpretations.angles.MedioCielo;
+    } else if (chartType === 'solar-return' && natalInterpretations?.angulos_vitales?.medio_cielo) {
+      solarReturnData = natalInterpretations.angulos_vitales.medio_cielo;
     }
 
     return (
@@ -870,29 +910,61 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           </svg>
           <div>
             <div className="text-white font-bold text-lg">
-              {typeof interpretation?.tooltip?.titulo === 'string' ? interpretation.tooltip.titulo : 'Medio Cielo'}
+              {interpretation?.tooltip?.titulo ||
+               (solarReturnData ? `Medio Cielo SR en ${midheaven.sign}` : 'Medio Cielo')}
             </div>
             <div className="text-gray-200 text-sm">
               {midheaven.degree}° {midheaven.sign}
+              {chartType === 'solar-return' && solarReturnYear && (
+                <span className="ml-2 text-yellow-300 text-xs">• SR {solarReturnYear}</span>
+              )}
             </div>
           </div>
         </div>
-        
+
         <div className="text-white text-sm font-semibold mb-1">🎯 Significado:</div>
         <div className="text-gray-200 text-xs mb-2">
-          {typeof interpretation?.tooltip?.significado === 'string' ? interpretation.tooltip.significado :
-            `Tu vocación, imagen pública y dirección profesional.`}
+          {interpretation?.tooltip?.significado ||
+           solarReturnData?.vocacion_soul ||
+           `Tu vocación, imagen pública y dirección profesional.`}
         </div>
 
-        <div className="space-y-1 mb-3">
-          <div className="text-cyan-200 text-xs">
-            <strong>Efecto:</strong> {typeof interpretation?.tooltip?.efecto === 'string' ? interpretation.tooltip.efecto : 'Influencia angular significativa'}
+        {/* ✅ Contenido adaptado según tipo de carta */}
+        {interpretation ? (
+          // NATAL: Muestra estructura tooltip completa
+          <div className="space-y-1 mb-3">
+            <div className="text-cyan-200 text-xs">
+              <strong>Efecto:</strong> {interpretation.tooltip.efecto || 'Influencia angular significativa'}
+            </div>
+            <div className="text-purple-200 text-xs">
+              <strong>Tipo:</strong> {interpretation.tooltip.tipo || 'Energía directiva'}
+            </div>
           </div>
-          <div className="text-purple-200 text-xs">
-            <strong>Tipo:</strong> {typeof interpretation?.tooltip?.tipo === 'string' ? interpretation.tooltip.tipo : 'Energía directiva'}
+        ) : solarReturnData ? (
+          // SOLAR RETURN: Muestra estructura de solar return
+          <div className="space-y-2 mb-3">
+            <div className="text-cyan-200 text-xs">
+              <strong>🎯 Vocación Soul:</strong> {solarReturnData.vocacion_soul}
+            </div>
+            <div className="text-purple-200 text-xs">
+              <strong>🌟 Legado:</strong> {solarReturnData.legado}
+            </div>
+            {solarReturnData.posicion && (
+              <div className="text-yellow-200 text-xs">
+                <strong>📍 Posición:</strong> {solarReturnData.posicion}
+              </div>
+            )}
           </div>
-        </div>
+        ) : (
+          // FALLBACK: Sin interpretación
+          <div className="bg-yellow-500/20 border border-yellow-400/30 rounded-lg p-2 mb-3">
+            <p className="text-yellow-200 text-xs">
+              💡 No hay interpretación generada para el Medio Cielo. Genera una interpretación para ver contenido personalizado.
+            </p>
+          </div>
+        )}
 
+        {/* ✅ Botón para abrir drawer (solo natal tiene drawer) */}
         {interpretation?.drawer && (
           <button
             onMouseDown={(e) => {
