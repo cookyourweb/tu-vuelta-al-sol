@@ -799,7 +799,8 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           </div>
         </div>
 
-        {interpretation?.drawer && (
+        {/* ✅ Show button if interpretation exists OR if we can generate one */}
+        {interpretation?.drawer ? (
           <button
             onMouseDown={(e) => {
               console.log('═══════════════════════════════════');
@@ -838,6 +839,74 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
             className="w-full py-2 px-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg text-sm font-semibold transition-all"
           >
             📖 Ver interpretación completa
+          </button>
+        ) : userId && (
+          <button
+            onMouseDown={async (e) => {
+              e.stopPropagation();
+              e.preventDefault();
+
+              // ⭐ GENERAR ASCENDENTE
+              setTooltipLocked(true);
+              setIsGenerating(true);
+
+              try {
+                console.log('🎯 Generando Ascendente...');
+
+                const response = await fetch('/api/astrology/interpret-planet', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    userId,
+                    planetName: 'Ascendente',
+                    sign: ascendant.sign,
+                    house: 1, // Ascendente siempre está en Casa 1
+                    degree: ascendant.degree,
+                    chartType
+                  })
+                });
+
+                const result = await response.json();
+
+                if (result.success && result.interpretation) {
+                  console.log('✅ Ascendente generado');
+
+                  const newInterpretation = result.interpretation;
+
+                  // Actualizar el estado de interpretaciones
+                  if (natalInterpretations) {
+                    setNatalInterpretations({
+                      ...natalInterpretations,
+                      angles: {
+                        ...natalInterpretations.angles,
+                        Ascendente: newInterpretation
+                      }
+                    });
+                  }
+
+                  if (newInterpretation?.drawer && onOpenDrawer) {
+                    console.log('✅ Abriendo drawer para Ascendente');
+                    onOpenDrawer(newInterpretation.drawer);
+                  }
+                } else {
+                  throw new Error(result.error || 'Error generando interpretación');
+                }
+              } catch (error) {
+                console.error('❌ Error generando Ascendente:', error);
+                alert('Error generando la interpretación. Por favor intenta de nuevo.');
+              } finally {
+                setIsGenerating(false);
+                setTooltipLocked(false);
+              }
+            }}
+            style={{
+              pointerEvents: 'auto',
+              zIndex: 9999999,
+              cursor: 'pointer'
+            }}
+            className="w-full py-2 px-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg text-sm font-semibold transition-all"
+          >
+            {isGenerating ? '⏳ Generando...' : '✨ Generar interpretación'}
           </button>
         )}
       </div>
@@ -921,7 +990,8 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           </div>
         </div>
 
-        {interpretation?.drawer && (
+        {/* ✅ Show button if interpretation exists OR if we can generate one */}
+        {interpretation?.drawer ? (
           <button
             onMouseDown={(e) => {
               console.log('═══════════════════════════════════');
@@ -963,6 +1033,74 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
             className="w-full py-2 px-4 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white rounded-lg text-sm font-semibold transition-all"
           >
             📖 Ver interpretación completa
+          </button>
+        ) : userId && (
+          <button
+            onMouseDown={async (e) => {
+              e.stopPropagation();
+              e.preventDefault();
+
+              // ⭐ GENERAR MEDIO CIELO
+              setTooltipLocked(true);
+              setIsGenerating(true);
+
+              try {
+                console.log('🎯 Generando Medio Cielo...');
+
+                const response = await fetch('/api/astrology/interpret-planet', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    userId,
+                    planetName: 'MedioCielo',
+                    sign: midheaven.sign,
+                    house: 10, // Medio Cielo siempre está en Casa 10
+                    degree: midheaven.degree,
+                    chartType
+                  })
+                });
+
+                const result = await response.json();
+
+                if (result.success && result.interpretation) {
+                  console.log('✅ Medio Cielo generado');
+
+                  const newInterpretation = result.interpretation;
+
+                  // Actualizar el estado de interpretaciones
+                  if (natalInterpretations) {
+                    setNatalInterpretations({
+                      ...natalInterpretations,
+                      angles: {
+                        ...natalInterpretations.angles,
+                        MedioCielo: newInterpretation
+                      }
+                    });
+                  }
+
+                  if (newInterpretation?.drawer && onOpenDrawer) {
+                    console.log('✅ Abriendo drawer para Medio Cielo');
+                    onOpenDrawer(newInterpretation.drawer);
+                  }
+                } else {
+                  throw new Error(result.error || 'Error generando interpretación');
+                }
+              } catch (error) {
+                console.error('❌ Error generando Medio Cielo:', error);
+                alert('Error generando la interpretación. Por favor intenta de nuevo.');
+              } finally {
+                setIsGenerating(false);
+                setTooltipLocked(false);
+              }
+            }}
+            style={{
+              pointerEvents: 'auto',
+              zIndex: 9999999,
+              cursor: 'pointer'
+            }}
+            className="w-full py-2 px-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg text-sm font-semibold transition-all"
+          >
+            {isGenerating ? '⏳ Generando...' : '✨ Generar interpretación'}
           </button>
         )}
       </div>

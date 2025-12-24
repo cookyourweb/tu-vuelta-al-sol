@@ -6,7 +6,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
-import { generatePlanetInterpretation } from '@/services/tripleFusedInterpretationService';
+import {
+  generatePlanetInterpretation,
+  generateAscendantInterpretation,
+  generateMidheavenInterpretation
+} from '@/services/tripleFusedInterpretationService';
 import * as admin from 'firebase-admin';
 
 
@@ -77,40 +81,70 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Generate planet interpretation
-    const interpretation = await generatePlanetInterpretation(
-      planetName,
-      sign,
-      house,
-      degree || 0,
-      {} as any, // TODO: Add proper userProfile parameter
-      chartType,
-      year,
-      natalPlanetPosition  // ⭐ Pasar posición natal para comparación
-    );
+    // ✅ NEW: Check if it's an angle (Ascendente or MedioCielo)
+    const isAscendente = planetName === 'Ascendente';
+    const isMedioCielo = planetName === 'MedioCielo' || planetName === 'Medio Cielo';
+
+    let interpretation;
+    let planetKey;
+    let section;
+
+    // ✅ Generate interpretation based on type
+    if (isAscendente) {
+      console.log('🌅 [ANGLE] Generando Ascendente...');
+      interpretation = await generateAscendantInterpretation(
+        sign,
+        degree || 0,
+        {} as any // TODO: Add proper userProfile parameter
+      );
+      planetKey = 'Ascendente';
+      section = 'angles';
+      console.log('🎯 [ANGLE] Detectado ASCENDENTE - guardando en sección: angles');
+    } else if (isMedioCielo) {
+      console.log('🌐 [ANGLE] Generando Medio Cielo...');
+      interpretation = await generateMidheavenInterpretation(
+        sign,
+        degree || 0,
+        {} as any // TODO: Add proper userProfile parameter
+      );
+      planetKey = 'MedioCielo';
+      section = 'angles';
+      console.log('🎯 [ANGLE] Detectado MEDIO CIELO - guardando en sección: angles');
+    } else {
+      // Regular planet
+      interpretation = await generatePlanetInterpretation(
+        planetName,
+        sign,
+        house,
+        degree || 0,
+        {} as any, // TODO: Add proper userProfile parameter
+        chartType,
+        year,
+        natalPlanetPosition  // ⭐ Pasar posición natal para comparación
+      );
+
+      planetKey = `${planetName}-${sign}-${house}`;
+
+      // Determinar categoría del planeta
+      section = 'planets'; // Por defecto
+
+      // Nodos se guardan en "nodes"
+      if (planetName.includes('Nodo')) {
+        section = 'nodes';
+        console.log('🎯 [PLANET] Detectado NODO - guardando en sección: nodes');
+      }
+      // Asteroides se guardan en "asteroids"
+      else if (['Quirón', 'Lilith', 'Ceres', 'Pallas', 'Juno', 'Vesta'].includes(planetName)) {
+        section = 'asteroids';
+        console.log('🎯 [PLANET] Detectado ASTEROIDE - guardando en sección: asteroids');
+      }
+    }
 
     if (!interpretation) {
-      throw new Error('Failed to generate planet interpretation');
+      throw new Error(`Failed to generate interpretation for ${planetName}`);
     }
 
-    console.log('✅ [PLANET] Generated interpretation for:', planetName);
-
-    // Save to MongoDB
-    const planetKey = `${planetName}-${sign}-${house}`;
-
-    // Determinar categoría del planeta
-    let section = 'planets'; // Por defecto
-
-    // Nodos se guardan en "nodes"
-    if (planetName.includes('Nodo')) {
-      section = 'nodes';
-      console.log('🎯 [PLANET] Detectado NODO - guardando en sección: nodes');
-    }
-    // Asteroides se guardan en "asteroids"
-    else if (['Quirón', 'Lilith', 'Ceres', 'Pallas', 'Juno', 'Vesta'].includes(planetName)) {
-      section = 'asteroids';
-      console.log('🎯 [PLANET] Detectado ASTEROIDE - guardando en sección: asteroids');
-    }
+    console.log(`✅ [${section.toUpperCase()}] Generated interpretation for: ${planetName}`);
 
     console.log(`📝 [PLANET] Guardando en sección: ${section}`);
     console.log(`📝 [PLANET] chartType: ${chartType}`);
