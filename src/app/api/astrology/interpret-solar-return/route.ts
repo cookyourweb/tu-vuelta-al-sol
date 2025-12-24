@@ -1156,9 +1156,35 @@ export async function GET(request: NextRequest) {
     // Handle case where interpretationDoc could be an array
     const doc = Array.isArray(interpretationDoc) ? interpretationDoc[0] : interpretationDoc;
 
+    // ⭐ FIX: Merge interpretación masiva con interpretaciones individuales
+    // La interpretación masiva está en doc.interpretation
+    // Las interpretaciones individuales de planetas están en doc.interpretations
+    const mergedInterpretation = {
+      ...doc?.interpretation,
+      // Merge individual planet interpretations (generated on-demand)
+      planets: {
+        ...(doc?.interpretation?.planets || {}),
+        ...(doc?.interpretations?.planets || {})
+      },
+      nodes: {
+        ...(doc?.interpretation?.nodes || {}),
+        ...(doc?.interpretations?.nodes || {})
+      },
+      asteroids: {
+        ...(doc?.interpretation?.asteroids || {}),
+        ...(doc?.interpretations?.asteroids || {})
+      }
+    };
+
+    console.log('📦 [GET SR] Merged data:', {
+      massivePlanets: Object.keys(doc?.interpretation?.planets || {}).length,
+      individualPlanets: Object.keys(doc?.interpretations?.planets || {}).length,
+      totalPlanets: Object.keys(mergedInterpretation.planets).length
+    });
+
     return NextResponse.json({
       success: true,
-      interpretation: doc?.interpretation,
+      interpretation: mergedInterpretation,
       cached: true,
       generatedAt: doc?.generatedAt,
       method: 'mongodb_cached'

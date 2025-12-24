@@ -612,8 +612,15 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                     // Get Firebase ID token for authentication
                     const token = await user!.getIdToken();
 
+                    // ⭐ FIX: Usar endpoint correcto según chartType
+                    const refreshEndpoint = chartType === 'solar-return'
+                      ? `/api/astrology/interpret-solar-return?userId=${userId}`
+                      : `/api/astrology/interpret-natal?userId=${userId}`;
+
+                    console.log('🔄 Refrescando desde:', refreshEndpoint);
+
                     // Refrescar interpretaciones
-                    const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`, {
+                    const refreshResponse = await fetch(refreshEndpoint, {
                       headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -624,21 +631,33 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                     // ⭐ DEBUGGING: Ver qué devuelve la API
                     console.log('📦 Refresh result completo:', refreshResult);
                     console.log('📦 refreshResult.success:', refreshResult.success);
-                    console.log('📦 refreshResult.data:', refreshResult.data);
-                    console.log('📦 refreshResult.data?.planets:', refreshResult.data?.planets);
 
                     if (refreshResult.success) {
-                      console.log('🔄 Actualizando estado con:', refreshResult.data);
-                      setNatalInterpretations(refreshResult.data);
+                      // ⭐ FIX: Manejar estructura diferente según chartType
+                      // Natal: refreshResult.data.planets[...]
+                      // Solar Return: refreshResult.interpretation.planets[...] o refreshResult.data.planets[...]
+                      const interpretationsData = chartType === 'solar-return'
+                        ? (refreshResult.interpretation || refreshResult.data)
+                        : refreshResult.data;
+
+                      console.log('🔄 Actualizando estado con:', interpretationsData);
+                      console.log('📊 Estructura:', {
+                        hasPlanets: !!interpretationsData?.planets,
+                        hasNodes: !!interpretationsData?.nodes,
+                        hasAsteroids: !!interpretationsData?.asteroids,
+                        planetKeys: interpretationsData?.planets ? Object.keys(interpretationsData.planets).slice(0, 5) : []
+                      });
+
+                      setNatalInterpretations(interpretationsData);
 
                       const newKey = `${planet.name}-${planet.sign}-${planet.house}`;
                       console.log('🔍 Buscando interpretación con key:', newKey);
 
-                      // ⭐ CRÍTICO: Buscar en refreshResult.data (NO en estado)
+                      // ⭐ CRÍTICO: Buscar en interpretationsData (estructura correcta)
                       let newInterpretation =
-                        refreshResult.data?.planets?.[newKey] ||
-                        refreshResult.data?.asteroids?.[newKey] ||
-                        refreshResult.data?.nodes?.[newKey];
+                        interpretationsData?.planets?.[newKey] ||
+                        interpretationsData?.asteroids?.[newKey] ||
+                        interpretationsData?.nodes?.[newKey];
 
                       console.log('📖 Interpretación encontrada:', !!newInterpretation);
 
@@ -647,9 +666,11 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                         onOpenDrawer(newInterpretation.drawer);
                       } else {
                         console.error('❌ No se encontró interpretación para:', newKey);
-                        console.error('   - Secciones disponibles:', Object.keys(refreshResult.data || {}));
-                        console.error('   - Nodes keys:', Object.keys(refreshResult.data?.nodes || {}));
-                        console.error('   - Asteroids keys:', Object.keys(refreshResult.data?.asteroids || {}));
+                        console.error('   - chartType:', chartType);
+                        console.error('   - Secciones disponibles:', Object.keys(interpretationsData || {}));
+                        console.error('   - Planets keys:', Object.keys(interpretationsData?.planets || {}));
+                        console.error('   - Nodes keys:', Object.keys(interpretationsData?.nodes || {}));
+                        console.error('   - Asteroids keys:', Object.keys(interpretationsData?.asteroids || {}));
                       }
                     } else {
                       console.error('❌ Refresh failed:', refreshResult);
