@@ -768,10 +768,10 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
             {planetData.cierre && (
               <div className="mt-6 bg-white/10 rounded-lg p-4">
                 <p className="text-sm text-purple-200 mb-2">
-                  <strong>Te activas cuando:</strong> {planetData.cierre.energia_vital || planetData.cierre.activacion}
+                  {planetData.cierre.energia_vital || planetData.cierre.activacion}
                 </p>
                 <p className="text-sm text-purple-200">
-                  <strong>Tu don mayor:</strong> {planetData.cierre.don_mayor}
+                  {planetData.cierre.don_mayor}
                 </p>
               </div>
             )}

@@ -29,7 +29,7 @@ La luz emerge cuando aprendes a confiar en tu intuición sin perder el contacto 
 ━━━━━━━━━━━━━━━━━━
 ✨ EN RESUMEN
 
-Te activas mentalmente cuando: Puedes explorar ideas de forma libre y creativa, sin presión por ser lógico/a o estructurado/a.
+Eres más tú mismo/a cuando: Puedes explorar ideas de forma libre y creativa, sin presión por ser lógico/a o estructurado/a.
 
 Tu don mayor en esta área: La capacidad de comunicar desde el corazón y comprender el lenguaje emocional del mundo.
 `;
@@ -62,7 +62,7 @@ export interface TripleFusedInterpretation {
                                  // 6. Sombra
                                  // 7. Luz
     cierre: {
-      activacion: string;        // "Te activas cuando..."
+      activacion: string;        // "Eres más tú mismo/a cuando..." (lenguaje permanente, NO temporal)
       don_mayor: string;         // "Tu don mayor en esta área..."
     };
   };
@@ -134,7 +134,7 @@ Debes responder SOLO con JSON válido en este formato:
     ],
 
     "cierre": {
-      "activacion": "String de 1-2 líneas: Cuándo te activas en esta área (completa: 'Te activas [área] cuando...')",
+      "activacion": "String de 1-2 líneas: Cuándo eres más tú mismo/a en esta área. USA LENGUAJE PERMANENTE: 'Eres más tú mismo/a cuando...', 'Tu esencia fluye cuando...', 'Estás en tu elemento cuando...'. NUNCA uses 'Te activas cuando...' (eso es para Solar Return).",
       "don_mayor": "String de 1-2 líneas: Tu don mayor en esta área (completa: 'Tu don mayor en esta área...')"
     }
   }

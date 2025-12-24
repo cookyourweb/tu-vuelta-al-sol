@@ -15,6 +15,25 @@ import { getPersonalizedPlanetInterpretation, getPersonalizedAspectInterpretatio
 import { getExampleInterpretation } from '@/data/interpretations/ExampleInterpretations';
 import { useAuth } from '@/context/AuthContext';
 
+// Helper function to get house meaning
+const getHouseMeaning = (house: number): string => {
+  const meanings: Record<number, string> = {
+    1: 'identidad, forma de ser, cómo te presentas al mundo',
+    2: 'recursos personales, valores, autovalía',
+    3: 'comunicación, aprendizaje, hermanos',
+    4: 'hogar, familia, raíces emocionales',
+    5: 'creatividad, romance, autoexpresión',
+    6: 'trabajo, salud, rutinas diarias',
+    7: 'relaciones, pareja, asociaciones',
+    8: 'transformación, intimidad, recursos compartidos',
+    9: 'filosofía, viajes, expansión mental',
+    10: 'carrera, reputación, propósito público',
+    11: 'amistades, grupos, ideales',
+    12: 'espiritualidad, inconsciente, retiro'
+  };
+  return meanings[house] || 'área de vida';
+};
+
 interface ChartTooltipsProps {
   hoveredPlanet: string | null;
   hoveredAspect: string | null;
@@ -520,8 +539,11 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
         <div className="text-gray-300 text-sm mb-3">
           <strong style={{ color: PLANET_COLORS[planet.name] || '#ffffff', fontSize: '1.125rem' }}>
-            {planet.name} en {planet.sign} en Casa {planet.house} ({planet.degree}°)
+            {planet.name} en {planet.sign} en Casa {planet.house}
           </strong>
+          <div className="text-gray-400 text-xs mt-1 italic">
+            (Casa {planet.house}: {getHouseMeaning(planet.house)})
+          </div>
         </div>
 
         <div className="mb-3">

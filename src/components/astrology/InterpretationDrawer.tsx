@@ -173,11 +173,9 @@ export const InterpretationDrawer: React.FC<InterpretationDrawerProps> = ({
                 </h3>
                 <div className="space-y-3">
                   <p className="text-sm md:text-base text-gray-200">
-                    <strong className="text-purple-200">Te activas cuando:</strong>{' '}
                     {(content as DrawerContentEducativo).cierre.activacion}
                   </p>
                   <p className="text-sm md:text-base text-gray-200">
-                    <strong className="text-purple-200">Tu don mayor:</strong>{' '}
                     {(content as DrawerContentEducativo).cierre.don_mayor}
                   </p>
                 </div>
