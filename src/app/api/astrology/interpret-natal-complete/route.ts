@@ -1,17 +1,17 @@
 // =============================================================================
-// 🎯 COMPLETE NATAL INTERPRETATION API ROUTE
+// 🌟 CLEAN NATAL INTERPRETATION API ROUTE
 // src/app/api/astrology/interpret-natal-complete/route.ts
-// Genera interpretación COMPLETA con 17 secciones en una sola llamada
+// Genera interpretación LIMPIA y PEDAGÓGICA sin rituales ni mantras
 // =============================================================================
 
 import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
 import {
-  generateCompleteNatalInterpretation,
-  generateCompleteNatalInterpretationChunked,
-  type CartaNatalCompleta,
-} from '@/services/completeNatalInterpretationService';
-import type { ChartData, UserProfile } from '@/utils/prompts/completeNatalChartPrompt';
+  generateCleanNatalInterpretation,
+  generateCleanNatalInterpretationChunked,
+  type CartaNatalLimpia,
+} from '@/services/cleanNatalInterpretationService';
+import type { ChartData, UserProfile } from '@/utils/prompts/natalChartPrompt_clean';
 
 // =============================================================================
 // GET - Retrieve existing complete interpretation
@@ -71,11 +71,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { userId, chartData, userProfile, regenerate = false, useChunked = true } = body;
 
-    console.log('🎯 [COMPLETE NATAL] POST request received');
-    console.log('🎯 [COMPLETE NATAL] userId:', userId);
-    console.log('🎯 [COMPLETE NATAL] userProfile:', userProfile?.name);
-    console.log('🎯 [COMPLETE NATAL] regenerate:', regenerate);
-    console.log('🎯 [COMPLETE NATAL] useChunked:', useChunked);
+    console.log('🌟 [CLEAN NATAL] POST request received');
+    console.log('🌟 [CLEAN NATAL] userId:', userId);
+    console.log('🌟 [CLEAN NATAL] userProfile:', userProfile?.name);
+    console.log('🌟 [CLEAN NATAL] regenerate:', regenerate);
+    console.log('🌟 [CLEAN NATAL] useChunked:', useChunked);
 
     if (!userId || !chartData || !userProfile) {
       return NextResponse.json(
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
 
         // Return cached if less than 24 hours old
         if (hoursDiff < 24) {
-          console.log('✅ [COMPLETE NATAL] Returning cached interpretation');
+          console.log('✅ [CLEAN NATAL] Returning cached interpretation');
           return NextResponse.json({
             success: true,
             interpretation: existing.interpretation,
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log('🎯 [COMPLETE NATAL] Starting generation for:', userProfile.name);
+    console.log('🌟 [CLEAN NATAL] Starting generation for:', userProfile.name);
 
     const startTime = Date.now();
 
@@ -136,17 +136,17 @@ export async function POST(request: NextRequest) {
     };
 
     // Generate interpretation (single call or chunked)
-    let interpretation: CartaNatalCompleta;
+    let interpretation: CartaNatalLimpia;
 
     if (useChunked) {
-      console.log('🎯 [COMPLETE NATAL] Using chunked generation');
-      interpretation = await generateCompleteNatalInterpretationChunked(
+      console.log('🌟 [CLEAN NATAL] Using chunked generation');
+      interpretation = await generateCleanNatalInterpretationChunked(
         preparedChartData,
         preparedUserProfile
       );
     } else {
-      console.log('🎯 [COMPLETE NATAL] Using single-call generation');
-      interpretation = await generateCompleteNatalInterpretation(
+      console.log('🌟 [CLEAN NATAL] Using single-call generation');
+      interpretation = await generateCleanNatalInterpretation(
         preparedChartData,
         preparedUserProfile
       );
@@ -154,8 +154,8 @@ export async function POST(request: NextRequest) {
 
     const generationTime = ((Date.now() - startTime) / 1000).toFixed(0);
 
-    console.log('✅ [COMPLETE NATAL] Generation complete in', generationTime, 'seconds');
-    console.log('✅ [COMPLETE NATAL] Sections generated:', Object.keys(interpretation).length);
+    console.log('✅ [CLEAN NATAL] Generation complete in', generationTime, 'seconds');
+    console.log('✅ [CLEAN NATAL] Sections generated:', Object.keys(interpretation).length);
 
     // Save to MongoDB
     await db.collection('interpretations_complete').updateOne(
@@ -175,7 +175,7 @@ export async function POST(request: NextRequest) {
       { upsert: true }
     );
 
-    console.log('✅ [COMPLETE NATAL] Saved to MongoDB');
+    console.log('✅ [CLEAN NATAL] Saved to MongoDB');
 
     return NextResponse.json({
       success: true,
@@ -187,7 +187,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('❌ [COMPLETE NATAL] Error:', error);
+    console.error('❌ [CLEAN NATAL] Error:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Server error',
