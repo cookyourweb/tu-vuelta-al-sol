@@ -1185,6 +1185,186 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           </div>
         )}
 
+        {/* ✅ SOLAR RETURN: COMPARACIONES PLANETARIAS (NATAL VS SOLAR RETURN) */}
+        {data.comparaciones_planetarias && type === 'solar-return' && (
+          <div className="bg-gradient-to-br from-purple-900/60 to-indigo-900/60 rounded-2xl p-8 border border-purple-400/30">
+            <h3 className="text-3xl font-bold text-white text-center mb-4">
+              🔄 Comparaciones Planetarias: Natal vs Solar Return
+            </h3>
+            <p className="text-purple-200 text-center mb-8 max-w-3xl mx-auto">
+              Descubre cómo tu identidad permanente (Natal) se activa de manera específica este año (Solar Return)
+            </p>
+
+            <div className="space-y-6">
+              {Object.entries(data.comparaciones_planetarias).map(([planetKey, comparacion]: [string, any]) => {
+                const planetIcons: Record<string, string> = {
+                  sol: '☀️',
+                  luna: '🌙',
+                  mercurio: '🗣️',
+                  venus: '💚',
+                  marte: '⚔️',
+                  jupiter: '🎯',
+                  saturno: '🏔️'
+                };
+
+                const planetNames: Record<string, string> = {
+                  sol: 'Sol',
+                  luna: 'Luna',
+                  mercurio: 'Mercurio',
+                  venus: 'Venus',
+                  marte: 'Marte',
+                  jupiter: 'Júpiter',
+                  saturno: 'Saturno'
+                };
+
+                const planetIcon = planetIcons[planetKey.toLowerCase()] || '⭐';
+                const planetName = planetNames[planetKey.toLowerCase()] || planetKey;
+
+                return (
+                  <div
+                    key={planetKey}
+                    className="bg-slate-900/50 rounded-xl border border-purple-500/30 overflow-hidden"
+                  >
+                    {/* Planet Header */}
+                    <div className="bg-gradient-to-r from-purple-700 to-indigo-700 p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="text-3xl">{planetIcon}</span>
+                        <h4 className="text-white font-bold text-xl">{planetName}</h4>
+                      </div>
+                      {comparacion.frase_clave && (
+                        <div className="bg-yellow-500/20 px-3 py-1 rounded-full border border-yellow-500/40">
+                          <p className="text-yellow-200 text-xs font-semibold">FRASE CLAVE</p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="p-6 space-y-6">
+                      {/* Frase Clave del Año - Destacada */}
+                      {comparacion.frase_clave && (
+                        <div className="bg-gradient-to-r from-yellow-600/30 to-orange-600/30 rounded-lg p-4 border-l-4 border-yellow-500">
+                          <p className="text-yellow-200 font-semibold text-sm mb-1">⚡ FRASE CLAVE DEL AÑO:</p>
+                          <blockquote className="text-white text-lg font-bold italic">
+                            "{extractTextFromTooltipDrawer(comparacion.frase_clave)}"
+                          </blockquote>
+                        </div>
+                      )}
+
+                      {/* 1. Natal - Cómo eres normalmente */}
+                      {comparacion.natal && (
+                        <div className="bg-purple-800/20 rounded-lg p-4 border border-purple-600/30">
+                          <h5 className="text-purple-300 font-bold text-sm mb-2 flex items-center gap-2">
+                            <span>🔹</span> CÓMO ERES NORMALMENTE (Natal)
+                          </h5>
+                          {comparacion.natal.posicion && (
+                            <p className="text-purple-400 text-xs font-mono mb-2">
+                              📍 {extractTextFromTooltipDrawer(comparacion.natal.posicion)}
+                            </p>
+                          )}
+                          {comparacion.natal.descripcion && (
+                            <p className="text-slate-200 leading-relaxed text-sm">
+                              {extractTextFromTooltipDrawer(comparacion.natal.descripcion)}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* 2. Solar Return - Qué se activa este año */}
+                      {comparacion.solar_return && (
+                        <div className="bg-orange-800/20 rounded-lg p-4 border border-orange-600/30">
+                          <h5 className="text-orange-300 font-bold text-sm mb-2 flex items-center gap-2">
+                            <span>🔸</span> QUÉ SE ACTIVA ESTE AÑO (Solar Return)
+                          </h5>
+                          {comparacion.solar_return.posicion && (
+                            <p className="text-orange-400 text-xs font-mono mb-2">
+                              📍 {extractTextFromTooltipDrawer(comparacion.solar_return.posicion)}
+                            </p>
+                          )}
+                          {comparacion.solar_return.descripcion && (
+                            <p className="text-slate-200 leading-relaxed text-sm">
+                              {extractTextFromTooltipDrawer(comparacion.solar_return.descripcion)}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* 3. Choque - Dónde choca o potencia */}
+                      {comparacion.choque && (
+                        <div className="bg-yellow-800/20 rounded-lg p-4 border border-yellow-600/30">
+                          <h5 className="text-yellow-300 font-bold text-sm mb-2 flex items-center gap-2">
+                            <span>🔁</span> DÓNDE CHOCA O POTENCIA
+                          </h5>
+                          <p className="text-slate-200 leading-relaxed text-sm">
+                            {extractTextFromTooltipDrawer(comparacion.choque)}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* 4. Qué hacer - Acción concreta */}
+                      {comparacion.que_hacer && (
+                        <div className="bg-green-800/20 rounded-lg p-4 border border-green-600/30">
+                          <h5 className="text-green-300 font-bold text-sm mb-2 flex items-center gap-2">
+                            <span>✅</span> QUÉ CONVIENE HACER AHORA
+                          </h5>
+                          <p className="text-slate-200 leading-relaxed text-sm">
+                            {extractTextFromTooltipDrawer(comparacion.que_hacer)}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Error Automático - Advertencia */}
+                      {comparacion.error_automatico && (
+                        <div className="bg-red-900/30 rounded-lg p-4 border-l-4 border-red-500">
+                          <h5 className="text-red-300 font-bold text-sm mb-2 flex items-center gap-2">
+                            <span>⚠️</span> ERROR AUTOMÁTICO A EVITAR
+                          </h5>
+                          <p className="text-red-100 text-sm italic">
+                            {extractTextFromTooltipDrawer(comparacion.error_automatico)}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Uso en Agenda (opcional - puede colapsarse) */}
+                      {comparacion.uso_agenda && (
+                        <details className="bg-indigo-900/20 rounded-lg border border-indigo-600/30">
+                          <summary className="cursor-pointer p-4 text-indigo-300 font-semibold text-sm hover:bg-indigo-800/30 transition-colors">
+                            📅 CÓMO USAR ESTO EN TU AGENDA (Click para expandir)
+                          </summary>
+                          <div className="p-4 pt-0 space-y-3">
+                            {comparacion.uso_agenda.luna_nueva && (
+                              <div className="bg-indigo-800/20 rounded p-3">
+                                <p className="text-indigo-300 font-semibold text-xs mb-1">🌑 Luna Nueva:</p>
+                                <p className="text-slate-300 text-xs">
+                                  {extractTextFromTooltipDrawer(comparacion.uso_agenda.luna_nueva)}
+                                </p>
+                              </div>
+                            )}
+                            {comparacion.uso_agenda.luna_llena && (
+                              <div className="bg-indigo-800/20 rounded p-3">
+                                <p className="text-indigo-300 font-semibold text-xs mb-1">🌕 Luna Llena:</p>
+                                <p className="text-slate-300 text-xs">
+                                  {extractTextFromTooltipDrawer(comparacion.uso_agenda.luna_llena)}
+                                </p>
+                              </div>
+                            )}
+                            {comparacion.uso_agenda.retrogradaciones && (
+                              <div className="bg-indigo-800/20 rounded p-3">
+                                <p className="text-indigo-300 font-semibold text-xs mb-1">↩️ Retrogradaciones:</p>
+                                <p className="text-slate-300 text-xs">
+                                  {extractTextFromTooltipDrawer(comparacion.uso_agenda.retrogradaciones)}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </details>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* ✅ SOLAR RETURN: EVENTOS CLAVE DEL AÑO */}
         {data.eventos_clave && type === 'solar-return' && (
           <div className="bg-gradient-to-br from-rose-900/40 to-red-900/40 rounded-2xl p-8 border border-rose-400/30">
