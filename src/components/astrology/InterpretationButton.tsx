@@ -808,7 +808,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
             {/* Sol */}
             {data.sol && (
               <div className="bg-gradient-to-br from-yellow-900/40 to-orange-900/40 rounded-2xl p-8 border border-yellow-400/30">
-                <h4 className="text-yellow-100 font-bold text-2xl mb-2">☀️ {data.sol.titulo || 'Tu Propósito de Vida'}</h4>
+                <h4 className="text-yellow-100 font-bold text-2xl mb-2">{data.sol.titulo || 'Tu Propósito de Vida'}</h4>
                 {data.sol.posicion && <p className="text-yellow-300 text-sm font-mono mb-2">📍 {data.sol.posicion}</p>}
                 {data.sol.que_significa_casa && <p className="text-yellow-200 text-sm italic mb-4">💡 {data.sol.que_significa_casa}</p>}
                 <p className="text-yellow-50 leading-relaxed mb-4">{extractTextFromTooltipDrawer(data.sol.interpretacion || data.sol)}</p>
@@ -823,7 +823,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
             {/* Luna */}
             {data.luna && (
               <div className="bg-gradient-to-br from-blue-900/40 to-indigo-900/40 rounded-2xl p-8 border border-blue-400/30">
-                <h4 className="text-blue-100 font-bold text-2xl mb-2">🌙 {data.luna.titulo || 'Tus Emociones'}</h4>
+                <h4 className="text-blue-100 font-bold text-2xl mb-2">{data.luna.titulo || 'Tus Emociones'}</h4>
                 {data.luna.posicion && <p className="text-blue-300 text-sm font-mono mb-2">📍 {data.luna.posicion}</p>}
                 {data.luna.que_significa_casa && <p className="text-blue-200 text-sm italic mb-4">💡 {data.luna.que_significa_casa}</p>}
                 <p className="text-blue-50 leading-relaxed mb-4">{extractTextFromTooltipDrawer(data.luna.interpretacion || data.luna)}</p>
@@ -838,7 +838,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
             {/* Ascendente */}
             {data.ascendente && (
               <div className="bg-gradient-to-br from-green-900/40 to-emerald-900/40 rounded-2xl p-8 border border-green-400/30">
-                <h4 className="text-green-100 font-bold text-2xl mb-2">⬆️ {data.ascendente.titulo || 'Tu Personalidad'}</h4>
+                <h4 className="text-green-100 font-bold text-2xl mb-2">{data.ascendente.titulo || 'Tu Personalidad'}</h4>
                 {data.ascendente.posicion && <p className="text-green-300 text-sm font-mono mb-4">📍 {data.ascendente.posicion}</p>}
                 <p className="text-green-50 leading-relaxed mb-4">{extractTextFromTooltipDrawer(data.ascendente.interpretacion || data.ascendente)}</p>
                 {data.ascendente.primera_impresion && (
@@ -852,7 +852,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
             {/* Mercurio */}
             {data.mercurio && (
               <div className="bg-gradient-to-br from-cyan-900/40 to-sky-900/40 rounded-2xl p-8 border border-cyan-400/30">
-                <h4 className="text-cyan-100 font-bold text-2xl mb-2">🗣️ {data.mercurio.titulo || 'Cómo Piensas y Cómo Hablas'}</h4>
+                <h4 className="text-cyan-100 font-bold text-2xl mb-2">{data.mercurio.titulo || 'Cómo Piensas y Cómo Hablas'}</h4>
                 {data.mercurio.posicion && <p className="text-cyan-300 text-sm font-mono mb-2">📍 {data.mercurio.posicion}</p>}
                 {data.mercurio.que_significa_casa && <p className="text-cyan-200 text-sm italic mb-4">💡 {data.mercurio.que_significa_casa}</p>}
                 <p className="text-cyan-50 leading-relaxed mb-4">{extractTextFromTooltipDrawer(data.mercurio.interpretacion || data.mercurio)}</p>
@@ -867,7 +867,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
             {/* Venus */}
             {data.venus && (
               <div className="bg-gradient-to-br from-pink-900/40 to-rose-900/40 rounded-2xl p-8 border border-pink-400/30">
-                <h4 className="text-pink-100 font-bold text-2xl mb-2">💕 {data.venus.titulo || 'Cómo Amas'}</h4>
+                <h4 className="text-pink-100 font-bold text-2xl mb-2">{data.venus.titulo || 'Cómo Amas'}</h4>
                 {data.venus.posicion && <p className="text-pink-300 text-sm font-mono mb-2">📍 {data.venus.posicion}</p>}
                 {data.venus.que_significa_casa && <p className="text-pink-200 text-sm italic mb-4">💡 {data.venus.que_significa_casa}</p>}
                 <p className="text-pink-50 leading-relaxed mb-4">{extractTextFromTooltipDrawer(data.venus.interpretacion || data.venus)}</p>
@@ -882,7 +882,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
             {/* Marte */}
             {data.marte && (
               <div className="bg-gradient-to-br from-red-900/40 to-orange-900/40 rounded-2xl p-8 border border-red-400/30">
-                <h4 className="text-red-100 font-bold text-2xl mb-2">🔥 {data.marte.titulo || 'Cómo Enfrentas la Vida'}</h4>
+                <h4 className="text-red-100 font-bold text-2xl mb-2">{data.marte.titulo || 'Cómo Enfrentas la Vida'}</h4>
                 {data.marte.posicion && <p className="text-red-300 text-sm font-mono mb-2">📍 {data.marte.posicion}</p>}
                 {data.marte.que_significa_casa && <p className="text-red-200 text-sm italic mb-4">💡 {data.marte.que_significa_casa}</p>}
                 <p className="text-red-50 leading-relaxed mb-4">{extractTextFromTooltipDrawer(data.marte.interpretacion || data.marte)}</p>
@@ -897,7 +897,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
             {/* Júpiter */}
             {data.jupiter && (
               <div className="bg-gradient-to-br from-purple-900/40 to-violet-900/40 rounded-2xl p-8 border border-purple-400/30">
-                <h4 className="text-purple-100 font-bold text-2xl mb-2">🌱 {data.jupiter.titulo || 'Tu Suerte y Tus Ganancias'}</h4>
+                <h4 className="text-purple-100 font-bold text-2xl mb-2">{data.jupiter.titulo || 'Tu Suerte y Tus Ganancias'}</h4>
                 {data.jupiter.posicion && <p className="text-purple-300 text-sm font-mono mb-2">📍 {data.jupiter.posicion}</p>}
                 {data.jupiter.que_significa_casa && <p className="text-purple-200 text-sm italic mb-4">💡 {data.jupiter.que_significa_casa}</p>}
                 <p className="text-purple-50 leading-relaxed mb-4">{extractTextFromTooltipDrawer(data.jupiter.interpretacion || data.jupiter)}</p>
@@ -912,7 +912,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
             {/* Saturno */}
             {data.saturno && (
               <div className="bg-gradient-to-br from-gray-900/40 to-slate-900/40 rounded-2xl p-8 border border-gray-400/30">
-                <h4 className="text-gray-100 font-bold text-2xl mb-2">🪐 {data.saturno.titulo || 'Tu Karma y Responsabilidades'}</h4>
+                <h4 className="text-gray-100 font-bold text-2xl mb-2">{data.saturno.titulo || 'Tu Karma y Responsabilidades'}</h4>
                 {data.saturno.posicion && <p className="text-gray-300 text-sm font-mono mb-2">📍 {data.saturno.posicion}</p>}
                 {data.saturno.que_significa_casa && <p className="text-gray-200 text-sm italic mb-4">💡 {data.saturno.que_significa_casa}</p>}
                 <p className="text-gray-50 leading-relaxed mb-4">{extractTextFromTooltipDrawer(data.saturno.interpretacion || data.saturno)}</p>

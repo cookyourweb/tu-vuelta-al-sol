@@ -149,120 +149,140 @@ Responde ÚNICAMENTE con un objeto JSON válido (sin markdown, sin backticks):
 {
   "esencia_natal": {
     "titulo": "Tu Esencia Natal",
-    "descripcion": "200-250 palabras. Describe la identidad central combinando Sol (${sun?.sign} Casa ${sun?.house}), Luna (${moon?.sign} Casa ${moon?.house}), y Ascendente (${chartData.ascendant.sign}). Explica cómo estas energías conviven, cooperan o entran en tensión. Debe sentirse reconocible para ${userProfile.name}."
+    "descripcion": "150-180 palabras (MÁS CORTO Y EMOCIONAL). Describe la identidad central combinando Sol (${sun?.sign} Casa ${sun?.house}), Luna (${moon?.sign} Casa ${moon?.house}), y Ascendente (${chartData.ascendant.sign}). EVITA repetir signos múltiples veces. Traduce a experiencia vital, no técnica. Engancha emocionalmente desde la primera frase. Ejemplo de tono: 'Tu esencia combina una identidad libre y visionaria con una vida emocional mucho más profunda de lo que aparentas. Aunque te muestras racional, por dentro sientes intensamente y buscas vínculos que te transformen de verdad.'"
   },
 
   // 1️⃣ ESENCIA PERSONAL (cómo funcionas en el día a día)
+  // FÓRMULA OBLIGATORIA PARA CADA PLANETA: 1) Cómo eres, 2) Cómo se nota, 3) Qué necesitas
 
   "sol": {
-    "titulo": "☀️ Tu Propósito de Vida",
+    "titulo": "Tu Propósito de Vida",
     "posicion": "${sun?.sign} Casa ${sun?.house}",
-    "que_significa_casa": "Una línea explicando qué representa Casa ${sun?.house}. Ejemplo: 'Casa 1 = tu identidad visible; cómo impactas el mundo'",
-    "interpretacion": "150-180 palabras. Explica: 1) Qué viene a desarrollar esta persona, 2) Qué la hace única, 3) Qué la apaga cuando no vive alineada con su Sol. NO hables de futuro. NO des consejos. Solo explica la naturaleza del propósito.",
+    "que_significa_casa": "UNA línea clara. Ej: 'La casa 10 es tu imagen pública y tu contribución al mundo'",
+    "interpretacion": "150-180 palabras. FÓRMULA: 1) Cómo eres en esencia → 2) Cómo se manifiesta esto en tu vida → 3) Qué te apaga cuando no vives alineado con tu Sol. SIN tecnicismos. SIN consejos futuros. Solo explica la naturaleza del propósito.",
     "palabra_clave": "Una palabra que resuma este Sol"
   },
 
   "luna": {
-    "titulo": "🌙 Tus Emociones",
+    "titulo": "Tus Emociones",
     "posicion": "${moon?.sign} Casa ${moon?.house}",
-    "que_significa_casa": "Una línea sobre Casa ${moon?.house} para la Luna",
-    "interpretacion": "150-180 palabras. Describe: 1) Cómo procesa las emociones, 2) Qué necesita para sentirse segura emocionalmente, 3) Cómo reacciona instintivamente. Explica su mundo emocional ACTUAL, sin mencionar infancia aquí.",
-    "necesidad_emocional": "50 palabras sobre qué necesita esta Luna para sentirse en paz"
+    "que_significa_casa": "UNA línea clara sobre Casa ${moon?.house} para emociones",
+    "interpretacion": "150-180 palabras. FÓRMULA: 1) Cómo procesas las emociones → 2) Cómo reaccionas instintivamente → 3) Qué necesitas para estar en equilibrio emocional. Explica su mundo emocional ACTUAL (no infancia, eso va en Formación Lunar).",
+    "necesidad_emocional": "40-50 palabras. Qué necesita esta Luna para sentirse en paz."
   },
 
   "ascendente": {
-    "titulo": "⬆️ Tu Personalidad",
+    "titulo": "Tu Personalidad",
     "posicion": "${chartData.ascendant.sign}",
-    "interpretacion": "120-150 palabras. Explica cómo ${userProfile.name} se muestra al mundo, cómo la perciben los demás, y cuál es su forma instintiva de abordar la vida. Sin metáforas exageradas.",
-    "primera_impresion": "40 palabras sobre la primera impresión que da"
+    "interpretacion": "120-150 palabras. FÓRMULA: 1) Cómo te muestras al mundo → 2) Cómo te perciben los demás → 3) Cuál es tu forma instintiva de abordar la vida. Sin metáforas cósmicas. Lenguaje directo y humano.",
+    "primera_impresion": "40 palabras. Primera impresión que das al conocerte."
   },
 
   "mercurio": {
-    "titulo": "🗣️ Cómo Piensas y Cómo Hablas",
+    "titulo": "Cómo Piensas y Cómo Hablas",
     "posicion": "${mercury?.sign} Casa ${mercury?.house}",
-    "que_significa_casa": "Una línea sobre Casa ${mercury?.house}",
-    "interpretacion": "120-150 palabras. Explica: 1) Cómo piensa, 2) Cómo se expresa, 3) Su estilo de comunicación. Sin juicio. Sin consejos.",
-    "estilo_mental": "Una frase sobre su estilo de pensamiento"
+    "que_significa_casa": "UNA línea clara sobre Casa ${mercury?.house} para la mente",
+    "interpretacion": "120-150 palabras. FÓRMULA: 1) Cómo piensas → 2) Cómo te comunicas → 3) Dónde puede bloquearse tu mente. Sin juicio. Estilo conversacional.",
+    "estilo_mental": "Una frase sobre tu estilo de pensamiento"
   },
 
   "venus": {
-    "titulo": "💕 Cómo Amas",
+    "titulo": "Cómo Amas",
     "posicion": "${venus?.sign} Casa ${venus?.house}",
-    "que_significa_casa": "Una línea sobre Casa ${venus?.house}",
-    "interpretacion": "120-150 palabras. Describe: 1) Qué busca en las relaciones, 2) Qué necesita para amar con seguridad, 3) Qué valora profundamente.",
-    "lenguaje_amor": "40 palabras sobre cómo expresa amor"
+    "que_significa_casa": "UNA línea clara sobre Casa ${venus?.house} para el amor",
+    "interpretacion": "120-150 palabras. FÓRMULA: 1) Qué buscas en las relaciones → 2) Cómo amas cuando te sientes segura → 3) Qué valoras profundamente en los vínculos. Tono cálido pero honesto.",
+    "lenguaje_amor": "40 palabras. Cómo expresas amor."
   },
 
   "marte": {
-    "titulo": "🔥 Cómo Enfrentas la Vida",
+    "titulo": "Cómo Enfrentas la Vida",
     "posicion": "${mars?.sign} Casa ${mars?.house}",
-    "que_significa_casa": "Una línea sobre Casa ${mars?.house}",
-    "interpretacion": "120-150 palabras. Explica: 1) Cómo toma decisiones, 2) Cómo maneja el conflicto, 3) Cómo usa su energía vital.",
-    "estilo_accion": "Una frase sobre su forma de actuar"
+    "que_significa_casa": "UNA línea clara sobre Casa ${mars?.house} para la acción",
+    "interpretacion": "120-150 palabras. FÓRMULA: 1) Cómo tomas decisiones → 2) Cómo enfrentas conflictos → 3) Cómo usas tu energía vital. Directo y práctico.",
+    "estilo_accion": "Una frase sobre tu forma de actuar"
   },
 
   "jupiter": {
-    "titulo": "🌱 Tu Suerte y Tus Ganancias",
+    "titulo": "Tu Suerte y Tus Ganancias",
     "posicion": "${jupiter?.sign} Casa ${jupiter?.house}",
-    "que_significa_casa": "Una línea sobre Casa ${jupiter?.house}",
-    "interpretacion": "100-120 palabras. Describe dónde fluye con más facilidad, dónde tiene oportunidades naturales, y cómo crece.",
-    "zona_abundancia": "40 palabras sobre su zona de suerte natural"
+    "que_significa_casa": "UNA línea clara sobre Casa ${jupiter?.house} para expansión",
+    "interpretacion": "100-120 palabras. FÓRMULA: 1) Dónde fluyes con facilidad → 2) Dónde tienes oportunidades naturales → 3) Cómo creces. Tono optimista pero realista.",
+    "zona_abundancia": "40 palabras. Tu zona de suerte natural."
   },
 
   "saturno": {
-    "titulo": "🪐 Tu Karma y Responsabilidades",
+    "titulo": "Tu Karma y Responsabilidades",
     "posicion": "${saturn?.sign} Casa ${saturn?.house}",
-    "que_significa_casa": "Una línea sobre Casa ${saturn?.house}",
-    "interpretacion": "120-150 palabras. Explica las áreas donde debe asumir responsabilidad, dónde enfrenta desafíos recurrentes, y qué está aprendiendo a través de la disciplina. Sin tono de castigo.",
-    "leccion_principal": "50 palabras sobre la lección saturnina"
+    "que_significa_casa": "UNA línea clara sobre Casa ${saturn?.house} para lecciones",
+    "interpretacion": "120-150 palabras. FÓRMULA: 1) Dónde asumes responsabilidad → 2) Qué desafíos recurrentes enfrentas → 3) Qué aprendes a través de la disciplina. SIN tono de castigo. Enfoque de maestría y maduración.",
+    "leccion_principal": "50 palabras. La lección saturnina."
   },
 
   // 2️⃣ FORMACIÓN TEMPRANA (por qué eres así emocionalmente)
+  // CRÍTICO: CADA SECCIÓN DEBE CONECTAR INFANCIA → PRESENTE
 
   "formacion_temprana": {
     "lunar": {
-      "titulo": "🌙 Formación Lunar",
+      "titulo": "Formación Lunar",
       "subtitulo": "Cómo aprendiste a sentir y protegerte",
-      "interpretacion": "120-150 palabras. Explica el clima emocional de la infancia, qué aprendió sobre las emociones, cómo se formó su patrón de seguridad. Conecta infancia → patrón emocional adulto. Ejemplo: 'Desde pequeña aprendiste que el equilibrio emocional era clave para sentirte a salvo...'",
-      "aprendizaje_clave": "50 palabras sobre qué necesitaba para sentirse segura y qué patrón se grabó"
+      "interpretacion": "150-180 palabras. ESTRUCTURA OBLIGATORIA: 1) Clima emocional de la infancia con Luna en ${moon?.sign} Casa ${moon?.house}, 2) Qué aprendiste sobre las emociones, 3) Cómo se formó tu patrón de seguridad, 4) SOMBRA ADULTA: Una frase conectando con el presente. Ejemplo: 'En la adultez, esto puede llevarte a priorizar la paz externa aunque por dentro no estés en calma.' Tono empático y conectivo.",
+      "aprendizaje_clave": "50 palabras. Qué necesitabas para sentirte segura y qué patrón se grabó."
     },
     "saturnina": {
-      "titulo": "🪐 Formación Saturnina",
+      "titulo": "Formación Saturnina",
       "subtitulo": "Las primeras exigencias y límites",
-      "interpretacion": "120-150 palabras. Explica dónde sintió que tenía que madurar antes de tiempo, asumir responsabilidad o demostrar algo. Qué límites o exigencias moldearon su forma de crear y expresarse. Ejemplo: 'Aprendiste pronto que expresarte tenía consecuencias, y eso moldeó tu forma de comunicar.'",
-      "leccion_principal": "50 palabras sobre qué le exigieron y cómo eso influyó en su personalidad"
+      "interpretacion": "150-180 palabras. ESTRUCTURA OBLIGATORIA: 1) Dónde sentiste que tenías que madurar antes de tiempo con Saturno en ${saturn?.sign} Casa ${saturn?.house}, 2) Qué límites o exigencias moldearon tu forma de expresarte, 3) AÑADE EMOCIÓN, no solo exigencia. Ejemplo: 'Aprendiste que expresarte tenía peso, que tus palabras importaban y debían estar bien pensadas. Esto te dio estructura, pero también pudo hacerte dudar antes de mostrarte libremente.' Tono comprensivo y profundo.",
+      "leccion_principal": "50 palabras. Qué te exigieron y cómo influyó en tu personalidad."
     },
     "venusina": {
-      "titulo": "💕 Formación Venusina",
+      "titulo": "Formación Venusina",
       "subtitulo": "Cómo aprendiste a amar y a valorarte",
-      "interpretacion": "120-150 palabras. Explica qué modelo afectivo vio en su entorno, cómo se vivía el amor, y cómo eso influyó en su forma adulta de vincularse. Ejemplo: 'El amor se vivía como compromiso, no como demostración emocional abierta.'",
-      "modelo_afectivo": "50 palabras sobre el patrón relacional que aprendió"
+      "interpretacion": "180-220 palabras. ESTRUCTURA OBLIGATORIA COMPLETA CON VENUS EN ${venus?.sign} CASA ${venus?.house}:
+
+      PÁRRAFO 1 (60-80 palabras): En tu entorno temprano, el amor pudo sentirse más como [característica de Venus en ${venus?.sign}]. Aprendiste que querer implicaba [valores de ${venus?.sign}], más que [lo contrario]. Es posible que no siempre se hablara de emociones, pero sí se esperaba [expectativa según casa ${venus?.house}].
+
+      PÁRRAFO 2 (60-80 palabras): Este modelo te enseñó a amar desde [fortaleza de Venus]. Sin embargo, también pudo sembrar la idea de que mostrar vulnerabilidad o necesidad emocional [consecuencia de la sombra].
+
+      PÁRRAFO 3 (60-80 palabras): En la adultez, esto se traduce en [forma de amar actual]. El aprendizaje actual es [integración necesaria].
+
+      Ejemplo de tono: 'En tu entorno temprano, el amor pudo sentirse más como responsabilidad que como expresión emocional abierta. Aprendiste que querer implicaba compromiso y constancia, más que demostraciones visibles de afecto. Este modelo te enseñó a amar desde la profundidad y la discreción, desarrollando gran capacidad de entrega. Sin embargo, también pudo sembrar la idea de que mostrar vulnerabilidad no era seguro. En la adultez, esto se traduce en una forma de amar reservada pero sólida: cuando te comprometes, lo haces de verdad. El aprendizaje actual es permitirte recibir amor de forma más abierta, sin sentir que debes cargar con todo en silencio.'",
+      "modelo_afectivo": "50-60 palabras. El patrón relacional que aprendiste. DEBE SER ESPECÍFICO y conectar con la interpretación anterior."
     }
   },
 
   // 3️⃣ NODOS LUNARES - CAMINO DE VIDA (hacia dónde creces y de dónde vienes)
+  // CRÍTICO: INCLUIR FRASE PUENTE ENTRE NODO SUR Y NORTE
 
   "nodo_sur": {
-    "titulo": "⬇️ Nodo Sur",
+    "titulo": "Nodo Sur",
     "subtitulo": "Zona cómoda / Talento innato",
     "posicion": "${southNode?.sign} Casa ${southNode?.house}",
-    "interpretacion": "100-120 palabras. Explica: 1) Lo que le sale natural, 2) Dónde tiende a quedarse, 3) Lo que ya domina. Ejemplo: 'Tu creatividad y facilidad para comunicar son innatas, pero pueden convertirse en refugio si no evolucionan.'",
-    "zona_comoda": "40 palabras sobre su zona de confort que debe trascender"
+    "interpretacion": "120-150 palabras. ESTRUCTURA: 1) Lo que te sale natural con ${southNode?.sign} en Casa ${southNode?.house}, 2) Dónde tiendes a quedarte, 3) Lo que ya dominas. AÑADE AL FINAL: Frase puente conectando con Nodo Norte. Ejemplo: 'Tu creatividad y facilidad para comunicar son innatas, pero pueden convertirse en refugio si no evolucionan hacia algo más grande.' Tono honesto pero sin juicio.",
+    "zona_comoda": "40-50 palabras. Tu zona de confort que debes trascender."
   },
 
   "nodo_norte": {
-    "titulo": "⬆️ Nodo Norte",
+    "titulo": "Nodo Norte",
     "subtitulo": "Dirección evolutiva del alma",
     "posicion": "${northNode?.sign} Casa ${northNode?.house}",
-    "interpretacion": "120-150 palabras. Explica: 1) Lo que incomoda, 2) Lo que toca aprender, 3) El crecimiento real. Ejemplo: 'La vida te empuja a pensar en grande, compartir visión y formar parte de algo colectivo.'",
-    "direccion_evolutiva": "50 palabras sobre hacia dónde debe crecer para evolucionar"
+    "interpretacion": "150-180 palabras. ESTRUCTURA: 1) Lo que incomoda con ${northNode?.sign} en Casa ${northNode?.house}, 2) Lo que toca aprender, 3) El crecimiento real. INCLUIR ANTES DE TERMINAR: 'La vida no te pide que abandones tu talento natural (Nodo Sur), sino que lo pongas al servicio de [visión de Nodo Norte].' Ejemplo: 'La vida te empuja a pensar en grande, compartir visión y formar parte de algo colectivo.' Tono inspirador y claro.",
+    "direccion_evolutiva": "50-60 palabras. Hacia dónde debes crecer para evolucionar."
   },
 
   // 4️⃣ SÍNTESIS FINAL (todo integrado, sin técnica)
+  // CRÍTICO: CIERRE EMPODERADOR, NO DESCRIPTIVO
 
   "sintesis_final": {
-    "titulo": "✨ Síntesis de Tu Carta Natal",
-    "contenido": "180-220 palabras. Un cierre potente que integre identidad, origen emocional y dirección evolutiva. Ejemplo de tono: 'Tu carta natal no define tu destino, define tu punto de partida. Cuando integras tu identidad única, tu profundidad emocional y tu dirección evolutiva, te conviertes en alguien que no solo vive su vida, sino que inspira a otros a vivir la suya.' SIN incluir mantras, rituales, planes de acción, fechas, ni predicciones."
+    "titulo": "Síntesis de Tu Carta Natal",
+    "contenido": "200-250 palabras. ESTRUCTURA OBLIGATORIA:
+
+    PÁRRAFO 1 (70-80 palabras): Integración de identidad (Sol + Luna + Ascendente). Quién eres en esencia.
+
+    PÁRRAFO 2 (70-80 palabras): Integración de origen emocional (Formación Temprana). Por qué funcionas como funcionas.
+
+    PÁRRAFO 3 (70-90 palabras): Integración de dirección evolutiva (Nodos). Hacia dónde creces. CIERRE EMPODERADOR. Ejemplo de tono final: 'Cuando eliges expandirte más allá de lo cómodo, tu voz deja de ser solo personal y se convierte en una guía para otros.'
+
+    SIN incluir mantras, rituales, planes de acción, fechas, ni predicciones. TONO FINAL: Inspirador, potente, que deje al lector con sensación de claridad y poder personal. La carta natal no define destino, define punto de partida."
   }
 }
 \`\`\`
