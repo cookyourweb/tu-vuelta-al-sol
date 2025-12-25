@@ -83,10 +83,51 @@ export interface FinalIntegration {
   pregunta_reflexion: string;
 }
 
+// ==========================================
+// 🔥 PLANETARY COMPARISON INTERFACES (3-Layer Architecture)
+// ==========================================
+
+export interface UsoAgenda {
+  luna_nueva: string;
+  luna_llena: string;
+  retrogradaciones: string;
+}
+
+export interface ComparacionPlanetaria {
+  natal: {
+    posicion: string;
+    descripcion: string;
+  };
+  solar_return: {
+    posicion: string;
+    descripcion: string;
+  };
+  choque: string;
+  que_hacer: string;
+  uso_agenda: UsoAgenda;
+  error_automatico: string;
+  frase_clave: string;
+}
+
+export interface ComparacionesPlanetarias {
+  sol: ComparacionPlanetaria;
+  luna: ComparacionPlanetaria;
+  mercurio: ComparacionPlanetaria;
+  venus: ComparacionPlanetaria;
+  marte: ComparacionPlanetaria;
+  jupiter: ComparacionPlanetaria;
+  saturno: ComparacionPlanetaria;
+}
+
+// ==========================================
+// 🌟 COMPLETE SOLAR RETURN INTERPRETATION
+// ==========================================
+
 export interface CompleteSolarReturnInterpretation {
   esencia_revolucionaria_anual: string;
   proposito_vida_anual: string;
   tema_central_del_anio: string;
+  comparaciones_planetarias: ComparacionesPlanetarias;  // ✅ NEW: Personalized comparisons
   analisis_tecnico_profesional: TechnicalAnalysis;
   plan_accion: ActionPlan;
   calendario_lunar_anual: LunarMonth[];

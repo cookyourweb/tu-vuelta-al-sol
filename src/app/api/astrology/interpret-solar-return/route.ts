@@ -206,7 +206,8 @@ async function generateCompleteWithOpenAI(
   solarReturnChart: any,
   userProfile: any,
   returnYear: number,
-  srComparison?: any
+  srComparison?: any,
+  natalInterpretations?: any
 ): Promise<CompleteSolarReturnInterpretation> {
 
   console.log('🤖 ===== GENERATING WITH OPENAI =====');
@@ -224,7 +225,8 @@ async function generateCompleteWithOpenAI(
     solarReturnChart,
     userProfile,
     returnYear,
-    srComparison
+    srComparison,
+    natalInterpretations  // ✅ PASS NATAL INTERPRETATIONS FOR COMPARISONS
   });
 
   console.log('📏 Prompt stats:', {
@@ -1018,6 +1020,34 @@ export async function POST(request: NextRequest) {
       planetaryChanges: srComparison.planetaryChanges.length
     });
 
+    // ✅ BUSCAR INTERPRETACIONES NATALES (para comparaciones personalizadas)
+    console.log('🔍 Buscando interpretaciones natales...');
+    let natalInterpretations = null;
+
+    try {
+      const mongoose = await connectDB();
+      const db = (mongoose as any).connection?.db ?? (mongoose as any).db;
+
+      const natalDoc = await db.collection('interpretations_complete').findOne({
+        userId,
+        chartType: 'natal-complete'
+      });
+
+      if (natalDoc) {
+        natalInterpretations = natalDoc.interpretation;
+        console.log('✅ Interpretaciones natales encontradas:', {
+          hasSol: !!natalInterpretations?.sol,
+          hasLuna: !!natalInterpretations?.luna,
+          hasMercurio: !!natalInterpretations?.mercurio
+        });
+      } else {
+        console.log('⚠️ No se encontraron interpretaciones natales guardadas');
+      }
+    } catch (natalError) {
+      console.warn('⚠️ Error buscando interpretaciones natales:', natalError);
+      // Continuar sin interpretaciones natales
+    }
+
     if (process.env.OPENAI_API_KEY) {
       try {
         interpretation = await generateCompleteWithOpenAI(
@@ -1025,7 +1055,8 @@ export async function POST(request: NextRequest) {
           solarReturnChart,
           { ...userProfile, locationContext }, // Pass location data
           returnYear,
-          srComparison // ✅ PASAR COMPARACIÓN
+          srComparison, // ✅ PASAR COMPARACIÓN
+          natalInterpretations // ✅ PASAR INTERPRETACIONES NATALES
         );
       } catch (openaiError) {
         console.warn('⚠️ OpenAI failed, using complete fallback:', openaiError);

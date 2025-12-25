@@ -10,8 +10,9 @@ export function generateSolarReturnProfessionalPrompt(data: {
   userProfile: any;
   returnYear: number;
   srComparison?: any;
+  natalInterpretations?: any;
 }): string {
-  const { natalChart, solarReturnChart, userProfile, returnYear, srComparison } = data;
+  const { natalChart, solarReturnChart, userProfile, returnYear, srComparison, natalInterpretations } = data;
 
   // ✅ EXTRAER DATOS CLAVE
   const natalSol = natalChart.planets?.find((p: any) => p.name === 'Sol' || p.name === 'Sun');
@@ -193,6 +194,142 @@ Responde ÚNICAMENTE con un objeto JSON válido (sin markdown, sin backticks):
     }
   },
 
+  "comparaciones_planetarias": {
+    "sol": {
+      "natal": {
+        "posicion": "Describir signo y casa natal del Sol (ej: Leo Casa 10)",
+        "descripcion": "80-100 palabras. ¿QUIÉN ERES en tu esencia? Tu propósito de vida base según la carta natal. ${natalInterpretations?.sol ? 'USAR INTERPRETACIÓN NATAL: ' + JSON.stringify(natalInterpretations.sol.interpretacion).substring(0, 200) + '...' : 'Generar interpretación de identidad permanente.'}"
+      },
+      "solar_return": {
+        "posicion": "Describir signo (siempre el mismo) y CASA SR del Sol",
+        "descripcion": "80-100 palabras. ¿QUÉ ÁREA DE VIDA SE ACTIVA este año? Dónde pones tu energía vital. El Sol SIEMPRE está en el mismo signo natal, pero la CASA SR cambia."
+      },
+      "choque": "120-150 palabras. ¿DÓNDE CHOCA O POTENCIA? Comparar quién eres (natal) vs dónde debes brillar este año (SR). Si natal Sol Casa 3 (comunicación) y SR Sol Casa 10 (vocación pública) → el choque es: 'Normalmente brillas hablando/escribiendo, pero este año debes brillar liderando públicamente'. Ser MUY específico con las casas reales.",
+      "que_hacer": "100-120 palabras. ¿QUÉ CONVIENE HACER AHORA? Acción concreta basada en el choque. NO consejos genéricos. Ejemplo: 'No te quedes solo compartiendo ideas (tu zona cómoda Casa 3), comprométete con proyectos visibles donde tengas que liderar (Casa 10 SR).'",
+      "uso_agenda": {
+        "luna_nueva": "60-80 palabras. ¿Qué iniciar en cada Luna Nueva para honrar este entrenamiento solar?",
+        "luna_llena": "60-80 palabras. ¿Qué revisar/liberar en cada Luna Llena? ¿Estás evitando el área de vida activada?",
+        "retrogradaciones": "60-80 palabras. ¿Cómo usar las retrogradaciones para integrar el cambio?"
+      },
+      "error_automatico": "Una frase de 15-25 palabras. El error más común que cometerás este año si actúas en automático. Ejemplo: 'Refugiarte en tu zona cómoda en lugar de asumir liderazgo visible.'",
+      "frase_clave": "Una frase de 10-15 palabras. Mantra funcional del año. Ejemplo: 'Mi voz importa, pero este año la sostengo con presencia pública.'"
+    },
+    "luna": {
+      "natal": {
+        "posicion": "Signo y casa natal de Luna",
+        "descripcion": "80-100 palabras. ¿CÓMO ERES EMOCIONALMENTE? Tu mundo emocional base. ${natalInterpretations?.luna ? 'USAR INTERPRETACIÓN NATAL: ' + JSON.stringify(natalInterpretations.luna.interpretacion).substring(0, 200) + '...' : 'Generar interpretación emocional permanente.'}"
+      },
+      "solar_return": {
+        "posicion": "Signo y casa SR de Luna",
+        "descripcion": "80-100 palabras. ¿QUÉ NECESITAS EMOCIONALMENTE este año? Dónde buscas seguridad emocional durante este ciclo."
+      },
+      "choque": "120-150 palabras. Comparar necesidad emocional natal vs necesidad emocional SR. Ejemplo: Natal Luna Cáncer Casa 4 (necesitas hogar/familia) vs SR Luna Capricornio Casa 10 (necesitas logros/estructura). El choque: 'Normalmente te sientes segura en casa, pero este año necesitas sentirte segura logrando cosas públicamente.'",
+      "que_hacer": "100-120 palabras. ¿Qué hacer con esta tensión emocional? Ejemplo: 'No evites los compromisos profesionales por quedarte en casa. Tu nutrición emocional ESTE AÑO viene de construir algo sólido afuera.'",
+      "uso_agenda": {
+        "luna_nueva": "60-80 palabras. Rituales emocionales para Luna Nueva.",
+        "luna_llena": "60-80 palabras. Liberación emocional en Luna Llena.",
+        "retrogradaciones": "60-80 palabras. Integración emocional en retros."
+      },
+      "error_automatico": "15-25 palabras. Error emocional típico del año.",
+      "frase_clave": "10-15 palabras. Mantra emocional."
+    },
+    "mercurio": {
+      "natal": {
+        "posicion": "Signo y casa natal de Mercurio",
+        "descripcion": "80-100 palabras. ¿CÓMO PIENSAS Y TE COMUNICAS NORMALMENTE? ${natalInterpretations?.mercurio ? 'USAR INTERPRETACIÓN NATAL: ' + JSON.stringify(natalInterpretations.mercurio.interpretacion).substring(0, 200) + '...' : 'Generar interpretación mental permanente.'}"
+      },
+      "solar_return": {
+        "posicion": "Signo y casa SR de Mercurio",
+        "descripcion": "80-100 palabras. ¿DÓNDE Y CÓMO DEBES PENSAR/COMUNICAR este año?"
+      },
+      "choque": "120-150 palabras. Comparar estilo mental natal vs estilo mental SR. Ejemplo: Natal Mercurio Piscis Casa 1 (piensas intuitivamente, hablas desde la sensibilidad) vs SR Mercurio Acuario Casa 12 (este año tu mente necesita distancia, silencio, visión objetiva). Choque: 'Normalmente piensas sintiendo, pero este año necesitas pensar desde el distanciamiento.'",
+      "que_hacer": "100-120 palabras. Acción mental concreta.",
+      "uso_agenda": {
+        "luna_nueva": "60-80 palabras.",
+        "luna_llena": "60-80 palabras.",
+        "retrogradaciones": "60-80 palabras. ESPECIALMENTE IMPORTANTE PARA MERCURIO."
+      },
+      "error_automatico": "15-25 palabras.",
+      "frase_clave": "10-15 palabras."
+    },
+    "venus": {
+      "natal": {
+        "posicion": "Signo y casa natal de Venus",
+        "descripcion": "80-100 palabras. ¿CÓMO AMAS Y QUÉ VALORAS? ${natalInterpretations?.venus ? 'USAR INTERPRETACIÓN NATAL: ' + JSON.stringify(natalInterpretations.venus.interpretacion).substring(0, 200) + '...' : 'Generar interpretación de valores permanente.'}"
+      },
+      "solar_return": {
+        "posicion": "Signo y casa SR de Venus",
+        "descripcion": "80-100 palabras. ¿QUÉ DEBES VALORAR Y CÓMO AMAR este año?"
+      },
+      "choque": "120-150 palabras. Comparar valores natales vs valores SR.",
+      "que_hacer": "100-120 palabras.",
+      "uso_agenda": {
+        "luna_nueva": "60-80 palabras.",
+        "luna_llena": "60-80 palabras.",
+        "retrogradaciones": "60-80 palabras."
+      },
+      "error_automatico": "15-25 palabras.",
+      "frase_clave": "10-15 palabras."
+    },
+    "marte": {
+      "natal": {
+        "posicion": "Signo y casa natal de Marte",
+        "descripcion": "80-100 palabras. ¿CÓMO ACTÚAS Y ENFRENTAS LA VIDA? ${natalInterpretations?.marte ? 'USAR INTERPRETACIÓN NATAL: ' + JSON.stringify(natalInterpretations.marte.interpretacion).substring(0, 200) + '...' : 'Generar interpretación de acción permanente.'}"
+      },
+      "solar_return": {
+        "posicion": "Signo y casa SR de Marte",
+        "descripcion": "80-100 palabras. ¿DÓNDE Y CÓMO DEBES ACTUAR este año?"
+      },
+      "choque": "120-150 palabras. Comparar estilo de acción natal vs SR. Ejemplo: Natal Marte Tauro Casa 2 (actúas con paciencia, paso a paso) vs SR Marte Acuario Casa 11 (este año debes actuar rápido, experimentando, en grupo). Choque: 'Normalmente necesitas garantías antes de moverte, pero este año debes actuar sin certeza total.'",
+      "que_hacer": "100-120 palabras.",
+      "uso_agenda": {
+        "luna_nueva": "60-80 palabras.",
+        "luna_llena": "60-80 palabras.",
+        "retrogradaciones": "60-80 palabras."
+      },
+      "error_automatico": "15-25 palabras.",
+      "frase_clave": "10-15 palabras."
+    },
+    "jupiter": {
+      "natal": {
+        "posicion": "Signo y casa natal de Júpiter",
+        "descripcion": "80-100 palabras. ¿DÓNDE CRECES Y QUÉ TE DA FE? ${natalInterpretations?.jupiter ? 'USAR INTERPRETACIÓN NATAL: ' + JSON.stringify(natalInterpretations.jupiter.interpretacion).substring(0, 200) + '...' : 'Generar interpretación de expansión permanente.'}"
+      },
+      "solar_return": {
+        "posicion": "Signo y casa SR de Júpiter",
+        "descripcion": "80-100 palabras. ¿DÓNDE SE EXPANDE TU VIDA este año?"
+      },
+      "choque": "120-150 palabras.",
+      "que_hacer": "100-120 palabras.",
+      "uso_agenda": {
+        "luna_nueva": "60-80 palabras.",
+        "luna_llena": "60-80 palabras.",
+        "retrogradaciones": "60-80 palabras."
+      },
+      "error_automatico": "15-25 palabras.",
+      "frase_clave": "10-15 palabras."
+    },
+    "saturno": {
+      "natal": {
+        "posicion": "Signo y casa natal de Saturno",
+        "descripcion": "80-100 palabras. ¿DÓNDE ESTÁN TUS LÍMITES Y RESPONSABILIDADES BASE? ${natalInterpretations?.saturno ? 'USAR INTERPRETACIÓN NATAL: ' + JSON.stringify(natalInterpretations.saturno.interpretacion).substring(0, 200) + '...' : 'Generar interpretación de estructura permanente.'}"
+      },
+      "solar_return": {
+        "posicion": "Signo y casa SR de Saturno",
+        "descripcion": "80-100 palabras. ¿QUÉ DEBES ESTRUCTURAR/LIMITAR este año?"
+      },
+      "choque": "120-150 palabras.",
+      "que_hacer": "100-120 palabras.",
+      "uso_agenda": {
+        "luna_nueva": "60-80 palabras.",
+        "luna_llena": "60-80 palabras.",
+        "retrogradaciones": "60-80 palabras."
+      },
+      "error_automatico": "15-25 palabras.",
+      "frase_clave": "10-15 palabras."
+    }
+  },
+
   "analisis_tecnico_profesional": {
     "asc_sr_en_casa_natal": {
       "casa": ${ascSRenCasaNatal},
@@ -320,10 +457,26 @@ Responde ÚNICAMENTE con un objeto JSON válido (sin markdown, sin backticks):
 7. **SÉ ESPECÍFICO**: Usa grados, casas, signos reales. Nada genérico
 8. **ENFOCADO EN LA EXPERIENCIA**: No en predicciones, sino en cómo vivir el año
 
+### 🔥 COMPARACIONES PLANETARIAS (CRÍTICO):
+9. **LAS COMPARACIONES SON OBLIGATORIAS**: Cada planeta debe tener las 4 partes:
+   - ¿QUIÉN ERES? (natal - identidad permanente)
+   - ¿QUÉ SE ACTIVA? (solar return - área del año)
+   - ¿DÓNDE CHOCA O POTENCIA? (comparación específica)
+   - ¿QUÉ HACER? (acción concreta, NO consejos genéricos)
+
+10. **USA LAS INTERPRETACIONES NATALES SI EXISTEN**: ${natalInterpretations ? 'SE HAN PROPORCIONADO INTERPRETACIONES NATALES. ÚSALAS en la sección "natal.descripcion" de cada planeta. Extrae la esencia de la interpretación natal y úsala como base para la comparación.' : 'No hay interpretaciones natales guardadas. Genera descripciones de identidad permanente basándote en los datos de la carta natal.'}
+
+11. **SÉ MUY ESPECÍFICO CON LAS CASAS**:
+    - Natal Sol Casa 3 vs SR Sol Casa 10 → "Normalmente brillas comunicando (Casa 3), pero este año debes brillar liderando públicamente (Casa 10)"
+    - Natal Luna Casa 4 vs SR Luna Casa 10 → "Normalmente te nutres en casa (Casa 4), pero este año necesitas logros públicos (Casa 10)"
+    - Evita generalidades como "este año será intenso"
+
+12. **USO_AGENDA ES PARA CAPA 3**: Esta sección prepara el contenido para la Agenda Astrológica (Layer 3). Debe indicar cómo usar cada ciclo lunar para integrar el aprendizaje del año.
+
 ### FORMATO:
-9. **JSON VÁLIDO**: Sin comentarios, sin markdown dentro del JSON
-10. **TODO EN ESPAÑOL**: Incluso nombres de planetas y signos
-11. **RESPETA LA ESTRUCTURA**: No añadas ni quites campos del JSON
+13. **JSON VÁLIDO**: Sin comentarios, sin markdown dentro del JSON
+14. **TODO EN ESPAÑOL**: Incluso nombres de planetas y signos
+15. **RESPETA LA ESTRUCTURA**: No añadas ni quites campos del JSON
 
 ---
 
