@@ -139,6 +139,42 @@ export interface CompleteSolarReturnInterpretation {
   integracion_final: FinalIntegration;
 }
 
+// ==========================================
+// 🕯️ SYMBOLIC OBJECTS INTERFACES (Layer 3)
+// ==========================================
+
+export interface ObjetoSimbolico {
+  tipo: 'vela' | 'piedra' | 'kit';
+  nombre: string;
+  color?: string;
+  descripcion: string;
+  funcion: string;
+  como_usar: string;
+  cuando_usar: string;
+  advertencia?: string;
+  frase_ancla: string;
+}
+
+export interface MicroRitual {
+  duracion: string;
+  pasos: string[];
+  frase_mental: string;
+}
+
+export interface KitMensual {
+  mes: string;
+  planeta_activo: string;
+  entrenamiento: string;
+  vela: ObjetoSimbolico;
+  piedra: ObjetoSimbolico;
+  micro_ritual: MicroRitual;
+  qr_audio?: string;
+}
+
+// ==========================================
+// 📄 DOCUMENT INTERFACES
+// ==========================================
+
 export interface InterpretationDocument {
   _id: string;
   userId: string;
