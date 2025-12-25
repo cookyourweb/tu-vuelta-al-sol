@@ -4,11 +4,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import {
-  generateDisruptiveNatalPrompt,
-  formatChartForPrompt,
+  generateCleanNatalChartPrompt,
   type ChartData,
   type UserProfile
-} from '@/utils/prompts/disruptivePrompts';
+} from '@/utils/prompts/natalChartPrompt_clean';
 
 // Cache en memoria para evitar regenerar interpretaciones duplicadas
 const interpretationCache = new Map<string, { interpretation: any; timestamp: number }>();
@@ -31,16 +30,16 @@ function getOpenAIClient() {
   });
 }
 
-// ✅ FUNCIÓN: Generar interpretación disruptiva
-async function generateDisruptiveInterpretation(
+// ✅ FUNCIÓN: Generar interpretación limpia (estructura pedagógica)
+async function generateCleanInterpretation(
   chartData: ChartData,
   userProfile: UserProfile
 ): Promise<any> {
   const openai = getOpenAIClient();
 
-  const prompt = generateDisruptiveNatalPrompt(chartData, userProfile);
+  const prompt = generateCleanNatalChartPrompt(chartData, userProfile);
 
-  console.log('🔥 Generando interpretación disruptiva con prompt:', prompt.substring(0, 200) + '...');
+  console.log('🌟 Generando interpretación natal limpia con prompt:', prompt.substring(0, 200) + '...');
 
   try {
     const completion = await openai.chat.completions.create({
@@ -48,7 +47,7 @@ async function generateDisruptiveInterpretation(
       messages: [
         {
           role: "system",
-          content: "Eres un astrólogo evolutivo revolucionario EXPERTO. Respondes EXCLUSIVAMENTE con JSON válido, sin texto adicional, sin markdown. Tu enfoque es disruptivo, transformacional y activador de poder personal. SIEMPRE completas TODAS las secciones del JSON requerido: esencia_revolucionaria, proposito_vida, formacion_temprana, patrones_psicologicos, planetas_profundos, angulos_vitales, nodos_lunares, declaracion_poder, advertencias (MÍNIMO 3), insights_transformacionales (MÍNIMO 5), rituales_recomendados (MÍNIMO 4 rituales prácticos), y pregunta_final_reflexion."
+          content: "Eres un astrólogo evolutivo profesional especializado en cartas natales. Respondes EXCLUSIVAMENTE con JSON válido, sin texto adicional, sin markdown. Tu enfoque es pedagógico, claro y personalizado. La carta natal es un MAPA DE IDENTIDAD permanente. NO haces predicciones, NO hablas de tiempo, NO incluyes rituales ni mantras. Solo explicas QUIÉN ES la persona y POR QUÉ funciona como funciona. SIEMPRE completas TODAS las secciones requeridas: esencia_natal, sol, luna, ascendente, mercurio, venus, marte, jupiter, saturno, urano, neptuno, pluton, nodo_norte, nodo_sur, chiron, sintesis_final."
         },
         {
           role: "user",
@@ -262,17 +261,17 @@ export async function POST(request: NextRequest) {
 
     let interpretation: any;
 
-    // Generar interpretación
-    if (disruptiveMode && process.env.OPENAI_API_KEY) {
-      console.log('🔥 [INTERPRET-NATAL] Modo disruptivo activado con IA');
+    // Generar interpretación limpia (estructura pedagógica)
+    if (process.env.OPENAI_API_KEY) {
+      console.log('🌟 [INTERPRET-NATAL-CLEAN] Generando interpretación limpia con IA');
       try {
-        interpretation = await generateDisruptiveInterpretation(natalChart, userProfile);
+        interpretation = await generateCleanInterpretation(natalChart, userProfile);
       } catch (error) {
-        console.warn('⚠️ [INTERPRET-NATAL] IA falló, usando fallback:', error);
+        console.warn('⚠️ [INTERPRET-NATAL-CLEAN] IA falló, usando fallback:', error);
         interpretation = generateFallbackInterpretation(userProfile);
       }
     } else {
-      console.log('📋 [INTERPRET-NATAL] Usando interpretación de fallback');
+      console.log('📋 [INTERPRET-NATAL-CLEAN] Usando interpretación de fallback');
       interpretation = generateFallbackInterpretation(userProfile);
     }
 
