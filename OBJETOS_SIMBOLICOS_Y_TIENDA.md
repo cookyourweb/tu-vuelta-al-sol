@@ -337,18 +337,25 @@ CAPA 1: CARTA NATAL
 
 CAPA 2: RETORNO SOLAR
    └─ Comparaciones (qué entrenas este año)
-   └─ Define QUÉ objetos usar (basado en planeta activo)
+   └─ Define ejercicios y prácticas
 
-CAPA 3: AGENDA
+CAPA 3: AGENDA ← LO FUNCIONAL
    └─ Timing mensual/lunar
-   └─ AQUÍ se usan los objetos
-   └─ Rituales de 2 minutos
-   └─ Kits mensuales
+   └─ Rituales de 2 minutos (SIN objetos necesarios)
+   └─ Ejercicios personalizados (journaling, micro-acciones, mantras)
+   └─ Guías lunares (qué hacer en Luna Nueva/Llena)
+
+TIENDA ← LO OPCIONAL
+   └─ Kits se OFRECEN como complemento
+   └─ "Si quieres potenciar tu práctica..."
+   └─ NO son necesarios para la agenda
 ```
 
 ---
 
-## 📊 Flujo Técnico: De Comparación a Kit
+## 📊 Flujo Técnico: Agenda + Oferta de Kits
+
+### FLUJO PRINCIPAL (Agenda - Funcional)
 
 ```
 1. Usuario tiene Solar Return generado
@@ -359,22 +366,45 @@ CAPA 3: AGENDA
    - que_hacer (acción a entrenar)
    - error_automatico (trampa a evitar)
    - frase_clave (anclaje mental)
+   - uso_agenda (luna_nueva, luna_llena, retrogradaciones)
    ↓
-4. Genera KitMensual con:
-   - Vela del color de Marte (terracota)
-   - Piedra (Hematita)
-   - Micro-ritual (2 min)
-   - Frase ancla (de frase_clave)
+4. Genera Agenda Mensual con:
+   - Ritual de 2 minutos (SIN objetos)
+   - Ejercicios personalizados:
+     * Journaling (conciencia)
+     * Micro-acción guiada
+     * Mantra funcional
+     * Meditación breve
+     * Pregunta de integración
+   - Guías lunares (qué hacer en Luna Nueva/Llena)
+   - Timing específico
    ↓
-5. Agenda muestra:
-   - Kit del mes
-   - Cuándo usarlo (Luna Nueva/Llena)
-   - Advertencias (no usar diario)
+5. Usuario VE en Agenda:
+   - Rituales y prácticas concretas
+   - Cuándo hacerlos (timing lunar)
+   - Todo funciona SIN necesidad de comprar nada
+```
+
+### FLUJO SECUNDARIO (Tienda - Opcional)
+
+```
+1. Usuario está en Agenda
    ↓
-6. Usuario puede:
-   - Ver instrucciones
-   - Comprar kit físico (futura tienda)
-   - Escuchar audio guiado
+2. Ve banner/sección: "Potencia tu práctica con objetos simbólicos"
+   ↓
+3. Sistema genera KitMensual sugerido:
+   - Vela del color del planeta activo
+   - Piedra correspondiente
+   - Instrucciones de uso
+   ↓
+4. Usuario PUEDE:
+   - Ignorarlo (agenda funciona igual)
+   - Comprarlo como complemento
+   ↓
+5. Si compra:
+   - Recibe kit físico
+   - Acceso a audios guiados (QR)
+   - Tarjeta con instrucciones
 ```
 
 ---

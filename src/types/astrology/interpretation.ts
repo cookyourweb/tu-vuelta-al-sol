@@ -140,7 +140,46 @@ export interface CompleteSolarReturnInterpretation {
 }
 
 // ==========================================
-// 🕯️ SYMBOLIC OBJECTS INTERFACES (Layer 3)
+// 📅 AGENDA INTERFACES (Layer 3 - Functional)
+// ==========================================
+
+export interface EjercicioPersonalizado {
+  tipo: 'conciencia' | 'accion_guiada' | 'mantra_funcional' | 'meditacion' | 'pregunta_integracion';
+  titulo: string;
+  instrucciones: string;
+  duracion: string; // "2 minutos", "5 minutos"
+  cuando_hacerlo: string;
+}
+
+export interface RitualPractico {
+  nombre: string;
+  duracion: string;
+  pasos: string[];
+  frase_mental: string;
+  cuando: 'luna_nueva' | 'luna_llena' | 'diario' | 'semanal';
+}
+
+export interface GuiaLunar {
+  tipo: 'luna_nueva' | 'luna_llena';
+  fecha_proxima?: Date;
+  titulo: string;
+  que_hacer: string; // Del uso_agenda de comparaciones
+  ejercicio_sugerido: EjercicioPersonalizado;
+}
+
+export interface AgendaMensual {
+  mes: string;
+  planeta_activo: string;
+  entrenamiento_principal: string; // Del que_hacer de comparaciones
+  frase_clave: string;
+  error_evitar: string;
+  rituales: RitualPractico[];
+  ejercicios: EjercicioPersonalizado[]; // Los 5 tipos
+  guias_lunares: GuiaLunar[];
+}
+
+// ==========================================
+// 🕯️ SYMBOLIC OBJECTS INTERFACES (Store - Optional)
 // ==========================================
 
 export interface ObjetoSimbolico {
@@ -169,6 +208,8 @@ export interface KitMensual {
   piedra: ObjetoSimbolico;
   micro_ritual: MicroRitual;
   qr_audio?: string;
+  // ⚠️ IMPORTANTE: Este kit es OPCIONAL y se ofrece en tienda
+  // La agenda NO depende de esto
 }
 
 // ==========================================

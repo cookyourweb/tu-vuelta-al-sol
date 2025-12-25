@@ -112,58 +112,65 @@ const [drawerOpen, setDrawerOpen] = useState(false);
 
 ---
 
-### 2. Frontend - Agenda (Layer 3)
+### 2. Frontend - Agenda (Layer 3 - FUNCIONAL)
 
-#### A. Crear página de Agenda
+#### A. Crear página de Agenda ⏳
 
 **Archivo nuevo**: `src/app/(dashboard)/agenda/page.tsx`
 
 **Debe incluir**:
 - Vista mensual/semanal
-- Ciclos lunares (Luna Nueva, Luna Llena)
-- Kit del mes activo
-- Rituales de 2 minutos
-- Objetos simbólicos recomendados
+- Ciclos lunares (Luna Nueva, Luna Llena) con fechas
+- Rituales de 2 minutos (SIN objetos necesarios)
+- 5 tipos de ejercicios personalizados
+- Frase clave del mes destacada
+- Error a evitar
+- **Banner opcional**: "Potencia tu práctica" (link a tienda)
 
-#### B. Componente KitDelMes
+#### B. Componente EntrenamientoDelMes ⏳
 
-**Archivo nuevo**: `src/components/agenda/KitDelMes.tsx`
+**Archivo nuevo**: `src/components/agenda/EntrenamientoDelMes.tsx`
 
 **Debe mostrar**:
 ```tsx
-interface KitDelMesProps {
-  kit: KitMensual;
+interface EntrenamientoDelMesProps {
+  agenda: AgendaMensual;
 }
 
 // Secciones:
 - Planeta activo del mes (icon + nombre)
-- Entrenamiento principal
-- Vela (color, cómo usar, frase ancla)
-- Piedra (nombre, función, advertencia)
-- Micro-ritual (2 min, pasos)
-- Botón "Comprar Kit" (futura tienda)
+- Frase clave (destacada)
+- Error a evitar (warning box)
+- Entrenamiento principal (qué_hacer)
+- 5 ejercicios personalizados:
+  1. Conciencia (journaling)
+  2. Acción guiada (micro-acción)
+  3. Mantra funcional
+  4. Meditación breve (2 min)
+  5. Pregunta de integración
 ```
 
-#### C. Componente CicloLunar
+#### C. Componente CicloLunar ⏳
 
 **Archivo nuevo**: `src/components/agenda/CicloLunar.tsx`
 
 **Debe mostrar**:
-- Próxima Luna Nueva (fecha, qué plantar/iniciar)
-- Próxima Luna Llena (fecha, qué liberar)
-- Guías específicas del `uso_agenda` de comparaciones
+- Próxima Luna Nueva (fecha, guía específica, ejercicio sugerido)
+- Próxima Luna Llena (fecha, guía específica, ejercicio sugerido)
+- Ritual práctico (2 min, pasos sin objetos)
+- **NO** menciona velas ni piedras (funciona sin comprar nada)
 
 ---
 
-### 3. Backend - Generación de Kits
+### 3. Backend - Generación de Agenda (Prioridad)
 
-#### A. Endpoint de Kits Mensuales
+#### A. Endpoint de Agenda Mensual ⏳ PRIORIDAD ALTA
 
-**Archivo nuevo**: `src/app/api/agenda/kit-mensual/route.ts`
+**Archivo nuevo**: `src/app/api/agenda/mensual/route.ts`
 
 **Funcionalidad**:
 ```typescript
-// GET /api/agenda/kit-mensual
+// GET /api/agenda/mensual
 // Query params: userId, mes (opcional - default: mes actual)
 
 export async function GET(request: Request) {
@@ -171,68 +178,70 @@ export async function GET(request: Request) {
   // 2. Buscar interpretación SR más reciente
   // 3. Identificar planeta dominante del mes
   // 4. Extraer comparacion del planeta
-  // 5. Generar kit usando kitGenerator.ts
-  // 6. Retornar kit
+  // 5. Generar AgendaMensual usando agendaGenerator.ts:
+  //    - Rituales de 2 min (sin objetos)
+  //    - 5 ejercicios personalizados
+  //    - Guías lunares con fechas
+  // 6. Retornar agenda completa
+  // 7. TODO funciona SIN necesidad de comprar nada
 }
 ```
 
-#### B. Endpoint de Agenda Mensual
+#### B. Servicio de Ciclos Lunares ⏳
 
-**Archivo nuevo**: `src/app/api/agenda/mensual/route.ts`
+**Ya existe base**: `astronomy-engine` (instalada)
+
+**Archivo nuevo**: `src/services/lunarCycleService.ts`
 
 **Funcionalidad**:
 ```typescript
-// GET /api/agenda/mensual
-// Query params: userId, mes, año
-
-export async function GET(request: Request) {
-  // 1. Obtener SR del usuario
-  // 2. Calcular ciclos lunares del mes
-  // 3. Identificar planeta del mes
-  // 4. Generar kit del mes
-  // 5. Extraer uso_agenda del planeta
-  // 6. Retornar agenda completa
-}
+export function calcularProximaLunaNueva(): Date
+export function calcularProximaLunaLlena(): Date
+export function calcularLunasCicloMes(mes: number, año: number): {
+  luna_nueva: Date;
+  luna_llena: Date;
+}[]
 ```
 
 ---
 
-### 4. Servicio de Ciclos Lunares
+### 4. Backend - Kits (Tienda - Opcional)
 
-#### Archivo nuevo: `src/services/lunarCycleService.ts`
+**⚠️ IMPORTANTE**: Los kits son OPCIONALES y se implementan DESPUÉS de la agenda funcional.
 
-**Debe incluir**:
+#### A. Endpoint de Kits Mensuales ⏳ PRIORIDAD BAJA
+
+**Archivo nuevo**: `src/app/api/tienda/kit-sugerido/route.ts`
+
+**Funcionalidad**:
 ```typescript
-export interface LunaCiclo {
-  tipo: 'nueva' | 'llena';
-  fecha: Date;
-  signo: string;
-  mensaje_generico: string;
-  mensaje_personalizado?: string; // Basado en comparaciones
+// GET /api/tienda/kit-sugerido
+// Query params: userId
+
+export async function GET(request: Request) {
+  // 1. Obtener SR del usuario
+  // 2. Identificar planeta activo
+  // 3. Generar kit sugerido usando kitGenerator.ts
+  // 4. Retornar kit como OFERTA opcional
+  // 5. Usuario puede ignorarlo (agenda funciona igual)
 }
-
-export function calcularLunasCiclo(
-  mesInicio: Date,
-  mesFin: Date
-): LunaCiclo[]
-
-export function obtenerProximaLunaNueva(): LunaCiclo
-
-export function obtenerProximaLunaLlena(): LunaCiclo
-
-export function personalizarMensajeLunar(
-  luna: LunaCiclo,
-  comparacion: ComparacionPlanetaria
-): string
 ```
-
-**Librería sugerida**: `astronomy-engine` (ya instalada en el proyecto)
 
 ---
 
 ### 5. Testing
 
-#### A. Testing de Generación de Kits
+#### A. Testing de Generación de Agenda ⏳
+
+**Archivo**: `__tests__/services/agendaGenerator.test.ts`
+
+**Tests necesarios**:
+- ✅ Generar agenda mensual con 5 ejercicios
+- ✅ Verificar que rituales NO requieren objetos
+- ✅ Validar guías lunares incluyen uso_agenda
+- ✅ Confirmar que todo funciona sin comprar nada
+
+#### B. Testing de Generación de Kits ⏳ OPCIONAL
 
 **Archivo**: `__tests__/services/kitGenerator.test.ts`
 
@@ -293,9 +302,9 @@ interface Product {
 
 ---
 
-## 🎯 PRIORIDADES SUGERIDAS
+## 🎯 PRIORIDADES SUGERIDAS (ACTUALIZADAS)
 
-### 🔥 Prioridad ALTA (Siguiente Sprint)
+### 🔥 Prioridad ALTA (Esta Semana)
 
 1. **Integrar SolarReturnPlanetDrawer** en página SR
    - Reemplazar drawer antiguo
@@ -310,35 +319,48 @@ interface Product {
    - Probar que comparaciones se generan correctamente
    - Verificar que natal interpretations se usan
 
-### 🟡 Prioridad MEDIA (Próximo mes)
+### 🟡 Prioridad MEDIA (Próximas 2 Semanas)
 
-4. **Crear página Agenda básica**
+4. **Servicio de ciclos lunares**
+   - Cálculo automático Luna Nueva/Llena usando astronomy-engine
+   - Integrar con comparaciones
+
+5. **Endpoint de Agenda Mensual** (`/api/agenda/mensual`)
+   - Generar AgendaMensual usando agendaGenerator.ts
+   - Incluir fechas lunares reales
+   - TODO funciona sin objetos
+
+6. **Crear página Agenda básica**
    - Vista mensual
-   - Kit del mes
-   - Sin ciclos lunares (manual por ahora)
+   - Entrenamiento del mes (planeta activo)
+   - 5 ejercicios personalizados
+   - Rituales de 2 min (sin objetos)
+   - Guías lunares con fechas
 
-5. **Componente KitDelMes**
-   - Mostrar vela, piedra, micro-ritual
-   - Botón "Comprar" deshabilitado (futuro)
-
-6. **Endpoint de kits mensuales**
-   - Generar kit basado en SR actual
-   - Cachear en MongoDB
+7. **Componente EntrenamientoDelMes**
+   - Frase clave destacada
+   - Error a evitar
+   - 5 ejercicios (tabs o accordion)
 
 ### 🟢 Prioridad BAJA (Futuro)
 
-7. **Servicio de ciclos lunares**
-   - Cálculo automático Luna Nueva/Llena
-   - Personalización con comparaciones
+8. **Banner de Tienda** en Agenda
+   - "Potencia tu práctica con objetos simbólicos"
+   - Link a página de tienda (futura)
 
-8. **E-commerce completo**
-   - Productos en base de datos
-   - Checkout con Stripe
-   - Envío físico de kits
+9. **Endpoint de Kits Sugeridos** (`/api/tienda/kit-sugerido`)
+   - Generar kit basado en planeta activo
+   - Como OFERTA opcional
 
-9. **Audio guiados**
-   - Meditaciones de 2 minutos
-   - QR codes en kits físicos
+10. **E-commerce completo**
+    - Productos en base de datos
+    - Checkout con Stripe
+    - Envío físico de kits
+    - Página de tienda
+
+11. **Audio guiados**
+    - Meditaciones de 2 minutos
+    - QR codes en kits físicos
 
 ---
 
