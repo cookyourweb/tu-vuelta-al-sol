@@ -213,6 +213,82 @@ export interface KitMensual {
 }
 
 // ==========================================
+// 🪐 INDIVIDUAL PLANET INTERPRETATION (SOLAR RETURN CONTEXT)
+// ==========================================
+
+export interface PlanetTooltipSR {
+  simbolo: string;
+  titulo: string;
+  subtitulo: string;
+  grado: string;
+  area_activada: string;
+  tipo_energia: string;
+  frase_clave: string;
+}
+
+export interface PlanetDrawerQuienEres {
+  titulo: string;
+  posicion_natal: string;
+  descripcion: string;
+}
+
+export interface PlanetDrawerQueSeActiva {
+  titulo: string;
+  posicion_sr: string;
+  descripcion: string;
+}
+
+export interface PlanetDrawerCruceClave {
+  titulo: string;
+  descripcion: string;
+}
+
+export interface PlanetDrawerImpactoReal {
+  titulo: string;
+  descripcion: string;
+}
+
+export interface PlanetDrawerComoUsar {
+  titulo: string;
+  accion_concreta: string;
+  ejemplo_practico: string;
+}
+
+export interface PlanetDrawerSombras {
+  titulo: string;
+  trampa_automatica: string;
+  antidoto: string;
+}
+
+export interface PlanetDrawerSintesis {
+  titulo: string;
+  frase_resumen: string;
+}
+
+export interface PlanetDrawerEncajaAgenda {
+  titulo: string;
+  luna_nueva: string;
+  luna_llena: string;
+  retrogradaciones: string;
+}
+
+export interface PlanetDrawerSR {
+  quien_eres: PlanetDrawerQuienEres;
+  que_se_activa: PlanetDrawerQueSeActiva;
+  cruce_clave: PlanetDrawerCruceClave;
+  impacto_real: PlanetDrawerImpactoReal;
+  como_usar: PlanetDrawerComoUsar;
+  sombras: PlanetDrawerSombras;
+  sintesis: PlanetDrawerSintesis;
+  encaja_agenda: PlanetDrawerEncajaAgenda;
+}
+
+export interface PlanetIndividualSRInterpretation {
+  tooltip: PlanetTooltipSR;
+  drawer: PlanetDrawerSR;
+}
+
+// ==========================================
 // 📄 DOCUMENT INTERFACES
 // ==========================================
 
