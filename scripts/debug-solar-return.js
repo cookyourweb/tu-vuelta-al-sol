@@ -30,8 +30,7 @@ async function debugSolarReturn(userId = null) {
       : { chartType: 'solar-return' };
 
     const interpretation = await collection
-      .findOne(query)
-      .sort({ generatedAt: -1 });
+      .findOne(query, { sort: { generatedAt: -1 } });
 
     if (!interpretation) {
       console.log('⚠️ No se encontró interpretación Solar Return');
