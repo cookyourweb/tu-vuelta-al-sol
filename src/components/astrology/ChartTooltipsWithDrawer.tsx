@@ -53,7 +53,7 @@ interface DrawerContent {
   titulo: string;
   educativo: string;
   poderoso: string;
-  poetico: string;
+  impacto_real: string;
   sombras: {
     nombre: string;
     descripcion: string;

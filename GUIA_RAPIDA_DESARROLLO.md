@@ -66,19 +66,19 @@
 
 #### NATAL:
 ```typescript
-// Drawer: 5 secciones POÉTICAS
+// Drawer: 5 secciones PROFESIONALES
 {
   educativo: "¿Qué es esto?",
   poderoso: "Tu superpoder",
-  poetico: "Eres como...",
+  impacto_real: "Cómo se manifiesta en tu vida",
   sombras: "Trampa + Regalo",
   sintesis: "Declaración de poder"
 }
 ```
 
 **Longitud**: ~400 palabras
-**Tono**: Poético, emocional
-**Ejemplo**: "Eres como un volcán dormido que despierta..."
+**Tono**: Profesional con profundidad psicológica (NO poético excesivo)
+**Ejemplo**: "Durante tu vida: - No toleras espacios donde tengas que esconder tu autenticidad..."
 
 ---
 

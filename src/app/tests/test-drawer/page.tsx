@@ -7,7 +7,7 @@ type DrawerContent = {
   titulo: string;
   educativo: string;
   poderoso: string;
-  poetico: string;
+  impacto_real: string;
   sombras: {
     nombre: string;
     descripcion: string;
@@ -37,7 +37,16 @@ export default function TestDrawerPage() {
     poderoso: `Usa esta energía como tu superpoder de expansión infinita. Cuando enfrentes limitaciones, recuerda que Júpiter en Casa 9 te da la capacidad de ver más allá de las fronteras convencionales. Tu mente es como un telescopio cósmico que puede ver oportunidades donde otros solo ven obstáculos.
 
     En momentos de duda, activa tu "modo Júpiter": pregúntate "¿Qué lección divina hay aquí?" o "¿Cómo puedo expandir mi perspectiva?". Esta posición te da una fe innata en el universo y su capacidad para proveer abundancia en todas las formas.`,
-    poetico: `Eres el peregrino eterno, caminando senderos invisibles entre las estrellas. Tu alma lleva el mapa de constelaciones olvidadas, y cada paso que das dibuja nuevas galaxias en el tapiz del universo. Como Júpiter, el rey de los dioses, expandes todo lo que tocas - no con fuerza bruta, sino con la suave inevitabilidad de la luz que ilumina la oscuridad.`,
+    impacto_real: `Esta configuración no se vive en ideas ni teorías: se nota en decisiones concretas.
+
+Durante tu vida:
+- No toleras trabajos o proyectos que no tengan un propósito más grande
+- Sientes urgencia física por viajar cuando pasas demasiado tiempo en un solo lugar
+- Buscas formación académica o espiritual de forma natural y constante
+- Atraes oportunidades internacionales o multiculturales sin buscarlas activamente
+- Las personas te consultan cuando necesitan perspectiva filosófica o consejo de vida
+
+Esta energía jupiteriana en Casa 9 no es abstracta: es tu forma de respirar significado en todo lo que haces.`,
     sombras: [
       {
         nombre: "📖 El Intelectual Arrogante",

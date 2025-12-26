@@ -749,7 +749,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           if (drawer.titulo) parts.push(drawer.titulo);
           if (drawer.educativo) parts.push(drawer.educativo);
           if (drawer.poderoso) parts.push(drawer.poderoso);
-          if (drawer.poetico) parts.push(drawer.poetico);
+          if (drawer.impacto_real) parts.push(drawer.impacto_real);
           if (drawer.sintesis?.frase) parts.push(drawer.sintesis.frase);
           if (drawer.sintesis?.declaracion) parts.push(drawer.sintesis.declaracion);
           return parts.join('\n\n');

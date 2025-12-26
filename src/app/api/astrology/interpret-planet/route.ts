@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
 import { generatePlanetInterpretation } from '@/services/tripleFusedInterpretationService';
+import { getUserProfile } from '@/services/userDataService';
 import * as admin from 'firebase-admin';
 
 
@@ -31,13 +32,19 @@ export async function POST(request: NextRequest) {
     const mongoose = await connectToDatabase();
     const db = (mongoose as any).connection?.db ?? (mongoose as any).db;
 
+    // Fetch user profile
+    const userProfile = await getUserProfile(userId);
+    if (!userProfile) {
+      console.warn('⚠️ [PLANET] User profile not found, using defaults');
+    }
+
     // Generate planet interpretation
     const interpretation = await generatePlanetInterpretation(
       planetName,
       sign,
       house,
       degree || 0,
-      {} as any // TODO: Add proper userProfile parameter
+      userProfile || { name: '', age: 0, birthDate: '', birthPlace: '' }
     );
 
     if (!interpretation) {

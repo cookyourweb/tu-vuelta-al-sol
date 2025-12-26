@@ -27,11 +27,18 @@ AQUÍ ESTÁ LA VERDAD CÓSMICA: Esa sensación de "no pertenecer" NO es tu debil
 
 Tu sistema nervioso está literalmente sintonizado con frecuencias del FUTURO que otros aún no pueden percibir. Cuando te sientes "fuera de lugar" en situaciones convencionales, no es que algo esté mal contigo - es que estás captando la LIMITACIÓN de ese espacio.
 
-🌙 **LA METÁFORA (Poético):**
+🎯 **IMPACTO REAL EN TU VIDA:**
 
-Imagina que naciste con GAFAS DE VER FUTUROS. Mientras la mayoría de las personas caminan mirando al suelo, calculando el siguiente paso seguro en el camino conocido, tú levantas la vista automáticamente y ves CONSTELACIONES DE POSIBILIDADES flotando en el aire que aún no se han manifestado en el plano físico.
+Esta configuración no se vive en ideas ni teorías: se nota en decisiones concretas.
 
-No viniste a ser vela. Viniste a ser TORMENTA ELÉCTRICA.
+Durante tu vida:
+- No toleras espacios donde tengas que esconder tu autenticidad
+- Tu cuerpo reacciona con incomodidad física cuando intentas "encajar"
+- Atraes situaciones que requieren pensamiento innovador y ruptura de moldes
+- Las personas te buscan cuando necesitan perspectivas diferentes
+- Te sientes vivo cuando estás creando algo que no existía antes
+
+Esta energía acuariana en Casa 1 no es abstracta: es tu forma automática de respirar en el mundo.
 
 ⚠️ **SOMBRAS A TRABAJAR:**
 
@@ -69,7 +76,7 @@ export interface TripleFusedInterpretation {
     titulo: string;
     educativo: string;        // Varios párrafos educativos
     poderoso: string;         // Varios párrafos empoderadores
-    poetico: string;          // Varios párrafos poéticos/metafóricos
+    impacto_real: string;     // Manifestación concreta en la vida (reemplaza poetico)
     sombras: {
       nombre: string;
       descripcion: string;
@@ -156,15 +163,16 @@ Debes responder SOLO con JSON válido en este formato:
     - Usa MAYÚSCULAS para énfasis en palabras clave
     - Incluye validación emocional ('Probablemente has sentido...')
     - Longitud: 6-8 párrafos completos",
-    
-    "poetico": "String largo (múltiples párrafos separados por \\n\\n):
-    - Usa metáforas poderosas y memorables
-    - Crea imágenes visuales evocativas
-    - Conecta con arquetipos universales
-    - Usa lenguaje simbólico y poético
-    - Evoca la ESENCIA de esta posición
-    - Debe ser inspirador y memorable
-    - Longitud: 4-6 párrafos completos",
+
+    "impacto_real": "String largo (múltiples párrafos separados por \\n\\n):
+    - Describe cómo se manifiesta CONCRETAMENTE en la vida diaria
+    - Usa formato de lista con viñetas para claridad
+    - Ejemplos: 'Durante tu vida: - No toleras X - Tu cuerpo reacciona cuando Y - Atraes situaciones Z'
+    - Tono profesional, claro, directo (NO metáforas largas)
+    - Enfócate en decisiones concretas, comportamientos observables
+    - Mantén profundidad psicológica pero con lenguaje accesible
+    - Cierra con una frase que ancle la energía en lo tangible
+    - Longitud: 4-6 párrafos completos (más corto que educativo/poderoso)",
     
     "sombras": [
       {
@@ -202,9 +210,9 @@ Debes responder SOLO con JSON válido en este formato:
 
 3. **LONGITUD:**
    - Educativo: 6-8 párrafos densos
-    - Poderoso: 6-8 párrafos transformadores
-    - Poético: 4-6 párrafos evocativos
-    - Cada párrafo debe tener 4-6 líneas mínimo
+   - Poderoso: 6-8 párrafos transformadores
+   - Impacto Real: 4-6 párrafos concretos (profesional, NO poético)
+   - Cada párrafo debe tener 4-6 líneas mínimo
 
 4. **PERSONALIZACIÓN:**
    - Usa el nombre ${userName} SOLO 2-3 veces en momentos clave
@@ -297,12 +305,14 @@ Sigue la misma estructura que para planetas, pero adaptada al Ascendente:
     - Cómo su Ascendente protege/sirve a su Sol
     - Herramientas para activarlo positivamente
     6-8 párrafos completos",
-    
-    "poetico": "Metáforas sobre:
-    - Su presencia en el mundo
-    - La 'máscara' como herramienta, no mentira
-    - La primera impresión como portal
-    4-6 párrafos poéticos",
+
+    "impacto_real": "Manifestación concreta:
+    - Cómo se nota físicamente (postura, energía, presencia)
+    - Primeras impresiones que genera en otros
+    - Situaciones donde su Ascendente se activa automáticamente
+    - Usa formato de lista con viñetas
+    - Tono profesional, concreto, NO metáforas largas
+    4-6 párrafos concretos",
     
     "sombras": [
       {
@@ -402,12 +412,14 @@ Es el punto más alto del cielo en tu carta - simboliza tu culminación.
     - La diferencia entre 'éxito' y 'realización' para ella
     - Herramientas para manifestar su MC
     6-8 párrafos completos",
-    
-    "poetico": "Metáforas sobre:
-    - Su vocación como llamado del alma
-    - El legado como semilla plantada
-    - La autoridad como servicio
-    4-6 párrafos poéticos",
+
+    "impacto_real": "Manifestación concreta:
+    - Tipos específicos de decisiones profesionales que toma
+    - Cómo se ve su autoridad en la práctica
+    - Situaciones laborales donde brilla naturalmente
+    - Usa formato de lista con viñetas
+    - Tono profesional, concreto, NO metáforas largas
+    4-6 párrafos concretos",
     
     "sombras": [
       {
@@ -514,12 +526,14 @@ ${getAspectDescription(aspectName)}
     - Herramientas para integrar ambos planetas
     - Ejemplos de personas famosas con este aspecto
     6-8 párrafos completos",
-    
-    "poetico": "Metáforas sobre:
-    - El diálogo entre estos dos arquetipos
-    - La danza/batalla entre estas energías
-    - La integración como síntesis creativa
-    4-6 párrafos poéticos",
+
+    "impacto_real": "Manifestación concreta:
+    - Situaciones específicas donde este diálogo se activa
+    - Cómo se nota en decisiones cotidianas
+    - Conflictos internos concretos que experimenta
+    - Usa formato de lista con viñetas
+    - Tono profesional, concreto, NO metáforas largas
+    4-6 párrafos concretos",
     
     "sombras": [
       {
