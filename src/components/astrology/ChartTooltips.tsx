@@ -758,6 +758,17 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
     if (natalInterpretations?.angles?.Ascendente) {
       interpretation = natalInterpretations.angles.Ascendente;
+    } else {
+      // ⭐ FIX: Agregar fallback para Ascendente
+      interpretation = {
+        tooltip: {
+          titulo: 'Ascendente',
+          significado: 'Tu máscara social, cómo te presentas al mundo y tu apariencia física. Haz click para generar tu interpretación personalizada.',
+          efecto: 'Primera impresión y personalidad externa',
+          tipo: 'Punto angular fundamental'
+        },
+        drawer: null
+      };
     }
 
     return (
@@ -838,45 +849,90 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           </div>
         </div>
 
-        {interpretation?.drawer && (
+        {interpretation && (
           <button
-            onMouseDown={(e) => {
-              console.log('═══════════════════════════════════');
-              console.log('🎯 ABRIENDO DRAWER CON MOUSEDOWN - ASCENDANT');
-              console.log('1. onOpenDrawer exists?', !!onOpenDrawer);
-              console.log('2. interpretation.drawer:', interpretation.drawer);
-              console.log('3. interpretation.drawer.titulo:', interpretation?.drawer?.titulo);
-              console.log('═══════════════════════════════════');
-
+            onMouseDown={async (e) => {
               e.stopPropagation();
               e.preventDefault();
 
-              if (!onOpenDrawer) {
-                console.error('❌ onOpenDrawer is undefined');
+              const hasAI = natalInterpretations?.angles?.Ascendente;
+
+              if (!hasAI && userId) {
+                // ⭐ GENERAR ASCENDENTE
+                setGeneratingAspect(true);
+                try {
+                  console.log('🎯 Generando Ascendente...');
+
+                  const response = await fetch('/api/astrology/interpret-ascendant', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      userId,
+                      sign: ascendant.sign,
+                      degree: ascendant.degree,
+                      chartType: 'natal'
+                    })
+                  });
+
+                  const result = await response.json();
+
+                  if (result.success) {
+                    console.log('✅ Ascendente generado');
+
+                    // Refrescar interpretaciones
+                    const token = await user!.getIdToken();
+                    const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`, {
+                      headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                      }
+                    });
+                    const refreshResult = await refreshResponse.json();
+
+                    if (refreshResult.success) {
+                      setNatalInterpretations(refreshResult.data);
+
+                      if (refreshResult.data?.angles?.Ascendente?.drawer && onOpenDrawer) {
+                        onOpenDrawer(refreshResult.data.angles.Ascendente.drawer);
+                      }
+                    }
+                  }
+                } catch (error) {
+                  console.error('❌ Error:', error);
+                  alert('Error generando interpretación: ' + (error as Error).message);
+                } finally {
+                  setGeneratingAspect(false);
+                }
                 return;
               }
 
-              if (!interpretation?.drawer) {
-                console.error('❌ interpretation.drawer is undefined');
-                return;
-              }
-
-              try {
-                console.log('✅ Calling onOpenDrawer...');
+              // Si ya tiene AI, abrir drawer
+              if (onOpenDrawer && interpretation?.drawer) {
                 onOpenDrawer(interpretation.drawer);
-                console.log('✅ onOpenDrawer called successfully');
-              } catch (error) {
-                console.error('❌ Error calling onOpenDrawer:', error);
               }
             }}
+            disabled={generatingAspect}
             style={{
               pointerEvents: 'auto',
               zIndex: 9999999,
               cursor: 'pointer'
             }}
-            className="w-full py-2 px-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg text-sm font-semibold transition-all"
+            className="w-full py-2 px-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            📖 Ver interpretación completa
+            {generatingAspect ? (
+              <>
+                <div className="animate-spin inline-block mr-2">⏳</div>
+                <span>Generando...</span>
+              </>
+            ) : (
+              <>
+                {natalInterpretations?.angles?.Ascendente ? (
+                  <span>📖 Ver interpretación completa</span>
+                ) : (
+                  <span>✨ Generar Interpretación IA</span>
+                )}
+              </>
+            )}
           </button>
         )}
       </div>
@@ -892,6 +948,17 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
     if (natalInterpretations?.angles?.MedioCielo) {
       interpretation = natalInterpretations.angles.MedioCielo;
+    } else {
+      // ⭐ FIX: Agregar fallback para Medio Cielo
+      interpretation = {
+        tooltip: {
+          titulo: 'Medio Cielo',
+          significado: 'Tu vocación, carrera y legado público. Haz click para generar tu interpretación personalizada.',
+          efecto: 'Dirección profesional y propósito de vida',
+          tipo: 'Punto angular fundamental'
+        },
+        drawer: null
+      };
     }
 
     return (
@@ -960,48 +1027,91 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           </div>
         </div>
 
-        {interpretation?.drawer && (
+        {interpretation && (
           <button
-            onMouseDown={(e) => {
-              console.log('═══════════════════════════════════');
-              console.log('🎯 ABRIENDO DRAWER CON MOUSEDOWN - MIDHEAVEN');
-              console.log('1. onOpenDrawer exists?', !!onOpenDrawer);
-              console.log('2. interpretation.drawer:', interpretation.drawer);
-              console.log('3. interpretation.drawer.titulo:', interpretation?.drawer?.titulo);
-              console.log('═══════════════════════════════════');
-
+            onMouseDown={async (e) => {
               e.stopPropagation();
               e.preventDefault();
 
-              if (!onOpenDrawer) {
-                console.error('❌ onOpenDrawer is undefined');
+              const hasAI = natalInterpretations?.angles?.MedioCielo;
+
+              if (!hasAI && userId) {
+                // ⭐ GENERAR MEDIO CIELO
+                setGeneratingAspect(true);
+                try {
+                  console.log('🎯 Generando Medio Cielo...');
+
+                  const response = await fetch('/api/astrology/interpret-midheaven', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      userId,
+                      sign: midheaven.sign,
+                      degree: midheaven.degree,
+                      chartType: 'natal'
+                    })
+                  });
+
+                  const result = await response.json();
+
+                  if (result.success) {
+                    console.log('✅ Medio Cielo generado');
+
+                    // Refrescar interpretaciones
+                    const token = await user!.getIdToken();
+                    const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`, {
+                      headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                      }
+                    });
+                    const refreshResult = await refreshResponse.json();
+
+                    if (refreshResult.success) {
+                      setNatalInterpretations(refreshResult.data);
+
+                      if (refreshResult.data?.angles?.MedioCielo?.drawer && onOpenDrawer) {
+                        onOpenDrawer(refreshResult.data.angles.MedioCielo.drawer);
+                      }
+                    }
+                  }
+                } catch (error) {
+                  console.error('❌ Error:', error);
+                  alert('Error generando interpretación: ' + (error as Error).message);
+                } finally {
+                  setGeneratingAspect(false);
+                }
                 return;
               }
 
-              if (!interpretation?.drawer) {
-                console.error('❌ interpretation.drawer is undefined');
-                return;
-              }
-
-              try {
-                // ⭐ NUEVO: Marcar tooltip como "locked" para que NO se cierre
-                setTooltipLocked(true);
-
-                console.log('✅ Calling onOpenDrawer...');
+              // Si ya tiene AI, abrir drawer
+              setTooltipLocked(true);
+              if (onOpenDrawer && interpretation?.drawer) {
                 onOpenDrawer(interpretation.drawer);
-                console.log('✅ onOpenDrawer called successfully');
-              } catch (error) {
-                console.error('❌ Error calling onOpenDrawer:', error);
               }
             }}
+            disabled={generatingAspect}
             style={{
               pointerEvents: 'auto',
               zIndex: 9999999,
               cursor: 'pointer'
             }}
-            className="w-full py-2 px-4 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white rounded-lg text-sm font-semibold transition-all"
+            className="w-full py-2 px-4 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white rounded-lg text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            📖 Ver interpretación completa
+            {generatingAspect ? (
+              <>
+                <div className="animate-spin inline-block mr-2">⏳</div>
+                <span>Generando...</span>
+              </>
+            ) : (
+              <>
+                {natalInterpretations?.angles?.MedioCielo ? (
+                  <span>📖 Ver interpretación completa</span>
+                ) : (
+                  <span>✨ Generar Interpretación IA</span>
+                )}
+              </>
+            )}
           </button>
         )}
       </div>
