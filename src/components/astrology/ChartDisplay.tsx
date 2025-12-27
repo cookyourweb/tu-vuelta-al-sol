@@ -52,12 +52,13 @@ const ChartDisplay = ({
   solarReturnYear,
   solarReturnTheme,
   ascSRInNatalHouse,
+  solarReturnInterpretation, // ⭐ NUEVO: interpretación de SR para tooltips
   onCloseDrawer,
   // ✅ ADDED: For drawer functionality
   onOpenDrawer,
   drawerOpen = false,
   userId
-}: ChartDisplayProps) => {
+}: any) => {
 
   // ✅ ESTADOS
   const [showAspects, setShowAspects] = useState(true);
@@ -2142,6 +2143,8 @@ const ChartDisplay = ({
         solarReturnYear={solarReturnYear}
         solarReturnTheme={solarReturnTheme}
         ascSRInNatalHouse={ascSRInNatalHouse}
+        // ⭐ NUEVO: Pasar interpretación de SR para comparaciones en tooltips
+        natalInterpretations={chartType === 'solar-return' ? solarReturnInterpretation : undefined}
         // ✅ FIX: Pass card timer props for tooltip to cancel close timer
         cardHoverTimer={cardHoverTimer}
         setCardHoverTimer={setCardHoverTimer}

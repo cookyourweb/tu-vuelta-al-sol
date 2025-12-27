@@ -555,7 +555,10 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                   'Venus': 'venus',
                   'Marte': 'marte',
                   'Júpiter': 'jupiter',
-                  'Saturno': 'saturno'
+                  'Saturno': 'saturno',
+                  'Urano': 'urano',
+                  'Neptuno': 'neptuno',
+                  'Plutón': 'pluton'
                 };
 
                 const planetKey = planetKeyMap[planet.name];

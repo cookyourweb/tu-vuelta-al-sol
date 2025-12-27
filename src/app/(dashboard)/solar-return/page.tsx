@@ -52,6 +52,7 @@ export default function SolarReturnPage() {
   const [natalChart, setNatalChart] = useState<any>(null);
   const [birthData, setBirthData] = useState<any>(null);
   const [solarReturnData, setSolarReturnData] = useState<any>(null);
+  const [solarReturnInterpretation, setSolarReturnInterpretation] = useState<any>(null); // ⭐ NUEVO: para comparaciones_planetarias
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [regenerating, setRegenerating] = useState(false);
@@ -157,6 +158,31 @@ export default function SolarReturnPage() {
       } else {
         setSolarReturnData(null);
         setChartData(null);
+      }
+
+      // STEP 4: Load Solar Return Interpretation (for comparaciones_planetarias)
+      console.log('📋 Paso 4: Cargando interpretación de Solar Return...');
+      try {
+        const token = await user?.getIdToken();
+        const srInterpretationResponse = await fetch(`/api/astrology/interpret-solar-return?userId=${user?.uid}&year=${new Date().getFullYear()}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (srInterpretationResponse.ok) {
+          const srInterpretationResult = await srInterpretationResponse.json();
+          console.log('✅ Interpretación de Solar Return cargada:', srInterpretationResult.success);
+          if (srInterpretationResult.success) {
+            setSolarReturnInterpretation(srInterpretationResult.interpretation || srInterpretationResult.data);
+          }
+        } else {
+          console.warn('⚠️ No se encontró interpretación de Solar Return (puede no estar generada aún)');
+        }
+      } catch (error) {
+        console.warn('⚠️ Error cargando interpretación de Solar Return:', error);
+        // No es crítico, solo no habrá comparaciones en tooltips
       }
 
       console.log('✅ ===== FIN loadAllData EXITOSO =====');
@@ -502,6 +528,7 @@ export default function SolarReturnPage() {
                   onCloseDrawer={closeDrawer}
                   drawerOpen={drawerOpen}
                   userId={user?.uid}
+                  solarReturnInterpretation={solarReturnInterpretation} // ⭐ NUEVO: para comparaciones en tooltips
                 />
               </div>
             </div>
