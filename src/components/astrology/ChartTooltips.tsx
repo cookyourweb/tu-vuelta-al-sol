@@ -10,7 +10,7 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Planet, Aspect } from '@/types/astrology/chartDisplay';
-import { planetMeanings, signMeanings, houseMeanings, aspectMeanings, PLANET_SYMBOLS, PLANET_COLORS } from '@/constants/astrology';
+import { planetMeanings, signMeanings, houseMeanings, aspectMeanings, PLANET_SYMBOLS, SIGN_SYMBOLS, PLANET_COLORS } from '@/constants/astrology';
 import { getPersonalizedPlanetInterpretation, getPersonalizedAspectInterpretation } from '@/services/chartInterpretationsService';
 import { getExampleInterpretation } from '@/data/interpretations/ExampleInterpretations';
 import { useAuth } from '@/context/AuthContext';
@@ -477,8 +477,7 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
             </span>
             <div className="flex-1">
               <div className="text-white font-bold text-base leading-tight">
-                {PLANET_SYMBOLS[planet.name] || planet.name.charAt(0)}{' '}
-                {planet.name} en {planet.sign} en Casa {planet.house}
+                {planet.name} en {SIGN_SYMBOLS[planet.sign] || ''} {planet.sign} en Casa {planet.house}
               </div>
               <div className="text-gray-300 text-sm mt-1">
                 {planet.degree.toFixed(2)}° - Casa {planet.house} ({houseMeanings[planet.house]?.name.split(' - ')[1] || 'Área de vida'})
