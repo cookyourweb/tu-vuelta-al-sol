@@ -541,6 +541,10 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
               // ⭐ SOLAR RETURN: Buscar comparación planetaria
               if (chartType === 'solar-return') {
+                console.log('🔄 SOLAR RETURN - Buscando comparación para:', planet.name);
+                console.log('📊 natalInterpretations:', natalInterpretations);
+                console.log('📊 comparaciones_planetarias:', natalInterpretations?.comparaciones_planetarias);
+
                 setTooltipLocked(true);
 
                 // Mapear nombre de planeta a key de comparaciones_planetarias
@@ -555,7 +559,11 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                 };
 
                 const planetKey = planetKeyMap[planet.name];
+                console.log('🔍 planetKey:', planetKey);
+
                 const comparison = natalInterpretations?.comparaciones_planetarias?.[planetKey];
+                console.log('🔍 comparison found:', !!comparison);
+                console.log('🔍 comparison:', comparison);
 
                 if (comparison && onOpenDrawer) {
                   // Mapear estructura de comparación al formato del drawer existente
