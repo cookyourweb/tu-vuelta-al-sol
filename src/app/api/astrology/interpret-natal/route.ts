@@ -692,8 +692,8 @@ async function generatePlanetInterpretation(
       }
     ],
     "sintesis": {
-      "frase": "[Resumen POTENTE del tema central en máximo 12 palabras. DEBE ser DIRECTO y MOTIVADOR, NO metafórico. Ejemplos: 'Mi mente conecta intuición con conocimiento profundo', 'Pienso en dimensiones que otros no perciben']",
-      "declaracion": "[Afirmación PODEROSA en primera persona de máximo 2 líneas. DEBE ser CONCRETA, PRÁCTICA y MOTIVADORA. Ejemplos: 'Mi forma de pensar trasciende la lógica convencional. Uso esta capacidad para comprender lo que otros no ven.', 'No pienso linealmente - mi mente conecta realidades invisibles. Esta es mi fortaleza, no mi debilidad.']"
+      "frase": "[Resumen POTENTE en máximo 12 palabras. PROHIBIDO usar: 'puente', 'canción', 'magia', 'alma', 'corazón', 'tejer', 'océano de', o cualquier metáfora poética. DEBE ser DIRECTO y CONCRETO. Ejemplos BUENOS: 'Mi mente traduce intuición en conocimiento profundo', 'Pienso en dimensiones que el pensamiento lineal no alcanza', 'Mi comunicación conecta verdades que otros no ven']",
+      "declaracion": "[Afirmación en primera persona de máximo 2 líneas. PROHIBIDO usar lenguaje metafórico o poético. DEBE ser DISRUPTIVO y CONCRETO. Ejemplos BUENOS: 'Mi forma de pensar no es confusa - es multidimensional. Uso esta capacidad conscientemente para acceder a comprensiones profundas.', 'No pienso como la mayoría - mi mente conecta patrones invisibles. Esta es mi ventaja, no mi debilidad.', 'Mi ${planet.name} en ${planet.sign} no es accidente - es herramienta cósmica. La activo conscientemente para crear mi realidad.']"
     }
   }
 }
