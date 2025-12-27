@@ -585,8 +585,8 @@ async function generateAngleInterpretation(
       }
     ],
     "sintesis": {
-      "frase": "[Resumen profesional del tema central en máximo 12 palabras. DEBE ser DIRECTO, NO metafórico, NO poético]",
-      "declaracion": "[Afirmación profesional en primera persona de máximo 2 líneas. DEBE ser CONCRETA y PRÁCTICA, NO metafórica]"
+      "frase": "[Resumen POTENTE del tema central en máximo 12 palabras. DIRECTO y MOTIVADOR, NO metafórico]",
+      "declaracion": "[Afirmación PODEROSA en primera persona de máximo 2 líneas. CONCRETA, PRÁCTICA y MOTIVADORA]"
     }
   }
 }
@@ -692,8 +692,8 @@ async function generatePlanetInterpretation(
       }
     ],
     "sintesis": {
-      "frase": "[Resumen profesional del tema central en máximo 12 palabras. DEBE ser DIRECTO, NO metafórico, NO poético. Ejemplo: 'Mi mente es intuitiva y busca significados profundos']",
-      "declaracion": "[Afirmación profesional en primera persona de máximo 2 líneas. DEBE ser CONCRETA y PRÁCTICA, NO metafórica. Ejemplo: 'Reconozco que mi forma de pensar es profunda e intuitiva. Uso esta capacidad conscientemente para comprender el mundo de manera única.']"
+      "frase": "[Resumen POTENTE del tema central en máximo 12 palabras. DEBE ser DIRECTO y MOTIVADOR, NO metafórico. Ejemplos: 'Mi mente conecta intuición con conocimiento profundo', 'Pienso en dimensiones que otros no perciben']",
+      "declaracion": "[Afirmación PODEROSA en primera persona de máximo 2 líneas. DEBE ser CONCRETA, PRÁCTICA y MOTIVADORA. Ejemplos: 'Mi forma de pensar trasciende la lógica convencional. Uso esta capacidad para comprender lo que otros no ven.', 'No pienso linealmente - mi mente conecta realidades invisibles. Esta es mi fortaleza, no mi debilidad.']"
     }
   }
 }
@@ -804,8 +804,8 @@ function generateFallbackAngleInterpretation(angleName: string, angleData: any):
         },
       ],
       sintesis: {
-        frase: `Mi ${angleName} en ${angleData.sign} define cómo me presento al mundo.`,
-        declaracion: `Reconozco que mi ${angleName} en ${angleData.sign} es parte fundamental de mi identidad. Uso esta energía conscientemente.`,
+        frase: `Mi ${angleName} en ${angleData.sign} es mi poder de presencia.`,
+        declaracion: `Mi ${angleName} en ${angleData.sign} no es máscara - es herramienta consciente. La uso para manifestar mi propósito.`,
       },
     },
   };
@@ -834,8 +834,8 @@ function generateFallbackPlanetInterpretation(planet: any): PlanetInterpretation
         },
       ],
       sintesis: {
-        frase: `Mi ${planet.name} en ${planet.sign} en Casa ${planet.house} define esta área de mi vida.`,
-        declaracion: `Reconozco que mi ${planet.name} en ${planet.sign} es una parte importante de quién soy. Uso esta energía conscientemente en mi día a día.`,
+        frase: `Mi ${planet.name} en ${planet.sign} es poder esperando ser activado.`,
+        declaracion: `Mi ${planet.name} en ${planet.sign} no es accidente - es herramienta cósmica. La activo conscientemente para crear mi realidad.`,
       },
     },
   };
@@ -885,8 +885,8 @@ async function generateElementInterpretation(
       }
     ],
     "sintesis": {
-      "frase": "[Resumen profesional del tema central en máximo 12 palabras. DEBE ser DIRECTO, NO metafórico, NO poético]",
-      "declaracion": "[Afirmación profesional en primera persona de máximo 2 líneas. DEBE ser CONCRETA y PRÁCTICA, NO metafórica]"
+      "frase": "[Resumen POTENTE del tema central en máximo 12 palabras. DIRECTO y MOTIVADOR, NO metafórico]",
+      "declaracion": "[Afirmación PODEROSA en primera persona de máximo 2 líneas. CONCRETA, PRÁCTICA y MOTIVADORA]"
     }
   }
 }
@@ -979,8 +979,8 @@ async function generateModalityInterpretation(
       }
     ],
     "sintesis": {
-      "frase": "[Resumen profesional del tema central en máximo 12 palabras. DEBE ser DIRECTO, NO metafórico, NO poético]",
-      "declaracion": "[Afirmación profesional en primera persona de máximo 2 líneas. DEBE ser CONCRETA y PRÁCTICA, NO metafórica]"
+      "frase": "[Resumen POTENTE del tema central en máximo 12 palabras. DIRECTO y MOTIVADOR, NO metafórico]",
+      "declaracion": "[Afirmación PODEROSA en primera persona de máximo 2 líneas. CONCRETA, PRÁCTICA y MOTIVADORA]"
     }
   }
 }
@@ -1072,8 +1072,8 @@ async function generateAspectInterpretation(
       }
     ],
     "sintesis": {
-      "frase": "[Resumen profesional del tema central en máximo 12 palabras. DEBE ser DIRECTO, NO metafórico, NO poético]",
-      "declaracion": "[Afirmación profesional en primera persona de máximo 2 líneas. DEBE ser CONCRETA y PRÁCTICA, NO metafórica]"
+      "frase": "[Resumen POTENTE del tema central en máximo 12 palabras. DIRECTO y MOTIVADOR, NO metafórico]",
+      "declaracion": "[Afirmación PODEROSA en primera persona de máximo 2 líneas. CONCRETA, PRÁCTICA y MOTIVADORA]"
     }
   }
 }
@@ -1153,8 +1153,8 @@ function generateFallbackElementInterpretation(element: any): PlanetInterpretati
         },
       ],
       sintesis: {
-        frase: `Mi elemento dominante ${element.name} define mi energía fundamental.`,
-        declaracion: `Reconozco que mi elemento ${element.name} es mi fuerza primordial. Lo uso conscientemente en mis decisiones y acciones.`,
+        frase: `Mi elemento ${element.name} es fuego primordial que dirijo.`,
+        declaracion: `Mi elemento ${element.name} no me domina - yo lo dirijo. Esta energía es mi fuerza, no mi limitación.`,
       },
     },
   };
@@ -1183,8 +1183,8 @@ function generateFallbackModalityInterpretation(modality: any): PlanetInterpreta
         },
       ],
       sintesis: {
-        frase: `Mi modalidad dominante ${modality.name} define cómo actúo en la vida.`,
-        declaracion: `Reconozco que mi modalidad ${modality.name} es mi ritmo natural. Lo uso conscientemente para lograr mis objetivos.`,
+        frase: `Mi modalidad ${modality.name} es ritmo cósmico que dirijo.`,
+        declaracion: `Mi modalidad ${modality.name} no me controla - yo la dirijo. Este ritmo es mi estrategia, no mi prisión.`,
       },
     },
   };
@@ -1213,8 +1213,8 @@ function generateFallbackAspectInterpretation(aspect: any): PlanetInterpretation
         },
       ],
       sintesis: {
-        frase: `Mi aspecto ${aspect.type} entre ${aspect.planet1} y ${aspect.planet2} es un diálogo interno.`,
-        declaracion: `Reconozco la conexión entre mi ${aspect.planet1} y ${aspect.planet2}. Trabajo conscientemente con esta dinámica interna.`,
+        frase: `Mi ${aspect.type} entre ${aspect.planet1} y ${aspect.planet2} es puente de poder.`,
+        declaracion: `Integro conscientemente mi ${aspect.planet1} y ${aspect.planet2}. Esta conexión no me divide - me completa.`,
       },
     },
   };

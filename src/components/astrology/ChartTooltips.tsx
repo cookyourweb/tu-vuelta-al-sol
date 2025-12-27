@@ -805,46 +805,100 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           </div>
         )}
 
-        {/* ✅ Botón para abrir drawer (solo natal tiene drawer) */}
-        {interpretation?.drawer && (
+        {/* ✅ Botón para generar o abrir drawer (solo natal tiene drawer) */}
+        {chartType === 'natal' && (
           <button
-            onMouseDown={(e) => {
-              console.log('═══════════════════════════════════');
-              console.log('🎯 ABRIENDO DRAWER CON MOUSEDOWN - ASCENDANT');
-              console.log('1. onOpenDrawer exists?', !!onOpenDrawer);
-              console.log('2. interpretation.drawer:', interpretation.drawer);
-              console.log('3. interpretation.drawer.titulo:', interpretation?.drawer?.titulo);
-              console.log('═══════════════════════════════════');
-
+            onMouseDown={async (e) => {
               e.stopPropagation();
               e.preventDefault();
 
-              if (!onOpenDrawer) {
-                console.error('❌ onOpenDrawer is undefined');
+              const hasAI = interpretation?.drawer;
+
+              if (!hasAI && userId) {
+                // ⭐ GENERAR ÁNGULO INDIVIDUAL
+                setTooltipLocked(true);
+                setGeneratingAspect(true);
+                setIsGenerating(true);
+
+                const longGenerationTimer = setTimeout(() => {
+                  setShowLongGeneratingMessage(true);
+                }, 5000);
+
+                try {
+                  console.log('🎯 Generando ángulo individual: Ascendente');
+
+                  const response = await fetch('/api/astrology/interpret-angle', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      userId,
+                      angleName: 'Ascendente',
+                      sign: ascendant.sign,
+                      degree: ascendant.degree
+                    })
+                  });
+
+                  const result = await response.json();
+
+                  if (result.success) {
+                    console.log('✅ Ascendente generado');
+
+                    const token = await user!.getIdToken();
+
+                    const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`, {
+                      headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                      }
+                    });
+                    const refreshResult = await refreshResponse.json();
+
+                    if (refreshResult.success) {
+                      setNatalInterpretations(refreshResult.data);
+                      const newInterpretation = refreshResult.data?.angles?.Ascendente;
+
+                      if (newInterpretation?.drawer && onOpenDrawer) {
+                        console.log('✅ Abriendo drawer para: Ascendente');
+                        onOpenDrawer(newInterpretation.drawer);
+                      }
+                    }
+                  }
+                } catch (error) {
+                  console.error('❌ Error:', error);
+                  alert('Error generando interpretación: ' + (error as Error).message);
+                } finally {
+                  setGeneratingAspect(false);
+                  setIsGenerating(false);
+                  setShowLongGeneratingMessage(false);
+                  clearTimeout(longGenerationTimer);
+                }
                 return;
               }
 
-              if (!interpretation?.drawer) {
-                console.error('❌ interpretation.drawer is undefined');
-                return;
-              }
-
-              try {
-                console.log('✅ Calling onOpenDrawer...');
+              // Si ya tiene AI, abrir drawer
+              setTooltipLocked(true);
+              if (onOpenDrawer && interpretation?.drawer) {
                 onOpenDrawer(interpretation.drawer);
-                console.log('✅ onOpenDrawer called successfully');
-              } catch (error) {
-                console.error('❌ Error calling onOpenDrawer:', error);
               }
             }}
+            disabled={generatingAspect}
             style={{
               pointerEvents: 'auto',
               zIndex: 9999999,
               cursor: 'pointer'
             }}
-            className="w-full py-2 px-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg text-sm font-semibold transition-all"
+            className="w-full py-2 px-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            📖 Ver interpretación completa
+            {generatingAspect ? (
+              <>
+                <div className="animate-spin inline-block mr-2">⏳</div>
+                <span>Generando...</span>
+              </>
+            ) : interpretation?.drawer ? (
+              <>📖 Ver interpretación completa</>
+            ) : (
+              <>✨ Generar Interpretación IA</>
+            )}
           </button>
         )}
       </div>
@@ -963,49 +1017,100 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           </div>
         )}
 
-        {/* ✅ Botón para abrir drawer (solo natal tiene drawer) */}
-        {interpretation?.drawer && (
+        {/* ✅ Botón para generar o abrir drawer (solo natal tiene drawer) */}
+        {chartType === 'natal' && (
           <button
-            onMouseDown={(e) => {
-              console.log('═══════════════════════════════════');
-              console.log('🎯 ABRIENDO DRAWER CON MOUSEDOWN - MIDHEAVEN');
-              console.log('1. onOpenDrawer exists?', !!onOpenDrawer);
-              console.log('2. interpretation.drawer:', interpretation.drawer);
-              console.log('3. interpretation.drawer.titulo:', interpretation?.drawer?.titulo);
-              console.log('═══════════════════════════════════');
-
+            onMouseDown={async (e) => {
               e.stopPropagation();
               e.preventDefault();
 
-              if (!onOpenDrawer) {
-                console.error('❌ onOpenDrawer is undefined');
-                return;
-              }
+              const hasAI = interpretation?.drawer;
 
-              if (!interpretation?.drawer) {
-                console.error('❌ interpretation.drawer is undefined');
-                return;
-              }
-
-              try {
-                // ⭐ NUEVO: Marcar tooltip como "locked" para que NO se cierre
+              if (!hasAI && userId) {
+                // ⭐ GENERAR ÁNGULO INDIVIDUAL
                 setTooltipLocked(true);
+                setGeneratingAspect(true);
+                setIsGenerating(true);
 
-                console.log('✅ Calling onOpenDrawer...');
+                const longGenerationTimer = setTimeout(() => {
+                  setShowLongGeneratingMessage(true);
+                }, 5000);
+
+                try {
+                  console.log('🎯 Generando ángulo individual: Medio Cielo');
+
+                  const response = await fetch('/api/astrology/interpret-angle', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      userId,
+                      angleName: 'Medio Cielo',
+                      sign: midheaven.sign,
+                      degree: midheaven.degree
+                    })
+                  });
+
+                  const result = await response.json();
+
+                  if (result.success) {
+                    console.log('✅ Medio Cielo generado');
+
+                    const token = await user!.getIdToken();
+
+                    const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`, {
+                      headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                      }
+                    });
+                    const refreshResult = await refreshResponse.json();
+
+                    if (refreshResult.success) {
+                      setNatalInterpretations(refreshResult.data);
+                      const newInterpretation = refreshResult.data?.angles?.MedioCielo;
+
+                      if (newInterpretation?.drawer && onOpenDrawer) {
+                        console.log('✅ Abriendo drawer para: Medio Cielo');
+                        onOpenDrawer(newInterpretation.drawer);
+                      }
+                    }
+                  }
+                } catch (error) {
+                  console.error('❌ Error:', error);
+                  alert('Error generando interpretación: ' + (error as Error).message);
+                } finally {
+                  setGeneratingAspect(false);
+                  setIsGenerating(false);
+                  setShowLongGeneratingMessage(false);
+                  clearTimeout(longGenerationTimer);
+                }
+                return;
+              }
+
+              // Si ya tiene AI, abrir drawer
+              setTooltipLocked(true);
+              if (onOpenDrawer && interpretation?.drawer) {
                 onOpenDrawer(interpretation.drawer);
-                console.log('✅ onOpenDrawer called successfully');
-              } catch (error) {
-                console.error('❌ Error calling onOpenDrawer:', error);
               }
             }}
+            disabled={generatingAspect}
             style={{
               pointerEvents: 'auto',
               zIndex: 9999999,
               cursor: 'pointer'
             }}
-            className="w-full py-2 px-4 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white rounded-lg text-sm font-semibold transition-all"
+            className="w-full py-2 px-4 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white rounded-lg text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            📖 Ver interpretación completa
+            {generatingAspect ? (
+              <>
+                <div className="animate-spin inline-block mr-2">⏳</div>
+                <span>Generando...</span>
+              </>
+            ) : interpretation?.drawer ? (
+              <>📖 Ver interpretación completa</>
+            ) : (
+              <>✨ Generar Interpretación IA</>
+            )}
           </button>
         )}
       </div>
