@@ -60,6 +60,11 @@ const ChartDisplay = ({
   userId
 }: any) => {
 
+  // 🔍 DEBUG: Log solarReturnInterpretation received
+  console.log('📥 ChartDisplay recibió solarReturnInterpretation:', solarReturnInterpretation);
+  console.log('📥 ChartType:', chartType);
+  console.log('📥 SR Interpretation tiene comparaciones?', !!solarReturnInterpretation?.comparaciones_planetarias);
+
   // ✅ ESTADOS
   const [showAspects, setShowAspects] = useState(true);
   const [selectedAspectTypes, setSelectedAspectTypes] = useState({

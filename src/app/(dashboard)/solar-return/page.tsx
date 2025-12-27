@@ -174,11 +174,16 @@ export default function SolarReturnPage() {
         if (srInterpretationResponse.ok) {
           const srInterpretationResult = await srInterpretationResponse.json();
           console.log('✅ Interpretación de Solar Return cargada:', srInterpretationResult.success);
+          console.log('📦 Resultado completo:', srInterpretationResult);
           if (srInterpretationResult.success) {
-            setSolarReturnInterpretation(srInterpretationResult.interpretation || srInterpretationResult.data);
+            const interpretation = srInterpretationResult.interpretation || srInterpretationResult.data;
+            console.log('📊 Interpretación a guardar:', interpretation);
+            console.log('🔍 Tiene comparaciones_planetarias?', !!interpretation?.comparaciones_planetarias);
+            setSolarReturnInterpretation(interpretation);
           }
         } else {
           console.warn('⚠️ No se encontró interpretación de Solar Return (puede no estar generada aún)');
+          console.log('Status:', srInterpretationResponse.status);
         }
       } catch (error) {
         console.warn('⚠️ Error cargando interpretación de Solar Return:', error);
@@ -507,6 +512,8 @@ export default function SolarReturnPage() {
                 🌟 Tu Rueda Solar Return {new Date().getFullYear()} - {new Date().getFullYear() + 1}
               </h2>
               <div className="flex justify-center">
+                {console.log('🎨 RENDERING ChartDisplay con solarReturnInterpretation:', solarReturnInterpretation)}
+                {console.log('🔍 SR Interpretation tiene comparaciones?', !!solarReturnInterpretation?.comparaciones_planetarias)}
                 <ChartDisplay
                   planets={chartData.planets || []}
                   houses={chartData.houses || []}
