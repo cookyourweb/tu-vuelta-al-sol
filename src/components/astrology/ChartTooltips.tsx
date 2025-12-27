@@ -456,7 +456,9 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           significado: fallbackText,
           efecto: chartType === 'solar-return' ? 'Activación anual específica' : 'Influencia única en tu personalidad',
           tipo: chartType === 'solar-return' ? 'Entrenamiento del año' : 'Energía transformadora'
-        }
+        },
+        // ⭐ FIX: Agregar drawer vacío para que siempre aparezca el botón de generar
+        drawer: null
       };
       console.log('⚠️ Using fallback for', interpretationKey, 'chartType:', chartType);
       console.log('   - Interpretation:', interpretation);
@@ -564,7 +566,7 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           </div>
         )}
 
-        {interpretation?.drawer && (
+        {interpretation && (
           <button
             onMouseDown={async (e) => {
               e.stopPropagation();
