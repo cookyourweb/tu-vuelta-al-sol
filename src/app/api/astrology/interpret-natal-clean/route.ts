@@ -97,11 +97,11 @@ async function generateCleanInterpretation(
   }
 }
 
-// ✅ FUNCIÓN: Interpretación de fallback - ESTRUCTURA COMPLETA
+// ✅ FUNCIÓN: Interpretación de fallback - ESTRUCTURA COMPLETA CON TONO DISRUPTIVO/MOTIVADOR
 function generateFallbackInterpretation(userProfile: UserProfile): any {
   return {
-    esencia_revolucionaria: `${userProfile.name}, eres una fuerza revolucionaria auténtica encarnada. Tu presencia cambia energías automáticamente. No viniste a este mundo a pasar desapercibido/a - viniste a ACTIVAR.`,
-    proposito_vida: "Activar el potencial humano dormido a través de tu autenticidad radical y visión de futuro. Cada día que vives alineado/a con tu carta natal es un día que cumples tu misión cósmica.",
+    esencia_revolucionaria: `${userProfile.name}, tu carta natal revela una configuración única que NO es accidente. Tu forma de ser desafía lo convencional - y eso no es problema, es tu herramienta.`,
+    proposito_vida: "Tu propósito no es encajar - es usar tu autenticidad como catalizador. Cada día que vives alineado con tu naturaleza real, manifiestas lo que viniste a hacer.",
     formacion_temprana: {
       casa_lunar: {
         planeta: "Luna",
