@@ -585,8 +585,8 @@ async function generateAngleInterpretation(
       }
     ],
     "sintesis": {
-      "frase": "[Frase memorable de máximo 15 palabras]",
-      "declaracion": "[Declaración 'Yo soy...' que el usuario puede repetir. 2-4 líneas]"
+      "frase": "[Resumen profesional del tema central en máximo 12 palabras. DEBE ser DIRECTO, NO metafórico, NO poético]",
+      "declaracion": "[Afirmación profesional en primera persona de máximo 2 líneas. DEBE ser CONCRETA y PRÁCTICA, NO metafórica]"
     }
   }
 }
@@ -692,8 +692,8 @@ async function generatePlanetInterpretation(
       }
     ],
     "sintesis": {
-      "frase": "[Frase memorable máximo 15 palabras]",
-      "declaracion": "[Declaración en primera persona: 'Yo soy...' o 'Mi ${planet.name}...'. 2-4 líneas que el usuario puede repetir como mantra]"
+      "frase": "[Resumen profesional del tema central en máximo 12 palabras. DEBE ser DIRECTO, NO metafórico, NO poético. Ejemplo: 'Mi mente es intuitiva y busca significados profundos']",
+      "declaracion": "[Afirmación profesional en primera persona de máximo 2 líneas. DEBE ser CONCRETA y PRÁCTICA, NO metafórica. Ejemplo: 'Reconozco que mi forma de pensar es profunda e intuitiva. Uso esta capacidad conscientemente para comprender el mundo de manera única.']"
     }
   }
 }
@@ -804,8 +804,8 @@ function generateFallbackAngleInterpretation(angleName: string, angleData: any):
         },
       ],
       sintesis: {
-        frase: `Tu ${angleName} en ${angleData.sign} es tu superpoder único.`,
-        declaracion: `Yo activo mi ${angleName} en ${angleData.sign} conscientemente. Esta configuración me define y me empodera para cumplir mi propósito.`,
+        frase: `Mi ${angleName} en ${angleData.sign} define cómo me presento al mundo.`,
+        declaracion: `Reconozco que mi ${angleName} en ${angleData.sign} es parte fundamental de mi identidad. Uso esta energía conscientemente.`,
       },
     },
   };
@@ -834,8 +834,8 @@ function generateFallbackPlanetInterpretation(planet: any): PlanetInterpretation
         },
       ],
       sintesis: {
-        frase: `Tu ${planet.name} en ${planet.sign} es poder esperando ser activado.`,
-        declaracion: `Yo activo conscientemente mi ${planet.name} en ${planet.sign}. Esta energía no me limita, me empodera. La uso para mi máxima expresión.`,
+        frase: `Mi ${planet.name} en ${planet.sign} en Casa ${planet.house} define esta área de mi vida.`,
+        declaracion: `Reconozco que mi ${planet.name} en ${planet.sign} es una parte importante de quién soy. Uso esta energía conscientemente en mi día a día.`,
       },
     },
   };
@@ -885,8 +885,8 @@ async function generateElementInterpretation(
       }
     ],
     "sintesis": {
-      "frase": "[Frase memorable máximo 15 palabras]",
-      "declaracion": "[Declaración en primera persona: 'Yo soy...' o 'Mi elemento...'. 2-4 líneas que el usuario puede repetir como mantra]"
+      "frase": "[Resumen profesional del tema central en máximo 12 palabras. DEBE ser DIRECTO, NO metafórico, NO poético]",
+      "declaracion": "[Afirmación profesional en primera persona de máximo 2 líneas. DEBE ser CONCRETA y PRÁCTICA, NO metafórica]"
     }
   }
 }
@@ -979,8 +979,8 @@ async function generateModalityInterpretation(
       }
     ],
     "sintesis": {
-      "frase": "[Frase memorable máximo 15 palabras]",
-      "declaracion": "[Declaración en primera persona: 'Yo soy...' o 'Mi modalidad...'. 2-4 líneas que el usuario puede repetir como mantra]"
+      "frase": "[Resumen profesional del tema central en máximo 12 palabras. DEBE ser DIRECTO, NO metafórico, NO poético]",
+      "declaracion": "[Afirmación profesional en primera persona de máximo 2 líneas. DEBE ser CONCRETA y PRÁCTICA, NO metafórica]"
     }
   }
 }
@@ -1072,8 +1072,8 @@ async function generateAspectInterpretation(
       }
     ],
     "sintesis": {
-      "frase": "[Frase memorable máximo 15 palabras]",
-      "declaracion": "[Declaración en primera persona: 'Yo integro...' o 'Mi aspecto...'. 2-4 líneas que el usuario puede repetir como mantra]"
+      "frase": "[Resumen profesional del tema central en máximo 12 palabras. DEBE ser DIRECTO, NO metafórico, NO poético]",
+      "declaracion": "[Afirmación profesional en primera persona de máximo 2 líneas. DEBE ser CONCRETA y PRÁCTICA, NO metafórica]"
     }
   }
 }
@@ -1153,8 +1153,8 @@ function generateFallbackElementInterpretation(element: any): PlanetInterpretati
         },
       ],
       sintesis: {
-        frase: `Tu elemento ${element.name} es poder primordial esperando ser activado.`,
-        declaracion: `Yo activo conscientemente mi elemento ${element.name}. Esta energía primordial no me limita, me empodera. La uso para mi máxima expresión.`,
+        frase: `Mi elemento dominante ${element.name} define mi energía fundamental.`,
+        declaracion: `Reconozco que mi elemento ${element.name} es mi fuerza primordial. Lo uso conscientemente en mis decisiones y acciones.`,
       },
     },
   };
@@ -1183,8 +1183,8 @@ function generateFallbackModalityInterpretation(modality: any): PlanetInterpreta
         },
       ],
       sintesis: {
-        frase: `Tu modalidad ${modality.name} es ritmo esperando ser dirigido.`,
-        declaracion: `Yo activo conscientemente mi modalidad ${modality.name}. Este ritmo no me limita, me empodera. Lo uso para mi máxima expresión.`,
+        frase: `Mi modalidad dominante ${modality.name} define cómo actúo en la vida.`,
+        declaracion: `Reconozco que mi modalidad ${modality.name} es mi ritmo natural. Lo uso conscientemente para lograr mis objetivos.`,
       },
     },
   };
@@ -1213,8 +1213,8 @@ function generateFallbackAspectInterpretation(aspect: any): PlanetInterpretation
         },
       ],
       sintesis: {
-        frase: `Tu aspecto ${aspect.type} es puente esperando ser cruzado.`,
-        declaracion: `Yo integro conscientemente mi ${aspect.planet1} y ${aspect.planet2}. Esta conexión no me limita, me empodera. La uso para mi máxima expresión.`,
+        frase: `Mi aspecto ${aspect.type} entre ${aspect.planet1} y ${aspect.planet2} es un diálogo interno.`,
+        declaracion: `Reconozco la conexión entre mi ${aspect.planet1} y ${aspect.planet2}. Trabajo conscientemente con esta dinámica interna.`,
       },
     },
   };

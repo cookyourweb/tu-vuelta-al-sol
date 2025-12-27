@@ -268,8 +268,8 @@ function generateFallbackPlanetInterpretation(
         }
       ],
       sintesis: {
-        frase: `Tu ${planetName} en ${sign} es tu superpoder único.`,
-        declaracion: `Yo honro mi ${planetName} en ${sign} y uso su energía conscientemente para crear la vida que deseo.`
+        frase: `Mi ${planetName} en ${sign} en Casa ${house} define esta área de mi vida.`,
+        declaracion: `Reconozco que mi ${planetName} en ${sign} es una parte importante de quién soy. Uso esta energía conscientemente en mi día a día.`
       }
     }
   };
@@ -298,8 +298,8 @@ function generateFallbackAscendantInterpretation(sign: string): TripleFusedInter
         }
       ],
       sintesis: {
-        frase: `Mi Ascendente en ${sign} es mi forma única de estar en el mundo.`,
-        declaracion: `Yo uso mi Ascendente en ${sign} conscientemente como herramienta, no como prisión.`
+        frase: `Mi Ascendente en ${sign} define cómo me presento al mundo.`,
+        declaracion: `Reconozco que mi Ascendente en ${sign} es mi interfaz con el mundo. Lo uso conscientemente en mis interacciones.`
       }
     }
   };
@@ -328,8 +328,8 @@ function generateFallbackMidheavenInterpretation(sign: string): TripleFusedInter
         }
       ],
       sintesis: {
-        frase: `Mi Medio Cielo en ${sign} es mi llamado del alma.`,
-        declaracion: `Yo sigo mi vocación en ${sign} y dejo un legado alineado con mi verdad.`
+        frase: `Mi Medio Cielo en ${sign} define mi vocación y legado profesional.`,
+        declaracion: `Reconozco que mi Medio Cielo en ${sign} marca mi dirección profesional. Sigo este camino conscientemente.`
       }
     }
   };
@@ -373,8 +373,8 @@ function generateFallbackAspectInterpretation(
         }
       ],
       sintesis: {
-        frase: `Mi ${aspectName} entre ${planet1} y ${planet2} es mi fortaleza interna.`,
-        declaracion: `Yo integro conscientemente las energías de ${planet1} y ${planet2}, convirtiéndolas en mi superpoder.`
+        frase: `Mi ${aspectName} entre ${planet1} y ${planet2} es un diálogo interno importante.`,
+        declaracion: `Reconozco la conexión entre mi ${planet1} y ${planet2}. Trabajo conscientemente con esta dinámica interna.`
       }
     }
   };
