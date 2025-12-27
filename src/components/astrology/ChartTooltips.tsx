@@ -539,13 +539,11 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
               e.stopPropagation();
               e.preventDefault();
 
-              // ⭐ SOLAR RETURN: Buscar comparación planetaria
+              // ⭐ SOLAR RETURN: Intentar buscar comparación planetaria primero
               if (chartType === 'solar-return') {
                 console.log('🔄 SOLAR RETURN - Buscando comparación para:', planet.name);
                 console.log('📊 natalInterpretations:', natalInterpretations);
                 console.log('📊 comparaciones_planetarias:', natalInterpretations?.comparaciones_planetarias);
-
-                setTooltipLocked(true);
 
                 // Mapear nombre de planeta a key de comparaciones_planetarias
                 const planetKeyMap: Record<string, string> = {
@@ -569,7 +567,9 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                 console.log('🔍 comparison:', comparison);
 
                 if (comparison && onOpenDrawer) {
-                  // Mapear estructura de comparación al formato del drawer existente
+                  // ✅ CASO 1: Hay comparación - mostrar drawer comparativo
+                  setTooltipLocked(true);
+
                   const drawerContent = {
                     titulo: `${planet.name}: Natal vs Solar Return`,
                     educativo: `🔹 CÓMO ERES NORMALMENTE (Natal)\n\n📍 ${comparison.natal?.ubicacion || `${comparison.natal?.signo || planet.sign} en Casa ${comparison.natal?.casa || planet.house}`}\n\n${comparison.natal?.descripcion || 'Tu energía natal permanente'}`,
@@ -588,10 +588,12 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                   };
 
                   onOpenDrawer(drawerContent);
+                  return;
                 } else {
-                  console.warn('⚠️ No se encontró comparación para:', planet.name);
+                  // ⚠️ CASO 2: No hay comparación - caer en flujo normal de generar interpretación individual
+                  console.warn('⚠️ No se encontró comparación para:', planet.name, '- usando generación individual');
+                  // NO hacer return aquí - continuar al flujo normal de generación
                 }
-                return;
               }
 
               // ⭐ NATAL: Generar/ver interpretación individual
@@ -716,10 +718,27 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                 <span>Generando...</span>
               </>
             ) : chartType === 'solar-return' ? (
-              <>
-                <span>🔄 Ver comparación Natal vs SR</span>
-                <span className="group-hover:translate-x-1 transition-transform">→</span>
-              </>
+              // ⭐ SOLAR RETURN: Mostrar texto según si hay comparación o no
+              (() => {
+                const planetKeyMap: Record<string, string> = {
+                  'Sol': 'sol', 'Luna': 'luna', 'Mercurio': 'mercurio',
+                  'Venus': 'venus', 'Marte': 'marte', 'Júpiter': 'jupiter',
+                  'Saturno': 'saturno', 'Urano': 'urano', 'Neptuno': 'neptuno', 'Plutón': 'pluton'
+                };
+                const planetKey = planetKeyMap[planet.name];
+                const hasComparison = !!natalInterpretations?.comparaciones_planetarias?.[planetKey];
+
+                return hasComparison ? (
+                  <>
+                    <span>🔄 Ver comparación Natal vs SR</span>
+                    <span className="group-hover:translate-x-1 transition-transform">→</span>
+                  </>
+                ) : (
+                  <>
+                    <span>✨ Generar Interpretación IA</span>
+                  </>
+                );
+              })()
             ) : (
               <>
                 {(natalInterpretations?.planets?.[`${planet.name}-${planet.sign}-${planet.house}`] || natalInterpretations?.asteroids?.[`${planet.name}-${planet.sign}-${planet.house}`]) ? (
