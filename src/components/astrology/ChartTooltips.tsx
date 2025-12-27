@@ -532,7 +532,8 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           </div>
         )}
 
-        {interpretation?.drawer && (
+        {/* ⭐ SOLO EN NATAL: Botón de generar/ver interpretación individual */}
+        {interpretation?.drawer && chartType === 'natal' && (
           <button
             onMouseDown={async (e) => {
               e.stopPropagation();
@@ -675,7 +676,8 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           </button>
         )}
 
-        {!interpretation?.drawer && (
+        {/* ⭐ Mensaje solo en Natal si no hay interpretación */}
+        {!interpretation?.drawer && chartType === 'natal' && (
           <div className="text-center text-xs text-gray-400 py-2">
             💡 Haz hover más tiempo para ver la interpretación
           </div>
