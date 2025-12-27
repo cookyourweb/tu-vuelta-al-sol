@@ -7,7 +7,7 @@
 const REFERENCE_EXAMPLE = `
 **EJEMPLO DE LENGUAJE TRIPLE FUSIONADO:**
 
-🌟 **Sol en Acuario Casa 1: El Visionario Auténtico**
+**Sol en Acuario en Casa 1: Autenticidad e Innovación**
 
 📚 **QUÉ SIGNIFICA (Educativo):**
 
@@ -133,7 +133,7 @@ Debes responder SOLO con JSON válido en este formato:
 
 {
   "tooltip": {
-    "titulo": "String: Título memorable con emoji (Ej: '🌟 El Visionario Auténtico')",
+    "titulo": "String: Título descriptivo simple (Ej: 'Autenticidad e Innovación'). SIN emojis, SIN metáforas, PROFESIONAL",
     "descripcionBreve": "${planetName} en ${sign} en Casa ${house} (significado de la casa en palabras, NO grados)",
     "significado": "String de 2-3 líneas: Resumen poderoso que fusiona educativo + transformador. Debe capturar la esencia de forma memorable.",
     "efecto": "String de 1 línea: El efecto principal de esta posición",
@@ -141,8 +141,8 @@ Debes responder SOLO con JSON válido en este formato:
   },
   
   "drawer": {
-    "titulo": "String: Título expandido y memorable (más poético que el del tooltip)",
-    
+    "titulo": "String: ${planetName} en ${sign} en Casa ${house}: [Tema principal] (Ej: 'Sol en Acuario en Casa 1: Autenticidad y Visión'). DEBE ser PROFESIONAL, NO poético ni metafórico.",
+
     "educativo": "String largo (múltiples párrafos separados por \\n\\n):
     - Explica qué representa ${planetName} (su arquetipos, función psicológica)
     - Explica qué representa ${sign} (elemento, modalidad, características)

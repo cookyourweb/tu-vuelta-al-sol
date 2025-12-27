@@ -572,7 +572,7 @@ async function generateAngleInterpretation(
     "tipo": "[Arquetipo - ej: 'Revolucionario', 'Sanador']"
   },
   "drawer": {
-    "titulo": "🌟 [Título completo poderoso]",
+    "titulo": "${angleName} en ${angleData.sign}: [Tema principal - ej: 'Identidad y Expresión']",
     "educativo": "[Explicación clara: QUÉ es el ${angleName}, CÓMO funciona en ${angleData.sign}, ejemplos desde niño y ahora. 3-5 párrafos]",
     "poderoso": "[Mensaje transformacional: '¡NO VINISTE A...!', 'Tu superpoder es...'. Habla de trampas y regalos. 4-6 párrafos]",
     "impacto_real": "[Impacto concreto en tu vida. NO metáforas. SÍ decisiones y comportamientos reales. 'Durante tu vida: - No toleras...', '- Sientes urgencia por...'. 3-5 ejemplos concretos de cómo se manifiesta día a día. 2-3 párrafos]",
@@ -673,7 +673,7 @@ async function generatePlanetInterpretation(
     "tipo": "[Arquetipo - ej: 'Visionario', 'Guerrero']"
   },
   "drawer": {
-    "titulo": "🌟 [Título completo poderoso]",
+    "titulo": "${planet.name} en ${planet.sign} en Casa ${planet.house}: [Tema principal - ej: 'Expansión de la Identidad']",
     "educativo": "[QUÉ significa ${planet.name}, CÓMO funciona en ${planet.sign}, QUÉ implica Casa ${planet.house}. Ejemplos desde niño y ahora. 3-5 párrafos claros]",
     "poderoso": "[Mensaje transformacional: '¡NO VINISTE A...!', '¡ESTO ES ENORME!', 'Tu superpoder es...'. Habla de trampas y regalos ocultos. 4-6 párrafos intensos]",
     "impacto_real": "[Impacto concreto en tu vida. NO metáforas. SÍ decisiones y comportamientos reales. 'Durante tu vida: - No toleras espacios donde...', '- Tu cuerpo reacciona con...', '- Las personas notan que...'. 4-6 ejemplos concretos de cómo esta configuración se manifiesta en decisiones del día a día. 2-3 párrafos directos]",
@@ -872,7 +872,7 @@ async function generateElementInterpretation(
     "tipo": "[Arquetipo - ej: 'Flamígero', 'Terrestre']"
   },
   "drawer": {
-    "titulo": "🌟 [Título completo poderoso]",
+    "titulo": "Elemento ${element.name}: [Tema principal - ej: 'Pasión y Acción']",
     "educativo": "[QUÉ significa el elemento ${element.name}, CÓMO funciona, ejemplos desde niño y ahora. 3-5 párrafos claros]",
     "poderoso": "[Mensaje transformacional: '¡NO VINISTE A...!', 'Tu superpoder es...'. Habla de trampas y regalos. 4-6 párrafos intensos]",
     "impacto_real": "[Impacto concreto en tu vida. NO metáforas. SÍ decisiones y comportamientos reales relacionados con el elemento ${element.name}. 'Durante tu vida: - Cuando el elemento ${element.name} está activo...', '- Las personas notan...'. 3-5 ejemplos concretos. 2-3 párrafos]",
@@ -966,7 +966,7 @@ async function generateModalityInterpretation(
     "tipo": "[Arquetipo - ej: 'Iniciador', 'Estabilizador']"
   },
   "drawer": {
-    "titulo": "🌟 [Título completo poderoso]",
+    "titulo": "Modalidad ${modality.name}: [Tema principal - ej: 'Iniciación y Liderazgo']",
     "educativo": "[QUÉ significa la modalidad ${modality.name}, CÓMO funciona, ejemplos desde niño y ahora. 3-5 párrafos claros]",
     "poderoso": "[Mensaje transformacional: '¡NO VINISTE A...!', 'Tu superpoder es...'. Habla de trampas y regalos. 4-6 párrafos intensos]",
     "impacto_real": "[Impacto concreto en tu vida. NO metáforas. SÍ decisiones y comportamientos reales relacionados con la modalidad ${modality.name}. 'Durante tu vida: - Tu forma de iniciar/mantener/adaptar proyectos...', '- En momentos críticos...'. 3-5 ejemplos concretos. 2-3 párrafos]",
@@ -1059,7 +1059,7 @@ async function generateAspectInterpretation(
     "tipo": "[Arquetipo - ej: 'Conflicto Creativo', 'Armonía Cósmica']"
   },
   "drawer": {
-    "titulo": "🌟 [Título completo poderoso]",
+    "titulo": "${aspect.planet1} ${aspect.type} ${aspect.planet2}: [Tema principal - ej: 'Tensión entre Identidad y Emoción']",
     "educativo": "[QUÉ significa este aspecto ${aspect.type}, CÓMO funciona entre ${aspect.planet1} y ${aspect.planet2}, ejemplos desde niño y ahora. 3-5 párrafos claros]",
     "poderoso": "[Mensaje transformacional: '¡NO VINISTE A...!', 'Tu superpoder es...'. Habla de trampas y regalos. 4-6 párrafos intensos]",
     "impacto_real": "[Impacto concreto en tu vida. NO metáforas. SÍ decisiones y comportamientos reales relacionados con este aspecto. 'Durante tu vida: - Cuando estas dos energías interactúan...', '- Las personas notan...', '- En situaciones de...'. 3-5 ejemplos concretos. 2-3 párrafos]",
