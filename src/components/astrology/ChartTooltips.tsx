@@ -578,8 +578,12 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                     // Get Firebase ID token for authentication
                     const token = await user!.getIdToken();
 
-                    // Refrescar interpretaciones
-                    const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`, {
+                    // Refrescar interpretaciones (⭐ USAR ENDPOINT CORRECTO SEGÚN CHARTTYPE)
+                    const refreshEndpoint = chartType === 'solar-return'
+                      ? `/api/astrology/interpret-solar-return?userId=${userId}&year=${solarReturnYear}`
+                      : `/api/astrology/interpret-natal?userId=${userId}`;
+
+                    const refreshResponse = await fetch(refreshEndpoint, {
                       headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -844,7 +848,12 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
                     const token = await user!.getIdToken();
 
-                    const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`, {
+                    // ⭐ USAR ENDPOINT CORRECTO SEGÚN CHARTTYPE
+                    const refreshEndpoint = chartType === 'solar-return'
+                      ? `/api/astrology/interpret-solar-return?userId=${userId}&year=${solarReturnYear}`
+                      : `/api/astrology/interpret-natal?userId=${userId}`;
+
+                    const refreshResponse = await fetch(refreshEndpoint, {
                       headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -1056,7 +1065,12 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
                     const token = await user!.getIdToken();
 
-                    const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`, {
+                    // ⭐ USAR ENDPOINT CORRECTO SEGÚN CHARTTYPE
+                    const refreshEndpoint = chartType === 'solar-return'
+                      ? `/api/astrology/interpret-solar-return?userId=${userId}&year=${solarReturnYear}`
+                      : `/api/astrology/interpret-natal?userId=${userId}`;
+
+                    const refreshResponse = await fetch(refreshEndpoint, {
                       headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
