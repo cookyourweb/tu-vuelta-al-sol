@@ -134,7 +134,7 @@ Debes responder SOLO con JSON válido en este formato:
 {
   "tooltip": {
     "titulo": "String: Título memorable con emoji (Ej: '🌟 El Visionario Auténtico')",
-    "descripcionBreve": "${planetName} en ${sign} en Casa ${house} (Significado de la casa)",
+    "descripcionBreve": "${planetName} en ${sign} en Casa ${house} (significado de la casa en palabras, NO grados)",
     "significado": "String de 2-3 líneas: Resumen poderoso que fusiona educativo + transformador. Debe capturar la esencia de forma memorable.",
     "efecto": "String de 1 línea: El efecto principal de esta posición",
     "tipo": "String de 1 línea: El tipo/categoría de energía (Ej: 'Revolucionario', 'Sanador', 'Comunicador')"
@@ -194,6 +194,24 @@ Debes responder SOLO con JSON válido en este formato:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚡ INSTRUCCIONES CRÍTICAS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+0. **DESCRIPCIÓN BREVE (CRÍTICO):**
+   ⚠️ NUNCA uses grados numéricos en descripcionBreve
+   ✅ CORRECTO: "Júpiter en Acuario en Casa 1 (Identidad y Personalidad)"
+   ❌ INCORRECTO: "Júpiter en Acuario en Casa 1 (23.75°)"
+   - Usa el SIGNIFICADO de la casa en palabras humanas
+   - Casa 1: "Identidad y Personalidad"
+   - Casa 2: "Recursos y Valores"
+   - Casa 3: "Comunicación y Aprendizaje"
+   - Casa 4: "Hogar y Raíces"
+   - Casa 5: "Creatividad y Placer"
+   - Casa 6: "Trabajo y Salud"
+   - Casa 7: "Relaciones y Pareja"
+   - Casa 8: "Transformación y Poder"
+   - Casa 9: "Filosofía y Expansión"
+   - Casa 10: "Carrera y Legado"
+   - Casa 11: "Comunidad y Visión"
+   - Casa 12: "Espiritualidad y Transcendencia"
 
 1. **LENGUAJE:**
    - Claro y accesible para personas sin conocimientos astrológicos
