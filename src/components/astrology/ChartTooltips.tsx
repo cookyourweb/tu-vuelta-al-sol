@@ -503,7 +503,10 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
         <div className="text-gray-300 text-sm mb-3">
           <strong style={{ color: PLANET_COLORS[planet.name] || '#ffffff', fontSize: '1.125rem' }}>
-            {planet.name} en {planet.sign} en Casa {planet.house} ({planet.degree}°)
+            {typeof interpretation?.tooltip?.descripcionBreve === 'string'
+              ? interpretation.tooltip.descripcionBreve
+              : `${planet.name} en ${planet.sign} en Casa ${planet.house} (${houseMeanings[planet.house]?.theme || 'Casa ' + planet.house})`
+            }
           </strong>
         </div>
 
