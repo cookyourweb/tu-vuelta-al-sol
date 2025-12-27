@@ -21,7 +21,7 @@ export interface DrawerContent {
   titulo: string;              // Título poético completo
   educativo: string;           // Múltiples párrafos (usar \n\n)
   poderoso: string;            // Múltiples párrafos
-  poetico: string;             // Múltiples párrafos
+  impacto_real: string;        // Múltiples párrafos - Impacto concreto en la vida
   sombras: ShadowWork[];       // Array de sombras
   sintesis: {
     frase: string;             // "Tu rareza es tu revolución"

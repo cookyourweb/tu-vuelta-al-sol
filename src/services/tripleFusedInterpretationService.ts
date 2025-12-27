@@ -258,7 +258,7 @@ function generateFallbackPlanetInterpretation(
       titulo: `${planetName} en ${sign} Casa ${house}`,
       educativo: `${planetName} representa una energía específica en tu carta natal. En el signo de ${sign}, esta energía se expresa de una manera particular. La Casa ${house} indica el área de vida donde esta energía se manifiesta más claramente.`,
       poderoso: `Esta posición te otorga capacidades únicas que puedes desarrollar conscientemente. Tu ${planetName} en ${sign} es parte de tu don personal que viniste a compartir con el mundo.`,
-      poetico: `Imagina que tu ${planetName} es como una luz brillando a través del prisma de ${sign}, proyectando sus colores únicos en el área de vida representada por la Casa ${house}.`,
+      impacto_real: `Durante tu vida:\n- Tus decisiones en el área de la Casa ${house} reflejan las cualidades de ${sign}\n- Las personas notan en ti características asociadas con ${planetName} en ${sign}\n- Cuando esta energía está activa, experimentas mayor autenticidad y propósito\n- Tu forma de abordar los temas de la Casa ${house} está profundamente influenciada por ${sign}`,
       sombras: [
         {
           nombre: 'Desequilibrio',
@@ -288,7 +288,7 @@ function generateFallbackAscendantInterpretation(sign: string): TripleFusedInter
       titulo: `Tu Ascendente en ${sign}`,
       educativo: `El Ascendente es el signo que estaba ascendiendo en el horizonte oriental en el momento exacto de tu nacimiento. Representa tu máscara social, tu primera impresión, y cómo te presentas al mundo. En ${sign}, esta energía se expresa de forma única.`,
       poderoso: `Tu Ascendente en ${sign} es tu herramienta para navegar el mundo. No es una mentira, es tu interfaz con la realidad exterior.`,
-      poetico: `Imagina que tu Ascendente es la puerta de entrada a tu ser. En ${sign}, esta puerta tiene características únicas que invitan al mundo a conocerte.`,
+      impacto_real: `Durante tu vida:\n- Las personas perciben inmediatamente tu esencia ${sign} cuando te conocen\n- Tiendes a tomar decisiones que reflejan las cualidades de ${sign}\n- Tu forma de presentarte al mundo está profundamente influenciada por esta configuración\n- Cuando actúas alineado con ${sign}, sientes mayor autenticidad y fluidez`,
       sombras: [
         {
           nombre: 'Máscara rígida',
@@ -318,7 +318,7 @@ function generateFallbackMidheavenInterpretation(sign: string): TripleFusedInter
       titulo: `Tu Medio Cielo en ${sign}`,
       educativo: `El Medio Cielo es el punto más alto del cielo en tu carta natal. Representa tu vocación, tu imagen pública, y el tipo de contribución que quieres hacer al mundo. En ${sign}, esta vocación toma una forma específica.`,
       poderoso: `Tu Medio Cielo en ${sign} no es solo sobre "trabajo" - es sobre tu contribución única al mundo. Es tu legado en construcción.`,
-      poetico: `Imagina que tu Medio Cielo es la cumbre de una montaña. En ${sign}, esta cumbre tiene características únicas que definen lo que viniste a alcanzar y compartir.`,
+      impacto_real: `Durante tu vida:\n- Tu carrera y vocación tienden a reflejar las cualidades de ${sign}\n- Las personas te reconocen profesionalmente por características asociadas con ${sign}\n- Cuando trabajas alineado con ${sign}, experimentas mayor propósito y satisfacción\n- Tu legado público está profundamente influenciado por esta configuración`,
       sombras: [
         {
           nombre: 'Éxito vacío',
@@ -363,7 +363,7 @@ function generateFallbackAspectInterpretation(
       titulo: `${aspectName}: El Diálogo entre ${planet1} y ${planet2}`,
       educativo: `Los aspectos son ángulos entre planetas que crean "conversaciones" internas. Una ${aspectName} entre ${planet1} y ${planet2} indica una relación específica entre estas dos energías en tu psique.`,
       poderoso: `Este aspecto es parte de tu arquitectura interna única. La tensión o armonía entre ${planet1} y ${planet2} es donde se forja tu maestría.`,
-      poetico: `Imagina que ${planet1} y ${planet2} son dos músicos tocando juntos. Su ${aspectName} determina si tocan en armonía o crean tensión creativa.`,
+      impacto_real: `Durante tu vida:\n- Cuando estas dos energías (${planet1} y ${planet2}) interactúan, manifiestas comportamientos característicos del aspecto ${aspectName}\n- Las personas notan cómo integras o tensionas estas dos partes de tu personalidad\n- En situaciones que activan ambas energías, tu respuesta refleja la naturaleza de esta conexión\n- Tu crecimiento personal depende de aprender a trabajar conscientemente con este diálogo interno`,
       sombras: [
         {
           nombre: 'Desintegración',

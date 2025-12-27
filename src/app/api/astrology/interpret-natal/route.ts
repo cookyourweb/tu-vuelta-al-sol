@@ -30,7 +30,7 @@ interface DrawerInterpretation {
   titulo: string;
   educativo: string;
   poderoso: string;
-  poetico: string;
+  impacto_real: string;
   sombras: Array<{
     nombre: string;
     descripcion: string;
@@ -575,7 +575,7 @@ async function generateAngleInterpretation(
     "titulo": "🌟 [Título completo poderoso]",
     "educativo": "[Explicación clara: QUÉ es el ${angleName}, CÓMO funciona en ${angleData.sign}, ejemplos desde niño y ahora. 3-5 párrafos]",
     "poderoso": "[Mensaje transformacional: '¡NO VINISTE A...!', 'Tu superpoder es...'. Habla de trampas y regalos. 4-6 párrafos]",
-    "poetico": "[Metáfora hermosa comparando con naturaleza/cosmos. 2-3 párrafos]",
+    "impacto_real": "[Impacto concreto en tu vida. NO metáforas. SÍ decisiones y comportamientos reales. 'Durante tu vida: - No toleras...', '- Sientes urgencia por...'. 3-5 ejemplos concretos de cómo se manifiesta día a día. 2-3 párrafos]",
     "sombras": [
       {
         "nombre": "[Nombre de la sombra]",
@@ -676,7 +676,7 @@ async function generatePlanetInterpretation(
     "titulo": "🌟 [Título completo poderoso]",
     "educativo": "[QUÉ significa ${planet.name}, CÓMO funciona en ${planet.sign}, QUÉ implica Casa ${planet.house}. Ejemplos desde niño y ahora. 3-5 párrafos claros]",
     "poderoso": "[Mensaje transformacional: '¡NO VINISTE A...!', '¡ESTO ES ENORME!', 'Tu superpoder es...'. Habla de trampas y regalos ocultos. 4-6 párrafos intensos]",
-    "poetico": "[Metáfora HERMOSA. Compara ${planet.name} en ${planet.sign} con naturaleza, animales, cosmos. Crea imagen visual potente. 2-3 párrafos líricos]",
+    "impacto_real": "[Impacto concreto en tu vida. NO metáforas. SÍ decisiones y comportamientos reales. 'Durante tu vida: - No toleras espacios donde...', '- Tu cuerpo reacciona con...', '- Las personas notan que...'. 4-6 ejemplos concretos de cómo esta configuración se manifiesta en decisiones del día a día. 2-3 párrafos directos]",
     "sombras": [
       {
         "nombre": "[Nombre de la sombra principal]",
@@ -794,7 +794,7 @@ function generateFallbackAngleInterpretation(angleName: string, angleData: any):
       titulo: `✨ Tu ${angleName} en ${angleData.sign}`,
       educativo: `El ${angleName} representa un punto crucial en tu carta natal. Cuando está en ${angleData.sign}, adquiere las cualidades de este signo y se expresa de una manera única.\n\nDesde la infancia, esta configuración ha estado moldeando tu forma de ser, aunque quizás no fueras consciente de ello. Ahora que lo comprendes, puedes activar conscientemente este poder.`,
       poderoso: `¡NO VINISTE a este mundo con esta configuración por casualidad!\n\nEsta posición es una de tus herramientas más poderosas. Tu verdadero superpoder está en reconocer y activar conscientemente esta energía.\n\nCada vez que actúas alineado con tu ${angleName} en ${angleData.sign}, estás cumpliendo tu propósito. No es accidental. Es intencional. Es cósmico.`,
-      poetico: `Imagina que tu ${angleName} es como una puerta luminosa en el cielo.\n\nEn ${angleData.sign}, esta puerta brilla con una frecuencia especial que solo tú tienes. Es tu portal único hacia tu verdadero ser.`,
+      impacto_real: `Durante tu vida:\n- Las personas perciben inmediatamente tu esencia ${angleData.sign} cuando te conocen\n- Tiendes a tomar decisiones que reflejan las cualidades de ${angleData.sign}\n- Tu forma de presentarte al mundo está profundamente influenciada por esta configuración\n- Cuando actúas alineado con ${angleData.sign}, sientes mayor autenticidad y fluidez`,
       sombras: [
         {
           nombre: 'Uso inconsciente',
@@ -824,7 +824,7 @@ function generateFallbackPlanetInterpretation(planet: any): PlanetInterpretation
       titulo: `✨ ${planet.name} en ${planet.sign} en Casa ${planet.house}`,
       educativo: `${planet.name} simboliza aspectos esenciales de tu ser. En ${planet.sign}, esta energía se expresa con las cualidades de este signo. La Casa ${planet.house} muestra dónde se manifiesta más intensamente en tu vida.\n\nDesde niño, esta configuración ha influido en tu forma de ser, aunque quizás no lo reconocieras. Comprender esto te permite activar conscientemente este poder interior.`,
       poderoso: `¡NO VINISTE con ${planet.name} en ${planet.sign} por casualidad!\n\n¡ESTO ES ENORME! Esta posición es una de tus herramientas cósmicas más poderosas.\n\nTu verdadero superpoder es usar conscientemente la energía de ${planet.sign} en las áreas que gobierna la Casa ${planet.house}. Cuando lo haces, te conviertes en agente de tu propia transformación.`,
-      poetico: `Tu ${planet.name} es como una gema brillando en ${planet.sign}.\n\nComo una estrella guía en la noche, ilumina tu camino hacia tu verdadero ser. En ${planet.sign}, proyecta colores únicos que solo tú puedes manifestar.`,
+      impacto_real: `Durante tu vida:\n- Tus decisiones en el área de la Casa ${planet.house} reflejan las cualidades de ${planet.sign}\n- Las personas notan en ti características asociadas con ${planet.name} en ${planet.sign}\n- Cuando esta energía está activa, experimentas mayor autenticidad y propósito\n- Tu forma de abordar los temas de la Casa ${planet.house} está profundamente influenciada por ${planet.sign}`,
       sombras: [
         {
           nombre: 'Uso reactivo de la energía',
@@ -875,7 +875,7 @@ async function generateElementInterpretation(
     "titulo": "🌟 [Título completo poderoso]",
     "educativo": "[QUÉ significa el elemento ${element.name}, CÓMO funciona, ejemplos desde niño y ahora. 3-5 párrafos claros]",
     "poderoso": "[Mensaje transformacional: '¡NO VINISTE A...!', 'Tu superpoder es...'. Habla de trampas y regalos. 4-6 párrafos intensos]",
-    "poetico": "[Metáfora HERMOSA. Compara el elemento ${element.name} con naturaleza, elementos. Crea imagen visual potente. 2-3 párrafos líricos]",
+    "impacto_real": "[Impacto concreto en tu vida. NO metáforas. SÍ decisiones y comportamientos reales relacionados con el elemento ${element.name}. 'Durante tu vida: - Cuando el elemento ${element.name} está activo...', '- Las personas notan...'. 3-5 ejemplos concretos. 2-3 párrafos]",
     "sombras": [
       {
         "nombre": "[Nombre de la sombra principal]",
@@ -969,7 +969,7 @@ async function generateModalityInterpretation(
     "titulo": "🌟 [Título completo poderoso]",
     "educativo": "[QUÉ significa la modalidad ${modality.name}, CÓMO funciona, ejemplos desde niño y ahora. 3-5 párrafos claros]",
     "poderoso": "[Mensaje transformacional: '¡NO VINISTE A...!', 'Tu superpoder es...'. Habla de trampas y regalos. 4-6 párrafos intensos]",
-    "poetico": "[Metáfora HERMOSA. Compara la modalidad ${modality.name} con naturaleza, movimientos. Crea imagen visual potente. 2-3 párrafos líricos]",
+    "impacto_real": "[Impacto concreto en tu vida. NO metáforas. SÍ decisiones y comportamientos reales relacionados con la modalidad ${modality.name}. 'Durante tu vida: - Tu forma de iniciar/mantener/adaptar proyectos...', '- En momentos críticos...'. 3-5 ejemplos concretos. 2-3 párrafos]",
     "sombras": [
       {
         "nombre": "[Nombre de la sombra principal]",
@@ -1062,7 +1062,7 @@ async function generateAspectInterpretation(
     "titulo": "🌟 [Título completo poderoso]",
     "educativo": "[QUÉ significa este aspecto ${aspect.type}, CÓMO funciona entre ${aspect.planet1} y ${aspect.planet2}, ejemplos desde niño y ahora. 3-5 párrafos claros]",
     "poderoso": "[Mensaje transformacional: '¡NO VINISTE A...!', 'Tu superpoder es...'. Habla de trampas y regalos. 4-6 párrafos intensos]",
-    "poetico": "[Metáfora HERMOSA. Compara este aspecto con naturaleza, cosmos. Crea imagen visual potente. 2-3 párrafos líricos]",
+    "impacto_real": "[Impacto concreto en tu vida. NO metáforas. SÍ decisiones y comportamientos reales relacionados con este aspecto. 'Durante tu vida: - Cuando estas dos energías interactúan...', '- Las personas notan...', '- En situaciones de...'. 3-5 ejemplos concretos. 2-3 párrafos]",
     "sombras": [
       {
         "nombre": "[Nombre de la sombra principal]",
@@ -1143,7 +1143,7 @@ function generateFallbackElementInterpretation(element: any): PlanetInterpretati
       titulo: `✨ Tu Elemento ${element.name}`,
       educativo: `El elemento ${element.name} es una de las cuatro fuerzas primordiales en astrología. Con ${element.distribution} planetas en este elemento, su influencia es notable en tu carta.\n\nDesde niño, esta energía elemental ha moldeado tu forma de relacionarte con el mundo. Ahora que lo comprendes, puedes activar conscientemente este poder.`,
       poderoso: `¡NO VINISTE con esta distribución elemental por casualidad!\n\n¡ESTO ES ENORME! Tu equilibrio de elementos es una de tus herramientas cósmicas más poderosas.\n\nTu verdadero superpoder es usar conscientemente la energía del elemento ${element.name}. Cuando lo haces, te conviertes en agente de tu propia transformación elemental.`,
-      poetico: `El elemento ${element.name} es como una fuerza primordial danzando en tu ser.\n\nComo una corriente subterránea o un viento invisible, moldea tu realidad con su esencia única. En tu carta, proyecta una frecuencia especial que solo tú puedes manifestar.`,
+      impacto_real: `Durante tu vida:\n- Tu forma de tomar decisiones está profundamente influenciada por el elemento ${element.name}\n- Las personas notan en ti las cualidades asociadas con ${element.name}\n- En momentos de crisis o cambio, tiendes a recurrir a estrategias típicas de ${element.name}\n- Tu equilibrio emocional y energético depende de mantener activa la energía de ${element.name}`,
       sombras: [
         {
           nombre: 'Desequilibrio elemental',
@@ -1173,7 +1173,7 @@ function generateFallbackModalityInterpretation(modality: any): PlanetInterpreta
       titulo: `✨ Tu Modalidad ${modality.name}`,
       educativo: `La modalidad ${modality.name} describe cómo te relacionas con el cambio, la estabilidad y la acción. Con ${modality.distribution} planetas en esta modalidad, su influencia es notable en tu carta.\n\nDesde niño, esta forma de actuar ha sido tu patrón natural. Ahora que lo comprendes, puedes elegir conscientemente cuándo aplicarla.`,
       poderoso: `¡NO VINISTE con esta distribución modal por casualidad!\n\n¡ESTO ES ENORME! Tu ritmo de acción es una de tus herramientas cósmicas más poderosas.\n\nTu verdadero superpoder es usar conscientemente la modalidad ${modality.name}. Cuando lo haces, te conviertes en maestro de tu propio ritmo cósmico.`,
-      poetico: `La modalidad ${modality.name} es como un ritmo primordial latiendo en tu ser.\n\nComo una danza cósmica o una corriente marina, establece el tempo de tu vida. En tu carta, marca el compás único que solo tú puedes bailar.`,
+      impacto_real: `Durante tu vida:\n- Tu forma de iniciar, mantener o adaptar proyectos refleja la modalidad ${modality.name}\n- Las personas notan tu tendencia a actuar de manera ${modality.name.toLowerCase()}\n- En momentos de cambio o estabilidad, tu respuesta natural es característica de ${modality.name}\n- Tu éxito y bienestar dependen de honrar tu ritmo ${modality.name}`,
       sombras: [
         {
           nombre: 'Ritmo automático',
@@ -1203,7 +1203,7 @@ function generateFallbackAspectInterpretation(aspect: any): PlanetInterpretation
       titulo: `✨ ${aspect.planet1} ${aspect.type} ${aspect.planet2}`,
       educativo: `El aspecto ${aspect.type} entre ${aspect.planet1} y ${aspect.planet2} crea una relación energética específica. Con una separación de ${aspect.orb} grados, esta conexión es notable en tu carta.\n\nDesde niño, esta dinámica planetaria ha influido en cómo integras estas dos energías. Ahora que lo comprendes, puedes trabajar conscientemente con esta conexión.`,
       poderoso: `¡NO VINISTE con este aspecto por casualidad!\n\n¡ESTO ES ENORME! Esta conexión entre ${aspect.planet1} y ${aspect.planet2} es una de tus herramientas cósmicas más poderosas.\n\nTu verdadero superpoder es integrar conscientemente estas dos energías. Cuando lo haces, te conviertes en alquimista de tu propia transformación.`,
-      poetico: `Este aspecto es como un puente luminoso entre dos mundos planetarios.\n\n${aspect.planet1} y ${aspect.planet2} danzan en una coreografía cósmica, creando música única que solo tu alma puede escuchar. En tu carta, tejen una sinfonía especial.`,
+      impacto_real: `Durante tu vida:\n- Cuando estas dos energías (${aspect.planet1} y ${aspect.planet2}) interactúan, manifiestas comportamientos característicos del aspecto ${aspect.type}\n- Las personas notan cómo integras o tensionas estas dos partes de tu personalidad\n- En situaciones que activan ambas energías, tu respuesta refleja la naturaleza del ${aspect.type}\n- Tu crecimiento personal depende de aprender a trabajar conscientemente con esta conexión`,
       sombras: [
         {
           nombre: 'Conexión inconsciente',
