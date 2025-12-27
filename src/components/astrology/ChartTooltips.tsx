@@ -503,17 +503,26 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
         </div>
 
         <div className="mb-4">
+          <div className="text-white text-xs font-semibold mb-2 flex items-center gap-1">
+            <span className="text-base">✨</span> Significado Astrológico
+          </div>
           <div className="text-gray-200 text-sm leading-relaxed">
             {typeof interpretation?.tooltip?.significado === 'string' ? interpretation.tooltip.significado : getPersonalizedPlanetInterpretation(planet)}
           </div>
         </div>
 
-        <div className="space-y-1 mb-3">
-          <div className="text-cyan-200 text-xs">
-            <strong>Efecto:</strong> {typeof interpretation?.tooltip?.efecto === 'string' ? interpretation.tooltip.efecto : 'Influencia planetaria significativa'}
+        <div className="space-y-2 mb-3">
+          <div className="text-cyan-200 text-xs flex items-start gap-2">
+            <span className="text-sm">🌟</span>
+            <div>
+              <strong>Efecto:</strong> {typeof interpretation?.tooltip?.efecto === 'string' ? interpretation.tooltip.efecto : 'Influencia planetaria significativa'}
+            </div>
           </div>
-          <div className="text-purple-200 text-xs">
-            <strong>Tipo:</strong> {typeof interpretation?.tooltip?.tipo === 'string' ? interpretation.tooltip.tipo : 'Energía transformadora'}
+          <div className="text-purple-200 text-xs flex items-start gap-2">
+            <span className="text-sm">🔮</span>
+            <div>
+              <strong>Arquetipo:</strong> {typeof interpretation?.tooltip?.tipo === 'string' ? interpretation.tooltip.tipo : 'Energía transformadora'}
+            </div>
           </div>
         </div>
 
