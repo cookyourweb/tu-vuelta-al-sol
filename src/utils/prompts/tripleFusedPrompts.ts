@@ -7,7 +7,7 @@
 const REFERENCE_EXAMPLE = `
 **EJEMPLO DE LENGUAJE TRIPLE FUSIONADO:**
 
-🌟 **Sol en Acuario Casa 1: El Visionario Auténtico**
+**Sol en Acuario en Casa 1: Autenticidad e Innovación**
 
 📚 **QUÉ SIGNIFICA (Educativo):**
 
@@ -27,11 +27,18 @@ AQUÍ ESTÁ LA VERDAD CÓSMICA: Esa sensación de "no pertenecer" NO es tu debil
 
 Tu sistema nervioso está literalmente sintonizado con frecuencias del FUTURO que otros aún no pueden percibir. Cuando te sientes "fuera de lugar" en situaciones convencionales, no es que algo esté mal contigo - es que estás captando la LIMITACIÓN de ese espacio.
 
-🌙 **LA METÁFORA (Poético):**
+🎯 **IMPACTO REAL EN TU VIDA:**
 
-Imagina que naciste con GAFAS DE VER FUTUROS. Mientras la mayoría de las personas caminan mirando al suelo, calculando el siguiente paso seguro en el camino conocido, tú levantas la vista automáticamente y ves CONSTELACIONES DE POSIBILIDADES flotando en el aire que aún no se han manifestado en el plano físico.
+Esta configuración no se vive en ideas ni teorías: se nota en decisiones concretas.
 
-No viniste a ser vela. Viniste a ser TORMENTA ELÉCTRICA.
+Durante tu vida:
+- No toleras espacios donde tengas que esconder tu autenticidad
+- Tu cuerpo reacciona con incomodidad física cuando intentas "encajar"
+- Atraes situaciones que requieren pensamiento innovador y ruptura de moldes
+- Las personas te buscan cuando necesitan perspectivas diferentes
+- Te sientes vivo cuando estás creando algo que no existía antes
+
+Esta energía acuariana en Casa 1 no es abstracta: es tu forma automática de respirar en el mundo.
 
 ⚠️ **SOMBRAS A TRABAJAR:**
 
@@ -63,13 +70,13 @@ export interface TripleFusedInterpretation {
     efecto: string;           // 1 línea
     tipo: string;             // 1 línea
   };
-
+  
   // Drawer (contenido completo)
   drawer: {
     titulo: string;
     educativo: string;        // Varios párrafos educativos
     poderoso: string;         // Varios párrafos empoderadores
-    poetico: string;          // Varios párrafos poéticos/metafóricos
+    impacto_real: string;     // Manifestación concreta en la vida (reemplaza poetico)
     sombras: {
       nombre: string;
       descripcion: string;
@@ -79,8 +86,6 @@ export interface TripleFusedInterpretation {
     sintesis: {
       frase: string;
       declaracion: string;
-      donMayor?: string;         // ⭐ NATAL: Talento permanente
-      teActivasCuando?: string;  // ⭐ SOLAR RETURN: Triggers del año
     };
   };
 }
@@ -88,25 +93,6 @@ export interface TripleFusedInterpretation {
 // =============================================================================
 // 🌟 PROMPT PARA PLANETAS (Sol, Luna, Mercurio, etc.)
 // =============================================================================
-
-// =============================================================================
-// 🏠 SIGNIFICADOS DE CASAS PARA USAR EN PROMPTS
-// =============================================================================
-
-const HOUSE_MEANINGS_SHORT: Record<number, string> = {
-  1: "Identidad, apariencia, primeras impresiones",
-  2: "Recursos, dinero, valores personales",
-  3: "Comunicación, hermanos, aprendizaje",
-  4: "Hogar, familia, raíces",
-  5: "Creatividad, romance, hijos",
-  6: "Trabajo diario, salud, rutinas",
-  7: "Pareja, matrimonio, socios",
-  8: "Transformación, sexualidad, recursos compartidos",
-  9: "Filosofía, viajes, estudios superiores",
-  10: "Carrera, reputación, imagen pública",
-  11: "Amistades, grupos, ideales",
-  12: "Espiritualidad, subconsciente, karma, sacrificio"
-};
 
 export function generatePlanetTripleFusedPrompt(
   planetName: string,
@@ -116,8 +102,7 @@ export function generatePlanetTripleFusedPrompt(
   userProfile: any
 ): string {
   const userName = userProfile.name || 'la persona';
-  const houseMeaning = HOUSE_MEANINGS_SHORT[house] || `Casa ${house}`;
-
+  
   return `
 Eres un astrólogo evolutivo EXPERTO en crear interpretaciones transformacionales.
 
@@ -148,16 +133,16 @@ Debes responder SOLO con JSON válido en este formato:
 
 {
   "tooltip": {
-    "titulo": "String: Título memorable con emoji (Ej: '🌟 El Visionario Auténtico')",
-    "descripcionBreve": "${planetName} en ${sign} en Casa ${house} (${houseMeaning})",
+    "titulo": "String: Título descriptivo simple (Ej: 'Autenticidad e Innovación'). SIN emojis, SIN metáforas, PROFESIONAL",
+    "descripcionBreve": "${planetName} en ${sign} en Casa ${house} (significado de la casa en palabras, NO grados)",
     "significado": "String de 2-3 líneas: Resumen poderoso que fusiona educativo + transformador. Debe capturar la esencia de forma memorable.",
     "efecto": "String de 1 línea: El efecto principal de esta posición",
     "tipo": "String de 1 línea: El tipo/categoría de energía (Ej: 'Revolucionario', 'Sanador', 'Comunicador')"
   },
   
   "drawer": {
-    "titulo": "String: Título expandido y memorable (más poético que el del tooltip)",
-    
+    "titulo": "String: ${planetName} en ${sign} en Casa ${house}: [Tema principal] (Ej: 'Sol en Acuario en Casa 1: Autenticidad y Visión'). DEBE ser PROFESIONAL, NO poético ni metafórico.",
+
     "educativo": "String largo (múltiples párrafos separados por \\n\\n):
     - Explica qué representa ${planetName} (su arquetipos, función psicológica)
     - Explica qué representa ${sign} (elemento, modalidad, características)
@@ -178,15 +163,16 @@ Debes responder SOLO con JSON válido en este formato:
     - Usa MAYÚSCULAS para énfasis en palabras clave
     - Incluye validación emocional ('Probablemente has sentido...')
     - Longitud: 6-8 párrafos completos",
-    
-    "poetico": "String largo (múltiples párrafos separados por \\n\\n):
-    - Usa metáforas poderosas y memorables
-    - Crea imágenes visuales evocativas
-    - Conecta con arquetipos universales
-    - Usa lenguaje simbólico y poético
-    - Evoca la ESENCIA de esta posición
-    - Debe ser inspirador y memorable
-    - Longitud: 4-6 párrafos completos",
+
+    "impacto_real": "String largo (múltiples párrafos separados por \\n\\n):
+    - Describe cómo se manifiesta CONCRETAMENTE en la vida diaria
+    - Usa formato de lista con viñetas para claridad
+    - Ejemplos: 'Durante tu vida: - No toleras X - Tu cuerpo reacciona cuando Y - Atraes situaciones Z'
+    - Tono profesional, claro, directo (NO metáforas largas)
+    - Enfócate en decisiones concretas, comportamientos observables
+    - Mantén profundidad psicológica pero con lenguaje accesible
+    - Cierra con una frase que ancle la energía en lo tangible
+    - Longitud: 4-6 párrafos completos (más corto que educativo/poderoso)",
     
     "sombras": [
       {
@@ -200,8 +186,7 @@ Debes responder SOLO con JSON válido en este formato:
     
     "sintesis": {
       "frase": "String: Una frase memorable y poderosa que resume todo (como un mantra)",
-      "declaracion": "String: Declaración en primera persona que ${userName} puede usar como afirmación personal. Debe empezar con 'Yo soy...' o 'Yo, ${userName},...'",
-      "donMayor": "String de 1-2 líneas: El talento o poder PERMANENTE que emerge de esta posición. Este es tu don innato, tu habilidad natural, tu superpoder que llevas desde siempre."
+      "declaracion": "String: Declaración en primera persona que ${userName} puede usar como afirmación personal. Debe empezar con 'Yo soy...' o 'Yo, ${userName},...'"
     }
   }
 }
@@ -210,13 +195,23 @@ Debes responder SOLO con JSON válido en este formato:
 ⚡ INSTRUCCIONES CRÍTICAS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-0. **FORMATO DESCRIPCIÓN BREVE - MUY IMPORTANTE:**
-   - El campo "descripcionBreve" DEBE seguir EXACTAMENTE este formato:
-     "${planetName} en ${sign} en Casa ${house} (${houseMeaning})"
-   - Ejemplo correcto: "Venus en Capricornio en Casa 12 (Espiritualidad, subconsciente, karma, sacrificio)"
-   - NO inventes tu propio significado de casa
-   - NO uses frases como "área donde..." o "lugar de..."
-   - USA EXACTAMENTE el significado de casa proporcionado: "${houseMeaning}"
+0. **DESCRIPCIÓN BREVE (CRÍTICO):**
+   ⚠️ NUNCA uses grados numéricos en descripcionBreve
+   ✅ CORRECTO: "Júpiter en Acuario en Casa 1 (Identidad y Personalidad)"
+   ❌ INCORRECTO: "Júpiter en Acuario en Casa 1 (23.75°)"
+   - Usa el SIGNIFICADO de la casa en palabras humanas
+   - Casa 1: "Identidad y Personalidad"
+   - Casa 2: "Recursos y Valores"
+   - Casa 3: "Comunicación y Aprendizaje"
+   - Casa 4: "Hogar y Raíces"
+   - Casa 5: "Creatividad y Placer"
+   - Casa 6: "Trabajo y Salud"
+   - Casa 7: "Relaciones y Pareja"
+   - Casa 8: "Transformación y Poder"
+   - Casa 9: "Filosofía y Expansión"
+   - Casa 10: "Carrera y Legado"
+   - Casa 11: "Comunidad y Visión"
+   - Casa 12: "Espiritualidad y Transcendencia"
 
 1. **LENGUAJE:**
    - Claro y accesible para personas sin conocimientos astrológicos
@@ -233,9 +228,9 @@ Debes responder SOLO con JSON válido en este formato:
 
 3. **LONGITUD:**
    - Educativo: 6-8 párrafos densos
-    - Poderoso: 6-8 párrafos transformadores
-    - Poético: 4-6 párrafos evocativos
-    - Cada párrafo debe tener 4-6 líneas mínimo
+   - Poderoso: 6-8 párrafos transformadores
+   - Impacto Real: 4-6 párrafos concretos (profesional, NO poético)
+   - Cada párrafo debe tener 4-6 líneas mínimo
 
 4. **PERSONALIZACIÓN:**
    - Usa el nombre ${userName} SOLO 2-3 veces en momentos clave
@@ -249,205 +244,6 @@ Debes responder SOLO con JSON válido en este formato:
    - Usa \\n\\n para separar párrafos dentro de strings
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Genera ahora la interpretación completa en JSON:
-`;
-}
-
-// =============================================================================
-// ☀️ PROMPT PARA PLANETAS DE SOLAR RETURN - ACTIVACIONES ANUALES
-// =============================================================================
-
-export function generateSolarReturnPlanetPrompt(
-  planetName: string,
-  sign: string,
-  house: number,
-  degree: number,
-  year: number,
-  userProfile: any,
-  natalPosition?: { sign: string; house: number }
-): string {
-  const userName = userProfile.name || 'la persona';
-  const userAge = userProfile.age || 0;
-  const houseMeaning = HOUSE_MEANINGS_SHORT[house] || `Casa ${house}`;
-
-  const natalReference = natalPosition
-    ? `Tu ${planetName} natal está en ${natalPosition.sign} Casa ${natalPosition.house}, pero este año ${year} se entrena diferente.`
-    : '';
-
-  return `
-Eres un astrólogo evolutivo EXPERTO en interpretar RETORNOS SOLARES.
-
-Tu tarea: Generar una interpretación del **${planetName} en ${sign} Casa ${house}** en el RETORNO SOLAR ${year}-${year + 1} de ${userName}.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ PRINCIPIO FUNDAMENTAL - LEE CON ATENCIÓN
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**CARTA NATAL = QUIÉN ERES (identidad permanente)**
-**SOLAR RETURN = QUÉ SE ACTIVA/ENTRENA ESTE AÑO (temporal)**
-
-En Solar Return:
-- NO defines personalidad ni identidad
-- NO hablas de "eres así" o "tu esencia es"
-- NO mencionas infancia, traumas pasados, o psicología permanente
-
-SÍ explicas:
-- Qué función psicológica se ENTRENA este año
-- En qué área de vida (casa SR)
-- Con qué estilo energético (signo SR)
-- Cómo se manifiesta en la vida cotidiana durante ${year}-${year + 1}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📚 CONTEXTO
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Usuario: ${userName}
-Edad: ${userAge} años
-Año del Retorno Solar: ${year}-${year + 1}
-
-**Posición SR a interpretar:**
-${planetName} en ${sign} ${Math.floor(degree)}° Casa ${house} SR
-
-${natalReference}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎯 FÓRMULA DE LECTURA (APLICAR SIEMPRE)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-1. **FUNCIÓN DEL PLANETA** (qué se entrena)
-   ${planetName} representa: [función psicológica específica]
-
-2. **SIGNO SR** (cómo se entrena)
-   ${sign} aporta el estilo: [características del signo]
-
-3. **CASA SR** (dónde/en qué escenario)
-   Casa ${house} (${houseMeaning}) es el área donde se manifiesta
-
-4. **CONEXIÓN CON NATAL** (como filtro, opcional)
-   "Dependiendo de cómo seas natalmente, este tránsito puede sentirse..."
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 ESTRUCTURA JSON REQUERIDA
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Responde SOLO con JSON válido:
-
-{
-  "tooltip": {
-    "titulo": "[Título corto sobre QUÉ SE ACTIVA - max 5 palabras]",
-    "descripcionBreve": "${planetName} en ${sign} en Casa ${house} (${houseMeaning})",
-    "significado": "String de 2-3 líneas: QUÉ se activa este año ${year}, NO quién es ${userName}. Usar lenguaje temporal: 'Durante ${year}...', 'Este año...'",
-    "efecto": "String de 1 línea: Qué área de vida se entrena específicamente",
-    "tipo": "String: Tipo de entrenamiento anual (Ej: 'Expansión mental', 'Disciplina emocional', 'Comunicación innovadora')"
-  },
-
-  "drawer": {
-    "titulo": "[Título memorable sobre el entrenamiento del año]",
-
-    "educativo": "String largo (6-8 párrafos):
-
-    ESTRUCTURA OBLIGATORIA:
-
-    Párrafo 1: '${planetName} en Retorno Solar no define quién eres, sino qué energía se entrena este año. En ${sign}, esta energía toma un carácter de [características]. En Casa ${house} (${houseMeaning}), se manifiesta específicamente en [área de vida].'
-
-    Párrafo 2-3: 'Durante ${year}, es probable que [ejemplos concretos de manifestación]: conversaciones que..., decisiones que..., personas que..., situaciones que...'
-
-    Párrafo 4: 'Este año la vida te entrena en la habilidad de [habilidad específica]. No es casualidad que ${planetName} esté aquí: el universo te pide [qué desarrollar este año].'
-
-    Párrafo 5: 'Dependiendo de cómo seas natalmente, este tránsito puede sentirse como [opciones de vivencia]. El truco durante ${year} es [estrategia práctica].'
-
-    Párrafo 6: 'A los ${userAge} años, este tránsito tiene especial relevancia porque [conexión con edad/etapa vital].'
-
-    Párrafo 7-8: 'Durante ${year}-${year + 1}, tu trabajo es [objetivo del entrenamiento]. [Consecuencias de hacerlo consciente vs inconsciente].'",
-
-    "poderoso": "String largo (4-6 párrafos):
-
-    ENFOQUE: Cómo usar conscientemente este entrenamiento anual.
-
-    - Validar lo que puede estar sintiendo durante ${year}
-    - Explicar qué pasa si reacciona en automático vs conscientemente
-    - Dar herramientas PRÁCTICAS para este año específico
-    - Preguntas poderosas para cada mes/trimestre
-    - Actitud que sirve durante ${year}
-
-    EVITAR: Hablar de identidad permanente, sombras psicológicas de siempre, o traumas pasados.",
-
-    "poetico": "String (3-4 párrafos):
-
-    Metáfora específica del CICLO ANUAL.
-
-    - 'Este año es como...'
-    - 'El clima energético de ${year} te invita a...'
-    - 'Al final del ciclo...'
-
-    NO usar metáforas de identidad permanente.",
-
-    "sombras": [
-      {
-        "nombre": "Sombra del entrenamiento 1",
-        "descripcion": "Cómo se manifiesta SI NO prestas atención este año",
-        "trampa": "❌ Si este año reaccionas sin consciencia: [consecuencia específica de ${year}]",
-        "regalo": "✅ Si usas esto con consciencia este año: [beneficio específico de ${year}]"
-      },
-      {
-        "nombre": "Sombra del entrenamiento 2",
-        "descripcion": "...",
-        "trampa": "❌ Tentación de [patrón reactivo durante ${year}]",
-        "regalo": "✅ Oportunidad de [aprendizaje de ${year}]"
-      }
-    ],
-
-    "sintesis": {
-      "frase": "String de 3-6 palabras: Frase-clave del AÑO (NO identidad permanente)",
-      "declaracion": "String de 20-40 palabras: [Declaración sobre el aprendizaje/entrenamiento del año]. Debe incluir: 'La [cualidad] transforma cualquier tránsito.'",
-      "teActivasCuando": "String de 1-2 líneas: Qué circunstancias, situaciones o momentos ACTIVAN este entrenamiento durante ${year}. Describe los triggers o catalizadores específicos del año que pondrán en marcha esta energía."
-    }
-  }
-}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚡ INSTRUCCIONES CRÍTICAS - SOLAR RETURN
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-0. **LENGUAJE TEMPORAL OBLIGATORIO:**
-   ✅ "Este año ${year}..."
-   ✅ "Durante ${year}-${year + 1}..."
-   ✅ "Se te pide..."
-   ✅ "La vida te entrena..."
-   ✅ "Es una invitación a..."
-
-   ❌ NUNCA: "Eres...", "Tu esencia...", "Desde siempre..."
-
-1. **NO HABLES DE:**
-   - Identidad permanente
-   - Infancia o traumas pasados
-   - Personalidad base
-   - "Quién eres"
-
-2. **SÍ HABLA DE:**
-   - Qué se activa/entrena durante ${year}
-   - Cómo se manifiesta en la vida cotidiana
-   - Ejemplos concretos de situaciones del año
-   - Herramientas prácticas para ${year}
-
-3. **SOMBRAS = SOMBRAS DEL ENTRENAMIENTO ANUAL**
-   - NO sombras psicológicas permanentes
-   - SÍ patrones reactivos que pueden surgir durante ${year}
-   - Siempre en formato: "Si este año... / Si usas esto este año..."
-
-4. **SÍNTESIS = FRASE-CLAVE DEL AÑO**
-   - 3-6 palabras que resumen el entrenamiento anual
-   - NO describe identidad, describe el PROCESO del año
-
-5. **EJEMPLOS CONCRETOS:**
-   - Conversaciones, decisiones, personas, situaciones
-   - Que puedan ocurrir durante ${year}
-   - Relacionados con Casa ${house} SR
-
-6. **FORMATO:**
-   - JSON válido, sin markdown, sin comentarios
-   - Párrafos separados con \\n\\n
 
 Genera ahora la interpretación completa en JSON:
 `;
@@ -527,12 +323,14 @@ Sigue la misma estructura que para planetas, pero adaptada al Ascendente:
     - Cómo su Ascendente protege/sirve a su Sol
     - Herramientas para activarlo positivamente
     6-8 párrafos completos",
-    
-    "poetico": "Metáforas sobre:
-    - Su presencia en el mundo
-    - La 'máscara' como herramienta, no mentira
-    - La primera impresión como portal
-    4-6 párrafos poéticos",
+
+    "impacto_real": "Manifestación concreta:
+    - Cómo se nota físicamente (postura, energía, presencia)
+    - Primeras impresiones que genera en otros
+    - Situaciones donde su Ascendente se activa automáticamente
+    - Usa formato de lista con viñetas
+    - Tono profesional, concreto, NO metáforas largas
+    4-6 párrafos concretos",
     
     "sombras": [
       {
@@ -632,12 +430,14 @@ Es el punto más alto del cielo en tu carta - simboliza tu culminación.
     - La diferencia entre 'éxito' y 'realización' para ella
     - Herramientas para manifestar su MC
     6-8 párrafos completos",
-    
-    "poetico": "Metáforas sobre:
-    - Su vocación como llamado del alma
-    - El legado como semilla plantada
-    - La autoridad como servicio
-    4-6 párrafos poéticos",
+
+    "impacto_real": "Manifestación concreta:
+    - Tipos específicos de decisiones profesionales que toma
+    - Cómo se ve su autoridad en la práctica
+    - Situaciones laborales donde brilla naturalmente
+    - Usa formato de lista con viñetas
+    - Tono profesional, concreto, NO metáforas largas
+    4-6 párrafos concretos",
     
     "sombras": [
       {
@@ -744,12 +544,14 @@ ${getAspectDescription(aspectName)}
     - Herramientas para integrar ambos planetas
     - Ejemplos de personas famosas con este aspecto
     6-8 párrafos completos",
-    
-    "poetico": "Metáforas sobre:
-    - El diálogo entre estos dos arquetipos
-    - La danza/batalla entre estas energías
-    - La integración como síntesis creativa
-    4-6 párrafos poéticos",
+
+    "impacto_real": "Manifestación concreta:
+    - Situaciones específicas donde este diálogo se activa
+    - Cómo se nota en decisiones cotidianas
+    - Conflictos internos concretos que experimenta
+    - Usa formato de lista con viñetas
+    - Tono profesional, concreto, NO metáforas largas
+    4-6 párrafos concretos",
     
     "sombras": [
       {
@@ -778,211 +580,6 @@ Genera ahora la interpretación completa en JSON:
 }
 
 // =============================================================================
-// ☀️ PROMPT PARA ASPECTOS DE SOLAR RETURN - DIÁLOGOS ANUALES
-// =============================================================================
-
-export function generateSolarReturnAspectPrompt(
-  planet1: string,
-  planet2: string,
-  aspectType: string,
-  orb: number,
-  year: number,
-  userProfile: any
-): string {
-  const userName = userProfile.name || 'la persona';
-  const userAge = userProfile.age || 0;
-
-  // Traducir tipos de aspectos
-  const aspectTypeSpanish: Record<string, string> = {
-    'conjunction': 'Conjunción',
-    'opposition': 'Oposición',
-    'trine': 'Trígono',
-    'square': 'Cuadratura',
-    'sextile': 'Sextil',
-    'semisextile': 'Semisextil',
-    'semisquare': 'Semicuadratura',
-    'sesquiquadrate': 'Sesquicuadratura',
-    'quincunx': 'Quincuncio'
-  };
-
-  const aspectName = aspectTypeSpanish[aspectType] || aspectType;
-  const isExact = orb < 1;
-
-  return `
-Eres un astrólogo evolutivo EXPERTO en interpretar ASPECTOS en RETORNOS SOLARES.
-
-Tu tarea: Generar una interpretación del aspecto **${planet1} ${aspectName} ${planet2}** en el RETORNO SOLAR ${year}-${year + 1} de ${userName}.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ PRINCIPIO FUNDAMENTAL - ASPECTOS EN SOLAR RETURN
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**CARTA NATAL = Cómo conversan SIEMPRE estas energías (patrón permanente)**
-**SOLAR RETURN = Qué DIÁLOGO se activa/entrena ESTE AÑO (temporal)**
-
-En aspectos de Solar Return:
-- NO describes patrones psicológicos permanentes
-- NO hablas de "tu forma de ser" o "tu personalidad"
-- NO mencionas infancia, heridas del pasado, o dinámicas profundas
-
-SÍ explicas:
-- Qué conversación/tensión/armonía se ACTIVA durante ${year}
-- Cómo se manifiesta en la vida cotidiana este año
-- Qué aprendizaje/entrenamiento ofrece este diálogo anual
-- Ejemplos concretos de situaciones durante ${year}-${year + 1}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📚 CONTEXTO
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Usuario: ${userName}
-Edad: ${userAge} años
-Año del Retorno Solar: ${year}-${year + 1}
-
-**Aspecto SR a interpretar:**
-${planet1} ${aspectName} ${planet2}
-Orbe: ${orb.toFixed(2)}°${isExact ? ' (EXACTO - máxima intensidad este año)' : ''}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎯 FÓRMULA DE LECTURA - ASPECTOS SR
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-1. **FUNCIÓN DE ${planet1}** (qué representa)
-   Breve recordatorio: ${planet1} = [función psicológica]
-
-2. **FUNCIÓN DE ${planet2}** (qué representa)
-   Breve recordatorio: ${planet2} = [función psicológica]
-
-3. **TIPO DE DIÁLOGO (${aspectName})**
-   ${getAspectDescription(aspectName)}
-
-4. **QUÉ SE ACTIVA ESTE AÑO**
-   "Durante ${year}, estas dos funciones ${aspectName === 'Conjunción' ? 'se fusionan' : aspectName === 'Oposición' ? 'buscan balance' : aspectName === 'Cuadratura' ? 'generan tensión creativa' : aspectName === 'Trígono' ? 'fluyen con facilidad' : 'dialogan'} en tu vida de [manera específica]."
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 ESTRUCTURA JSON REQUERIDA
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Responde SOLO con JSON válido:
-
-{
-  "tooltip": {
-    "titulo": "[Título corto sobre QUÉ DIÁLOGO se activa - max 5 palabras]",
-    "descripcionBreve": "${aspectName} entre ${planet1} y ${planet2} (${year})",
-    "significado": "String de 2-3 líneas: QUÉ conversación/tensión/armonía se ACTIVA entre estas dos funciones durante ${year}, NO tu patrón psicológico permanente.",
-    "efecto": "String de 1 línea: Cómo se manifiesta en la vida cotidiana este año",
-    "tipo": "String: Tipo de diálogo anual (Ej: 'Tensión creativa', 'Armonía fluida', 'Fusión intensa')"
-  },
-
-  "drawer": {
-    "titulo": "[Título memorable sobre el diálogo del año]",
-
-    "educativo": "String largo (6-8 párrafos):
-
-    ESTRUCTURA OBLIGATORIA:
-
-    Párrafo 1: '${planet1} representa [función]. ${planet2} representa [función]. Cuando forman ${aspectName} en Solar Return, NO estamos hablando de tu psicología permanente, sino del DIÁLOGO que se activa entre estas funciones durante ${year}.'
-
-    Párrafo 2-3: 'Este año ${year}, es probable que vivas situaciones donde: [ejemplos concretos de cómo se manifiesta este aspecto en la vida cotidiana]. No es casualidad que estas dos energías ${aspectName === 'Conjunción' ? 'trabajen juntas' : 'dialoguen así'} ahora.'
-
-    Párrafo 4: 'El ${aspectName} te entrena en [habilidad específica que desarrolla este aspecto durante el año]. Este tipo de aspecto ${aspectName === 'Cuadratura' || aspectName === 'Oposición' ? 'genera fricción productiva' : 'facilita el flujo'}, y durante ${year} aprenderás [qué se aprende].'
-
-    Párrafo 5: 'Dependiendo de cómo seas natalmente, este aspecto puede manifestarse como [opciones de vivencia]. La clave durante ${year} es [estrategia práctica para trabajar con este aspecto].'
-
-    Párrafo 6: 'A los ${userAge} años, este diálogo ${planet1}-${planet2} tiene especial relevancia porque [conexión con edad/etapa vital].'
-
-    Párrafo 7-8: 'Durante ${year}-${year + 1}, tu trabajo con este aspecto es [objetivo del entrenamiento]. [Consecuencias de trabajarlo consciente vs reactivamente].'",
-
-    "poderoso": "String largo (4-6 párrafos):
-
-    ENFOQUE: Cómo usar este diálogo conscientemente durante ${year}.
-
-    - Validar lo que puede estar experimentando con este aspecto
-    - Explicar qué pasa si lo vive en automático vs conscientemente
-    - Dar herramientas PRÁCTICAS específicas para este año
-    - Preguntas poderosas para cada trimestre del año
-    - Actitud que sirve durante ${year}
-
-    EVITAR: Hablar de patrones permanentes, heridas profundas, o dinámicas de toda la vida.",
-
-    "poetico": "String (3-4 párrafos):
-
-    Metáfora específica del DIÁLOGO ANUAL.
-
-    - 'Este año, ${planet1} y ${planet2} ${aspectName === 'Conjunción' ? 'danzan juntos' : aspectName === 'Oposición' ? 'tiran de los extremos' : 'conversan'} como...'
-    - 'El clima energético de ${year} con este aspecto es como...'
-    - 'Al final del ciclo, habrás aprendido...'
-
-    NO usar metáforas de identidad o patrones permanentes.",
-
-    "sombras": [
-      {
-        "nombre": "Sombra del diálogo anual 1",
-        "descripcion": "Cómo se manifiesta SI NO prestas atención este año",
-        "trampa": "❌ Si este año reaccionas sin consciencia a este aspecto: [consecuencia específica de ${year}]",
-        "regalo": "✅ Si trabajas este aspecto conscientemente durante ${year}: [beneficio específico]"
-      },
-      {
-        "nombre": "Sombra del diálogo anual 2",
-        "descripcion": "...",
-        "trampa": "❌ Tentación de [patrón reactivo con este aspecto durante ${year}]",
-        "regalo": "✅ Oportunidad de [aprendizaje del aspecto en ${year}]"
-      }
-    ],
-
-    "sintesis": {
-      "frase": "String de 3-6 palabras: Frase-clave del DIÁLOGO DEL AÑO (NO patrón permanente)",
-      "declaracion": "String de 20-40 palabras: Declaración sobre el aprendizaje/integración de este aspecto durante ${year}. Debe reflejar el entrenamiento temporal, NO un patrón de toda la vida.",
-      "teActivasCuando": "String de 1-2 líneas: Qué circunstancias o momentos durante ${year} activarán más intensamente este diálogo ${planet1}-${planet2}."
-    }
-  }
-}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚡ INSTRUCCIONES CRÍTICAS - ASPECTOS SOLAR RETURN
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-0. **LENGUAJE TEMPORAL OBLIGATORIO:**
-   ✅ "Este año ${year}..."
-   ✅ "Durante ${year}-${year + 1}..."
-   ✅ "Se activa un diálogo entre..."
-   ✅ "La vida te entrena en..."
-
-   ❌ NUNCA: "Tu psicología...", "Tu patrón interno...", "Siempre has..."
-
-1. **NO HABLES DE:**
-   - Patrones psicológicos permanentes
-   - Dinámicas profundas de personalidad
-   - Heridas del pasado o infancia
-   - "Cómo eres"
-
-2. **SÍ HABLA DE:**
-   - Qué diálogo se activa durante ${year}
-   - Cómo se manifiesta en situaciones concretas del año
-   - Qué entrenamiento ofrece este aspecto
-   - Herramientas prácticas para ${year}
-
-3. **EJEMPLOS CONCRETOS:**
-   - Conversaciones, decisiones, personas, situaciones
-   - Que puedan ocurrir específicamente durante ${year}
-
-4. **SOMBRAS = SOMBRAS DEL DIÁLOGO ANUAL**
-   - NO sombras psicológicas profundas
-   - SÍ patrones reactivos que pueden surgir con este aspecto durante ${year}
-
-5. **SÍNTESIS = FRASE-CLAVE DEL DIÁLOGO DEL AÑO**
-   - Describe el PROCESO/ENTRENAMIENTO del año
-   - NO describe un patrón interno permanente
-
-6. **FORMATO:**
-   - JSON válido, sin markdown, sin comentarios
-   - Párrafos separados con \\n\\n
-
-Genera ahora la interpretación completa en JSON:
-`;
-}
-
-// =============================================================================
 // 🔧 FUNCIONES AUXILIARES
 // =============================================================================
 
@@ -994,6 +591,6 @@ function getAspectDescription(aspectName: string): string {
     'Cuadratura': 'Ángulo 90° - Tensión creativa. Fricción que genera crecimiento. El desafío forja maestría.',
     'Sextil': 'Ángulo 60° - Oportunidad fácil. Talento que requiere activación consciente. Potencial disponible.'
   };
-
+  
   return descriptions[aspectName] || 'Aspecto que conecta estas energías planetarias.';
 }

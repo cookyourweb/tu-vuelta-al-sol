@@ -5,7 +5,7 @@
 // InterpretationDrawer.tsx
 // =============================================================================
 // Componente que muestra la interpretación completa de planetas/aspectos
-// con lenguaje educativo + poderoso + poético
+// con lenguaje educativo + poderoso + impacto real
 // =============================================================================
 
 'use client';
@@ -20,7 +20,7 @@ interface DrawerContent {
   titulo: string;
   educativo: string;
   poderoso: string;
-  poetico: string;
+  impacto_real: string;
   sombras: {
     nombre: string;
     descripcion: string;
@@ -119,7 +119,7 @@ export const InterpretationDrawer: React.FC<InterpretationDrawerProps> = ({
               <span className="text-2xl">📚</span> QUÉ SIGNIFICA
             </h3>
             <div className="prose prose-invert max-w-none">
-              {content.educativo?.split('\n\n').map((parrafo: string, i: number) => {
+              {content.educativo.split('\n\n').map((parrafo: string, i: number) => {
                 const cleanParrafo = parrafo.trim();
                 if (!cleanParrafo) return null;
 
@@ -143,7 +143,7 @@ export const InterpretationDrawer: React.FC<InterpretationDrawerProps> = ({
               <span className="text-2xl">🔥</span> CÓMO USARLO COMO SUPERPODER
             </h3>
             <div className="prose prose-invert max-w-none">
-              {content.poderoso?.split('\n\n').map((parrafo: string, i: number) => {
+              {content.poderoso.split('\n\n').map((parrafo: string, i: number) => {
                 const cleanParrafo = parrafo.trim();
                 if (!cleanParrafo) return null;
 
@@ -161,20 +161,21 @@ export const InterpretationDrawer: React.FC<InterpretationDrawerProps> = ({
 
           <div className="h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent" />
 
-          {/* SECCIÓN POÉTICA */}
+          {/* SECCIÓN IMPACTO REAL (con fallback a poetico para compatibilidad) */}
           <section>
             <h3 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2 text-white">
-              <span className="text-2xl">🌙</span> LA METÁFORA
+              <span className="text-2xl">{content.impacto_real ? '🎯' : '🌙'}</span>
+              {content.impacto_real ? 'IMPACTO REAL EN TU VIDA' : 'LA METÁFORA'}
             </h3>
             <div className="prose prose-invert max-w-none">
-              {content.poetico?.split('\n\n').map((parrafo: string, i: number) => {
+              {(content.impacto_real || (content as any).poetico || '').split('\n\n').map((parrafo: string, i: number) => {
                 const cleanParrafo = parrafo.trim();
                 if (!cleanParrafo) return null;
 
                 return (
                   <p
                     key={i}
-                    className="mb-4 text-sm md:text-base text-gray-200 leading-relaxed italic"
+                    className={`mb-4 text-sm md:text-base text-gray-200 leading-relaxed ${!(content.impacto_real) ? 'italic' : ''}`}
                   >
                     {cleanParrafo}
                   </p>
