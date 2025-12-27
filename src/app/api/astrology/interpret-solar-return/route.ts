@@ -289,11 +289,17 @@ Required JSON structure:
 
       console.log('📦 Response received:', {
         length: rawResponse.length,
-        first100: rawResponse.substring(0, 100)
+        first100: rawResponse.substring(0, 100),
+        last100: rawResponse.substring(rawResponse.length - 100)
       });
 
       // ✅ PARSE & VALIDATE
       parsedResponse = JSON.parse(rawResponse);
+
+      // ✅ DEBUG: Log exactly what keys OpenAI returned
+      console.log('🔍 Keys returned by OpenAI:', Object.keys(parsedResponse));
+      console.log('🔍 Sample check - has calendario_lunar_anual?', !!parsedResponse.calendario_lunar_anual);
+      console.log('🔍 Sample check - has calendario_lunar?', !!parsedResponse.calendario_lunar);
 
       // Required sections for 3 LAYERS structure
       const requiredSections = [
@@ -311,6 +317,13 @@ Required JSON structure:
       const missingSections = requiredSections.filter(
         section => !parsedResponse[section]
       );
+
+      console.log('📊 Validation check:', {
+        totalKeys: Object.keys(parsedResponse).length,
+        requiredSections: requiredSections.length,
+        missingSections: missingSections.length,
+        missing: missingSections
+      });
 
       if (missingSections.length === 0) {
         // ✅ VALIDATE CONTENT QUALITY
