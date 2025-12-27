@@ -467,20 +467,21 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           e.stopPropagation();
         }}
       >
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center flex-1">
             <span
               className="text-4xl mr-3"
               style={{ color: PLANET_COLORS[planet.name] || '#ffffff' }}
             >
               {PLANET_SYMBOLS[planet.name] || planet.name.charAt(0)}
             </span>
-            <div>
-            <div className="text-white font-bold text-lg">
-              {PLANET_SYMBOLS[planet.name] || planet.name.charAt(0)} {typeof interpretation?.tooltip?.titulo === 'string' ? interpretation.tooltip.titulo : planet.name}
-            </div>
-              <div className="text-gray-200 text-sm">
-                {planet.degree}° {planet.sign}
+            <div className="flex-1">
+              <div className="text-white font-bold text-base leading-tight">
+                {PLANET_SYMBOLS[planet.name] || planet.name.charAt(0)}{' '}
+                {planet.name} en {planet.sign} en Casa {planet.house}
+              </div>
+              <div className="text-gray-300 text-sm mt-1">
+                {planet.degree.toFixed(2)}° - {houseMeanings[planet.house]?.theme || `Casa ${planet.house}`}
               </div>
             </div>
           </div>
@@ -494,28 +495,14 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                 setClickedTooltipTimer(null);
               }
             }}
-            className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
+            className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all ml-2"
             aria-label="Cerrar"
           >
             <X className="w-5 h-5 text-white" />
           </button>
         </div>
 
-        <div className="text-gray-300 text-sm mb-3">
-          <strong style={{ color: PLANET_COLORS[planet.name] || '#ffffff', fontSize: '1.125rem' }}>
-            {typeof interpretation?.tooltip?.descripcionBreve === 'string'
-              ? interpretation.tooltip.descripcionBreve
-              : `${planet.name} en ${planet.sign} en Casa ${planet.house} (${houseMeanings[planet.house]?.theme || 'Casa ' + planet.house})`
-            }
-          </strong>
-        </div>
-
-        <div className="mb-3">
-          <div className="text-white text-sm font-semibold mb-2">
-            <span style={{ color: PLANET_COLORS[planet.name] || '#ffffff' }}>
-              {PLANET_SYMBOLS[planet.name] || planet.name.charAt(0)}
-            </span> Significado:
-          </div>
+        <div className="mb-4">
           <div className="text-gray-200 text-sm leading-relaxed">
             {typeof interpretation?.tooltip?.significado === 'string' ? interpretation.tooltip.significado : getPersonalizedPlanetInterpretation(planet)}
           </div>
