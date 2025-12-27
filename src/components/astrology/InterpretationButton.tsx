@@ -1410,11 +1410,18 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
         )}
 
         {/* ✅ SOLAR RETURN: CALENDARIO LUNAR ANUAL */}
-        {data.calendario_lunar && type === 'solar-return' && (
-          <div className="bg-gradient-to-br from-slate-900/60 to-slate-800/60 rounded-2xl p-8 border border-slate-400/30">
-            <h3 className="text-3xl font-bold text-white text-center mb-8">
-              🌙 Calendario Lunar Anual 2025-2026
-            </h3>
+        {data.calendario_lunar && type === 'solar-return' && (() => {
+          // ✅ Calcular año de retorno solar dinámicamente
+          const returnYear = chartData?.solarReturnInfo?.year ||
+                             chartData?.solarReturnYear ||
+                             new Date().getFullYear();
+          const nextYear = returnYear + 1;
+
+          return (
+            <div className="bg-gradient-to-br from-slate-900/60 to-slate-800/60 rounded-2xl p-8 border border-slate-400/30">
+              <h3 className="text-3xl font-bold text-white text-center mb-8">
+                🌙 Calendario Lunar Anual {returnYear}-{nextYear}
+              </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {data.calendario_lunar.map((mes: any, i: number) => (
                 <div key={i} className="bg-slate-800/50 rounded-xl p-4 border border-slate-500/20">
@@ -1441,7 +1448,8 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               ))}
             </div>
           </div>
-        )}
+          );
+        })()}
 
         {/* ✅ SOLAR RETURN: COMPARACIONES PLANETARIAS (NATAL VS SOLAR RETURN) */}
         {data.comparaciones_planetarias && type === 'solar-return' && (
