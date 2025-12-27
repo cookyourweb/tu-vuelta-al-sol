@@ -532,13 +532,58 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           </div>
         )}
 
-        {/* ⭐ SOLO EN NATAL: Botón de generar/ver interpretación individual */}
-        {interpretation?.drawer && chartType === 'natal' && (
+        {/* ⭐ Botón para ver interpretación (diferente según chartType) */}
+        {interpretation?.drawer && (
           <button
             onMouseDown={async (e) => {
               e.stopPropagation();
               e.preventDefault();
 
+              // ⭐ SOLAR RETURN: Buscar comparación planetaria
+              if (chartType === 'solar-return') {
+                setTooltipLocked(true);
+
+                // Mapear nombre de planeta a key de comparaciones_planetarias
+                const planetKeyMap: Record<string, string> = {
+                  'Sol': 'sol',
+                  'Luna': 'luna',
+                  'Mercurio': 'mercurio',
+                  'Venus': 'venus',
+                  'Marte': 'marte',
+                  'Júpiter': 'jupiter',
+                  'Saturno': 'saturno'
+                };
+
+                const planetKey = planetKeyMap[planet.name];
+                const comparison = natalInterpretations?.comparaciones_planetarias?.[planetKey];
+
+                if (comparison && onOpenDrawer) {
+                  // Mapear estructura de comparación al formato del drawer existente
+                  const drawerContent = {
+                    titulo: `${planet.name}: Natal vs Solar Return`,
+                    educativo: `🔹 CÓMO ERES NORMALMENTE (Natal)\n\n📍 ${comparison.natal?.ubicacion || `${comparison.natal?.signo || planet.sign} en Casa ${comparison.natal?.casa || planet.house}`}\n\n${comparison.natal?.descripcion || 'Tu energía natal permanente'}`,
+                    poderoso: `🔸 QUÉ SE ACTIVA ESTE AÑO (Solar Return)\n\n📍 ${comparison.solar_return?.ubicacion || comparison.solar?.ubicacion || `${planet.sign} en Casa ${planet.house} SR`}\n\n${comparison.solar_return?.descripcion || comparison.solar?.descripcion || 'Energía activada este año'}`,
+                    impacto_real: `🔁 DÓNDE CHOCA O POTENCIA\n\n${comparison.comparacion || comparison.donde_choca_potencia || 'Interacción entre ambas energías'}`,
+                    sombras: [{
+                      nombre: 'Acción Recomendada',
+                      descripcion: 'Este año',
+                      trampa: '❌ Ignorar esta activación',
+                      regalo: `✅ ${comparison.accion || comparison.que_conviene_hacer || 'Aprovecha esta energía conscientemente'}`
+                    }],
+                    sintesis: {
+                      frase: `${planet.name} se activa de manera específica este año`,
+                      declaracion: comparison.frase_clave || `Mi ${planet.name} natal se manifiesta este año de forma única. Uso conscientemente esta activación.`
+                    }
+                  };
+
+                  onOpenDrawer(drawerContent);
+                } else {
+                  console.warn('⚠️ No se encontró comparación para:', planet.name);
+                }
+                return;
+              }
+
+              // ⭐ NATAL: Generar/ver interpretación individual
               const interpretationKey = `${planet.name}-${planet.sign}-${planet.house}`;
               const hasAI = natalInterpretations?.planets?.[interpretationKey];
 
@@ -658,6 +703,11 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
               <>
                 <div className="animate-spin">⏳</div>
                 <span>Generando...</span>
+              </>
+            ) : chartType === 'solar-return' ? (
+              <>
+                <span>🔄 Ver comparación Natal vs SR</span>
+                <span className="group-hover:translate-x-1 transition-transform">→</span>
               </>
             ) : (
               <>
