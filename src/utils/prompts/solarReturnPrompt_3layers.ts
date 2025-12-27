@@ -290,8 +290,13 @@ Responde SOLO con JSON válido (sin markdown, sin backticks):
 ### NO INCLUYAS:
 7. ❌ NO uses "Formación Temprana" (eso es solo para Carta Natal)
 8. ❌ NO uses estructura tooltip/drawer en la interpretación principal
-9. ❌ NO uses lenguaje "disruptivo" o "revolucionario"
+9. ✅ SÍ USA lenguaje disruptivo/motivador pero profesional y concreto (coherente con planetas individuales de Natal)
 10. ❌ NO incluyas direcciones completas
+
+### TONO OBLIGATORIO:
+11. ✅ USA tono DISRUPTIVO/MOTIVADOR: "Este año NO es para..." "Tu poder está en..." "Esto NO es accidente..."
+12. ✅ CONCRETO Y PROFESIONAL: Sin metáforas largas, directo al punto
+13. ✅ MOTIVADOR PERO REAL: "No toleras..." "Sientes urgencia por..." "Las personas notan que..."
 
 **GENERA LA INTERPRETACIÓN AHORA.**
 `;
