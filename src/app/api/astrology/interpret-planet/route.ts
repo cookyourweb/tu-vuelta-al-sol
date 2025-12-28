@@ -24,50 +24,54 @@ async function generatePlanetComparison(
   year: number,
   userProfile: any
 ) {
-  const prompt = `Eres un astrólogo profesional que genera comparaciones VIVENCIALES entre Natal y Solar Return. Tu objetivo: que la persona SIENTA "esto me pasa a mí AHORA y sé qué hacer".
+  const prompt = `Eres un astrólogo profesional que genera comparaciones VIVENCIALES, POTENTES y ACCIONABLES entre Natal y Solar Return.
 
 PLANETA: ${planetName}
 NATAL: ${planetName} en ${natal.sign}, Casa ${natal.house}
 SOLAR RETURN ${year}: ${planetName} en ${solarReturn.sign}, Casa ${solarReturn.house}
 
 ════════════════════════════════════════════════════════
-🔥 ESTRUCTURA MENTAL CORRECTA (ORDEN SAGRADO):
+🔥 ESTRUCTURA CORRECTA:
 
-1️⃣ QUÉ SE ACTIVA ESTE AÑO (Solar primero)
-→ "Esto es lo que estás viviendo AHORA"
-→ Parte del PRESENTE, no del pasado
+1️⃣ QUÉ SE ACTIVA ESTE AÑO
+   - Frase de ACTIVACIÓN inicial: "Este año tu [planeta] [qué pasa], aunque tú normalmente [patrón natal]"
+   - Explicar Casa ${solarReturn.house} en la PRÁCTICA
+   - Enumerar qué se activa (3-4 items concretos)
+   - 👉 Condición: "Si intentas [patrón antiguo], [consecuencia]. Si te permites [nuevo patrón], [resultado]."
 
-2️⃣ POR QUÉ TE DESCOLOCA (Natal después)
-→ "Por qué te resulta fácil o difícil"
-→ Tu natal explica el CONFLICTO
+2️⃣ POR QUÉ SE SIENTE TAN DIFERENTE EN TI (Cruce con natal)
+   - Explicar cómo funciona ${planetName} natal en ${natal.sign} Casa ${natal.house}
+   - "De base, tú estás acostumbrada a: [3 items]"
+   - "Por eso este año puede sentirse [emoción]: [3 síntomas]"
+   - 💥 VALIDACIÓN: "No estás [miedo]. Estás [transformación real]."
 
-3️⃣ QUÉ TE ESTÁ PIDIENDO LA VIDA
-→ "Cambio de comportamiento concreto"
-→ Dirección clara
+3️⃣ QUÉ TE ESTÁ PIDIENDO LA VIDA ESTE AÑO
+   - Frase directa: "Este año no se trata de [lo antiguo], sino de [lo nuevo]"
+   - "La vida te pide: [3 items con emoji]"
+   - "Este es un año de: [4-5 conceptos clave]"
 
 4️⃣ CONSECUENCIAS
-→ "Qué pasa si lo haces / si no"
-→ Conciencia + urgencia
+   🌱 Si lo respetas: [4 consecuencias positivas MUY específicas]
+   ⚠️ Si lo resistes: [4 consecuencias negativas concretas - no genéricas]
 
 5️⃣ ACCIONES CONCRETAS
-→ "Pocas, directas, reales"
+   HAZ: ✅ [3-4 acciones VIVENCIALES - no "sé creativo" sino acciones específicas]
+   EVITA: ❌ [3 acciones a evitar - específicas del contexto]
 
 ════════════════════════════════════════════════════════
 
-REGLAS DE ORO:
+REGLAS CRÍTICAS:
 
-✅ Empieza SIEMPRE con el Solar Return (lo que vive AHORA)
-✅ Usa NARRATIVA FLUIDA, no listas técnicas
-✅ Habla en PRESENTE: "Este año tu mente no quiere ruido"
-✅ Explica el CONFLICTO: "Tú, de base, piensas mostrándote. Por eso este año se siente raro"
-✅ Valida lo que siente: "No es bloqueo. Es recalibración."
-✅ Consecuencias ESPECÍFICAS: no "estancamiento" sino "confusión, cansancio mental, hablar de más"
-✅ Acciones POCAS pero REALES: "escribe solo para ti" no "sé más creativo"
+✅ FRASE DE ACTIVACIÓN al inicio: "Este año tu [planeta] [cambio], aunque tú normalmente [patrón natal]"
+✅ Cruce natal TEMPRANO (en sección 2, no al final)
+✅ DIRECCIÓN CENTRAL clara: No es [miedo común], es [transformación específica]
+✅ Acciones VIVENCIALES: no genéricas - específicas a ${planetName} ${solarReturn.sign} Casa ${solarReturn.house}
+✅ Usar emociones: "puede sentirse desconcertante", "aparece confusión", etc.
+✅ Validar siempre: "💥 No estás [miedo]. Estás [verdad]."
 
-❌ NO empieces con Natal
-❌ NO uses tono académico
-❌ NO digas "tu energía natural ocurre cuando..."
-❌ NO hagas listas sin contexto
+❌ NO acciones genéricas tipo "sé más creativo" o "confía en ti"
+❌ NO solo describir - dar DIRECCIÓN
+❌ NO dejar el natal para el final - integrarlo en sección 2
 
 ════════════════════════════════════════════════════════
 
@@ -75,55 +79,56 @@ ESTRUCTURA JSON:
 
 {
   "titulo_atractivo": "${planetName} en tu Retorno Solar ${year}",
-  "subtitulo": "[Frase gancho de 8-12 palabras que capture el tema del año - ejemplo: 'El año en que tu mente cambia de plano']",
+  "subtitulo": "[Frase gancho de 8-12 palabras - ejemplo: 'El año en que tu identidad se redefine desde dentro']",
 
   "que_se_activa": {
     "ubicacion": "${planetName} en ${solarReturn.sign} · Casa ${solarReturn.house} (Retorno Solar ${year})",
-    "narrativa": "[2-3 párrafos narrativos empezando con 'Este año tu [planeta] no quiere [patrón antiguo]. Quiere [patrón nuevo].' Explicar qué significa Casa ${solarReturn.house} en la PRÁCTICA, no en teoría. Usar frases cortas y directas. Terminar con '👉 Si intentas [patrón antiguo], te [consecuencia].']",
-    "se_activa_lista": "[3-4 items cortos de qué se activa - ejemplo: 'pensamiento no convencional', 'ideas disruptivas']"
+    "narrativa": "**FRASE DE ACTIVACIÓN:** Este año tu ${planetName} [qué pasa específicamente], aunque tú normalmente [patrón natal en 3-4 palabras].\\n\\n[2 párrafos explicando qué significa Casa ${solarReturn.house} en la PRÁCTICA y cómo afecta a ${planetName}. Usar lenguaje emocional.]\\n\\nLa Casa ${solarReturn.house} [significado práctico]:
+• [qué se activa 1]\\n• [qué se activa 2]\\n• [qué se activa 3]\\n• [qué se activa 4]\\n\\n👉 Si intentas [patrón antiguo], [consecuencia específica].\\n👉 Si te permites [nuevo patrón], [resultado específico].",
+    "se_activa_lista": "[ítem 1] · [ítem 2] · [ítem 3] · [ítem 4]"
   },
 
   "por_que_descoloca": {
+    "titulo_seccion": "POR QUÉ SE SIENTE TAN DIFERENTE EN TI",
+    "subtitulo": "(Cruce con tu carta natal)",
     "ubicacion": "${planetName} natal en ${natal.sign} · Casa ${natal.house}",
-    "narrativa": "[2-3 párrafos explicando: 'Tú, de base, [patrón natal]. [Explicar cómo funciona normalmente]. Por eso este año se siente raro: [lista de 2-3 síntomas del conflicto].' Terminar validando: '💥 No es [miedo/bloqueo]. Es [recalibración/ajuste/transformación].']"
+    "narrativa": "De base, tú estás acostumbrada a:\\n• [patrón natal específico 1]\\n• [patrón natal específico 2]\\n• [patrón natal específico 3]\\n\\nPor eso este año puede sentirse [emoción específica - ejemplo: desconcertante, liberador, confuso]:\\n• [síntoma del conflicto 1]\\n• [síntoma del conflicto 2]\\n• [síntoma del conflicto 3]\\n\\n💥 No estás [miedo/pérdida]. Estás [transformación real en 1 frase potente]."
   },
 
   "que_te_pide": {
-    "narrativa": "[2 párrafos. Primero: 'La vida te está pidiendo: [lista de 3 items con emoji 🧠 o similar]'. Segundo: 'Este es un año de: [4-5 conceptos clave separados por línea]'. Terminar con frase potente: 'No todo lo que [haces normalmente] ahora [resultado]. Y eso está bien.']"
+    "narrativa": "Este año no se trata de [patrón antiguo específico],\\nsino de [patrón nuevo específico].\\n\\nLa vida te pide:\\n🧠 [petición 1 - concreta]\\n🧠 [petición 2 - concreta]\\n🧠 [petición 3 - concreta]\\n\\nEste es un año de:\\n[concepto 1] · [concepto 2] · [concepto 3] · [concepto 4]"
   },
 
   "consecuencias": {
-    "si_lo_respetas": "[4 consecuencias positivas concretas - ejemplo: 'claridad mental profunda', 'ideas verdaderamente originales']",
-    "si_no_lo_respetas": "[4 consecuencias negativas específicas - ejemplo: 'confusión', 'cansancio mental', 'hablar de más', 'sensación de no ser comprendida']"
+    "si_lo_respetas": "[consecuencia positiva 1 muy específica] · [consecuencia 2] · [consecuencia 3] · [consecuencia 4]",
+    "si_no_lo_respetas": "[consecuencia negativa 1 muy específica - NO genérica] · [consecuencia 2] · [consecuencia 3] · [consecuencia 4]"
   },
 
   "acciones": {
     "hacer": [
-      "[acción concreta 1 - ejemplo: 'escribe solo para ti']",
-      "[acción concreta 2]",
-      "[acción concreta 3]",
-      "[acción concreta 4]",
-      "[acción concreta 5]"
+      "[acción vivencial 1 - ejemplo: 'crea espacios de silencio (meditación, escritura intuitiva)']",
+      "[acción vivencial 2 - ejemplo: 'permite decisiones sin lógica inmediata']",
+      "[acción vivencial 3 - específica al contexto]",
+      "[acción vivencial 4]"
     ],
     "evitar": [
-      "[qué NO hacer 1 - ejemplo: 'explicarte constantemente']",
-      "[qué NO hacer 2]",
-      "[qué NO hacer 3]",
-      "[qué NO hacer 4]"
+      "[qué evitar 1 - específico - ejemplo: 'forzarte a tener todo claro']",
+      "[qué evitar 2 - específico]",
+      "[qué evitar 3 - específico]"
     ]
   },
 
   "sintesis": {
-    "frase_potente": "[Frase de 1 línea que capture el año - ejemplo: 'Este año no vienes a hablar más. Vienes a pensar distinto.']",
-    "explicacion": "[1-2 frases explicando la transformación]",
-    "declaracion": "\"Cuando [acción correcta], mi ${planetName} [resultado positivo]. Cuando [acción incorrecta], [resultado negativo].\""
+    "frase_potente": "[Frase de 1 línea potente - ejemplo: 'Este año no vienes a ser alguien nuevo. Vienes a recordar quién eres cuando nadie te mira.']",
+    "explicacion": "[1-2 frases de cierre]",
+    "declaracion": "\\"Cuando [acción correcta específica], mi ${planetName} [resultado]. Cuando [acción incorrecta específica], [consecuencia].\\""
   },
 
   "drawer": {
     "titulo": "${planetName} en tu Retorno Solar ${year}",
-    "educativo": "📍 ${planetName} en ${solarReturn.sign} · Casa ${solarReturn.house}\\n\\n[que_se_activa.narrativa completa SIN el emoji inicial ni título - solo la narrativa pura]",
-    "poderoso": "📍 ${planetName} natal en ${natal.sign} · Casa ${natal.house}\\n\\n[por_que_descoloca.narrativa completa SIN el emoji inicial ni título - solo la narrativa pura]",
-    "impacto_real": "[que_te_pide.narrativa completa]\\n\\n🌱 SI LO RESPETAS:\\n• [consecuencias.si_lo_respetas lista con bullets]\\n\\n⚠️ SI NO LO RESPETAS:\\n• [consecuencias.si_no_lo_respetas lista con bullets]",
+    "educativo": "📍 ${planetName} en ${solarReturn.sign} · Casa ${solarReturn.house}\\n\\n[que_se_activa.narrativa completa incluyendo frase de activación]",
+    "poderoso": "**POR QUÉ SE SIENTE TAN DIFERENTE EN TI**\\n(Cruce con tu carta natal)\\n\\n📍 ${planetName} natal en ${natal.sign} · Casa ${natal.house}\\n\\n[por_que_descoloca.narrativa completa]",
+    "impacto_real": "**QUÉ TE ESTÁ PIDIENDO LA VIDA ESTE AÑO**\\n\\n[que_te_pide.narrativa]\\n\\n🌱 **SI LO RESPETAS:**\\n• [consecuencias positivas con bullets]\\n\\n⚠️ **SI LO RESISTES:**\\n• [consecuencias negativas con bullets]",
     "sombras": [{
       "nombre": "Acciones Concretas ${year}",
       "descripcion": "Qué hacer y qué evitar",
