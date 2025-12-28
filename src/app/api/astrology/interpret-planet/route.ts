@@ -121,9 +121,9 @@ ESTRUCTURA JSON:
 
   "drawer": {
     "titulo": "${planetName} en tu Retorno Solar ${year}",
-    "educativo": "🔥 QUÉ SE ACTIVA ESTE AÑO\\n\\n📍 ${planetName} en ${solarReturn.sign} · Casa ${solarReturn.house}\\n\\n[que_se_activa.narrativa completa]",
-    "poderoso": "💥 POR QUÉ TE DESCOLOCA\\n\\n📍 ${planetName} natal en ${natal.sign} · Casa ${natal.house}\\n\\n[por_que_descoloca.narrativa completa]",
-    "impacto_real": "🧭 QUÉ TE ESTÁ PIDIENDO LA VIDA\\n\\n[que_te_pide.narrativa]\\n\\n🌱 SI LO RESPETAS:\\n• [consecuencias.si_lo_respetas lista]\\n\\n⚠️ SI NO LO RESPETAS:\\n• [consecuencias.si_no_lo_respetas lista]",
+    "educativo": "📍 ${planetName} en ${solarReturn.sign} · Casa ${solarReturn.house}\\n\\n[que_se_activa.narrativa completa SIN el emoji inicial ni título - solo la narrativa pura]",
+    "poderoso": "📍 ${planetName} natal en ${natal.sign} · Casa ${natal.house}\\n\\n[por_que_descoloca.narrativa completa SIN el emoji inicial ni título - solo la narrativa pura]",
+    "impacto_real": "[que_te_pide.narrativa completa]\\n\\n🌱 SI LO RESPETAS:\\n• [consecuencias.si_lo_respetas lista con bullets]\\n\\n⚠️ SI NO LO RESPETAS:\\n• [consecuencias.si_no_lo_respetas lista con bullets]",
     "sombras": [{
       "nombre": "Acciones Concretas ${year}",
       "descripcion": "Qué hacer y qué evitar",
@@ -168,6 +168,22 @@ EJEMPLO COMPLETO (Mercurio Piscis Casa 1 → Acuario Casa 12):
     "frase_potente": "Este año no vienes a hablar más. Vienes a pensar distinto.",
     "explicacion": "Tu mente se está liberando de viejas formas, aunque todavía no tenga palabras para explicarlo.",
     "declaracion": "\\"Cuando respeto el silencio, mi Mercurio innova. Cuando me fuerzo a comunicar, me pierdo.\\""
+  },
+  "drawer": {
+    "titulo": "Mercurio en tu Retorno Solar 2025",
+    "educativo": "📍 Mercurio en Acuario · Casa 12\\n\\nEste año tu mente no quiere ruido. Quiere espacio, silencio y libertad.\\n\\nNo es un año para explicar quién eres, sino para pensar diferente desde dentro. La Casa 12 es el laboratorio mental invisible - donde las ideas se gestan antes de nacer.\\n\\n👉 Si intentas forzarte a comunicarte como siempre, te saturas.",
+    "poderoso": "📍 Mercurio natal en Piscis · Casa 1\\n\\nTú, de base, piensas mostrándote. Hablas para entenderte. Conectas emocionalmente a través de la palabra.\\n\\nPor eso este año se siente raro: no quieres explicar tanto, no te apetece exponerte, necesitas procesar antes de decir.\\n\\n💥 No es bloqueo. Es recalibración mental.",
+    "impacto_real": "La vida te está pidiendo:\\n🧠 pensar sin necesidad de compartir\\n🧠 crear sin testigos\\n🧠 gestar ideas antes de exponerlas\\n\\nEste es un año de:\\nincubación mental\\ninsights\\nredefinición interna de tu discurso\\nruptura con viejas narrativas\\n\\nNo todo lo que piensas ahora está listo para ser dicho. Y eso está bien.\\n\\n🌱 SI LO RESPETAS:\\n• claridad mental profunda\\n• ideas verdaderamente originales\\n• sensación de sentido\\n• preparación para un nuevo ciclo de expresión\\n\\n⚠️ SI NO LO RESPETAS:\\n• confusión\\n• cansancio mental\\n• hablar de más\\n• sensación de no ser comprendida",
+    "sombras": [{
+      "nombre": "Acciones Concretas 2025",
+      "descripcion": "Qué hacer y qué evitar",
+      "trampa": "❌ EVITA: explicarte constantemente · buscar validación mental · forzarte a decidir rápido · exponer procesos inacabados",
+      "regalo": "✅ HAZ: escribe solo para ti · trabaja ideas en privado · observa tus pensamientos sin juzgarlos · medita o camina en silencio · deja que las ideas maduren"
+    }],
+    "sintesis": {
+      "frase": "Este año no vienes a hablar más. Vienes a pensar distinto.\\n\\nTu mente se está liberando de viejas formas, aunque todavía no tenga palabras para explicarlo.",
+      "declaracion": "\\"Cuando respeto el silencio, mi Mercurio innova. Cuando me fuerzo a comunicar, me pierdo.\\""
+    }
   }
 }
 
