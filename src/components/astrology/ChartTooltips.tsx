@@ -718,6 +718,20 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                     // ⭐ USAR DIRECTAMENTE EL RESULTADO DE interpret-planet
                     if (result.interpretation?.drawer && onOpenDrawer) {
                       console.log('✅ Abriendo drawer directamente desde interpret-planet');
+
+                      // ⭐ ACTUALIZAR ESTADO antes de abrir drawer (para que el botón cambie)
+                      if (chartType === 'solar-return' && result.planetKey) {
+                        const updatedInterpretations = {
+                          ...natalInterpretations,
+                          comparaciones_planetarias: {
+                            ...natalInterpretations?.comparaciones_planetarias,
+                            [result.planetKey]: result.interpretation
+                          }
+                        };
+                        setNatalInterpretations(updatedInterpretations);
+                        console.log('🔄 Estado actualizado con nueva comparación:', result.planetKey);
+                      }
+
                       onOpenDrawer(result.interpretation.drawer);
                       setGeneratingAspect(false);
                       setIsGenerating(false);
