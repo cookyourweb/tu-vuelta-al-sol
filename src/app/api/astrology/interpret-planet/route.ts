@@ -209,6 +209,76 @@ Devuelve SOLO el JSON completo siguiendo EXACTAMENTE esta estructura y este tono
   return JSON.parse(content);
 }
 
+// =============================================================================
+// Helper: Format Comparison as Drawer
+// =============================================================================
+function formatComparisonAsDrawer(comparison: any, planetName: string): any {
+  // Construir narrativa de QUÉ SE ACTIVA
+  const queSeActivaNarrativa = [
+    comparison.que_se_activa?.narrativa || '',
+    '',
+    comparison.que_se_activa?.se_activa_lista?.length > 0
+      ? `**Este año se activa:**\n${comparison.que_se_activa.se_activa_lista.map((item: string) => `• ${item}`).join('\n')}`
+      : ''
+  ].filter(Boolean).join('\n');
+
+  // Construir narrativa de QUÉ TE PIDE
+  const queTeVideNarrativa = [
+    comparison.que_te_pide?.narrativa || '',
+    '',
+    comparison.que_te_pide?.te_pide_lista?.length > 0
+      ? `**La vida te pide:**\n${comparison.que_te_pide.te_pide_lista.map((item: string) => `• ${item}`).join('\n')}`
+      : '',
+    '',
+    comparison.que_te_pide?.conceptos_clave?.length > 0
+      ? `**Este es un año de:** ${comparison.que_te_pide.conceptos_clave.join(', ')}`
+      : ''
+  ].filter(Boolean).join('\n');
+
+  // Construir consecuencias
+  const consecuencias = [
+    '**🌱 Si lo respetas:**',
+    ...(comparison.consecuencias?.si_lo_respetas || []).map((c: string) => `• ${c}`),
+    '',
+    '**⚠️ Si lo resistes:**',
+    ...(comparison.consecuencias?.si_no_lo_respetas || []).map((c: string) => `• ${c}`)
+  ].join('\n');
+
+  return {
+    titulo: comparison.titulo_atractivo || `${planetName} en tu Retorno Solar`,
+    subtitulo: comparison.subtitulo || '',
+
+    // 📚 QUÉ SIGNIFICA (Sección 1: QUÉ SE ACTIVA)
+    educativo: queSeActivaNarrativa,
+
+    // 💥 POR QUÉ ES POTENTE (Sección 2: POR QUÉ DESCOLOCA - Cruce con natal)
+    poderoso: comparison.por_que_descoloca?.narrativa || '',
+
+    // 🌍 IMPACTO REAL (Sección 3: QUÉ TE PIDE)
+    impacto_real: queTeVideNarrativa,
+
+    // ⚠️ SOMBRAS (Sección 4: CONSECUENCIAS)
+    sombras: [{
+      nombre: 'Consecuencias',
+      descripcion: 'Según cómo manejes esta energía',
+      trampa: consecuencias,
+      regalo: '' // No se usa aquí, está en trampa
+    }],
+
+    // 💎 SÍNTESIS (Sección 5: ACCIONES)
+    sintesis: {
+      frase: comparison.subtitulo || `${planetName} se activa de manera específica este año`,
+      declaracion: [
+        '**✅ HAZ:**',
+        ...(comparison.acciones?.hacer || []).map((a: string) => `• ${a}`),
+        '',
+        '**❌ EVITA:**',
+        ...(comparison.acciones?.evitar || []).map((a: string) => `• ${a}`)
+      ].join('\n')
+    }
+  };
+}
+
 
 // =============================================================================
 // POST - Generate single planet interpretation
@@ -294,9 +364,15 @@ export async function POST(request: NextRequest) {
 
       console.log('✅ [PLANET] Comparación guardada:', planetKeyLower);
 
+      // Formatear comparación como drawer para respuesta inmediata
+      const drawer = formatComparisonAsDrawer(comparison, planetName);
+
       return NextResponse.json({
         success: true,
-        interpretation: comparison,
+        interpretation: {
+          ...comparison,
+          drawer  // ⭐ Incluir drawer formateado
+        },
         planetKey: planetKeyLower,
         message: `Comparación de ${planetName} generada correctamente`,
       });

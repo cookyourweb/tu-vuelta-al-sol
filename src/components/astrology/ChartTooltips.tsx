@@ -576,22 +576,83 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                   // ✅ CASO 1: Hay comparación - mostrar drawer comparativo
                   setTooltipLocked(true);
 
-                  const drawerContent = {
-                    titulo: `${planet.name}: Natal vs Solar Return`,
-                    educativo: `🔹 CÓMO ERES NORMALMENTE (Natal)\n\n📍 ${comparison.natal?.ubicacion || `${comparison.natal?.signo || planet.sign} en Casa ${comparison.natal?.casa || planet.house}`}\n\n${comparison.natal?.descripcion || 'Tu energía natal permanente'}`,
-                    poderoso: `🔸 QUÉ SE ACTIVA ESTE AÑO (Solar Return)\n\n📍 ${comparison.solar_return?.ubicacion || comparison.solar?.ubicacion || `${planet.sign} en Casa ${planet.house} SR`}\n\n${comparison.solar_return?.descripcion || comparison.solar?.descripcion || 'Energía activada este año'}`,
-                    impacto_real: `🔁 DÓNDE CHOCA O POTENCIA\n\n${comparison.comparacion || comparison.donde_choca_potencia || 'Interacción entre ambas energías'}`,
-                    sombras: [{
-                      nombre: 'Acción Recomendada',
-                      descripcion: 'Este año',
-                      trampa: '❌ Ignorar esta activación',
-                      regalo: `✅ ${comparison.accion || comparison.que_conviene_hacer || 'Aprovecha esta energía conscientemente'}`
-                    }],
-                    sintesis: {
-                      frase: `${planet.name} se activa de manera específica este año`,
-                      declaracion: comparison.frase_clave || `Mi ${planet.name} natal se manifiesta este año de forma única. Uso conscientemente esta activación.`
-                    }
-                  };
+                  // Detectar si es formato NUEVO (con que_se_activa, por_que_descoloca, etc.)
+                  const isNewFormat = comparison.que_se_activa || comparison.por_que_descoloca;
+
+                  let drawerContent;
+
+                  if (isNewFormat) {
+                    // ✅ FORMATO NUEVO: Estructura del prompt actualizado
+                    const queSeActivaNarrativa = [
+                      comparison.que_se_activa?.narrativa || '',
+                      '',
+                      comparison.que_se_activa?.se_activa_lista?.length > 0
+                        ? `**Este año se activa:**\n${comparison.que_se_activa.se_activa_lista.map((item: string) => `• ${item}`).join('\n')}`
+                        : ''
+                    ].filter(Boolean).join('\n');
+
+                    const queTeVideNarrativa = [
+                      comparison.que_te_pide?.narrativa || '',
+                      '',
+                      comparison.que_te_pide?.te_pide_lista?.length > 0
+                        ? `**La vida te pide:**\n${comparison.que_te_pide.te_pide_lista.map((item: string) => `• ${item}`).join('\n')}`
+                        : '',
+                      '',
+                      comparison.que_te_pide?.conceptos_clave?.length > 0
+                        ? `**Este es un año de:** ${comparison.que_te_pide.conceptos_clave.join(', ')}`
+                        : ''
+                    ].filter(Boolean).join('\n');
+
+                    const consecuencias = [
+                      '**🌱 Si lo respetas:**',
+                      ...(comparison.consecuencias?.si_lo_respetas || []).map((c: string) => `• ${c}`),
+                      '',
+                      '**⚠️ Si lo resistes:**',
+                      ...(comparison.consecuencias?.si_no_lo_respetas || []).map((c: string) => `• ${c}`)
+                    ].join('\n');
+
+                    drawerContent = {
+                      titulo: comparison.titulo_atractivo || `${planet.name}: Natal vs Solar Return`,
+                      subtitulo: comparison.subtitulo || '',
+                      educativo: queSeActivaNarrativa,
+                      poderoso: comparison.por_que_descoloca?.narrativa || '',
+                      impacto_real: queTeVideNarrativa,
+                      sombras: [{
+                        nombre: 'Consecuencias',
+                        descripcion: 'Según cómo manejes esta energía',
+                        trampa: consecuencias,
+                        regalo: ''
+                      }],
+                      sintesis: {
+                        frase: comparison.subtitulo || `${planet.name} se activa de manera específica este año`,
+                        declaracion: [
+                          '**✅ HAZ:**',
+                          ...(comparison.acciones?.hacer || []).map((a: string) => `• ${a}`),
+                          '',
+                          '**❌ EVITA:**',
+                          ...(comparison.acciones?.evitar || []).map((a: string) => `• ${a}`)
+                        ].join('\n')
+                      }
+                    };
+                  } else {
+                    // ⚠️ FORMATO ANTIGUO (por compatibilidad)
+                    drawerContent = {
+                      titulo: `${planet.name}: Natal vs Solar Return`,
+                      educativo: `🔹 CÓMO ERES NORMALMENTE (Natal)\n\n📍 ${comparison.natal?.ubicacion || `${comparison.natal?.signo || planet.sign} en Casa ${comparison.natal?.casa || planet.house}`}\n\n${comparison.natal?.descripcion || 'Tu energía natal permanente'}`,
+                      poderoso: `🔸 QUÉ SE ACTIVA ESTE AÑO (Solar Return)\n\n📍 ${comparison.solar_return?.ubicacion || comparison.solar?.ubicacion || `${planet.sign} en Casa ${planet.house} SR`}\n\n${comparison.solar_return?.descripcion || comparison.solar?.descripcion || 'Energía activada este año'}`,
+                      impacto_real: `🔁 DÓNDE CHOCA O POTENCIA\n\n${comparison.comparacion || comparison.donde_choca_potencia || 'Interacción entre ambas energías'}`,
+                      sombras: [{
+                        nombre: 'Acción Recomendada',
+                        descripcion: 'Este año',
+                        trampa: '❌ Ignorar esta activación',
+                        regalo: `✅ ${comparison.accion || comparison.que_conviene_hacer || 'Aprovecha esta energía conscientemente'}`
+                      }],
+                      sintesis: {
+                        frase: `${planet.name} se activa de manera específica este año`,
+                        declaracion: comparison.frase_clave || `Mi ${planet.name} natal se manifiesta este año de forma única. Uso conscientemente esta activación.`
+                      }
+                    };
+                  }
 
                   onOpenDrawer(drawerContent);
                   return;
