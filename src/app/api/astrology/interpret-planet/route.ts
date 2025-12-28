@@ -24,108 +24,156 @@ async function generatePlanetComparison(
   year: number,
   userProfile: any
 ) {
-  const prompt = `Eres un astrólogo profesional especializado en Solar Returns. Vas a generar una comparación PROFUNDA, ESPECÍFICA y TRANSFORMADORA entre la posición natal de un planeta y su posición en Solar Return.
+  const prompt = `Eres un astrólogo profesional que genera comparaciones VIVENCIALES entre Natal y Solar Return. Tu objetivo: que la persona SIENTA "esto me pasa a mí AHORA y sé qué hacer".
 
 PLANETA: ${planetName}
 NATAL: ${planetName} en ${natal.sign}, Casa ${natal.house}
 SOLAR RETURN ${year}: ${planetName} en ${solarReturn.sign}, Casa ${solarReturn.house}
 
-USUARIO:
-- Nombre: ${userProfile.name || 'Usuario'}
-- Edad: ${userProfile.age || 'N/A'}
+════════════════════════════════════════════════════════
+🔥 ESTRUCTURA MENTAL CORRECTA (ORDEN SAGRADO):
+
+1️⃣ QUÉ SE ACTIVA ESTE AÑO (Solar primero)
+→ "Esto es lo que estás viviendo AHORA"
+→ Parte del PRESENTE, no del pasado
+
+2️⃣ POR QUÉ TE DESCOLOCA (Natal después)
+→ "Por qué te resulta fácil o difícil"
+→ Tu natal explica el CONFLICTO
+
+3️⃣ QUÉ TE ESTÁ PIDIENDO LA VIDA
+→ "Cambio de comportamiento concreto"
+→ Dirección clara
+
+4️⃣ CONSECUENCIAS
+→ "Qué pasa si lo haces / si no"
+→ Conciencia + urgencia
+
+5️⃣ ACCIONES CONCRETAS
+→ "Pocas, directas, reales"
 
 ════════════════════════════════════════════════════════
-LÓGICA PROFESIONAL:
 
-A) QUIÉN ERES (NATAL) → patrón estable de ${planetName} en ${natal.sign} Casa ${natal.house}
-B) QUÉ SE ACTIVA (SOLAR) → ${planetName} en ${solarReturn.sign} Casa ${solarReturn.house} este año
-C) TENSIÓN / AJUSTE → diferencia entre Casa ${natal.house} y Casa ${solarReturn.house}
-D) IMPACTO REAL → síntomas específicos, decisiones concretas, cambios observables
-E) ACCIÓN CONCRETA → acciones específicas (no genéricas como "sé creativo")
+REGLAS DE ORO:
 
-════════════════════════════════════════════════════════
+✅ Empieza SIEMPRE con el Solar Return (lo que vive AHORA)
+✅ Usa NARRATIVA FLUIDA, no listas técnicas
+✅ Habla en PRESENTE: "Este año tu mente no quiere ruido"
+✅ Explica el CONFLICTO: "Tú, de base, piensas mostrándote. Por eso este año se siente raro"
+✅ Valida lo que siente: "No es bloqueo. Es recalibración."
+✅ Consecuencias ESPECÍFICAS: no "estancamiento" sino "confusión, cansancio mental, hablar de más"
+✅ Acciones POCAS pero REALES: "escribe solo para ti" no "sé más creativo"
 
-IMPORTANTE - LEE ESTO COMPLETAMENTE:
-
-1. **ESPECIFICIDAD DE CASAS**:
-   - Debes explicar el significado de Casa ${natal.house} vs Casa ${solarReturn.house}
-   - NO digas "actúas con cautela" - DI "actúas en tu entorno cercano, con palabras, en conversaciones del día a día" (si Casa 3)
-   - Ejemplo: Casa 3 = comunicación cercana, Casa 5 = escenario, protagonismo público
-
-2. **NARRATIVA, NO LISTAS**:
-   - Usa párrafos conectados, no solo bullets
-   - Cuenta una HISTORIA de transformación
-   - "Tu [planeta] natal funciona así: [2-3 frases]. Este año cambia porque [2-3 frases explicando por qué]."
-
-3. **EJEMPLOS CONCRETOS DE VIDA REAL**:
-   ❌ MAL: "Deseo de destacar"
-   ✅ BIEN: "Te darán ganas de subir tu trabajo a redes, de hablar en público, de ponerte al frente de un proyecto, de que te vean"
-
-   ❌ MAL: "Mayor creatividad"
-   ✅ BIEN: "Querrás crear algo que lleve tu nombre, que muestre tu estilo, que te diferencie"
-
-4. **ACCIONES ESPECÍFICAS**:
-   ❌ MAL: "Lidera con creatividad"
-   ✅ BIEN: "Crea un proyecto que muestre tu trabajo públicamente. Comparte tu proceso en redes. Organiza algo donde seas visible. Di que sí a estar al frente."
-
-5. **CONTRASTE ESPECÍFICO POR SIGNO Y CASA**:
-   - ${natal.sign} Casa ${natal.house} tiene una energía MUY diferente a ${solarReturn.sign} Casa ${solarReturn.house}
-   - Explica CÓMO se siente esa diferencia en la vida diaria
-   - Ejemplo: "Normalmente actúas desde la estabilidad y lo cercano (Tauro Casa 3). Este año necesitas actuar desde el protagonismo y lo visible (Leo Casa 5)."
-
-6. **CONSECUENCIAS REALES**:
-   - No digas "estancamiento" - DI "te sentirás frustrado porque tendrás ideas pero no las mostrarás, verás oportunidades pasar porque no te atreviste a estar visible"
+❌ NO empieces con Natal
+❌ NO uses tono académico
+❌ NO digas "tu energía natural ocurre cuando..."
+❌ NO hagas listas sin contexto
 
 ════════════════════════════════════════════════════════
 
 ESTRUCTURA JSON:
 
 {
-  "natal": {
-    "ubicacion": "${planetName} en ${natal.sign}, Casa ${natal.house}",
-    "descripcion": "Tu ${planetName} natal funciona así: [2-3 frases narrativas explicando cómo actúa naturalmente este planeta en ${natal.sign} Casa ${natal.house}]. [Nueva línea] [Explicar qué significa Casa ${natal.house} en la práctica - no teoría, sino cómo se vive].\\n\\nConfías en:\\n• [item específico 1 - NO genérico]\\n• [item específico 2]\\n• [item específico 3]\\n\\n**Tu riesgo natal:** [Riesgo específico de ${natal.sign} Casa ${natal.house} - 1-2 frases concretas]"
+  "titulo_atractivo": "${planetName} en tu Retorno Solar ${year}",
+  "subtitulo": "[Frase gancho de 8-12 palabras que capture el tema del año - ejemplo: 'El año en que tu mente cambia de plano']",
+
+  "que_se_activa": {
+    "ubicacion": "${planetName} en ${solarReturn.sign} · Casa ${solarReturn.house} (Retorno Solar ${year})",
+    "narrativa": "[2-3 párrafos narrativos empezando con 'Este año tu [planeta] no quiere [patrón antiguo]. Quiere [patrón nuevo].' Explicar qué significa Casa ${solarReturn.house} en la PRÁCTICA, no en teoría. Usar frases cortas y directas. Terminar con '👉 Si intentas [patrón antiguo], te [consecuencia].']",
+    "se_activa_lista": "[3-4 items cortos de qué se activa - ejemplo: 'pensamiento no convencional', 'ideas disruptivas']"
   },
-  "solar_return": {
-    "ubicacion": "${planetName} en ${solarReturn.sign}, Casa ${solarReturn.house}",
-    "descripcion": "Este año **no se trata de** [patrón natal específico], sino de [lo nuevo que se activa con ${solarReturn.sign} Casa ${solarReturn.house}]. [Explicar qué significa Casa ${solarReturn.house} en la práctica].\\n\\nLa [acción/expansión/energía] llega a través de:\\n• [situación concreta 1 - no "creatividad", sino "crear algo que muestre tu estilo"]\\n• [situación concreta 2]\\n• [situación concreta 3]\\n• [situación concreta 4]\\n\\n**Si no [acción específica], no se activa.**\\n**Si no [acción específica 2], no crece.**"
+
+  "por_que_descoloca": {
+    "ubicacion": "${planetName} natal en ${natal.sign} · Casa ${natal.house}",
+    "narrativa": "[2-3 párrafos explicando: 'Tú, de base, [patrón natal]. [Explicar cómo funciona normalmente]. Por eso este año se siente raro: [lista de 2-3 síntomas del conflicto].' Terminar validando: '💥 No es [miedo/bloqueo]. Es [recalibración/ajuste/transformación].']"
   },
-  "comparacion": "**Normalmente** (${natal.sign} Casa ${natal.house}):\\n[Párrafo narrativo de 2-3 frases describiendo cómo actúas normalmente - específico, no genérico]\\n\\n**Este año** (${solarReturn.sign} Casa ${solarReturn.house}):\\n[Párrafo narrativo de 2-3 frases describiendo cómo necesitas actuar este año - específico, mencionar Casa ${solarReturn.house}]\\n\\n👉 [Frase de transición explicando el ajuste necesario].\\n\\n**Lo notarás así en tu vida diaria:**\\n• [Síntoma observable 1 - ejemplo: "Te darán ganas de..."]\\n• [Síntoma observable 2 - ejemplo: "Te sentirás inquieto cuando..."]\\n• [Oportunidad que aparece - ejemplo: "Llegarán situaciones donde..."]\\n• [Cambio interno - ejemplo: "Pensarás diferente sobre..."]\\n\\n**Si te quedas en ${natal.sign} Casa ${natal.house}:**\\n• [Consecuencia específica 1 - no "estancamiento", sino qué sentirás exactamente]\\n• [Consecuencia específica 2 - qué oportunidades perderás]\\n• [Frustración concreta - cómo se manifestará]",
-  "accion": "**Este año ${planetName} te pide:**\\n\\n✅ [Acción concreta 1 - ejemplo: "Comparte tu trabajo en redes semanalmente"]\\n✅ [Acción concreta 2 - ejemplo: "Di que sí a liderar un proyecto"]\\n✅ [Acción concreta 3 - ejemplo: "Crea algo que lleve tu nombre"]\\n✅ [Acción concreta 4 - ejemplo: "Habla en público aunque te dé miedo"]\\n✅ [Acción concreta 5]\\n\\n**No te pide:**\\n❌ [Lo que NO hacer 1 - específico]\\n❌ [Lo que NO hacer 2 - específico]\\n❌ [Lo que NO hacer 3 - específico]\\n\\n⚠️ **SOMBRA A TRABAJAR:** [Sombra específica de ${solarReturn.sign} Casa ${solarReturn.house} - ejemplo: "El ego excesivo, querer brillar sin sustancia, imponerte sin escuchar"]\\n\\n💡 **Clave:** [Frase directa de máximo 8 palabras]",
-  "frase_clave": "[Frase POTENTE de máximo 10 palabras - debe capturar el contraste entre Casa ${natal.house} y Casa ${solarReturn.house}]",
+
+  "que_te_pide": {
+    "narrativa": "[2 párrafos. Primero: 'La vida te está pidiendo: [lista de 3 items con emoji 🧠 o similar]'. Segundo: 'Este es un año de: [4-5 conceptos clave separados por línea]'. Terminar con frase potente: 'No todo lo que [haces normalmente] ahora [resultado]. Y eso está bien.']"
+  },
+
+  "consecuencias": {
+    "si_lo_respetas": "[4 consecuencias positivas concretas - ejemplo: 'claridad mental profunda', 'ideas verdaderamente originales']",
+    "si_no_lo_respetas": "[4 consecuencias negativas específicas - ejemplo: 'confusión', 'cansancio mental', 'hablar de más', 'sensación de no ser comprendida']"
+  },
+
+  "acciones": {
+    "hacer": [
+      "[acción concreta 1 - ejemplo: 'escribe solo para ti']",
+      "[acción concreta 2]",
+      "[acción concreta 3]",
+      "[acción concreta 4]",
+      "[acción concreta 5]"
+    ],
+    "evitar": [
+      "[qué NO hacer 1 - ejemplo: 'explicarte constantemente']",
+      "[qué NO hacer 2]",
+      "[qué NO hacer 3]",
+      "[qué NO hacer 4]"
+    ]
+  },
+
+  "sintesis": {
+    "frase_potente": "[Frase de 1 línea que capture el año - ejemplo: 'Este año no vienes a hablar más. Vienes a pensar distinto.']",
+    "explicacion": "[1-2 frases explicando la transformación]",
+    "declaracion": "\"Cuando [acción correcta], mi ${planetName} [resultado positivo]. Cuando [acción incorrecta], [resultado negativo].\""
+  },
+
   "drawer": {
-    "titulo": "${planetName}: Natal vs Solar Return ${year}",
-    "educativo": "🔹 CÓMO ERES NORMALMENTE (Carta Natal)\\n\\n📍 ${planetName} en ${natal.sign} · Casa ${natal.house}\\n\\n[Descripción natal completa - narrativa, no lista]",
-    "poderoso": "🔸 QUÉ SE ACTIVA ESTE AÑO (Retorno Solar)\\n\\n📍 ${planetName} en ${solarReturn.sign} · Casa ${solarReturn.house}\\n\\n[Descripción SR completa - narrativa con ejemplos concretos]",
-    "impacto_real": "🔁 DÓNDE SE AJUSTA TU MANERA DE [VERBO según planeta]\\n\\n[Comparación completa con ejemplos de vida real y consecuencias específicas]",
+    "titulo": "${planetName} en tu Retorno Solar ${year}",
+    "educativo": "🔥 QUÉ SE ACTIVA ESTE AÑO\\n\\n📍 ${planetName} en ${solarReturn.sign} · Casa ${solarReturn.house}\\n\\n[que_se_activa.narrativa completa]",
+    "poderoso": "💥 POR QUÉ TE DESCOLOCA\\n\\n📍 ${planetName} natal en ${natal.sign} · Casa ${natal.house}\\n\\n[por_que_descoloca.narrativa completa]",
+    "impacto_real": "🧭 QUÉ TE ESTÁ PIDIENDO LA VIDA\\n\\n[que_te_pide.narrativa]\\n\\n🌱 SI LO RESPETAS:\\n• [consecuencias.si_lo_respetas lista]\\n\\n⚠️ SI NO LO RESPETAS:\\n• [consecuencias.si_no_lo_respetas lista]",
     "sombras": [{
-      "nombre": "Acción Recomendada ${year}",
+      "nombre": "Acciones Concretas ${year}",
       "descripcion": "Qué hacer y qué evitar",
-      "trampa": "❌ **Trampas:** [trampa 1 específica] · [trampa 2] · [trampa 3]",
-      "regalo": "✅ **Acciones:** [acción concreta 1] · [acción concreta 2] · [acción concreta 3] · [acción concreta 4]"
+      "trampa": "❌ EVITA: [acciones.evitar separadas por ·]",
+      "regalo": "✅ HAZ: [acciones.hacer separadas por ·]"
     }],
     "sintesis": {
-      "frase": "[Frase inicial potente de 1 línea]. Cuando [acción positiva específica], tu ${planetName} [resultado]. Cuando [acción negativa específica], se [consecuencia].",
-      "declaracion": "\\"Mi ${planetName} este año [declaración en primera persona usando el contraste Casa ${natal.house} → Casa ${solarReturn.house}].\\""
+      "frase": "[sintesis.frase_potente]\\n\\n[sintesis.explicacion]",
+      "declaracion": "[sintesis.declaracion]"
     }
   }
 }
 
 ════════════════════════════════════════════════════════
 
-EJEMPLOS DE TONO CORRECTO:
+EJEMPLO COMPLETO (Mercurio Piscis Casa 1 → Acuario Casa 12):
 
-❌ MAL: "Tu acción natural ocurre cuando construyes con paciencia"
-✅ BIEN: "Tu Marte natal se mueve desde la constancia. No te lanzas - construyes. No improvisas - planificas. Actúas en tu entorno cercano (Casa 3): con palabras cuidadas, ideas concretas, conversaciones donde controlas cada detalle. Tu fuerza viene de la repetición, no del riesgo."
-
-❌ MAL: "Este año expande comunicación"
-✅ BIEN: "Este año Marte no quiere que planifiques - quiere que brilles. Pasa de Casa 3 (entorno cercano) a Casa 5 (escenario). Ahora la acción llega cuando te expones, cuando creas algo que lleve tu sello, cuando te pones al frente aunque no tengas todo controlado. Si te quedas en lo seguro, no se activa nada."
-
-❌ MAL: "Lo notarás así: Deseo de destacar"
-✅ BIEN: "Lo notarás así: Te darán ganas de subir tu trabajo a redes (aunque antes lo guardabas). Querrás liderar algo visible (aunque antes preferías estar detrás). Te sentirás inquieto si nadie ve lo que haces. Llegarán oportunidades donde tienes que estar al frente - y esta vez dirás que sí."
+{
+  "titulo_atractivo": "Mercurio en tu Retorno Solar 2025",
+  "subtitulo": "El año en que tu mente cambia de plano",
+  "que_se_activa": {
+    "ubicacion": "Mercurio en Acuario · Casa 12 (Retorno Solar 2025)",
+    "narrativa": "Este año tu mente no quiere ruido. Quiere espacio, silencio y libertad.\\n\\nNo es un año para explicar quién eres, sino para pensar diferente desde dentro. La Casa 12 es el laboratorio mental invisible - donde las ideas se gestan antes de nacer.\\n\\n👉 Si intentas forzarte a comunicarte como siempre, te saturas.",
+    "se_activa_lista": "pensamiento no convencional · ideas disruptivas · comprensión profunda de patrones invisibles · necesidad de aislarte mentalmente"
+  },
+  "por_que_descoloca": {
+    "ubicacion": "Mercurio natal en Piscis · Casa 1",
+    "narrativa": "Tú, de base, piensas mostrándote. Hablas para entenderte. Conectas emocionalmente a través de la palabra.\\n\\nPor eso este año se siente raro: no quieres explicar tanto, no te apetece exponerte, necesitas procesar antes de decir.\\n\\n💥 No es bloqueo. Es recalibración mental."
+  },
+  "que_te_pide": {
+    "narrativa": "La vida te está pidiendo:\\n🧠 pensar sin necesidad de compartir\\n🧠 crear sin testigos\\n🧠 gestar ideas antes de exponerlas\\n\\nEste es un año de:\\nincubación mental\\ninsights\\nredefinición interna de tu discurso\\nruptura con viejas narrativas\\n\\nNo todo lo que piensas ahora está listo para ser dicho. Y eso está bien."
+  },
+  "consecuencias": {
+    "si_lo_respetas": "claridad mental profunda · ideas verdaderamente originales · sensación de sentido · preparación para un nuevo ciclo de expresión",
+    "si_no_lo_respetas": "confusión · cansancio mental · hablar de más · sensación de no ser comprendida"
+  },
+  "acciones": {
+    "hacer": ["escribe solo para ti", "trabaja ideas en privado", "observa tus pensamientos sin juzgarlos", "medita o camina en silencio", "deja que las ideas maduren"],
+    "evitar": ["explicarte constantemente", "buscar validación mental", "forzarte a decidir rápido", "exponer procesos inacabados"]
+  },
+  "sintesis": {
+    "frase_potente": "Este año no vienes a hablar más. Vienes a pensar distinto.",
+    "explicacion": "Tu mente se está liberando de viejas formas, aunque todavía no tenga palabras para explicarlo.",
+    "declaracion": "\\"Cuando respeto el silencio, mi Mercurio innova. Cuando me fuerzo a comunicar, me pierdo.\\""
+  }
+}
 
 ════════════════════════════════════════════════════════
 
-Devuelve SOLO el JSON completo, sin explicaciones adicionales.`;
+Devuelve SOLO el JSON completo siguiendo EXACTAMENTE esta estructura y este tono.`;
 
   const response = await openai.chat.completions.create({
     model: 'gpt-4o',
