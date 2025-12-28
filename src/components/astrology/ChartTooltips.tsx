@@ -576,6 +576,14 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                   // ✅ CASO 1: Hay comparación - mostrar drawer comparativo
                   setTooltipLocked(true);
 
+                  // Helper: Asegurar array (puede venir como string o array)
+                  const ensureArray = (value: any): string[] => {
+                    if (!value) return [];
+                    if (Array.isArray(value)) return value;
+                    if (typeof value === 'string') return [value];
+                    return [];
+                  };
+
                   // Detectar si es formato NUEVO (con que_se_activa, por_que_descoloca, etc.)
                   const isNewFormat = comparison.que_se_activa || comparison.por_que_descoloca;
 
@@ -583,32 +591,37 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
                   if (isNewFormat) {
                     // ✅ FORMATO NUEVO: Estructura del prompt actualizado
+                    const seActivaLista = ensureArray(comparison.que_se_activa?.se_activa_lista);
                     const queSeActivaNarrativa = [
                       comparison.que_se_activa?.narrativa || '',
                       '',
-                      comparison.que_se_activa?.se_activa_lista?.length > 0
-                        ? `**Este año se activa:**\n${comparison.que_se_activa.se_activa_lista.map((item: string) => `• ${item}`).join('\n')}`
+                      seActivaLista.length > 0
+                        ? `**Este año se activa:**\n${seActivaLista.map((item: string) => `• ${item}`).join('\n')}`
                         : ''
                     ].filter(Boolean).join('\n');
 
+                    const tePideLista = ensureArray(comparison.que_te_pide?.te_pide_lista);
+                    const conceptosClave = ensureArray(comparison.que_te_pide?.conceptos_clave);
                     const queTeVideNarrativa = [
                       comparison.que_te_pide?.narrativa || '',
                       '',
-                      comparison.que_te_pide?.te_pide_lista?.length > 0
-                        ? `**La vida te pide:**\n${comparison.que_te_pide.te_pide_lista.map((item: string) => `• ${item}`).join('\n')}`
+                      tePideLista.length > 0
+                        ? `**La vida te pide:**\n${tePideLista.map((item: string) => `• ${item}`).join('\n')}`
                         : '',
                       '',
-                      comparison.que_te_pide?.conceptos_clave?.length > 0
-                        ? `**Este es un año de:** ${comparison.que_te_pide.conceptos_clave.join(', ')}`
+                      conceptosClave.length > 0
+                        ? `**Este es un año de:** ${conceptosClave.join(', ')}`
                         : ''
                     ].filter(Boolean).join('\n');
 
+                    const siLoRespetas = ensureArray(comparison.consecuencias?.si_lo_respetas);
+                    const siLoResistes = ensureArray(comparison.consecuencias?.si_no_lo_respetas);
                     const consecuencias = [
                       '**🌱 Si lo respetas:**',
-                      ...(comparison.consecuencias?.si_lo_respetas || []).map((c: string) => `• ${c}`),
+                      ...siLoRespetas.map((c: string) => `• ${c}`),
                       '',
                       '**⚠️ Si lo resistes:**',
-                      ...(comparison.consecuencias?.si_no_lo_respetas || []).map((c: string) => `• ${c}`)
+                      ...siLoResistes.map((c: string) => `• ${c}`)
                     ].join('\n');
 
                     drawerContent = {
@@ -627,10 +640,10 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                         frase: comparison.subtitulo || `${planet.name} se activa de manera específica este año`,
                         declaracion: [
                           '**✅ HAZ:**',
-                          ...(comparison.acciones?.hacer || []).map((a: string) => `• ${a}`),
+                          ...ensureArray(comparison.acciones?.hacer).map((a: string) => `• ${a}`),
                           '',
                           '**❌ EVITA:**',
-                          ...(comparison.acciones?.evitar || []).map((a: string) => `• ${a}`)
+                          ...ensureArray(comparison.acciones?.evitar).map((a: string) => `• ${a}`)
                         ].join('\n')
                       }
                     };
