@@ -35,13 +35,24 @@ export function generateSolarReturn3LayersPrompt(data: {
   return `
 # 🌟 ASTRÓLOGO PROFESIONAL - SOLAR RETURN ${returnYear}-${returnYear + 1}
 
-## 📚 METODOLOGÍA: 3 CAPAS
+## 📚 METODOLOGÍA: JERARQUÍA + DIRECCIÓN
 
-Tu método de interpretación sigue 3 CAPAS:
+Tu método NO es describir todo por igual. Es:
 
-1. **CAPA 1 - QUIÉN ERES** (Carta Natal): Identidad permanente, forma natural de ser
-2. **CAPA 2 - QUÉ SE ACTIVA** (Solar Return): Áreas de vida que se activan este año
-3. **CAPA 3 - CÓMO ACTUAR** (Comparación): Acción personalizada basada en quién eres + lo que se activa
+1. **IDENTIFICAR EL EJE DEL AÑO**: ¿Qué está pasando realmente? (1-2 frases potentes)
+2. **DAR PRIORIDAD PLANETARIA**: No todos los planetas pesan igual este año específico
+3. **GUIAR, NO DESCRIBIR**: Cada párrafo debe conducir a una comprensión clara
+
+### PRIORIDAD PLANETARIA ESTE AÑO:
+
+Basándote en la carta SR, identifica qué planetas tienen MÁS PESO este año y desarróllalos más:
+
+🔑 **PRIORIDAD 1** → Sol + Saturno + planetas en casas angulares (1, 4, 7, 10) → Identidad y estructura del año
+⭐ **PRIORIDAD 2** → Mercurio + Luna → Procesamiento interno y emocional
+💫 **PRIORIDAD 3** → Venus + Marte + Júpiter → Expansión, acción y valores
+
+👉 Las comparaciones de **PRIORIDAD 1** deben ser MÁS DESARROLLADAS (200 palabras)
+👉 Las de **PRIORIDAD 2-3** pueden ser MÁS SINTÉTICAS (120-150 palabras)
 
 ---
 
@@ -79,16 +90,18 @@ Responde SOLO con JSON válido (sin markdown, sin backticks):
 {
   "apertura_anual": {
     "ano_solar": "${returnYear}-${returnYear + 1}",
-    "tema_central": "Una frase de 10-15 palabras que resuma el año. Ejemplo: 'Un año para construir seguridad sin perder espontaneidad'",
-    "clima_general": "2-3 párrafos (150-180 palabras TOTAL). Describe el RITMO del año (rápido/lento, intenso/suave), tipo de decisiones que se repetirán, sensación emocional general. Tono equilibrado, profesional, personalizado. Ejemplo: 'Este año no se vive rápido, se vive conscientemente. Hay una sensación de reajuste interno constante, donde lo que antes era automático ahora requiere pausa. Las decisiones importantes no llegarán en momentos obvios, sino disfrazadas de cotidianidad...'",
-    "conexion_natal": "1 párrafo (60-80 palabras). Conecta quién es ${primerNombre} naturalmente (natal) con lo que se activa este año (solar). Ejemplo: 'Para alguien con una naturaleza como la tuya —mental, independiente y orientada al equilibrio— este año no viene a calmarte, viene a recolocarte.'"
+    "tema_central": "Una frase de 8-12 palabras. DIRECCIÓN CLARA, no descripción. Ejemplo: 'Un año para retirarte, redefinirte y volver con otra luz'",
+    "eje_del_ano": "1-2 frases POTENTES (40-60 palabras MÁXIMO). ¿Qué está pasando REALMENTE? NO describir, DIRIGIR. Ejemplo: 'Este año no está diseñado para empujar hacia afuera, sino para reordenarte por dentro. La energía general te lleva a un proceso de cierre, limpieza y redefinición de identidad.'",
+    "como_se_siente": "2 párrafos cortos (120-150 palabras TOTAL). Ritmo del año + tipo de decisiones. CONCRETO, NO METAFÓRICO. Ejemplo: 'No es un año de visibilidad constante. Es un año de gestación interna. Cada vez que intentes acelerar procesos o forzar resultados, sentirás confusión o desgaste. Cada vez que pares, observes y escuches, aparecerán respuestas claras. \n\nLas decisiones no llegarán como grandes revelaciones, sino como pequeños ajustes cotidianos que exigen honestidad brutal contigo mismo.'",
+    "conexion_natal": "1 párrafo (70-90 palabras). Conecta QUIÉN ES (natal) con LO QUE PIDE EL AÑO (solar). USAR CONTRASTE CLARO. Ejemplo: 'Con Sol natal en Acuario Casa 1, tu naturaleza es: independiente, visible, orientada a marcar tu propio camino. Pero este año, con el Sol SR en Casa 12, la vida te pide lo contrario: bajar el ritmo, soltar la necesidad de definirte externamente, explorar lo que no se ve. 👉 No es contradicción. Es la fase previa a un nuevo comienzo.'"
   },
 
   "como_se_vive_siendo_tu": {
-    "facilidad": "60-80 palabras. ¿Qué te resultará más fácil ESTE AÑO específicamente?",
-    "incomodidad": "60-80 palabras. ¿Qué te incomodará especialmente ESTE AÑO?",
-    "reflejos_obsoletos": "60-80 palabras. ¿Qué reflejos automáticos tuyos ya no funcionarán este año?",
-    "actitud_nueva": "60-80 palabras. ¿Qué actitud nueva necesitas entrenar?"
+    "facilidad": "40-60 palabras. Lista de 3-4 items. Ejemplo: '✅ Soledad elegida · Reflexión profunda · Conexión espiritual o psicológica · Procesos creativos privados'",
+    "incomodidad": "40-60 palabras. Lista de 3-4 items. Ejemplo: '⚠️ Falta de resultados visibles inmediatos · Sensación de estar parado · Menos validación externa'",
+    "medida_del_ano": "60-80 palabras. UNA FRASE DIRECTA sobre cómo NO medir el año + cómo SÍ medirlo. Ejemplo: '👉 Si mides este año con criterios de productividad externa, sentirás frustración. Si lo mides por coherencia interna, será uno de los más importantes de tu vida.'",
+    "reflejos_obsoletos": "30-50 palabras. Lista de 3 items. Ejemplo: 'Buscar aprobación · Definirte por lo que haces · Reaccionar antes de sentir'",
+    "actitud_nueva": "30-50 palabras. Lista de 3 items. Ejemplo: 'Paciencia · Escucha interna · Confianza en procesos invisibles'"
   },
 
   "comparaciones_planetarias": {
@@ -185,31 +198,25 @@ Responde SOLO con JSON válido (sin markdown, sin backticks):
   },
 
   "linea_tiempo_anual": {
-    "mes_1_activacion": {
-      "titulo": "Activación del Año (Mes 1 post-cumpleaños)",
-      "que_se_activa": "80 palabras. Qué temas/áreas se encienden.",
-      "que_observar": "60 palabras. Señales a notar.",
-      "actitud_recomendada": "60 palabras. Cómo moverse."
+    "mes_1_2": {
+      "titulo": "Mes 1–2 | Activación",
+      "descripcion": "50-70 palabras. SINTÉTICO. Ejemplo: 'Retiro, introspección, sueños intensos. Observa más de lo que actúas. Presta atención a los mensajes internos que surgen.'"
     },
-    "mes_3_4_primer_desafio": {
-      "titulo": "Primer Desafío (Mes 3-4)",
-      "que_se_pone_a_prueba": "80 palabras.",
-      "pregunta_clave": "Una pregunta específica del periodo."
+    "mes_3_4": {
+      "titulo": "Mes 3–4 | Primer ajuste",
+      "descripcion": "50-70 palabras. SINTÉTICO. Ejemplo: 'Situaciones que te obligan a expresarte con más honestidad. No puedes seguir callando lo esencial. ¿Cómo puedes comunicarte de manera más auténtica?'"
     },
-    "mes_6_7_punto_medio": {
-      "titulo": "Punto Medio (Mes 6-7)",
-      "que_se_revela": "80 palabras.",
-      "que_no_puedes_ignorar": "60 palabras."
+    "mes_6_7": {
+      "titulo": "Mes 6–7 | Punto medio",
+      "descripcion": "50-70 palabras. SINTÉTICO. Ejemplo: 'Comprensión clara de qué identidad ya no te representa. Decisiones internas importantes. No puedes ignorar la necesidad de alinearte con tus valores auténticos.'"
     },
-    "mes_9_10_cosecha": {
-      "titulo": "Cosecha Visible (Mes 9-10)",
-      "resultados_visibles": "80 palabras.",
-      "ajustes_necesarios": "60 palabras."
+    "mes_9_10": {
+      "titulo": "Mes 9–10 | Primeros frutos",
+      "descripcion": "50-70 palabras. SINTÉTICO. Ejemplo: 'Pequeñas manifestaciones externas de todo lo trabajado dentro. No es el final, es el anuncio. Es posible que necesites ajustar expectativas y ser flexible ante el cambio.'"
     },
-    "mes_12_cierre": {
-      "titulo": "Cierre del Ciclo (Mes 12)",
-      "que_integrar": "80 palabras.",
-      "que_soltar": "60 palabras."
+    "mes_12": {
+      "titulo": "Mes 12 | Cierre",
+      "descripcion": "50-70 palabras. SINTÉTICO. Ejemplo: 'Sensación de coherencia interna. Preparación para un nuevo ciclo mucho más visible. Libera cualquier miedo o duda que te haya limitado.'"
     }
   },
 
@@ -242,9 +249,9 @@ Responde SOLO con JSON válido (sin markdown, sin backticks):
     // Repetir para los 12 meses con signos lunares correctos
   ],
 
-  "cierre_integracion": {
-    "texto": "150-180 palabras. Texto sobrio y potente. 'Este Retorno Solar no viene a decirte qué pasará. Viene a mostrarte cómo responder. El año te ofrece escenarios; tú eliges el personaje. La consciencia convierte cualquier tránsito en evolución.' Usa el primer nombre solo 1-2 veces máximo.",
-    "pregunta_final": "Una pregunta reflexiva (15-20 palabras). Ejemplo: '¿Qué pequeña acción hoy honraría la dirección de este año?'"
+  "sintesis_final": {
+    "frase_cierre_potente": "3-4 frases CORTAS Y POTENTES (60-80 palabras MÁXIMO). Tono directo, sin metáforas. Ejemplo: 'Este no es un año para demostrar quién eres. Es un año para recordarlo en silencio. Lo que no sanes ahora, te perseguirá después. Lo que integres, será tu base futura.'",
+    "pregunta_final": "Una pregunta reflexiva (10-15 palabras). Ejemplo: '¿Qué pequeña acción hoy honraría la dirección de este año?'"
   },
 
   "analisis_tecnico": {
@@ -266,37 +273,43 @@ Responde SOLO con JSON válido (sin markdown, sin backticks):
 
 ## ⚠️ INSTRUCCIONES CRÍTICAS:
 
-### TONO:
-1. **PROFESIONAL Y EQUILIBRADO**: Sin gritos, sin mayúsculas excesivas
-2. **PERSONALIZADO**: Usa el primer nombre solo cuando sea natural (1-3 veces máximo)
-3. **LENGUAJE HUMANO**: Claro, directo, reconocible
+### 1. JERARQUÍA, NO IGUALDAD:
+❌ NO HAGAS: Desarrollar todos los planetas por igual
+✅ SÍ HAZLO: Identifica qué planetas tienen MÁS PESO este año:
+   - Sol + Saturno + planetas en casas angulares → MÁS DESARROLLO (200 palabras)
+   - Mercurio + Luna → DESARROLLO MEDIO (150 palabras)
+   - Venus + Marte + Júpiter → DESARROLLO SINTÉTICO (120 palabras)
 
-### LAS 3 CAPAS SON OBLIGATORIAS:
-4. En cada planeta de comparaciones_planetarias:
-   - **NATAL**: Quién eres (identidad permanente)
-   - **SOLAR_RETURN**: Qué se activa este año (área temporal)
-   - **CHOQUE**: Dónde choca o potencia (comparación específica con casas reales)
-   - **QUE_HACER**: Acción concreta (NO consejos genéricos)
+### 2. GUIAR, NO DESCRIBIR:
+❌ NO HAGAS: "Este año será intenso y transformador"
+✅ SÍ HAZLO: "Este año no está diseñado para empujar hacia afuera, sino para reordenarte por dentro"
 
-### ESPECÍFICO CON CASAS:
-5. **SÉ MUY ESPECÍFICO**: Usa las casas reales. Ejemplo:
-   - "Natal Sol Casa 3 (comunicación) vs SR Sol Casa 10 (liderazgo público)"
-   - "Normalmente brillas comunicando, pero este año debes brillar liderando"
-   - Evita: "este año será intenso" o "debes trabajar en ti"
+Cada párrafo debe CONDUCIR A UNA COMPRENSIÓN CLARA, no solo describir.
 
-### USA INTERPRETACIONES NATALES:
-6. ${natalInterpretations ? 'SE HAN PROPORCIONADO INTERPRETACIONES NATALES. ÚSALAS en natal.descripcion de cada planeta. Extrae la esencia de quién ES la persona.' : 'No hay interpretaciones natales. Genera descripciones de identidad permanente basadas en la carta natal.'}
+### 3. TONO DIRECTO Y POTENTE:
+✅ Frases cortas
+✅ Sin metáforas largas
+✅ Contraste claro (quién eres vs qué pide el año)
+✅ Ejemplos concretos con casas reales: "Natal Sol Casa 3 (comunicación) vs SR Sol Casa 10 (liderazgo público)"
 
-### NO INCLUYAS:
-7. ❌ NO uses "Formación Temprana" (eso es solo para Carta Natal)
-8. ❌ NO uses estructura tooltip/drawer en la interpretación principal
-9. ✅ SÍ USA lenguaje disruptivo/motivador pero profesional y concreto (coherente con planetas individuales de Natal)
-10. ❌ NO incluyas direcciones completas
+### 4. USA INTERPRETACIONES NATALES:
+${natalInterpretations ? '✅ SE HAN PROPORCIONADO INTERPRETACIONES NATALES. ÚSALAS en natal.descripcion de cada planeta. Extrae la esencia de quién ES la persona.' : 'No hay interpretaciones natales. Genera descripciones de identidad permanente basadas en la carta natal.'}
 
-### TONO OBLIGATORIO:
-11. ✅ USA tono DISRUPTIVO/MOTIVADOR: "Este año NO es para..." "Tu poder está en..." "Esto NO es accidente..."
-12. ✅ CONCRETO Y PROFESIONAL: Sin metáforas largas, directo al punto
-13. ✅ MOTIVADOR PERO REAL: "No toleras..." "Sientes urgencia por..." "Las personas notan que..."
+### 5. LA SÍNTESIS FINAL ES CRÍTICA:
+La "sintesis_final" debe ser TU FRASE MÁS POTENTE.
+Es lo que el usuario recordará. Hazla valer.
+
+Ejemplo:
+"Este no es un año para demostrar quién eres. Es un año para recordarlo en silencio. Lo que no sanes ahora, te perseguirá después. Lo que integres, será tu base futura."
+
+### 6. NO INCLUYAS:
+❌ Formación Temprana (solo para Natal)
+❌ Estructura tooltip/drawer en interpretación principal
+❌ Metáforas largas o lenguaje vago
+❌ Primer nombre usado en exceso (máximo 2-3 veces)
+
+### 7. LÍNEA DE TIEMPO SINTÉTICA:
+Cada periodo debe ser CONCISO (50-70 palabras). No párrafos largos.
 
 **GENERA LA INTERPRETACIÓN AHORA.**
 `;
