@@ -338,6 +338,12 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
       return;
     }
 
+    // ⚠️ Solar Return: Los aspectos aún no están implementados
+    if (chartType === 'solar-return') {
+      alert('🚧 La generación de aspectos en Solar Return estará disponible próximamente.\n\nPor ahora solo puedes generar comparaciones de planetas individuales.');
+      return;
+    }
+
     setGeneratingAspect(true);
     setIsGenerating(true); // ⭐ NUEVO: Para el modal
     setAspectTooltipLocked(true);
