@@ -90,133 +90,145 @@ Responde SOLO con JSON válido (sin markdown, sin backticks):
 {
   "apertura_anual": {
     "ano_solar": "${returnYear}-${returnYear + 1}",
-    "tema_central": "Una frase de 8-12 palabras. DIRECCIÓN CLARA, no descripción. Ejemplo: 'Un año para retirarte, redefinirte y volver con otra luz'",
+    "tema_central": "Una frase de 10-15 palabras. DIRECCIÓN CLARA + PROPÓSITO. Ejemplo: 'Un año de retiro consciente para redefinir tu identidad antes de un nuevo comienzo visible'",
     "eje_del_ano": "1-2 frases POTENTES (40-60 palabras MÁXIMO). ¿Qué está pasando REALMENTE? NO describir, DIRIGIR. Ejemplo: 'Este año no está diseñado para empujar hacia afuera, sino para reordenarte por dentro. La energía general te lleva a un proceso de cierre, limpieza y redefinición de identidad.'",
-    "como_se_siente": "2 párrafos cortos (120-150 palabras TOTAL). Ritmo del año + tipo de decisiones. CONCRETO, NO METAFÓRICO. Ejemplo: 'No es un año de visibilidad constante. Es un año de gestación interna. Cada vez que intentes acelerar procesos o forzar resultados, sentirás confusión o desgaste. Cada vez que pares, observes y escuches, aparecerán respuestas claras. \n\nLas decisiones no llegarán como grandes revelaciones, sino como pequeños ajustes cotidianos que exigen honestidad brutal contigo mismo.'",
-    "conexion_natal": "1 párrafo (70-90 palabras). Conecta QUIÉN ES (natal) con LO QUE PIDE EL AÑO (solar). USAR CONTRASTE CLARO. Ejemplo: 'Con Sol natal en Acuario Casa 1, tu naturaleza es: independiente, visible, orientada a marcar tu propio camino. Pero este año, con el Sol SR en Casa 12, la vida te pide lo contrario: bajar el ritmo, soltar la necesidad de definirte externamente, explorar lo que no se ve. 👉 No es contradicción. Es la fase previa a un nuevo comienzo.'"
+    "como_se_siente": "1 párrafo (80-100 palabras). Ritmo del año + tipo de decisiones. CONCRETO, NO METAFÓRICO. SIN REPETIR la misma idea varias veces. UNA SOLA VEZ cada concepto. Termina con FRASE DE CONSECUENCIA. Ejemplo: 'No es un año de visibilidad constante, sino de gestación interna. Las decisiones no llegarán como grandes revelaciones, sino como pequeños ajustes cotidianos que exigen honestidad brutal. Este no es un año para acelerar, sino para depurar. Si escuchas, avanzas. Si fuerzas, te agotas.'",
+    "conexion_natal": "1 párrafo (70-90 palabras). Conecta QUIÉN ES (natal) con LO QUE PIDE EL AÑO (solar). USAR CONTRASTE CLARO + FRASE DE DIRECCIÓN EVOLUTIVA. Ejemplo: 'Con Sol natal en Acuario Casa 1, tu naturaleza es: independiente, visible, orientada a marcar tu propio camino. Pero este año, con el Sol SR en Casa 12, la vida te pide lo contrario: bajar el ritmo, soltar la necesidad de definirte externamente, explorar lo que no se ve. 👉 Este año no anula tu naturaleza acuariana: la está preparando para su siguiente versión.'"
   },
 
   "como_se_vive_siendo_tu": {
     "facilidad": "40-60 palabras. Lista de 3-4 items. Ejemplo: '✅ Soledad elegida · Reflexión profunda · Conexión espiritual o psicológica · Procesos creativos privados'",
     "incomodidad": "40-60 palabras. Lista de 3-4 items. Ejemplo: '⚠️ Falta de resultados visibles inmediatos · Sensación de estar parado · Menos validación externa'",
     "medida_del_ano": "60-80 palabras. UNA FRASE DIRECTA sobre cómo NO medir el año + cómo SÍ medirlo. Ejemplo: '👉 Si mides este año con criterios de productividad externa, sentirás frustración. Si lo mides por coherencia interna, será uno de los más importantes de tu vida.'",
-    "reflejos_obsoletos": "30-50 palabras. Lista de 3 items. Ejemplo: 'Buscar aprobación · Definirte por lo que haces · Reaccionar antes de sentir'",
-    "actitud_nueva": "30-50 palabras. Lista de 3 items. Ejemplo: 'Paciencia · Escucha interna · Confianza en procesos invisibles'"
+    "reflejos_obsoletos": "30-50 palabras. Lista de 3 items con LENGUAJE ACTIVO. Ejemplo: 'Buscar validación externa antes de actuar · Definirte por tus logros visibles · Reaccionar emocionalmente antes de comprender'",
+    "actitud_nueva": "30-50 palabras. Lista de 3 items con LENGUAJE ACTIVO. Ejemplo: 'Elegir validarte desde dentro · Confiar en procesos invisibles · Pausar antes de responder'"
   },
 
   "comparaciones_planetarias": {
     "sol": {
       "natal": {
         "posicion": "${natalSol?.sign} en Casa ${natalSol?.house}",
-        "descripcion": "80-100 palabras. ¿QUIÉN ERES en esencia? Tu propósito vital base. ${natalInterpretations?.sol ? 'Usa la interpretación natal guardada como base.' : 'Genera descripción de identidad permanente.'}"
+        "descripcion": "60-80 palabras. ¿QUIÉN ERES en esencia? Tu propósito vital base. ${natalInterpretations?.sol ? 'Usa la interpretación natal guardada como base.' : 'Genera descripción de identidad permanente.'}"
       },
       "solar_return": {
         "posicion": "${srSol?.sign} (mismo signo) en Casa ${srSol?.house} SR",
-        "descripcion": "80-100 palabras. ¿QUÉ ÁREA DE VIDA SE ACTIVA este año? Dónde pones tu energía vital. El Sol SIEMPRE está en el mismo signo natal, pero la CASA SR cambia y marca dónde brillas ESTE AÑO."
+        "descripcion": "60-80 palabras. ¿QUÉ ÁREA DE VIDA SE ACTIVA este año? Dónde pones tu energía vital. El Sol SIEMPRE está en el mismo signo natal, pero la CASA SR cambia y marca dónde brillas ESTE AÑO."
       },
-      "choque": "120-150 palabras. ¿DÓNDE CHOCA O POTENCIA? Compara quién eres (natal) vs dónde debes brillar este año (SR). Sé MUY ESPECÍFICO con las casas. Ejemplo: 'Normalmente brillas comunicando ideas (Casa 3 natal), pero este año debes brillar liderando públicamente (Casa 10 SR). El choque: tu zona cómoda es hablar/escribir, pero este año necesitas visibilidad y responsabilidad pública.'",
-      "que_hacer": "100-120 palabras. ¿QUÉ CONVIENE HACER AHORA? Acción concreta basada en el choque. NO consejos genéricos. Ejemplo: 'No te quedes solo compartiendo ideas (tu zona cómoda Casa 3), comprométete con proyectos donde tengas que liderar visiblemente (Casa 10 SR). Acepta responsabilidades públicas aunque no te sientas 100% preparado.'"
+      "choque": "100-120 palabras. ¿DÓNDE CHOCA O POTENCIA? Compara quién eres (natal) vs dónde debes brillar este año (SR). Sé MUY ESPECÍFICO con las casas. Ejemplo: 'Normalmente brillas comunicando ideas (Casa 3 natal), pero este año debes brillar liderando públicamente (Casa 10 SR). El choque: tu zona cómoda es hablar/escribir, pero este año necesitas visibilidad y responsabilidad pública.'",
+      "que_hacer": "80-100 palabras. ¿QUÉ CONVIENE HACER AHORA? Acción concreta basada en el choque. NO consejos genéricos. Ejemplo: 'No te quedes solo compartiendo ideas (tu zona cómoda Casa 3), comprométete con proyectos donde tengas que liderar visiblemente (Casa 10 SR). Acepta responsabilidades públicas aunque no te sientas 100% preparado.'",
+      "mandato_del_ano": "UNA FRASE DIRECTIVA (15-25 palabras). Formato: 'Este año, este planeta te pide X. Si haces Y, fluye. Si haces Z, se bloquea.' Ejemplo: 'Este año tu Sol te pide retirarte y gestarte. Si escuchas, creces. Si fuerzas visibilidad, te agota.'"
     },
 
     "luna": {
       "natal": {
         "posicion": "${natalLuna?.sign} en Casa ${natalLuna?.house}",
-        "descripcion": "80-100 palabras. ¿CÓMO ERES EMOCIONALMENTE? Tu mundo emocional base, qué te da seguridad. ${natalInterpretations?.luna ? 'Usa la interpretación natal guardada.' : 'Genera descripción emocional permanente.'}"
+        "descripcion": "60-80 palabras. ¿CÓMO ERES EMOCIONALMENTE? Tu mundo emocional base, qué te da seguridad. ${natalInterpretations?.luna ? 'Usa la interpretación natal guardada.' : 'Genera descripción emocional permanente.'}"
       },
       "solar_return": {
         "posicion": "${srLuna?.sign} en Casa ${srLuna?.house} SR",
-        "descripcion": "80-100 palabras. ¿QUÉ NECESITAS EMOCIONALMENTE este año? Dónde buscas seguridad emocional durante este ciclo."
+        "descripcion": "60-80 palabras. ¿QUÉ NECESITAS EMOCIONALMENTE este año? Dónde buscas seguridad emocional durante este ciclo."
       },
-      "choque": "120-150 palabras. Compara necesidad emocional natal vs SR. Ejemplo: 'Natal Luna Cáncer Casa 4 (necesitas hogar/familia) vs SR Luna Capricornio Casa 10 (necesitas logros/estructura). Choque: normalmente te sientes seguro en casa, pero este año necesitas sentirte seguro logrando cosas públicamente.'",
-      "que_hacer": "100-120 palabras. Acción emocional concreta."
+      "choque": "100-120 palabras. Compara necesidad emocional natal vs SR. Ejemplo: 'Natal Luna Cáncer Casa 4 (necesitas hogar/familia) vs SR Luna Capricornio Casa 10 (necesitas logros/estructura). Choque: normalmente te sientes seguro en casa, pero este año necesitas sentirte seguro logrando cosas públicamente.'",
+      "que_hacer": "80-100 palabras. Acción emocional concreta.",
+      "mandato_del_ano": "UNA FRASE DIRECTIVA (15-25 palabras). Formato: 'Este año, tu Luna te pide X. Si haces Y, fluye. Si haces Z, se bloquea.'"
     },
 
     "mercurio": {
       "natal": {
         "posicion": "Describir signo y casa natal",
-        "descripcion": "80-100 palabras. ¿CÓMO PIENSAS Y TE COMUNICAS normalmente? ${natalInterpretations?.mercurio ? 'Usa interpretación natal.' : 'Genera descripción mental permanente.'}"
+        "descripcion": "60-80 palabras. ¿CÓMO PIENSAS Y TE COMUNICAS normalmente? ${natalInterpretations?.mercurio ? 'Usa interpretación natal.' : 'Genera descripción mental permanente.'}"
       },
       "solar_return": {
         "posicion": "${srMercurio?.sign} en Casa ${srMercurio?.house} SR",
-        "descripcion": "80-100 palabras. ¿DÓNDE Y CÓMO DEBES PENSAR/COMUNICAR este año?"
+        "descripcion": "60-80 palabras. ¿DÓNDE Y CÓMO DEBES PENSAR/COMUNICAR este año?"
       },
-      "choque": "120-150 palabras. Comparar estilo mental natal vs SR.",
-      "que_hacer": "100-120 palabras. Acción mental concreta."
+      "choque": "80-100 palabras. Comparar estilo mental natal vs SR.",
+      "que_hacer": "70-90 palabras. Acción mental concreta.",
+      "mandato_del_ano": "UNA FRASE DIRECTIVA (15-25 palabras). Formato: 'Este año, Mercurio te pide X. Si haces Y, fluye. Si haces Z, se bloquea.'"
     },
 
     "venus": {
       "natal": {
         "posicion": "Describir signo y casa natal",
-        "descripcion": "80-100 palabras. ¿CÓMO AMAS Y QUÉ VALORAS? ${natalInterpretations?.venus ? 'Usa interpretación natal.' : 'Genera descripción de valores permanente.'}"
+        "descripcion": "60-80 palabras. ¿CÓMO AMAS Y QUÉ VALORAS? ${natalInterpretations?.venus ? 'Usa interpretación natal.' : 'Genera descripción de valores permanente.'}"
       },
       "solar_return": {
         "posicion": "${srVenus?.sign} en Casa ${srVenus?.house} SR",
-        "descripcion": "80-100 palabras. ¿QUÉ DEBES VALORAR Y CÓMO AMAR este año?"
+        "descripcion": "60-80 palabras. ¿QUÉ DEBES VALORAR Y CÓMO AMAR este año?"
       },
-      "choque": "120-150 palabras. Comparar valores natales vs SR.",
-      "que_hacer": "100-120 palabras. Acción relacional concreta."
+      "choque": "80-100 palabras. Comparar valores natales vs SR.",
+      "que_hacer": "70-90 palabras. Acción relacional concreta.",
+      "mandato_del_ano": "UNA FRASE DIRECTIVA (15-25 palabras). Formato: 'Este año, Venus te pide X. Si haces Y, fluye. Si haces Z, se bloquea.'"
     },
 
     "marte": {
       "natal": {
         "posicion": "Describir signo y casa natal",
-        "descripcion": "80-100 palabras. ¿CÓMO ACTÚAS Y ENFRENTAS LA VIDA? ${natalInterpretations?.marte ? 'Usa interpretación natal.' : 'Genera descripción de acción permanente.'}"
+        "descripcion": "60-80 palabras. ¿CÓMO ACTÚAS Y ENFRENTAS LA VIDA? ${natalInterpretations?.marte ? 'Usa interpretación natal.' : 'Genera descripción de acción permanente.'}"
       },
       "solar_return": {
         "posicion": "${srMarte?.sign} en Casa ${srMarte?.house} SR",
-        "descripcion": "80-100 palabras. ¿DÓNDE Y CÓMO DEBES ACTUAR este año?"
+        "descripcion": "60-80 palabras. ¿DÓNDE Y CÓMO DEBES ACTUAR este año?"
       },
-      "choque": "120-150 palabras. Comparar estilo de acción natal vs SR.",
-      "que_hacer": "100-120 palabras. Acción concreta de iniciativa."
+      "choque": "80-100 palabras. Comparar estilo de acción natal vs SR.",
+      "que_hacer": "70-90 palabras. Acción concreta de iniciativa.",
+      "mandato_del_ano": "UNA FRASE DIRECTIVA (15-25 palabras). Formato: 'Este año, Marte te pide X. Si haces Y, fluye. Si haces Z, se bloquea.'"
     },
 
     "jupiter": {
       "natal": {
         "posicion": "Describir signo y casa natal",
-        "descripcion": "80-100 palabras. ¿DÓNDE CRECES Y QUÉ TE DA FE? ${natalInterpretations?.jupiter ? 'Usa interpretación natal.' : 'Genera descripción de expansión permanente.'}"
+        "descripcion": "60-80 palabras. ¿DÓNDE CRECES Y QUÉ TE DA FE? ${natalInterpretations?.jupiter ? 'Usa interpretación natal.' : 'Genera descripción de expansión permanente.'}"
       },
       "solar_return": {
         "posicion": "${srJupiter?.sign} en Casa ${srJupiter?.house} SR",
-        "descripcion": "80-100 palabras. ¿DÓNDE SE EXPANDE TU VIDA este año?"
+        "descripcion": "60-80 palabras. ¿DÓNDE SE EXPANDE TU VIDA este año?"
       },
-      "choque": "120-150 palabras. Comparar área de expansión natal vs SR.",
-      "que_hacer": "100-120 palabras. Cómo aprovechar la expansión."
+      "choque": "80-100 palabras. Comparar área de expansión natal vs SR.",
+      "que_hacer": "70-90 palabras. Cómo aprovechar la expansión.",
+      "mandato_del_ano": "UNA FRASE DIRECTIVA (15-25 palabras). Formato: 'Este año, Júpiter te pide X. Si haces Y, fluye. Si haces Z, se bloquea.'"
     },
 
     "saturno": {
       "natal": {
         "posicion": "Describir signo y casa natal",
-        "descripcion": "80-100 palabras. ¿DÓNDE ESTÁN TUS LÍMITES Y RESPONSABILIDADES BASE? ${natalInterpretations?.saturno ? 'Usa interpretación natal.' : 'Genera descripción de estructura permanente.'}"
+        "descripcion": "60-80 palabras. ¿DÓNDE ESTÁN TUS LÍMITES Y RESPONSABILIDADES BASE? ${natalInterpretations?.saturno ? 'Usa interpretación natal.' : 'Genera descripción de estructura permanente.'}"
       },
       "solar_return": {
         "posicion": "${srSaturno?.sign} en Casa ${srSaturno?.house} SR",
-        "descripcion": "80-100 palabras. ¿QUÉ DEBES ESTRUCTURAR/LIMITAR este año?"
+        "descripcion": "60-80 palabras. ¿QUÉ DEBES ESTRUCTURAR/LIMITAR este año?"
       },
-      "choque": "120-150 palabras. Comparar área de límites natal vs SR.",
-      "que_hacer": "100-120 palabras. Cómo trabajar con los límites del año."
+      "choque": "80-100 palabras. Comparar área de límites natal vs SR.",
+      "que_hacer": "70-90 palabras. Cómo trabajar con los límites del año.",
+      "mandato_del_ano": "UNA FRASE DIRECTIVA (15-25 palabras). Formato: 'Este año, Saturno te pide X. Si haces Y, fluye. Si haces Z, se bloquea.'"
     }
   },
 
   "linea_tiempo_anual": {
     "mes_1_2": {
       "titulo": "Mes 1–2 | Activación",
-      "descripcion": "50-70 palabras. SINTÉTICO. Ejemplo: 'Retiro, introspección, sueños intensos. Observa más de lo que actúas. Presta atención a los mensajes internos que surgen.'"
+      "descripcion": "50-70 palabras. SINTÉTICO. Ejemplo: 'Retiro, introspección, sueños intensos. Observa más de lo que actúas. Presta atención a los mensajes internos que surgen.'",
+      "accion_clave": "Una acción específica (3-5 palabras). Ejemplo: 'Observar sin decidir'"
     },
     "mes_3_4": {
       "titulo": "Mes 3–4 | Primer ajuste",
-      "descripcion": "50-70 palabras. SINTÉTICO. Ejemplo: 'Situaciones que te obligan a expresarte con más honestidad. No puedes seguir callando lo esencial. ¿Cómo puedes comunicarte de manera más auténtica?'"
+      "descripcion": "50-70 palabras. SINTÉTICO. Ejemplo: 'Situaciones que te obligan a expresarte con más honestidad. No puedes seguir callando lo esencial. ¿Cómo puedes comunicarte de manera más auténtica?'",
+      "accion_clave": "Una acción específica (3-5 palabras). Ejemplo: 'Decir lo que llevas callando'"
     },
     "mes_6_7": {
       "titulo": "Mes 6–7 | Punto medio",
-      "descripcion": "50-70 palabras. SINTÉTICO. Ejemplo: 'Comprensión clara de qué identidad ya no te representa. Decisiones internas importantes. No puedes ignorar la necesidad de alinearte con tus valores auténticos.'"
+      "descripcion": "50-70 palabras. SINTÉTICO. Ejemplo: 'Comprensión clara de qué identidad ya no te representa. Decisiones internas importantes. No puedes ignorar la necesidad de alinearte con tus valores auténticos.'",
+      "accion_clave": "Una acción específica (3-5 palabras). Ejemplo: 'Soltar una identidad'"
     },
     "mes_9_10": {
       "titulo": "Mes 9–10 | Primeros frutos",
-      "descripcion": "50-70 palabras. SINTÉTICO. Ejemplo: 'Pequeñas manifestaciones externas de todo lo trabajado dentro. No es el final, es el anuncio. Es posible que necesites ajustar expectativas y ser flexible ante el cambio.'"
+      "descripcion": "50-70 palabras. SINTÉTICO. Ejemplo: 'Pequeñas manifestaciones externas de todo lo trabajado dentro. No es el final, es el anuncio. Es posible que necesites ajustar expectativas y ser flexible ante el cambio.'",
+      "accion_clave": "Una acción específica (3-5 palabras). Ejemplo: 'Mostrar algo nuevo'"
     },
     "mes_12": {
       "titulo": "Mes 12 | Cierre",
-      "descripcion": "50-70 palabras. SINTÉTICO. Ejemplo: 'Sensación de coherencia interna. Preparación para un nuevo ciclo mucho más visible. Libera cualquier miedo o duda que te haya limitado.'"
+      "descripcion": "50-70 palabras. SINTÉTICO. Ejemplo: 'Sensación de coherencia interna. Preparación para un nuevo ciclo mucho más visible. Libera cualquier miedo o duda que te haya limitado.'",
+      "accion_clave": "Una acción específica (3-5 palabras). Ejemplo: 'Cerrar con conciencia'"
     }
   },
 
@@ -232,22 +244,29 @@ Responde SOLO con JSON válido (sin markdown, sin backticks):
     "Frase práctica 3."
   ],
 
-  "calendario_lunar_anual": [
-    {
-      "mes": "Enero ${returnYear}",
-      "luna_nueva": {
-        "fecha": "Fecha aproximada YYYY-MM-DD",
-        "signo": "Capricornio",
-        "accion": "50 palabras. Qué plantar/iniciar en esta Luna Nueva específica."
+  "uso_calendario_lunar": {
+    "marco_general": "80-100 palabras. CÓMO USAR las lunas este año específico. Ejemplo: 'Este no es un año para iniciar grandes proyectos en luna nueva, sino para observar qué emerge. 🌑 Lunas Nuevas → intención interna, siembra silenciosa. 🌕 Lunas Llenas → cierre emocional, comprensión, liberación. Las lunas funcionan como marcadores de ritmo interno, no de acción externa.'",
+    "lunas_clave": [
+      {
+        "fase": "Luna Nueva o Luna Llena",
+        "fecha_aproximada": "YYYY-MM-DD",
+        "signo": "Signo zodiacal",
+        "por_que_es_clave": "60-80 palabras. Por qué esta luna es especialmente importante ESTE AÑO para ESTE usuario. Conectar con temas del SR."
       },
-      "luna_llena": {
-        "fecha": "Fecha aproximada YYYY-MM-DD",
-        "signo": "Cáncer",
-        "accion": "50 palabras. Qué culmina/liberar en esta Luna Llena."
+      {
+        "fase": "Luna Nueva o Luna Llena",
+        "fecha_aproximada": "YYYY-MM-DD",
+        "signo": "Signo zodiacal",
+        "por_que_es_clave": "60-80 palabras."
+      },
+      {
+        "fase": "Luna Nueva o Luna Llena",
+        "fecha_aproximada": "YYYY-MM-DD",
+        "signo": "Signo zodiacal",
+        "por_que_es_clave": "60-80 palabras."
       }
-    }
-    // Repetir para los 12 meses con signos lunares correctos
-  ],
+    ]
+  },
 
   "sintesis_final": {
     "frase_cierre_potente": "3-4 frases CORTAS Y POTENTES (60-80 palabras MÁXIMO). Tono directo, sin metáforas. Ejemplo: 'Este no es un año para demostrar quién eres. Es un año para recordarlo en silencio. Lo que no sanes ahora, te perseguirá después. Lo que integres, será tu base futura.'",
@@ -310,6 +329,20 @@ Ejemplo:
 
 ### 7. LÍNEA DE TIEMPO SINTÉTICA:
 Cada periodo debe ser CONCISO (50-70 palabras). No párrafos largos.
+INCLUIR acción_clave por cada fase (3-5 palabras accionables).
+
+### 8. CALENDARIO LUNAR - NO LISTAR TODO:
+❌ NO HAGAS: Listar 24 fechas (12 lunas nuevas + 12 lunas llenas)
+✅ SÍ HAZLO:
+   - Marco general: CÓMO usar las lunas este año (80-100 palabras)
+   - 3 LUNAS CLAVE: Las más importantes para ESTE usuario ESTE año
+   - Conectar con temas específicos del SR
+
+### 9. MANDATOS PLANETARIOS:
+Cada planeta debe terminar con una FRASE DE MANDATO:
+"Este año, [planeta] te pide X. Si haces Y, fluye. Si haces Z, se bloquea."
+
+Esto convierte interpretación en guía accionable.
 
 **GENERA LA INTERPRETACIÓN AHORA.**
 `;
