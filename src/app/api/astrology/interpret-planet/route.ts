@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
 import { generatePlanetInterpretation } from '@/services/tripleFusedInterpretationService';
 import { getUserProfile } from '@/services/userDataService';
+import Chart from '@/models/Chart';
 import * as admin from 'firebase-admin';
 import OpenAI from 'openai';
 
@@ -123,13 +124,17 @@ export async function POST(request: NextRequest) {
       console.log('🔄 [PLANET] Generando COMPARACIÓN Natal vs Solar Return');
 
       // Obtener carta natal del usuario
-      const natalChart = await db.collection('users').findOne({ userId });
-      if (!natalChart?.natalChart?.planets) {
+      const chartDoc = await Chart.findOne({ userId });
+      console.log('📊 Chart document found:', !!chartDoc);
+      console.log('📊 Has natalChart:', !!chartDoc?.natalChart);
+      console.log('📊 Has planets:', !!chartDoc?.natalChart?.planets);
+
+      if (!chartDoc?.natalChart?.planets) {
         throw new Error('Carta natal no encontrada - se necesita para generar comparación');
       }
 
       // Buscar planeta en carta natal
-      const natalPlanet = natalChart.natalChart.planets.find((p: any) => p.name === planetName);
+      const natalPlanet = chartDoc.natalChart.planets.find((p: any) => p.name === planetName);
       if (!natalPlanet) {
         throw new Error(`Planeta ${planetName} no encontrado en carta natal`);
       }
