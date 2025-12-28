@@ -633,8 +633,20 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
                   if (result.success) {
                     console.log('✅ Planeta generado:', planet.name);
+                    console.log('📦 Resultado de interpret-planet:', result);
 
-                    // Get Firebase ID token for authentication
+                    // ⭐ USAR DIRECTAMENTE EL RESULTADO DE interpret-planet
+                    if (result.interpretation?.drawer && onOpenDrawer) {
+                      console.log('✅ Abriendo drawer directamente desde interpret-planet');
+                      onOpenDrawer(result.interpretation.drawer);
+                      setGeneratingAspect(false);
+                      setIsGenerating(false);
+                      setShowLongGeneratingMessage(false);
+                      clearTimeout(longGenerationTimer);
+                      return;
+                    }
+
+                    // Si no viene en el resultado directo, refrescar interpretaciones completas
                     const token = await user!.getIdToken();
 
                     // Refrescar interpretaciones (⭐ USAR ENDPOINT CORRECTO SEGÚN CHARTTYPE)
