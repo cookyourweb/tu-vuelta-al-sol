@@ -259,6 +259,15 @@ function processProkeralaData(apiResponse: any, latitude: number, longitude: num
   const planets = planetData.map((planet: any) => {
     const houseValue = planet.house_number || planet.house || planet.housePosition || 1; // ← Obtener valor de casa
 
+    // 🐛 DEBUG: Log raw planeta data para detectar valores incorrectos
+    if (planet.name === 'Neptune' || planet.name === 'Neptuno') {
+      console.log(`🐛 DEBUG NEPTUNO RAW:`, JSON.stringify(planet, null, 2));
+      console.log(`🐛 DEBUG house_number:`, planet.house_number);
+      console.log(`🐛 DEBUG house:`, planet.house);
+      console.log(`🐛 DEBUG housePosition:`, planet.housePosition);
+      console.log(`🐛 DEBUG houseValue computed:`, houseValue);
+    }
+
     const result = {
       name: translatePlanet(planet.name || 'Unknown'),
       sign: getSignFromLongitude(planet.longitude || 0),
