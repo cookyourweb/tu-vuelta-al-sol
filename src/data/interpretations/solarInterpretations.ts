@@ -94,7 +94,7 @@ Tu trabajo en esta vida:
 5. USAR TU DIFERENCIA PARA SERVIR
    → Tu rareza no es para ti solo - es para expandir lo que es posible`,
 
-      poetico: `Imagina que naciste con GAFAS DE VER FUTUROS.
+      impacto_real: `Imagina que naciste con GAFAS DE VER FUTUROS.
 
 Mientras la mayoría de las personas caminan mirando al suelo, calculando el siguiente paso seguro en el camino conocido, tú levantas la vista automáticamente y ves CONSTELACIONES DE POSIBILIDADES flotando en el aire que aún no se han manifestado en el plano físico.
 
@@ -228,7 +228,7 @@ Tu trabajo en esta vida:
 5. USAR TU SENSIBILIDAD como don sagrado
    → No como carga a esconder`,
 
-      poetico: `Imagina que eres un OCÉANO HECHO PERSONA.
+      impacto_real: `Imagina que eres un OCÉANO HECHO PERSONA.
 
 Mientras otros tienen fronteras rígidas entre el yo y el tú, tú eres como el mar que se mezcla suavemente con cada río que llega a ti. No pierdes tu esencia en esa mezcla - la COMPARTES.
 
