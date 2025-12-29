@@ -3,9 +3,9 @@
 // ═══════════════════════════════════════════════════════════
 
 export interface TooltipContent {
-  titulo: string;              // "🌟 El Visionario Auténtico"
+  titulo: string;              // Título profesional sin emojis
   descripcionBreve: string;    // "Sol en Acuario en Casa 1"
-  significado: string;         // 2-4 líneas con lenguaje triple
+  significado: string;         // 2-4 líneas con lenguaje observador
   efecto: string;              // 1 línea de efecto
   tipo: string;                // 1 línea de tipo/cualidad
 }
@@ -18,13 +18,13 @@ export interface ShadowWork {
 }
 
 export interface DrawerContent {
-  titulo: string;              // Título poético completo
+  titulo: string;              // Título profesional completo
   educativo: string;           // Múltiples párrafos (usar \n\n)
-  poderoso: string;            // Múltiples párrafos
-  poetico: string;             // Múltiples párrafos
+  observador: string;          // Múltiples párrafos - Cómo se manifiesta
+  impacto_real: string;        // Múltiples párrafos - Impacto concreto en la vida
   sombras: ShadowWork[];       // Array de sombras
   sintesis: {
-    frase: string;             // "Tu rareza es tu revolución"
+    frase: string;             // Frase memorable
     declaracion: string;       // Declaración personalizada
   };
 }

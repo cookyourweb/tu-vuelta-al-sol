@@ -449,14 +449,33 @@ Responde ÚNICAMENTE con un JSON válido:
   "mantra_personal": "[Mantra POÉTICO Y EMPODERADOR - inspirador y práctico: 'Crezco a través de [experiencia específica del área]. Los desafíos en [contexto] me fortalecen. Abrazo el cambio porque es mi forma de evolucionar.']"
 }
 
+⚠️ TONO Y LENGUAJE (CRÍTICO - SOBRESCRIBE TODAS LAS INSTRUCCIONES ANTERIORES DE ESTILO):
+
+❌ NO uses lenguaje poético, metáforas elaboradas ni tono épico/místico
+❌ NO uses palabras como: "arquetipo cósmico", "portal", "misión del alma", "revolución interna", "superpoder", "maestro cósmico"
+❌ NO escribas en mayúsculas enfáticas (CONCENTRACIÓN DE PODER, DIÁLOGO PRODUCTIVO, etc.)
+❌ NO uses emojis excesivos ni tono motivacional inspiracional
+❌ NO uses frases como "Eres un arquitecto del lenguaje", "Tu misión cósmica", "Tu superpoder está en..."
+
+✅ SÍ usa lenguaje psicológico, conductual y claro
+✅ SÍ describe comportamientos observables y situaciones concretas
+✅ SÍ usa tono adulto, analítico, directo
+✅ SÍ explica qué se activa, cómo se vive, qué hacer
+
+Ejemplo de TONO INCORRECTO:
+"Eres un arquitecto del lenguaje cuya misión cósmica es transformar cada conversación en un acto de creación consciente. Tu SUPERPODER está en..."
+
+Ejemplo de TONO CORRECTO:
+"Tu proceso de maduración está ligado a la expresión creativa y la comunicación. Desde temprano, puedes haber sentido que expresarte libremente no era tan sencillo. Esta posición te pide aprender a estructurar tu creatividad y asumir responsabilidad sobre lo que comunicas."
+
 IMPORTANT INSTRUCTIONS:
 1. All fields must contain REAL and PERSONALIZED content for ${userProfile.name} - NO placeholders
-2. Use a direct, honest, transformative and practical tone that emphasizes personal growth through challenges
+2. Use a direct, clear, psychological tone focused on observable behaviors and practical decisions
 3. Use empowering second-person language: "Your development comes from...", "Your growth requires...", "Your evolution involves..."
 4. Practices should ALWAYS be linked to LUNAR PHASES (New Moon, Waxing Moon, Full Moon, Waning Moon) - NEVER weekdays
 5. Use SPECIFIC DATA from the positions (signs, houses, degrees) in each interpretation
 6. Valid and complete JSON without [...] or internal comments
-7. Each planetary interpretation should have an archetypal title focused on transformation
+7. Each planetary interpretation should focus on practical psychological understanding, not mystical archetypes
 8. Integrate concepts naturally that emphasize: personal commitment, resilience, adaptability, calculated risk-taking, learning from feedback, balanced strategies, enduring value
 9. Use practical, action-oriented language - be HONEST AND DIRECT without being aggressive`;
 }

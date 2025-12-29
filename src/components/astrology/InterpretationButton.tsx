@@ -88,9 +88,9 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
 
   const isNatal = type === 'natal';
   const isSolarReturn = type === 'solar-return';
-  // ✅ ENDPOINT ACTUALIZADO: Usar interpret-natal-complete con nuevo prompt Capa 1 expandido
-  // Incluye 50+ subsecciones: transpersonales, puntos sensibles, modalidades, aspectos, retrógrados
-  const endpoint = isNatal ? '/api/astrology/interpret-natal-complete' :
+  // ✅ FIX: Usar interpret-natal-clean para la interpretación revolucionaria completa
+  // interpret-natal-clean usa el prompt disruptivo con advertencias, insights, rituales, etc.
+  const endpoint = isNatal ? '/api/astrology/interpret-natal-clean' :
                 isSolarReturn ? '/api/astrology/interpret-solar-return' :
                 '/api/astrology/interpret-progressed';
 
@@ -291,28 +291,97 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       console.log(`🤖 userId: ${userId}`);
       console.log(`🤖 userProfile:`, userProfile);
 
-      // ✅ USAR ENDPOINT UNIFICADO PARA TODOS LOS TIPOS (incluyendo natal)
-      {
+      // ✅ SINGLE REQUEST FOR ALL CHART TYPES (including natal with clean prompt)
+      if (false && type === 'natal') {
+        // DISABLED: Chunked generation for natal (now using clean prompt in single request)
+        console.log('🔄 ===== GENERANDO EN CHUNKS =====');
+
+        const chunks: Record<string, any> = {};
+        const sections = [
+          { key: 'esencia', section: 'esencia_revolucionaria', label: 'Esencia Revolucionaria', progress: 20 },
+          { key: 'proposito', section: 'proposito_vida', label: 'Propósito de Vida', progress: 40 },
+          { key: 'formacion', section: 'formacion_temprana', label: 'Formación Temprana', progress: 60 },
+          { key: 'nodos', section: 'nodos_lunares', label: 'Nodos Lunares', progress: 80 },
+          { key: 'declaracion', section: 'declaracion_poder', label: 'Declaración de Poder', progress: 100 }
+        ];
+
+        for (const { key, section, label, progress } of sections) {
+          setCurrentChunk(`Generando ${label}...`);
+          setGenerationProgress(`Consultando los astros para ${label.toLowerCase()}...`);
+
+          const chunkResponse = await fetch('/api/astrology/interpret-chunk', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId,
+              chartData,
+              section,
+              userProfile,
+              type,
+              natalChart
+            })
+          });
+
+          if (!chunkResponse.ok) {
+            throw new Error(`Error generando ${label}`);
+          }
+
+          const chunkData = await chunkResponse.json();
+          chunks[key] = chunkData.data;
+          setChunkProgress(progress);
+
+          console.log(`✅ Chunk ${label} completado`);
+        }
+
+        // Combine chunks
+        const interpretationData = {
+          esencia_revolucionaria: chunks['esencia'],
+          proposito_vida: chunks['proposito'],
+          formacion_temprana: chunks['formacion'],
+          nodos_lunares: chunks['nodos'],
+          declaracion_poder: chunks['declaracion'],
+          planetas: [],
+          plan_accion: [],
+          advertencias: [],
+          insights_transformacionales: [],
+          rituales_recomendados: [],
+          integracion_carta: ''
+        };
+
+        const newInterpretation = {
+          interpretation: interpretationData,
+          cached: false,
+          generatedAt: new Date().toISOString(),
+          method: 'chunked'
+        };
+
+        console.log('✅ ===== INTERPRETACIÓN EN CHUNKS COMPLETADA =====');
+
+        setInterpretation(newInterpretation);
+        setHasRecentInterpretation(true);
+        setGenerationProgress('¡Revolución completada! 🎉');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        setShowModal(true);
+
+        await autoSaveInterpretation(newInterpretation);
+
+      } else {
+        // ✅ SINGLE REQUEST FOR NATAL, SOLAR-RETURN AND PROGRESSED
         // ✅ Simulate progress messages
         if (forceRegenerate) {
           setTimeout(() => setGenerationProgress('Conectando con los astros...'), 500);
           setTimeout(() => setGenerationProgress('Analizando tu carta natal...'), 2000);
-          setTimeout(() => setGenerationProgress('Interpretando planetas personales...'), 4000);
-          setTimeout(() => setGenerationProgress('Analizando planetas transpersonales...'), 7000);
-          setTimeout(() => setGenerationProgress('Procesando puntos sensibles (Quirón, Lilith)...'), 10000);
-          setTimeout(() => setGenerationProgress('Calculando elementos y modalidades...'), 13000);
-          setTimeout(() => setGenerationProgress('Generando aspectos principales...'), 16000);
-          setTimeout(() => setGenerationProgress('Integrando tu sinfonía cósmica...'), 20000);
-          setTimeout(() => setGenerationProgress('Casi listo... Creando tu mapa completo...'), 23000);
+          setTimeout(() => setGenerationProgress('Calculando posiciones planetarias...'), 4000);
+          setTimeout(() => setGenerationProgress('Generando interpretación con IA...'), 6000);
+          setTimeout(() => setGenerationProgress('Casi listo... Creando tu mapa de identidad...'), 10000);
         }
 
         const requestBody = isNatal
           ? {
               userId,
-              chartData,
+              natalChart: chartData,
               userProfile,
-              regenerate: forceRegenerate,
-              useChunked: false // Usar generación completa en una llamada
+              regenerate: forceRegenerate
             }
           : isSolarReturn
           ? {
@@ -347,42 +416,19 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
             progressPercentage += 2; // Incremento más rápido para mejor UX
             setChunkProgress(progressPercentage); // ✅ FIX: Actualizar la barra de progreso
 
-            // Actualizar mensaje según progreso (adaptado para carta natal completa)
-            if (isNatal) {
-              if (progressPercentage < 10) {
-                setGenerationProgress('🌟 Iniciando análisis de tu carta natal...');
-              } else if (progressPercentage < 20) {
-                setGenerationProgress('☀️ Interpretando planetas personales (Sol-Saturno)...');
-              } else if (progressPercentage < 35) {
-                setGenerationProgress('⚡ Analizando planetas transpersonales (Urano-Plutón)...');
-              } else if (progressPercentage < 50) {
-                setGenerationProgress('🩹 Procesando puntos sensibles (Quirón, Lilith)...');
-              } else if (progressPercentage < 65) {
-                setGenerationProgress('🔥 Calculando configuración elemental...');
-              } else if (progressPercentage < 75) {
-                setGenerationProgress('🚀 Analizando modalidades astrológicas...');
-              } else if (progressPercentage < 85) {
-                setGenerationProgress('🔗 Interpretando aspectos principales...');
-              } else if (progressPercentage < 95) {
-                setGenerationProgress('🌟 Integrando tu sinfonía cósmica...');
-              } else {
-                setGenerationProgress('✨ Finalizando tu mapa completo de personalidad...');
-              }
+            // Actualizar mensaje según progreso
+            if (progressPercentage < 10) {
+              setGenerationProgress('🌟 Iniciando generación de interpretaciones...');
+            } else if (progressPercentage < 20) {
+              setGenerationProgress('✨ Generando Ascendente y Medio Cielo...');
+            } else if (progressPercentage < 50) {
+              setGenerationProgress('🪐 Interpretando planetas principales...');
+            } else if (progressPercentage < 70) {
+              setGenerationProgress('🌙 Generando nodos lunares y asteroides...');
+            } else if (progressPercentage < 90) {
+              setGenerationProgress('🔥 Analizando elementos y modalidades...');
             } else {
-              // Mensajes para Solar Return y Progresada
-              if (progressPercentage < 10) {
-                setGenerationProgress('🌟 Iniciando generación de interpretaciones...');
-              } else if (progressPercentage < 20) {
-                setGenerationProgress('✨ Generando Ascendente y Medio Cielo...');
-              } else if (progressPercentage < 50) {
-                setGenerationProgress('🪐 Interpretando planetas principales...');
-              } else if (progressPercentage < 70) {
-                setGenerationProgress('🌙 Generando nodos lunares y asteroides...');
-              } else if (progressPercentage < 90) {
-                setGenerationProgress('🔥 Analizando elementos y modalidades...');
-              } else {
-                setGenerationProgress('🔗 Procesando aspectos planetarios...');
-              }
+              setGenerationProgress('🔗 Procesando aspectos planetarios...');
             }
           }
         }, 1000); // ✅ FIX: Cada 1 segundo para actualización más fluida
@@ -443,25 +489,26 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           // ✅ Only solar-return and progressed reach this point (natal uses chunks)
           if (type === 'solar-return') {
             interpretationData = {
+              // ⭐ NUEVA ESTRUCTURA DE 3 CAPAS (Natal → Solar → Acción)
+              apertura_anual: rawInterpretation.apertura_anual,
+              como_se_vive_siendo_tu: rawInterpretation.como_se_vive_siendo_tu,
+              comparaciones_planetarias: rawInterpretation.comparaciones_planetarias,
+              linea_tiempo_anual: rawInterpretation.linea_tiempo_anual,
+              sombras_del_ano: rawInterpretation.sombras_del_ano,
+              claves_integracion: rawInterpretation.claves_integracion,
+              calendario_lunar: rawInterpretation.calendario_lunar_anual,
+              // ⭐ FALLBACK: Mantener soporte para formato antiguo si existe
               esencia_revolucionaria: rawInterpretation.esencia_revolucionaria_anual,
               proposito_vida: rawInterpretation.proposito_vida_anual,
-              tema_anual: rawInterpretation.tema_central_del_anio,
+              tema_anual: rawInterpretation.tema_central_del_anio || rawInterpretation.apertura_anual?.tema_central,
               analisis_tecnico: rawInterpretation.analisis_tecnico_profesional,
               plan_accion: rawInterpretation.plan_accion,
-              calendario_lunar: rawInterpretation.calendario_lunar_anual,
               declaracion_poder: rawInterpretation.declaracion_poder_anual,
               advertencias: rawInterpretation.advertencias,
               eventos_clave: rawInterpretation.eventos_clave_del_anio,
               insights_transformacionales: rawInterpretation.insights_transformacionales,
               rituales_recomendados: rawInterpretation.rituales_recomendados,
-              integracion_final: rawInterpretation.integracion_final,
-              // ✅ ADD MISSING SECTIONS FOR COMPLETE SOLAR RETURN DISPLAY
-              formacion_temprana: rawInterpretation.formacion_temprana,
-              patrones_psicologicos: rawInterpretation.patrones_psicologicos,
-              planetas_profundos: rawInterpretation.planetas_profundos,
-              angulos_vitales: rawInterpretation.angulos_vitales,
-              nodos_lunares: rawInterpretation.nodos_lunares,
-              pregunta_final_reflexion: rawInterpretation.pregunta_final_reflexion
+              integracion_final: rawInterpretation.integracion_final
             };
           } else {
             interpretationData = rawInterpretation;
@@ -703,7 +750,7 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           if (drawer.titulo) parts.push(drawer.titulo);
           if (drawer.educativo) parts.push(drawer.educativo);
           if (drawer.poderoso) parts.push(drawer.poderoso);
-          if (drawer.poetico) parts.push(drawer.poetico);
+          if (drawer.impacto_real) parts.push(drawer.impacto_real);
           if (drawer.sintesis?.frase) parts.push(drawer.sintesis.frase);
           if (drawer.sintesis?.declaracion) parts.push(drawer.sintesis.declaracion);
           return parts.join('\n\n');
@@ -738,154 +785,258 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
       // Fallback for any other type
       return String(data || '');
     };
-
-    // ✅ DETECT NEW "LAYER 1" STRUCTURE (Natal Chart Complete)
-    const isLayer1Structure = Boolean(
-      data.planetas_en_casas ||
-      data.planetas_transpersonales ||
-      data.momento_evolutivo_actual ||
-      data.configuracion_elemental ||
-      data.modalidades_astrologicas
-    );
-
-    console.log('🔍 Is Layer 1 Structure?', isLayer1Structure);
-    console.log('🔍 Available keys:', Object.keys(data));
-
-    // ✅ RENDER LAYER 1 STRUCTURE (New Natal Chart Format)
-    if (isLayer1Structure) {
-      return (
-        <div className="space-y-6 text-white">
-          <div className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-xl p-4 border border-purple-400/30 mb-6">
-            <p className="text-purple-100 text-sm">
-              ✨ Interpretación completa generada con nueva estructura "Capa 1" - Identidad Psicológica
-            </p>
-          </div>
-
-          {/* Render each main section as a collapsible card */}
-          {Object.entries(data).map(([sectionKey, sectionData]: [string, any]) => {
-            if (!sectionData || typeof sectionData !== 'object') return null;
-
-            // Section title mapping
-            const sectionTitles: Record<string, string> = {
-              planetas_en_casas: '🪐 Planetas en Casas',
-              planetas_transpersonales: '⚡ Planetas Transpersonales',
-              puntos_sensibles: '🩹 Puntos Sensibles',
-              momento_evolutivo_actual: '🌟 Momento Evolutivo Actual',
-              configuracion_elemental: '🔥 Configuración Elemental',
-              modalidades_astrologicas: '🔄 Modalidades Astrológicas',
-              aspectos_principales: '🔗 Aspectos Principales',
-              planetas_retrogrados_natales: '🔄 Planetas Retrógrados Natales',
-              integracion_carta_natal: '🌈 Integración de la Carta Natal',
-            };
-
-            const sectionTitle = sectionTitles[sectionKey] || sectionKey.replace(/_/g, ' ').toUpperCase();
-
-            return (
-              <div
-                key={sectionKey}
-                className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 rounded-xl p-6 border border-slate-600/30"
-              >
-                <h3 className="text-2xl font-bold text-purple-300 mb-4">{sectionTitle}</h3>
-                <div className="space-y-4">
-                  {/* Recursively render section content */}
-                  {renderSection(sectionData)}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      );
-    }
-
-    // Helper function to render any section recursively
-    function renderSection(obj: any, depth: number = 0): React.ReactNode {
-      if (!obj) return null;
-
-      // Render strings directly
-      if (typeof obj === 'string') {
-        return (
-          <p className="text-slate-100 leading-relaxed whitespace-pre-wrap">
-            {obj}
-          </p>
-        );
-      }
-
-      // Render numbers
-      if (typeof obj === 'number') {
-        return <span className="text-slate-200">{obj}</span>;
-      }
-
-      // Render arrays
-      if (Array.isArray(obj)) {
-        if (obj.length === 0) return <p className="text-slate-400 italic">Sin datos</p>;
-
-        return (
-          <div className="space-y-3">
-            {obj.map((item, idx) => (
-              <div key={idx} className={`${depth > 0 ? 'pl-4 border-l-2 border-purple-500/30' : ''}`}>
-                {renderSection(item, depth + 1)}
-              </div>
-            ))}
-          </div>
-        );
-      }
-
-      // Render objects
-      if (typeof obj === 'object') {
-        // ✅ Special handling: If object has "titulo", use it as the main heading
-        if (obj.titulo && typeof obj.titulo === 'string') {
-          const otherFields = Object.entries(obj).filter(([key]) => key !== 'titulo');
-
-          return (
-            <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 rounded-xl p-5 border border-purple-500/30">
-              {/* Show titulo as main heading */}
-              <h4 className="text-purple-100 font-bold text-lg mb-4">
-                {obj.titulo}
-              </h4>
-
-              {/* Render other fields without showing their keys */}
-              <div className="space-y-3">
-                {otherFields.map(([key, value]: [string, any]) => {
-                  // Skip internal fields
-                  if (key.startsWith('_')) return null;
-
-                  return (
-                    <div key={key}>
-                      {renderSection(value, depth + 1)}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        }
-
-        // ✅ Default object rendering (when no "titulo" field)
-        return (
-          <div className="space-y-3">
-            {Object.entries(obj).map(([key, value]: [string, any]) => {
-              // Skip internal fields
-              if (key.startsWith('_')) return null;
-
-              const label = key.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
-
-              return (
-                <div key={key} className="bg-slate-700/20 rounded-lg p-3">
-                  <h4 className="text-purple-200 font-semibold text-sm mb-2">{label}</h4>
-                  {renderSection(value, depth + 1)}
-                </div>
-              );
-            })}
-          </div>
-        );
-      }
-
-      return null;
-    }
-
-    // ✅ ORIGINAL RENDERING (For old structure + Solar Return)
     return (
       <div className="space-y-8">
+        {/* ✅ NATAL CHART: CLEAN STRUCTURE (New pedagogical format) */}
+        {type === 'natal' && data.esencia_natal && (
+          <>
+            {/* Introducción: Esencia Natal */}
+            <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 rounded-2xl p-8 border border-purple-400/30">
+              <h4 className="text-purple-100 font-bold text-2xl mb-4">
+                {data.esencia_natal.titulo || 'Tu Esencia Natal'}
+              </h4>
+              <p className="text-purple-50 text-lg leading-relaxed">
+                {extractTextFromTooltipDrawer(data.esencia_natal.descripcion || data.esencia_natal)}
+              </p>
+            </div>
+
+            {/* 1️⃣ ESENCIA PERSONAL */}
+            <div className="bg-gradient-to-br from-slate-800/40 to-gray-800/40 rounded-2xl p-6 border border-slate-400/30">
+              <h3 className="text-slate-100 font-bold text-3xl mb-2 text-center">1️⃣ ESENCIA PERSONAL</h3>
+              <p className="text-slate-300 text-center text-sm mb-6 italic">Cómo funcionas en el día a día</p>
+            </div>
+
+            {/* Sol */}
+            {data.sol && (
+              <div className="bg-gradient-to-br from-yellow-900/40 to-orange-900/40 rounded-2xl p-8 border border-yellow-400/30">
+                <h4 className="text-yellow-100 font-bold text-2xl mb-2">{data.sol.titulo || 'Tu Propósito de Vida'}</h4>
+                {data.sol.posicion && <p className="text-yellow-300 text-sm font-mono mb-2">📍 {data.sol.posicion}</p>}
+                {data.sol.que_significa_casa && <p className="text-yellow-200 text-sm italic mb-4">💡 {data.sol.que_significa_casa}</p>}
+                <p className="text-yellow-50 leading-relaxed mb-4">{extractTextFromTooltipDrawer(data.sol.interpretacion || data.sol)}</p>
+                {data.sol.palabra_clave && (
+                  <div className="bg-yellow-800/30 rounded-lg p-3 mt-3">
+                    <p className="text-yellow-200 text-sm font-semibold">Palabra clave: {data.sol.palabra_clave}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Luna */}
+            {data.luna && (
+              <div className="bg-gradient-to-br from-blue-900/40 to-indigo-900/40 rounded-2xl p-8 border border-blue-400/30">
+                <h4 className="text-blue-100 font-bold text-2xl mb-2">{data.luna.titulo || 'Tus Emociones'}</h4>
+                {data.luna.posicion && <p className="text-blue-300 text-sm font-mono mb-2">📍 {data.luna.posicion}</p>}
+                {data.luna.que_significa_casa && <p className="text-blue-200 text-sm italic mb-4">💡 {data.luna.que_significa_casa}</p>}
+                <p className="text-blue-50 leading-relaxed mb-4">{extractTextFromTooltipDrawer(data.luna.interpretacion || data.luna)}</p>
+                {data.luna.necesidad_emocional && (
+                  <div className="bg-blue-800/30 rounded-lg p-3 mt-3">
+                    <p className="text-blue-200 text-sm"><strong>Necesidad emocional:</strong> {data.luna.necesidad_emocional}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Ascendente */}
+            {data.ascendente && (
+              <div className="bg-gradient-to-br from-green-900/40 to-emerald-900/40 rounded-2xl p-8 border border-green-400/30">
+                <h4 className="text-green-100 font-bold text-2xl mb-2">{data.ascendente.titulo || 'Tu Personalidad'}</h4>
+                {data.ascendente.posicion && <p className="text-green-300 text-sm font-mono mb-4">📍 {data.ascendente.posicion}</p>}
+                <p className="text-green-50 leading-relaxed mb-4">{extractTextFromTooltipDrawer(data.ascendente.interpretacion || data.ascendente)}</p>
+                {data.ascendente.primera_impresion && (
+                  <div className="bg-green-800/30 rounded-lg p-3 mt-3">
+                    <p className="text-green-200 text-sm"><strong>Primera impresión:</strong> {data.ascendente.primera_impresion}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Mercurio */}
+            {data.mercurio && (
+              <div className="bg-gradient-to-br from-cyan-900/40 to-sky-900/40 rounded-2xl p-8 border border-cyan-400/30">
+                <h4 className="text-cyan-100 font-bold text-2xl mb-2">{data.mercurio.titulo || 'Cómo Piensas y Cómo Hablas'}</h4>
+                {data.mercurio.posicion && <p className="text-cyan-300 text-sm font-mono mb-2">📍 {data.mercurio.posicion}</p>}
+                {data.mercurio.que_significa_casa && <p className="text-cyan-200 text-sm italic mb-4">💡 {data.mercurio.que_significa_casa}</p>}
+                <p className="text-cyan-50 leading-relaxed mb-4">{extractTextFromTooltipDrawer(data.mercurio.interpretacion || data.mercurio)}</p>
+                {data.mercurio.estilo_mental && (
+                  <div className="bg-cyan-800/30 rounded-lg p-3 mt-3">
+                    <p className="text-cyan-200 text-sm"><strong>Estilo mental:</strong> {data.mercurio.estilo_mental}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Venus */}
+            {data.venus && (
+              <div className="bg-gradient-to-br from-pink-900/40 to-rose-900/40 rounded-2xl p-8 border border-pink-400/30">
+                <h4 className="text-pink-100 font-bold text-2xl mb-2">{data.venus.titulo || 'Cómo Amas'}</h4>
+                {data.venus.posicion && <p className="text-pink-300 text-sm font-mono mb-2">📍 {data.venus.posicion}</p>}
+                {data.venus.que_significa_casa && <p className="text-pink-200 text-sm italic mb-4">💡 {data.venus.que_significa_casa}</p>}
+                <p className="text-pink-50 leading-relaxed mb-4">{extractTextFromTooltipDrawer(data.venus.interpretacion || data.venus)}</p>
+                {data.venus.lenguaje_amor && (
+                  <div className="bg-pink-800/30 rounded-lg p-3 mt-3">
+                    <p className="text-pink-200 text-sm"><strong>Lenguaje de amor:</strong> {data.venus.lenguaje_amor}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Marte */}
+            {data.marte && (
+              <div className="bg-gradient-to-br from-red-900/40 to-orange-900/40 rounded-2xl p-8 border border-red-400/30">
+                <h4 className="text-red-100 font-bold text-2xl mb-2">{data.marte.titulo || 'Cómo Enfrentas la Vida'}</h4>
+                {data.marte.posicion && <p className="text-red-300 text-sm font-mono mb-2">📍 {data.marte.posicion}</p>}
+                {data.marte.que_significa_casa && <p className="text-red-200 text-sm italic mb-4">💡 {data.marte.que_significa_casa}</p>}
+                <p className="text-red-50 leading-relaxed mb-4">{extractTextFromTooltipDrawer(data.marte.interpretacion || data.marte)}</p>
+                {data.marte.estilo_accion && (
+                  <div className="bg-red-800/30 rounded-lg p-3 mt-3">
+                    <p className="text-red-200 text-sm"><strong>Estilo de acción:</strong> {data.marte.estilo_accion}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Júpiter */}
+            {data.jupiter && (
+              <div className="bg-gradient-to-br from-purple-900/40 to-violet-900/40 rounded-2xl p-8 border border-purple-400/30">
+                <h4 className="text-purple-100 font-bold text-2xl mb-2">{data.jupiter.titulo || 'Tu Suerte y Tus Ganancias'}</h4>
+                {data.jupiter.posicion && <p className="text-purple-300 text-sm font-mono mb-2">📍 {data.jupiter.posicion}</p>}
+                {data.jupiter.que_significa_casa && <p className="text-purple-200 text-sm italic mb-4">💡 {data.jupiter.que_significa_casa}</p>}
+                <p className="text-purple-50 leading-relaxed mb-4">{extractTextFromTooltipDrawer(data.jupiter.interpretacion || data.jupiter)}</p>
+                {data.jupiter.zona_abundancia && (
+                  <div className="bg-purple-800/30 rounded-lg p-3 mt-3">
+                    <p className="text-purple-200 text-sm"><strong>Zona de abundancia:</strong> {data.jupiter.zona_abundancia}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Saturno */}
+            {data.saturno && (
+              <div className="bg-gradient-to-br from-gray-900/40 to-slate-900/40 rounded-2xl p-8 border border-gray-400/30">
+                <h4 className="text-gray-100 font-bold text-2xl mb-2">{data.saturno.titulo || 'Tu Karma y Responsabilidades'}</h4>
+                {data.saturno.posicion && <p className="text-gray-300 text-sm font-mono mb-2">📍 {data.saturno.posicion}</p>}
+                {data.saturno.que_significa_casa && <p className="text-gray-200 text-sm italic mb-4">💡 {data.saturno.que_significa_casa}</p>}
+                <p className="text-gray-50 leading-relaxed mb-4">{extractTextFromTooltipDrawer(data.saturno.interpretacion || data.saturno)}</p>
+                {data.saturno.leccion_principal && (
+                  <div className="bg-gray-800/30 rounded-lg p-3 mt-3">
+                    <p className="text-gray-200 text-sm"><strong>Lección principal:</strong> {data.saturno.leccion_principal}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 2️⃣ FORMACIÓN TEMPRANA */}
+            {data.formacion_temprana && (
+              <>
+                <div className="bg-gradient-to-br from-slate-800/40 to-gray-800/40 rounded-2xl p-6 border border-slate-400/30 mt-8">
+                  <h3 className="text-slate-100 font-bold text-3xl mb-2 text-center">2️⃣ FORMACIÓN TEMPRANA</h3>
+                  <p className="text-slate-300 text-center text-sm italic">Por qué eres así emocionalmente</p>
+                </div>
+
+                {/* Formación Lunar */}
+                {data.formacion_temprana.lunar && (
+                  <div className="bg-gradient-to-br from-blue-800/40 to-indigo-800/40 rounded-2xl p-8 border border-blue-400/30">
+                    <h4 className="text-blue-100 font-bold text-2xl mb-1">{data.formacion_temprana.lunar.titulo || '🌙 Formación Lunar'}</h4>
+                    <p className="text-blue-300 text-sm italic mb-4">{data.formacion_temprana.lunar.subtitulo || 'Cómo aprendiste a sentir y protegerte'}</p>
+                    <p className="text-blue-50 leading-relaxed mb-4">{extractTextFromTooltipDrawer(data.formacion_temprana.lunar.interpretacion)}</p>
+                    {data.formacion_temprana.lunar.aprendizaje_clave && (
+                      <div className="bg-blue-900/30 rounded-lg p-3 mt-3">
+                        <p className="text-blue-200 text-sm"><strong>Aprendizaje clave:</strong> {data.formacion_temprana.lunar.aprendizaje_clave}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Formación Saturnina */}
+                {data.formacion_temprana.saturnina && (
+                  <div className="bg-gradient-to-br from-gray-800/40 to-slate-800/40 rounded-2xl p-8 border border-gray-400/30">
+                    <h4 className="text-gray-100 font-bold text-2xl mb-1">{data.formacion_temprana.saturnina.titulo || '🪐 Formación Saturnina'}</h4>
+                    <p className="text-gray-300 text-sm italic mb-4">{data.formacion_temprana.saturnina.subtitulo || 'Las primeras exigencias y límites'}</p>
+                    <p className="text-gray-50 leading-relaxed mb-4">{extractTextFromTooltipDrawer(data.formacion_temprana.saturnina.interpretacion)}</p>
+                    {data.formacion_temprana.saturnina.leccion_principal && (
+                      <div className="bg-gray-900/30 rounded-lg p-3 mt-3">
+                        <p className="text-gray-200 text-sm"><strong>Lección principal:</strong> {data.formacion_temprana.saturnina.leccion_principal}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Formación Venusina */}
+                {data.formacion_temprana.venusina && (
+                  <div className="bg-gradient-to-br from-pink-800/40 to-rose-800/40 rounded-2xl p-8 border border-pink-400/30">
+                    <h4 className="text-pink-100 font-bold text-2xl mb-1">{data.formacion_temprana.venusina.titulo || '💕 Formación Venusina'}</h4>
+                    <p className="text-pink-300 text-sm italic mb-4">{data.formacion_temprana.venusina.subtitulo || 'Cómo aprendiste a amar y a valorarte'}</p>
+                    <p className="text-pink-50 leading-relaxed mb-4">{extractTextFromTooltipDrawer(data.formacion_temprana.venusina.interpretacion)}</p>
+                    {data.formacion_temprana.venusina.modelo_afectivo && (
+                      <div className="bg-pink-900/30 rounded-lg p-3 mt-3">
+                        <p className="text-pink-200 text-sm"><strong>Modelo afectivo:</strong> {data.formacion_temprana.venusina.modelo_afectivo}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* 3️⃣ NODOS LUNARES - CAMINO DE VIDA */}
+            {(data.nodo_sur || data.nodo_norte) && (
+              <>
+                <div className="bg-gradient-to-br from-slate-800/40 to-gray-800/40 rounded-2xl p-6 border border-slate-400/30 mt-8">
+                  <h3 className="text-slate-100 font-bold text-3xl mb-2 text-center">3️⃣ NODOS LUNARES - CAMINO DE VIDA</h3>
+                  <p className="text-slate-300 text-center text-sm italic">Hacia dónde creces y de dónde vienes</p>
+                </div>
+
+                {/* Nodo Sur */}
+                {data.nodo_sur && (
+                  <div className="bg-gradient-to-br from-amber-800/40 to-yellow-800/40 rounded-2xl p-8 border border-amber-400/30">
+                    <h4 className="text-amber-100 font-bold text-2xl mb-1">{data.nodo_sur.titulo || '⬇️ Nodo Sur'}</h4>
+                    <p className="text-amber-300 text-sm italic mb-2">{data.nodo_sur.subtitulo || 'Zona cómoda / Talento innato'}</p>
+                    {data.nodo_sur.posicion && <p className="text-amber-300 text-sm font-mono mb-4">📍 {data.nodo_sur.posicion}</p>}
+                    <p className="text-amber-50 leading-relaxed mb-4">{extractTextFromTooltipDrawer(data.nodo_sur.interpretacion)}</p>
+                    {data.nodo_sur.zona_comoda && (
+                      <div className="bg-amber-900/30 rounded-lg p-3 mt-3">
+                        <p className="text-amber-200 text-sm"><strong>Zona cómoda:</strong> {data.nodo_sur.zona_comoda}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Nodo Norte */}
+                {data.nodo_norte && (
+                  <div className="bg-gradient-to-br from-green-800/40 to-emerald-800/40 rounded-2xl p-8 border border-green-400/30">
+                    <h4 className="text-green-100 font-bold text-2xl mb-1">{data.nodo_norte.titulo || '⬆️ Nodo Norte'}</h4>
+                    <p className="text-green-300 text-sm italic mb-2">{data.nodo_norte.subtitulo || 'Dirección evolutiva del alma'}</p>
+                    {data.nodo_norte.posicion && <p className="text-green-300 text-sm font-mono mb-4">📍 {data.nodo_norte.posicion}</p>}
+                    <p className="text-green-50 leading-relaxed mb-4">{extractTextFromTooltipDrawer(data.nodo_norte.interpretacion)}</p>
+                    {data.nodo_norte.direccion_evolutiva && (
+                      <div className="bg-green-900/30 rounded-lg p-3 mt-3">
+                        <p className="text-green-200 text-sm"><strong>Dirección evolutiva:</strong> {data.nodo_norte.direccion_evolutiva}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* 4️⃣ SÍNTESIS FINAL */}
+            {data.sintesis_final && (
+              <>
+                <div className="bg-gradient-to-br from-slate-800/40 to-gray-800/40 rounded-2xl p-6 border border-slate-400/30 mt-8">
+                  <h3 className="text-slate-100 font-bold text-3xl mb-2 text-center">4️⃣ SÍNTESIS FINAL</h3>
+                  <p className="text-slate-300 text-center text-sm italic">Todo integrado, sin técnica</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-purple-800/60 to-indigo-800/60 rounded-2xl p-8 border border-purple-400/30">
+                  <h4 className="text-purple-100 font-bold text-2xl mb-4">{data.sintesis_final.titulo || '✨ Síntesis de Tu Carta Natal'}</h4>
+                  <p className="text-purple-50 leading-relaxed text-lg">
+                    {extractTextFromTooltipDrawer(data.sintesis_final.contenido || data.sintesis_final)}
+                  </p>
+                </div>
+              </>
+            )}
+          </>
+        )}
+
+        {/* ✅ OLD DISRUPTIVE STRUCTURE (fallback for old interpretations) */}
         {data.esencia_revolucionaria && (
           <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 rounded-2xl p-8 border border-purple-400/30">
             <h4 className="text-purple-100 font-bold text-xl mb-4 flex items-center gap-3">
@@ -903,120 +1054,6 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
               Tu Propósito de Vida
             </h4>
       <p className="text-blue-50 text-lg leading-relaxed font-medium">{extractTextFromTooltipDrawer(data.proposito_vida)}</p>
-          </div>
-        )}
-
-        {/* ✅ NUEVA SECCIÓN: FORMACIÓN TEMPRANA */}
-        {data.formacion_temprana && (
-          <div className="bg-gradient-to-br from-cyan-900/40 to-teal-900/40 rounded-2xl p-8 border border-cyan-400/30">
-            <h4 className="text-cyan-100 font-bold text-xl mb-6 flex items-center gap-3">
-              <Star className="w-8 h-8 text-cyan-300" />
-              Formación Temprana (Casa Lunar, Saturnina, Venusina)
-            </h4>
-            <div className="space-y-6">
-              {data.formacion_temprana.casa_lunar && (
-                <div className="bg-cyan-800/30 rounded-lg p-4">
-                  <h5 className="text-cyan-200 font-semibold mb-2">🌙 Casa Lunar (Infancia y Raíces)</h5>
-                  {typeof data.formacion_temprana.casa_lunar === 'string' ? (
-                    <p className="text-cyan-50 whitespace-pre-line">{extractTextFromTooltipDrawer(data.formacion_temprana.casa_lunar)}</p>
-                  ) : data.formacion_temprana.casa_lunar.drawer || data.formacion_temprana.casa_lunar.tooltip ? (
-                    // ✅ Handle new {tooltip, drawer} structure
-                    <p className="text-cyan-50 whitespace-pre-line">
-                      {extractTextFromTooltipDrawer(data.formacion_temprana.casa_lunar)}
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
-                      {data.formacion_temprana.casa_lunar.signo_casa && (
-                        <p className="text-cyan-200 text-sm font-semibold">
-                          📍 {extractTextFromTooltipDrawer(data.formacion_temprana.casa_lunar.signo_casa)}
-                        </p>
-                      )}
-                      {data.formacion_temprana.casa_lunar.interpretacion && (
-                        <p className="text-cyan-50 text-sm">
-                          {extractTextFromTooltipDrawer(data.formacion_temprana.casa_lunar.interpretacion)}
-                        </p>
-                      )}
-                      {data.formacion_temprana.casa_lunar.influencia && (
-                        <div className="bg-cyan-700/30 rounded-lg p-2 mt-2">
-                          <p className="text-cyan-200 font-semibold text-xs mb-1">
-                            🌟 Influencia:
-                          </p>
-                          <p className="text-cyan-50 text-xs">
-                            {extractTextFromTooltipDrawer(data.formacion_temprana.casa_lunar.influencia)}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-              {data.formacion_temprana.casa_saturnina && (
-                <div className="bg-cyan-800/30 rounded-lg p-4">
-                  <h5 className="text-cyan-200 font-semibold mb-2">🪐 Casa Saturnina (Lecciones y Disciplina)</h5>
-                  {typeof data.formacion_temprana.casa_saturnina === 'string' ? (
-                    <p className="text-cyan-50 whitespace-pre-line">{extractTextFromTooltipDrawer(data.formacion_temprana.casa_saturnina)}</p>
-                  ) : data.formacion_temprana.casa_saturnina.drawer || data.formacion_temprana.casa_saturnina.tooltip ? (
-                    <p className="text-cyan-50 whitespace-pre-line">
-                      {extractTextFromTooltipDrawer(data.formacion_temprana.casa_saturnina)}
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
-                      {data.formacion_temprana.casa_saturnina.signo_casa && (
-                        <p className="text-cyan-200 text-sm font-semibold">
-                          📍 {extractTextFromTooltipDrawer(data.formacion_temprana.casa_saturnina.signo_casa)}
-                        </p>
-                      )}
-                      {data.formacion_temprana.casa_saturnina.interpretacion && (
-                        <p className="text-cyan-50 text-sm">
-                          {extractTextFromTooltipDrawer(data.formacion_temprana.casa_saturnina.interpretacion)}
-                        </p>
-                      )}
-                      {data.formacion_temprana.casa_saturnina.leccion && (
-                        <div className="bg-cyan-700/30 rounded-lg p-2 mt-2">
-                          <p className="text-cyan-200 font-semibold text-xs mb-1">
-                            📚 Lección:
-                          </p>
-                          <p className="text-cyan-50 text-xs">
-                            {extractTextFromTooltipDrawer(data.formacion_temprana.casa_saturnina.leccion)}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-              {data.formacion_temprana.casa_venusina && (
-                <div className="bg-cyan-800/30 rounded-lg p-4">
-                  <h5 className="text-cyan-200 font-semibold mb-2">💕 Casa Venusina (Amor y Valores)</h5>
-                  {typeof data.formacion_temprana.casa_venusina === 'string' ? (
-                    <p className="text-cyan-50 whitespace-pre-line">{extractTextFromTooltipDrawer(data.formacion_temprana.casa_venusina)}</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {data.formacion_temprana.casa_venusina.signo_casa && (
-                        <p className="text-cyan-200 text-sm font-semibold">
-                          📍 {extractTextFromTooltipDrawer(data.formacion_temprana.casa_venusina.signo_casa)}
-                        </p>
-                      )}
-                      {data.formacion_temprana.casa_venusina.interpretacion && (
-                        <p className="text-cyan-50 text-sm">
-                          {extractTextFromTooltipDrawer(data.formacion_temprana.casa_venusina.interpretacion)}
-                        </p>
-                      )}
-                      {data.formacion_temprana.casa_venusina.valores && (
-                        <div className="bg-cyan-700/30 rounded-lg p-2 mt-2">
-                          <p className="text-cyan-200 font-semibold text-xs mb-1">
-                            💎 Valores:
-                          </p>
-                          <p className="text-cyan-50 text-xs">
-                            {extractTextFromTooltipDrawer(data.formacion_temprana.casa_venusina.valores)}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
           </div>
         )}
 
@@ -1259,12 +1296,129 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           </div>
         )}
 
-        {/* ✅ SOLAR RETURN: CALENDARIO LUNAR ANUAL */}
-        {data.calendario_lunar && type === 'solar-return' && (
-          <div className="bg-gradient-to-br from-slate-900/60 to-slate-800/60 rounded-2xl p-8 border border-slate-400/30">
-            <h3 className="text-3xl font-bold text-white text-center mb-8">
-              🌙 Calendario Lunar Anual 2025-2026
+        {/* ✅ SOLAR RETURN: APERTURA ANUAL (3 CAPAS) */}
+        {data.apertura_anual && type === 'solar-return' && (
+          <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 rounded-2xl p-8 border border-amber-400/30">
+            <h3 className="text-3xl font-bold text-white text-center mb-6">
+              🌅 Apertura del Año Solar
             </h3>
+            {data.apertura_anual.tema_central && (
+              <div className="mb-6 text-center">
+                <p className="text-amber-100 text-2xl font-bold italic">
+                  "{extractTextFromTooltipDrawer(data.apertura_anual.tema_central)}"
+                </p>
+              </div>
+            )}
+            {data.apertura_anual.clima_general && (
+              <div className="mb-4">
+                <p className="text-amber-50 text-lg leading-relaxed">
+                  {extractTextFromTooltipDrawer(data.apertura_anual.clima_general)}
+                </p>
+              </div>
+            )}
+            {data.apertura_anual.conexion_natal && (
+              <div className="bg-amber-800/30 rounded-lg p-4 mt-4">
+                <h4 className="text-amber-200 font-semibold mb-2">🔗 Conexión con tu Carta Natal</h4>
+                <p className="text-amber-50">
+                  {extractTextFromTooltipDrawer(data.apertura_anual.conexion_natal)}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ✅ SOLAR RETURN: CÓMO SE VIVE SIENDO TÚ (3 CAPAS) */}
+        {data.como_se_vive_siendo_tu && type === 'solar-return' && (
+          <div className="bg-gradient-to-br from-indigo-900/40 to-purple-900/40 rounded-2xl p-8 border border-indigo-400/30">
+            <h3 className="text-3xl font-bold text-white text-center mb-6">
+              🎭 Cómo Se Vive Siendo Tú Este Año
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {data.como_se_vive_siendo_tu.facilidad && (
+                <div className="bg-green-900/30 rounded-lg p-4">
+                  <h4 className="text-green-200 font-semibold mb-2">✅ Lo que fluye naturalmente</h4>
+                  <p className="text-green-50">
+                    {extractTextFromTooltipDrawer(data.como_se_vive_siendo_tu.facilidad)}
+                  </p>
+                </div>
+              )}
+              {data.como_se_vive_siendo_tu.incomodidad && (
+                <div className="bg-orange-900/30 rounded-lg p-4">
+                  <h4 className="text-orange-200 font-semibold mb-2">⚠️ Lo que te incomoda</h4>
+                  <p className="text-orange-50">
+                    {extractTextFromTooltipDrawer(data.como_se_vive_siendo_tu.incomodidad)}
+                  </p>
+                </div>
+              )}
+              {data.como_se_vive_siendo_tu.reflejos_obsoletos && (
+                <div className="bg-red-900/30 rounded-lg p-4">
+                  <h4 className="text-red-200 font-semibold mb-2">🔄 Reflejos obsoletos a soltar</h4>
+                  <p className="text-red-50">
+                    {extractTextFromTooltipDrawer(data.como_se_vive_siendo_tu.reflejos_obsoletos)}
+                  </p>
+                </div>
+              )}
+              {data.como_se_vive_siendo_tu.actitud_nueva && (
+                <div className="bg-blue-900/30 rounded-lg p-4">
+                  <h4 className="text-blue-200 font-semibold mb-2">✨ Actitud nueva a integrar</h4>
+                  <p className="text-blue-50">
+                    {extractTextFromTooltipDrawer(data.como_se_vive_siendo_tu.actitud_nueva)}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ✅ SOLAR RETURN: SOMBRAS DEL AÑO (3 CAPAS) */}
+        {data.sombras_del_ano && type === 'solar-return' && (
+          <div className="bg-gradient-to-br from-slate-900/40 to-gray-900/40 rounded-2xl p-8 border border-slate-400/30">
+            <h3 className="text-3xl font-bold text-white text-center mb-6">
+              ⚠️ Sombras del Año
+            </h3>
+            <div className="space-y-3">
+              {data.sombras_del_ano.map((sombra: string, i: number) => (
+                <div key={i} className="bg-slate-800/50 rounded-lg p-4 border-l-4 border-yellow-500">
+                  <p className="text-slate-100">
+                    {extractTextFromTooltipDrawer(sombra)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ✅ SOLAR RETURN: CLAVES DE INTEGRACIÓN (3 CAPAS) */}
+        {data.claves_integracion && type === 'solar-return' && (
+          <div className="bg-gradient-to-br from-emerald-900/40 to-teal-900/40 rounded-2xl p-8 border border-emerald-400/30">
+            <h3 className="text-3xl font-bold text-white text-center mb-6">
+              🔑 Claves de Integración
+            </h3>
+            <div className="space-y-3">
+              {data.claves_integracion.map((clave: string, i: number) => (
+                <div key={i} className="bg-emerald-800/50 rounded-lg p-4 border-l-4 border-emerald-500">
+                  <p className="text-emerald-50">
+                    {extractTextFromTooltipDrawer(clave)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ✅ SOLAR RETURN: CALENDARIO LUNAR ANUAL */}
+        {data.calendario_lunar && type === 'solar-return' && (() => {
+          // ✅ Calcular año de retorno solar dinámicamente
+          const returnYear = chartData?.solarReturnInfo?.year ||
+                             chartData?.solarReturnYear ||
+                             new Date().getFullYear();
+          const nextYear = returnYear + 1;
+
+          return (
+            <div className="bg-gradient-to-br from-slate-900/60 to-slate-800/60 rounded-2xl p-8 border border-slate-400/30">
+              <h3 className="text-3xl font-bold text-white text-center mb-8">
+                🌙 Calendario Lunar Anual {returnYear}-{nextYear}
+              </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {data.calendario_lunar.map((mes: any, i: number) => (
                 <div key={i} className="bg-slate-800/50 rounded-xl p-4 border border-slate-500/20">
@@ -1289,6 +1443,238 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                   )}
                 </div>
               ))}
+            </div>
+          </div>
+          );
+        })()}
+
+        {/* ✅ SOLAR RETURN: COMPARACIONES PLANETARIAS (NATAL VS SOLAR RETURN) */}
+        {data.comparaciones_planetarias && type === 'solar-return' && (
+          <div className="bg-gradient-to-br from-purple-900/60 to-indigo-900/60 rounded-2xl p-8 border border-purple-400/30">
+            <h3 className="text-3xl font-bold text-white text-center mb-4">
+              🔄 Comparaciones Planetarias: Natal vs Solar Return
+            </h3>
+            <p className="text-purple-200 text-center mb-8 max-w-3xl mx-auto">
+              Descubre cómo tu identidad permanente (Natal) se activa de manera específica este año (Solar Return)
+            </p>
+
+            <div className="space-y-6">
+              {Object.entries(data.comparaciones_planetarias).map(([planetKey, comparacion]: [string, any]) => {
+                const planetIcons: Record<string, string> = {
+                  sol: '☀️',
+                  luna: '🌙',
+                  mercurio: '🗣️',
+                  venus: '💚',
+                  marte: '⚔️',
+                  jupiter: '🎯',
+                  saturno: '🏔️'
+                };
+
+                const planetNames: Record<string, string> = {
+                  sol: 'Sol',
+                  luna: 'Luna',
+                  mercurio: 'Mercurio',
+                  venus: 'Venus',
+                  marte: 'Marte',
+                  jupiter: 'Júpiter',
+                  saturno: 'Saturno'
+                };
+
+                const planetIcon = planetIcons[planetKey.toLowerCase()] || '⭐';
+                const planetName = planetNames[planetKey.toLowerCase()] || planetKey;
+
+                return (
+                  <div
+                    key={planetKey}
+                    className="bg-slate-900/50 rounded-xl border border-purple-500/30 overflow-hidden"
+                  >
+                    {/* Planet Header */}
+                    <div className="bg-gradient-to-r from-purple-700 to-indigo-700 p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="text-3xl">{planetIcon}</span>
+                        <h4 className="text-white font-bold text-xl">{planetName}</h4>
+                      </div>
+                      {comparacion.frase_clave && (
+                        <div className="bg-yellow-500/20 px-3 py-1 rounded-full border border-yellow-500/40">
+                          <p className="text-yellow-200 text-xs font-semibold">FRASE CLAVE</p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="p-6 space-y-6">
+                      {/* Frase Clave del Año - Destacada */}
+                      {comparacion.frase_clave && (
+                        <div className="bg-gradient-to-r from-yellow-600/30 to-orange-600/30 rounded-lg p-4 border-l-4 border-yellow-500">
+                          <p className="text-yellow-200 font-semibold text-sm mb-1">⚡ FRASE CLAVE DEL AÑO:</p>
+                          <blockquote className="text-white text-lg font-bold italic">
+                            "{extractTextFromTooltipDrawer(comparacion.frase_clave)}"
+                          </blockquote>
+                        </div>
+                      )}
+
+                      {/* 1. Natal - Cómo eres normalmente */}
+                      {comparacion.natal && (
+                        <div className="bg-purple-800/20 rounded-lg p-4 border border-purple-600/30">
+                          <h5 className="text-purple-300 font-bold text-sm mb-2 flex items-center gap-2">
+                            <span>🔹</span> CÓMO ERES NORMALMENTE (Natal)
+                          </h5>
+                          {comparacion.natal.posicion && (
+                            <p className="text-purple-400 text-xs font-mono mb-2">
+                              📍 {extractTextFromTooltipDrawer(comparacion.natal.posicion)}
+                            </p>
+                          )}
+                          {comparacion.natal.descripcion && (
+                            <p className="text-slate-200 leading-relaxed text-sm">
+                              {extractTextFromTooltipDrawer(comparacion.natal.descripcion)}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* 2. Solar Return - Qué se activa este año */}
+                      {comparacion.solar_return && (
+                        <div className="bg-orange-800/20 rounded-lg p-4 border border-orange-600/30">
+                          <h5 className="text-orange-300 font-bold text-sm mb-2 flex items-center gap-2">
+                            <span>🔸</span> QUÉ SE ACTIVA ESTE AÑO (Solar Return)
+                          </h5>
+                          {comparacion.solar_return.posicion && (
+                            <p className="text-orange-400 text-xs font-mono mb-2">
+                              📍 {extractTextFromTooltipDrawer(comparacion.solar_return.posicion)}
+                            </p>
+                          )}
+                          {comparacion.solar_return.descripcion && (
+                            <p className="text-slate-200 leading-relaxed text-sm">
+                              {extractTextFromTooltipDrawer(comparacion.solar_return.descripcion)}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* 3. Choque - Dónde choca o potencia */}
+                      {comparacion.choque && (
+                        <div className="bg-yellow-800/20 rounded-lg p-4 border border-yellow-600/30">
+                          <h5 className="text-yellow-300 font-bold text-sm mb-2 flex items-center gap-2">
+                            <span>🔁</span> DÓNDE CHOCA O POTENCIA
+                          </h5>
+                          <p className="text-slate-200 leading-relaxed text-sm">
+                            {extractTextFromTooltipDrawer(comparacion.choque)}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* 4. Qué hacer - Acción concreta */}
+                      {comparacion.que_hacer && (
+                        <div className="bg-green-800/20 rounded-lg p-4 border border-green-600/30">
+                          <h5 className="text-green-300 font-bold text-sm mb-2 flex items-center gap-2">
+                            <span>✅</span> QUÉ CONVIENE HACER AHORA
+                          </h5>
+                          <p className="text-slate-200 leading-relaxed text-sm">
+                            {extractTextFromTooltipDrawer(comparacion.que_hacer)}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Error Automático - Advertencia */}
+                      {comparacion.error_automatico && (
+                        <div className="bg-red-900/30 rounded-lg p-4 border-l-4 border-red-500">
+                          <h5 className="text-red-300 font-bold text-sm mb-2 flex items-center gap-2">
+                            <span>⚠️</span> ERROR AUTOMÁTICO A EVITAR
+                          </h5>
+                          <p className="text-red-100 text-sm italic">
+                            {extractTextFromTooltipDrawer(comparacion.error_automatico)}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Uso en Agenda (opcional - puede colapsarse) */}
+                      {comparacion.uso_agenda && (
+                        <details className="bg-indigo-900/20 rounded-lg border border-indigo-600/30">
+                          <summary className="cursor-pointer p-4 text-indigo-300 font-semibold text-sm hover:bg-indigo-800/30 transition-colors">
+                            📅 CÓMO USAR ESTO EN TU AGENDA (Click para expandir)
+                          </summary>
+                          <div className="p-4 pt-0 space-y-3">
+                            {comparacion.uso_agenda.luna_nueva && (
+                              <div className="bg-indigo-800/20 rounded p-3">
+                                <p className="text-indigo-300 font-semibold text-xs mb-1">🌑 Luna Nueva:</p>
+                                <p className="text-slate-300 text-xs">
+                                  {extractTextFromTooltipDrawer(comparacion.uso_agenda.luna_nueva)}
+                                </p>
+                              </div>
+                            )}
+                            {comparacion.uso_agenda.luna_llena && (
+                              <div className="bg-indigo-800/20 rounded p-3">
+                                <p className="text-indigo-300 font-semibold text-xs mb-1">🌕 Luna Llena:</p>
+                                <p className="text-slate-300 text-xs">
+                                  {extractTextFromTooltipDrawer(comparacion.uso_agenda.luna_llena)}
+                                </p>
+                              </div>
+                            )}
+                            {comparacion.uso_agenda.retrogradaciones && (
+                              <div className="bg-indigo-800/20 rounded p-3">
+                                <p className="text-indigo-300 font-semibold text-xs mb-1">↩️ Retrogradaciones:</p>
+                                <p className="text-slate-300 text-xs">
+                                  {extractTextFromTooltipDrawer(comparacion.uso_agenda.retrogradaciones)}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </details>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ✅ SOLAR RETURN: LÍNEA DE TIEMPO ANUAL (3 CAPAS) */}
+        {data.linea_tiempo_anual && type === 'solar-return' && (
+          <div className="bg-gradient-to-br from-cyan-900/40 to-blue-900/40 rounded-2xl p-8 border border-cyan-400/30">
+            <h3 className="text-3xl font-bold text-white text-center mb-8">
+              📅 Línea de Tiempo Anual
+            </h3>
+            <div className="space-y-6">
+              {data.linea_tiempo_anual.mes_1_activacion && (
+                <div className="bg-cyan-800/30 rounded-xl p-6 border-l-4 border-cyan-500">
+                  <h4 className="text-cyan-200 font-bold text-lg mb-3">Mes 1 - Activación</h4>
+                  <p className="text-cyan-50">
+                    {extractTextFromTooltipDrawer(data.linea_tiempo_anual.mes_1_activacion.evento || data.linea_tiempo_anual.mes_1_activacion)}
+                  </p>
+                </div>
+              )}
+              {data.linea_tiempo_anual.mes_3_4_primer_desafio && (
+                <div className="bg-orange-800/30 rounded-xl p-6 border-l-4 border-orange-500">
+                  <h4 className="text-orange-200 font-bold text-lg mb-3">Meses 3-4 - Primer Desafío</h4>
+                  <p className="text-orange-50">
+                    {extractTextFromTooltipDrawer(data.linea_tiempo_anual.mes_3_4_primer_desafio.evento || data.linea_tiempo_anual.mes_3_4_primer_desafio)}
+                  </p>
+                </div>
+              )}
+              {data.linea_tiempo_anual.mes_6_7_punto_medio && (
+                <div className="bg-purple-800/30 rounded-xl p-6 border-l-4 border-purple-500">
+                  <h4 className="text-purple-200 font-bold text-lg mb-3">Meses 6-7 - Punto Medio</h4>
+                  <p className="text-purple-50">
+                    {extractTextFromTooltipDrawer(data.linea_tiempo_anual.mes_6_7_punto_medio.evento || data.linea_tiempo_anual.mes_6_7_punto_medio)}
+                  </p>
+                </div>
+              )}
+              {data.linea_tiempo_anual.mes_9_10_cosecha && (
+                <div className="bg-green-800/30 rounded-xl p-6 border-l-4 border-green-500">
+                  <h4 className="text-green-200 font-bold text-lg mb-3">Meses 9-10 - Cosecha</h4>
+                  <p className="text-green-50">
+                    {extractTextFromTooltipDrawer(data.linea_tiempo_anual.mes_9_10_cosecha.evento || data.linea_tiempo_anual.mes_9_10_cosecha)}
+                  </p>
+                </div>
+              )}
+              {data.linea_tiempo_anual.mes_12_cierre && (
+                <div className="bg-indigo-800/30 rounded-xl p-6 border-l-4 border-indigo-500">
+                  <h4 className="text-indigo-200 font-bold text-lg mb-3">Mes 12 - Cierre</h4>
+                  <p className="text-indigo-50">
+                    {extractTextFromTooltipDrawer(data.linea_tiempo_anual.mes_12_cierre.evento || data.linea_tiempo_anual.mes_12_cierre)}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         )}

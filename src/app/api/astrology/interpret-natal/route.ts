@@ -14,6 +14,9 @@ import {
   verifyExpectedPlanets,
 } from '@/utils/planetNameUtils';
 
+// ⏱️ Configurar timeout para Vercel (60 segundos en plan Pro)
+export const maxDuration = 60;
+
 // =============================================================================
 // TYPES
 // =============================================================================
@@ -30,7 +33,7 @@ interface DrawerInterpretation {
   titulo: string;
   educativo: string;
   poderoso: string;
-  poetico: string;
+  impacto_real: string;
   sombras: Array<{
     nombre: string;
     descripcion: string;
@@ -572,26 +575,28 @@ async function generateAngleInterpretation(
     "tipo": "[Arquetipo - ej: 'Revolucionario', 'Sanador']"
   },
   "drawer": {
-    "titulo": "🌟 [Título completo poderoso]",
-    "educativo": "[Explicación clara: QUÉ es el ${angleName}, CÓMO funciona en ${angleData.sign}, ejemplos desde niño y ahora. 3-5 párrafos]",
-    "poderoso": "[Mensaje transformacional: '¡NO VINISTE A...!', 'Tu superpoder es...'. Habla de trampas y regalos. 4-6 párrafos]",
-    "poetico": "[Metáfora hermosa comparando con naturaleza/cosmos. 2-3 párrafos]",
+    "titulo": "${angleName} en ${angleData.sign}: [Tema principal - ej: 'Identidad y Presencia']",
+    "educativo": "[Explicación clara: QUÉ es el ${angleName}, CÓMO funciona en ${angleData.sign}. Usa lenguaje psicológico, no místico. Ejemplos desde la infancia hasta ahora con comportamientos observables. 3-5 párrafos claros]",
+    "poderoso": "[Análisis psicológico profundo de cómo se manifiesta. Usa TONO OBSERVADOR, no directivo. Describe patrones estables. Ejemplo: 'Tu forma de presentarte al mundo está ligada a...' NO uses: 'superpoder', '¡NO VINISTE A...!'. SÍ usa: 'Desde temprano, puedes haber sentido...', 'Esta configuración se nota cuando...'. 3-4 párrafos observadores]",
+    "impacto_real": "[Impacto concreto en tu vida. NO metáforas. SÍ decisiones y comportamientos reales. Usa lenguaje observador: 'Puedes notar que...', 'Se manifiesta cuando...'. 3-5 ejemplos concretos de cómo se vive día a día. 2-3 párrafos directos]",
     "sombras": [
       {
         "nombre": "[Nombre de la sombra]",
-        "descripcion": "[Explicación]",
-        "trampa": "❌ [Forma reactiva]",
-        "regalo": "✅ [Forma consciente]"
+        "descripcion": "[Cómo se manifiesta - tono observador]",
+        "trampa": "❌ [Patrón reactivo - describe sin ordenar]",
+        "regalo": "✅ [Patrón integrado - posibilidad, no mandato]"
       }
     ],
     "sintesis": {
-      "frase": "[Frase memorable de máximo 15 palabras]",
-      "declaracion": "[Declaración 'Yo soy...' que el usuario puede repetir. 2-4 líneas]"
+      "frase": "[Resumen claro en máximo 15 palabras. PROHIBIDO: 'superpoder', 'misión cósmica', 'portal', metáforas. DEBE ser PSICOLÓGICO. Ejemplo: 'Tu forma de presentarte al mundo refleja independencia y autenticidad']",
+      "declaracion": "[Afirmación en primera persona de máximo 2 líneas. PROHIBIDO lenguaje épico. DEBE ser OBSERVADOR. Ejemplo: 'Mi forma de estar en el mundo incluye autenticidad y espontaneidad. Esto se refleja en cómo me presento y relaciono.']"
     }
   }
 }
 
-ESTILO: Disruptivo ("¡NO VINISTE A...!"), transformacional, directo.
+ESTILO: Observador (NO directivo), psicológico, claro y adulto.
+PROHIBIDO: "superpoder", "misión cósmica", "¡NO VINISTE A...!", mayúsculas enfáticas.
+TONO: Describe cómo eres y cómo funciona, no órdenes.
 RESPONDE SOLO CON JSON VÁLIDO.`;
 
   try {
@@ -673,32 +678,34 @@ async function generatePlanetInterpretation(
     "tipo": "[Arquetipo - ej: 'Visionario', 'Guerrero']"
   },
   "drawer": {
-    "titulo": "🌟 [Título completo poderoso]",
-    "educativo": "[QUÉ significa ${planet.name}, CÓMO funciona en ${planet.sign}, QUÉ implica Casa ${planet.house}. Ejemplos desde niño y ahora. 3-5 párrafos claros]",
-    "poderoso": "[Mensaje transformacional: '¡NO VINISTE A...!', '¡ESTO ES ENORME!', 'Tu superpoder es...'. Habla de trampas y regalos ocultos. 4-6 párrafos intensos]",
-    "poetico": "[Metáfora HERMOSA. Compara ${planet.name} en ${planet.sign} con naturaleza, animales, cosmos. Crea imagen visual potente. 2-3 párrafos líricos]",
+    "titulo": "${planet.name} en ${planet.sign} en Casa ${planet.house}: [Tema principal - ej: 'Proceso de Maduración']",
+    "educativo": "[QUÉ significa ${planet.name}, CÓMO funciona en ${planet.sign}, QUÉ implica Casa ${planet.house}. Usa lenguaje psicológico, no místico. Explica desde la infancia hasta ahora con comportamientos observables. 3-5 párrafos claros y directos]",
+    "poderoso": "[Análisis psicológico profundo: Cómo se manifiesta esta configuración en tu forma de ser. Usa TONO OBSERVADOR, no directivo. Describe patrones estables, no órdenes. Ejemplo: 'Tu proceso de maduración está ligado a...' NO uses: 'superpoder', 'misión cósmica', '¡NO VINISTE A...!'. SÍ usa: 'Desde temprano, puedes haber sentido...', 'Esta configuración activa...'. 3-4 párrafos observadores]",
+    "impacto_real": "[Impacto concreto en tu vida. NO metáforas. SÍ decisiones y comportamientos reales. Usa lenguaje observador: 'Puedes notar que...', 'Se manifiesta cuando...', 'Esta configuración aparece en situaciones donde...'. 4-6 ejemplos concretos de cómo se vive en el día a día. 2-3 párrafos directos]",
     "sombras": [
       {
         "nombre": "[Nombre de la sombra principal]",
-        "descripcion": "[Cómo se manifiesta]",
-        "trampa": "❌ [Forma reactiva/inconsciente]",
-        "regalo": "✅ [Forma consciente/transformada]"
+        "descripcion": "[Cómo se manifiesta - tono observador, no juicio]",
+        "trampa": "❌ [Patrón reactivo - describe sin ordenar]",
+        "regalo": "✅ [Patrón integrado - describe posibilidad, no mandato]"
       },
       {
         "nombre": "[Segunda sombra opcional]",
-        "descripcion": "[Explicación]",
-        "trampa": "❌ [Trampa]",
-        "regalo": "✅ [Regalo]"
+        "descripcion": "[Explicación - tono psicológico]",
+        "trampa": "❌ [Trampa observable]",
+        "regalo": "✅ [Regalo cuando se integra]"
       }
     ],
     "sintesis": {
-      "frase": "[Frase memorable máximo 15 palabras]",
-      "declaracion": "[Declaración en primera persona: 'Yo soy...' o 'Mi ${planet.name}...'. 2-4 líneas que el usuario puede repetir como mantra]"
+      "frase": "[Resumen claro en máximo 15 palabras. PROHIBIDO: 'superpoder', 'misión cósmica', 'portal', 'puente', 'tejer', 'océano de', metáforas poéticas. DEBE ser PSICOLÓGICO y CONCRETO. Ejemplos: 'Tu proceso de desarrollo está ligado a la expresión creativa', 'Esta configuración activa patrones de independencia y autonomía']",
+      "declaracion": "[Afirmación en primera persona de máximo 2 líneas. PROHIBIDO lenguaje épico o místico. DEBE ser OBSERVADOR y CLARO. Ejemplos: 'Mi forma de procesar emociones incluye profundidad e intensidad. Esta capacidad se manifiesta en mis relaciones y decisiones.', 'Esta configuración se refleja en mi necesidad de estructura y autonomía simultáneas.']"
     }
   }
 }
 
-ESTILO: Disruptivo ("¡NO VINISTE A...!"), transformacional, psicológico (sombras/regalos), motivador.
+ESTILO: Observador (NO directivo), psicológico (sombras/posibilidades), claro y adulto.
+PROHIBIDO: "superpoder", "misión cósmica", "portal", "¡NO VINISTE A...!", mayúsculas enfáticas.
+TONO: Describe cómo eres y cómo funciona, no órdenes de qué hacer.
 RESPONDE SOLO JSON VÁLIDO. NO agregues texto antes/después.`;
 
   try {
@@ -792,20 +799,20 @@ function generateFallbackAngleInterpretation(angleName: string, angleData: any):
     },
     drawer: {
       titulo: `✨ Tu ${angleName} en ${angleData.sign}`,
-      educativo: `El ${angleName} representa un punto crucial en tu carta natal. Cuando está en ${angleData.sign}, adquiere las cualidades de este signo y se expresa de una manera única.\n\nDesde la infancia, esta configuración ha estado moldeando tu forma de ser, aunque quizás no fueras consciente de ello. Ahora que lo comprendes, puedes activar conscientemente este poder.`,
-      poderoso: `¡NO VINISTE a este mundo con esta configuración por casualidad!\n\nEsta posición es una de tus herramientas más poderosas. Tu verdadero superpoder está en reconocer y activar conscientemente esta energía.\n\nCada vez que actúas alineado con tu ${angleName} en ${angleData.sign}, estás cumpliendo tu propósito. No es accidental. Es intencional. Es cósmico.`,
-      poetico: `Imagina que tu ${angleName} es como una puerta luminosa en el cielo.\n\nEn ${angleData.sign}, esta puerta brilla con una frecuencia especial que solo tú tienes. Es tu portal único hacia tu verdadero ser.`,
+      educativo: `El ${angleName} representa un punto crucial en tu carta natal. Cuando está en ${angleData.sign}, adquiere las cualidades de este signo y se expresa de una manera única.\n\nDesde la infancia, esta configuración ha estado moldeando tu forma de ser, aunque quizás no fueras consciente de ello. Esta configuración actúa como filtro a través del cual percibes y te relacionas con el mundo.`,
+      poderoso: `Tu ${angleName} en ${angleData.sign} se manifiesta en tu forma de presentarte y relacionarte con el entorno.\n\nEsta configuración actúa de manera constante en tu vida. Puedes notar que ciertos patrones de comportamiento se repiten, especialmente en cómo inicias nuevas situaciones o cómo te perciben los demás.\n\nCuando actúas alineado con las cualidades de ${angleData.sign}, experimentas mayor fluidez. Cuando resistes o intentas ser diferente a esta naturaleza, puede aparecer tensión o sensación de inautenticidad.`,
+      impacto_real: `Durante tu vida:\n- Las personas perciben inmediatamente tu esencia ${angleData.sign} cuando te conocen\n- Tiendes a tomar decisiones que reflejan las cualidades de ${angleData.sign}\n- Tu forma de presentarte al mundo está profundamente influenciada por esta configuración\n- Cuando actúas alineado con ${angleData.sign}, sientes mayor autenticidad y fluidez`,
       sombras: [
         {
           nombre: 'Uso inconsciente',
           descripcion: 'Cuando no activamos esta energía conscientemente',
-          trampa: '❌ Dejar que actúe automáticamente sin dirección',
-          regalo: '✅ Usarla con intención y propósito claro',
+          trampa: '❌ Actúa automáticamente sin consciencia cuando no reconoces esta energía',
+          regalo: '✅ Cuando reconoces conscientemente esta configuración, puedes usarla con mayor intención',
         },
       ],
       sintesis: {
-        frase: `Tu ${angleName} en ${angleData.sign} es tu superpoder único.`,
-        declaracion: `Yo activo mi ${angleName} en ${angleData.sign} conscientemente. Esta configuración me define y me empodera para cumplir mi propósito.`,
+        frase: `Mi ${angleName} en ${angleData.sign} define mi forma de presentarme al mundo.`,
+        declaracion: `Mi ${angleName} en ${angleData.sign} se manifiesta en mi forma de ser y relacionarme. Esta configuración es parte integral de mi identidad.`,
       },
     },
   };
@@ -822,20 +829,20 @@ function generateFallbackPlanetInterpretation(planet: any): PlanetInterpretation
     },
     drawer: {
       titulo: `✨ ${planet.name} en ${planet.sign} en Casa ${planet.house}`,
-      educativo: `${planet.name} simboliza aspectos esenciales de tu ser. En ${planet.sign}, esta energía se expresa con las cualidades de este signo. La Casa ${planet.house} muestra dónde se manifiesta más intensamente en tu vida.\n\nDesde niño, esta configuración ha influido en tu forma de ser, aunque quizás no lo reconocieras. Comprender esto te permite activar conscientemente este poder interior.`,
-      poderoso: `¡NO VINISTE con ${planet.name} en ${planet.sign} por casualidad!\n\n¡ESTO ES ENORME! Esta posición es una de tus herramientas cósmicas más poderosas.\n\nTu verdadero superpoder es usar conscientemente la energía de ${planet.sign} en las áreas que gobierna la Casa ${planet.house}. Cuando lo haces, te conviertes en agente de tu propia transformación.`,
-      poetico: `Tu ${planet.name} es como una gema brillando en ${planet.sign}.\n\nComo una estrella guía en la noche, ilumina tu camino hacia tu verdadero ser. En ${planet.sign}, proyecta colores únicos que solo tú puedes manifestar.`,
+      educativo: `${planet.name} simboliza aspectos esenciales de tu ser. En ${planet.sign}, esta energía se expresa con las cualidades de este signo. La Casa ${planet.house} muestra dónde se manifiesta más intensamente en tu vida.\n\nDesde temprano en tu vida, esta configuración ha influido en tu forma de ser, aunque quizás no lo reconocieras. Esta posición actúa como patrón estable en tu personalidad.`,
+      poderoso: `Tu ${planet.name} en ${planet.sign} se manifiesta en patrones observables de comportamiento.\n\nEsta configuración actúa de manera constante en tu vida, especialmente en las áreas relacionadas con la Casa ${planet.house}. Puedes notar que ciertas tendencias se repiten en cómo abordas estos temas.\n\nCuando actúas alineado con las cualidades de ${planet.sign} en estos temas, las cosas tienden a fluir. Cuando intentas forzar un enfoque que no resuena con esta naturaleza, puede aparecer resistencia o frustración.`,
+      impacto_real: `Durante tu vida:\n- Tus decisiones en el área de la Casa ${planet.house} reflejan las cualidades de ${planet.sign}\n- Las personas notan en ti características asociadas con ${planet.name} en ${planet.sign}\n- Cuando esta energía está activa, experimentas mayor autenticidad y propósito\n- Tu forma de abordar los temas de la Casa ${planet.house} está profundamente influenciada por ${planet.sign}`,
       sombras: [
         {
           nombre: 'Uso reactivo de la energía',
           descripcion: 'Cuando esta configuración actúa automáticamente sin consciencia',
-          trampa: '❌ Dejar que te controle en lugar de dirigirla',
-          regalo: '✅ Convertirla en superpoder con consciencia e intención',
+          trampa: '❌ Actúa de forma reactiva cuando no reconoces conscientemente este patrón',
+          regalo: '✅ Cuando reconoces esta configuración, puedes trabajar con ella de manera más consciente',
         },
       ],
       sintesis: {
-        frase: `Tu ${planet.name} en ${planet.sign} es poder esperando ser activado.`,
-        declaracion: `Yo activo conscientemente mi ${planet.name} en ${planet.sign}. Esta energía no me limita, me empodera. La uso para mi máxima expresión.`,
+        frase: `Mi ${planet.name} en ${planet.sign} define cómo funciono en esta área de mi vida.`,
+        declaracion: `Mi ${planet.name} en ${planet.sign} se manifiesta en patrones estables de comportamiento. Esta configuración es parte de mi naturaleza.`,
       },
     },
   };
@@ -872,10 +879,10 @@ async function generateElementInterpretation(
     "tipo": "[Arquetipo - ej: 'Flamígero', 'Terrestre']"
   },
   "drawer": {
-    "titulo": "🌟 [Título completo poderoso]",
+    "titulo": "Elemento ${element.name}: [Tema principal - ej: 'Pasión y Acción']",
     "educativo": "[QUÉ significa el elemento ${element.name}, CÓMO funciona, ejemplos desde niño y ahora. 3-5 párrafos claros]",
-    "poderoso": "[Mensaje transformacional: '¡NO VINISTE A...!', 'Tu superpoder es...'. Habla de trampas y regalos. 4-6 párrafos intensos]",
-    "poetico": "[Metáfora HERMOSA. Compara el elemento ${element.name} con naturaleza, elementos. Crea imagen visual potente. 2-3 párrafos líricos]",
+    "poderoso": "[Análisis psicológico profundo de cómo se manifiesta el elemento ${element.name}. Usa TONO OBSERVADOR, no directivo. Describe patrones estables. Ejemplo: 'El elemento ${element.name} se manifiesta en tu tendencia a...' NO uses: 'superpoder', '¡NO VINISTE A...!'. SÍ usa: 'Puedes notar que...', 'Esta configuración elemental aparece cuando...'. 3-4 párrafos observadores]",
+    "impacto_real": "[Impacto concreto en tu vida. NO metáforas. SÍ decisiones y comportamientos reales. Usa lenguaje observador: 'Puedes notar que cuando el elemento ${element.name} está activo...', 'Se manifiesta en situaciones donde...'. 3-5 ejemplos concretos de cómo se vive día a día. 2-3 párrafos directos]",
     "sombras": [
       {
         "nombre": "[Nombre de la sombra principal]",
@@ -885,20 +892,16 @@ async function generateElementInterpretation(
       }
     ],
     "sintesis": {
-      "frase": "[Frase memorable máximo 15 palabras]",
-      "declaracion": "[Declaración en primera persona: 'Yo soy...' o 'Mi elemento...'. 2-4 líneas que el usuario puede repetir como mantra]"
+      "frase": "[Resumen claro en máximo 15 palabras. PROHIBIDO: 'superpoder', 'misión cósmica', 'portal', metáforas. DEBE ser PSICOLÓGICO. Ejemplo: 'El elemento ${element.name} define mi forma de abordar la vida']",
+      "declaracion": "[Afirmación en primera persona de máximo 2 líneas. PROHIBIDO lenguaje épico. DEBE ser OBSERVADOR. Ejemplo: 'Mi predominancia de ${element.name} se manifiesta en patrones observables. Esta configuración es parte de mi naturaleza.']"
     }
   }
 }
 
-ESTILO: Disruptivo ("¡NO VINISTE A...!"), transformacional, psicológico (sombras/regalos), motivador.
-RESPONDE SOLO JSON VÁLIDO. NO agregues texto antes/después.
-
-EJEMPLOS PARA ${element.name}:
-${element.name === 'Fuego' ? '- Fuego: "¡NO VINISTE A APAGARTE!", "Tu superpoder es encender el mundo"' : ''}
-${element.name === 'Tierra' ? '- Tierra: "¡NO VINISTE A DESMORONARTE!", "Tu superpoder es construir imperios"' : ''}
-${element.name === 'Aire' ? '- Aire: "¡NO VINISTE A CALLARTE!", "Tu superpoder es revolucionar ideas"' : ''}
-${element.name === 'Agua' ? '- Agua: "¡NO VINISTE A SECARTE!", "Tu superpoder es fluir con la vida"' : ''}`;
+ESTILO: Observador (NO directivo), psicológico (sombras/posibilidades), claro y adulto.
+PROHIBIDO: "superpoder", "misión cósmica", "portal", "¡NO VINISTE A...!", mayúsculas enfáticas.
+TONO: Describe cómo eres y cómo funciona el elemento, no órdenes.
+RESPONDE SOLO JSON VÁLIDO. NO agregues texto antes/después.`;
 
   try {
     const completion = await openai.chat.completions.create({
@@ -966,10 +969,10 @@ async function generateModalityInterpretation(
     "tipo": "[Arquetipo - ej: 'Iniciador', 'Estabilizador']"
   },
   "drawer": {
-    "titulo": "🌟 [Título completo poderoso]",
+    "titulo": "Modalidad ${modality.name}: [Tema principal - ej: 'Iniciación y Liderazgo']",
     "educativo": "[QUÉ significa la modalidad ${modality.name}, CÓMO funciona, ejemplos desde niño y ahora. 3-5 párrafos claros]",
-    "poderoso": "[Mensaje transformacional: '¡NO VINISTE A...!', 'Tu superpoder es...'. Habla de trampas y regalos. 4-6 párrafos intensos]",
-    "poetico": "[Metáfora HERMOSA. Compara la modalidad ${modality.name} con naturaleza, movimientos. Crea imagen visual potente. 2-3 párrafos líricos]",
+    "poderoso": "[Análisis psicológico profundo de cómo se manifiesta la modalidad ${modality.name}. Usa TONO OBSERVADOR, no directivo. Describe patrones estables. Ejemplo: 'La modalidad ${modality.name} se manifiesta en tu forma de abordar proyectos...' NO uses: 'superpoder', '¡NO VINISTE A...!'. SÍ usa: 'Puedes notar que...', 'Esta modalidad aparece cuando...'. 3-4 párrafos observadores]",
+    "impacto_real": "[Impacto concreto en tu vida. NO metáforas. SÍ decisiones y comportamientos reales. Usa lenguaje observador: 'Puedes notar que tu forma de iniciar/mantener/adaptar proyectos...', 'En momentos críticos, esta modalidad se manifiesta...'. 3-5 ejemplos concretos de cómo se vive día a día. 2-3 párrafos directos]",
     "sombras": [
       {
         "nombre": "[Nombre de la sombra principal]",
@@ -979,19 +982,16 @@ async function generateModalityInterpretation(
       }
     ],
     "sintesis": {
-      "frase": "[Frase memorable máximo 15 palabras]",
-      "declaracion": "[Declaración en primera persona: 'Yo soy...' o 'Mi modalidad...'. 2-4 líneas que el usuario puede repetir como mantra]"
+      "frase": "[Resumen claro en máximo 15 palabras. PROHIBIDO: 'superpoder', 'misión cósmica', 'portal', metáforas. DEBE ser PSICOLÓGICO. Ejemplo: 'La modalidad ${modality.name} define mi ritmo de acción']",
+      "declaracion": "[Afirmación en primera persona de máximo 2 líneas. PROHIBIDO lenguaje épico. DEBE ser OBSERVADOR. Ejemplo: 'Mi predominancia de modalidad ${modality.name} se manifiesta en mi forma de actuar. Esta configuración es parte de mi naturaleza.']"
     }
   }
 }
 
-ESTILO: Disruptivo ("¡NO VINISTE A...!"), transformacional, psicológico (sombras/regalos), motivador.
-RESPONDE SOLO JSON VÁLIDO. NO agregues texto antes/después.
-
-EJEMPLOS PARA ${modality.name}:
-${modality.name === 'Cardinal' ? '- Cardinal: "¡NO VINISTE A PARARTE!", "Tu superpoder es iniciar revoluciones"' : ''}
-${modality.name === 'Fijo' ? '- Fijo: "¡NO VINISTE A RENDIRTE!", "Tu superpoder es mantener la visión"' : ''}
-${modality.name === 'Mutable' ? '- Mutable: "¡NO VINISTE A QUEDARTE!", "Tu superpoder es adaptarte a todo"' : ''}`;
+ESTILO: Observador (NO directivo), psicológico (sombras/posibilidades), claro y adulto.
+PROHIBIDO: "superpoder", "misión cósmica", "portal", "¡NO VINISTE A...!", mayúsculas enfáticas.
+TONO: Describe cómo eres y cómo funciona la modalidad, no órdenes.
+RESPONDE SOLO JSON VÁLIDO. NO agregues texto antes/después.`;
 
   try {
     const completion = await openai.chat.completions.create({
@@ -1059,10 +1059,10 @@ async function generateAspectInterpretation(
     "tipo": "[Arquetipo - ej: 'Conflicto Creativo', 'Armonía Cósmica']"
   },
   "drawer": {
-    "titulo": "🌟 [Título completo poderoso]",
+    "titulo": "${aspect.planet1} ${aspect.type} ${aspect.planet2}: [Tema principal - ej: 'Tensión entre Identidad y Emoción']",
     "educativo": "[QUÉ significa este aspecto ${aspect.type}, CÓMO funciona entre ${aspect.planet1} y ${aspect.planet2}, ejemplos desde niño y ahora. 3-5 párrafos claros]",
-    "poderoso": "[Mensaje transformacional: '¡NO VINISTE A...!', 'Tu superpoder es...'. Habla de trampas y regalos. 4-6 párrafos intensos]",
-    "poetico": "[Metáfora HERMOSA. Compara este aspecto con naturaleza, cosmos. Crea imagen visual potente. 2-3 párrafos líricos]",
+    "poderoso": "[Análisis psicológico profundo de cómo se manifiesta este aspecto ${aspect.type} entre ${aspect.planet1} y ${aspect.planet2}. Usa TONO OBSERVADOR, no directivo. Describe patrones estables. Ejemplo: 'Este aspecto se manifiesta en la forma en que estas dos energías interactúan...' NO uses: 'superpoder', '¡NO VINISTE A...!'. SÍ usa: 'Puedes notar que...', 'Esta conexión aparece cuando...'. 3-4 párrafos observadores]",
+    "impacto_real": "[Impacto concreto en tu vida. NO metáforas. SÍ decisiones y comportamientos reales. Usa lenguaje observador: 'Puedes notar que cuando estas dos energías interactúan...', 'Se manifiesta en situaciones donde...', 'Las personas pueden percibir...'. 3-5 ejemplos concretos de cómo se vive día a día. 2-3 párrafos directos]",
     "sombras": [
       {
         "nombre": "[Nombre de la sombra principal]",
@@ -1072,20 +1072,16 @@ async function generateAspectInterpretation(
       }
     ],
     "sintesis": {
-      "frase": "[Frase memorable máximo 15 palabras]",
-      "declaracion": "[Declaración en primera persona: 'Yo integro...' o 'Mi aspecto...'. 2-4 líneas que el usuario puede repetir como mantra]"
+      "frase": "[Resumen claro en máximo 15 palabras. PROHIBIDO: 'superpoder', 'misión cósmica', 'portal', metáforas. DEBE ser PSICOLÓGICO. Ejemplo: 'Este aspecto ${aspect.type} define cómo interactúan estas dos energías en mi vida']",
+      "declaracion": "[Afirmación en primera persona de máximo 2 líneas. PROHIBIDO lenguaje épico. DEBE ser OBSERVADOR. Ejemplo: 'Este aspecto ${aspect.type} entre ${aspect.planet1} y ${aspect.planet2} se manifiesta en patrones observables. Esta configuración es parte de mi naturaleza.']"
     }
   }
 }
 
-ESTILO: Disruptivo ("¡NO VINISTE A...!"), transformacional, psicológico (sombras/regalos), motivador.
-RESPONDE SOLO JSON VÁLIDO. NO agregues texto antes/después.
-
-EJEMPLOS PARA ${aspect.type}:
-${aspect.type === 'Cuadratura' ? '- Cuadratura: "¡NO VINISTE A EVITAR EL CONFLICTO!", "Tu superpoder es transformar tensión en crecimiento"' : ''}
-${aspect.type === 'Oposición' ? '- Oposición: "¡NO VINISTE A IGNORAR LA DICOTOMÍA!", "Tu superpoder es integrar opuestos"' : ''}
-${aspect.type === 'Trígono' ? '- Trígono: "¡NO VINISTE A DESPERDICIAR TU TALENTO!", "Tu superpoder es fluir con facilidad"' : ''}
-${aspect.type === 'Sextil' ? '- Sextil: "¡NO VINISTE A PERDER OPORTUNIDADES!", "Tu superpoder es crear oportunidades"' : ''}`;
+ESTILO: Observador (NO directivo), psicológico (sombras/posibilidades), claro y adulto.
+PROHIBIDO: "superpoder", "misión cósmica", "portal", "¡NO VINISTE A...!", mayúsculas enfáticas.
+TONO: Describe cómo funcionan estas energías en interacción, no órdenes.
+RESPONDE SOLO JSON VÁLIDO. NO agregues texto antes/después.`;
 
   try {
     const completion = await openai.chat.completions.create({
@@ -1141,20 +1137,20 @@ function generateFallbackElementInterpretation(element: any): PlanetInterpretati
     },
     drawer: {
       titulo: `✨ Tu Elemento ${element.name}`,
-      educativo: `El elemento ${element.name} es una de las cuatro fuerzas primordiales en astrología. Con ${element.distribution} planetas en este elemento, su influencia es notable en tu carta.\n\nDesde niño, esta energía elemental ha moldeado tu forma de relacionarte con el mundo. Ahora que lo comprendes, puedes activar conscientemente este poder.`,
-      poderoso: `¡NO VINISTE con esta distribución elemental por casualidad!\n\n¡ESTO ES ENORME! Tu equilibrio de elementos es una de tus herramientas cósmicas más poderosas.\n\nTu verdadero superpoder es usar conscientemente la energía del elemento ${element.name}. Cuando lo haces, te conviertes en agente de tu propia transformación elemental.`,
-      poetico: `El elemento ${element.name} es como una fuerza primordial danzando en tu ser.\n\nComo una corriente subterránea o un viento invisible, moldea tu realidad con su esencia única. En tu carta, proyecta una frecuencia especial que solo tú puedes manifestar.`,
+      educativo: `El elemento ${element.name} es una de las cuatro fuerzas primordiales en astrología. Con ${element.distribution} planetas en este elemento, su influencia es notable en tu carta.\n\nDesde temprano en tu vida, esta energía elemental ha moldeado tu forma de relacionarte con el mundo. Esta configuración actúa como patrón estable en tu personalidad.`,
+      poderoso: `Tu predominancia del elemento ${element.name} se manifiesta en patrones observables de comportamiento.\n\nEsta configuración actúa de manera constante en tu vida. Puedes notar que ciertas tendencias se repiten en cómo abordas situaciones y relaciones.\n\nCuando actúas alineado con las cualidades de ${element.name}, las cosas tienden a fluir. Cuando intentas forzar un enfoque que no resuena con esta naturaleza elemental, puede aparecer resistencia o agotamiento.`,
+      impacto_real: `Durante tu vida:\n- Tu forma de tomar decisiones está profundamente influenciada por el elemento ${element.name}\n- Las personas notan en ti las cualidades asociadas con ${element.name}\n- En momentos de crisis o cambio, tiendes a recurrir a estrategias típicas de ${element.name}\n- Tu equilibrio emocional y energético depende de mantener activa la energía de ${element.name}`,
       sombras: [
         {
           nombre: 'Desequilibrio elemental',
           descripcion: 'Cuando la energía elemental actúa sin consciencia',
-          trampa: '❌ Dejar que te domine en lugar de dirigirla',
-          regalo: '✅ Convertirla en superpoder con consciencia e intención',
+          trampa: '❌ Actúa de forma reactiva cuando no reconoces este patrón elemental',
+          regalo: '✅ Cuando reconoces esta configuración, puedes trabajar con ella conscientemente',
         },
       ],
       sintesis: {
-        frase: `Tu elemento ${element.name} es poder primordial esperando ser activado.`,
-        declaracion: `Yo activo conscientemente mi elemento ${element.name}. Esta energía primordial no me limita, me empodera. La uso para mi máxima expresión.`,
+        frase: `Mi predominancia del elemento ${element.name} define mi forma de abordar la vida.`,
+        declaracion: `Mi predominancia del elemento ${element.name} se manifiesta en patrones observables. Esta configuración es parte de mi naturaleza.`,
       },
     },
   };
@@ -1171,20 +1167,20 @@ function generateFallbackModalityInterpretation(modality: any): PlanetInterpreta
     },
     drawer: {
       titulo: `✨ Tu Modalidad ${modality.name}`,
-      educativo: `La modalidad ${modality.name} describe cómo te relacionas con el cambio, la estabilidad y la acción. Con ${modality.distribution} planetas en esta modalidad, su influencia es notable en tu carta.\n\nDesde niño, esta forma de actuar ha sido tu patrón natural. Ahora que lo comprendes, puedes elegir conscientemente cuándo aplicarla.`,
-      poderoso: `¡NO VINISTE con esta distribución modal por casualidad!\n\n¡ESTO ES ENORME! Tu ritmo de acción es una de tus herramientas cósmicas más poderosas.\n\nTu verdadero superpoder es usar conscientemente la modalidad ${modality.name}. Cuando lo haces, te conviertes en maestro de tu propio ritmo cósmico.`,
-      poetico: `La modalidad ${modality.name} es como un ritmo primordial latiendo en tu ser.\n\nComo una danza cósmica o una corriente marina, establece el tempo de tu vida. En tu carta, marca el compás único que solo tú puedes bailar.`,
+      educativo: `La modalidad ${modality.name} describe cómo te relacionas con el cambio, la estabilidad y la acción. Con ${modality.distribution} planetas en esta modalidad, su influencia es notable en tu carta.\n\nDesde temprano en tu vida, esta forma de actuar ha sido tu patrón natural. Esta configuración actúa como patrón estable en tu forma de abordar proyectos y cambios.`,
+      poderoso: `Tu predominancia de la modalidad ${modality.name} se manifiesta en patrones observables de cómo abordas proyectos y cambios.\n\nEsta configuración actúa de manera constante en tu vida. Puedes notar que tu forma de iniciar, mantener o adaptar proyectos sigue ciertos patrones característicos de ${modality.name}.\n\nCuando honras este ritmo natural, las cosas tienden a funcionar mejor. Cuando intentas forzar un ritmo que no resuena con tu naturaleza modal, puede aparecer frustración o agotamiento.`,
+      impacto_real: `Durante tu vida:\n- Tu forma de iniciar, mantener o adaptar proyectos refleja la modalidad ${modality.name}\n- Las personas notan tu tendencia a actuar de manera ${modality.name.toLowerCase()}\n- En momentos de cambio o estabilidad, tu respuesta natural es característica de ${modality.name}\n- Tu éxito y bienestar dependen de honrar tu ritmo ${modality.name}`,
       sombras: [
         {
           nombre: 'Ritmo automático',
           descripcion: 'Cuando la modalidad actúa sin consciencia',
-          trampa: '❌ Dejar que te lleve en lugar de dirigirla',
-          regalo: '✅ Convertirla en superpoder con consciencia e intención',
+          trampa: '❌ Actúa de forma reactiva cuando no reconoces conscientemente este ritmo',
+          regalo: '✅ Cuando reconoces este patrón, puedes trabajar con él de manera más consciente',
         },
       ],
       sintesis: {
-        frase: `Tu modalidad ${modality.name} es ritmo esperando ser dirigido.`,
-        declaracion: `Yo activo conscientemente mi modalidad ${modality.name}. Este ritmo no me limita, me empodera. Lo uso para mi máxima expresión.`,
+        frase: `Mi predominancia de modalidad ${modality.name} define mi ritmo de acción.`,
+        declaracion: `Mi predominancia de modalidad ${modality.name} se manifiesta en mi forma de actuar. Esta configuración es parte de mi naturaleza.`,
       },
     },
   };
@@ -1201,20 +1197,20 @@ function generateFallbackAspectInterpretation(aspect: any): PlanetInterpretation
     },
     drawer: {
       titulo: `✨ ${aspect.planet1} ${aspect.type} ${aspect.planet2}`,
-      educativo: `El aspecto ${aspect.type} entre ${aspect.planet1} y ${aspect.planet2} crea una relación energética específica. Con una separación de ${aspect.orb} grados, esta conexión es notable en tu carta.\n\nDesde niño, esta dinámica planetaria ha influido en cómo integras estas dos energías. Ahora que lo comprendes, puedes trabajar conscientemente con esta conexión.`,
-      poderoso: `¡NO VINISTE con este aspecto por casualidad!\n\n¡ESTO ES ENORME! Esta conexión entre ${aspect.planet1} y ${aspect.planet2} es una de tus herramientas cósmicas más poderosas.\n\nTu verdadero superpoder es integrar conscientemente estas dos energías. Cuando lo haces, te conviertes en alquimista de tu propia transformación.`,
-      poetico: `Este aspecto es como un puente luminoso entre dos mundos planetarios.\n\n${aspect.planet1} y ${aspect.planet2} danzan en una coreografía cósmica, creando música única que solo tu alma puede escuchar. En tu carta, tejen una sinfonía especial.`,
+      educativo: `El aspecto ${aspect.type} entre ${aspect.planet1} y ${aspect.planet2} crea una relación energética específica. Con una separación de ${aspect.orb} grados, esta conexión es notable en tu carta.\n\nDesde temprano en tu vida, esta dinámica planetaria ha influido en cómo integras estas dos energías. Esta configuración actúa como patrón estable en tu personalidad.`,
+      poderoso: `Este aspecto ${aspect.type} entre ${aspect.planet1} y ${aspect.planet2} se manifiesta en patrones observables de comportamiento.\n\nEsta configuración actúa de manera constante en tu vida. Puedes notar que la interacción entre estas dos energías sigue ciertos patrones característicos.\n\nCuando ambas energías trabajan en sintonía, las cosas fluyen. Cuando están en tensión, puede aparecer conflicto interno o indecisión que requiere integración consciente.`,
+      impacto_real: `Durante tu vida:\n- Cuando estas dos energías (${aspect.planet1} y ${aspect.planet2}) interactúan, manifiestas comportamientos característicos del aspecto ${aspect.type}\n- Las personas notan cómo integras o tensionas estas dos partes de tu personalidad\n- En situaciones que activan ambas energías, tu respuesta refleja la naturaleza del ${aspect.type}\n- Tu crecimiento personal depende de aprender a trabajar conscientemente con esta conexión`,
       sombras: [
         {
           nombre: 'Conexión inconsciente',
           descripcion: 'Cuando el aspecto actúa sin consciencia',
-          trampa: '❌ Dejar que te divida en lugar de unirte',
-          regalo: '✅ Convertirla en superpoder con consciencia e intención',
+          trampa: '❌ Actúa de forma reactiva cuando estas energías están en tensión',
+          regalo: '✅ Cuando reconoces esta dinámica, puedes integrar ambas energías conscientemente',
         },
       ],
       sintesis: {
-        frase: `Tu aspecto ${aspect.type} es puente esperando ser cruzado.`,
-        declaracion: `Yo integro conscientemente mi ${aspect.planet1} y ${aspect.planet2}. Esta conexión no me limita, me empodera. La uso para mi máxima expresión.`,
+        frase: `Mi ${aspect.type} entre ${aspect.planet1} y ${aspect.planet2} define cómo interactúan estas energías.`,
+        declaracion: `Este aspecto ${aspect.type} entre ${aspect.planet1} y ${aspect.planet2} se manifiesta en patrones observables. Esta configuración es parte de mi naturaleza.`,
       },
     },
   };

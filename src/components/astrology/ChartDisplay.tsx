@@ -52,13 +52,20 @@ const ChartDisplay = ({
   solarReturnYear,
   solarReturnTheme,
   ascSRInNatalHouse,
-  natalChart, // ⭐ Carta natal para conectar SR
+  solarReturnInterpretation, // ⭐ NUEVO: interpretación de SR para tooltips
   onCloseDrawer,
   // ✅ ADDED: For drawer functionality
   onOpenDrawer,
   drawerOpen = false,
   userId
-}: ChartDisplayProps) => {
+}: any) => {
+
+  // 🔍 DEBUG: Log solarReturnInterpretation received
+  useEffect(() => {
+    console.log('📥 ChartDisplay recibió solarReturnInterpretation:', solarReturnInterpretation);
+    console.log('📥 ChartType:', chartType);
+    console.log('📥 SR Interpretation tiene comparaciones?', !!solarReturnInterpretation?.comparaciones_planetarias);
+  }, [solarReturnInterpretation, chartType]);
 
   // ✅ ESTADOS
   const [showAspects, setShowAspects] = useState(true);
@@ -207,26 +214,32 @@ const ChartDisplay = ({
     return signBase + degree;
   };
 
-  const normalizedPlanets: any[] = planets.map((planet, index) => {
+  const normalizedPlanets: any[] = planets.map((planet: any, index: number) => {
     if (!planet) return null;
 
     const realPosition = convertAstrologicalDegreeToPosition(
-      planet.degree || 0, 
+      planet.degree || 0,
       planet.sign || 'Aries'
     );
+
+    // ✅ FIX: Use API house when available (Prokerala uses proper house system)
+    // Priority: houseNumber (correct from API) > housePosition > house (may be wrong)
+    const apiHouse = planet.houseNumber || planet.housePosition || planet.house;
+    const fallbackHouse = Math.floor(((realPosition - (ascendant?.degree || 0) + 360) % 360) / 30) + 1;
+    const finalHouse = apiHouse || fallbackHouse;
 
     return {
       ...planet,
       position: realPosition,
-      house: planet.house || planet.houseNumber || 1,
+      house: finalHouse, // ✅ Use API house (correct Placidus/Koch calculation)
       retrograde: planet.retrograde || false
     };
   }).filter(Boolean) as any[];
 
-  const normalizedHouses = houses.map((house, index) => {
+  const normalizedHouses = houses.map((house: any, index: number) => {
     if (!house) return null;
 
-    const realPosition = house.sign ? 
+    const realPosition = house.sign ?
       convertAstrologicalDegreeToPosition(house.degree || 0, house.sign) :
       (index * 30);
 
@@ -2143,7 +2156,8 @@ const ChartDisplay = ({
         solarReturnYear={solarReturnYear}
         solarReturnTheme={solarReturnTheme}
         ascSRInNatalHouse={ascSRInNatalHouse}
-        natalChart={natalChart} // ⭐ CRITICAL: Pasar carta natal para conectar SR
+        // ⭐ NUEVO: Pasar interpretación de SR para comparaciones en tooltips
+        natalInterpretations={chartType === 'solar-return' ? solarReturnInterpretation : undefined}
         // ✅ FIX: Pass card timer props for tooltip to cancel close timer
         cardHoverTimer={cardHoverTimer}
         setCardHoverTimer={setCardHoverTimer}

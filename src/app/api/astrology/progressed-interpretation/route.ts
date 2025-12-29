@@ -9,6 +9,9 @@ import connectDB from '@/lib/db';
 import BirthData, { castBirthData } from '@/models/BirthData';
 import Chart, { castChart } from '@/models/Chart';
 
+// ⏱️ Configurar timeout para Vercel (60 segundos en plan Pro)
+export const maxDuration = 60;
+
 function getOpenAIClient() {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error('OPENAI_API_KEY no está configurada');

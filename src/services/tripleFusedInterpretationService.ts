@@ -1,11 +1,11 @@
 //src/services/tripleFusedInterpretationService.ts
 
 // =============================================================================
-// 🤖 SERVICIO DE GENERACIÓN DE INTERPRETACIONES TRIPLE FUSIONADO
+// 🤖 SERVICIO DE GENERACIÓN DE INTERPRETACIONES ASTROLÓGICAS
 // tripleFusedInterpretationService.ts
 // =============================================================================
-// Genera interpretaciones personalizadas con IA usando lenguaje triple fusionado
-// (educativo + poderoso + poético)
+// Genera interpretaciones personalizadas con IA usando lenguaje observador
+// (educativo + observador + concreto)
 // =============================================================================
 
 import { generateAscendantTripleFusedPrompt, generateAspectTripleFusedPrompt, generateMidheavenTripleFusedPrompt, generatePlanetTripleFusedPrompt, TripleFusedInterpretation } from '@/utils/prompts/tripleFusedPrompts';
@@ -61,7 +61,7 @@ export async function generatePlanetInterpretation(
       messages: [
         {
           role: 'system',
-          content: 'Eres un astrólogo evolutivo experto en crear interpretaciones transformacionales con lenguaje triple fusionado (educativo + poderoso + poético). Respondes SOLO con JSON válido.'
+          content: 'Eres un astrólogo profesional especializado en interpretaciones psicológicas profundas con lenguaje observador (educativo + observador + concreto). Respondes SOLO con JSON válido.'
         },
         {
           role: 'user',
@@ -111,7 +111,7 @@ export async function generateAscendantInterpretation(
       messages: [
         {
           role: 'system',
-          content: 'Eres un astrólogo evolutivo experto en crear interpretaciones transformacionales con lenguaje triple fusionado. Respondes SOLO con JSON válido.'
+          content: 'Eres un astrólogo profesional especializado en interpretaciones psicológicas profundas con lenguaje observador. Respondes SOLO con JSON válido.'
         },
         {
           role: 'user',
@@ -129,7 +129,7 @@ export async function generateAscendantInterpretation(
     }
 
     const interpretation = JSON.parse(content) as TripleFusedInterpretation;
-    
+
     console.log(`✅ Interpretación de Ascendente generada exitosamente`);
     return interpretation;
 
@@ -159,7 +159,7 @@ export async function generateMidheavenInterpretation(
       messages: [
         {
           role: 'system',
-          content: 'Eres un astrólogo evolutivo experto en crear interpretaciones transformacionales con lenguaje triple fusionado. Respondes SOLO con JSON válido.'
+          content: 'Eres un astrólogo profesional especializado en interpretaciones psicológicas profundas con lenguaje observador. Respondes SOLO con JSON válido.'
         },
         {
           role: 'user',
@@ -209,7 +209,7 @@ export async function generateAspectInterpretation(
       messages: [
         {
           role: 'system',
-          content: 'Eres un astrólogo evolutivo experto en crear interpretaciones transformacionales con lenguaje triple fusionado. Respondes SOLO con JSON válido.'
+          content: 'Eres un astrólogo profesional especializado en interpretaciones psicológicas profundas con lenguaje observador. Respondes SOLO con JSON válido.'
         },
         {
           role: 'user',
@@ -227,7 +227,7 @@ export async function generateAspectInterpretation(
     }
 
     const interpretation = JSON.parse(content) as TripleFusedInterpretation;
-    
+
     console.log(`✅ Interpretación de aspecto generada exitosamente`);
     return interpretation;
 
@@ -257,19 +257,19 @@ function generateFallbackPlanetInterpretation(
     drawer: {
       titulo: `${planetName} en ${sign} Casa ${house}`,
       educativo: `${planetName} representa una energía específica en tu carta natal. En el signo de ${sign}, esta energía se expresa de una manera particular. La Casa ${house} indica el área de vida donde esta energía se manifiesta más claramente.`,
-      poderoso: `Esta posición te otorga capacidades únicas que puedes desarrollar conscientemente. Tu ${planetName} en ${sign} es parte de tu don personal que viniste a compartir con el mundo.`,
-      impacto_real: `Durante tu vida:\n- Tus decisiones en el área de la Casa ${house} reflejan las cualidades de ${sign}\n- Las personas notan en ti características asociadas con ${planetName} en ${sign}\n- Cuando esta energía está activa, experimentas mayor autenticidad y propósito\n- Tu forma de abordar los temas de la Casa ${house} está profundamente influenciada por ${sign}`,
+      observador: `Esta configuración se manifiesta en patrones específicos de comportamiento. Cuando trabajas con esta energía, tiendes a experimentar mayor fluidez. Cuando la resistes, pueden aparecer fricciones en el área de la Casa ${house}.`,
+      impacto_real: `Durante tu vida:\n- Tus decisiones en el área de la Casa ${house} reflejan las cualidades de ${sign}\n- Las personas notan en ti características asociadas con ${planetName} en ${sign}\n- Cuando esta energía está activa, experimentas mayor autenticidad\n- Tu forma de abordar los temas de la Casa ${house} está influenciada por ${sign}`,
       sombras: [
         {
           nombre: 'Desequilibrio',
           descripcion: 'Cuando esta energía no está integrada',
           trampa: '❌ Puede manifestarse de forma reactiva',
-          regalo: '✅ Al integrarla conscientemente, se convierte en fortaleza'
+          regalo: '✅ Al integrarla conscientemente, funciona con mayor naturalidad'
         }
       ],
       sintesis: {
-        frase: `Mi ${planetName} en ${sign} es poder esperando ser activado.`,
-        declaracion: `Mi ${planetName} en ${sign} no es accidente - es herramienta cósmica. La activo conscientemente para crear mi realidad.`
+        frase: `Mi ${planetName} en ${sign} es parte de mi configuración natural.`,
+        declaracion: `Mi ${planetName} en ${sign} se manifiesta en mi forma de ser. Reconocerlo me facilita el camino.`
       }
     }
   };
@@ -287,19 +287,19 @@ function generateFallbackAscendantInterpretation(sign: string): TripleFusedInter
     drawer: {
       titulo: `Tu Ascendente en ${sign}`,
       educativo: `El Ascendente es el signo que estaba ascendiendo en el horizonte oriental en el momento exacto de tu nacimiento. Representa tu máscara social, tu primera impresión, y cómo te presentas al mundo. En ${sign}, esta energía se expresa de forma única.`,
-      poderoso: `Tu Ascendente en ${sign} es tu herramienta para navegar el mundo. No es una mentira, es tu interfaz con la realidad exterior.`,
-      impacto_real: `Durante tu vida:\n- Las personas perciben inmediatamente tu esencia ${sign} cuando te conocen\n- Tiendes a tomar decisiones que reflejan las cualidades de ${sign}\n- Tu forma de presentarte al mundo está profundamente influenciada por esta configuración\n- Cuando actúas alineado con ${sign}, sientes mayor autenticidad y fluidez`,
+      observador: `Tu Ascendente en ${sign} se manifiesta en tu forma automática de abordar situaciones nuevas. No es algo que eliges conscientemente - es tu respuesta natural inicial. Reconocerlo te permite trabajar con él en lugar de contra él.`,
+      impacto_real: `Durante tu vida:\n- Las personas perciben inmediatamente tu esencia ${sign} cuando te conocen\n- Tiendes a tomar decisiones que reflejan las cualidades de ${sign}\n- Tu forma de presentarte al mundo está influenciada por esta configuración\n- Cuando actúas alineado con ${sign}, sientes mayor autenticidad y fluidez`,
       sombras: [
         {
           nombre: 'Máscara rígida',
           descripcion: 'Cuando te identificas demasiado con tu Ascendente',
           trampa: '❌ Puede ocultar tu verdadero ser (Sol)',
-          regalo: '✅ Cuando se usa conscientemente, es tu superpoder social'
+          regalo: '✅ Cuando lo reconoces como una capa de ti, no como todo tú, funciona mejor'
         }
       ],
       sintesis: {
-        frase: `Mi Ascendente en ${sign} es mi poder de presencia.`,
-        declaracion: `Mi Ascendente en ${sign} no es máscara - es herramienta consciente. La uso para manifestar mi propósito.`
+        frase: `Mi Ascendente en ${sign} es mi forma natural de presentarme.`,
+        declaracion: `Mi Ascendente en ${sign} es parte de mi configuración. Lo reconozco sin identificarme completamente con él.`
       }
     }
   };
@@ -310,26 +310,26 @@ function generateFallbackMidheavenInterpretation(sign: string): TripleFusedInter
     tooltip: {
       titulo: `Medio Cielo en ${sign}`,
       descripcionBreve: `Medio Cielo en ${sign} (Vocación)`,
-      significado: `Tu Medio Cielo en ${sign} indica tu vocación del alma y el legado que viniste a dejar en el mundo.`,
+      significado: `Tu Medio Cielo en ${sign} indica tu vocación natural y el tipo de contribución que tiendes a hacer al mundo.`,
       efecto: 'Vocación y legado público',
       tipo: 'Propósito profesional'
     },
     drawer: {
       titulo: `Tu Medio Cielo en ${sign}`,
       educativo: `El Medio Cielo es el punto más alto del cielo en tu carta natal. Representa tu vocación, tu imagen pública, y el tipo de contribución que quieres hacer al mundo. En ${sign}, esta vocación toma una forma específica.`,
-      poderoso: `Tu Medio Cielo en ${sign} no es solo sobre "trabajo" - es sobre tu contribución única al mundo. Es tu legado en construcción.`,
-      impacto_real: `Durante tu vida:\n- Tu carrera y vocación tienden a reflejar las cualidades de ${sign}\n- Las personas te reconocen profesionalmente por características asociadas con ${sign}\n- Cuando trabajas alineado con ${sign}, experimentas mayor propósito y satisfacción\n- Tu legado público está profundamente influenciado por esta configuración`,
+      observador: `Tu Medio Cielo en ${sign} se manifiesta en el tipo de actividades profesionales que te resultan naturales y satisfactorias. No es un mandato sino una orientación - una dirección en la que tus talentos tienden a fluir con mayor facilidad.`,
+      impacto_real: `Durante tu vida:\n- Tu carrera y vocación tienden a reflejar las cualidades de ${sign}\n- Las personas te reconocen profesionalmente por características asociadas con ${sign}\n- Cuando trabajas alineado con ${sign}, experimentas mayor satisfacción\n- Tu imagen pública está influenciada por esta configuración`,
       sombras: [
         {
           nombre: 'Éxito vacío',
           descripcion: 'Cuando buscas éxito externo sin alineación interna',
-          trampa: '❌ Puede llevar a logros que no nutren tu alma',
-          regalo: '✅ Cuando sigues tu vocación verdadera, el éxito tiene significado'
+          trampa: '❌ Puede llevar a logros que no generan satisfacción real',
+          regalo: '✅ Cuando sigues tu vocación natural, el trabajo se siente más significativo'
         }
       ],
       sintesis: {
-        frase: `Mi Medio Cielo en ${sign} es mi llamado cósmico.`,
-        declaracion: `Mi Medio Cielo en ${sign} no es trabajo - es misión. La cumplo conscientemente construyendo mi legado.`
+        frase: `Mi Medio Cielo en ${sign} indica mi vocación natural.`,
+        declaracion: `Mi Medio Cielo en ${sign} se manifiesta en el tipo de contribución que me resulta natural. Reconocerlo me orienta.`
       }
     }
   };
@@ -362,19 +362,19 @@ function generateFallbackAspectInterpretation(
     drawer: {
       titulo: `${aspectName}: El Diálogo entre ${planet1} y ${planet2}`,
       educativo: `Los aspectos son ángulos entre planetas que crean "conversaciones" internas. Una ${aspectName} entre ${planet1} y ${planet2} indica una relación específica entre estas dos energías en tu psique.`,
-      poderoso: `Este aspecto es parte de tu arquitectura interna única. La tensión o armonía entre ${planet1} y ${planet2} es donde se forja tu maestría.`,
-      impacto_real: `Durante tu vida:\n- Cuando estas dos energías (${planet1} y ${planet2}) interactúan, manifiestas comportamientos característicos del aspecto ${aspectName}\n- Las personas notan cómo integras o tensionas estas dos partes de tu personalidad\n- En situaciones que activan ambas energías, tu respuesta refleja la naturaleza de esta conexión\n- Tu crecimiento personal depende de aprender a trabajar conscientemente con este diálogo interno`,
+      observador: `Este aspecto se manifiesta en cómo interactúan naturalmente estas dos energías en ti. La ${aspectName} indica el tipo de relación que mantienen - si fluyen juntas o generan tensión que requiere integración consciente.`,
+      impacto_real: `Durante tu vida:\n- Cuando estas dos energías (${planet1} y ${planet2}) interactúan, manifiestas comportamientos característicos del aspecto ${aspectName}\n- Las personas notan cómo integras o tensionas estas dos partes de tu personalidad\n- En situaciones que activan ambas energías, tu respuesta refleja la naturaleza de esta conexión\n- Reconocer este patrón te permite trabajar con él conscientemente`,
       sombras: [
         {
           nombre: 'Desintegración',
           descripcion: 'Cuando estas energías están en conflicto no resuelto',
           trampa: '❌ Puede crear fragmentación interna',
-          regalo: '✅ Al integrarlas, emerges más completo y poderoso'
+          regalo: '✅ Al integrarlas, funciona con mayor fluidez'
         }
       ],
       sintesis: {
-        frase: `Mi ${aspectName} entre ${planet1} y ${planet2} es puente de poder.`,
-        declaracion: `Integro conscientemente mi ${planet1} y ${planet2}. Esta conexión no me divide - me completa.`
+        frase: `Mi ${aspectName} entre ${planet1} y ${planet2} es parte de mi configuración interna.`,
+        declaracion: `Mi ${planet1} y ${planet2} interactúan de esta manera específica. Reconocerlo me ayuda a trabajar con ello.`
       }
     }
   };

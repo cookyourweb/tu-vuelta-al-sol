@@ -10,7 +10,7 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Planet, Aspect } from '@/types/astrology/chartDisplay';
-import { planetMeanings, signMeanings, houseMeanings, aspectMeanings, PLANET_SYMBOLS, PLANET_COLORS, SIGN_SYMBOLS } from '@/constants/astrology';
+import { planetMeanings, signMeanings, houseMeanings, aspectMeanings, PLANET_SYMBOLS, SIGN_SYMBOLS, PLANET_COLORS } from '@/constants/astrology';
 import { getPersonalizedPlanetInterpretation, getPersonalizedAspectInterpretation } from '@/services/chartInterpretationsService';
 import { getExampleInterpretation } from '@/data/interpretations/ExampleInterpretations';
 import { useAuth } from '@/context/AuthContext';
@@ -45,7 +45,7 @@ interface ChartTooltipsProps {
   solarReturnYear?: number;
   solarReturnTheme?: string;
   ascSRInNatalHouse?: number;
-  natalChart?: any; // ⭐ Carta natal para conectar con SR
+  natalInterpretations?: any;
   cardHoverTimer?: NodeJS.Timeout | null;
   setCardHoverTimer?: (timer: NodeJS.Timeout | null) => void;
 }
@@ -80,27 +80,8 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
     modalityDistribution,
     solarReturnYear,
     solarReturnTheme,
-    ascSRInNatalHouse,
-    natalChart // ⭐ Carta natal para referencia
+    ascSRInNatalHouse
   } = props;
-
-  // =============================================================================
-  // CONSTANTS - Significados de casas para fallback
-  // =============================================================================
-  const HOUSE_MEANINGS_SHORT: Record<number, string> = {
-    1: "Identidad, apariencia, primeras impresiones",
-    2: "Recursos, dinero, valores personales",
-    3: "Comunicación, hermanos, aprendizaje",
-    4: "Hogar, familia, raíces",
-    5: "Creatividad, romance, hijos",
-    6: "Trabajo diario, salud, rutinas",
-    7: "Pareja, matrimonio, socios",
-    8: "Transformación, sexualidad, recursos compartidos",
-    9: "Filosofía, viajes, estudios superiores",
-    10: "Carrera, reputación, imagen pública",
-    11: "Amistades, grupos, ideales",
-    12: "Espiritualidad, subconsciente, karma, sacrificio"
-  };
 
   // =============================================================================
   // STATE
@@ -359,67 +340,97 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
     }
 
     setGeneratingAspect(true);
-    setIsGenerating(true); // ⭐ NUEVO: Para el modal
+    setIsGenerating(true);
     setAspectTooltipLocked(true);
     setShowLongGeneratingMessage(false);
 
     // ⭐ Timer para mensaje largo
     const longGenerationTimer = setTimeout(() => {
       setShowLongGeneratingMessage(true);
-    }, 5000); // Después de 5 segundos
+    }, 5000);
 
     try {
       console.log(`🎯 Generating aspect: ${planet1} ${aspectType} ${planet2}`);
+      console.log(`📊 Chart type: ${chartType}`);
 
-      const response = await fetch('/api/astrology/interpret-natal', {
-        method: 'PUT',
+      // ⭐ Determinar endpoint según tipo de carta
+      const endpoint = chartType === 'solar-return'
+        ? '/api/astrology/interpret-aspect-sr'
+        : '/api/astrology/interpret-aspect';
+
+      console.log(`📍 Using endpoint: ${endpoint}`);
+
+      // Construir body según tipo de carta
+      const body: any = {
+        userId,
+        planet1,
+        planet2,
+        aspectType,
+      };
+
+      if (chartType === 'solar-return') {
+        body.solarReturnOrb = orb;
+        body.year = new Date().getFullYear(); // TODO: Obtener del contexto
+      } else {
+        body.orb = orb;
+        body.chartType = 'natal';
+      }
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          planet1,
-          planet2,
-          aspectType,
-          orb
-        })
+        body: JSON.stringify(body)
       });
 
       const result = await response.json();
+      console.log('📦 Resultado de interpret-aspect:', result);
 
       if (result.success) {
-        console.log('✅ Aspect interpretation generated');
+        console.log('✅ Aspecto generado:', `${planet1} ${aspectType} ${planet2}`);
 
-        // Get Firebase ID token for authentication
-        const token = await user!.getIdToken();
+        // ⭐ ACTUALIZAR ESTADO inmediatamente
+        const aspectKey = result.aspectKey || `${planet1}-${planet2}-${aspectType}`;
 
-        // Refresh interpretations
-        const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        const refreshResult = await refreshResponse.json();
-
-        if (refreshResult.success) {
-          setNatalInterpretations(refreshResult.data);
-          console.log('✅ Interpretations refreshed');
-
-          // Open drawer immediately after generation
-          const aspectKeyFull = `${planet1}-${planet2}-${aspectType}`;
-          const aspectInterpretation = refreshResult.data?.aspects?.[aspectKeyFull];
-
-          if (aspectInterpretation?.drawer && onOpenDrawer) {
-            console.log('🎯 Opening drawer after generation for aspect:', aspectKeyFull);
-            onOpenDrawer(aspectInterpretation.drawer);
-          }
+        if (chartType === 'solar-return') {
+          // Para Solar Return
+          const updatedInterpretations = {
+            ...natalInterpretations,
+            aspects_solar_return: {
+              ...natalInterpretations?.aspects_solar_return,
+              [aspectKey]: result.interpretation
+            }
+          };
+          setNatalInterpretations(updatedInterpretations);
+          console.log('🔄 Estado actualizado con nuevo aspecto SR:', aspectKey);
+        } else {
+          // Para Natal
+          const updatedInterpretations = {
+            ...natalInterpretations,
+            aspects: {
+              ...natalInterpretations?.aspects,
+              [aspectKey]: result.interpretation
+            }
+          };
+          setNatalInterpretations(updatedInterpretations);
+          console.log('🔄 Estado actualizado con nuevo aspecto natal:', aspectKey);
         }
+
+        // ⭐ ABRIR DRAWER directamente
+        if (result.interpretation?.drawer && onOpenDrawer) {
+          console.log('✅ Abriendo drawer directamente desde interpret-aspect');
+          onOpenDrawer(result.interpretation.drawer);
+        }
+
+      } else {
+        throw new Error(result.error || 'Error generating aspect');
       }
+
     } catch (error) {
       console.error('❌ Error generating aspect:', error);
-      alert('❌ Error generando interpretación');
+      alert('❌ Error generando interpretación del aspecto');
     } finally {
       setGeneratingAspect(false);
-      setIsGenerating(false); // ⭐ NUEVO: Para el modal
+      setIsGenerating(false);
       setShowLongGeneratingMessage(false);
       clearTimeout(longGenerationTimer);
     }
@@ -445,22 +456,8 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
       interpretation = natalInterpretations.asteroids[interpretationKey];
       console.log('✅ Using AI interpretation for asteroid', interpretationKey);
     } else {
-      // ⭐ FIX: Usar fallback diferente según chartType
-      const fallbackText = chartType === 'solar-return'
-        ? `Este año ${solarReturnYear || 'actual'}, este posicionamiento activa un entrenamiento específico en tu vida. Haz click para generar tu interpretación personalizada del año.`
-        : 'Esta configuración astrológica tiene un significado especial en tu carta natal. Haz click para descubrir tu interpretación completa personalizada.';
-
-      interpretation = {
-        tooltip: {
-          titulo: 'Interpretación Personalizada',
-          significado: fallbackText,
-          efecto: chartType === 'solar-return' ? 'Activación anual específica' : 'Influencia única en tu personalidad',
-          tipo: chartType === 'solar-return' ? 'Entrenamiento del año' : 'Energía transformadora'
-        },
-        // ⭐ FIX: Agregar drawer vacío para que siempre aparezca el botón de generar
-        drawer: null
-      };
-      console.log('⚠️ Using fallback for', interpretationKey, 'chartType:', chartType);
+      interpretation = getExampleInterpretation(interpretationKey);
+      console.log('⚠️ Using fallback for', interpretationKey);
       console.log('   - Interpretation:', interpretation);
       console.log('   - Has drawer?', !!interpretation?.drawer);
       console.log('   - onOpenDrawer exists?', !!onOpenDrawer);
@@ -501,26 +498,20 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           e.stopPropagation();
         }}
       >
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center flex-1">
-            <div className="flex flex-col items-start flex-1">
-              {/* Título principal con iconos y descripción */}
-              <div className="flex items-center gap-2 text-white font-bold text-base mb-1">
-                <span className="text-2xl" style={{ color: PLANET_COLORS[planet.name] || '#ffffff' }}>
-                  {PLANET_SYMBOLS[planet.name] || planet.name.charAt(0)}
-                </span>
-                <span className="text-2xl">
-                  {SIGN_SYMBOLS[planet.sign] || ''}
-                </span>
-                <span>
-                  {planet.name} en {planet.sign} en Casa {planet.house} ({HOUSE_MEANINGS_SHORT[planet.house] || `Casa ${planet.house}`}) {planet.degree.toFixed(1)}°
-                </span>
+            <span
+              className="text-4xl mr-3"
+              style={{ color: PLANET_COLORS[planet.name] || '#ffffff' }}
+            >
+              {PLANET_SYMBOLS[planet.name] || planet.name.charAt(0)}
+            </span>
+            <div className="flex-1">
+              <div className="text-white font-bold text-base leading-tight">
+                {planet.name} en {SIGN_SYMBOLS[planet.sign] || ''} {planet.sign} en Casa {planet.house}
               </div>
-              {/* Subtítulo */}
-              <div className="text-gray-200 text-sm ml-20">
-                {typeof interpretation?.tooltip?.titulo === 'string'
-                  ? `✨ ${interpretation.tooltip.titulo}`
-                  : '✨ Interpretación Personalizada'}
+              <div className="text-gray-300 text-sm mt-1">
+                {planet.degree.toFixed(2)}° - Casa {planet.house} ({planet.house && houseMeanings[planet.house as keyof typeof houseMeanings] ? houseMeanings[planet.house as keyof typeof houseMeanings].name.split(' - ')[1] : 'Área de vida'})
               </div>
             </div>
           </div>
@@ -534,28 +525,34 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                 setClickedTooltipTimer(null);
               }
             }}
-            className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all"
+            className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all ml-2"
             aria-label="Cerrar"
           >
             <X className="w-5 h-5 text-white" />
           </button>
         </div>
 
-        <div className="mb-3">
-          <div className="text-white text-sm font-semibold mb-2">
-            Significado:
+        <div className="mb-4">
+          <div className="text-white text-xs font-semibold mb-2 flex items-center gap-1">
+            <span className="text-base">✨</span> Significado Astrológico
           </div>
           <div className="text-gray-200 text-sm leading-relaxed">
             {typeof interpretation?.tooltip?.significado === 'string' ? interpretation.tooltip.significado : getPersonalizedPlanetInterpretation(planet)}
           </div>
         </div>
 
-        <div className="space-y-1 mb-3">
-          <div className="text-cyan-200 text-xs">
-            <strong>Efecto:</strong> {typeof interpretation?.tooltip?.efecto === 'string' ? interpretation.tooltip.efecto : 'Influencia planetaria significativa'}
+        <div className="space-y-2 mb-3">
+          <div className="text-cyan-200 text-xs flex items-start gap-2">
+            <span className="text-sm">🌟</span>
+            <div>
+              <strong>Efecto:</strong> {typeof interpretation?.tooltip?.efecto === 'string' ? interpretation.tooltip.efecto : 'Influencia planetaria significativa'}
+            </div>
           </div>
-          <div className="text-purple-200 text-xs">
-            <strong>Tipo:</strong> {typeof interpretation?.tooltip?.tipo === 'string' ? interpretation.tooltip.tipo : 'Energía transformadora'}
+          <div className="text-purple-200 text-xs flex items-start gap-2">
+            <span className="text-sm">🔮</span>
+            <div>
+              <strong>Arquetipo:</strong> {typeof interpretation?.tooltip?.tipo === 'string' ? interpretation.tooltip.tipo : 'Energía transformadora'}
+            </div>
           </div>
         </div>
 
@@ -566,12 +563,145 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           </div>
         )}
 
-        {interpretation && (
+        {/* ⭐ Botón para ver interpretación (diferente según chartType) */}
+        {interpretation?.drawer && (
           <button
             onMouseDown={async (e) => {
               e.stopPropagation();
               e.preventDefault();
 
+              // ⭐ SOLAR RETURN: Intentar buscar comparación planetaria primero
+              if (chartType === 'solar-return') {
+                console.log('🔄 SOLAR RETURN - Buscando comparación para:', planet.name);
+                console.log('📊 natalInterpretations:', natalInterpretations);
+                console.log('📊 comparaciones_planetarias:', natalInterpretations?.comparaciones_planetarias);
+
+                // Mapear nombre de planeta a key de comparaciones_planetarias
+                const planetKeyMap: Record<string, string> = {
+                  'Sol': 'sol',
+                  'Luna': 'luna',
+                  'Mercurio': 'mercurio',
+                  'Venus': 'venus',
+                  'Marte': 'marte',
+                  'Júpiter': 'jupiter',
+                  'Saturno': 'saturno',
+                  'Urano': 'urano',
+                  'Neptuno': 'neptuno',
+                  'Plutón': 'pluton'
+                };
+
+                const planetKey = planetKeyMap[planet.name];
+                console.log('🔍 planetKey:', planetKey);
+
+                const comparison = natalInterpretations?.comparaciones_planetarias?.[planetKey];
+                console.log('🔍 comparison found:', !!comparison);
+                console.log('🔍 comparison:', comparison);
+
+                if (comparison && onOpenDrawer) {
+                  // ✅ CASO 1: Hay comparación - mostrar drawer comparativo
+                  setTooltipLocked(true);
+
+                  // Helper: Asegurar array (puede venir como string o array)
+                  const ensureArray = (value: any): string[] => {
+                    if (!value) return [];
+                    if (Array.isArray(value)) return value;
+                    if (typeof value === 'string') return [value];
+                    return [];
+                  };
+
+                  // Detectar si es formato NUEVO (con que_se_activa, por_que_descoloca, etc.)
+                  const isNewFormat = comparison.que_se_activa || comparison.por_que_descoloca;
+
+                  let drawerContent;
+
+                  if (isNewFormat) {
+                    // ✅ FORMATO NUEVO: Estructura del prompt actualizado
+                    const seActivaLista = ensureArray(comparison.que_se_activa?.se_activa_lista);
+                    const queSeActivaNarrativa = [
+                      comparison.que_se_activa?.narrativa || '',
+                      '',
+                      seActivaLista.length > 0
+                        ? `**Este año se activa:**\n${seActivaLista.map((item: string) => `• ${item}`).join('\n')}`
+                        : ''
+                    ].filter(Boolean).join('\n');
+
+                    const tePideLista = ensureArray(comparison.que_te_pide?.te_pide_lista);
+                    const conceptosClave = ensureArray(comparison.que_te_pide?.conceptos_clave);
+                    const queTeVideNarrativa = [
+                      comparison.que_te_pide?.narrativa || '',
+                      '',
+                      tePideLista.length > 0
+                        ? `**La vida te pide:**\n${tePideLista.map((item: string) => `• ${item}`).join('\n')}`
+                        : '',
+                      '',
+                      conceptosClave.length > 0
+                        ? `**Este es un año de:** ${conceptosClave.join(', ')}`
+                        : ''
+                    ].filter(Boolean).join('\n');
+
+                    const siLoRespetas = ensureArray(comparison.consecuencias?.si_lo_respetas);
+                    const siLoResistes = ensureArray(comparison.consecuencias?.si_no_lo_respetas);
+                    const consecuencias = [
+                      '**🌱 Si lo respetas:**',
+                      ...siLoRespetas.map((c: string) => `• ${c}`),
+                      '',
+                      '**⚠️ Si lo resistes:**',
+                      ...siLoResistes.map((c: string) => `• ${c}`)
+                    ].join('\n');
+
+                    drawerContent = {
+                      titulo: comparison.titulo_atractivo || `${planet.name}: Natal vs Solar Return`,
+                      subtitulo: comparison.subtitulo || '',
+                      educativo: queSeActivaNarrativa,
+                      poderoso: comparison.por_que_descoloca?.narrativa || '',
+                      impacto_real: queTeVideNarrativa,
+                      sombras: [{
+                        nombre: 'Consecuencias',
+                        descripcion: 'Según cómo manejes esta energía',
+                        trampa: consecuencias,
+                        regalo: ''
+                      }],
+                      sintesis: {
+                        frase: comparison.subtitulo || `${planet.name} se activa de manera específica este año`,
+                        declaracion: [
+                          '**✅ HAZ:**',
+                          ...ensureArray(comparison.acciones?.hacer).map((a: string) => `• ${a}`),
+                          '',
+                          '**❌ EVITA:**',
+                          ...ensureArray(comparison.acciones?.evitar).map((a: string) => `• ${a}`)
+                        ].join('\n')
+                      }
+                    };
+                  } else {
+                    // ⚠️ FORMATO ANTIGUO (por compatibilidad)
+                    drawerContent = {
+                      titulo: `${planet.name}: Natal vs Solar Return`,
+                      educativo: `🔹 CÓMO ERES NORMALMENTE (Natal)\n\n📍 ${comparison.natal?.ubicacion || `${comparison.natal?.signo || planet.sign} en Casa ${comparison.natal?.casa || planet.house}`}\n\n${comparison.natal?.descripcion || 'Tu energía natal permanente'}`,
+                      poderoso: `🔸 QUÉ SE ACTIVA ESTE AÑO (Solar Return)\n\n📍 ${comparison.solar_return?.ubicacion || comparison.solar?.ubicacion || `${planet.sign} en Casa ${planet.house} SR`}\n\n${comparison.solar_return?.descripcion || comparison.solar?.descripcion || 'Energía activada este año'}`,
+                      impacto_real: `🔁 DÓNDE CHOCA O POTENCIA\n\n${comparison.comparacion || comparison.donde_choca_potencia || 'Interacción entre ambas energías'}`,
+                      sombras: [{
+                        nombre: 'Acción Recomendada',
+                        descripcion: 'Este año',
+                        trampa: '❌ Ignorar esta activación',
+                        regalo: `✅ ${comparison.accion || comparison.que_conviene_hacer || 'Aprovecha esta energía conscientemente'}`
+                      }],
+                      sintesis: {
+                        frase: `${planet.name} se activa de manera específica este año`,
+                        declaracion: comparison.frase_clave || `Mi ${planet.name} natal se manifiesta este año de forma única. Uso conscientemente esta activación.`
+                      }
+                    };
+                  }
+
+                  onOpenDrawer(drawerContent);
+                  return;
+                } else {
+                  // ⚠️ CASO 2: No hay comparación - caer en flujo normal de generar interpretación individual
+                  console.warn('⚠️ No se encontró comparación para:', planet.name, '- usando generación individual');
+                  // NO hacer return aquí - continuar al flujo normal de generación
+                }
+              }
+
+              // ⭐ NATAL: Generar/ver interpretación individual
               const interpretationKey = `${planet.name}-${planet.sign}-${planet.house}`;
               const hasAI = natalInterpretations?.planets?.[interpretationKey];
 
@@ -589,19 +719,6 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                 try {
                   console.log('🎯 Generando planeta individual:', planet.name);
 
-                  // ⭐ Si es SR, buscar posición natal del mismo planeta
-                  let natalPosition = undefined;
-                  if (chartType === 'solar-return' && natalChart?.planets) {
-                    const natalPlanet = natalChart.planets.find((p: any) => p.name === planet.name);
-                    if (natalPlanet) {
-                      natalPosition = {
-                        sign: natalPlanet.sign,
-                        house: natalPlanet.house
-                      };
-                      console.log(`  └─ Posición natal: ${natalPlanet.sign} Casa ${natalPlanet.house}`);
-                    }
-                  }
-
                   // ⭐ LLAMAR AL NUEVO ENDPOINT
                   const response = await fetch('/api/astrology/interpret-planet', {
                     method: 'POST',
@@ -613,8 +730,7 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                       house: planet.house,
                       degree: planet.degree,
                       chartType,  // ⭐ Incluye chartType
-                      year: solarReturnYear,
-                      natalPosition // ⭐ Posición natal para conectar
+                      year: solarReturnYear
                     })
                   });
 
@@ -622,18 +738,53 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
                   if (result.success) {
                     console.log('✅ Planeta generado:', planet.name);
+                    console.log('📦 Resultado de interpret-planet:', result);
 
-                    // Get Firebase ID token for authentication
+                    // ⭐ USAR DIRECTAMENTE EL RESULTADO DE interpret-planet
+                    if (result.interpretation?.drawer && onOpenDrawer) {
+                      console.log('✅ Abriendo drawer directamente desde interpret-planet');
+
+                      // ⭐ ACTUALIZAR ESTADO antes de abrir drawer (para que el botón cambie)
+                      if (chartType === 'solar-return' && result.planetKey) {
+                        const updatedInterpretations = {
+                          ...natalInterpretations,
+                          comparaciones_planetarias: {
+                            ...natalInterpretations?.comparaciones_planetarias,
+                            [result.planetKey]: result.interpretation
+                          }
+                        };
+                        setNatalInterpretations(updatedInterpretations);
+                        console.log('🔄 Estado actualizado con nueva comparación:', result.planetKey);
+                      } else if (chartType === 'natal' && result.planetKey) {
+                        // ✅ ACTUALIZAR ESTADO para cartas natales
+                        const section = ['Quirón', 'Lilith'].includes(planet.name) ? 'asteroids' : 'planets';
+                        const updatedInterpretations = {
+                          ...natalInterpretations,
+                          [section]: {
+                            ...natalInterpretations?.[section],
+                            [result.planetKey]: result.interpretation
+                          }
+                        };
+                        setNatalInterpretations(updatedInterpretations);
+                        console.log('🔄 Estado actualizado con nueva interpretación natal:', result.planetKey);
+                      }
+
+                      onOpenDrawer(result.interpretation.drawer);
+                      setGeneratingAspect(false);
+                      setIsGenerating(false);
+                      setShowLongGeneratingMessage(false);
+                      clearTimeout(longGenerationTimer);
+                      return;
+                    }
+
+                    // Si no viene en el resultado directo, refrescar interpretaciones completas
                     const token = await user!.getIdToken();
 
-                    // ⭐ FIX: Usar endpoint correcto según chartType
+                    // Refrescar interpretaciones (⭐ USAR ENDPOINT CORRECTO SEGÚN CHARTTYPE)
                     const refreshEndpoint = chartType === 'solar-return'
-                      ? `/api/astrology/interpret-solar-return?userId=${userId}&year=${solarReturnYear || new Date().getFullYear()}`
+                      ? `/api/astrology/interpret-solar-return?userId=${userId}&year=${solarReturnYear}`
                       : `/api/astrology/interpret-natal?userId=${userId}`;
 
-                    console.log('🔄 Refrescando desde:', refreshEndpoint);
-
-                    // Refrescar interpretaciones
                     const refreshResponse = await fetch(refreshEndpoint, {
                       headers: {
                         'Authorization': `Bearer ${token}`,
@@ -645,33 +796,21 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                     // ⭐ DEBUGGING: Ver qué devuelve la API
                     console.log('📦 Refresh result completo:', refreshResult);
                     console.log('📦 refreshResult.success:', refreshResult.success);
+                    console.log('📦 refreshResult.data:', refreshResult.data);
+                    console.log('📦 refreshResult.data?.planets:', refreshResult.data?.planets);
 
                     if (refreshResult.success) {
-                      // ⭐ FIX: Manejar estructura diferente según chartType
-                      // Natal: refreshResult.data.planets[...]
-                      // Solar Return: refreshResult.interpretation.planets[...] o refreshResult.data.planets[...]
-                      const interpretationsData = chartType === 'solar-return'
-                        ? (refreshResult.interpretation || refreshResult.data)
-                        : refreshResult.data;
-
-                      console.log('🔄 Actualizando estado con:', interpretationsData);
-                      console.log('📊 Estructura:', {
-                        hasPlanets: !!interpretationsData?.planets,
-                        hasNodes: !!interpretationsData?.nodes,
-                        hasAsteroids: !!interpretationsData?.asteroids,
-                        planetKeys: interpretationsData?.planets ? Object.keys(interpretationsData.planets).slice(0, 5) : []
-                      });
-
-                      setNatalInterpretations(interpretationsData);
+                      console.log('🔄 Actualizando estado con:', refreshResult.data);
+                      setNatalInterpretations(refreshResult.data);
 
                       const newKey = `${planet.name}-${planet.sign}-${planet.house}`;
                       console.log('🔍 Buscando interpretación con key:', newKey);
 
-                      // ⭐ CRÍTICO: Buscar en interpretationsData (estructura correcta)
+                      // ⭐ CRÍTICO: Buscar en refreshResult.data (NO en estado)
                       let newInterpretation =
-                        interpretationsData?.planets?.[newKey] ||
-                        interpretationsData?.asteroids?.[newKey] ||
-                        interpretationsData?.nodes?.[newKey];
+                        refreshResult.data?.planets?.[newKey] ||
+                        refreshResult.data?.asteroids?.[newKey] ||
+                        refreshResult.data?.nodes?.[newKey];
 
                       console.log('📖 Interpretación encontrada:', !!newInterpretation);
 
@@ -680,11 +819,9 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                         onOpenDrawer(newInterpretation.drawer);
                       } else {
                         console.error('❌ No se encontró interpretación para:', newKey);
-                        console.error('   - chartType:', chartType);
-                        console.error('   - Secciones disponibles:', Object.keys(interpretationsData || {}));
-                        console.error('   - Planets keys:', Object.keys(interpretationsData?.planets || {}));
-                        console.error('   - Nodes keys:', Object.keys(interpretationsData?.nodes || {}));
-                        console.error('   - Asteroids keys:', Object.keys(interpretationsData?.asteroids || {}));
+                        console.error('   - Secciones disponibles:', Object.keys(refreshResult.data || {}));
+                        console.error('   - Nodes keys:', Object.keys(refreshResult.data?.nodes || {}));
+                        console.error('   - Asteroids keys:', Object.keys(refreshResult.data?.asteroids || {}));
                       }
                     } else {
                       console.error('❌ Refresh failed:', refreshResult);
@@ -723,6 +860,28 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                 <div className="animate-spin">⏳</div>
                 <span>Generando...</span>
               </>
+            ) : chartType === 'solar-return' ? (
+              // ⭐ SOLAR RETURN: Mostrar texto según si hay comparación o no
+              (() => {
+                const planetKeyMap: Record<string, string> = {
+                  'Sol': 'sol', 'Luna': 'luna', 'Mercurio': 'mercurio',
+                  'Venus': 'venus', 'Marte': 'marte', 'Júpiter': 'jupiter',
+                  'Saturno': 'saturno', 'Urano': 'urano', 'Neptuno': 'neptuno', 'Plutón': 'pluton'
+                };
+                const planetKey = planetKeyMap[planet.name];
+                const hasComparison = !!natalInterpretations?.comparaciones_planetarias?.[planetKey];
+
+                return hasComparison ? (
+                  <>
+                    <span>🔄 Ver comparación Natal vs SR</span>
+                    <span className="group-hover:translate-x-1 transition-transform">→</span>
+                  </>
+                ) : (
+                  <>
+                    <span>✨ Generar Interpretación IA</span>
+                  </>
+                );
+              })()
             ) : (
               <>
                 {(natalInterpretations?.planets?.[`${planet.name}-${planet.sign}-${planet.house}`] || natalInterpretations?.asteroids?.[`${planet.name}-${planet.sign}-${planet.house}`]) ? (
@@ -740,7 +899,8 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           </button>
         )}
 
-        {!interpretation?.drawer && (
+        {/* ⭐ Mensaje solo en Natal si no hay interpretación */}
+        {!interpretation?.drawer && chartType === 'natal' && (
           <div className="text-center text-xs text-gray-400 py-2">
             💡 Haz hover más tiempo para ver la interpretación
           </div>
@@ -750,25 +910,18 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
   }
 
   // =============================================================================
-  // 🌅 TOOLTIP FOR ASCENDANT
+  // 🌅 TOOLTIP FOR ASCENDANT (✅ ADAPTADO PARA NATAL Y SOLAR RETURN)
   // =============================================================================
 
   if (hoveredPlanet === 'Ascendente' && ascendant) {
     let interpretation = null;
+    let solarReturnData = null;
 
-    if (natalInterpretations?.angles?.Ascendente) {
+    // ✅ Detectar estructura según chartType
+    if (chartType === 'natal' && natalInterpretations?.angles?.Ascendente) {
       interpretation = natalInterpretations.angles.Ascendente;
-    } else {
-      // ⭐ FIX: Agregar fallback para Ascendente
-      interpretation = {
-        tooltip: {
-          titulo: 'Ascendente',
-          significado: 'Tu máscara social, cómo te presentas al mundo y tu apariencia física. Haz click para generar tu interpretación personalizada.',
-          efecto: 'Primera impresión y personalidad externa',
-          tipo: 'Punto angular fundamental'
-        },
-        drawer: null
-      };
+    } else if (chartType === 'solar-return' && natalInterpretations?.angulos_vitales?.ascendente) {
+      solarReturnData = natalInterpretations.angulos_vitales.ascendente;
     }
 
     return (
@@ -826,51 +979,90 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           </svg>
           <div>
             <div className="text-white font-bold text-lg">
-              {typeof interpretation?.tooltip?.titulo === 'string' ? interpretation.tooltip.titulo : 'Ascendente'}
+              {interpretation?.tooltip?.titulo ||
+               (solarReturnData ? `Ascendente SR en ${ascendant.sign}` : 'Ascendente')}
             </div>
             <div className="text-gray-200 text-sm">
               {ascendant.degree}° {ascendant.sign}
+              {chartType === 'solar-return' && solarReturnYear && (
+                <span className="ml-2 text-yellow-300 text-xs">• SR {solarReturnYear}</span>
+              )}
             </div>
           </div>
         </div>
 
         <div className="text-white text-sm font-semibold mb-1">🎯 Significado:</div>
         <div className="text-gray-200 text-xs mb-2">
-          {typeof interpretation?.tooltip?.significado === 'string' ? interpretation.tooltip.significado :
-            `Tu máscara social, cómo te presentas al mundo y tu apariencia física.`}
+          {interpretation?.tooltip?.significado ||
+           solarReturnData?.mascara_social ||
+           `Tu máscara social, cómo te presentas al mundo y tu apariencia física.`}
         </div>
 
-        <div className="space-y-1 mb-3">
-          <div className="text-cyan-200 text-xs">
-            <strong>Efecto:</strong> {typeof interpretation?.tooltip?.efecto === 'string' ? interpretation.tooltip.efecto : 'Influencia angular significativa'}
+        {/* ✅ Contenido adaptado según tipo de carta */}
+        {interpretation ? (
+          // NATAL: Muestra estructura tooltip completa
+          <div className="space-y-1 mb-3">
+            <div className="text-cyan-200 text-xs">
+              <strong>Efecto:</strong> {interpretation.tooltip.efecto || 'Influencia angular significativa'}
+            </div>
+            <div className="text-purple-200 text-xs">
+              <strong>Tipo:</strong> {interpretation.tooltip.tipo || 'Energía directiva'}
+            </div>
           </div>
-          <div className="text-purple-200 text-xs">
-            <strong>Tipo:</strong> {typeof interpretation?.tooltip?.tipo === 'string' ? interpretation.tooltip.tipo : 'Energía directiva'}
+        ) : solarReturnData ? (
+          // SOLAR RETURN: Muestra estructura de solar return
+          <div className="space-y-2 mb-3">
+            <div className="text-cyan-200 text-xs">
+              <strong>🎭 Máscara Anual:</strong> {solarReturnData.mascara_social}
+            </div>
+            <div className="text-purple-200 text-xs">
+              <strong>⚡ Superpoder:</strong> {solarReturnData.superpoder}
+            </div>
+            {solarReturnData.posicion && (
+              <div className="text-yellow-200 text-xs">
+                <strong>📍 Posición:</strong> {solarReturnData.posicion}
+              </div>
+            )}
           </div>
-        </div>
+        ) : (
+          // FALLBACK: Sin interpretación
+          <div className="bg-yellow-500/20 border border-yellow-400/30 rounded-lg p-2 mb-3">
+            <p className="text-yellow-200 text-xs">
+              💡 No hay interpretación generada para el Ascendente. Genera una interpretación para ver contenido personalizado.
+            </p>
+          </div>
+        )}
 
-        {interpretation && (
+        {/* ✅ Botón para generar o abrir drawer (solo natal tiene drawer) */}
+        {chartType === 'natal' && (
           <button
             onMouseDown={async (e) => {
               e.stopPropagation();
               e.preventDefault();
 
-              const hasAI = natalInterpretations?.angles?.Ascendente;
+              const hasAI = interpretation?.drawer;
 
               if (!hasAI && userId) {
-                // ⭐ GENERAR ASCENDENTE
+                // ⭐ GENERAR ÁNGULO INDIVIDUAL
+                setTooltipLocked(true);
                 setGeneratingAspect(true);
-                try {
-                  console.log('🎯 Generando Ascendente...');
+                setIsGenerating(true);
 
-                  const response = await fetch('/api/astrology/interpret-ascendant', {
+                const longGenerationTimer = setTimeout(() => {
+                  setShowLongGeneratingMessage(true);
+                }, 5000);
+
+                try {
+                  console.log('🎯 Generando ángulo individual: Ascendente');
+
+                  const response = await fetch('/api/astrology/interpret-angle', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                       userId,
+                      angleName: 'Ascendente',
                       sign: ascendant.sign,
-                      degree: ascendant.degree,
-                      chartType: 'natal'
+                      degree: ascendant.degree
                     })
                   });
 
@@ -879,9 +1071,12 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                   if (result.success) {
                     console.log('✅ Ascendente generado');
 
-                    // Refrescar interpretaciones
                     const token = await user!.getIdToken();
-                    const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`, {
+
+                    // ⭐ NATAL: Refrescar interpretaciones natales
+                    const refreshEndpoint = `/api/astrology/interpret-natal?userId=${userId}`;
+
+                    const refreshResponse = await fetch(refreshEndpoint, {
                       headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -891,9 +1086,11 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
                     if (refreshResult.success) {
                       setNatalInterpretations(refreshResult.data);
+                      const newInterpretation = refreshResult.data?.angles?.Ascendente;
 
-                      if (refreshResult.data?.angles?.Ascendente?.drawer && onOpenDrawer) {
-                        onOpenDrawer(refreshResult.data.angles.Ascendente.drawer);
+                      if (newInterpretation?.drawer && onOpenDrawer) {
+                        console.log('✅ Abriendo drawer para: Ascendente');
+                        onOpenDrawer(newInterpretation.drawer);
                       }
                     }
                   }
@@ -902,11 +1099,15 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                   alert('Error generando interpretación: ' + (error as Error).message);
                 } finally {
                   setGeneratingAspect(false);
+                  setIsGenerating(false);
+                  setShowLongGeneratingMessage(false);
+                  clearTimeout(longGenerationTimer);
                 }
                 return;
               }
 
               // Si ya tiene AI, abrir drawer
+              setTooltipLocked(true);
               if (onOpenDrawer && interpretation?.drawer) {
                 onOpenDrawer(interpretation.drawer);
               }
@@ -924,14 +1125,10 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                 <div className="animate-spin inline-block mr-2">⏳</div>
                 <span>Generando...</span>
               </>
+            ) : interpretation?.drawer ? (
+              <>📖 Ver interpretación completa</>
             ) : (
-              <>
-                {natalInterpretations?.angles?.Ascendente ? (
-                  <span>📖 Ver interpretación completa</span>
-                ) : (
-                  <span>✨ Generar Interpretación IA</span>
-                )}
-              </>
+              <>✨ Generar Interpretación IA</>
             )}
           </button>
         )}
@@ -940,25 +1137,18 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
   }
 
   // =============================================================================
-  // 🎯 TOOLTIP FOR MIDHEAVEN
+  // 🎯 TOOLTIP FOR MIDHEAVEN (✅ ADAPTADO PARA NATAL Y SOLAR RETURN)
   // =============================================================================
 
   if (hoveredPlanet === 'Medio Cielo' && midheaven) {
     let interpretation = null;
+    let solarReturnData = null;
 
-    if (natalInterpretations?.angles?.MedioCielo) {
+    // ✅ Detectar estructura según chartType
+    if (chartType === 'natal' && natalInterpretations?.angles?.MedioCielo) {
       interpretation = natalInterpretations.angles.MedioCielo;
-    } else {
-      // ⭐ FIX: Agregar fallback para Medio Cielo
-      interpretation = {
-        tooltip: {
-          titulo: 'Medio Cielo',
-          significado: 'Tu vocación, carrera y legado público. Haz click para generar tu interpretación personalizada.',
-          efecto: 'Dirección profesional y propósito de vida',
-          tipo: 'Punto angular fundamental'
-        },
-        drawer: null
-      };
+    } else if (chartType === 'solar-return' && natalInterpretations?.angulos_vitales?.medio_cielo) {
+      solarReturnData = natalInterpretations.angulos_vitales.medio_cielo;
     }
 
     return (
@@ -1004,51 +1194,90 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           </svg>
           <div>
             <div className="text-white font-bold text-lg">
-              {typeof interpretation?.tooltip?.titulo === 'string' ? interpretation.tooltip.titulo : 'Medio Cielo'}
+              {interpretation?.tooltip?.titulo ||
+               (solarReturnData ? `Medio Cielo SR en ${midheaven.sign}` : 'Medio Cielo')}
             </div>
             <div className="text-gray-200 text-sm">
               {midheaven.degree}° {midheaven.sign}
+              {chartType === 'solar-return' && solarReturnYear && (
+                <span className="ml-2 text-yellow-300 text-xs">• SR {solarReturnYear}</span>
+              )}
             </div>
           </div>
         </div>
-        
+
         <div className="text-white text-sm font-semibold mb-1">🎯 Significado:</div>
         <div className="text-gray-200 text-xs mb-2">
-          {typeof interpretation?.tooltip?.significado === 'string' ? interpretation.tooltip.significado :
-            `Tu vocación, imagen pública y dirección profesional.`}
+          {interpretation?.tooltip?.significado ||
+           solarReturnData?.vocacion_soul ||
+           `Tu vocación, imagen pública y dirección profesional.`}
         </div>
 
-        <div className="space-y-1 mb-3">
-          <div className="text-cyan-200 text-xs">
-            <strong>Efecto:</strong> {typeof interpretation?.tooltip?.efecto === 'string' ? interpretation.tooltip.efecto : 'Influencia angular significativa'}
+        {/* ✅ Contenido adaptado según tipo de carta */}
+        {interpretation ? (
+          // NATAL: Muestra estructura tooltip completa
+          <div className="space-y-1 mb-3">
+            <div className="text-cyan-200 text-xs">
+              <strong>Efecto:</strong> {interpretation.tooltip.efecto || 'Influencia angular significativa'}
+            </div>
+            <div className="text-purple-200 text-xs">
+              <strong>Tipo:</strong> {interpretation.tooltip.tipo || 'Energía directiva'}
+            </div>
           </div>
-          <div className="text-purple-200 text-xs">
-            <strong>Tipo:</strong> {typeof interpretation?.tooltip?.tipo === 'string' ? interpretation.tooltip.tipo : 'Energía directiva'}
+        ) : solarReturnData ? (
+          // SOLAR RETURN: Muestra estructura de solar return
+          <div className="space-y-2 mb-3">
+            <div className="text-cyan-200 text-xs">
+              <strong>🎯 Vocación Soul:</strong> {solarReturnData.vocacion_soul}
+            </div>
+            <div className="text-purple-200 text-xs">
+              <strong>🌟 Legado:</strong> {solarReturnData.legado}
+            </div>
+            {solarReturnData.posicion && (
+              <div className="text-yellow-200 text-xs">
+                <strong>📍 Posición:</strong> {solarReturnData.posicion}
+              </div>
+            )}
           </div>
-        </div>
+        ) : (
+          // FALLBACK: Sin interpretación
+          <div className="bg-yellow-500/20 border border-yellow-400/30 rounded-lg p-2 mb-3">
+            <p className="text-yellow-200 text-xs">
+              💡 No hay interpretación generada para el Medio Cielo. Genera una interpretación para ver contenido personalizado.
+            </p>
+          </div>
+        )}
 
-        {interpretation && (
+        {/* ✅ Botón para generar o abrir drawer (solo natal tiene drawer) */}
+        {chartType === 'natal' && (
           <button
             onMouseDown={async (e) => {
               e.stopPropagation();
               e.preventDefault();
 
-              const hasAI = natalInterpretations?.angles?.MedioCielo;
+              const hasAI = interpretation?.drawer;
 
               if (!hasAI && userId) {
-                // ⭐ GENERAR MEDIO CIELO
+                // ⭐ GENERAR ÁNGULO INDIVIDUAL
+                setTooltipLocked(true);
                 setGeneratingAspect(true);
-                try {
-                  console.log('🎯 Generando Medio Cielo...');
+                setIsGenerating(true);
 
-                  const response = await fetch('/api/astrology/interpret-midheaven', {
+                const longGenerationTimer = setTimeout(() => {
+                  setShowLongGeneratingMessage(true);
+                }, 5000);
+
+                try {
+                  console.log('🎯 Generando ángulo individual: Medio Cielo');
+
+                  const response = await fetch('/api/astrology/interpret-angle', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                       userId,
+                      angleName: 'Medio Cielo',
                       sign: midheaven.sign,
-                      degree: midheaven.degree,
-                      chartType: 'natal'
+                      degree: midheaven.degree
                     })
                   });
 
@@ -1057,9 +1286,12 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                   if (result.success) {
                     console.log('✅ Medio Cielo generado');
 
-                    // Refrescar interpretaciones
                     const token = await user!.getIdToken();
-                    const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`, {
+
+                    // ⭐ NATAL: Refrescar interpretaciones natales
+                    const refreshEndpoint = `/api/astrology/interpret-natal?userId=${userId}`;
+
+                    const refreshResponse = await fetch(refreshEndpoint, {
                       headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -1069,9 +1301,11 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
                     if (refreshResult.success) {
                       setNatalInterpretations(refreshResult.data);
+                      const newInterpretation = refreshResult.data?.angles?.MedioCielo;
 
-                      if (refreshResult.data?.angles?.MedioCielo?.drawer && onOpenDrawer) {
-                        onOpenDrawer(refreshResult.data.angles.MedioCielo.drawer);
+                      if (newInterpretation?.drawer && onOpenDrawer) {
+                        console.log('✅ Abriendo drawer para: Medio Cielo');
+                        onOpenDrawer(newInterpretation.drawer);
                       }
                     }
                   }
@@ -1080,6 +1314,9 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                   alert('Error generando interpretación: ' + (error as Error).message);
                 } finally {
                   setGeneratingAspect(false);
+                  setIsGenerating(false);
+                  setShowLongGeneratingMessage(false);
+                  clearTimeout(longGenerationTimer);
                 }
                 return;
               }
@@ -1103,14 +1340,10 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                 <div className="animate-spin inline-block mr-2">⏳</div>
                 <span>Generando...</span>
               </>
+            ) : interpretation?.drawer ? (
+              <>📖 Ver interpretación completa</>
             ) : (
-              <>
-                {natalInterpretations?.angles?.MedioCielo ? (
-                  <span>📖 Ver interpretación completa</span>
-                ) : (
-                  <span>✨ Generar Interpretación IA</span>
-                )}
-              </>
+              <>✨ Generar Interpretación IA</>
             )}
           </button>
         )}
@@ -1134,7 +1367,11 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
     const planet2Desc = planetMeanings[currentAspect.planet2 as keyof typeof planetMeanings]?.keywords.split(',')[0]?.trim() || 'planeta';
 
     const aspectKeyFull = `${currentAspect.planet1}-${currentAspect.planet2}-${currentAspect.type}`;
-    const hasAIInterpretation = natalInterpretations?.aspects && natalInterpretations.aspects[aspectKeyFull] ? true : false;
+
+    // ⭐ Verificar interpretación según tipo de carta
+    const hasAIInterpretation = chartType === 'solar-return'
+      ? (natalInterpretations?.aspects_solar_return && natalInterpretations.aspects_solar_return[aspectKeyFull])
+      : (natalInterpretations?.aspects && natalInterpretations.aspects[aspectKeyFull]);
 
     return (
       <div
@@ -1307,7 +1544,7 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
               console.log('🎯 ABRIENDO DRAWER CON MOUSEDOWN - ASPECT');
               console.log('1. onOpenDrawer exists?', !!onOpenDrawer);
               console.log('2. aspectKeyFull:', aspectKeyFull);
-              console.log('3. drawer content:', natalInterpretations?.aspects?.[aspectKeyFull]?.drawer);
+              console.log('3. chartType:', chartType);
               console.log('═══════════════════════════════════');
 
               e.stopPropagation();
@@ -1318,7 +1555,13 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                 return;
               }
 
-              const aspectInterpretation = natalInterpretations?.aspects?.[aspectKeyFull];
+              // ⭐ Obtener interpretación según tipo de carta
+              const aspectInterpretation = chartType === 'solar-return'
+                ? natalInterpretations?.aspects_solar_return?.[aspectKeyFull]
+                : natalInterpretations?.aspects?.[aspectKeyFull];
+
+              console.log('4. aspectInterpretation:', aspectInterpretation);
+
               if (!aspectInterpretation) {
                 console.error('❌ aspectInterpretation is undefined');
                 return;

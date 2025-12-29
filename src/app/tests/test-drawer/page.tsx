@@ -6,8 +6,8 @@ import { InterpretationDrawer } from '@/components/astrology/InterpretationDrawe
 type DrawerContent = {
   titulo: string;
   educativo: string;
-  poderoso: string;
-  poetico: string;
+  observador: string;
+  impacto_real: string;
   sombras: {
     nombre: string;
     descripcion: string;
@@ -34,10 +34,19 @@ export default function TestDrawerPage() {
     educativo: `Júpiter en la Casa 9 representa la expansión espiritual y filosófica. Esta posición indica una búsqueda natural de significado más profundo en la vida, con una inclinación hacia el aprendizaje superior, los viajes largos y la exploración de diferentes culturas y sistemas de creencias.
 
     La Casa 9 es tradicionalmente la casa de la filosofía, la educación superior, los viajes al extranjero y la espiritualidad. Cuando Júpiter, el planeta de la expansión y la abundancia, reside aquí, amplifica estas cualidades, creando una personalidad que naturalmente busca crecer a través del conocimiento y la experiencia.`,
-    poderoso: `Usa esta energía como tu superpoder de expansión infinita. Cuando enfrentes limitaciones, recuerda que Júpiter en Casa 9 te da la capacidad de ver más allá de las fronteras convencionales. Tu mente es como un telescopio cósmico que puede ver oportunidades donde otros solo ven obstáculos.
+    observador: `Puedes haber notado que buscas constantemente significado y propósito en todo lo que haces. Esta configuración se manifiesta en tu tendencia natural a ver el panorama general, a conectar conceptos aparentemente inconexos, y a encontrar patrones filosóficos en la experiencia diaria.
 
-    En momentos de duda, activa tu "modo Júpiter": pregúntate "¿Qué lección divina hay aquí?" o "¿Cómo puedo expandir mi perspectiva?". Esta posición te da una fe innata en el universo y su capacidad para proveer abundancia en todas las formas.`,
-    poetico: `Eres el peregrino eterno, caminando senderos invisibles entre las estrellas. Tu alma lleva el mapa de constelaciones olvidadas, y cada paso que das dibuja nuevas galaxias en el tapiz del universo. Como Júpiter, el rey de los dioses, expandes todo lo que tocas - no con fuerza bruta, sino con la suave inevitabilidad de la luz que ilumina la oscuridad.`,
+    Cuando trabajas con esta energía, te sientes más vivo y auténtico. Tu mente funciona mejor cuando explora nuevas ideas, cuando aprende sobre culturas diferentes, o cuando considera preguntas existenciales. Esta no es una necesidad superficial - es parte de tu configuración fundamental.`,
+    impacto_real: `Esta configuración no se vive en ideas ni teorías: se nota en decisiones concretas.
+
+Durante tu vida:
+- No toleras trabajos o proyectos que no tengan un propósito más grande
+- Sientes urgencia física por viajar cuando pasas demasiado tiempo en un solo lugar
+- Buscas formación académica o espiritual de forma natural y constante
+- Atraes oportunidades internacionales o multiculturales sin buscarlas activamente
+- Las personas te consultan cuando necesitan perspectiva filosófica o consejo de vida
+
+Esta energía jupiteriana en Casa 9 no es abstracta: es tu forma de respirar significado en todo lo que haces.`,
     sombras: [
       {
         nombre: "📖 El Intelectual Arrogante",
