@@ -10,7 +10,7 @@ import { generateAspectInterpretation } from '@/services/tripleFusedInterpretati
 import { getUserProfile } from '@/services/userDataService';
 
 // ⏱️ Configurar timeout para Vercel (60 segundos en plan Pro)
-export const maxDuration = 60;
+export const maxDuration = 10;
 
 // =============================================================================
 // POST - Generate single aspect interpretation

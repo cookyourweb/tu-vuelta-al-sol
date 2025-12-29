@@ -9,7 +9,7 @@ import connectDB from '@/lib/db';
 import Interpretation from '@/models/Interpretation';
 
 // ⏱️ Configurar timeout para Vercel (60 segundos en plan Pro)
-export const maxDuration = 60;
+export const maxDuration = 10;
 
 // ✅ Lazy initialization to avoid build-time errors
 let openai: OpenAI | null = null;
@@ -147,7 +147,7 @@ export async function GET(request: NextRequest) {
     );
 
     const completion = await client.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini', // ⚡ Cambio a mini: 5-10x más rápido para plan gratuito
       messages: [
         {
           role: 'system',
@@ -160,6 +160,7 @@ export async function GET(request: NextRequest) {
       ],
       response_format: { type: 'json_object' },
       temperature: 0.8,
+      timeout: 8000 // ⏱️ 8 segundos max para dejar margen en 10seg total
     });
 
     const rawResponse = completion.choices[0].message.content;

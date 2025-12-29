@@ -11,7 +11,7 @@ import Chart from '@/models/Chart';
 import OpenAI from 'openai';
 
 // ⏱️ Configurar timeout para Vercel (60 segundos en plan Pro)
-export const maxDuration = 60;
+export const maxDuration = 10;
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -135,10 +135,11 @@ IMPORTANTE:
 Devuelve SOLO el JSON completo siguiendo EXACTAMENTE esta estructura y este tono observador.`;
 
   const response = await openai.chat.completions.create({
-    model: 'gpt-4o',
+    model: 'gpt-4o-mini', // ⚡ Cambio a mini: 5-10x más rápido para plan gratuito
     messages: [{ role: 'user', content: prompt }],
     temperature: 0.85,
-    response_format: { type: 'json_object' }
+    response_format: { type: 'json_object' },
+    timeout: 8000 // ⏱️ 8 segundos max para dejar margen en 10seg total
   });
 
   const content = response.choices[0]?.message?.content;
