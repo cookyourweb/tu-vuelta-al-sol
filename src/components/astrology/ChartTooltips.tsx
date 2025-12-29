@@ -1073,10 +1073,8 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
                     const token = await user!.getIdToken();
 
-                    // ⭐ USAR ENDPOINT CORRECTO SEGÚN CHARTTYPE
-                    const refreshEndpoint = chartType === 'solar-return'
-                      ? `/api/astrology/interpret-solar-return?userId=${userId}&year=${solarReturnYear}`
-                      : `/api/astrology/interpret-natal?userId=${userId}`;
+                    // ⭐ NATAL: Refrescar interpretaciones natales
+                    const refreshEndpoint = `/api/astrology/interpret-natal?userId=${userId}`;
 
                     const refreshResponse = await fetch(refreshEndpoint, {
                       headers: {
@@ -1290,10 +1288,8 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
                     const token = await user!.getIdToken();
 
-                    // ⭐ USAR ENDPOINT CORRECTO SEGÚN CHARTTYPE
-                    const refreshEndpoint = chartType === 'solar-return'
-                      ? `/api/astrology/interpret-solar-return?userId=${userId}&year=${solarReturnYear}`
-                      : `/api/astrology/interpret-natal?userId=${userId}`;
+                    // ⭐ NATAL: Refrescar interpretaciones natales
+                    const refreshEndpoint = `/api/astrology/interpret-natal?userId=${userId}`;
 
                     const refreshResponse = await fetch(refreshEndpoint, {
                       headers: {
