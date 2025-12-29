@@ -127,7 +127,7 @@ ESTRUCTURA JSON:
   "drawer": {
     "titulo": "${planetName} en tu Retorno Solar ${year}",
     "educativo": "📍 ${planetName} en ${solarReturn.sign} · Casa ${solarReturn.house}\\n\\n[que_se_activa.narrativa completa incluyendo frase de activación]",
-    "poderoso": "**POR QUÉ SE SIENTE TAN DIFERENTE EN TI**\\n(Cruce con tu carta natal)\\n\\n📍 ${planetName} natal en ${natal.sign} · Casa ${natal.house}\\n\\n[por_que_descoloca.narrativa completa]",
+    "observador": "**POR QUÉ SE SIENTE TAN DIFERENTE EN TI**\\n(Cruce con tu carta natal)\\n\\n📍 ${planetName} natal en ${natal.sign} · Casa ${natal.house}\\n\\n[por_que_descoloca.narrativa completa]",
     "impacto_real": "**QUÉ TE ESTÁ PIDIENDO LA VIDA ESTE AÑO**\\n\\n[que_te_pide.narrativa]\\n\\n🌱 **SI LO RESPETAS:**\\n• [consecuencias positivas con bullets]\\n\\n⚠️ **SI LO RESISTES:**\\n• [consecuencias negativas con bullets]",
     "sombras": [{
       "nombre": "Acciones Concretas ${year}",
@@ -177,7 +177,7 @@ EJEMPLO COMPLETO (Mercurio Piscis Casa 1 → Acuario Casa 12):
   "drawer": {
     "titulo": "Mercurio en tu Retorno Solar 2025",
     "educativo": "📍 Mercurio en Acuario · Casa 12\\n\\nEste año tu mente no quiere ruido. Quiere espacio, silencio y libertad.\\n\\nNo es un año para explicar quién eres, sino para pensar diferente desde dentro. La Casa 12 es el laboratorio mental invisible - donde las ideas se gestan antes de nacer.\\n\\n👉 Si intentas forzarte a comunicarte como siempre, te saturas.",
-    "poderoso": "📍 Mercurio natal en Piscis · Casa 1\\n\\nTú, de base, piensas mostrándote. Hablas para entenderte. Conectas emocionalmente a través de la palabra.\\n\\nPor eso este año se siente raro: no quieres explicar tanto, no te apetece exponerte, necesitas procesar antes de decir.\\n\\n💥 No es bloqueo. Es recalibración mental.",
+    "observador": "📍 Mercurio natal en Piscis · Casa 1\\n\\nTú, de base, piensas mostrándote. Hablas para entenderte. Conectas emocionalmente a través de la palabra.\\n\\nPor eso este año se siente raro: no quieres explicar tanto, no te apetece exponerte, necesitas procesar antes de decir.\\n\\n💥 No es bloqueo. Es recalibración mental.",
     "impacto_real": "La vida te está pidiendo:\\n🧠 pensar sin necesidad de compartir\\n🧠 crear sin testigos\\n🧠 gestar ideas antes de exponerlas\\n\\nEste es un año de:\\nincubación mental\\ninsights\\nredefinición interna de tu discurso\\nruptura con viejas narrativas\\n\\nNo todo lo que piensas ahora está listo para ser dicho. Y eso está bien.\\n\\n🌱 SI LO RESPETAS:\\n• claridad mental profunda\\n• ideas verdaderamente originales\\n• sensación de sentido\\n• preparación para un nuevo ciclo de expresión\\n\\n⚠️ SI NO LO RESPETAS:\\n• confusión\\n• cansancio mental\\n• hablar de más\\n• sensación de no ser comprendida",
     "sombras": [{
       "nombre": "Acciones Concretas 2025",
@@ -266,8 +266,8 @@ function formatComparisonAsDrawer(comparison: any, planetName: string): any {
     // 📚 QUÉ SIGNIFICA (Sección 1: QUÉ SE ACTIVA)
     educativo: queSeActivaNarrativa,
 
-    // 💥 POR QUÉ ES POTENTE (Sección 2: POR QUÉ DESCOLOCA - Cruce con natal)
-    poderoso: comparison.por_que_descoloca?.narrativa || '',
+    // 🔥 CÓMO SE MANIFIESTA (Sección 2: POR QUÉ DESCOLOCA - Cruce con natal)
+    observador: comparison.por_que_descoloca?.narrativa || '',
 
     // 🌍 IMPACTO REAL (Sección 3: QUÉ TE PIDE)
     impacto_real: queTeVideNarrativa,
