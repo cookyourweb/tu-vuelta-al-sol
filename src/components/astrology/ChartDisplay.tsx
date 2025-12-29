@@ -222,14 +222,16 @@ const ChartDisplay = ({
       planet.sign || 'Aries'
     );
 
-    // ✅ FIX: Recalculate house based on planet position relative to ascendant
-    const ascendantDegree = ascendant?.degree || 0;
-    const calculatedHouse = Math.floor(((realPosition - ascendantDegree + 360) % 360) / 30) + 1;
+    // ✅ FIX: Use API house when available (Prokerala uses proper house system)
+    // Only calculate house as fallback if API didn't provide one
+    const apiHouse = planet.house || planet.houseNumber || planet.housePosition;
+    const fallbackHouse = Math.floor(((realPosition - (ascendant?.degree || 0) + 360) % 360) / 30) + 1;
+    const finalHouse = apiHouse || fallbackHouse;
 
     return {
       ...planet,
       position: realPosition,
-      house: calculatedHouse, // Use calculated house instead of API house
+      house: finalHouse, // ✅ Use API house (correct Placidus/Koch calculation)
       retrograde: planet.retrograde || false
     };
   }).filter(Boolean) as any[];
