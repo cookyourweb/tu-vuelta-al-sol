@@ -411,6 +411,8 @@ function generateFallbackInterpretation(
 
     tema_central_del_anio: `"Revolución de Identidad y Empoderamiento Sin Filtros"`,
 
+    comparaciones_planetarias: generatePlanetaryComparisons(natalChart, solarReturnChart, userProfile),
+
     analisis_tecnico_profesional: {
       asc_sr_en_casa_natal: {
         casa: ascSRInNatalHouse,
@@ -520,6 +522,39 @@ function generateFallbackInterpretation(
 // ==========================================
 // 🛠️ HELPER FUNCTIONS
 // ==========================================
+
+function generatePlanetaryComparisons(natalChart: any, solarReturnChart: any, userProfile: UserProfile): ComparacionesPlanetarias {
+  const planets = ['sol', 'luna', 'mercurio', 'venus', 'marte', 'jupiter', 'saturno'];
+
+  const comparisons: any = {};
+
+  planets.forEach(planetName => {
+    const natalPlanet = natalChart?.planets?.find((p: any) => p.name.toLowerCase() === planetName);
+    const srPlanet = solarReturnChart?.planets?.find((p: any) => p.name.toLowerCase() === planetName);
+
+    comparisons[planetName] = {
+      natal: {
+        posicion: natalPlanet ? `${natalPlanet.sign} Casa ${natalPlanet.house}` : 'No disponible',
+        descripcion: natalPlanet ? `Tu ${planetName} natal en ${natalPlanet.sign} Casa ${natalPlanet.house}` : 'Información no disponible'
+      },
+      solar_return: {
+        posicion: srPlanet ? `${srPlanet.sign} Casa ${srPlanet.house}` : 'No disponible',
+        descripcion: srPlanet ? `Este año tu ${planetName} en ${srPlanet.sign} Casa ${srPlanet.house}` : 'Información no disponible'
+      },
+      choque: `Transición de ${natalPlanet?.sign || 'natal'} a ${srPlanet?.sign || 'SR'} - cambio de energía`,
+      que_hacer: `Trabajar conscientemente con la energía de ${planetName} en su nueva posición`,
+      uso_agenda: {
+        luna_nueva: `Plantar intenciones relacionadas con ${planetName}`,
+        luna_llena: `Liberar patrones antiguos de ${planetName}`,
+        retrogradaciones: `Revisar y ajustar expresiones de ${planetName}`
+      },
+      error_automatico: `Repetir patrones antiguos de ${planetName} en lugar de adaptarse a la nueva energía`,
+      frase_clave: `"Mi ${planetName} evoluciona este año"`
+    };
+  });
+
+  return comparisons as ComparacionesPlanetarias;
+}
 
 function getHouseMeaning(house: number): string {
   const meanings: Record<number, string> = {

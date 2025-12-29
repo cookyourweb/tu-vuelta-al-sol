@@ -512,8 +512,6 @@ export default function SolarReturnPage() {
                 🌟 Tu Rueda Solar Return {new Date().getFullYear()} - {new Date().getFullYear() + 1}
               </h2>
               <div className="flex justify-center">
-                {console.log('🎨 RENDERING ChartDisplay con solarReturnInterpretation:', solarReturnInterpretation)}
-                {console.log('🔍 SR Interpretation tiene comparaciones?', !!solarReturnInterpretation?.comparaciones_planetarias)}
                 <ChartDisplay
                   planets={chartData.planets || []}
                   houses={chartData.houses || []}

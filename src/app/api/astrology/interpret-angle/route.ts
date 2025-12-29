@@ -40,6 +40,22 @@ export async function POST(request: NextRequest) {
 
     // Fetch user profile
     const userProfile = await getUserProfile(userId);
+
+    // Convert UserProfile to the format expected by tripleFusedInterpretationService
+    const convertedProfile = userProfile ? {
+      name: userProfile.name || 'Usuario',
+      age: 0, // Age calculation would require birth date parsing
+      birthDate: userProfile.birthData?.date || '',
+      birthTime: userProfile.birthData?.time || '',
+      birthPlace: userProfile.birthData?.location || ''
+    } : {
+      name: 'Usuario',
+      age: 0,
+      birthDate: '',
+      birthTime: '',
+      birthPlace: ''
+    };
+
     if (!userProfile) {
       console.warn('⚠️ [ANGLE] User profile not found, using defaults');
     }
@@ -50,13 +66,13 @@ export async function POST(request: NextRequest) {
       interpretation = await generateAscendantInterpretation(
         sign,
         degree || 0,
-        userProfile || { name: '', age: 0, birthDate: '', birthTime: '', birthPlace: '' }
+        convertedProfile
       );
     } else {
       interpretation = await generateMidheavenInterpretation(
         sign,
         degree || 0,
-        userProfile || { name: '', age: 0, birthDate: '', birthTime: '', birthPlace: '' }
+        convertedProfile
       );
     }
 

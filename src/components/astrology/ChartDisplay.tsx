@@ -61,9 +61,11 @@ const ChartDisplay = ({
 }: any) => {
 
   // 🔍 DEBUG: Log solarReturnInterpretation received
-  console.log('📥 ChartDisplay recibió solarReturnInterpretation:', solarReturnInterpretation);
-  console.log('📥 ChartType:', chartType);
-  console.log('📥 SR Interpretation tiene comparaciones?', !!solarReturnInterpretation?.comparaciones_planetarias);
+  useEffect(() => {
+    console.log('📥 ChartDisplay recibió solarReturnInterpretation:', solarReturnInterpretation);
+    console.log('📥 ChartType:', chartType);
+    console.log('📥 SR Interpretation tiene comparaciones?', !!solarReturnInterpretation?.comparaciones_planetarias);
+  }, [solarReturnInterpretation, chartType]);
 
   // ✅ ESTADOS
   const [showAspects, setShowAspects] = useState(true);
@@ -216,14 +218,18 @@ const ChartDisplay = ({
     if (!planet) return null;
 
     const realPosition = convertAstrologicalDegreeToPosition(
-      planet.degree || 0, 
+      planet.degree || 0,
       planet.sign || 'Aries'
     );
+
+    // ✅ FIX: Recalculate house based on planet position relative to ascendant
+    const ascendantDegree = ascendant?.degree || 0;
+    const calculatedHouse = Math.floor(((realPosition - ascendantDegree + 360) % 360) / 30) + 1;
 
     return {
       ...planet,
       position: realPosition,
-      house: planet.house || planet.houseNumber || 1,
+      house: calculatedHouse, // Use calculated house instead of API house
       retrograde: planet.retrograde || false
     };
   }).filter(Boolean) as any[];
