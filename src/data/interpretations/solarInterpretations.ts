@@ -50,7 +50,7 @@ AHORA:
 - Tu mayor sufrimiento es intentar "ser normal"
 - Tu mayor alegría es expresar tu autenticidad completa`,
 
-      poderoso: `Probablemente has vivido momentos donde sentiste que tu "rareza" era un problema. Quizás intentaste "encajar" y te sentiste asfixiado. Quizás te rechazaron por ser "demasiado diferente".
+      observador: `Probablemente has vivido momentos donde sentiste que tu "rareza" era un problema. Quizás intentaste "encajar" y te sentiste asfixiado. Quizás te rechazaron por ser "demasiado diferente".
 
 AQUÍ ESTÁ LA VERDAD CÓSMICA:
 
@@ -186,7 +186,7 @@ AHORA:
 - Tu mayor realización viene de ser puente entre almas
 - A veces te pierdes en el otro y necesitas recordar tus límites`,
 
-      poderoso: `Probablemente has vivido relaciones intensas donde sentiste que "perdías tu identidad" o donde tu sensibilidad fue vista como "demasiado". Quizás te dijeron que eras "codependiente" o que "amabas demasiado".
+      observador: `Probablemente has vivido relaciones intensas donde sentiste que "perdías tu identidad" o donde tu sensibilidad fue vista como "demasiado". Quizás te dijeron que eras "codependiente" o que "amabas demasiado".
 
 AQUÍ ESTÁ LA VERDAD CÓSMICA:
 
