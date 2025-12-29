@@ -730,6 +730,18 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                         };
                         setNatalInterpretations(updatedInterpretations);
                         console.log('🔄 Estado actualizado con nueva comparación:', result.planetKey);
+                      } else if (chartType === 'natal' && result.planetKey) {
+                        // ✅ ACTUALIZAR ESTADO para cartas natales
+                        const section = ['Quirón', 'Lilith'].includes(planet.name) ? 'asteroids' : 'planets';
+                        const updatedInterpretations = {
+                          ...natalInterpretations,
+                          [section]: {
+                            ...natalInterpretations?.[section],
+                            [result.planetKey]: result.interpretation
+                          }
+                        };
+                        setNatalInterpretations(updatedInterpretations);
+                        console.log('🔄 Estado actualizado con nueva interpretación natal:', result.planetKey);
                       }
 
                       onOpenDrawer(result.interpretation.drawer);
