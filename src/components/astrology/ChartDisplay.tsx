@@ -214,7 +214,7 @@ const ChartDisplay = ({
     return signBase + degree;
   };
 
-  const normalizedPlanets: any[] = planets.map((planet, index) => {
+  const normalizedPlanets: any[] = planets.map((planet: any, index: number) => {
     if (!planet) return null;
 
     const realPosition = convertAstrologicalDegreeToPosition(
