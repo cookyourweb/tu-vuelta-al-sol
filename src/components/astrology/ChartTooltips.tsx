@@ -45,6 +45,7 @@ interface ChartTooltipsProps {
   solarReturnYear?: number;
   solarReturnTheme?: string;
   ascSRInNatalHouse?: number;
+  natalInterpretations?: any;
   cardHoverTimer?: NodeJS.Timeout | null;
   setCardHoverTimer?: (timer: NodeJS.Timeout | null) => void;
 }

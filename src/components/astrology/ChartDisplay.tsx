@@ -236,10 +236,10 @@ const ChartDisplay = ({
     };
   }).filter(Boolean) as any[];
 
-  const normalizedHouses = houses.map((house, index) => {
+  const normalizedHouses = houses.map((house: any, index: number) => {
     if (!house) return null;
 
-    const realPosition = house.sign ? 
+    const realPosition = house.sign ?
       convertAstrologicalDegreeToPosition(house.degree || 0, house.sign) :
       (index * 30);
 

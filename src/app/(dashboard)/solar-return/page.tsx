@@ -99,10 +99,7 @@ export default function SolarReturnPage() {
 
 
   const loadAllData = async () => {
-    console.log('🚀 ===== INICIO loadAllData =====');
-
     if (!user?.uid) {
-      console.error('❌ No hay usuario autenticado');
       return;
     }
 
@@ -111,7 +108,6 @@ export default function SolarReturnPage() {
 
     try {
       // STEP 1: Load Birth Data
-      console.log('📋 Paso 1: Cargando Birth Data...');
       const birthResponse = await fetch(`/api/birth-data?userId=${user?.uid}`);
 
       if (!birthResponse.ok) {
@@ -119,7 +115,7 @@ export default function SolarReturnPage() {
       }
 
       const birthResult = await birthResponse.json();
-      
+
       if (!birthResult.success || !birthResult.data) {
         throw new Error('No se encontraron datos de nacimiento');
       }
@@ -127,7 +123,6 @@ export default function SolarReturnPage() {
       setBirthData(birthResult.data);
 
       // STEP 2: Load NATAL Chart
-      console.log('📋 Paso 2: Cargando Carta Natal...');
       const natalResponse = await fetch(`/api/charts/natal?userId=${user?.uid}`);
 
       if (!natalResponse.ok) {
@@ -143,7 +138,6 @@ export default function SolarReturnPage() {
       setNatalChart(natalResult.natalChart);
 
       // STEP 3: Load Solar Return
-      console.log('📋 Paso 3: Cargando Solar Return...');
       const srResponse = await fetch(`/api/charts/solar-return?userId=${user?.uid}`);
 
       if (!srResponse.ok) {
@@ -161,7 +155,6 @@ export default function SolarReturnPage() {
       }
 
       // STEP 4: Load Solar Return Interpretation (for comparaciones_planetarias)
-      console.log('📋 Paso 4: Cargando interpretación de Solar Return...');
       try {
         const token = await user?.getIdToken();
         const srInterpretationResponse = await fetch(`/api/astrology/interpret-solar-return?userId=${user?.uid}&year=${new Date().getFullYear()}`, {
@@ -173,27 +166,16 @@ export default function SolarReturnPage() {
 
         if (srInterpretationResponse.ok) {
           const srInterpretationResult = await srInterpretationResponse.json();
-          console.log('✅ Interpretación de Solar Return cargada:', srInterpretationResult.success);
-          console.log('📦 Resultado completo:', srInterpretationResult);
           if (srInterpretationResult.success) {
             const interpretation = srInterpretationResult.interpretation || srInterpretationResult.data;
-            console.log('📊 Interpretación a guardar:', interpretation);
-            console.log('🔍 Tiene comparaciones_planetarias?', !!interpretation?.comparaciones_planetarias);
             setSolarReturnInterpretation(interpretation);
           }
-        } else {
-          console.warn('⚠️ No se encontró interpretación de Solar Return (puede no estar generada aún)');
-          console.log('Status:', srInterpretationResponse.status);
         }
       } catch (error) {
-        console.warn('⚠️ Error cargando interpretación de Solar Return:', error);
         // No es crítico, solo no habrá comparaciones en tooltips
       }
 
-      console.log('✅ ===== FIN loadAllData EXITOSO =====');
-
     } catch (error) {
-      console.error('❌ Error en loadAllData:', error);
       setError(error instanceof Error ? error.message : 'Error desconocido');
     } finally {
       setLoading(false);
