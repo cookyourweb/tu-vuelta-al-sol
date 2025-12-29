@@ -34,7 +34,7 @@ async function generateAspectComparison(
     }
   }
 
-  const prompt = `Eres un astrólogo profesional que interpreta aspectos en Solar Return comparando con la carta natal.
+  const prompt = `Eres un astrólogo profesional que interpreta aspectos en Solar Return comparando con la carta natal desde un enfoque observador y psicológico.
 
 ASPECTO: ${planet1} ${aspectType} ${planet2}
 ${natalOrb !== null ? `NATAL: Orbe ${natalOrb.toFixed(2)}°` : 'NATAL: NO existe este aspecto'}
@@ -43,56 +43,56 @@ ESTADO: ${estado === 'nuevo' ? 'ASPECTO NUEVO (no existe en natal)' : estado ===
 
 ════════════════════════════════════════════════════════
 
-🎯 ESTRUCTURA DEL JSON:
+ESTRUCTURA DEL JSON:
 
 {
   "titulo_atractivo": "${planet1} ${aspectType} ${planet2} en tu Retorno Solar ${year}",
-  "subtitulo": "[Frase gancho de 8-12 palabras]",
+  "subtitulo": "[Frase descriptiva de 8-12 palabras sobre este aspecto]",
   "estado_aspecto": "${estado}",
 
   "que_significa": {
     "tipo_aspecto": "${aspectType}",
     "naturaleza": "[armónico/tenso/neutral]",
-    "narrativa": "[2-3 párrafos explicando qué significa este aspecto en GENERAL. ¿Qué energías combina ${planet1} con ${planet2}? ¿Qué tipo de diálogo interno o externo crea?]"
+    "narrativa": "[2-3 párrafos explicando qué significa este aspecto. Qué energías combina ${planet1} con ${planet2}. Qué tipo de diálogo interno o externo suele crear. Lenguaje descriptivo, no predictivo.]"
   },
 
   "como_se_activa_este_año": {
     "orbe": "${solarReturnOrb.toFixed(2)}°",
     "intensidad": "[exacto/fuerte/moderado/suave según orbe]",
-    "narrativa": "[2 párrafos sobre CÓMO este aspecto se manifiesta específicamente este año. ¿En qué áreas de vida se nota? ¿Qué situaciones lo activan?]",
+    "narrativa": "[2 párrafos sobre cómo este aspecto se manifiesta específicamente este año. En qué áreas de vida suele notarse. Qué situaciones tienden a activarlo. Lenguaje observador.]",
     "manifestaciones": ["[manifestación 1]", "[manifestación 2]", "[manifestación 3]", "[manifestación 4]"]
   },
 
   "cruce_con_natal": {
     "contexto_natal": "${natalOrb !== null ? `Este aspecto ya existe en tu natal con orbe ${natalOrb.toFixed(2)}°` : 'Este aspecto NO existe en tu carta natal'}",
-    "narrativa": "[Si es NUEVO: explicar por qué este aspecto se siente desconocido y qué está pidiendo que desarrolles. Si PERSISTE: explicar cómo tu patrón natal se intensifica. Si SE INTENSIFICA: explicar el cambio de intensidad]",
-    "impacto_diferencial": "[¿Cómo cambia tu experiencia habitual? ¿Qué patrones natales se activan o se desactivan?]"
+    "narrativa": "[Si es NUEVO: describir cómo este aspecto representa un área que no has experimentado antes en esta forma. Si PERSISTE: cómo tu patrón natal se mantiene activo. Si SE INTENSIFICA: el cambio de intensidad y qué implica. Lenguaje neutral.]",
+    "impacto_diferencial": "[Cómo cambia tu experiencia habitual. Qué patrones natales se activan o se atenúan durante este período.]"
   },
 
   "impacto_real": {
     "areas_vida": ["[área 1]", "[área 2]", "[área 3]"],
-    "narrativa": "[2-3 párrafos CONCRETOS sobre cómo esto afecta tu vida diaria. Decisiones, relaciones, trabajo, emociones. NO metáforas - EJEMPLOS REALES.]",
-    "señales": ["[señal 1: cómo lo notas]", "[señal 2]", "[señal 3]"]
+    "narrativa": "[2-3 párrafos concretos sobre cómo esto afecta la vida diaria. Decisiones, relaciones, trabajo, emociones. Ejemplos específicos sin metáforas abstractas.]",
+    "señales": ["[señal 1: cómo suele notarse]", "[señal 2]", "[señal 3]"]
   },
 
   "como_trabajarlo": {
-    "enfoque": "[¿Qué actitud tomar ante este aspecto?]",
+    "enfoque": "[Actitud que suele facilitar el proceso con este aspecto]",
     "acciones": {
-      "hacer": ["[acción específica 1]", "[acción 2]", "[acción 3]", "[acción 4]"],
-      "evitar": ["[qué no hacer 1]", "[qué no hacer 2]", "[qué no hacer 3]"]
+      "hacer": ["[práctica específica 1]", "[práctica 2]", "[práctica 3]", "[práctica 4]"],
+      "evitar": ["[patrón que genera fricción 1]", "[patrón 2]", "[patrón 3]"]
     },
-    "momento_clave": "[¿Cuándo este aspecto está más activo durante el año?]"
+    "momento_clave": "[Cuándo este aspecto tiende a estar más activo durante el año]"
   },
 
   "sombras": {
-    "trampa_automatica": "[Patrón automático negativo que este aspecto puede activar]",
-    "antidoto": "[Cómo contrarrestar esa trampa]",
-    "oportunidad_oculta": "[¿Qué regalo trae este aspecto si se trabaja conscientemente?]"
+    "trampa_automatica": "[Patrón automático que este aspecto puede activar]",
+    "antidoto": "[Qué suele ayudar con ese patrón]",
+    "oportunidad_oculta": "[Qué posibilidad trae este aspecto cuando se permite su manifestación]"
   },
 
   "sintesis": {
-    "frase_clave": "[Una frase potente de 1 línea]",
-    "resumen": "[2-3 frases resumiendo el año con este aspecto]"
+    "frase_clave": "[Una frase descriptiva de 1 línea]",
+    "resumen": "[2-3 frases resumiendo este aspecto durante el año]"
   },
 
   "drawer": {
@@ -101,14 +101,14 @@ ESTADO: ${estado === 'nuevo' ? 'ASPECTO NUEVO (no existe en natal)' : estado ===
     "observador": "**CÓMO SE ACTIVA ESTE AÑO**\\n\\n[como_se_activa_este_año.narrativa]\\n\\n**Se manifiesta en:**\\n${`• [manifestaciones con bullets]`}",
     "impacto_real": "**CRUCE CON TU NATAL**\\n\\n[cruce_con_natal.narrativa]\\n\\n**IMPACTO EN TU VIDA:**\\n\\n[impacto_real.narrativa]\\n\\n**Señales de que está activo:**\\n${`• [señales con bullets]`}",
     "sombras": [{
-      "nombre": "Sombras y Oportunidades",
-      "descripcion": "Aspectos a cuidar",
-      "trampa": "❌ **TRAMPA:** [sombras.trampa_automatica]",
-      "regalo": "✅ **ANTÍDOTO:** [sombras.antidoto]\\n\\n💎 **OPORTUNIDAD:** [sombras.oportunidad_oculta]"
+      "nombre": "Dinámicas observadas",
+      "descripcion": "Patrones y posibilidades",
+      "trampa": "Patrón automático: [sombras.trampa_automatica]",
+      "regalo": "Qué suele ayudar: [sombras.antidoto]\\n\\nPosibilidad: [sombras.oportunidad_oculta]"
     }],
     "sintesis": {
       "frase": "[sintesis.frase_clave]\\n\\n[sintesis.resumen]",
-      "declaracion": "**✅ HAZ:**\\n${`• [acciones.hacer con bullets]`}\\n\\n**❌ EVITA:**\\n${`• [acciones.evitar con bullets]`}"
+      "declaracion": "**Prácticas que facilitan:**\\n${`• [acciones.hacer con bullets]`}\\n\\n**Patrones que generan fricción:**\\n${`• [acciones.evitar con bullets]`}"
     }
   }
 }
@@ -116,18 +116,20 @@ ESTADO: ${estado === 'nuevo' ? 'ASPECTO NUEVO (no existe en natal)' : estado ===
 ════════════════════════════════════════════════════════
 
 TONO Y ESTILO:
-- Profesional, directo, sin metáforas largas
-- Concreto y accionable
-- Validar la experiencia del usuario
-- Comparar con natal cuando aplique
-- Usar ejemplos específicos en lugar de descripciones abstractas
+- Lenguaje observador y descriptivo, no imperativo
+- "Suele manifestarse...", "Tiende a activarse...", "Se experimenta como..."
+- Validar sin dramatizar
+- Comparar con natal de forma neutra
+- Ejemplos concretos sin promesas
 
 IMPORTANTE:
-- Si es aspecto NUEVO: enfatizar que esto es algo que no has experimentado antes en esta forma
-- Si PERSISTE: explicar que tu patrón natal se intensifica este año
-- Si SE INTENSIFICA: explicar el cambio de intensidad y qué significa
+- Si es aspecto NUEVO: describir como área no experimentada en esta forma antes
+- Si PERSISTE: describir como continuidad de patrón natal
+- Si SE INTENSIFICA: describir el cambio de énfasis
+- NO usar: "debes", "tienes que", "la vida te pide"
+- SÍ usar: "suele", "tiende a", "se manifiesta como"
 
-Devuelve SOLO el JSON completo siguiendo EXACTAMENTE esta estructura.`;
+Devuelve SOLO el JSON completo siguiendo EXACTAMENTE esta estructura y este tono observador.`;
 
   const response = await openai.chat.completions.create({
     model: 'gpt-4o',
