@@ -305,21 +305,30 @@ Responde SOLO con JSON válido (sin markdown, sin backticks):
 
 Cada párrafo debe CONDUCIR A UNA COMPRENSIÓN CLARA, no solo describir.
 
-### 3. TONO DIRECTO Y POTENTE:
-✅ Frases cortas
-✅ Sin metáforas largas
+### 3. TONO DIRECTO Y FUNCIONAL (CRÍTICO):
+❌ NO uses metáforas poéticas, lenguaje místico ni tono épico
+❌ NO uses palabras como: "arquetipo cósmico", "portal", "misión del alma", "revolución interna", "superpoder"
+❌ NO escribas en mayúsculas enfáticas ni uses emojis excesivos en el texto
+❌ NO uses tono motivacional inspiracional
+✅ Usa lenguaje psicológico y conductual
+✅ Describe comportamientos observables y situaciones concretas
+✅ Frases cortas y directas
 ✅ Contraste claro (quién eres vs qué pide el año)
 ✅ Ejemplos concretos con casas reales: "Natal Sol Casa 3 (comunicación) vs SR Sol Casa 10 (liderazgo público)"
+✅ Tono adulto, analítico, claro
 
 ### 4. USA INTERPRETACIONES NATALES:
 ${natalInterpretations ? '✅ SE HAN PROPORCIONADO INTERPRETACIONES NATALES. ÚSALAS en natal.descripcion de cada planeta. Extrae la esencia de quién ES la persona.' : 'No hay interpretaciones natales. Genera descripciones de identidad permanente basadas en la carta natal.'}
 
-### 5. LA SÍNTESIS FINAL ES CRÍTICA:
-La "sintesis_final" debe ser TU FRASE MÁS POTENTE.
-Es lo que el usuario recordará. Hazla valer.
+### 5. LA SÍNTESIS FINAL:
+La "sintesis_final" debe ser clara, directa y funcional.
+Evita lenguaje poético. Usa tono psicológico.
 
-Ejemplo:
-"Este no es un año para demostrar quién eres. Es un año para recordarlo en silencio. Lo que no sanes ahora, te perseguirá después. Lo que integres, será tu base futura."
+Ejemplo de TONO CORRECTO:
+"Este año no se trata de mostrar resultados, sino de reorganizar tu identidad desde dentro. Los cambios que hagas ahora en privado definirán tu próximo ciclo público."
+
+Ejemplo de TONO INCORRECTO:
+"Este es tu portal de transformación cósmica. Tu misión del alma se revela en el silencio sagrado."
 
 ### 6. NO INCLUYAS:
 ❌ Formación Temprana (solo para Natal)
@@ -343,6 +352,18 @@ Cada planeta debe terminar con una FRASE DE MANDATO:
 "Este año, [planeta] te pide X. Si haces Y, fluye. Si haces Z, se bloquea."
 
 Esto convierte interpretación en guía accionable.
+
+### 10. DESCRIPCIONES PLANETARIAS - LENGUAJE CONCRETO:
+Para cada planeta (natal.descripcion, solar_return.descripcion, choque, que_hacer):
+
+❌ NO ESCRIBAS: "Eres un arquitecto del lenguaje cuya misión cósmica es..."
+❌ NO ESCRIBAS: "Tu superpoder está en transformar cada conversación en un acto de creación consciente"
+✅ SÍ ESCRIBE: "Tu proceso de maduración está ligado a la expresión creativa y la comunicación. Desde temprano, puedes haber sentido que expresarte libremente no era tan sencillo."
+
+❌ NO ESCRIBAS: "El gran maestro cósmico te presenta desafíos para forjar tu carácter"
+✅ SÍ ESCRIBE: "Esta posición te pide aprender a estructurar tu creatividad y asumir responsabilidad sobre lo que comunicas."
+
+Usa verbos de acción, comportamientos observables y situaciones concretas.
 
 **GENERA LA INTERPRETACIÓN AHORA.**
 `;
