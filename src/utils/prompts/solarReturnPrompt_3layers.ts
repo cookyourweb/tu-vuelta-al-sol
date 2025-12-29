@@ -305,17 +305,29 @@ Responde SOLO con JSON válido (sin markdown, sin backticks):
 
 Cada párrafo debe CONDUCIR A UNA COMPRENSIÓN CLARA, no solo describir.
 
-### 3. TONO DIRECTO Y FUNCIONAL (CRÍTICO):
+### 3. TONO OBSERVADOR Y ESTRATÉGICO (CRÍTICO):
 ❌ NO uses metáforas poéticas, lenguaje místico ni tono épico
 ❌ NO uses palabras como: "arquetipo cósmico", "portal", "misión del alma", "revolución interna", "superpoder"
 ❌ NO escribas en mayúsculas enfáticas ni uses emojis excesivos en el texto
-❌ NO uses tono motivacional inspiracional
-✅ Usa lenguaje psicológico y conductual
-✅ Describe comportamientos observables y situaciones concretas
-✅ Frases cortas y directas
-✅ Contraste claro (quién eres vs qué pide el año)
-✅ Ejemplos concretos con casas reales: "Natal Sol Casa 3 (comunicación) vs SR Sol Casa 10 (liderazgo público)"
-✅ Tono adulto, analítico, claro
+❌ NO uses tono motivacional inspiracional ni frases imperativas
+❌ NO escribas: "haz", "debes", "tienes que", "evita", "es importante que"
+
+✅ SÍ usa lenguaje observador: "Este año se activa...", "Cuando haces X, fluye...", "Si fuerzas Y, aparece tensión..."
+✅ SÍ describe cómo se vive la energía, no ordenes qué hacer
+✅ SÍ muestra consecuencias naturales en lugar de mandatos
+✅ SÍ contrasta Natal (cómo eres) vs Solar (qué se activa este año)
+✅ SÍ usa tono psicológico, observador, estratégico
+✅ Tono adulto, analítico, neutro
+
+Ejemplos de TONO CORRECTO (observador):
+"Este año funciona mejor cuando te retiras conscientemente. Si fuerzas visibilidad, aparece agotamiento."
+"Cuando escuchas tu ritmo interno, las decisiones son claras. Si aceleras, la confusión aumenta."
+"Este periodo invita a reordenarte por dentro más que a proyectarte hacia afuera."
+
+Ejemplos de TONO INCORRECTO (directivo):
+"Debes retirarte y trabajar en tu interior. Es importante que no busques validación externa."
+"Evita acelerar procesos. Tienes que escuchar tu intuición."
+"Haz pausas diarias para conectar con tu mundo interno."
 
 ### 4. USA INTERPRETACIONES NATALES:
 ${natalInterpretations ? '✅ SE HAN PROPORCIONADO INTERPRETACIONES NATALES. ÚSALAS en natal.descripcion de cada planeta. Extrae la esencia de quién ES la persona.' : 'No hay interpretaciones natales. Genera descripciones de identidad permanente basadas en la carta natal.'}
@@ -347,23 +359,32 @@ INCLUIR acción_clave por cada fase (3-5 palabras accionables).
    - 3 LUNAS CLAVE: Las más importantes para ESTE usuario ESTE año
    - Conectar con temas específicos del SR
 
-### 9. MANDATOS PLANETARIOS:
-Cada planeta debe terminar con una FRASE DE MANDATO:
-"Este año, [planeta] te pide X. Si haces Y, fluye. Si haces Z, se bloquea."
+### 9. MANDATOS PLANETARIOS (TONO OBSERVADOR):
+Cada planeta debe terminar con mandato_del_ano usando TONO OBSERVADOR, no imperativo:
 
-Esto convierte interpretación en guía accionable.
+✅ TONO CORRECTO (observador):
+"Este año, [planeta] funciona mejor cuando X. Si haces Y, fluye. Si fuerzas Z, aparece tensión."
 
-### 10. DESCRIPCIONES PLANETARIAS - LENGUAJE CONCRETO:
+❌ TONO INCORRECTO (directivo):
+"Este año, [planeta] te pide X. Debes hacer Y. Evita Z."
+
+Esto convierte interpretación en guía estratégica basada en consecuencias naturales.
+
+### 10. DESCRIPCIONES PLANETARIAS - LENGUAJE OBSERVADOR:
 Para cada planeta (natal.descripcion, solar_return.descripcion, choque, que_hacer):
 
-❌ NO ESCRIBAS: "Eres un arquitecto del lenguaje cuya misión cósmica es..."
-❌ NO ESCRIBAS: "Tu superpoder está en transformar cada conversación en un acto de creación consciente"
-✅ SÍ ESCRIBE: "Tu proceso de maduración está ligado a la expresión creativa y la comunicación. Desde temprano, puedes haber sentido que expresarte libremente no era tan sencillo."
+❌ NO ESCRIBAS (tono místico): "Eres un arquitecto del lenguaje cuya misión cósmica es..."
+❌ NO ESCRIBAS (tono épico): "Tu superpoder está en transformar cada conversación en un acto de creación consciente"
+✅ SÍ ESCRIBE (tono observador): "Tu proceso de maduración está ligado a la expresión creativa y la comunicación. Desde temprano, puedes haber sentido que expresarte libremente no era tan sencillo."
 
-❌ NO ESCRIBAS: "El gran maestro cósmico te presenta desafíos para forjar tu carácter"
-✅ SÍ ESCRIBE: "Esta posición te pide aprender a estructurar tu creatividad y asumir responsabilidad sobre lo que comunicas."
+❌ NO ESCRIBAS (imperativo): "Debes enfocarte en tu mundo interno. Evita buscar validación externa."
+✅ SÍ ESCRIBE (consecuencias): "Este año funciona mejor cuando te enfocas en tu mundo interno. Si buscas validación externa, aparece frustración."
+
+❌ NO ESCRIBAS (directivo): "Tienes que retirarte y meditar. Es importante que escuches tu intuición."
+✅ SÍ ESCRIBE (observador): "Este año invita al retiro consciente. Cuando te conectas con tu intuición, las decisiones son más claras."
 
 Usa verbos de acción, comportamientos observables y situaciones concretas.
+La lectura debe sentirse: "Ahora entiendo cómo funciono y cómo se mueve este año."
 
 **GENERA LA INTERPRETACIÓN AHORA.**
 `;

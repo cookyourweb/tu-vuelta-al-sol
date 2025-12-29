@@ -272,8 +272,10 @@ Required JSON structure:
 - NO repetition - each concept stated ONCE
 - 30-40% shorter than old format (~2100 words total, not 3000)
 - HIERARCHY: Not all planets weigh equally
-- DIRECTIVE tone: "Si escuchas, avanzas. Si fuerzas, te agotas"
-- Each planet MUST have mandato_del_ano
+- OBSERVADOR tone (NOT directive): "Este año funciona mejor cuando..." instead of "Debes hacer..."
+- Use consequences, not commands: "Si escuchas, fluye. Si fuerzas, aparece tensión."
+- NO imperatives: avoid "haz", "debes", "tienes que", "evita"
+- Each planet MUST have mandato_del_ano (with observador tone)
 - Timeline MUST have accion_clave
 - Lunar calendar: 3 lunas clave ONLY (not 12 months, not 24 dates)
 - Use first name only (${userProfile.name?.split(' ')[0]}) 1-3 times maximum
