@@ -9,8 +9,9 @@ import type {
   CompleteSolarReturnInterpretation,
   UserProfile,
   APIResponse,
-  InterpretationDocument
-} from '@/types/astrology/interpretation'; // ✅ ADD THIS
+  InterpretationDocument,
+  ComparacionesPlanetarias
+} from '@/types/astrology/interpretation';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
