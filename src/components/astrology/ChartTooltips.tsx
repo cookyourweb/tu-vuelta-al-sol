@@ -486,7 +486,7 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                 {planet.name} en {SIGN_SYMBOLS[planet.sign] || ''} {planet.sign} en Casa {planet.house}
               </div>
               <div className="text-gray-300 text-sm mt-1">
-                {planet.degree.toFixed(2)}° - Casa {planet.house} ({houseMeanings[planet.house]?.name.split(' - ')[1] || 'Área de vida'})
+                {planet.degree.toFixed(2)}° - Casa {planet.house} ({planet.house && houseMeanings[planet.house] ? houseMeanings[planet.house].name.split(' - ')[1] : 'Área de vida'})
               </div>
             </div>
           </div>
