@@ -600,6 +600,102 @@ En lugar de:
 ✅ "Funciona mejor cuando [condición]. Aparece fricción cuando [condición opuesta]."
 ```
 
+### Ajustes Finos de Variación Léxica (2025-12-29) ⚡ NUEVO
+
+**Contexto**: Tras la primera implementación del tono observador, el usuario reportó que el texto era correcto pero podía mejorarse con variación léxica para evitar repeticiones y mejorar la fluidez editorial.
+
+#### 1️⃣ Variación temporal - Evitar repetición de "Este año..."
+
+**Problema identificado:**
+```
+❌ "Este año, tu energía vital se concentra..."
+❌ "Este año, encuentras seguridad emocional..."
+❌ "Este año, tu pensamiento se enfoca..."
+```
+
+**Solución implementada:**
+```
+✅ Alternar con: "Durante este periodo...", "A lo largo del año...", "En este ciclo...", "Ahora el foco se desplaza hacia..."
+
+Ejemplo mejorado:
+"Durante este periodo, tu energía vital se concentra en el autoanálisis."
+"A lo largo del año, encuentras seguridad emocional en la creatividad."
+"En este ciclo, el pensamiento se enfoca en lo subconsciente."
+"Ahora el foco se desplaza hacia la introspección."
+```
+
+**Impacto**: Texto más fluido, menos repetitivo, sensación editorial profesional.
+
+#### 2️⃣ Bajada de directividad en sugerencias - De imperativo a sugerente
+
+**Problema identificado:**
+```
+❌ "Dedica tiempo a la reflexión interna..."
+❌ "Prioriza tu mundo interior..."
+❌ "Aprovecha este tiempo para sanar..."
+```
+
+**Solución implementada:**
+```
+✅ Usar sugerencias no imperativas:
+   - "Puede ser útil dedicar tiempo a la reflexión interna..."
+   - "Este periodo favorece prácticas como..."
+   - "Tiende a funcionar mejor cuando priorizas tu mundo interior..."
+
+Ejemplo mejorado:
+"Puede ser útil dedicar tiempo a la reflexión interna y exploración de pensamientos profundos."
+"Este periodo favorece prácticas introspectivas como la meditación o la escritura."
+"Tiende a funcionar mejor cuando te permites pausas conscientes."
+```
+
+**Impacto**: Guía sin ordenar, mantiene autonomía del usuario, suena a consejo profesional en lugar de mandato.
+
+#### 3️⃣ Variación léxica en conceptos repetidos - "validación externa"
+
+**Problema identificado:**
+```
+❌ "Si buscas validación externa... validación externa... validación externa..."
+```
+
+**Solución implementada:**
+```
+✅ Alternar con sinónimos:
+   - "reconocimiento externo"
+   - "aprobación externa"
+   - "mirada externa"
+
+Ejemplo mejorado:
+Párrafo 1: "Si buscas validación externa, aparece frustración."
+Párrafo 2: "El reconocimiento externo pierde peso este año."
+Párrafo 3: "Cuando dependes de la mirada externa, la claridad se nubla."
+Párrafo 4: "Buscar aprobación externa tiende a generar agotamiento."
+```
+
+**Impacto**: Riqueza semántica, menos repetitivo, mantiene el mensaje central sin saturación.
+
+#### Implementación Técnica
+
+**Archivos modificados:**
+
+1. **`src/utils/prompts/solarReturnPrompt_3layers.ts`**
+   - Línea 315: Agregadas variaciones temporales
+   - Línea 321: Agregada regla de variación léxica
+   - Línea 323-327: Ejemplos actualizados con variaciones
+   - Línea 367-370: Mandatos planetarios con sugerencias no imperativas
+   - Línea 387-398: Nueva sección "VARIACIÓN LÉXICA IMPORTANTE"
+
+2. **`src/app/api/astrology/interpret-solar-return/route.ts`**
+   - Línea 276-277: Reglas de variación léxica en system prompt
+   - Línea 279: Sugerencias no imperativas explícitas
+   - Línea 280: Prohibiciones ampliadas (dedica, prioriza)
+
+**Resultado final:**
+- ✅ Texto publicable con calidad editorial
+- ✅ Escalable y repetible
+- ✅ Tono sobrio y profesional
+- ✅ Sin deriva espiritualista
+- ✅ Fluidez natural
+
 ---
 
 ## 📝 Ejemplos Antes/Después
