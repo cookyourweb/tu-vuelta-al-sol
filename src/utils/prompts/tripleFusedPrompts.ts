@@ -75,7 +75,7 @@ export interface TripleFusedInterpretation {
   drawer: {
     titulo: string;
     educativo: string;        // Varios párrafos educativos
-    poderoso: string;         // Varios párrafos empoderadores
+    observador: string;       // Varios párrafos observadores (tono psicológico)
     impacto_real: string;     // Manifestación concreta en la vida (reemplaza poetico)
     sombras: {
       nombre: string;
