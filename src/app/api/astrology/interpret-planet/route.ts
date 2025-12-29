@@ -12,6 +12,9 @@ import Chart from '@/models/Chart';
 import * as admin from 'firebase-admin';
 import OpenAI from 'openai';
 
+// ⏱️ Configurar timeout para Vercel (60 segundos en plan Pro)
+export const maxDuration = 60;
+
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // =============================================================================

@@ -9,6 +9,9 @@ import connectToDatabase from '@/lib/db';
 import { generateAscendantInterpretation, generateMidheavenInterpretation } from '@/services/tripleFusedInterpretationService';
 import { getUserProfile } from '@/services/userDataService';
 
+// ⏱️ Configurar timeout para Vercel (60 segundos en plan Pro)
+export const maxDuration = 60;
+
 // =============================================================================
 // POST - Generate single angle interpretation
 // =============================================================================

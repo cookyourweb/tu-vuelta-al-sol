@@ -8,6 +8,9 @@ import OpenAI from 'openai';
 import connectDB from '@/lib/db';
 import Interpretation from '@/models/Interpretation';
 
+// ⏱️ Configurar timeout para Vercel (60 segundos en plan Pro)
+export const maxDuration = 60;
+
 // ✅ Lazy initialization to avoid build-time errors
 let openai: OpenAI | null = null;
 
