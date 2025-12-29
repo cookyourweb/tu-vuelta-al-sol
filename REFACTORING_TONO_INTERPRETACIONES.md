@@ -91,12 +91,15 @@ sobre lo que comunicas."
 
 ## 🛠️ Solución Implementada
 
+Se actualizaron **5 archivos clave** con el nuevo enfoque de tono observador.
+
 ### Estrategia
 
 1. **Crear prompt base limpio** → Nuevo archivo reutilizable
 2. **Actualizar prompts existentes** → Añadir reglas anti-poesía
 3. **Ejemplos explícitos** → Mostrar tono correcto vs incorrecto
 4. **Validación estricta** → Verificar que OpenAI no use lenguaje prohibido
+5. **Actualizar fallbacks** → Eliminar tono épico de respuestas de emergencia
 
 ### Principios de Tono (CRÍTICO)
 
@@ -374,6 +377,125 @@ if (lunasCount !== 3) {
   throw new Error(`Must have exactly 3 lunas, got ${lunasCount}`);
 }
 ```
+
+---
+
+### 5. **ACTUALIZADO: `src/app/api/astrology/interpret-natal/route.ts`** ⚡ NUEVO (2025-12-29)
+
+**Propósito**: Endpoint que genera interpretaciones individuales de planetas y ángulos para la Carta Natal.
+
+**Problema identificado**: El usuario reportó que el drawer de Neptuno mostraba:
+- ❌ Casa incorrecta (tooltip Casa 10 vs drawer Casa 9)
+- ❌ Tono épico/místico: "SUPERPODER", "en tu alma arde una llama inextinguible", "¡NO VINISTE A...!"
+
+**Causa raíz**: Este endpoint no había sido actualizado con el nuevo tono observador. Contenía:
+1. Prompts con tono directivo en las secciones de generación de IA
+2. Fallbacks hardcodeados con lenguaje épico/místico
+
+#### Cambios realizados:
+
+**A. Prompts de generación de IA actualizados (líneas 574-706)**
+
+1. **Prompt de ángulos** (Ascendente, Medio Cielo):
+   ```typescript
+   "poderoso": "[Análisis psicológico profundo de cómo se manifiesta. Usa TONO OBSERVADOR,
+   no directivo. Describe patrones estables. Ejemplo: 'Tu forma de presentarte al mundo está
+   ligada a...' NO uses: 'superpoder', '¡NO VINISTE A...!'. SÍ usa: 'Desde temprano, puedes
+   haber sentido...', 'Esta configuración se nota cuando...'. 3-4 párrafos observadores]"
+
+   ESTILO: Observador (NO directivo), psicológico, claro y adulto.
+   PROHIBIDO: "superpoder", "misión cósmica", "¡NO VINISTE A...!", mayúsculas enfáticas.
+   TONO: Describe cómo eres y cómo funciona, no órdenes.
+   ```
+
+2. **Prompt de planetas individuales**:
+   - Mismo cambio de ESTILO: "Disruptivo" → "Observador"
+   - Prohibiciones explícitas agregadas
+   - Ejemplos de tono correcto incluidos
+
+**B. Prompts de elementos, modalidades y aspectos (líneas 859-1092)**
+
+Actualizados TODOS los prompts de:
+- **Elementos** (Fuego, Tierra, Aire, Agua)
+- **Modalidades** (Cardinal, Fijo, Mutable)
+- **Aspectos** (Cuadratura, Oposición, Trígono, Sextil)
+
+**Antes:**
+```typescript
+ESTILO: Disruptivo ("¡NO VINISTE A...!"), transformacional, psicológico (sombras/regalos), motivador.
+
+EJEMPLOS PARA Fuego:
+- Fuego: "¡NO VINISTE A APAGARTE!", "Tu superpoder es encender el mundo"
+```
+
+**Ahora:**
+```typescript
+ESTILO: Observador (NO directivo), psicológico (sombras/posibilidades), claro y adulto.
+PROHIBIDO: "superpoder", "misión cósmica", "portal", "¡NO VINISTE A...!", mayúsculas enfáticas.
+TONO: Describe cómo eres y cómo funciona el elemento, no órdenes.
+```
+
+**C. Fallbacks hardcodeados actualizados (líneas 795-1214)**
+
+Todos los fallbacks que se usan cuando OpenAI falla fueron actualizados:
+
+1. **`generateFallbackAngleInterpretation`**:
+   ```typescript
+   // ANTES ❌
+   poderoso: `¡NO VINISTE a este mundo con esta configuración por casualidad!
+   Tu verdadero superpoder está en reconocer y activar conscientemente esta energía.`
+
+   // AHORA ✅
+   poderoso: `Tu ${angleName} en ${angleData.sign} se manifiesta en tu forma de
+   presentarte y relacionarte con el entorno. Puedes notar que ciertos patrones de
+   comportamiento se repiten. Cuando actúas alineado con las cualidades de
+   ${angleData.sign}, experimentas mayor fluidez.`
+   ```
+
+2. **`generateFallbackPlanetInterpretation`**:
+   ```typescript
+   // ANTES ❌
+   poderoso: `¡NO VINISTE con ${planet.name} en ${planet.sign} por casualidad!
+   ¡ESTO ES ENORME! Tu verdadero superpoder es usar conscientemente la energía...`
+
+   // AHORA ✅
+   poderoso: `Tu ${planet.name} en ${planet.sign} se manifiesta en patrones
+   observables de comportamiento. Cuando actúas alineado con las cualidades de
+   ${planet.sign}, las cosas tienden a fluir.`
+   ```
+
+3. **`generateFallbackElementInterpretation`**:
+   - Removido "¡NO VINISTE con esta distribución elemental por casualidad!"
+   - Removido "Tu verdadero superpoder es usar conscientemente la energía del elemento"
+   - Añadido lenguaje de consecuencias
+
+4. **`generateFallbackModalityInterpretation`**:
+   - Removido "maestro de tu propio ritmo cósmico"
+   - Añadido "Cuando honras este ritmo natural, las cosas tienden a funcionar mejor"
+
+5. **`generateFallbackAspectInterpretation`**:
+   - Removido "alquimista de tu propia transformación"
+   - Añadido lenguaje de integración de energías
+
+**D. Patrón de consecuencias implementado**
+
+Todos los fallbacks ahora usan el patrón:
+```typescript
+"Cuando actúas alineado con [configuración], las cosas tienden a fluir.
+Cuando intentas forzar un enfoque que no resuena con esta naturaleza,
+puede aparecer resistencia o frustración."
+```
+
+En lugar de:
+```typescript
+"Tu superpoder es [X]. ¡NO VINISTE A [Y]!"
+```
+
+**Impacto:**
+- ✅ Todos los drawers de planetas ahora generarán con tono observador
+- ✅ Los fallbacks mantienen coherencia de tono cuando OpenAI falla
+- ✅ Eliminado 100% del lenguaje épico/místico del endpoint natal
+- ✅ Resuelto el error reportado de Neptuno con tono antiguo
 
 ---
 
