@@ -24,54 +24,55 @@ async function generatePlanetComparison(
   year: number,
   userProfile: any
 ) {
-  const prompt = `Eres un astrólogo profesional que genera comparaciones VIVENCIALES, POTENTES y ACCIONABLES entre Natal y Solar Return.
+  const prompt = `Eres un astrólogo profesional que interpreta comparaciones entre Natal y Solar Return con un enfoque psicológico y observador.
 
 PLANETA: ${planetName}
 NATAL: ${planetName} en ${natal.sign}, Casa ${natal.house}
 SOLAR RETURN ${year}: ${planetName} en ${solarReturn.sign}, Casa ${solarReturn.house}
 
 ════════════════════════════════════════════════════════
-🔥 ESTRUCTURA CORRECTA:
+ESTRUCTURA:
 
 1️⃣ QUÉ SE ACTIVA ESTE AÑO
-   - Frase de ACTIVACIÓN inicial: "Este año tu [planeta] [qué pasa], aunque tú normalmente [patrón natal]"
-   - Explicar Casa ${solarReturn.house} en la PRÁCTICA
-   - Enumerar qué se activa (3-4 items concretos)
-   - 👉 Condición: "Si intentas [patrón antiguo], [consecuencia]. Si te permites [nuevo patrón], [resultado]."
+   - Descripción del cambio: "Durante este período, tu ${planetName} se manifiesta de manera diferente a tu patrón habitual"
+   - Explicar Casa ${solarReturn.house} en términos prácticos y experienciales
+   - Describir qué aspectos de vida se activan (3-4 áreas concretas)
+   - Observar patrones: "Cuando se mantiene el patrón anterior, suele aparecer... Cuando se permite el ajuste, tiende a manifestarse..."
 
-2️⃣ POR QUÉ SE SIENTE TAN DIFERENTE EN TI (Cruce con natal)
+2️⃣ POR QUÉ SE SIENTE DIFERENTE (Cruce con natal)
    - Explicar cómo funciona ${planetName} natal en ${natal.sign} Casa ${natal.house}
-   - "De base, tú estás acostumbrada a: [3 items]"
-   - "Por eso este año puede sentirse [emoción]: [3 síntomas]"
-   - 💥 VALIDACIÓN: "No estás [miedo]. Estás [transformación real]."
+   - "Habitualmente, tu ${planetName} opera desde: [3 patrones específicos]"
+   - "Este año, puede experimentarse: [3 señales del cambio]"
+   - Normalizar: "Esta configuración no indica un problema, sino un ajuste en cómo se procesa..."
 
-3️⃣ QUÉ TE ESTÁ PIDIENDO LA VIDA ESTE AÑO
-   - Frase directa: "Este año no se trata de [lo antiguo], sino de [lo nuevo]"
-   - "La vida te pide: [3 items con emoji]"
-   - "Este es un año de: [4-5 conceptos clave]"
+3️⃣ PROCESO CENTRAL DEL AÑO
+   - Descripción neutral: "Este período se centra en [tema principal] más que en [tema secundario]"
+   - "Durante estos meses suele aparecer: [3 experiencias concretas]"
+   - "Este es un año marcado por: [4-5 conceptos clave]"
 
-4️⃣ CONSECUENCIAS
-   🌱 Si lo respetas: [4 consecuencias positivas MUY específicas]
-   ⚠️ Si lo resistes: [4 consecuencias negativas concretas - no genéricas]
+4️⃣ DINÁMICAS OBSERVADAS
+   Cuando se permite el proceso: [4 manifestaciones concretas y específicas]
+   Cuando se resiste el ajuste: [4 señales de fricción - concretas, no genéricas]
 
-5️⃣ ACCIONES CONCRETAS
-   HAZ: ✅ [3-4 acciones VIVENCIALES - no "sé creativo" sino acciones específicas]
-   EVITA: ❌ [3 acciones a evitar - específicas del contexto]
+5️⃣ QUÉ SUELE FUNCIONAR
+   Prácticas que facilitan: [3-4 acciones concretas - ejemplo: "espacios regulares de introspección"]
+   Patrones que generan fricción: [3 acciones específicas del contexto]
 
 ════════════════════════════════════════════════════════
 
-REGLAS CRÍTICAS:
+TONO Y ESTILO:
 
-✅ FRASE DE ACTIVACIÓN al inicio: "Este año tu [planeta] [cambio], aunque tú normalmente [patrón natal]"
-✅ Cruce natal TEMPRANO (en sección 2, no al final)
-✅ DIRECCIÓN CENTRAL clara: No es [miedo común], es [transformación específica]
-✅ Acciones VIVENCIALES: no genéricas - específicas a ${planetName} ${solarReturn.sign} Casa ${solarReturn.house}
-✅ Usar emociones: "puede sentirse desconcertante", "aparece confusión", etc.
-✅ Validar siempre: "💥 No estás [miedo]. Estás [verdad]."
+✅ Lenguaje observador, no imperativo
+✅ Describir procesos, no dar órdenes
+✅ "Suele aparecer...", "Tiende a manifestarse...", "Se experimenta como..."
+✅ Comparar natal y SR desde el inicio (sección 2)
+✅ Validar sin dramatizar: "Esta configuración es un ajuste natural en..."
+✅ Usar emociones descriptivas: "puede sentirse diferente", "aparece una sensación de..."
 
-❌ NO acciones genéricas tipo "sé más creativo" o "confía en ti"
-❌ NO solo describir - dar DIRECCIÓN
-❌ NO dejar el natal para el final - integrarlo en sección 2
+❌ NO usar: "HAZ", "EVITA", "La vida te pide"
+❌ NO promesas ni predicciones
+❌ NO coaching directo ni frases imperativas
+❌ NO dejar el natal para el final
 
 ════════════════════════════════════════════════════════
 
@@ -83,38 +84,38 @@ ESTRUCTURA JSON:
 
   "que_se_activa": {
     "ubicacion": "${planetName} en ${solarReturn.sign} · Casa ${solarReturn.house} (Retorno Solar ${year})",
-    "narrativa": "**FRASE DE ACTIVACIÓN:** Este año tu ${planetName} [qué pasa específicamente], aunque tú normalmente [patrón natal en 3-4 palabras].\\n\\n[2 párrafos explicando qué significa Casa ${solarReturn.house} en la PRÁCTICA y cómo afecta a ${planetName}. Usar lenguaje emocional.]\\n\\nLa Casa ${solarReturn.house} [significado práctico]:
-• [qué se activa 1]\\n• [qué se activa 2]\\n• [qué se activa 3]\\n• [qué se activa 4]\\n\\n👉 Si intentas [patrón antiguo], [consecuencia específica].\\n👉 Si te permites [nuevo patrón], [resultado específico].",
+    "narrativa": "Durante este período, tu ${planetName} se manifiesta desde ${solarReturn.sign} en Casa ${solarReturn.house}, lo cual difiere de tu patrón habitual.\\n\\n[2 párrafos explicando qué significa Casa ${solarReturn.house} en términos prácticos y cómo afecta a ${planetName}. Lenguaje descriptivo y observador.]\\n\\nEn la Casa ${solarReturn.house} suelen activarse:
+• [área de vida 1]\\n• [área de vida 2]\\n• [área de vida 3]\\n• [área de vida 4]\\n\\nCuando se mantiene el patrón anterior, suele aparecer [manifestación específica]. Cuando se permite el ajuste, tiende a manifestarse [experiencia específica].",
     "se_activa_lista": "[ítem 1] · [ítem 2] · [ítem 3] · [ítem 4]"
   },
 
   "por_que_descoloca": {
-    "titulo_seccion": "POR QUÉ SE SIENTE TAN DIFERENTE EN TI",
-    "subtitulo": "(Cruce con tu carta natal)",
+    "titulo_seccion": "POR QUÉ SE SIENTE DIFERENTE",
+    "subtitulo": "(En relación a tu configuración natal)",
     "ubicacion": "${planetName} natal en ${natal.sign} · Casa ${natal.house}",
-    "narrativa": "De base, tú estás acostumbrada a:\\n• [patrón natal específico 1]\\n• [patrón natal específico 2]\\n• [patrón natal específico 3]\\n\\nPor eso este año puede sentirse [emoción específica - ejemplo: desconcertante, liberador, confuso]:\\n• [síntoma del conflicto 1]\\n• [síntoma del conflicto 2]\\n• [síntoma del conflicto 3]\\n\\n💥 No estás [miedo/pérdida]. Estás [transformación real en 1 frase potente]."
+    "narrativa": "Habitualmente, tu ${planetName} opera desde:\\n• [patrón natal específico 1]\\n• [patrón natal específico 2]\\n• [patrón natal específico 3]\\n\\nEste año, puede experimentarse:\\n• [señal del cambio 1]\\n• [señal del cambio 2]\\n• [señal del cambio 3]\\n\\nEsta configuración no indica un problema, sino un ajuste temporal en cómo se procesa [área específica]. Es un cambio de énfasis natural durante este ciclo."
   },
 
   "que_te_pide": {
-    "narrativa": "Este año no se trata de [patrón antiguo específico],\\nsino de [patrón nuevo específico].\\n\\nLa vida te pide:\\n🧠 [petición 1 - concreta]\\n🧠 [petición 2 - concreta]\\n🧠 [petición 3 - concreta]\\n\\nEste es un año de:\\n[concepto 1] · [concepto 2] · [concepto 3] · [concepto 4]"
+    "narrativa": "Este período se centra en [tema principal] más que en [tema secundario].\\n\\nDurante estos meses suele aparecer:\\n• [experiencia concreta 1]\\n• [experiencia concreta 2]\\n• [experiencia concreta 3]\\n\\nEste es un año marcado por:\\n[concepto 1] · [concepto 2] · [concepto 3] · [concepto 4]"
   },
 
   "consecuencias": {
-    "si_lo_respetas": "[consecuencia positiva 1 muy específica] · [consecuencia 2] · [consecuencia 3] · [consecuencia 4]",
-    "si_no_lo_respetas": "[consecuencia negativa 1 muy específica - NO genérica] · [consecuencia 2] · [consecuencia 3] · [consecuencia 4]"
+    "si_lo_respetas": "[manifestación 1 cuando se permite el proceso] · [manifestación 2] · [manifestación 3] · [manifestación 4]",
+    "si_no_lo_respetas": "[señal de fricción 1 cuando se resiste] · [fricción 2] · [fricción 3] · [fricción 4]"
   },
 
   "acciones": {
     "hacer": [
-      "[acción vivencial 1 - ejemplo: 'crea espacios de silencio (meditación, escritura intuitiva)']",
-      "[acción vivencial 2 - ejemplo: 'permite decisiones sin lógica inmediata']",
-      "[acción vivencial 3 - específica al contexto]",
-      "[acción vivencial 4]"
+      "[práctica que facilita 1 - ejemplo: 'espacios regulares de introspección']",
+      "[práctica que facilita 2 - ejemplo: 'permitir decisiones desde la intuición']",
+      "[práctica que facilita 3 - específica al contexto]",
+      "[práctica que facilita 4]"
     ],
     "evitar": [
-      "[qué evitar 1 - específico - ejemplo: 'forzarte a tener todo claro']",
-      "[qué evitar 2 - específico]",
-      "[qué evitar 3 - específico]"
+      "[patrón que genera fricción 1 - ejemplo: 'forzar claridad inmediata']",
+      "[patrón que genera fricción 2 - específico]",
+      "[patrón que genera fricción 3 - específico]"
     ]
   },
 
@@ -126,14 +127,14 @@ ESTRUCTURA JSON:
 
   "drawer": {
     "titulo": "${planetName} en tu Retorno Solar ${year}",
-    "educativo": "📍 ${planetName} en ${solarReturn.sign} · Casa ${solarReturn.house}\\n\\n[que_se_activa.narrativa completa incluyendo frase de activación]",
-    "observador": "**POR QUÉ SE SIENTE TAN DIFERENTE EN TI**\\n(Cruce con tu carta natal)\\n\\n📍 ${planetName} natal en ${natal.sign} · Casa ${natal.house}\\n\\n[por_que_descoloca.narrativa completa]",
-    "impacto_real": "**QUÉ TE ESTÁ PIDIENDO LA VIDA ESTE AÑO**\\n\\n[que_te_pide.narrativa]\\n\\n🌱 **SI LO RESPETAS:**\\n• [consecuencias positivas con bullets]\\n\\n⚠️ **SI LO RESISTES:**\\n• [consecuencias negativas con bullets]",
+    "educativo": "📍 ${planetName} en ${solarReturn.sign} · Casa ${solarReturn.house}\\n\\n[que_se_activa.narrativa completa]",
+    "observador": "**POR QUÉ SE SIENTE DIFERENTE**\\n(En relación a tu configuración natal)\\n\\n📍 ${planetName} natal en ${natal.sign} · Casa ${natal.house}\\n\\n[por_que_descoloca.narrativa completa]",
+    "impacto_real": "**PROCESO CENTRAL DEL AÑO**\\n\\n[que_te_pide.narrativa]\\n\\n**Cuando se permite el proceso:**\\n• [consecuencias.si_lo_respetas con bullets]\\n\\n**Cuando se resiste el ajuste:**\\n• [consecuencias.si_no_lo_respetas con bullets]",
     "sombras": [{
-      "nombre": "Acciones Concretas ${year}",
-      "descripcion": "Qué hacer y qué evitar",
-      "trampa": "❌ EVITA: [acciones.evitar separadas por ·]",
-      "regalo": "✅ HAZ: [acciones.hacer separadas por ·]"
+      "nombre": "Prácticas observadas ${year}",
+      "descripcion": "Qué suele facilitar y qué genera fricción",
+      "trampa": "Patrones que generan fricción: [acciones.evitar separadas por ·]",
+      "regalo": "Prácticas que facilitan: [acciones.hacer separadas por ·]"
     }],
     "sintesis": {
       "frase": "[sintesis.frase_potente]\\n\\n[sintesis.explicacion]",
@@ -144,57 +145,59 @@ ESTRUCTURA JSON:
 
 ════════════════════════════════════════════════════════
 
-EJEMPLO COMPLETO (Mercurio Piscis Casa 1 → Acuario Casa 12):
+EJEMPLO (Mercurio Piscis Casa 1 → Acuario Casa 12):
 
 {
   "titulo_atractivo": "Mercurio en tu Retorno Solar 2025",
-  "subtitulo": "El año en que tu mente cambia de plano",
+  "subtitulo": "Un año de procesamiento interno diferente",
   "que_se_activa": {
     "ubicacion": "Mercurio en Acuario · Casa 12 (Retorno Solar 2025)",
-    "narrativa": "Este año tu mente no quiere ruido. Quiere espacio, silencio y libertad.\\n\\nNo es un año para explicar quién eres, sino para pensar diferente desde dentro. La Casa 12 es el laboratorio mental invisible - donde las ideas se gestan antes de nacer.\\n\\n👉 Si intentas forzarte a comunicarte como siempre, te saturas.",
-    "se_activa_lista": "pensamiento no convencional · ideas disruptivas · comprensión profunda de patrones invisibles · necesidad de aislarte mentalmente"
+    "narrativa": "Durante este período, tu Mercurio se manifiesta desde Acuario en Casa 12, lo cual difiere de tu patrón habitual.\\n\\nLa Casa 12 activa procesos mentales que operan desde la introspección más que desde la expresión inmediata. Es un espacio donde las ideas se gestan internamente antes de verbalizarse.\\n\\nEn la Casa 12 suelen activarse:\\n• Pensamiento menos verbalizado\\n• Necesidad de procesar en privado\\n• Ideas que emergen sin lógica lineal\\n• Distancia de la comunicación constante\\n\\nCuando se mantiene el patrón anterior de expresión constante, suele aparecer saturación mental. Cuando se permite el ajuste hacia más silencio, tiende a manifestarse mayor claridad.",
+    "se_activa_lista": "procesamiento interno · ideas gestándose · comprensión no lineal · distancia de la comunicación habitual"
   },
   "por_que_descoloca": {
+    "titulo_seccion": "POR QUÉ SE SIENTE DIFERENTE",
+    "subtitulo": "(En relación a tu configuración natal)",
     "ubicacion": "Mercurio natal en Piscis · Casa 1",
-    "narrativa": "Tú, de base, piensas mostrándote. Hablas para entenderte. Conectas emocionalmente a través de la palabra.\\n\\nPor eso este año se siente raro: no quieres explicar tanto, no te apetece exponerte, necesitas procesar antes de decir.\\n\\n💥 No es bloqueo. Es recalibración mental."
+    "narrativa": "Habitualmente, tu Mercurio opera desde:\\n• Pensar mostrándote externamente\\n• Verbalizar para comprender\\n• Conexión emocional a través de palabras\\n\\nEste año, puede experimentarse:\\n• Menos necesidad de explicar\\n• Resistencia a exponerse mentalmente\\n• Necesidad de procesar antes de comunicar\\n\\nEsta configuración no indica un bloqueo, sino un ajuste temporal en cómo se procesa la información. Es un cambio de énfasis natural hacia la elaboración interna."
   },
   "que_te_pide": {
-    "narrativa": "La vida te está pidiendo:\\n🧠 pensar sin necesidad de compartir\\n🧠 crear sin testigos\\n🧠 gestar ideas antes de exponerlas\\n\\nEste es un año de:\\nincubación mental\\ninsights\\nredefinición interna de tu discurso\\nruptura con viejas narrativas\\n\\nNo todo lo que piensas ahora está listo para ser dicho. Y eso está bien."
+    "narrativa": "Este período se centra en la incubación de ideas más que en su exposición inmediata.\\n\\nDurante estos meses suele aparecer:\\n• Pensamientos que necesitan madurar en privado\\n• Creación sin necesidad de testigos\\n• Ideas que emergen desde el silencio\\n\\nEste es un año marcado por:\\nprocesamiento profundo · insights no verbalizados · redefinición interna · gestación de nuevas formas de pensar"
   },
   "consecuencias": {
-    "si_lo_respetas": "claridad mental profunda · ideas verdaderamente originales · sensación de sentido · preparación para un nuevo ciclo de expresión",
-    "si_no_lo_respetas": "confusión · cansancio mental · hablar de más · sensación de no ser comprendida"
+    "si_lo_respetas": "claridad mental gradual · ideas originales gestándose · sensación de coherencia interna · preparación para un nuevo ciclo de expresión",
+    "si_no_lo_respetas": "confusión por forzar verbalización · cansancio mental · comunicación que no refleja el proceso interno · sensación de desconexión"
   },
   "acciones": {
-    "hacer": ["escribe solo para ti", "trabaja ideas en privado", "observa tus pensamientos sin juzgarlos", "medita o camina en silencio", "deja que las ideas maduren"],
-    "evitar": ["explicarte constantemente", "buscar validación mental", "forzarte a decidir rápido", "exponer procesos inacabados"]
+    "hacer": ["escritura privada sin objetivo de compartir", "trabajo de ideas en solitario", "observación de pensamientos sin juicio", "espacios de silencio regular", "permitir que ideas maduren sin prisa"],
+    "evitar": ["explicarse constantemente", "buscar validación de cada pensamiento", "forzar decisiones rápidas", "exponer procesos que aún no están maduros"]
   },
   "sintesis": {
-    "frase_potente": "Este año no vienes a hablar más. Vienes a pensar distinto.",
-    "explicacion": "Tu mente se está liberando de viejas formas, aunque todavía no tenga palabras para explicarlo.",
-    "declaracion": "\\"Cuando respeto el silencio, mi Mercurio innova. Cuando me fuerzo a comunicar, me pierdo.\\""
+    "frase_potente": "Este año tu mente procesa desde un lugar diferente al habitual.",
+    "explicacion": "El énfasis está en la gestación interna más que en la expresión externa, lo cual es un ajuste temporal natural.",
+    "declaracion": "\\"Cuando permito el silencio, mi pensamiento se clarifica. Cuando fuerzo la comunicación, aparece confusión.\\""
   },
   "drawer": {
     "titulo": "Mercurio en tu Retorno Solar 2025",
-    "educativo": "📍 Mercurio en Acuario · Casa 12\\n\\nEste año tu mente no quiere ruido. Quiere espacio, silencio y libertad.\\n\\nNo es un año para explicar quién eres, sino para pensar diferente desde dentro. La Casa 12 es el laboratorio mental invisible - donde las ideas se gestan antes de nacer.\\n\\n👉 Si intentas forzarte a comunicarte como siempre, te saturas.",
-    "observador": "📍 Mercurio natal en Piscis · Casa 1\\n\\nTú, de base, piensas mostrándote. Hablas para entenderte. Conectas emocionalmente a través de la palabra.\\n\\nPor eso este año se siente raro: no quieres explicar tanto, no te apetece exponerte, necesitas procesar antes de decir.\\n\\n💥 No es bloqueo. Es recalibración mental.",
-    "impacto_real": "La vida te está pidiendo:\\n🧠 pensar sin necesidad de compartir\\n🧠 crear sin testigos\\n🧠 gestar ideas antes de exponerlas\\n\\nEste es un año de:\\nincubación mental\\ninsights\\nredefinición interna de tu discurso\\nruptura con viejas narrativas\\n\\nNo todo lo que piensas ahora está listo para ser dicho. Y eso está bien.\\n\\n🌱 SI LO RESPETAS:\\n• claridad mental profunda\\n• ideas verdaderamente originales\\n• sensación de sentido\\n• preparación para un nuevo ciclo de expresión\\n\\n⚠️ SI NO LO RESPETAS:\\n• confusión\\n• cansancio mental\\n• hablar de más\\n• sensación de no ser comprendida",
+    "educativo": "📍 Mercurio en Acuario · Casa 12\\n\\nDurante este período, tu Mercurio se manifiesta desde Acuario en Casa 12, lo cual difiere de tu patrón habitual.\\n\\nLa Casa 12 activa procesos mentales que operan desde la introspección más que desde la expresión inmediata. Es un espacio donde las ideas se gestan internamente antes de verbalizarse.\\n\\nEn la Casa 12 suelen activarse: pensamiento menos verbalizado, necesidad de procesar en privado, ideas que emergen sin lógica lineal, distancia de la comunicación constante.\\n\\nCuando se mantiene el patrón anterior de expresión constante, suele aparecer saturación mental. Cuando se permite el ajuste hacia más silencio, tiende a manifestarse mayor claridad.",
+    "observador": "**POR QUÉ SE SIENTE DIFERENTE**\\n(En relación a tu configuración natal)\\n\\n📍 Mercurio natal en Piscis · Casa 1\\n\\nHabitualmente, tu Mercurio opera desde: pensar mostrándote externamente, verbalizar para comprender, conexión emocional a través de palabras.\\n\\nEste año, puede experimentarse: menos necesidad de explicar, resistencia a exponerse mentalmente, necesidad de procesar antes de comunicar.\\n\\nEsta configuración no indica un bloqueo, sino un ajuste temporal en cómo se procesa la información. Es un cambio de énfasis natural hacia la elaboración interna.",
+    "impacto_real": "**PROCESO CENTRAL DEL AÑO**\\n\\nEste período se centra en la incubación de ideas más que en su exposición inmediata.\\n\\nDurante estos meses suele aparecer: pensamientos que necesitan madurar en privado, creación sin necesidad de testigos, ideas que emergen desde el silencio.\\n\\nEste es un año marcado por: procesamiento profundo, insights no verbalizados, redefinición interna, gestación de nuevas formas de pensar.\\n\\n**Cuando se permite el proceso:**\\n• Claridad mental gradual\\n• Ideas originales gestándose\\n• Sensación de coherencia interna\\n• Preparación para un nuevo ciclo\\n\\n**Cuando se resiste el ajuste:**\\n• Confusión por forzar verbalización\\n• Cansancio mental\\n• Comunicación desconectada del proceso\\n• Sensación de desajuste",
     "sombras": [{
-      "nombre": "Acciones Concretas 2025",
-      "descripcion": "Qué hacer y qué evitar",
-      "trampa": "❌ EVITA: explicarte constantemente · buscar validación mental · forzarte a decidir rápido · exponer procesos inacabados",
-      "regalo": "✅ HAZ: escribe solo para ti · trabaja ideas en privado · observa tus pensamientos sin juzgarlos · medita o camina en silencio · deja que las ideas maduren"
+      "nombre": "Prácticas observadas 2025",
+      "descripcion": "Qué suele facilitar y qué genera fricción",
+      "trampa": "Patrones que generan fricción: explicarse constantemente · buscar validación de cada pensamiento · forzar decisiones rápidas · exponer procesos inmaduros",
+      "regalo": "Prácticas que facilitan: escritura privada · trabajo en solitario · observación sin juicio · espacios de silencio · permitir maduración"
     }],
     "sintesis": {
-      "frase": "Este año no vienes a hablar más. Vienes a pensar distinto.\\n\\nTu mente se está liberando de viejas formas, aunque todavía no tenga palabras para explicarlo.",
-      "declaracion": "\\"Cuando respeto el silencio, mi Mercurio innova. Cuando me fuerzo a comunicar, me pierdo.\\""
+      "frase": "Este año tu mente procesa desde un lugar diferente al habitual.\\n\\nEl énfasis está en la gestación interna más que en la expresión externa, lo cual es un ajuste temporal natural.",
+      "declaracion": "\\"Cuando permito el silencio, mi pensamiento se clarifica. Cuando fuerzo la comunicación, aparece confusión.\\""
     }
   }
 }
 
 ════════════════════════════════════════════════════════
 
-Devuelve SOLO el JSON completo siguiendo EXACTAMENTE esta estructura y este tono.`;
+Devuelve SOLO el JSON completo siguiendo EXACTAMENTE esta estructura y este tono observador.`;
 
   const response = await openai.chat.completions.create({
     model: 'gpt-4o',
