@@ -385,17 +385,44 @@ if (lunasCount !== 3) {
 
 | Aspecto | Antes (❌) | Ahora (✅) |
 |---------|-----------|----------|
-| **Registro** | Inspiracional/Épico | Adulto/Analítico |
+| **Registro** | Inspiracional/Épico | Adulto/Analítico/Observador |
 | **Lenguaje** | Metafórico/Simbólico | Psicológico/Conductual |
 | **Énfasis** | MAYÚSCULAS/emojis | Cursivas moderadas |
 | **Enfoque** | "Tu misión cósmica" | "Tu patrón habitual" |
-| **Acciones** | "Transforma cada..." | "Conviene practicar..." |
+| **Acciones** | "Debes hacer..." | "Funciona mejor cuando..." |
+| **Consecuencias** | "Es importante que..." | "Si haces X, fluye. Si fuerzas Y, aparece tensión." |
 | **Validación** | "Tu SUPERPODER" | "Esta capacidad" |
 
-### Palabras Prohibidas
+### Diferencia Clave: Directivo vs Observador
+
+#### ❌ Tono Directivo (evitar):
+```
+"Debes retirarte y trabajar en tu interior."
+"Es importante que no busques validación externa."
+"Evita acelerar procesos."
+"Tienes que escuchar tu intuición."
+```
+
+#### ✅ Tono Observador (usar):
+```
+"Este año funciona mejor cuando te retiras conscientemente."
+"Si buscas validación externa, aparece frustración."
+"Cuando aceleras, la confusión aumenta."
+"Este periodo invita a conectar con tu intuición."
+```
+
+### Diferencia entre Natal y Solar Return
+
+| Tipo | Enfoque | Tono | Ejemplo |
+|------|---------|------|---------|
+| **Carta Natal** | Así eres / Así funcionas | Descriptivo de patrones estables | "Tu proceso de maduración está ligado a..." |
+| **Solar Return** | Esto se activa / Así se vive | Observador de dinámicas temporales | "Este año se activa... Cuando haces X, fluye..." |
+
+### Palabras y Frases Prohibidas
 
 **Lista completa de palabras/frases a evitar:**
 
+#### Lenguaje Místico/Épico:
 ```
 ❌ arquetipo cósmico
 ❌ portal
@@ -410,18 +437,45 @@ if (lunasCount !== 3) {
 ❌ concentración de poder (en mayúsculas)
 ```
 
+#### Imperativas Directivas (NUEVO):
+```
+❌ haz
+❌ debes
+❌ tienes que
+❌ evita
+❌ es importante que
+❌ necesitas hacer
+❌ no deberías
+```
+
 ### Frases Recomendadas
 
-**Alternativas funcionales:**
+**Alternativas funcionales (tono observador):**
 
+#### Para Carta Natal (patrones estables):
 ```
-✅ "Tu proceso de desarrollo..."
-✅ "Esta configuración te pide..."
+✅ "Tu proceso de desarrollo está ligado a..."
 ✅ "Desde temprano, puedes haber sentido..."
-✅ "Esta posición activa..."
-✅ "Conviene practicar..."
-✅ "Esta capacidad se manifiesta..."
+✅ "Esta configuración activa..."
+✅ "Esta capacidad se manifiesta cuando..."
 ✅ "Tu patrón habitual es..."
+```
+
+#### Para Solar Return (dinámicas temporales):
+```
+✅ "Este año se activa..."
+✅ "Este periodo funciona mejor cuando..."
+✅ "Cuando haces X, fluye..."
+✅ "Si fuerzas Y, aparece tensión..."
+✅ "Este año invita a..."
+✅ "Se nota en..."
+```
+
+#### Estructura de Consecuencias (NUEVO):
+```
+✅ "Si escuchas [X], [consecuencia positiva]. Si fuerzas [Y], [consecuencia negativa]."
+✅ "Cuando te permites [acción], [resultado]. Cuando resistes [acción], [tensión]."
+✅ "Funciona mejor cuando [condición]. Aparece fricción cuando [condición opuesta]."
 ```
 
 ---
