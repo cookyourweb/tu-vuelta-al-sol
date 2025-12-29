@@ -15,6 +15,9 @@ import {
   PlanetIndividualSRInterpretation,
 } from '@/types/astrology/interpretation';
 
+// ⏱️ Configurar timeout para Vercel (60 segundos en plan Pro)
+export const maxDuration = 60;
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });

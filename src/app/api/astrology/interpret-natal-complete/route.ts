@@ -13,6 +13,9 @@ import {
 } from '@/services/cleanNatalInterpretationService';
 import type { ChartData, UserProfile } from '@/utils/prompts/natalChartPrompt_clean';
 
+// ⏱️ Configurar timeout para Vercel (60 segundos en plan Pro)
+export const maxDuration = 60;
+
 // =============================================================================
 // GET - Retrieve existing complete interpretation
 // =============================================================================

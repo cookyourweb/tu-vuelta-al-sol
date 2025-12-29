@@ -52,6 +52,7 @@ export default function SolarReturnPage() {
   const [natalChart, setNatalChart] = useState<any>(null);
   const [birthData, setBirthData] = useState<any>(null);
   const [solarReturnData, setSolarReturnData] = useState<any>(null);
+  const [solarReturnInterpretation, setSolarReturnInterpretation] = useState<any>(null); // ⭐ NUEVO: para comparaciones_planetarias
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [regenerating, setRegenerating] = useState(false);
@@ -98,10 +99,7 @@ export default function SolarReturnPage() {
 
 
   const loadAllData = async () => {
-    console.log('🚀 ===== INICIO loadAllData =====');
-
     if (!user?.uid) {
-      console.error('❌ No hay usuario autenticado');
       return;
     }
 
@@ -110,7 +108,6 @@ export default function SolarReturnPage() {
 
     try {
       // STEP 1: Load Birth Data
-      console.log('📋 Paso 1: Cargando Birth Data...');
       const birthResponse = await fetch(`/api/birth-data?userId=${user?.uid}`);
 
       if (!birthResponse.ok) {
@@ -118,7 +115,7 @@ export default function SolarReturnPage() {
       }
 
       const birthResult = await birthResponse.json();
-      
+
       if (!birthResult.success || !birthResult.data) {
         throw new Error('No se encontraron datos de nacimiento');
       }
@@ -126,7 +123,6 @@ export default function SolarReturnPage() {
       setBirthData(birthResult.data);
 
       // STEP 2: Load NATAL Chart
-      console.log('📋 Paso 2: Cargando Carta Natal...');
       const natalResponse = await fetch(`/api/charts/natal?userId=${user?.uid}`);
 
       if (!natalResponse.ok) {
@@ -142,7 +138,6 @@ export default function SolarReturnPage() {
       setNatalChart(natalResult.natalChart);
 
       // STEP 3: Load Solar Return
-      console.log('📋 Paso 3: Cargando Solar Return...');
       const srResponse = await fetch(`/api/charts/solar-return?userId=${user?.uid}`);
 
       if (!srResponse.ok) {
@@ -159,10 +154,28 @@ export default function SolarReturnPage() {
         setChartData(null);
       }
 
-      console.log('✅ ===== FIN loadAllData EXITOSO =====');
+      // STEP 4: Load Solar Return Interpretation (for comparaciones_planetarias)
+      try {
+        const token = await user?.getIdToken();
+        const srInterpretationResponse = await fetch(`/api/astrology/interpret-solar-return?userId=${user?.uid}&year=${new Date().getFullYear()}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (srInterpretationResponse.ok) {
+          const srInterpretationResult = await srInterpretationResponse.json();
+          if (srInterpretationResult.success) {
+            const interpretation = srInterpretationResult.interpretation || srInterpretationResult.data;
+            setSolarReturnInterpretation(interpretation);
+          }
+        }
+      } catch (error) {
+        // No es crítico, solo no habrá comparaciones en tooltips
+      }
 
     } catch (error) {
-      console.error('❌ Error en loadAllData:', error);
       setError(error instanceof Error ? error.message : 'Error desconocido');
     } finally {
       setLoading(false);
@@ -443,6 +456,31 @@ export default function SolarReturnPage() {
                   className="flex-1 max-w-md"
                 />
 
+                {/* 🧪 BOTÓN DE PRUEBA - SEMANA MODELO */}
+                <button
+                  onClick={async () => {
+                    try {
+                      console.log('🧪 Probando endpoint de semana modelo...');
+                      const response = await fetch(`/api/astrology/generate-week-model?userId=${user?.uid}&year=${new Date().getFullYear()}`);
+                      const data = await response.json();
+                      console.log('✅ Semana modelo generada:', data);
+
+                      if (data.success) {
+                        alert('✅ Semana modelo generada! Revisa la consola para ver el resultado completo.');
+                      } else {
+                        alert('❌ Error: ' + data.error);
+                      }
+                    } catch (error) {
+                      console.error('❌ Error:', error);
+                      alert('❌ Error al generar semana modelo');
+                    }
+                  }}
+                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-600/30 to-yellow-600/30 border border-orange-400/50 text-orange-200 rounded-xl font-semibold text-sm hover:bg-orange-600/40 hover:text-white transition-all duration-300"
+                >
+                  <span className="text-lg">🧪</span>
+                  Probar Semana Modelo
+                </button>
+
                 <button
                   onClick={() => {
                     const timelineSection = document.getElementById('linea-tiempo');
@@ -502,6 +540,7 @@ export default function SolarReturnPage() {
                   onCloseDrawer={closeDrawer}
                   drawerOpen={drawerOpen}
                   userId={user?.uid}
+                  solarReturnInterpretation={solarReturnInterpretation} // ⭐ NUEVO: para comparaciones en tooltips
                 />
               </div>
             </div>

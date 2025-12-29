@@ -1,11 +1,11 @@
 //src/components/astrology/InterpretationDrawer.tsx
 
 // =============================================================================
-// 🎨 DRAWER DE INTERPRETACIONES TRIPLE FUSIONADO
+// 🎨 DRAWER DE INTERPRETACIONES ASTROLÓGICAS
 // InterpretationDrawer.tsx
 // =============================================================================
 // Componente que muestra la interpretación completa de planetas/aspectos
-// con lenguaje educativo + poderoso + impacto real
+// con lenguaje educativo + observador + impacto real
 // =============================================================================
 
 'use client';
@@ -19,7 +19,7 @@ import React, { useEffect } from 'react';
 interface DrawerContent {
   titulo: string;
   educativo: string;
-  poderoso: string;
+  observador: string;
   impacto_real: string;
   sombras: {
     nombre: string;
@@ -119,7 +119,7 @@ export const InterpretationDrawer: React.FC<InterpretationDrawerProps> = ({
               <span className="text-2xl">📚</span> QUÉ SIGNIFICA
             </h3>
             <div className="prose prose-invert max-w-none">
-              {content.educativo.split('\n\n').map((parrafo: string, i: number) => {
+              {(content.educativo || '').split('\n\n').map((parrafo: string, i: number) => {
                 const cleanParrafo = parrafo.trim();
                 if (!cleanParrafo) return null;
 
@@ -137,13 +137,13 @@ export const InterpretationDrawer: React.FC<InterpretationDrawerProps> = ({
 
           <div className="h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent" />
 
-          {/* SECCIÓN PODEROSA */}
+          {/* SECCIÓN OBSERVADORA */}
           <section>
             <h3 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2 text-white">
-              <span className="text-2xl">🔥</span> CÓMO USARLO COMO SUPERPODER
+              <span className="text-2xl">🔥</span> CÓMO SE MANIFIESTA
             </h3>
             <div className="prose prose-invert max-w-none">
-              {content.poderoso.split('\n\n').map((parrafo: string, i: number) => {
+              {(content.observador || '').split('\n\n').map((parrafo: string, i: number) => {
                 const cleanParrafo = parrafo.trim();
                 if (!cleanParrafo) return null;
 

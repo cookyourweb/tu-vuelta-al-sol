@@ -6,6 +6,7 @@ import LoginForm from '@/components/auth/LoginForm';
 import { useRouter } from 'next/navigation';
 import DeleteUserForm from '@/components/admin/DeleteUserForm';
 import BirthDataAdminTable from '@/components/admin/BirthDataAdminTable';
+import ResetInterpretationsForm from '@/components/admin/ResetInterpretationsForm';
 
 interface User {
   uid: string;
@@ -33,15 +34,20 @@ export default function AdminPage() {
       }
 
       try {
+        // Get Firebase ID token
+        console.log('Obteniendo token de Firebase para UID:', user.uid);
+        const token = await user.getIdToken();
+        console.log('Token obtenido exitosamente');
+
         // Fetch user data from API to get the role
         console.log('Verificando rol para UID:', user.uid);
-        const res = await fetch(`/api/users?uid=${user.uid}`);
+        const res = await fetch(`/api/users?uid=${user.uid}&token=${encodeURIComponent(token)}`);
         console.log('Respuesta de API users:', res.status, res.statusText);
-        
+
         if (res.ok) {
           const userData = await res.json();
           console.log('Datos del usuario recibidos:', userData);
-          
+
           if (userData.role === 'admin') {
             console.log('Usuario tiene rol admin, permitiendo acceso');
             setUserRole('admin');
@@ -50,7 +56,8 @@ export default function AdminPage() {
             setUserRole(userData.role); // No redirigir, solo establecer el rol
           }
         } else {
-          console.log('Error en respuesta de API');
+          const errorData = await res.json();
+          console.log('Error en respuesta de API:', errorData);
           setUserRole(null); // No redirigir
         }
       } catch (error) {
@@ -211,6 +218,12 @@ export default function AdminPage() {
           </table>
         </div>
       )}
+
+      {/* Sección de limpieza de interpretaciones */}
+      <div style={{ marginTop: 40 }}>
+        <ResetInterpretationsForm />
+      </div>
+
       <DeleteUserForm />
 
       {/* Sección administración de birth data */}

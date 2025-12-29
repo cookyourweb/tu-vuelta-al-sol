@@ -50,7 +50,7 @@ AHORA:
 - Tu mayor sufrimiento es intentar "ser normal"
 - Tu mayor alegría es expresar tu autenticidad completa`,
 
-      poderoso: `Probablemente has vivido momentos donde sentiste que tu "rareza" era un problema. Quizás intentaste "encajar" y te sentiste asfixiado. Quizás te rechazaron por ser "demasiado diferente".
+      observador: `Probablemente has vivido momentos donde sentiste que tu "rareza" era un problema. Quizás intentaste "encajar" y te sentiste asfixiado. Quizás te rechazaron por ser "demasiado diferente".
 
 AQUÍ ESTÁ LA VERDAD CÓSMICA:
 
@@ -94,7 +94,7 @@ Tu trabajo en esta vida:
 5. USAR TU DIFERENCIA PARA SERVIR
    → Tu rareza no es para ti solo - es para expandir lo que es posible`,
 
-      poetico: `Imagina que naciste con GAFAS DE VER FUTUROS.
+      impacto_real: `Imagina que naciste con GAFAS DE VER FUTUROS.
 
 Mientras la mayoría de las personas caminan mirando al suelo, calculando el siguiente paso seguro en el camino conocido, tú levantas la vista automáticamente y ves CONSTELACIONES DE POSIBILIDADES flotando en el aire que aún no se han manifestado en el plano físico.
 
@@ -186,7 +186,7 @@ AHORA:
 - Tu mayor realización viene de ser puente entre almas
 - A veces te pierdes en el otro y necesitas recordar tus límites`,
 
-      poderoso: `Probablemente has vivido relaciones intensas donde sentiste que "perdías tu identidad" o donde tu sensibilidad fue vista como "demasiado". Quizás te dijeron que eras "codependiente" o que "amabas demasiado".
+      observador: `Probablemente has vivido relaciones intensas donde sentiste que "perdías tu identidad" o donde tu sensibilidad fue vista como "demasiado". Quizás te dijeron que eras "codependiente" o que "amabas demasiado".
 
 AQUÍ ESTÁ LA VERDAD CÓSMICA:
 
@@ -228,7 +228,7 @@ Tu trabajo en esta vida:
 5. USAR TU SENSIBILIDAD como don sagrado
    → No como carga a esconder`,
 
-      poetico: `Imagina que eres un OCÉANO HECHO PERSONA.
+      impacto_real: `Imagina que eres un OCÉANO HECHO PERSONA.
 
 Mientras otros tienen fronteras rígidas entre el yo y el tú, tú eres como el mar que se mezcla suavemente con cada río que llega a ti. No pierdes tu esencia en esa mezcla - la COMPARTES.
 

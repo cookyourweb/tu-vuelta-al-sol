@@ -5,56 +5,56 @@
 // Este ejemplo muestra el estilo y profundidad esperada para todas las interpretaciones
 
 const REFERENCE_EXAMPLE = `
-**EJEMPLO DE LENGUAJE TRIPLE FUSIONADO:**
+**EJEMPLO DE LENGUAJE OBSERVADOR Y PSICOLÓGICO:**
 
 **Sol en Acuario en Casa 1: Autenticidad e Innovación**
 
 📚 **QUÉ SIGNIFICA (Educativo):**
 
-Tu Sol representa tu ESENCIA VITAL - el núcleo de quién eres cuando estás siendo completamente auténtico. Es tu propósito de vida, tu identidad fundamental, lo que viniste a SER en esta encarnación.
+Tu Sol representa tu esencia vital - el núcleo de quién eres cuando estás siendo completamente auténtico. Es tu propósito de vida, tu identidad fundamental.
 
-Acuario es el signo del VISIONARIO INNOVADOR. Rige la originalidad y el pensamiento revolucionario, la libertad individual y colectiva, la conexión con el futuro y las posibilidades, la autenticidad radical y la ruptura de moldes, la mente científica combinada con intuición, y los grupos, comunidades y causas sociales.
+Acuario es el signo que rige la originalidad y el pensamiento innovador, la libertad individual y colectiva, la autenticidad radical, la mente científica combinada con intuición, y la conexión con grupos y causas sociales.
 
-Casa 1 es tu IDENTIDAD EXTERNA - cómo te presentas al mundo, tu personalidad visible, tu forma de iniciar las cosas. Es tu "primera impresión" y tu forma natural de SER sin esfuerzo.
+Casa 1 es tu identidad externa - cómo te presentas al mundo, tu personalidad visible, tu forma de iniciar las cosas. Es tu "primera impresión" y tu forma natural de ser sin esfuerzo.
 
-Tu Sol en Acuario en Casa 1 significa que tu identidad COMPLETA está construida desde la autenticidad radical. No es que "tengas" rasgos acuarianos - es que TU ESENCIA ES acuariana.
+Tu Sol en Acuario en Casa 1 significa que tu identidad está construida desde la autenticidad. Esta configuración se manifiesta en tu forma natural de relacionarte con el mundo.
 
-🔥 **CÓMO USARLO COMO SUPERPODER (Poderoso):**
+🔥 **CÓMO SE MANIFIESTA (Observador):**
 
-Probablemente has vivido momentos donde sentiste que tu "rareza" era un problema. Quizás intentaste "encajar" y te sentiste asfixiado. Quizás te rechazaron por ser "demasiado diferente".
+Puedes haber notado momentos donde tu forma de ser diferente generaba fricción social. Desde temprano, es posible que hayas sentido que "encajar" requería esfuerzo o resultaba agotador.
 
-AQUÍ ESTÁ LA VERDAD CÓSMICA: Esa sensación de "no pertenecer" NO es tu debilidad. Es tu antena cósmica.
+Esta configuración actúa como patrón estable: cuando intentas adaptarte a moldes convencionales, aparece incomodidad o sensación de inautenticidad. Cuando te permites ser genuinamente tú, las cosas fluyen con mayor naturalidad.
 
-Tu sistema nervioso está literalmente sintonizado con frecuencias del FUTURO que otros aún no pueden percibir. Cuando te sientes "fuera de lugar" en situaciones convencionales, no es que algo esté mal contigo - es que estás captando la LIMITACIÓN de ese espacio.
+Tu sistema nervioso responde de manera particular a situaciones que requieren conformidad. No es debilidad - es una señal de que esa situación no resuena con tu configuración natural.
 
 🎯 **IMPACTO REAL EN TU VIDA:**
 
-Esta configuración no se vive en ideas ni teorías: se nota en decisiones concretas.
+Esta configuración no se vive en ideas abstractas - se nota en decisiones concretas.
 
 Durante tu vida:
-- No toleras espacios donde tengas que esconder tu autenticidad
+- Los espacios donde debes ocultar tu autenticidad te resultan insostenibles
 - Tu cuerpo reacciona con incomodidad física cuando intentas "encajar"
-- Atraes situaciones que requieren pensamiento innovador y ruptura de moldes
+- Tiendes a atraer situaciones que requieren pensamiento innovador
 - Las personas te buscan cuando necesitan perspectivas diferentes
-- Te sientes vivo cuando estás creando algo que no existía antes
+- Te sientes más vivo cuando estás creando algo que no existía antes
 
-Esta energía acuariana en Casa 1 no es abstracta: es tu forma automática de respirar en el mundo.
+Esta energía acuariana en Casa 1 no es abstracta: es tu forma automática de funcionar en el mundo.
 
 ⚠️ **SOMBRAS A TRABAJAR:**
 
-1. **Rebeldía sin Causa**: Ser diferente SOLO por ser diferente, sin propósito real.
-   - ❌ Trampa: Rechazar todo lo establecido por principio, sin discernimiento
-   - ✅ Regalo: Ser auténtico porque es tu naturaleza, y elegir conscientemente qué apoyar
+1. **Rebeldía Reactiva**: Ser diferente sin propósito claro, solo por oposición.
+   - ❌ Patrón reactivo: Rechazar todo lo establecido automáticamente, sin discernimiento
+   - ✅ Patrón integrado: Ser auténtico porque es tu naturaleza, elegir conscientemente qué apoyar
 
-2. **Desapego Emocional Excesivo**: Usar tu mente acuariana como ESCUDO contra la vulnerabilidad emocional.
-   - ❌ Trampa: Usar tu 'rareza' como excusa para no conectar profundamente
-   - ✅ Regalo: Ser único Y vulnerable - la verdadera revolución
+2. **Desapego Emocional Defensivo**: Usar tu mente como escudo contra la vulnerabilidad.
+   - ❌ Patrón reactivo: Usar tu diferencia como excusa para no conectar profundamente
+   - ✅ Patrón integrado: Ser único y vulnerable - autenticidad completa
 
 ✨ **SÍNTESIS:**
 
-"Tu rareza es tu revolución. No la escondas, actívala."
+"Tu autenticidad es tu forma natural de funcionar. Reconocerla facilita el camino."
 
-YO SOY el Visionario Auténtico, y mi autenticidad acuariana es mi propósito. No vine a este mundo a encajar en identidades limitantes. Vine a expandir los límites de lo que significa ser humano. Mi diferencia no es mi problema - es mi MISIÓN.
+Mi Sol en Acuario en Casa 1 se manifiesta en mi tendencia a la autenticidad y el pensamiento innovador. Esta configuración es parte de mi identidad, no algo que debo forzar o esconder.
 `;
 
 // =============================================================================
@@ -75,7 +75,7 @@ export interface TripleFusedInterpretation {
   drawer: {
     titulo: string;
     educativo: string;        // Varios párrafos educativos
-    poderoso: string;         // Varios párrafos empoderadores
+    observador: string;       // Varios párrafos observadores (tono psicológico)
     impacto_real: string;     // Manifestación concreta en la vida (reemplaza poetico)
     sombras: {
       nombre: string;
@@ -97,16 +97,16 @@ export interface TripleFusedInterpretation {
 export function generatePlanetTripleFusedPrompt(
   planetName: string,
   sign: string,
-  degree: number,
   house: number,
+  degree: number,
   userProfile: any
 ): string {
   const userName = userProfile.name || 'la persona';
   
   return `
-Eres un astrólogo evolutivo EXPERTO en crear interpretaciones transformacionales.
+Eres un astrólogo profesional especializado en interpretaciones psicológicas profundas.
 
-Tu tarea: Generar una interpretación del **${planetName} en ${sign} Casa ${house}** para ${userName} usando el **LENGUAJE TRIPLE FUSIONADO** (educativo + poderoso + poético).
+Tu tarea: Generar una interpretación del **${planetName} en ${sign} Casa ${house}** para ${userName} usando el **LENGUAJE OBSERVADOR Y PSICOLÓGICO** (educativo + observador + concreto).
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📚 CONTEXTO DEL USUARIO
@@ -141,7 +141,12 @@ Debes responder SOLO con JSON válido en este formato:
   },
   
   "drawer": {
-    "titulo": "String: ${planetName} en ${sign} en Casa ${house}: [Tema principal] (Ej: 'Sol en Acuario en Casa 1: Autenticidad y Visión'). DEBE ser PROFESIONAL, NO poético ni metafórico.",
+    "titulo": "String: ${planetName} en ${sign} en Casa ${house}: [Tema principal].
+    ⚠️ CRÍTICO: Debes usar EXACTAMENTE 'Casa ${house}' con el NÚMERO (ej: 'Casa 1', 'Casa 8', 'Casa 12').
+    ❌ NUNCA escribas 'Casa de Transformación' o 'Casa de Identidad' - siempre usa el NÚMERO.
+    ✅ EJEMPLO CORRECTO: 'Sol en Acuario en Casa 1: Autenticidad y Visión'
+    ✅ EJEMPLO CORRECTO: 'Marte en Tauro en Casa 8: Determinación y Poder'
+    DEBE ser PROFESIONAL, NO poético ni metafórico.",
 
     "educativo": "String largo (múltiples párrafos separados por \\n\\n):
     - Explica qué representa ${planetName} (su arquetipos, función psicológica)
@@ -152,16 +157,16 @@ Debes responder SOLO con JSON válido en este formato:
     - Da ejemplos concretos de comportamientos/situaciones
     - Usa lenguaje claro, sin jerga excesiva
     - Longitud: 6-8 párrafos completos",
-    
-    "poderoso": "String largo (múltiples párrafos separados por \\n\\n):
-    - Conecta con la experiencia vivida de ${userName}
-    - Reencuadra 'problemas' como superpoderes
-    - Explica por qué esta configuración es FORTALEZA
-    - Nombra el don específico que emerge
-    - Da herramientas prácticas para activarlo
-    - Habla directo al corazón, no solo a la mente
-    - Usa MAYÚSCULAS para énfasis en palabras clave
-    - Incluye validación emocional ('Probablemente has sentido...')
+
+    "observador": "String largo (múltiples párrafos separados por \\n\\n):
+    - Describe cómo se manifiesta esta configuración en la experiencia vivida
+    - Observa patrones de comportamiento sin juzgarlos como buenos o malos
+    - Identifica cómo esta configuración afecta decisiones y reacciones
+    - Explica las consecuencias naturales de trabajar con/contra esta energía
+    - Usa lenguaje observador: 'Puedes haber notado...', 'Esta configuración actúa como...'
+    - NO uses imperativos ni lenguaje directivo ('debes', 'tienes que')
+    - NO uses lenguaje épico ('superpoder', 'misión', 'destino')
+    - Incluye validación de experiencia ('Probablemente has sentido...')
     - Longitud: 6-8 párrafos completos",
 
     "impacto_real": "String largo (múltiples párrafos separados por \\n\\n):
@@ -221,14 +226,15 @@ Debes responder SOLO con JSON válido en este formato:
    - Balancea lo académico con lo emocional y lo poético
 
 2. **TONO:**
-   - Empoderador, no predictivo
-   - Honesto sobre sombras, pero constructivo
-   - Inspirador sin ser superficial
-   - Personal y directo
+   - Observador, no directivo ni predictivo
+   - Honesto sobre sombras sin dramatizar
+   - Psicológico sin ser superficial
+   - Personal pero profesional
+   - NO uses lenguaje épico, místico o imperativo
 
 3. **LONGITUD:**
    - Educativo: 6-8 párrafos densos
-   - Poderoso: 6-8 párrafos transformadores
+   - Observador: 6-8 párrafos descriptivos
    - Impacto Real: 4-6 párrafos concretos (profesional, NO poético)
    - Cada párrafo debe tener 4-6 líneas mínimo
 
@@ -261,9 +267,9 @@ export function generateAscendantTripleFusedPrompt(
   const userName = userProfile.name || 'la persona';
   
   return `
-Eres un astrólogo evolutivo EXPERTO en crear interpretaciones transformacionales.
+Eres un astrólogo profesional especializado en interpretaciones psicológicas profundas.
 
-Tu tarea: Generar una interpretación del **Ascendente en ${sign}** para ${userName} usando el **LENGUAJE TRIPLE FUSIONADO** (educativo + poderoso + poético).
+Tu tarea: Generar una interpretación del **Ascendente en ${sign}** para ${userName} usando el **LENGUAJE OBSERVADOR Y PSICOLÓGICO** (educativo + observador + concreto).
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📚 CONTEXTO DEL USUARIO
@@ -315,13 +321,15 @@ Sigue la misma estructura que para planetas, pero adaptada al Ascendente:
     - Cómo influye en su vitalidad y energía
     - Ejemplos concretos de comportamientos
     6-8 párrafos completos",
-    
-    "poderoso": "Explica:
-    - El superpoder de su Ascendente en ${sign}
-    - Cómo usar conscientemente esta máscara
+
+    "observador": "Describe:
+    - Cómo se manifiesta naturalmente su Ascendente en ${sign}
+    - Patrones automáticos en situaciones nuevas
     - La diferencia entre Ascendente auténtico vs defensivo
-    - Cómo su Ascendente protege/sirve a su Sol
-    - Herramientas para activarlo positivamente
+    - Cómo su Ascendente interactúa con su esencia solar
+    - Consecuencias de resistir vs aceptar esta energía
+    - NO uses lenguaje directivo ni épico
+    - Usa tono observador y descriptivo
     6-8 párrafos completos",
 
     "impacto_real": "Manifestación concreta:
@@ -370,9 +378,9 @@ export function generateMidheavenTripleFusedPrompt(
   const userName = userProfile.name || 'la persona';
   
   return `
-Eres un astrólogo evolutivo EXPERTO en crear interpretaciones transformacionales.
+Eres un astrólogo profesional especializado en interpretaciones psicológicas profundas.
 
-Tu tarea: Generar una interpretación del **Medio Cielo en ${sign}** para ${userName} usando el **LENGUAJE TRIPLE FUSIONADO** (educativo + poderoso + poético).
+Tu tarea: Generar una interpretación del **Medio Cielo en ${sign}** para ${userName} usando el **LENGUAJE OBSERVADOR Y PSICOLÓGICO** (educativo + observador + concreto).
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📚 CONTEXTO DEL USUARIO
@@ -422,13 +430,15 @@ Es el punto más alto del cielo en tu carta - simboliza tu culminación.
     - Qué tipo de liderazgo ejerce
     - Ejemplos específicos de profesiones/industrias
     6-8 párrafos completos",
-    
-    "poderoso": "Explica:
-    - Su verdadera contribución al mundo (más allá de 'trabajo')
-    - El legado que está destinada a dejar
-    - Cómo activar su autoridad interna
-    - La diferencia entre 'éxito' y 'realización' para ella
-    - Herramientas para manifestar su MC
+
+    "observador": "Describe:
+    - Cómo se manifiesta su contribución natural al mundo
+    - Patrones vocacionales que tienden a repetirse
+    - La relación entre su autoridad interna y externa
+    - La diferencia entre 'éxito externo' y 'realización personal'
+    - Consecuencias de alinearse/desalinearse con esta vocación
+    - NO uses lenguaje directivo ni sobre destino/misión
+    - Usa tono observador y descriptivo
     6-8 párrafos completos",
 
     "impacto_real": "Manifestación concreta:
@@ -491,9 +501,9 @@ export function generateAspectTripleFusedPrompt(
   const isExact = orb < 1;
   
   return `
-Eres un astrólogo evolutivo EXPERTO en crear interpretaciones transformacionales.
+Eres un astrólogo profesional especializado en interpretaciones psicológicas profundas.
 
-Tu tarea: Generar una interpretación del aspecto **${planet1} ${aspectName} ${planet2}** para ${userName} usando el **LENGUAJE TRIPLE FUSIONADO**.
+Tu tarea: Generar una interpretación del aspecto **${planet1} ${aspectName} ${planet2}** para ${userName} usando el **LENGUAJE OBSERVADOR Y PSICOLÓGICO**.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📚 CONTEXTO DEL USUARIO
@@ -536,13 +546,15 @@ ${getAspectDescription(aspectName)}
     - Ejemplos concretos de cómo se manifiesta
     - Por qué este aspecto es significativo
     6-8 párrafos completos",
-    
-    "poderoso": "Explica:
-    - El superpoder que emerge de esta tensión/armonía
-    - Cómo usar este aspecto conscientemente
-    - Por qué esta 'conversación interna' es su FUERZA
-    - Herramientas para integrar ambos planetas
-    - Ejemplos de personas famosas con este aspecto
+
+    "observador": "Describe:
+    - Cómo se manifiesta esta tensión/armonía en la práctica
+    - Patrones que emergen de esta configuración
+    - La dinámica interna entre ambas energías
+    - Consecuencias de integrar vs fragmentar estas energías
+    - Ejemplos de cómo se nota en decisiones cotidianas
+    - NO uses lenguaje épico ni sobre superpoderes/fuerza
+    - Usa tono observador y descriptivo
     6-8 párrafos completos",
 
     "impacto_real": "Manifestación concreta:

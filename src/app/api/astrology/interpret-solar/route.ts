@@ -9,6 +9,9 @@ import {
   type UserProfile
 } from '@/utils/prompts/disruptivePrompts';
 
+// ⏱️ Configurar timeout para Vercel (60 segundos en plan Pro)
+export const maxDuration = 60;
+
 // Cache en memoria para evitar regenerar interpretaciones duplicadas
 const interpretationCache = new Map<string, { interpretation: any; timestamp: number }>();
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 horas

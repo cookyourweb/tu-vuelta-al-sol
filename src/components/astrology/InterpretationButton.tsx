@@ -489,25 +489,26 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           // ✅ Only solar-return and progressed reach this point (natal uses chunks)
           if (type === 'solar-return') {
             interpretationData = {
+              // ⭐ NUEVA ESTRUCTURA DE 3 CAPAS (Natal → Solar → Acción)
+              apertura_anual: rawInterpretation.apertura_anual,
+              como_se_vive_siendo_tu: rawInterpretation.como_se_vive_siendo_tu,
+              comparaciones_planetarias: rawInterpretation.comparaciones_planetarias,
+              linea_tiempo_anual: rawInterpretation.linea_tiempo_anual,
+              sombras_del_ano: rawInterpretation.sombras_del_ano,
+              claves_integracion: rawInterpretation.claves_integracion,
+              calendario_lunar: rawInterpretation.calendario_lunar_anual,
+              // ⭐ FALLBACK: Mantener soporte para formato antiguo si existe
               esencia_revolucionaria: rawInterpretation.esencia_revolucionaria_anual,
               proposito_vida: rawInterpretation.proposito_vida_anual,
-              tema_anual: rawInterpretation.tema_central_del_anio,
+              tema_anual: rawInterpretation.tema_central_del_anio || rawInterpretation.apertura_anual?.tema_central,
               analisis_tecnico: rawInterpretation.analisis_tecnico_profesional,
               plan_accion: rawInterpretation.plan_accion,
-              calendario_lunar: rawInterpretation.calendario_lunar_anual,
               declaracion_poder: rawInterpretation.declaracion_poder_anual,
               advertencias: rawInterpretation.advertencias,
               eventos_clave: rawInterpretation.eventos_clave_del_anio,
               insights_transformacionales: rawInterpretation.insights_transformacionales,
               rituales_recomendados: rawInterpretation.rituales_recomendados,
-              integracion_final: rawInterpretation.integracion_final,
-              // ✅ ADD MISSING SECTIONS FOR COMPLETE SOLAR RETURN DISPLAY
-              formacion_temprana: rawInterpretation.formacion_temprana,
-              patrones_psicologicos: rawInterpretation.patrones_psicologicos,
-              planetas_profundos: rawInterpretation.planetas_profundos,
-              angulos_vitales: rawInterpretation.angulos_vitales,
-              nodos_lunares: rawInterpretation.nodos_lunares,
-              pregunta_final_reflexion: rawInterpretation.pregunta_final_reflexion
+              integracion_final: rawInterpretation.integracion_final
             };
           } else {
             interpretationData = rawInterpretation;
@@ -1056,120 +1057,6 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           </div>
         )}
 
-        {/* ✅ NUEVA SECCIÓN: FORMACIÓN TEMPRANA */}
-        {data.formacion_temprana && (
-          <div className="bg-gradient-to-br from-cyan-900/40 to-teal-900/40 rounded-2xl p-8 border border-cyan-400/30">
-            <h4 className="text-cyan-100 font-bold text-xl mb-6 flex items-center gap-3">
-              <Star className="w-8 h-8 text-cyan-300" />
-              Formación Temprana (Casa Lunar, Saturnina, Venusina)
-            </h4>
-            <div className="space-y-6">
-              {data.formacion_temprana.casa_lunar && (
-                <div className="bg-cyan-800/30 rounded-lg p-4">
-                  <h5 className="text-cyan-200 font-semibold mb-2">🌙 Casa Lunar (Infancia y Raíces)</h5>
-                  {typeof data.formacion_temprana.casa_lunar === 'string' ? (
-                    <p className="text-cyan-50 whitespace-pre-line">{extractTextFromTooltipDrawer(data.formacion_temprana.casa_lunar)}</p>
-                  ) : data.formacion_temprana.casa_lunar.drawer || data.formacion_temprana.casa_lunar.tooltip ? (
-                    // ✅ Handle new {tooltip, drawer} structure
-                    <p className="text-cyan-50 whitespace-pre-line">
-                      {extractTextFromTooltipDrawer(data.formacion_temprana.casa_lunar)}
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
-                      {data.formacion_temprana.casa_lunar.signo_casa && (
-                        <p className="text-cyan-200 text-sm font-semibold">
-                          📍 {extractTextFromTooltipDrawer(data.formacion_temprana.casa_lunar.signo_casa)}
-                        </p>
-                      )}
-                      {data.formacion_temprana.casa_lunar.interpretacion && (
-                        <p className="text-cyan-50 text-sm">
-                          {extractTextFromTooltipDrawer(data.formacion_temprana.casa_lunar.interpretacion)}
-                        </p>
-                      )}
-                      {data.formacion_temprana.casa_lunar.influencia && (
-                        <div className="bg-cyan-700/30 rounded-lg p-2 mt-2">
-                          <p className="text-cyan-200 font-semibold text-xs mb-1">
-                            🌟 Influencia:
-                          </p>
-                          <p className="text-cyan-50 text-xs">
-                            {extractTextFromTooltipDrawer(data.formacion_temprana.casa_lunar.influencia)}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-              {data.formacion_temprana.casa_saturnina && (
-                <div className="bg-cyan-800/30 rounded-lg p-4">
-                  <h5 className="text-cyan-200 font-semibold mb-2">🪐 Casa Saturnina (Lecciones y Disciplina)</h5>
-                  {typeof data.formacion_temprana.casa_saturnina === 'string' ? (
-                    <p className="text-cyan-50 whitespace-pre-line">{extractTextFromTooltipDrawer(data.formacion_temprana.casa_saturnina)}</p>
-                  ) : data.formacion_temprana.casa_saturnina.drawer || data.formacion_temprana.casa_saturnina.tooltip ? (
-                    <p className="text-cyan-50 whitespace-pre-line">
-                      {extractTextFromTooltipDrawer(data.formacion_temprana.casa_saturnina)}
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
-                      {data.formacion_temprana.casa_saturnina.signo_casa && (
-                        <p className="text-cyan-200 text-sm font-semibold">
-                          📍 {extractTextFromTooltipDrawer(data.formacion_temprana.casa_saturnina.signo_casa)}
-                        </p>
-                      )}
-                      {data.formacion_temprana.casa_saturnina.interpretacion && (
-                        <p className="text-cyan-50 text-sm">
-                          {extractTextFromTooltipDrawer(data.formacion_temprana.casa_saturnina.interpretacion)}
-                        </p>
-                      )}
-                      {data.formacion_temprana.casa_saturnina.leccion && (
-                        <div className="bg-cyan-700/30 rounded-lg p-2 mt-2">
-                          <p className="text-cyan-200 font-semibold text-xs mb-1">
-                            📚 Lección:
-                          </p>
-                          <p className="text-cyan-50 text-xs">
-                            {extractTextFromTooltipDrawer(data.formacion_temprana.casa_saturnina.leccion)}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-              {data.formacion_temprana.casa_venusina && (
-                <div className="bg-cyan-800/30 rounded-lg p-4">
-                  <h5 className="text-cyan-200 font-semibold mb-2">💕 Casa Venusina (Amor y Valores)</h5>
-                  {typeof data.formacion_temprana.casa_venusina === 'string' ? (
-                    <p className="text-cyan-50 whitespace-pre-line">{extractTextFromTooltipDrawer(data.formacion_temprana.casa_venusina)}</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {data.formacion_temprana.casa_venusina.signo_casa && (
-                        <p className="text-cyan-200 text-sm font-semibold">
-                          📍 {extractTextFromTooltipDrawer(data.formacion_temprana.casa_venusina.signo_casa)}
-                        </p>
-                      )}
-                      {data.formacion_temprana.casa_venusina.interpretacion && (
-                        <p className="text-cyan-50 text-sm">
-                          {extractTextFromTooltipDrawer(data.formacion_temprana.casa_venusina.interpretacion)}
-                        </p>
-                      )}
-                      {data.formacion_temprana.casa_venusina.valores && (
-                        <div className="bg-cyan-700/30 rounded-lg p-2 mt-2">
-                          <p className="text-cyan-200 font-semibold text-xs mb-1">
-                            💎 Valores:
-                          </p>
-                          <p className="text-cyan-50 text-xs">
-                            {extractTextFromTooltipDrawer(data.formacion_temprana.casa_venusina.valores)}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
         {/* ✅ NUEVA SECCIÓN: PATRONES PSICOLÓGICOS */}
         {data.patrones_psicologicos && (
           <div className="bg-gradient-to-br from-indigo-900/40 to-purple-900/40 rounded-2xl p-8 border border-indigo-400/30">
@@ -1409,6 +1296,116 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
           </div>
         )}
 
+        {/* ✅ SOLAR RETURN: APERTURA ANUAL (3 CAPAS) */}
+        {data.apertura_anual && type === 'solar-return' && (
+          <div className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 rounded-2xl p-8 border border-amber-400/30">
+            <h3 className="text-3xl font-bold text-white text-center mb-6">
+              🌅 Apertura del Año Solar
+            </h3>
+            {data.apertura_anual.tema_central && (
+              <div className="mb-6 text-center">
+                <p className="text-amber-100 text-2xl font-bold italic">
+                  "{extractTextFromTooltipDrawer(data.apertura_anual.tema_central)}"
+                </p>
+              </div>
+            )}
+            {data.apertura_anual.clima_general && (
+              <div className="mb-4">
+                <p className="text-amber-50 text-lg leading-relaxed">
+                  {extractTextFromTooltipDrawer(data.apertura_anual.clima_general)}
+                </p>
+              </div>
+            )}
+            {data.apertura_anual.conexion_natal && (
+              <div className="bg-amber-800/30 rounded-lg p-4 mt-4">
+                <h4 className="text-amber-200 font-semibold mb-2">🔗 Conexión con tu Carta Natal</h4>
+                <p className="text-amber-50">
+                  {extractTextFromTooltipDrawer(data.apertura_anual.conexion_natal)}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ✅ SOLAR RETURN: CÓMO SE VIVE SIENDO TÚ (3 CAPAS) */}
+        {data.como_se_vive_siendo_tu && type === 'solar-return' && (
+          <div className="bg-gradient-to-br from-indigo-900/40 to-purple-900/40 rounded-2xl p-8 border border-indigo-400/30">
+            <h3 className="text-3xl font-bold text-white text-center mb-6">
+              🎭 Cómo Se Vive Siendo Tú Este Año
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {data.como_se_vive_siendo_tu.facilidad && (
+                <div className="bg-green-900/30 rounded-lg p-4">
+                  <h4 className="text-green-200 font-semibold mb-2">✅ Lo que fluye naturalmente</h4>
+                  <p className="text-green-50">
+                    {extractTextFromTooltipDrawer(data.como_se_vive_siendo_tu.facilidad)}
+                  </p>
+                </div>
+              )}
+              {data.como_se_vive_siendo_tu.incomodidad && (
+                <div className="bg-orange-900/30 rounded-lg p-4">
+                  <h4 className="text-orange-200 font-semibold mb-2">⚠️ Lo que te incomoda</h4>
+                  <p className="text-orange-50">
+                    {extractTextFromTooltipDrawer(data.como_se_vive_siendo_tu.incomodidad)}
+                  </p>
+                </div>
+              )}
+              {data.como_se_vive_siendo_tu.reflejos_obsoletos && (
+                <div className="bg-red-900/30 rounded-lg p-4">
+                  <h4 className="text-red-200 font-semibold mb-2">🔄 Reflejos obsoletos a soltar</h4>
+                  <p className="text-red-50">
+                    {extractTextFromTooltipDrawer(data.como_se_vive_siendo_tu.reflejos_obsoletos)}
+                  </p>
+                </div>
+              )}
+              {data.como_se_vive_siendo_tu.actitud_nueva && (
+                <div className="bg-blue-900/30 rounded-lg p-4">
+                  <h4 className="text-blue-200 font-semibold mb-2">✨ Actitud nueva a integrar</h4>
+                  <p className="text-blue-50">
+                    {extractTextFromTooltipDrawer(data.como_se_vive_siendo_tu.actitud_nueva)}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ✅ SOLAR RETURN: SOMBRAS DEL AÑO (3 CAPAS) */}
+        {data.sombras_del_ano && type === 'solar-return' && (
+          <div className="bg-gradient-to-br from-slate-900/40 to-gray-900/40 rounded-2xl p-8 border border-slate-400/30">
+            <h3 className="text-3xl font-bold text-white text-center mb-6">
+              ⚠️ Sombras del Año
+            </h3>
+            <div className="space-y-3">
+              {data.sombras_del_ano.map((sombra: string, i: number) => (
+                <div key={i} className="bg-slate-800/50 rounded-lg p-4 border-l-4 border-yellow-500">
+                  <p className="text-slate-100">
+                    {extractTextFromTooltipDrawer(sombra)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ✅ SOLAR RETURN: CLAVES DE INTEGRACIÓN (3 CAPAS) */}
+        {data.claves_integracion && type === 'solar-return' && (
+          <div className="bg-gradient-to-br from-emerald-900/40 to-teal-900/40 rounded-2xl p-8 border border-emerald-400/30">
+            <h3 className="text-3xl font-bold text-white text-center mb-6">
+              🔑 Claves de Integración
+            </h3>
+            <div className="space-y-3">
+              {data.claves_integracion.map((clave: string, i: number) => (
+                <div key={i} className="bg-emerald-800/50 rounded-lg p-4 border-l-4 border-emerald-500">
+                  <p className="text-emerald-50">
+                    {extractTextFromTooltipDrawer(clave)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* ✅ SOLAR RETURN: CALENDARIO LUNAR ANUAL */}
         {data.calendario_lunar && type === 'solar-return' && (() => {
           // ✅ Calcular año de retorno solar dinámicamente
@@ -1627,6 +1624,57 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
                   </div>
                 );
               })}
+            </div>
+          </div>
+        )}
+
+        {/* ✅ SOLAR RETURN: LÍNEA DE TIEMPO ANUAL (3 CAPAS) */}
+        {data.linea_tiempo_anual && type === 'solar-return' && (
+          <div className="bg-gradient-to-br from-cyan-900/40 to-blue-900/40 rounded-2xl p-8 border border-cyan-400/30">
+            <h3 className="text-3xl font-bold text-white text-center mb-8">
+              📅 Línea de Tiempo Anual
+            </h3>
+            <div className="space-y-6">
+              {data.linea_tiempo_anual.mes_1_activacion && (
+                <div className="bg-cyan-800/30 rounded-xl p-6 border-l-4 border-cyan-500">
+                  <h4 className="text-cyan-200 font-bold text-lg mb-3">Mes 1 - Activación</h4>
+                  <p className="text-cyan-50">
+                    {extractTextFromTooltipDrawer(data.linea_tiempo_anual.mes_1_activacion.evento || data.linea_tiempo_anual.mes_1_activacion)}
+                  </p>
+                </div>
+              )}
+              {data.linea_tiempo_anual.mes_3_4_primer_desafio && (
+                <div className="bg-orange-800/30 rounded-xl p-6 border-l-4 border-orange-500">
+                  <h4 className="text-orange-200 font-bold text-lg mb-3">Meses 3-4 - Primer Desafío</h4>
+                  <p className="text-orange-50">
+                    {extractTextFromTooltipDrawer(data.linea_tiempo_anual.mes_3_4_primer_desafio.evento || data.linea_tiempo_anual.mes_3_4_primer_desafio)}
+                  </p>
+                </div>
+              )}
+              {data.linea_tiempo_anual.mes_6_7_punto_medio && (
+                <div className="bg-purple-800/30 rounded-xl p-6 border-l-4 border-purple-500">
+                  <h4 className="text-purple-200 font-bold text-lg mb-3">Meses 6-7 - Punto Medio</h4>
+                  <p className="text-purple-50">
+                    {extractTextFromTooltipDrawer(data.linea_tiempo_anual.mes_6_7_punto_medio.evento || data.linea_tiempo_anual.mes_6_7_punto_medio)}
+                  </p>
+                </div>
+              )}
+              {data.linea_tiempo_anual.mes_9_10_cosecha && (
+                <div className="bg-green-800/30 rounded-xl p-6 border-l-4 border-green-500">
+                  <h4 className="text-green-200 font-bold text-lg mb-3">Meses 9-10 - Cosecha</h4>
+                  <p className="text-green-50">
+                    {extractTextFromTooltipDrawer(data.linea_tiempo_anual.mes_9_10_cosecha.evento || data.linea_tiempo_anual.mes_9_10_cosecha)}
+                  </p>
+                </div>
+              )}
+              {data.linea_tiempo_anual.mes_12_cierre && (
+                <div className="bg-indigo-800/30 rounded-xl p-6 border-l-4 border-indigo-500">
+                  <h4 className="text-indigo-200 font-bold text-lg mb-3">Mes 12 - Cierre</h4>
+                  <p className="text-indigo-50">
+                    {extractTextFromTooltipDrawer(data.linea_tiempo_anual.mes_12_cierre.evento || data.linea_tiempo_anual.mes_12_cierre)}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         )}

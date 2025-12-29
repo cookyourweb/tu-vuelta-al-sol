@@ -3,16 +3,23 @@ import connectDB from '@/lib/db';
 import Interpretation from '@/models/Interpretation';
 
 /**
- * Admin endpoint to reset all interpretations of a specific chart type
+ * Admin endpoint to reset interpretations
  * This forces regeneration with the new prompt structure
  *
  * POST /api/admin/reset-interpretations
- * Body: { chartType: 'natal' | 'solar-return' | 'all' }
+ * Body: {
+ *   chartType: 'natal' | 'solar-return' | 'all',
+ *   userId?: string  // Optional: reset only for specific user
+ * }
+ *
+ * Examples:
+ * - Reset all natal: { chartType: 'natal' }
+ * - Reset for user: { chartType: 'natal', userId: 'abc123' }
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { chartType } = body;
+    const { chartType, userId } = body;
 
     if (!chartType || !['natal', 'solar-return', 'all'].includes(chartType)) {
       return NextResponse.json({
@@ -23,22 +30,32 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     let result;
+    let filter: any = {};
 
-    if (chartType === 'all') {
-      // Delete all interpretations
-      result = await Interpretation.deleteMany({});
-    } else {
-      // Delete specific chart type
-      result = await Interpretation.deleteMany({ chartType });
+    // Build filter
+    if (chartType !== 'all') {
+      filter.chartType = chartType;
     }
 
-    console.log(`✅ Reset complete: ${result.deletedCount} ${chartType} interpretations deleted`);
+    if (userId) {
+      filter.userId = userId;
+    }
+
+    // Delete interpretations
+    result = await Interpretation.deleteMany(filter);
+
+    const message = userId
+      ? `${result.deletedCount} ${chartType} interpretations deleted for user ${userId}`
+      : `${result.deletedCount} ${chartType} interpretations deleted`;
+
+    console.log(`✅ Reset complete: ${message}`);
 
     return NextResponse.json({
       success: true,
       chartType,
+      userId: userId || 'all',
       deletedCount: result.deletedCount,
-      message: `${result.deletedCount} ${chartType} interpretations deleted. Next generation will use new structure.`
+      message: `${message}. Next generation will use new structure.`
     });
 
   } catch (error) {

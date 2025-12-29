@@ -9,6 +9,9 @@ import connectDB from '@/lib/db';
 import BirthData, { castBirthData } from '@/models/BirthData';
 import Chart from '@/models/Chart';
 
+// ⏱️ Configurar timeout para Vercel (60 segundos en plan Pro)
+export const maxDuration = 60;
+
 /**
  * Calcular timezone offset
  */
