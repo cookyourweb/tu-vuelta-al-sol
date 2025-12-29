@@ -141,7 +141,12 @@ Debes responder SOLO con JSON válido en este formato:
   },
   
   "drawer": {
-    "titulo": "String: ${planetName} en ${sign} en Casa ${house}: [Tema principal] (Ej: 'Sol en Acuario en Casa 1: Autenticidad y Visión'). DEBE ser PROFESIONAL, NO poético ni metafórico.",
+    "titulo": "String: ${planetName} en ${sign} en Casa ${house}: [Tema principal].
+    ⚠️ CRÍTICO: Debes usar EXACTAMENTE 'Casa ${house}' con el NÚMERO (ej: 'Casa 1', 'Casa 8', 'Casa 12').
+    ❌ NUNCA escribas 'Casa de Transformación' o 'Casa de Identidad' - siempre usa el NÚMERO.
+    ✅ EJEMPLO CORRECTO: 'Sol en Acuario en Casa 1: Autenticidad y Visión'
+    ✅ EJEMPLO CORRECTO: 'Marte en Tauro en Casa 8: Determinación y Poder'
+    DEBE ser PROFESIONAL, NO poético ni metafórico.",
 
     "educativo": "String largo (múltiples párrafos separados por \\n\\n):
     - Explica qué representa ${planetName} (su arquetipos, función psicológica)
