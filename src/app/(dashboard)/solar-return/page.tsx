@@ -456,6 +456,31 @@ export default function SolarReturnPage() {
                   className="flex-1 max-w-md"
                 />
 
+                {/* 🧪 BOTÓN DE PRUEBA - SEMANA MODELO */}
+                <button
+                  onClick={async () => {
+                    try {
+                      console.log('🧪 Probando endpoint de semana modelo...');
+                      const response = await fetch(`/api/astrology/generate-week-model?userId=${user?.uid}&year=${new Date().getFullYear()}`);
+                      const data = await response.json();
+                      console.log('✅ Semana modelo generada:', data);
+
+                      if (data.success) {
+                        alert('✅ Semana modelo generada! Revisa la consola para ver el resultado completo.');
+                      } else {
+                        alert('❌ Error: ' + data.error);
+                      }
+                    } catch (error) {
+                      console.error('❌ Error:', error);
+                      alert('❌ Error al generar semana modelo');
+                    }
+                  }}
+                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-600/30 to-yellow-600/30 border border-orange-400/50 text-orange-200 rounded-xl font-semibold text-sm hover:bg-orange-600/40 hover:text-white transition-all duration-300"
+                >
+                  <span className="text-lg">🧪</span>
+                  Probar Semana Modelo
+                </button>
+
                 <button
                   onClick={() => {
                     const timelineSection = document.getElementById('linea-tiempo');
