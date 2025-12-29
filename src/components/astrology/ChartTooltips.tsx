@@ -694,6 +694,15 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                 try {
                   console.log('🎯 Generando planeta individual:', planet.name);
 
+                  // 🐛 DEBUG: Log planet object before sending
+                  console.log('🐛 [ChartTooltips] Planet object antes de enviar:', {
+                    name: planet.name,
+                    house: planet.house,
+                    houseNumber: planet.houseNumber,
+                    housePosition: planet.housePosition,
+                    degree: planet.degree
+                  });
+
                   // ⭐ LLAMAR AL NUEVO ENDPOINT
                   const response = await fetch('/api/astrology/interpret-planet', {
                     method: 'POST',
