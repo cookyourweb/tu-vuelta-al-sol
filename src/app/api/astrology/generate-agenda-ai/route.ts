@@ -15,6 +15,9 @@ import {
   InterpretationLevel
 } from '@/services/eventInterpretationService';
 
+// ⏱️ Configurar timeout para Vercel (60 segundos en plan Pro)
+export const maxDuration = 60;
+
 // INTERFACES COMPLETAS
 interface AgendaRequest {
   datos_usuario: {
