@@ -97,8 +97,8 @@ export interface TripleFusedInterpretation {
 export function generatePlanetTripleFusedPrompt(
   planetName: string,
   sign: string,
-  degree: number,
   house: number,
+  degree: number,
   userProfile: any
 ): string {
   const userName = userProfile.name || 'la persona';
