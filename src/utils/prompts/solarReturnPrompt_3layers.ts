@@ -312,17 +312,19 @@ Cada párrafo debe CONDUCIR A UNA COMPRENSIÓN CLARA, no solo describir.
 ❌ NO uses tono motivacional inspiracional ni frases imperativas
 ❌ NO escribas: "haz", "debes", "tienes que", "evita", "es importante que"
 
-✅ SÍ usa lenguaje observador: "Este año se activa...", "Cuando haces X, fluye...", "Si fuerzas Y, aparece tensión..."
+✅ SÍ usa lenguaje observador: "Este año se activa...", "Durante este periodo...", "A lo largo del año...", "En este ciclo...", "Ahora el foco se desplaza hacia..."
 ✅ SÍ describe cómo se vive la energía, no ordenes qué hacer
 ✅ SÍ muestra consecuencias naturales en lugar de mandatos
 ✅ SÍ contrasta Natal (cómo eres) vs Solar (qué se activa este año)
 ✅ SÍ usa tono psicológico, observador, estratégico
 ✅ Tono adulto, analítico, neutro
+✅ VARIACIÓN LÉXICA: Alterna "validación externa" con "reconocimiento externo", "aprobación externa", "mirada externa"
 
 Ejemplos de TONO CORRECTO (observador):
 "Este año funciona mejor cuando te retiras conscientemente. Si fuerzas visibilidad, aparece agotamiento."
-"Cuando escuchas tu ritmo interno, las decisiones son claras. Si aceleras, la confusión aumenta."
-"Este periodo invita a reordenarte por dentro más que a proyectarte hacia afuera."
+"Durante este periodo, escuchar tu ritmo interno facilita las decisiones. Si aceleras, la confusión aumenta."
+"En este ciclo, reordenarte por dentro tiene más peso que proyectarte hacia afuera."
+"A lo largo del año, las prácticas introspectivas ganan protagonismo."
 
 Ejemplos de TONO INCORRECTO (directivo):
 "Debes retirarte y trabajar en tu interior. Es importante que no busques validación externa."
@@ -359,18 +361,22 @@ INCLUIR acción_clave por cada fase (3-5 palabras accionables).
    - 3 LUNAS CLAVE: Las más importantes para ESTE usuario ESTE año
    - Conectar con temas específicos del SR
 
-### 9. MANDATOS PLANETARIOS (TONO OBSERVADOR):
-Cada planeta debe terminar con mandato_del_ano usando TONO OBSERVADOR, no imperativo:
+### 9. MANDATOS PLANETARIOS (TONO OBSERVADOR - NO IMPERATIVO):
+Cada planeta debe terminar con mandato_del_ano usando TONO OBSERVADOR y SUGERENTE, nunca imperativo:
 
-✅ TONO CORRECTO (observador):
-"Este año, [planeta] funciona mejor cuando X. Si haces Y, fluye. Si fuerzas Z, aparece tensión."
+✅ TONO CORRECTO (observador sugerente):
+"Durante este periodo, [planeta] funciona mejor cuando X. Si te mueves hacia Y, fluye. Si fuerzas Z, aparece tensión."
+"A lo largo del año, puede ser útil X cuando trabajes con [planeta]. Esto favorece Y."
+"En este ciclo, [planeta] responde bien a X. Forzar Y tiende a generar fricción."
 
-❌ TONO INCORRECTO (directivo):
+❌ TONO INCORRECTO (directivo/imperativo):
 "Este año, [planeta] te pide X. Debes hacer Y. Evita Z."
+"Tienes que enfocarte en X. Es importante que hagas Y."
+"Dedica tiempo a X. No descuides Y."
 
-Esto convierte interpretación en guía estratégica basada en consecuencias naturales.
+Esto convierte interpretación en guía estratégica basada en consecuencias naturales, no órdenes.
 
-### 10. DESCRIPCIONES PLANETARIAS - LENGUAJE OBSERVADOR:
+### 10. DESCRIPCIONES PLANETARIAS - LENGUAJE OBSERVADOR Y SUGERENTE:
 Para cada planeta (natal.descripcion, solar_return.descripcion, choque, que_hacer):
 
 ❌ NO ESCRIBAS (tono místico): "Eres un arquitecto del lenguaje cuya misión cósmica es..."
@@ -378,10 +384,18 @@ Para cada planeta (natal.descripcion, solar_return.descripcion, choque, que_hace
 ✅ SÍ ESCRIBE (tono observador): "Tu proceso de maduración está ligado a la expresión creativa y la comunicación. Desde temprano, puedes haber sentido que expresarte libremente no era tan sencillo."
 
 ❌ NO ESCRIBAS (imperativo): "Debes enfocarte en tu mundo interno. Evita buscar validación externa."
-✅ SÍ ESCRIBE (consecuencias): "Este año funciona mejor cuando te enfocas en tu mundo interno. Si buscas validación externa, aparece frustración."
+❌ NO ESCRIBAS (imperativo suave): "Dedica tiempo a la reflexión interna. Prioriza tu mundo interior."
+✅ SÍ ESCRIBE (consecuencias + sugerencia): "Este año funciona mejor cuando te enfocas en tu mundo interno. Si buscas reconocimiento externo, aparece frustración."
+✅ SÍ ESCRIBE (sugerencia no imperativa): "Puede ser útil enfocarte en tu mundo interno durante este periodo. Si buscas la mirada externa, tiende a aparecer frustración."
 
 ❌ NO ESCRIBAS (directivo): "Tienes que retirarte y meditar. Es importante que escuches tu intuición."
-✅ SÍ ESCRIBE (observador): "Este año invita al retiro consciente. Cuando te conectas con tu intuición, las decisiones son más claras."
+✅ SÍ ESCRIBE (observador sugerente): "Este año invita al retiro consciente. Cuando te conectas con tu intuición, las decisiones son más claras."
+✅ SÍ ESCRIBE (alternativa): "Durante este periodo, las prácticas introspectivas favorecen la claridad. Conectar con tu intuición facilita la toma de decisiones."
+
+**VARIACIÓN LÉXICA IMPORTANTE:**
+- Alterna "Este año" con: "Durante este periodo", "A lo largo del año", "En este ciclo", "Ahora"
+- Alterna "validación externa" con: "reconocimiento externo", "aprobación externa", "mirada externa"
+- Usa sugerencias no imperativas: "Puede ser útil...", "Este periodo favorece...", "Tiende a funcionar mejor cuando..."
 
 Usa verbos de acción, comportamientos observables y situaciones concretas.
 La lectura debe sentirse: "Ahora entiendo cómo funciono y cómo se mueve este año."

@@ -273,9 +273,12 @@ Required JSON structure:
 - 30-40% shorter than old format (~2100 words total, not 3000)
 - HIERARCHY: Not all planets weigh equally
 - OBSERVADOR tone (NOT directive): "Este año funciona mejor cuando..." instead of "Debes hacer..."
+- VARIACIÓN LÉXICA: Alternate "Este año" with "Durante este periodo", "A lo largo del año", "En este ciclo", "Ahora"
+- VARIACIÓN LÉXICA: Alternate "validación externa" with "reconocimiento externo", "aprobación externa", "mirada externa"
 - Use consequences, not commands: "Si escuchas, fluye. Si fuerzas, aparece tensión."
-- NO imperatives: avoid "haz", "debes", "tienes que", "evita"
-- Each planet MUST have mandato_del_ano (with observador tone)
+- Use SUGERENCIAS NO IMPERATIVAS: "Puede ser útil...", "Este periodo favorece...", "Tiende a funcionar mejor cuando..."
+- NO imperatives: avoid "haz", "debes", "tienes que", "evita", "dedica tiempo a", "prioriza"
+- Each planet MUST have mandato_del_ano (with observador tone + sugerencias)
 - Timeline MUST have accion_clave
 - Lunar calendar: 3 lunas clave ONLY (not 12 months, not 24 dates)
 - Use first name only (${userProfile.name?.split(' ')[0]}) 1-3 times maximum
