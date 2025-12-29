@@ -6,6 +6,7 @@ import LoginForm from '@/components/auth/LoginForm';
 import { useRouter } from 'next/navigation';
 import DeleteUserForm from '@/components/admin/DeleteUserForm';
 import BirthDataAdminTable from '@/components/admin/BirthDataAdminTable';
+import ResetInterpretationsForm from '@/components/admin/ResetInterpretationsForm';
 
 interface User {
   uid: string;
@@ -211,6 +212,12 @@ export default function AdminPage() {
           </table>
         </div>
       )}
+
+      {/* Sección de limpieza de interpretaciones */}
+      <div style={{ marginTop: 40 }}>
+        <ResetInterpretationsForm />
+      </div>
+
       <DeleteUserForm />
 
       {/* Sección administración de birth data */}
