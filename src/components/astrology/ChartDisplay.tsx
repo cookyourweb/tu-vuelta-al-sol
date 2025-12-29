@@ -222,11 +222,26 @@ const ChartDisplay = ({
       planet.sign || 'Aries'
     );
 
+    // 🐛 DEBUG: Log raw planet data for Marte
+    if (planet.name === 'Marte' || planet.name === 'Mars') {
+      console.log('🐛 [ChartDisplay] Marte raw planet:', {
+        house: planet.house,
+        houseNumber: planet.houseNumber,
+        housePosition: planet.housePosition,
+        degree: planet.degree
+      });
+    }
+
     // ✅ FIX: Use API house when available (Prokerala uses proper house system)
-    // Only calculate house as fallback if API didn't provide one
-    const apiHouse = planet.house || planet.houseNumber || planet.housePosition;
+    // Priority: houseNumber (correct from API) > housePosition > house (may be wrong)
+    const apiHouse = planet.houseNumber || planet.housePosition || planet.house;
     const fallbackHouse = Math.floor(((realPosition - (ascendant?.degree || 0) + 360) % 360) / 30) + 1;
     const finalHouse = apiHouse || fallbackHouse;
+
+    // 🐛 DEBUG: Log final house for Marte
+    if (planet.name === 'Marte' || planet.name === 'Mars') {
+      console.log('🐛 [ChartDisplay] Marte finalHouse:', finalHouse);
+    }
 
     return {
       ...planet,
