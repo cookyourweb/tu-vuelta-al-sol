@@ -119,7 +119,7 @@ export const InterpretationDrawer: React.FC<InterpretationDrawerProps> = ({
               <span className="text-2xl">📚</span> QUÉ SIGNIFICA
             </h3>
             <div className="prose prose-invert max-w-none">
-              {content.educativo.split('\n\n').map((parrafo: string, i: number) => {
+              {(content.educativo || '').split('\n\n').map((parrafo: string, i: number) => {
                 const cleanParrafo = parrafo.trim();
                 if (!cleanParrafo) return null;
 
@@ -143,7 +143,7 @@ export const InterpretationDrawer: React.FC<InterpretationDrawerProps> = ({
               <span className="text-2xl">🔥</span> CÓMO SE MANIFIESTA
             </h3>
             <div className="prose prose-invert max-w-none">
-              {content.observador.split('\n\n').map((parrafo: string, i: number) => {
+              {(content.observador || '').split('\n\n').map((parrafo: string, i: number) => {
                 const cleanParrafo = parrafo.trim();
                 if (!cleanParrafo) return null;
 
