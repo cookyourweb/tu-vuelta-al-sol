@@ -15,7 +15,7 @@ import {
 } from '@/utils/planetNameUtils';
 
 // ⏱️ Configurar timeout para Vercel (60 segundos en plan Pro)
-export const maxDuration = 10;
+export const maxDuration = 60;
 
 // =============================================================================
 // TYPES
