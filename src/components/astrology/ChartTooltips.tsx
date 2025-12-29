@@ -339,74 +339,98 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
       return;
     }
 
-    // ⚠️ Solar Return: Los aspectos aún no están implementados
-    if (chartType === 'solar-return') {
-      alert('🚧 La generación de aspectos en Solar Return estará disponible próximamente.\n\nPor ahora solo puedes generar comparaciones de planetas individuales.');
-      return;
-    }
-
     setGeneratingAspect(true);
-    setIsGenerating(true); // ⭐ NUEVO: Para el modal
+    setIsGenerating(true);
     setAspectTooltipLocked(true);
     setShowLongGeneratingMessage(false);
 
     // ⭐ Timer para mensaje largo
     const longGenerationTimer = setTimeout(() => {
       setShowLongGeneratingMessage(true);
-    }, 5000); // Después de 5 segundos
+    }, 5000);
 
     try {
       console.log(`🎯 Generating aspect: ${planet1} ${aspectType} ${planet2}`);
+      console.log(`📊 Chart type: ${chartType}`);
 
-      const response = await fetch('/api/astrology/interpret-natal', {
-        method: 'PUT',
+      // ⭐ Determinar endpoint según tipo de carta
+      const endpoint = chartType === 'solar-return'
+        ? '/api/astrology/interpret-aspect-sr'
+        : '/api/astrology/interpret-aspect';
+
+      console.log(`📍 Using endpoint: ${endpoint}`);
+
+      // Construir body según tipo de carta
+      const body: any = {
+        userId,
+        planet1,
+        planet2,
+        aspectType,
+      };
+
+      if (chartType === 'solar-return') {
+        body.solarReturnOrb = orb;
+        body.year = new Date().getFullYear(); // TODO: Obtener del contexto
+      } else {
+        body.orb = orb;
+        body.chartType = 'natal';
+      }
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          planet1,
-          planet2,
-          aspectType,
-          orb
-        })
+        body: JSON.stringify(body)
       });
 
       const result = await response.json();
+      console.log('📦 Resultado de interpret-aspect:', result);
 
       if (result.success) {
-        console.log('✅ Aspect interpretation generated');
+        console.log('✅ Aspecto generado:', `${planet1} ${aspectType} ${planet2}`);
 
-        // Get Firebase ID token for authentication
-        const token = await user!.getIdToken();
+        // ⭐ ACTUALIZAR ESTADO inmediatamente
+        const aspectKey = result.aspectKey || `${planet1}-${planet2}-${aspectType}`;
 
-        // Refresh interpretations
-        const refreshResponse = await fetch(`/api/astrology/interpret-natal?userId=${userId}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        const refreshResult = await refreshResponse.json();
-
-        if (refreshResult.success) {
-          setNatalInterpretations(refreshResult.data);
-          console.log('✅ Interpretations refreshed');
-
-          // Open drawer immediately after generation
-          const aspectKeyFull = `${planet1}-${planet2}-${aspectType}`;
-          const aspectInterpretation = refreshResult.data?.aspects?.[aspectKeyFull];
-
-          if (aspectInterpretation?.drawer && onOpenDrawer) {
-            console.log('🎯 Opening drawer after generation for aspect:', aspectKeyFull);
-            onOpenDrawer(aspectInterpretation.drawer);
-          }
+        if (chartType === 'solar-return') {
+          // Para Solar Return
+          const updatedInterpretations = {
+            ...natalInterpretations,
+            aspects_solar_return: {
+              ...natalInterpretations?.aspects_solar_return,
+              [aspectKey]: result.interpretation
+            }
+          };
+          setNatalInterpretations(updatedInterpretations);
+          console.log('🔄 Estado actualizado con nuevo aspecto SR:', aspectKey);
+        } else {
+          // Para Natal
+          const updatedInterpretations = {
+            ...natalInterpretations,
+            aspects: {
+              ...natalInterpretations?.aspects,
+              [aspectKey]: result.interpretation
+            }
+          };
+          setNatalInterpretations(updatedInterpretations);
+          console.log('🔄 Estado actualizado con nuevo aspecto natal:', aspectKey);
         }
+
+        // ⭐ ABRIR DRAWER directamente
+        if (result.interpretation?.drawer && onOpenDrawer) {
+          console.log('✅ Abriendo drawer directamente desde interpret-aspect');
+          onOpenDrawer(result.interpretation.drawer);
+        }
+
+      } else {
+        throw new Error(result.error || 'Error generating aspect');
       }
+
     } catch (error) {
       console.error('❌ Error generating aspect:', error);
-      alert('❌ Error generando interpretación');
+      alert('❌ Error generando interpretación del aspecto');
     } finally {
       setGeneratingAspect(false);
-      setIsGenerating(false); // ⭐ NUEVO: Para el modal
+      setIsGenerating(false);
       setShowLongGeneratingMessage(false);
       clearTimeout(longGenerationTimer);
     }
@@ -487,7 +511,7 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                 {planet.name} en {SIGN_SYMBOLS[planet.sign] || ''} {planet.sign} en Casa {planet.house}
               </div>
               <div className="text-gray-300 text-sm mt-1">
-                {planet.degree.toFixed(2)}° - Casa {planet.house} ({houseMeanings[planet.house]?.name.split(' - ')[1] || 'Área de vida'})
+                {planet.degree.toFixed(2)}° - Casa {planet.house} ({planet.house && houseMeanings[planet.house] ? houseMeanings[planet.house].name.split(' - ')[1] : 'Área de vida'})
               </div>
             </div>
           </div>
@@ -1347,7 +1371,11 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
     const planet2Desc = planetMeanings[currentAspect.planet2 as keyof typeof planetMeanings]?.keywords.split(',')[0]?.trim() || 'planeta';
 
     const aspectKeyFull = `${currentAspect.planet1}-${currentAspect.planet2}-${currentAspect.type}`;
-    const hasAIInterpretation = natalInterpretations?.aspects && natalInterpretations.aspects[aspectKeyFull] ? true : false;
+
+    // ⭐ Verificar interpretación según tipo de carta
+    const hasAIInterpretation = chartType === 'solar-return'
+      ? (natalInterpretations?.aspects_solar_return && natalInterpretations.aspects_solar_return[aspectKeyFull])
+      : (natalInterpretations?.aspects && natalInterpretations.aspects[aspectKeyFull]);
 
     return (
       <div
@@ -1520,7 +1548,7 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
               console.log('🎯 ABRIENDO DRAWER CON MOUSEDOWN - ASPECT');
               console.log('1. onOpenDrawer exists?', !!onOpenDrawer);
               console.log('2. aspectKeyFull:', aspectKeyFull);
-              console.log('3. drawer content:', natalInterpretations?.aspects?.[aspectKeyFull]?.drawer);
+              console.log('3. chartType:', chartType);
               console.log('═══════════════════════════════════');
 
               e.stopPropagation();
@@ -1531,7 +1559,13 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                 return;
               }
 
-              const aspectInterpretation = natalInterpretations?.aspects?.[aspectKeyFull];
+              // ⭐ Obtener interpretación según tipo de carta
+              const aspectInterpretation = chartType === 'solar-return'
+                ? natalInterpretations?.aspects_solar_return?.[aspectKeyFull]
+                : natalInterpretations?.aspects?.[aspectKeyFull];
+
+              console.log('4. aspectInterpretation:', aspectInterpretation);
+
               if (!aspectInterpretation) {
                 console.error('❌ aspectInterpretation is undefined');
                 return;
