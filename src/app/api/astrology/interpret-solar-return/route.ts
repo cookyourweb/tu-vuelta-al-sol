@@ -34,7 +34,8 @@ interface CompleteSolarReturnInterpretation {
   apertura_anual: {
     ano_solar: string;
     tema_central: string;
-    clima_general: string;
+    eje_del_ano: string;
+    como_se_siente: string;
     conexion_natal: string;
   };
 
@@ -42,6 +43,7 @@ interface CompleteSolarReturnInterpretation {
   como_se_vive_siendo_tu: {
     facilidad: string;
     incomodidad: string;
+    medida_del_ano: string;
     reflejos_obsoletos: string;
     actitud_nueva: string;
   };
@@ -59,11 +61,11 @@ interface CompleteSolarReturnInterpretation {
 
   // LÍNEA DE TIEMPO ANUAL
   linea_tiempo_anual: {
-    mes_1_activacion: TimelineEvent;
-    mes_3_4_primer_desafio: TimelineEvent;
-    mes_6_7_punto_medio: TimelineEvent;
-    mes_9_10_cosecha: TimelineEvent;
-    mes_12_cierre: TimelineEvent;
+    mes_1_2: TimelineEvent;
+    mes_3_4: TimelineEvent;
+    mes_6_7: TimelineEvent;
+    mes_9_10: TimelineEvent;
+    mes_12: TimelineEvent;
   };
 
   // SOMBRAS DEL AÑO
@@ -72,24 +74,20 @@ interface CompleteSolarReturnInterpretation {
   // CLAVES DE INTEGRACIÓN
   claves_integracion: string[];
 
-  // CALENDARIO LUNAR ANUAL
-  calendario_lunar_anual: Array<{
-    mes: string;
-    luna_nueva: {
-      fecha: string;
+  // USO CALENDARIO LUNAR
+  uso_calendario_lunar: {
+    marco_general: string;
+    lunas_clave: Array<{
+      fase: string;
+      fecha_aproximada: string;
       signo: string;
-      accion: string;
-    };
-    luna_llena: {
-      fecha: string;
-      signo: string;
-      accion: string;
-    };
-  }>;
+      por_que_es_clave: string;
+    }>;
+  };
 
-  // CIERRE E INTEGRACIÓN
-  cierre_integracion: {
-    texto: string;
+  // SÍNTESIS FINAL
+  sintesis_final: {
+    frase_cierre_potente: string;
     pregunta_final: string;
   };
 
@@ -119,11 +117,13 @@ interface PlanetComparison {
   };
   choque: string;
   que_hacer: string;
+  mandato_del_ano: string;
 }
 
 interface TimelineEvent {
   titulo: string;
-  [key: string]: string;
+  descripcion: string;
+  accion_clave: string;
 }
 
 // ==========================================
@@ -164,73 +164,95 @@ async function generateCompleteWithOpenAI(
     containsReturnYear: prompt.includes(returnYear.toString())
   });
 
-  // ✅ SYSTEM PROMPT WITH 3 LAYERS STRUCTURE
-  let systemPrompt = `You are a PROFESSIONAL astrologer specializing in Solar Return interpretation using the 3 LAYERS methodology.
+  // ✅ SYSTEM PROMPT WITH NEW STRUCTURE (jerarquía + dirección)
+  let systemPrompt = `You are a PROFESSIONAL astrologer specializing in Solar Return interpretation using JERARQUÍA + DIRECCIÓN methodology.
 
 ⚠️ CRITICAL REQUIREMENTS:
 1. You MUST respond with VALID JSON with the exact structure specified
 2. Use REAL astronomical data (planets, houses, signs, degrees)
 3. Use REAL user data: ${userProfile.name}, age ${userProfile.age}
 4. Use SPECIFIC positions: "Sol en ${solarReturnChart?.planets?.find((p: any) => p.name === 'Sol')?.sign} Casa ${solarReturnChart?.planets?.find((p: any) => p.name === 'Sol')?.house}"
-5. The 3 LAYERS are MANDATORY for each planet:
-   - NATAL: Who they ARE (permanent identity)
-   - SOLAR_RETURN: What activates THIS YEAR (temporary area)
-   - CHOQUE: Where it clashes/enhances (specific comparison)
-   - QUE_HACER: What to DO (concrete action, NO generic advice)
+5. JERARQUÍA PLANETARIA:
+   - PRIORIDAD 1 (200 palabras): Sol + Saturno + planetas en casas angulares
+   - PRIORIDAD 2 (150 palabras): Mercurio + Luna
+   - PRIORIDAD 3 (120 palabras): Venus + Marte + Júpiter
+6. Each planet MUST have: natal, solar_return, choque, que_hacer, mandato_del_ano
 
 Required JSON structure:
 {
   "apertura_anual": {
     "ano_solar": "string",
-    "tema_central": "string (10-15 words)",
-    "clima_general": "string (150-180 words)",
-    "conexion_natal": "string (60-80 words)"
+    "tema_central": "string (10-15 words) - DIRECCIÓN CLARA + PROPÓSITO",
+    "eje_del_ano": "string (40-60 words) - ¿Qué está pasando REALMENTE? NO describir, DIRIGIR",
+    "como_se_siente": "string (80-100 words) - Termina con FRASE DE CONSECUENCIA",
+    "conexion_natal": "string (70-90 words) - CONTRASTE CLARO + FRASE EVOLUTIVA"
   },
   "como_se_vive_siendo_tu": {
-    "facilidad": "string (60-80 words)",
-    "incomodidad": "string (60-80 words)",
-    "reflejos_obsoletos": "string (60-80 words)",
-    "actitud_nueva": "string (60-80 words)"
+    "facilidad": "string (40-60 words) - 3-4 items",
+    "incomodidad": "string (40-60 words) - 3-4 items",
+    "medida_del_ano": "string (60-80 words) - Cómo NO medir + cómo SÍ medir",
+    "reflejos_obsoletos": "string (30-50 words) - 3 items LENGUAJE ACTIVO",
+    "actitud_nueva": "string (30-50 words) - 3 items LENGUAJE ACTIVO"
   },
   "comparaciones_planetarias": {
     "sol": {
-      "natal": {"posicion": "string", "descripcion": "string (80-100 words)"},
-      "solar_return": {"posicion": "string", "descripcion": "string (80-100 words)"},
-      "choque": "string (120-150 words - BE SPECIFIC with houses)",
-      "que_hacer": "string (100-120 words - concrete action)"
+      "natal": {"posicion": "string", "descripcion": "string (60-80 words)"},
+      "solar_return": {"posicion": "string", "descripcion": "string (60-80 words)"},
+      "choque": "string (100-120 words - BE SPECIFIC with houses)",
+      "que_hacer": "string (80-100 words - concrete action)",
+      "mandato_del_ano": "string (15-25 words) - Este año, este planeta te pide X. Si haces Y, fluye. Si haces Z, se bloquea."
     },
-    "luna": {...same structure...},
-    "mercurio": {...same structure...},
-    "venus": {...same structure...},
-    "marte": {...same structure...},
-    "jupiter": {...same structure...},
-    "saturno": {...same structure...}
+    "luna": {...same structure with mandato_del_ano...},
+    "mercurio": {...same structure with mandato_del_ano...},
+    "venus": {...same structure with mandato_del_ano...},
+    "marte": {...same structure with mandato_del_ano...},
+    "jupiter": {...same structure with mandato_del_ano...},
+    "saturno": {...same structure with mandato_del_ano...}
   },
   "linea_tiempo_anual": {
-    "mes_1_activacion": {
-      "titulo": "string",
-      "que_se_activa": "string (80 words)",
-      "que_observar": "string (60 words)",
-      "actitud_recomendada": "string (60 words)"
+    "mes_1_2": {
+      "titulo": "Mes 1–2 | Activación",
+      "descripcion": "string (50-70 words) - SINTÉTICO",
+      "accion_clave": "string (3-5 words) - Una acción específica"
     },
-    "mes_3_4_primer_desafio": {...},
-    "mes_6_7_punto_medio": {...},
-    "mes_9_10_cosecha": {...},
-    "mes_12_cierre": {...}
-  },
-  "sombras_del_ano": ["string (40-50 words)", "string", "string"],
-  "claves_integracion": ["string (10-15 words)", "string", "string"],
-  "calendario_lunar_anual": [
-    {
-      "mes": "string",
-      "luna_nueva": {"fecha": "YYYY-MM-DD", "signo": "string", "accion": "string (50 words)"},
-      "luna_llena": {"fecha": "YYYY-MM-DD", "signo": "string", "accion": "string (50 words)"}
+    "mes_3_4": {
+      "titulo": "Mes 3–4 | Primer ajuste",
+      "descripcion": "string (50-70 words)",
+      "accion_clave": "string (3-5 words)"
+    },
+    "mes_6_7": {
+      "titulo": "Mes 6–7 | Punto medio",
+      "descripcion": "string (50-70 words)",
+      "accion_clave": "string (3-5 words)"
+    },
+    "mes_9_10": {
+      "titulo": "Mes 9–10 | Primeros frutos",
+      "descripcion": "string (50-70 words)",
+      "accion_clave": "string (3-5 words)"
+    },
+    "mes_12": {
+      "titulo": "Mes 12 | Cierre",
+      "descripcion": "string (50-70 words)",
+      "accion_clave": "string (3-5 words)"
     }
-    // 12 months
-  ],
-  "cierre_integracion": {
-    "texto": "string (150-180 words)",
-    "pregunta_final": "string (15-20 words)"
+  },
+  "sombras_del_ano": ["Sombra 1: (40-50 words)", "Sombra 2:", "Sombra 3:"],
+  "claves_integracion": ["Frase práctica 1 (10-15 words)", "Frase 2", "Frase 3"],
+  "uso_calendario_lunar": {
+    "marco_general": "string (80-100 words) - CÓMO USAR las lunas este año específico",
+    "lunas_clave": [
+      {
+        "fase": "Luna Nueva o Luna Llena",
+        "fecha_aproximada": "YYYY-MM-DD",
+        "signo": "string",
+        "por_que_es_clave": "string (60-80 words) - Por qué es importante ESTE AÑO para ESTE usuario"
+      },
+      {...2 more lunas - TOTAL 3, NOT 12 or 24...}
+    ]
+  },
+  "sintesis_final": {
+    "frase_cierre_potente": "string (60-80 words) - 3-4 frases CORTAS Y POTENTES",
+    "pregunta_final": "string (10-15 words) - Una pregunta reflexiva"
   },
   "analisis_tecnico": {
     "asc_sr_en_casa_natal": {
@@ -247,11 +269,14 @@ Required JSON structure:
 }
 
 ⚠️ IMPORTANT NOTES:
-- NO "Formación Temprana" in Solar Return (that's only for Natal Chart)
-- NO tooltip/drawer structure in main interpretation
-- Professional, balanced tone (NO "REVOLUTION", NO excessive capitals)
+- NO repetition - each concept stated ONCE
+- 30-40% shorter than old format (~2100 words total, not 3000)
+- HIERARCHY: Not all planets weigh equally
+- DIRECTIVE tone: "Si escuchas, avanzas. Si fuerzas, te agotas"
+- Each planet MUST have mandato_del_ano
+- Timeline MUST have accion_clave
+- Lunar calendar: 3 lunas clave ONLY (not 12 months, not 24 dates)
 - Use first name only (${userProfile.name?.split(' ')[0]}) 1-3 times maximum
-- Be VERY SPECIFIC with houses in comparisons
 - ${natalInterpretations ? 'USE PROVIDED NATAL INTERPRETATIONS in natal.descripcion of each planet' : 'Generate permanent identity descriptions based on natal chart'}
 
 ⚠️ OUTPUT ONLY JSON - NO markdown, NO explanations, NO text before/after`;
@@ -298,10 +323,10 @@ Required JSON structure:
 
       // ✅ DEBUG: Log exactly what keys OpenAI returned
       console.log('🔍 Keys returned by OpenAI:', Object.keys(parsedResponse));
-      console.log('🔍 Sample check - has calendario_lunar_anual?', !!parsedResponse.calendario_lunar_anual);
-      console.log('🔍 Sample check - has calendario_lunar?', !!parsedResponse.calendario_lunar);
+      console.log('🔍 Sample check - has uso_calendario_lunar?', !!parsedResponse.uso_calendario_lunar);
+      console.log('🔍 Sample check - has sintesis_final?', !!parsedResponse.sintesis_final);
 
-      // Required sections for 3 LAYERS structure
+      // Required sections for NEW structure (jerarquía + dirección)
       const requiredSections = [
         'apertura_anual',
         'como_se_vive_siendo_tu',
@@ -309,8 +334,8 @@ Required JSON structure:
         'linea_tiempo_anual',
         'sombras_del_ano',
         'claves_integracion',
-        'calendario_lunar_anual',
-        'cierre_integracion',
+        'uso_calendario_lunar',
+        'sintesis_final',
         'analisis_tecnico'
       ];
 
@@ -340,22 +365,58 @@ Required JSON structure:
           throw new Error(`Response missing planets: ${missingPlanets.join(', ')}`);
         }
 
-        // Check if each planet has the 3 LAYERS structure
+        // Check if each planet has the NEW structure (with mandato_del_ano)
         const hasProperStructure = requiredPlanets.every(planet => {
           const p = parsedResponse.comparaciones_planetarias[planet];
-          return p?.natal && p?.solar_return && p?.choque && p?.que_hacer;
+          return p?.natal && p?.solar_return && p?.choque && p?.que_hacer && p?.mandato_del_ano;
         });
 
         if (!hasProperStructure) {
-          console.warn('⚠️ Response missing 3 LAYERS structure in comparaciones_planetarias');
-          throw new Error('Response missing required 3 LAYERS structure (natal, solar_return, choque, que_hacer)');
+          console.warn('⚠️ Response missing NEW structure in comparaciones_planetarias');
+          throw new Error('Response missing required structure (natal, solar_return, choque, que_hacer, mandato_del_ano)');
+        }
+
+        // Check if apertura_anual has new fields
+        const hasNewAperturaFields =
+          parsedResponse.apertura_anual?.eje_del_ano &&
+          parsedResponse.apertura_anual?.como_se_siente;
+
+        if (!hasNewAperturaFields) {
+          console.warn('⚠️ Response missing new apertura_anual fields (eje_del_ano, como_se_siente)');
+          throw new Error('Response missing eje_del_ano and como_se_siente in apertura_anual');
+        }
+
+        // Check if como_se_vive_siendo_tu has medida_del_ano
+        if (!parsedResponse.como_se_vive_siendo_tu?.medida_del_ano) {
+          console.warn('⚠️ Response missing medida_del_ano');
+          throw new Error('Response missing medida_del_ano in como_se_vive_siendo_tu');
+        }
+
+        // Check if linea_tiempo has accion_clave
+        const timelineKeys = ['mes_1_2', 'mes_3_4', 'mes_6_7', 'mes_9_10', 'mes_12'];
+        const hasAccionClave = timelineKeys.every(key =>
+          parsedResponse.linea_tiempo_anual?.[key]?.accion_clave
+        );
+
+        if (!hasAccionClave) {
+          console.warn('⚠️ Response missing accion_clave in timeline');
+          throw new Error('Response missing accion_clave in linea_tiempo_anual');
+        }
+
+        // Check if uso_calendario_lunar has 3 lunas
+        const lunasCount = parsedResponse.uso_calendario_lunar?.lunas_clave?.length || 0;
+        if (lunasCount !== 3) {
+          console.warn(`⚠️ Response has ${lunasCount} lunas instead of 3`);
+          throw new Error(`uso_calendario_lunar must have exactly 3 lunas_clave, got ${lunasCount}`);
         }
 
         // Check if response has meaningful content
         const hasContent =
-          parsedResponse.apertura_anual?.clima_general?.length > 100 &&
+          parsedResponse.apertura_anual?.eje_del_ano?.length > 30 &&
+          parsedResponse.apertura_anual?.como_se_siente?.length > 70 &&
           parsedResponse.comparaciones_planetarias?.sol?.natal?.descripcion?.length > 50 &&
-          parsedResponse.comparaciones_planetarias?.sol?.choque?.length > 100;
+          parsedResponse.comparaciones_planetarias?.sol?.choque?.length > 80 &&
+          parsedResponse.comparaciones_planetarias?.sol?.mandato_del_ano?.length > 10;
 
         if (!hasContent) {
           console.warn('⚠️ Response has structure but empty content');
@@ -397,18 +458,29 @@ Required JSON structure:
       has_apertura_anual: !!parsedResponse.apertura_anual,
       has_como_se_vive: !!parsedResponse.como_se_vive_siendo_tu,
       has_comparaciones: !!parsedResponse.comparaciones_planetarias,
-      planets_count: parsedResponse.comparaciones_planetarias ? Object.keys(parsedResponse.comparaciones_planetarias).length : 0
+      planets_count: parsedResponse.comparaciones_planetarias ? Object.keys(parsedResponse.comparaciones_planetarias).length : 0,
+      has_uso_calendario_lunar: !!parsedResponse.uso_calendario_lunar,
+      has_sintesis_final: !!parsedResponse.sintesis_final
+    },
+    newFields: {
+      has_eje_del_ano: !!parsedResponse.apertura_anual?.eje_del_ano,
+      has_como_se_siente: !!parsedResponse.apertura_anual?.como_se_siente,
+      has_medida_del_ano: !!parsedResponse.como_se_vive_siendo_tu?.medida_del_ano,
+      has_mandato_del_ano: !!parsedResponse.comparaciones_planetarias?.sol?.mandato_del_ano,
+      lunas_count: parsedResponse.uso_calendario_lunar?.lunas_clave?.length || 0
     },
     contentLengths: {
-      clima_general: parsedResponse.apertura_anual?.clima_general?.length || 0,
+      eje_del_ano: parsedResponse.apertura_anual?.eje_del_ano?.length || 0,
       sol_natal_desc: parsedResponse.comparaciones_planetarias?.sol?.natal?.descripcion?.length || 0,
-      sol_choque: parsedResponse.comparaciones_planetarias?.sol?.choque?.length || 0
+      sol_choque: parsedResponse.comparaciones_planetarias?.sol?.choque?.length || 0,
+      sol_mandato: parsedResponse.comparaciones_planetarias?.sol?.mandato_del_ano?.length || 0
     }
   });
 
   console.log('📊 Sample content check:', {
     tema_central: parsedResponse.apertura_anual?.tema_central?.substring(0, 100) || 'MISSING',
-    sol_choque_preview: parsedResponse.comparaciones_planetarias?.sol?.choque?.substring(0, 100) || 'MISSING'
+    eje_del_ano: parsedResponse.apertura_anual?.eje_del_ano?.substring(0, 100) || 'MISSING',
+    sol_mandato: parsedResponse.comparaciones_planetarias?.sol?.mandato_del_ano || 'MISSING'
   });
 
   return parsedResponse;
@@ -639,7 +711,13 @@ export async function POST(request: NextRequest) {
       hasComparaciones: !!interpretation.comparaciones_planetarias,
       planetsCount: interpretation.comparaciones_planetarias ? Object.keys(interpretation.comparaciones_planetarias).length : 0,
       hasLineaTiempo: !!interpretation.linea_tiempo_anual,
-      hasCalendario: !!interpretation.calendario_lunar_anual
+      hasUsoCalendarioLunar: !!interpretation.uso_calendario_lunar,
+      hasSintesisFinal: !!interpretation.sintesis_final,
+      newFields: {
+        has_eje_del_ano: !!interpretation.apertura_anual?.eje_del_ano,
+        has_medida_del_ano: !!interpretation.como_se_vive_siendo_tu?.medida_del_ano,
+        lunas_count: interpretation.uso_calendario_lunar?.lunas_clave?.length || 0
+      }
     });
 
     const savedInterpretation = await Interpretation.create({
