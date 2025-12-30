@@ -2491,6 +2491,7 @@ const AgendaPersonalizada = () => {
             </div>
           </div>
         </div>
+          </div>
         )}
 
         {/* TOOLTIP ÉPICO */}
