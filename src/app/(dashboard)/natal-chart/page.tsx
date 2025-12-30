@@ -389,16 +389,36 @@ export default function NatalChartPage() {
 
           await loadBirthDataInfo();
         } else {
-          throw new Error(generateResult.error || 'Error generando carta');
+          throw new Error(generateResult.error || generateResult.message || 'Error generando carta');
         }
       } else {
-        throw new Error('Error en respuesta del servidor');
+        // Obtener detalles del error del servidor
+        const errorData = await generateResponse.json().catch(() => ({}));
+        const errorMessage = errorData.error || errorData.message || 'Error cósmico inesperado';
+
+        // Verificar si es error de autenticación
+        if (generateResponse.status === 401) {
+          console.log('🔒 Error de autenticación, redirigiendo al login...');
+          router.push('/login');
+          return;
+        }
+
+        throw new Error(errorMessage);
       }
 
     } catch (error) {
       console.error('❌ Error cargando carta natal:', error);
-      setError(error instanceof Error ? error.message : 'Error cargando carta');
-      setDebugInfo(`❌ Error: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+      const errorMessage = error instanceof Error ? error.message : 'Error cargando carta';
+
+      // Si es error de autenticación, redirigir al login
+      if (errorMessage.includes('autenticación') || errorMessage.includes('authenticated')) {
+        console.log('🔒 Error de autenticación, redirigiendo al login...');
+        router.push('/login');
+        return;
+      }
+
+      setError(errorMessage);
+      setDebugInfo(`❌ Error: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -584,39 +604,79 @@ export default function NatalChartPage() {
   // ✅ PANTALLA DE ERROR
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center space-y-6 max-w-md mx-auto">
-          <div className="bg-gradient-to-r from-red-500/20 to-pink-500/20 border border-red-400/30 rounded-full p-8 backdrop-blur-sm mx-auto w-fit">
-            <Sparkles className="w-16 h-16 text-red-400" />
+      <div className="min-h-screen flex items-center justify-center px-4 py-8">
+        <div className="text-center space-y-8 max-w-2xl mx-auto">
+          {/* Icono cósmico animado */}
+          <div className="relative mx-auto w-32 h-32">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-full blur-xl animate-pulse"></div>
+            <div className="relative bg-gradient-to-br from-purple-900/40 to-pink-900/40 border-2 border-purple-400/30 rounded-full p-8 backdrop-blur-sm">
+              <Sparkles className="w-16 h-16 text-purple-300 animate-pulse" />
+            </div>
           </div>
 
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-white">Error al cargar carta</h2>
-            <p className="text-gray-300">{error}</p>
+          <div className="space-y-6">
+            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+              Error Cósmico
+            </h1>
 
-            {debugInfo && (
-              <div className="bg-black/30 rounded-lg p-3 text-sm text-red-300 font-mono text-left">
-                {debugInfo}
-              </div>
-            )}
+            <p className="text-xl text-gray-300 leading-relaxed">
+              Las estrellas están temporalmente desalineadas
+            </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 border border-purple-400/20 rounded-2xl p-6 backdrop-blur-sm">
+              <p className="text-gray-200 text-lg mb-4">
+                {error.includes('datos de nacimiento')
+                  ? '🌙 Necesitamos tus datos de nacimiento para conectar con tu cosmos personal'
+                  : '✨ ' + error}
+              </p>
+
+              {debugInfo && (
+                <details className="mt-4">
+                  <summary className="text-sm text-purple-300 cursor-pointer hover:text-purple-200 mb-2">
+                    Detalles técnicos
+                  </summary>
+                  <div className="bg-black/40 rounded-lg p-4 text-sm text-purple-200 font-mono text-left border border-purple-500/20">
+                    {debugInfo}
+                  </div>
+                </details>
+              )}
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
               {error.includes('datos de nacimiento') ? (
-                <Button
-                  onClick={navigateToBirthData}
-                  className="bg-blue-600 hover:bg-blue-700 flex items-center space-x-2"
-                >
-                  <Edit className="w-4 h-4" />
-                  <span>Configurar datos</span>
-                </Button>
+                <>
+                  <Button
+                    onClick={navigateToBirthData}
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 flex items-center justify-center space-x-2 text-lg px-8 py-4 rounded-xl shadow-lg hover:shadow-purple-500/50 transition-all"
+                  >
+                    <Edit className="w-5 h-5" />
+                    <span>Configurar Datos de Nacimiento</span>
+                  </Button>
+                  <Button
+                    onClick={() => router.push('/dashboard')}
+                    className="bg-gray-700/50 hover:bg-gray-700 flex items-center justify-center space-x-2 text-lg px-8 py-4 rounded-xl border border-gray-600 transition-all"
+                  >
+                    <Star className="w-5 h-5" />
+                    <span>Volver al Dashboard</span>
+                  </Button>
+                </>
               ) : (
-                <Button
-                  onClick={() => loadChartData()}
-                  className="bg-purple-600 hover:bg-purple-700 flex items-center space-x-2"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                  <span>Intentar de nuevo</span>
-                </Button>
+                <>
+                  <Button
+                    onClick={() => loadChartData()}
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 flex items-center justify-center space-x-2 text-lg px-8 py-4 rounded-xl shadow-lg hover:shadow-purple-500/50 transition-all"
+                  >
+                    <RefreshCw className="w-5 h-5" />
+                    <span>Intentar de nuevo</span>
+                  </Button>
+                  <Button
+                    onClick={() => router.push('/dashboard')}
+                    className="bg-gray-700/50 hover:bg-gray-700 flex items-center justify-center space-x-2 text-lg px-8 py-4 rounded-xl border border-gray-600 transition-all"
+                  >
+                    <Star className="w-5 h-5" />
+                    <span>Volver al Dashboard</span>
+                  </Button>
+                </>
               )}
             </div>
           </div>
