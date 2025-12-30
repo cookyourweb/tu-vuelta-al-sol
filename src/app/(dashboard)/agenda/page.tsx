@@ -2455,7 +2455,6 @@ const AgendaPersonalizada = () => {
             </div>
           </div>
         </div>
-        )}
 
         {/* TOOLTIP ÉPICO */}
         {hoveredEvent && hoveredEvent?.aiInterpretation && (
@@ -2685,6 +2684,7 @@ const AgendaPersonalizada = () => {
             </div>
           </>
         )}
+      )}
 
       </div>
   );
