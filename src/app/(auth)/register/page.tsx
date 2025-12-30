@@ -1,7 +1,7 @@
 // src/app/(auth)/register/page.tsx
 import RegisterForm from '@/components/auth/RegisterForm';
 import Link from 'next/link';
-import { Star, Sparkles, ArrowLeft, Heart, Zap, Moon } from 'lucide-react';
+import { Star, Sparkles, ArrowLeft, Sun, Calendar } from 'lucide-react';
 
 export default function RegisterPage() {
   return (
@@ -68,18 +68,18 @@ export default function RegisterPage() {
             {/* Beneficios rápidos */}
             <div className="grid grid-cols-3 gap-4 mb-6">
               <div className="bg-gradient-to-br from-blue-400/10 to-cyan-500/10 border border-blue-400/30 rounded-2xl p-4 text-center backdrop-blur-sm">
-                <Moon className="w-6 h-6 text-blue-400 mx-auto mb-2" />
-                <p className="text-blue-300 text-xs font-semibold">Tu carta natal</p>
+                <Star className="w-6 h-6 text-blue-400 mx-auto mb-2" />
+                <p className="text-blue-300 text-xs font-semibold">Carta Natal</p>
               </div>
 
               <div className="bg-gradient-to-br from-yellow-400/10 to-orange-500/10 border border-yellow-400/30 rounded-2xl p-4 text-center backdrop-blur-sm">
-                <Star className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
-                <p className="text-yellow-300 text-xs font-semibold">Retorno solar</p>
+                <Sun className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
+                <p className="text-yellow-300 text-xs font-semibold">Retorno Solar</p>
               </div>
 
               <div className="bg-gradient-to-br from-purple-400/10 to-pink-500/10 border border-purple-400/30 rounded-2xl p-4 text-center backdrop-blur-sm">
-                <Zap className="w-6 h-6 text-purple-400 mx-auto mb-2" />
-                <p className="text-purple-300 text-xs font-semibold">Agenda personal</p>
+                <Calendar className="w-6 h-6 text-purple-400 mx-auto mb-2" />
+                <p className="text-purple-300 text-xs font-semibold">Agenda Personal</p>
               </div>
             </div>
 
