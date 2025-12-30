@@ -184,6 +184,7 @@ export default function DashboardPage() {
           </div>
         )}
         
+        {/* 🌟 NUEVA SECCIÓN DE BIENVENIDA */}
         <div className="text-center mb-16">
           <div className="flex justify-center items-center mb-8">
             <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 border border-yellow-400/30 rounded-full p-8 backdrop-blur-sm relative">
@@ -192,32 +193,109 @@ export default function DashboardPage() {
               <Star className="w-12 h-12 text-yellow-400" />
             </div>
           </div>
-          
-          <h1 className="text-4xl md:text-6xl font-black mb-6 leading-tight">
-            Bienvenido a tu 
-            <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent"> universo personal</span>
+
+          <h1 className="text-5xl md:text-6xl font-black mb-4 leading-tight">
+            Bienvenido/a a
           </h1>
-          
-          <div className="max-w-3xl mx-auto">
-            <p className="text-xl text-gray-300 mb-6 leading-relaxed">
-              {user?.displayName ? `✨ Hola ${user.displayName}, ` : '✨ Hola, explorador cósmico, '}
-              aquí encontrarás todo lo que necesitas para descubrir tu mapa astrológico y conectar con la energía transformadora del cosmos.
-            </p>
-            
-            <div className="flex justify-center items-center space-x-6 text-sm">
-              <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-                <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
-                <span className="text-green-300">Conectado</span>
-              </div>
-              <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-                <TrendingUp className="w-4 h-4 text-blue-400 mr-2" />
-                <span className="text-blue-300">En crecimiento</span>
-              </div>
-              <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-                <Heart className="w-4 h-4 text-pink-400 mr-2" />
-                <span className="text-pink-300">Alineado</span>
+          <h2 className="text-4xl md:text-5xl font-black mb-6 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
+            Tu Vuelta al Sol
+          </h2>
+          <p className="text-2xl md:text-3xl text-purple-300 font-semibold mb-12">
+            Tu agenda astrológica personalizada
+          </p>
+
+          <div className="max-w-4xl mx-auto space-y-8">
+            {/* Explicación principal */}
+            <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/20 border border-purple-400/20 rounded-3xl p-8 backdrop-blur-sm">
+              <p className="text-xl md:text-2xl text-white leading-relaxed mb-6 font-medium">
+                Este no es un horóscopo genérico.
+              </p>
+              <p className="text-lg md:text-xl text-gray-200 leading-relaxed mb-4">
+                Es una experiencia creada a partir de tu carta natal y tu retorno solar,
+                diseñada para acompañarte durante todo el año.
+              </p>
+              <p className="text-lg md:text-xl text-gray-300 leading-relaxed">
+                Aquí no vienes a predecir el futuro.<br/>
+                <span className="text-purple-300 font-semibold">Vienes a entenderte mejor y tomar decisiones con más conciencia.</span>
+              </p>
+            </div>
+
+            {/* ¿Qué vas a encontrar? */}
+            <div className="text-left">
+              <h3 className="text-3xl md:text-4xl font-bold text-center mb-12 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                ✨ ¿Qué vas a encontrar aquí?
+              </h3>
+
+              <div className="grid md:grid-cols-3 gap-8">
+                {/* Carta Natal */}
+                <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-400/30 rounded-2xl p-6 backdrop-blur-sm hover:scale-105 transition-all">
+                  <div className="flex justify-center mb-4">
+                    <div className="bg-blue-400/20 rounded-full p-4">
+                      <Moon className="w-10 h-10 text-blue-400" />
+                    </div>
+                  </div>
+                  <h4 className="text-2xl font-bold text-white mb-3 text-center">🌌 Tu Carta Natal</h4>
+                  <p className="text-gray-300 leading-relaxed text-center">
+                    Descubre tu mapa astrológico personal y comprende cómo funcionas, qué te mueve y cuáles son tus patrones esenciales.
+                  </p>
+                </div>
+
+                {/* Retorno Solar */}
+                <div className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border border-yellow-400/30 rounded-2xl p-6 backdrop-blur-sm hover:scale-105 transition-all">
+                  <div className="flex justify-center mb-4">
+                    <div className="bg-yellow-400/20 rounded-full p-4">
+                      <Sun className="w-10 h-10 text-yellow-400" />
+                    </div>
+                  </div>
+                  <h4 className="text-2xl font-bold text-white mb-3 text-center">🔄 Tu Retorno Solar Anual</h4>
+                  <p className="text-gray-300 leading-relaxed text-center">
+                    Una lectura clara de las energías que se activan este año en tu vida:
+                    retos, oportunidades, ritmos y momentos clave.
+                  </p>
+                </div>
+
+                {/* Agenda */}
+                <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-400/30 rounded-2xl p-6 backdrop-blur-sm hover:scale-105 transition-all">
+                  <div className="flex justify-center mb-4">
+                    <div className="bg-purple-400/20 rounded-full p-4">
+                      <CalendarDays className="w-10 h-10 text-purple-400" />
+                    </div>
+                  </div>
+                  <h4 className="text-2xl font-bold text-white mb-3 text-center">📔 Tu Agenda Personalizada</h4>
+                  <p className="text-gray-300 leading-relaxed text-center">
+                    Una agenda creada solo para ti, donde el tiempo deja de ser una exigencia y se convierte en una herramienta de alineación personal.
+                    Fechas clave, ciclos astrológicos y espacios de reflexión integrados en tu día a día.
+                  </p>
+                </div>
               </div>
             </div>
+
+            {/* ¿Para quién es? */}
+            <div className="bg-gradient-to-br from-pink-900/20 to-purple-900/20 border border-pink-400/20 rounded-3xl p-8 backdrop-blur-sm">
+              <h3 className="text-2xl md:text-3xl font-bold text-center mb-6 text-pink-300">
+                🌱 ¿Para quién es?
+              </h3>
+              <p className="text-xl md:text-2xl text-gray-200 leading-relaxed text-center font-medium">
+                Para personas que sienten que este año no va de correr más,<br/>
+                <span className="text-purple-300">sino de vivir con más sentido.</span>
+              </p>
+            </div>
+
+            {/* CTA Principal */}
+            {birthData.birthDate && hasNatalChart && hasSolarReturn && (
+              <div className="pt-6">
+                <Link href="/agenda">
+                  <button className="bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 hover:from-purple-500 hover:via-pink-500 hover:to-orange-500 text-white px-10 py-5 rounded-full text-xl md:text-2xl font-bold transition-all duration-300 transform hover:scale-105 shadow-2xl flex items-center mx-auto group">
+                    <Sparkles className="w-6 h-6 mr-3 group-hover:animate-spin" />
+                    👉 Empieza tu Vuelta al Sol
+                    <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
+                  </button>
+                </Link>
+                <p className="text-gray-400 text-center mt-4 text-sm">
+                  y transforma este año en un proceso consciente, real y profundamente tuyo.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
