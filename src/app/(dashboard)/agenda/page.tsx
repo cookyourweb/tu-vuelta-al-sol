@@ -51,6 +51,11 @@ const AgendaPersonalizada = () => {
   // Perfil de usuario REAL (no datos de prueba)
   const [userProfile, setUserProfile] = React.useState<UserProfile | null>(null);
 
+  // Estados para interpretaciones
+  const [solarReturnInterpretation, setSolarReturnInterpretation] = useState<any | null>(null);
+  const [natalInterpretation, setNatalInterpretation] = useState<any | null>(null);
+  const [loadingInterpretations, setLoadingInterpretations] = useState(false);
+
   React.useEffect(() => {
     const fetchUserProfile = async () => {
       if (!user?.uid) return;
@@ -91,6 +96,46 @@ const AgendaPersonalizada = () => {
 
     fetchUserProfile();
   }, [user]);
+
+  // 🌟 Cargar interpretaciones (Retorno Solar y Carta Natal)
+  React.useEffect(() => {
+    const fetchInterpretations = async () => {
+      if (!user?.uid) return;
+
+      setLoadingInterpretations(true);
+
+      try {
+        // Fetch Retorno Solar
+        const srRes = await fetch(`/api/interpretations?userId=${user.uid}&chartType=solar-return`);
+        if (srRes.ok) {
+          const srData = await srRes.json();
+          if (srData && srData.interpretation) {
+            console.log('✅ [INTERPRETATIONS] Solar Return loaded:', srData.interpretation);
+            setSolarReturnInterpretation(srData.interpretation);
+          }
+        }
+
+        // Fetch Carta Natal
+        const natalRes = await fetch(`/api/interpretations?userId=${user.uid}&chartType=natal`);
+        if (natalRes.ok) {
+          const natalData = await natalRes.json();
+          if (natalData && natalData.interpretation) {
+            console.log('✅ [INTERPRETATIONS] Natal chart loaded:', natalData.interpretation);
+            setNatalInterpretation(natalData.interpretation);
+          }
+        }
+      } catch (error) {
+        console.error('❌ [INTERPRETATIONS] Error fetching interpretations:', error);
+      } finally {
+        setLoadingInterpretations(false);
+      }
+    };
+
+    // Solo cargar cuando el usuario visite tabs de "mi-anio" o "mi-carta"
+    if (activeTab === 'mi-anio' || activeTab === 'mi-carta') {
+      fetchInterpretations();
+    }
+  }, [user, activeTab]);
 
   // 🔧 NUEVO: Cargar datos de carta progresada si vienen desde esa página
   React.useEffect(() => {
@@ -1388,35 +1433,111 @@ const AgendaPersonalizada = () => {
                 Mi Año Cósmico
               </h2>
 
-              <div className="space-y-6 text-white">
-                <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-2xl p-6 border border-yellow-400/30">
-                  <h3 className="text-xl font-bold mb-3 text-yellow-300">🌟 Portal de Entrada</h3>
-                  <p className="text-gray-200 leading-relaxed">
-                    Contenido del portal de entrada - se poblará con datos del Retorno Solar
-                  </p>
+              {loadingInterpretations ? (
+                <div className="text-center py-12">
+                  <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-400 mb-4"></div>
+                  <p className="text-white">Cargando tu interpretación del año...</p>
                 </div>
+              ) : !solarReturnInterpretation ? (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-4">🌟</div>
+                  <h3 className="text-2xl font-bold text-white mb-4">No tienes interpretación de Retorno Solar aún</h3>
+                  <p className="text-gray-300 mb-6">Genera tu Retorno Solar para ver el contenido de tu año cósmico</p>
+                  <button
+                    onClick={() => window.location.href = '/solar-return'}
+                    className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg"
+                  >
+                    Generar Retorno Solar
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-6 text-white">
+                  {/* Esencia Revolucionaria Anual */}
+                  {solarReturnInterpretation.esencia_revolucionaria_anual && (
+                    <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-2xl p-6 border border-yellow-400/30">
+                      <h3 className="text-xl font-bold mb-3 text-yellow-300">🌟 Portal de Entrada</h3>
+                      <p className="text-gray-200 leading-relaxed whitespace-pre-line">
+                        {solarReturnInterpretation.esencia_revolucionaria_anual}
+                      </p>
+                    </div>
+                  )}
 
-                <div className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded-2xl p-6 border border-pink-400/30">
-                  <h3 className="text-xl font-bold mb-3 text-pink-300">🎯 Tema Central del Año</h3>
-                  <p className="text-gray-200 leading-relaxed">
-                    Tema central extraído de la interpretación del Retorno Solar
-                  </p>
-                </div>
+                  {/* Tema Central del Año */}
+                  {solarReturnInterpretation.tema_central_del_anio && (
+                    <div className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded-2xl p-6 border border-pink-400/30">
+                      <h3 className="text-xl font-bold mb-3 text-pink-300">🎯 Tema Central del Año</h3>
+                      <p className="text-gray-200 leading-relaxed whitespace-pre-line">
+                        {solarReturnInterpretation.tema_central_del_anio}
+                      </p>
+                    </div>
+                  )}
 
-                <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl p-6 border border-green-400/30">
-                  <h3 className="text-xl font-bold mb-3 text-green-300">🔥 Ritual de Inicio</h3>
-                  <p className="text-gray-200 leading-relaxed">
-                    Ritual personalizado para comenzar tu año solar
-                  </p>
-                </div>
+                  {/* Propósito de Vida Anual */}
+                  {solarReturnInterpretation.proposito_vida_anual && (
+                    <div className="bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-2xl p-6 border border-blue-400/30">
+                      <h3 className="text-xl font-bold mb-3 text-blue-300">🎨 Propósito del Año</h3>
+                      <p className="text-gray-200 leading-relaxed whitespace-pre-line">
+                        {solarReturnInterpretation.proposito_vida_anual}
+                      </p>
+                    </div>
+                  )}
 
-                <div className="bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-2xl p-6 border border-blue-400/30">
-                  <h3 className="text-xl font-bold mb-3 text-blue-300">🌊 Qué Soltar Este Año</h3>
-                  <p className="text-gray-200 leading-relaxed">
-                    Patrones y hábitos a liberar durante este ciclo solar
-                  </p>
+                  {/* Rituales Recomendados */}
+                  {solarReturnInterpretation.rituales_recomendados && solarReturnInterpretation.rituales_recomendados.length > 0 && (
+                    <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl p-6 border border-green-400/30">
+                      <h3 className="text-xl font-bold mb-3 text-green-300">🔥 Rituales del Año</h3>
+                      <ul className="space-y-2">
+                        {solarReturnInterpretation.rituales_recomendados.map((ritual: string, index: number) => (
+                          <li key={index} className="text-gray-200 leading-relaxed flex items-start gap-2">
+                            <span className="text-green-400 flex-shrink-0">•</span>
+                            <span>{ritual}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Declaración de Poder */}
+                  {solarReturnInterpretation.declaracion_poder_anual && (
+                    <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl p-6 border border-purple-400/30">
+                      <h3 className="text-xl font-bold mb-3 text-purple-300">💪 Declaración de Poder</h3>
+                      <p className="text-white text-lg font-semibold italic leading-relaxed whitespace-pre-line">
+                        "{solarReturnInterpretation.declaracion_poder_anual}"
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Insights Transformacionales */}
+                  {solarReturnInterpretation.insights_transformacionales && solarReturnInterpretation.insights_transformacionales.length > 0 && (
+                    <div className="bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-2xl p-6 border border-indigo-400/30">
+                      <h3 className="text-xl font-bold mb-3 text-indigo-300">💡 Insights Transformacionales</h3>
+                      <ul className="space-y-2">
+                        {solarReturnInterpretation.insights_transformacionales.map((insight: string, index: number) => (
+                          <li key={index} className="text-gray-200 leading-relaxed flex items-start gap-2">
+                            <span className="text-indigo-400 flex-shrink-0">•</span>
+                            <span>{insight}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Advertencias */}
+                  {solarReturnInterpretation.advertencias && solarReturnInterpretation.advertencias.length > 0 && (
+                    <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-2xl p-6 border border-orange-400/30">
+                      <h3 className="text-xl font-bold mb-3 text-orange-300">⚠️ Aspectos a Cuidar</h3>
+                      <ul className="space-y-2">
+                        {solarReturnInterpretation.advertencias.map((advertencia: string, index: number) => (
+                          <li key={index} className="text-gray-200 leading-relaxed flex items-start gap-2">
+                            <span className="text-orange-400 flex-shrink-0">•</span>
+                            <span>{advertencia}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
-              </div>
+              )}
             </div>
           </div>
         )}
@@ -1430,28 +1551,118 @@ const AgendaPersonalizada = () => {
                 Mi Carta Natal
               </h2>
 
-              <div className="space-y-6 text-white">
-                <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-2xl p-6 border border-yellow-400/30">
-                  <h3 className="text-xl font-bold mb-3 text-yellow-300">✨ Propósito de Vida</h3>
-                  <p className="text-gray-200 leading-relaxed">
-                    Tu propósito de vida según tu carta natal
-                  </p>
+              {loadingInterpretations ? (
+                <div className="text-center py-12">
+                  <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-400 mb-4"></div>
+                  <p className="text-white">Cargando tu interpretación natal...</p>
                 </div>
+              ) : !natalInterpretation ? (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-4">⭐</div>
+                  <h3 className="text-2xl font-bold text-white mb-4">No tienes interpretación de Carta Natal aún</h3>
+                  <p className="text-gray-300 mb-6">Genera tu Carta Natal para descubrir tu propósito de vida</p>
+                  <button
+                    onClick={() => window.location.href = '/natal-chart'}
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg"
+                  >
+                    Generar Carta Natal
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-6 text-white">
+                  {/* Esencia Revolucionaria */}
+                  {natalInterpretation.esencia_revolucionaria && (
+                    <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-2xl p-6 border border-yellow-400/30">
+                      <h3 className="text-xl font-bold mb-3 text-yellow-300">✨ Tu Esencia</h3>
+                      <p className="text-gray-200 leading-relaxed whitespace-pre-line">
+                        {natalInterpretation.esencia_revolucionaria}
+                      </p>
+                    </div>
+                  )}
 
-                <div className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded-2xl p-6 border border-pink-400/30">
-                  <h3 className="text-xl font-bold mb-3 text-pink-300">🎨 Soul Chart</h3>
-                  <p className="text-gray-200 leading-relaxed">
-                    Representación visual de tu carta del alma
-                  </p>
-                </div>
+                  {/* Propósito de Vida */}
+                  {natalInterpretation.proposito_vida && (
+                    <div className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded-2xl p-6 border border-pink-400/30">
+                      <h3 className="text-xl font-bold mb-3 text-pink-300">🎯 Propósito de Vida</h3>
+                      <p className="text-gray-200 leading-relaxed whitespace-pre-line">
+                        {natalInterpretation.proposito_vida}
+                      </p>
+                    </div>
+                  )}
 
-                <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl p-6 border border-green-400/30">
-                  <h3 className="text-xl font-bold mb-3 text-green-300">💪 Fortalezas Innatas</h3>
-                  <p className="text-gray-200 leading-relaxed">
-                    Tus dones naturales según los planetas
-                  </p>
+                  {/* Misión de Vida */}
+                  {natalInterpretation.mision_vida && (
+                    <div className="bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-2xl p-6 border border-blue-400/30">
+                      <h3 className="text-xl font-bold mb-3 text-blue-300">🚀 Misión de Vida</h3>
+                      <p className="text-gray-200 leading-relaxed whitespace-pre-line">
+                        {natalInterpretation.mision_vida}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Poder Magnético */}
+                  {natalInterpretation.poder_magnetico && (
+                    <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl p-6 border border-purple-400/30">
+                      <h3 className="text-xl font-bold mb-3 text-purple-300">⚡ Poder Magnético</h3>
+                      <p className="text-gray-200 leading-relaxed whitespace-pre-line">
+                        {natalInterpretation.poder_magnetico}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Super Poderes */}
+                  {natalInterpretation.super_poderes && natalInterpretation.super_poderes.length > 0 && (
+                    <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl p-6 border border-green-400/30">
+                      <h3 className="text-xl font-bold mb-3 text-green-300">💪 Tus Super Poderes</h3>
+                      <ul className="space-y-2">
+                        {natalInterpretation.super_poderes.map((poder: string, index: number) => (
+                          <li key={index} className="text-gray-200 leading-relaxed flex items-start gap-2">
+                            <span className="text-green-400 flex-shrink-0">✨</span>
+                            <span>{poder}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Desafíos Evolutivos */}
+                  {natalInterpretation.desafios_evolutivos && natalInterpretation.desafios_evolutivos.length > 0 && (
+                    <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-2xl p-6 border border-orange-400/30">
+                      <h3 className="text-xl font-bold mb-3 text-orange-300">🎓 Desafíos Evolutivos</h3>
+                      <ul className="space-y-2">
+                        {natalInterpretation.desafios_evolutivos.map((desafio: string, index: number) => (
+                          <li key={index} className="text-gray-200 leading-relaxed flex items-start gap-2">
+                            <span className="text-orange-400 flex-shrink-0">•</span>
+                            <span>{desafio}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Planeta Dominante y Elemento */}
+                  {(natalInterpretation.planeta_dominante || natalInterpretation.elemento_dominante) && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {natalInterpretation.planeta_dominante && (
+                        <div className="bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-2xl p-6 border border-indigo-400/30">
+                          <h3 className="text-lg font-bold mb-2 text-indigo-300">🪐 Planeta Dominante</h3>
+                          <p className="text-white font-semibold text-xl">
+                            {natalInterpretation.planeta_dominante}
+                          </p>
+                        </div>
+                      )}
+                      {natalInterpretation.elemento_dominante && (
+                        <div className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-2xl p-6 border border-cyan-400/30">
+                          <h3 className="text-lg font-bold mb-2 text-cyan-300">🌊 Elemento Dominante</h3>
+                          <p className="text-white font-semibold text-xl">
+                            {natalInterpretation.elemento_dominante}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-              </div>
+              )}
             </div>
           </div>
         )}
