@@ -39,6 +39,10 @@ const AgendaPersonalizada = () => {
   const [loadedMonths, setLoadedMonths] = useState<Set<string>>(new Set());
   const [loadingMonthlyEvents, setLoadingMonthlyEvents] = useState(false);
   const [loadingMonthName, setLoadingMonthName] = useState<string>('');
+  // Estados para vista mensual/semanal
+  const [viewMode, setViewMode] = useState<'month' | 'week'>('month');
+  const [weekData, setWeekData] = useState<any | null>(null);
+  const [loadingWeekData, setLoadingWeekData] = useState(false);
 
   // Perfil de usuario REAL (no datos de prueba)
   const [userProfile, setUserProfile] = React.useState<UserProfile | null>(null);
@@ -1511,54 +1515,9 @@ const AgendaPersonalizada = () => {
             </div>
           </div>
 
-          {/* SIDEBAR EVENTOS - 1/3 en desktop */}
+          {/* SIDEBAR INFO DEL DÍA - 1/3 en desktop */}
           <div className="lg:col-span-1">
             <div className="sticky top-8">
-
-              {/* Info del usuario - MOVIDO ARRIBA */}
-              {userProfile && (
-                <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-3xl p-6 mb-6 relative overflow-hidden">
-                  <div className="absolute top-4 right-4 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                  <div className="absolute bottom-4 left-4 w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
-
-                  <div className="flex items-center mb-4">
-                    <div className="bg-gradient-to-r from-green-400/20 to-blue-500/20 border border-green-400/30 rounded-full p-3 backdrop-blur-sm mr-4">
-                      <span className="text-2xl">👤</span>
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-bold text-white">{userProfile.name || 'Usuario'}</h4>
-                      <p className="text-gray-300 text-sm">{userProfile.currentAge || 0} años</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="bg-black/30 rounded-xl p-3 border border-white/10">
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-400 text-xs">Lugar</span>
-                        <span className="text-white text-sm">📍 {userProfile.place || 'Sin ubicación'}</span>
-                      </div>
-                    </div>
-
-                    <div className="bg-black/30 rounded-xl p-3 border border-white/10">
-                      <div className="text-gray-400 text-xs mb-2">Signos Astrológicos</div>
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-yellow-300 text-xs">☉ Sol</span>
-                          <span className="text-white text-sm">{userProfile.astrological?.signs?.sun || 'N/A'}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-blue-300 text-xs">☽ Luna</span>
-                          <span className="text-white text-sm">{userProfile.astrological?.signs?.moon || 'N/A'}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-purple-300 text-xs">↗ Ascendente</span>
-                          <span className="text-white text-sm">{userProfile.astrological?.signs?.ascendant || 'N/A'}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {/* Header del sidebar */}
               <div className="bg-gradient-to-r from-pink-600/30 to-purple-600/30 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-pink-400/30">
