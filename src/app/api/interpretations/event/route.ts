@@ -9,6 +9,9 @@ import User from '@/models/User';
 import { generateEventInterpretationPrompt, EventData } from '@/utils/prompts/eventInterpretationPrompt';
 import OpenAI from 'openai';
 
+// ⏰ VERCEL PRO: Timeout de 60 segundos para llamadas a OpenAI
+export const maxDuration = 60;
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
