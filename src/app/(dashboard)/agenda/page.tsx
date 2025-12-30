@@ -1862,8 +1862,6 @@ const AgendaPersonalizada = () => {
 
         {/* 📅 TAB: CALENDARIO */}
         {activeTab === 'calendario' && (
-          <>
-            {/* LAYOUT DESKTOP/MOBILE */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
             {/* CALENDARIO PRINCIPAL - 2/3 en desktop */}
@@ -2493,7 +2491,6 @@ const AgendaPersonalizada = () => {
             </div>
           </div>
         </div>
-        </>
         )}
 
         {/* TOOLTIP ÉPICO */}
