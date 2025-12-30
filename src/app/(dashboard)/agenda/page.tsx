@@ -44,6 +44,10 @@ const AgendaPersonalizada = () => {
   const [weekData, setWeekData] = useState<any | null>(null);
   const [loadingWeekData, setLoadingWeekData] = useState(false);
 
+  // Estados para tabs principales
+  const [activeTab, setActiveTab] = useState<'mi-anio' | 'mi-carta' | 'calendario' | 'eventos'>('calendario');
+  const [calendarView, setCalendarView] = useState<'mes' | 'semana' | 'dia'>('mes');
+
   // Perfil de usuario REAL (no datos de prueba)
   const [userProfile, setUserProfile] = React.useState<UserProfile | null>(null);
 
@@ -1272,6 +1276,73 @@ const AgendaPersonalizada = () => {
           </div>
         </div>
 
+        {/* 🎨 NAVEGACIÓN DE TABS PRINCIPALES */}
+        <div className="mb-8">
+          <div className="bg-gradient-to-r from-purple-900/40 to-indigo-900/40 backdrop-blur-sm rounded-2xl p-2 border border-purple-400/30">
+            <div className="flex flex-wrap gap-2 justify-center">
+              {/* Tab: Mi Año */}
+              <button
+                onClick={() => setActiveTab('mi-anio')}
+                className={`
+                  flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300
+                  ${activeTab === 'mi-anio'
+                    ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg shadow-yellow-500/30'
+                    : 'bg-white/5 text-purple-200 hover:bg-white/10 hover:text-white'
+                  }
+                `}
+              >
+                <span className="text-xl">📖</span>
+                <span className="hidden sm:inline">Mi Año</span>
+              </button>
+
+              {/* Tab: Mi Carta */}
+              <button
+                onClick={() => setActiveTab('mi-carta')}
+                className={`
+                  flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300
+                  ${activeTab === 'mi-carta'
+                    ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg shadow-yellow-500/30'
+                    : 'bg-white/5 text-purple-200 hover:bg-white/10 hover:text-white'
+                  }
+                `}
+              >
+                <span className="text-xl">🌟</span>
+                <span className="hidden sm:inline">Mi Carta</span>
+              </button>
+
+              {/* Tab: Calendario */}
+              <button
+                onClick={() => setActiveTab('calendario')}
+                className={`
+                  flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300
+                  ${activeTab === 'calendario'
+                    ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg shadow-yellow-500/30'
+                    : 'bg-white/5 text-purple-200 hover:bg-white/10 hover:text-white'
+                  }
+                `}
+              >
+                <span className="text-xl">📅</span>
+                <span className="hidden sm:inline">Calendario</span>
+              </button>
+
+              {/* Tab: Todos los Eventos */}
+              <button
+                onClick={() => setActiveTab('eventos')}
+                className={`
+                  flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300
+                  ${activeTab === 'eventos'
+                    ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg shadow-yellow-500/30'
+                    : 'bg-white/5 text-purple-200 hover:bg-white/10 hover:text-white'
+                  }
+                `}
+              >
+                <span className="text-xl">📔</span>
+                <span className="hidden sm:inline">Eventos</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* ERROR BANNER - Si hay errores cargando eventos */}
         {error && (
           <div className="mb-6 bg-red-900/50 border border-red-500/50 rounded-xl p-4 backdrop-blur-sm">
@@ -1308,21 +1379,135 @@ const AgendaPersonalizada = () => {
           </div>
         )}
 
-        {/* LAYOUT DESKTOP/MOBILE */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* 📖 TAB: MI AÑO */}
+        {activeTab === 'mi-anio' && (
+          <div className="max-w-5xl mx-auto">
+            <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-sm rounded-3xl p-8 border border-purple-400/30">
+              <h2 className="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                <span className="text-4xl">📖</span>
+                Mi Año Cósmico
+              </h2>
+
+              <div className="space-y-6 text-white">
+                <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-2xl p-6 border border-yellow-400/30">
+                  <h3 className="text-xl font-bold mb-3 text-yellow-300">🌟 Portal de Entrada</h3>
+                  <p className="text-gray-200 leading-relaxed">
+                    Contenido del portal de entrada - se poblará con datos del Retorno Solar
+                  </p>
+                </div>
+
+                <div className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded-2xl p-6 border border-pink-400/30">
+                  <h3 className="text-xl font-bold mb-3 text-pink-300">🎯 Tema Central del Año</h3>
+                  <p className="text-gray-200 leading-relaxed">
+                    Tema central extraído de la interpretación del Retorno Solar
+                  </p>
+                </div>
+
+                <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl p-6 border border-green-400/30">
+                  <h3 className="text-xl font-bold mb-3 text-green-300">🔥 Ritual de Inicio</h3>
+                  <p className="text-gray-200 leading-relaxed">
+                    Ritual personalizado para comenzar tu año solar
+                  </p>
+                </div>
+
+                <div className="bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-2xl p-6 border border-blue-400/30">
+                  <h3 className="text-xl font-bold mb-3 text-blue-300">🌊 Qué Soltar Este Año</h3>
+                  <p className="text-gray-200 leading-relaxed">
+                    Patrones y hábitos a liberar durante este ciclo solar
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 🌟 TAB: MI CARTA */}
+        {activeTab === 'mi-carta' && (
+          <div className="max-w-5xl mx-auto">
+            <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-sm rounded-3xl p-8 border border-purple-400/30">
+              <h2 className="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                <span className="text-4xl">🌟</span>
+                Mi Carta Natal
+              </h2>
+
+              <div className="space-y-6 text-white">
+                <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-2xl p-6 border border-yellow-400/30">
+                  <h3 className="text-xl font-bold mb-3 text-yellow-300">✨ Propósito de Vida</h3>
+                  <p className="text-gray-200 leading-relaxed">
+                    Tu propósito de vida según tu carta natal
+                  </p>
+                </div>
+
+                <div className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded-2xl p-6 border border-pink-400/30">
+                  <h3 className="text-xl font-bold mb-3 text-pink-300">🎨 Soul Chart</h3>
+                  <p className="text-gray-200 leading-relaxed">
+                    Representación visual de tu carta del alma
+                  </p>
+                </div>
+
+                <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl p-6 border border-green-400/30">
+                  <h3 className="text-xl font-bold mb-3 text-green-300">💪 Fortalezas Innatas</h3>
+                  <p className="text-gray-200 leading-relaxed">
+                    Tus dones naturales según los planetas
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 📔 TAB: TODOS LOS EVENTOS */}
+        {activeTab === 'eventos' && (
+          <div className="max-w-5xl mx-auto">
+            <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-sm rounded-3xl p-8 border border-purple-400/30">
+              <h2 className="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                <span className="text-4xl">📔</span>
+                Todos los Eventos del Año
+              </h2>
+
+              <div className="space-y-4">
+                <div className="flex gap-2 flex-wrap">
+                  <button className="px-4 py-2 bg-purple-500/30 hover:bg-purple-500/50 rounded-lg text-white font-medium transition-colors">
+                    Todos
+                  </button>
+                  <button className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-purple-200 font-medium transition-colors">
+                    Fases Lunares
+                  </button>
+                  <button className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-purple-200 font-medium transition-colors">
+                    Eclipses
+                  </button>
+                  <button className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-purple-200 font-medium transition-colors">
+                    Retrogrados
+                  </button>
+                </div>
+
+                <div className="bg-white/5 rounded-2xl p-6 text-center text-gray-300">
+                  <p>Timeline de eventos - se poblará con la lista completa de eventos astrológicos</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 📅 TAB: CALENDARIO */}
+        {activeTab === 'calendario' && (
+          <>
+            {/* LAYOUT DESKTOP/MOBILE */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
             {/* CALENDARIO PRINCIPAL - 2/3 en desktop */}
           <div className="lg:col-span-2">
 
             {/* Header del calendario */}
             <div className="bg-gradient-to-r from-purple-600/30 to-indigo-600/30 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-purple-400/30">
-              <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
-                <h2 className="text-2xl lg:text-3xl font-bold text-white capitalize flex items-center">
-                  <span className="mr-3">🗓️</span>
-                  Agenda Cósmica
-                </h2>
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
+                  <h2 className="text-2xl lg:text-3xl font-bold text-white capitalize flex items-center">
+                    <span className="mr-3">🗓️</span>
+                    Agenda Cósmica
+                  </h2>
 
-                <div className="flex items-center gap-4 flex-wrap justify-center">
+                  <div className="flex items-center gap-4 flex-wrap justify-center">
                   {/* Botón regenerar eventos DEL MES ACTUAL */}
                   <button
                     onClick={async () => {
@@ -1400,14 +1585,57 @@ const AgendaPersonalizada = () => {
                     </button>
                   </div>
                 </div>
+
+                {/* Subtabs para vistas de calendario */}
+                <div className="flex justify-center gap-2">
+                  <button
+                    onClick={() => setCalendarView('mes')}
+                    className={`
+                      px-4 py-2 rounded-lg font-medium transition-all duration-200
+                      ${calendarView === 'mes'
+                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                        : 'bg-white/5 text-purple-200 hover:bg-white/10 hover:text-white'
+                      }
+                    `}
+                  >
+                    📅 Mes
+                  </button>
+
+                  <button
+                    onClick={() => setCalendarView('semana')}
+                    className={`
+                      px-4 py-2 rounded-lg font-medium transition-all duration-200
+                      ${calendarView === 'semana'
+                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                        : 'bg-white/5 text-purple-200 hover:bg-white/10 hover:text-white'
+                      }
+                    `}
+                  >
+                    📆 Semana
+                  </button>
+
+                  <button
+                    onClick={() => setCalendarView('dia')}
+                    className={`
+                      px-4 py-2 rounded-lg font-medium transition-all duration-200
+                      ${calendarView === 'dia'
+                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                        : 'bg-white/5 text-purple-200 hover:bg-white/10 hover:text-white'
+                      }
+                    `}
+                  >
+                    📋 Día
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Calendario mensual */}
-            <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-sm rounded-2xl shadow-2xl border border-purple-400/20 overflow-hidden">
+            {/* 📅 VISTA: MES */}
+            {calendarView === 'mes' && (
+              <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-sm rounded-2xl shadow-2xl border border-purple-400/20 overflow-hidden">
 
-              {/* Días de la semana */}
-              <div className="grid grid-cols-7 bg-gradient-to-r from-purple-700/30 to-indigo-700/30">
+                {/* Días de la semana */}
+                <div className="grid grid-cols-7 bg-gradient-to-r from-purple-700/30 to-indigo-700/30">
                 {weekDays.map((day, index) => (
                   <div key={index} className="py-3 text-center text-sm font-bold text-purple-100 border-r border-purple-400/20 last:border-r-0">
                     {day}
@@ -1490,6 +1718,61 @@ const AgendaPersonalizada = () => {
                     })}
               </div>
             </div>
+            )}
+
+            {/* 📆 VISTA: SEMANA */}
+            {calendarView === 'semana' && (
+              <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-sm rounded-2xl shadow-2xl border border-purple-400/20 p-8">
+                <div className="text-center text-white">
+                  <div className="text-6xl mb-4">📆</div>
+                  <h3 className="text-2xl font-bold mb-4">Vista Semanal</h3>
+                  <p className="text-gray-300 mb-6">Próximamente: Vista detallada de la semana con eventos día por día</p>
+
+                  <div className="grid grid-cols-1 gap-4 max-w-2xl mx-auto">
+                    {/* Placeholder para días de la semana */}
+                    {['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'].map((dia, index) => (
+                      <div key={index} className="bg-white/5 rounded-xl p-4 border border-purple-400/20">
+                        <div className="font-bold text-purple-300 mb-2">{dia}</div>
+                        <div className="text-sm text-gray-400">Eventos del día aparecerán aquí</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 📋 VISTA: DÍA */}
+            {calendarView === 'dia' && (
+              <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-sm rounded-2xl shadow-2xl border border-purple-400/20 p-8">
+                <div className="text-center text-white">
+                  <div className="text-6xl mb-4">📋</div>
+                  <h3 className="text-2xl font-bold mb-4">Vista Diaria Detallada</h3>
+                  <p className="text-gray-300 mb-6">Próximamente: Vista ultra-detallada del día seleccionado</p>
+
+                  <div className="max-w-3xl mx-auto space-y-4">
+                    <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-2xl p-6 border border-yellow-400/30">
+                      <h4 className="font-bold text-yellow-300 mb-2">🌟 Mantra del Día</h4>
+                      <p className="text-gray-200">Aquí aparecerá el mantra personalizado del día</p>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl p-6 border border-green-400/30">
+                      <h4 className="font-bold text-green-300 mb-2">🔥 Ritual del Día</h4>
+                      <p className="text-gray-200">Ritual breve de 5 minutos basado en la energía del día</p>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-2xl p-6 border border-blue-400/30">
+                      <h4 className="font-bold text-blue-300 mb-2">💪 Ejercicios Recomendados</h4>
+                      <p className="text-gray-200">Ejercicios prácticos según la interpretación del día</p>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded-2xl p-6 border border-pink-400/30">
+                      <h4 className="font-bold text-pink-300 mb-2">🎯 Eventos del Día</h4>
+                      <p className="text-gray-200">Lista completa de eventos astrológicos del día</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* CONTENIDO DE IMPRESIÓN OCULTO - Solo visible al imprimir */}
             <div className="print-only hidden">
@@ -1535,6 +1818,63 @@ const AgendaPersonalizada = () => {
                   }
                 </p>
               </div>
+
+              {/* 🌟 INFORMACIÓN DEL DÍA: Mantra, Ritual, Ejercicios */}
+              {selectedDate && selectedDayEvents.length > 0 && (
+                <div className="space-y-4 mb-6">
+                  {/* Mantra del día */}
+                  {selectedDayEvents.some(e => e.aiInterpretation?.mantra) && (
+                    <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-sm rounded-2xl p-4 border border-yellow-400/30">
+                      <h4 className="text-yellow-300 font-bold text-sm mb-2 flex items-center">
+                        <span className="mr-2">🌟</span>
+                        Mantra del Día
+                      </h4>
+                      <p className="text-white text-sm italic font-medium">
+                        "{selectedDayEvents.find(e => e.aiInterpretation?.mantra)?.aiInterpretation?.mantra}"
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Ritual del día */}
+                  {selectedDayEvents.some(e => e.aiInterpretation?.ritual_breve) && (
+                    <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm rounded-2xl p-4 border border-green-400/30">
+                      <h4 className="text-green-300 font-bold text-sm mb-2 flex items-center">
+                        <span className="mr-2">🔥</span>
+                        Ritual del Día
+                      </h4>
+                      <p className="text-white text-sm leading-relaxed">
+                        {selectedDayEvents.find(e => e.aiInterpretation?.ritual_breve)?.aiInterpretation?.ritual_breve || 'Ritual de 5 minutos para conectar con la energía del día'}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Consejo del día */}
+                  {selectedDayEvents.some(e => e.aiInterpretation?.advice) && (
+                    <div className="bg-gradient-to-r from-blue-500/20 to-indigo-500/20 backdrop-blur-sm rounded-2xl p-4 border border-blue-400/30">
+                      <h4 className="text-blue-300 font-bold text-sm mb-2 flex items-center">
+                        <span className="mr-2">💡</span>
+                        Consejo del Día
+                      </h4>
+                      <p className="text-white text-sm leading-relaxed">
+                        {selectedDayEvents.find(e => e.aiInterpretation?.advice)?.aiInterpretation?.advice}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Pregunta clave */}
+                  {selectedDayEvents.some(e => e.aiInterpretation?.pregunta_clave) && (
+                    <div className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 backdrop-blur-sm rounded-2xl p-4 border border-pink-400/30">
+                      <h4 className="text-pink-300 font-bold text-sm mb-2 flex items-center">
+                        <span className="mr-2">❓</span>
+                        Pregunta del Día
+                      </h4>
+                      <p className="text-white text-sm leading-relaxed font-medium italic">
+                        {selectedDayEvents.find(e => e.aiInterpretation?.pregunta_clave)?.aiInterpretation?.pregunta_clave}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Lista de eventos */}
               {selectedDayEvents.length > 0 && (
@@ -1603,6 +1943,8 @@ const AgendaPersonalizada = () => {
             </div>
           </div>
         </div>
+          </>
+        )}
 
         {/* TOOLTIP ÉPICO */}
         {hoveredEvent && hoveredEvent?.aiInterpretation && (
