@@ -1466,6 +1466,16 @@ const AgendaPersonalizada = () => {
                 </div>
               ) : (
                 <div className="space-y-6 text-white">
+                  {/* 🔍 DEBUG: Mostrar estructura completa del objeto */}
+                  <details className="bg-slate-800/50 rounded-xl p-4 border border-slate-600/30 mb-6">
+                    <summary className="text-slate-300 font-semibold cursor-pointer hover:text-white">
+                      🔍 DEBUG: Ver estructura de datos (click para expandir)
+                    </summary>
+                    <pre className="mt-4 text-xs text-slate-400 overflow-x-auto">
+                      {JSON.stringify(solarReturnInterpretation, null, 2)}
+                    </pre>
+                  </details>
+
                   {/* Esencia Revolucionaria Anual */}
                   {solarReturnInterpretation.esencia_revolucionaria_anual && (
                     <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-2xl p-6 border border-yellow-400/30">
