@@ -1051,9 +1051,74 @@ const AgendaPersonalizada = () => {
 
 
 
-  const handleDayClick = (day: AstronomicalDay) => {
+  const handleDayClick = async (day: AstronomicalDay) => {
     setSelectedDate(day.date);
     setSelectedDayEvents(day.events);
+
+    // 🌟 NUEVO: Cargar interpretaciones personalizadas para eventos HIGH/MEDIUM
+    const importantEvents = day.events.filter(e => e.priority === 'high' || e.priority === 'medium');
+
+    if (importantEvents.length > 0 && user && userProfile) {
+      console.log(`🔮 [INTERPRETATIONS] Loading personalized interpretations for ${importantEvents.length} events`);
+
+      // Cargar interpretaciones en background (no bloquear UI)
+      loadEventInterpretations(importantEvents);
+    }
+  };
+
+  // 🔮 Cargar interpretaciones personalizadas para eventos
+  const loadEventInterpretations = async (events: AstrologicalEvent[]) => {
+    if (!user) return;
+
+    try {
+      const token = await user.getIdToken();
+
+      // Cargar interpretaciones para cada evento importante
+      for (const event of events) {
+        // Si ya tiene interpretación personalizada, skip
+        if (event.aiInterpretation?.capa_2_aplicado) continue;
+
+        try {
+          const response = await fetch('/api/interpretations/event', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              event: {
+                type: event.type === 'lunar_phase' ? 'luna_nueva' :
+                      event.type === 'retrograde' ? 'transito' :
+                      event.type === 'eclipse' ? 'transito' : 'aspecto',
+                date: event.date,
+                sign: event.sign,
+                house: 1, // TODO: calcular casa real basada en carta natal
+                planetsInvolved: event.planet ? [event.planet] : [],
+                transitingPlanet: event.planet,
+              },
+              regenerate: false
+            })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+
+            // Actualizar el evento con la interpretación personalizada
+            setSelectedDayEvents(prev => prev.map(e =>
+              e.id === event.id
+                ? { ...e, aiInterpretation: data.interpretation }
+                : e
+            ));
+
+            console.log(`✅ [INTERPRETATIONS] Loaded for ${event.title}`);
+          }
+        } catch (err) {
+          console.error(`❌ [INTERPRETATIONS] Error loading for ${event.title}:`, err);
+        }
+      }
+    } catch (error) {
+      console.error('❌ [INTERPRETATIONS] Error getting token:', error);
+    }
   };
 
   // Modal handlers (reemplaza tooltip)
@@ -2204,11 +2269,71 @@ const AgendaPersonalizada = () => {
                 </p>
               </div>
 
-              {/* 🌟 INFORMACIÓN DEL DÍA: Mantra, Ritual, Ejercicios */}
+              {/* 🌟 INFORMACIÓN DEL DÍA: Interpretaciones Personalizadas */}
               {selectedDate && selectedDayEvents.length > 0 && (
                 <div className="space-y-4 mb-6">
-                  {/* Mantra del día */}
-                  {selectedDayEvents.some(e => e.aiInterpretation?.mantra) && (
+                  {/* 🔮 INTERPRETACIÓN PERSONALIZADA - CAPA 2 */}
+                  {selectedDayEvents.some(e => e.aiInterpretation?.capa_2_aplicado) && (
+                    <>
+                      {/* Cómo Se Vive en Ti */}
+                      {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.como_se_vive_en_ti) && (
+                        <div className="bg-gradient-to-r from-violet-500/20 to-purple-500/20 backdrop-blur-sm rounded-2xl p-4 border border-violet-400/30">
+                          <h4 className="text-violet-300 font-bold text-sm mb-2 flex items-center">
+                            <span className="mr-2">💫</span>
+                            Cómo Se Vive en Ti
+                          </h4>
+                          <p className="text-white text-sm leading-relaxed">
+                            {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.como_se_vive_en_ti)?.aiInterpretation?.capa_2_aplicado?.como_se_vive_en_ti}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Uso Consciente */}
+                      {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.uso_consciente_consejo_aplicado) && (
+                        <div className="bg-gradient-to-r from-emerald-500/20 to-green-500/20 backdrop-blur-sm rounded-2xl p-4 border border-emerald-400/30">
+                          <h4 className="text-emerald-300 font-bold text-sm mb-2 flex items-center">
+                            <span className="mr-2">✅</span>
+                            Uso Consciente
+                          </h4>
+                          <p className="text-white text-sm leading-relaxed">
+                            {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.uso_consciente_consejo_aplicado)?.aiInterpretation?.capa_2_aplicado?.uso_consciente_consejo_aplicado}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Acción Práctica */}
+                      {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.accion_practica_sugerida) && (
+                        <div className="bg-gradient-to-r from-blue-500/20 to-indigo-500/20 backdrop-blur-sm rounded-2xl p-4 border border-blue-400/30">
+                          <h4 className="text-blue-300 font-bold text-sm mb-2 flex items-center">
+                            <span className="mr-2">🎯</span>
+                            Acción Práctica
+                          </h4>
+                          <p className="text-white text-sm leading-relaxed">
+                            {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.accion_practica_sugerida)?.aiInterpretation?.capa_2_aplicado?.accion_practica_sugerida}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Síntesis/Mantra */}
+                      {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.sintesis_final) && (
+                        <div className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 backdrop-blur-sm rounded-2xl p-4 border border-amber-400/30">
+                          <h4 className="text-amber-300 font-bold text-sm mb-2 flex items-center">
+                            <span className="mr-2">✨</span>
+                            Tu Mantra
+                          </h4>
+                          <p className="text-white text-sm italic font-bold text-center">
+                            "{selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.sintesis_final)?.aiInterpretation?.capa_2_aplicado?.sintesis_final}"
+                          </p>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* FALLBACK: Mostrar interpretaciones genéricas si no hay personalizadas */}
+                  {!selectedDayEvents.some(e => e.aiInterpretation?.capa_2_aplicado) && (
+                    <>
+                      {/* Mantra del día */}
+                      {selectedDayEvents.some(e => e.aiInterpretation?.mantra) && (
                     <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-sm rounded-2xl p-4 border border-yellow-400/30">
                       <h4 className="text-yellow-300 font-bold text-sm mb-2 flex items-center">
                         <span className="mr-2">🌟</span>
@@ -2257,6 +2382,8 @@ const AgendaPersonalizada = () => {
                         {selectedDayEvents.find(e => e.aiInterpretation?.pregunta_clave)?.aiInterpretation?.pregunta_clave}
                       </p>
                     </div>
+                  )}
+                    </>
                   )}
                 </div>
               )}
