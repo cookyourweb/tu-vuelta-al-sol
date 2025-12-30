@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { format, addMonths, subMonths, isSameMonth, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
+import { format, addMonths, subMonths, isSameMonth, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, addWeeks, subWeeks, getDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -47,6 +47,7 @@ const AgendaPersonalizada = () => {
   // Estados para tabs principales
   const [activeTab, setActiveTab] = useState<'mi-anio' | 'mi-carta' | 'calendario' | 'eventos'>('calendario');
   const [calendarView, setCalendarView] = useState<'mes' | 'semana' | 'dia'>('mes');
+  const [currentWeekStart, setCurrentWeekStart] = useState<Date>(new Date());
 
   // Perfil de usuario REAL (no datos de prueba)
   const [userProfile, setUserProfile] = React.useState<UserProfile | null>(null);
@@ -967,6 +968,33 @@ const AgendaPersonalizada = () => {
         date: day,
         events: dayEvents,
         isCurrentMonth: isSameMonth(day, currentMonth),
+        hasEvents: dayEvents.length > 0
+      };
+    });
+
+    return daysWithEvents;
+  };
+
+  // 📆 Obtener días de la semana actual con eventos (para vista semanal)
+  const getCurrentWeekDays = () => {
+    const weekStart = startOfWeek(currentWeekStart, { weekStartsOn: 1 }); // Lunes
+    const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 1 }); // Domingo
+
+    const days = eachDayOfInterval({ start: weekStart, end: weekEnd });
+
+    const daysWithEvents = days.map(day => {
+      const dayEvents = events.filter(event => {
+        const eventDate = new Date(event.date);
+        return isSameDay(day, eventDate);
+      });
+
+      return {
+        date: day,
+        dayName: format(day, 'EEEE', { locale: es }),
+        dayNumber: format(day, 'd'),
+        monthName: format(day, 'MMM', { locale: es }),
+        events: dayEvents,
+        isToday: isSameDay(day, new Date()),
         hasEvents: dayEvents.length > 0
       };
     });
@@ -1933,54 +1961,233 @@ const AgendaPersonalizada = () => {
 
             {/* 📆 VISTA: SEMANA */}
             {calendarView === 'semana' && (
-              <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-sm rounded-2xl shadow-2xl border border-purple-400/20 p-8">
-                <div className="text-center text-white">
-                  <div className="text-6xl mb-4">📆</div>
-                  <h3 className="text-2xl font-bold mb-4">Vista Semanal</h3>
-                  <p className="text-gray-300 mb-6">Próximamente: Vista detallada de la semana con eventos día por día</p>
+              <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-sm rounded-2xl shadow-2xl border border-purple-400/20 overflow-hidden">
+                {/* Header de navegación semanal */}
+                <div className="bg-gradient-to-r from-purple-700/30 to-indigo-700/30 p-4 flex items-center justify-between">
+                  <button
+                    onClick={() => setCurrentWeekStart(subWeeks(currentWeekStart, 1))}
+                    className="p-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 transition-all duration-200 border border-purple-400/30 hover:border-purple-400/50"
+                    title="Semana anterior"
+                  >
+                    <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
 
-                  <div className="grid grid-cols-1 gap-4 max-w-2xl mx-auto">
-                    {/* Placeholder para días de la semana */}
-                    {['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'].map((dia, index) => (
-                      <div key={index} className="bg-white/5 rounded-xl p-4 border border-purple-400/20">
-                        <div className="font-bold text-purple-300 mb-2">{dia}</div>
-                        <div className="text-sm text-gray-400">Eventos del día aparecerán aquí</div>
+                  <h3 className="text-white font-bold text-lg">
+                    Semana del {format(startOfWeek(currentWeekStart, { weekStartsOn: 1 }), 'd MMM', { locale: es })} - {format(endOfWeek(currentWeekStart, { weekStartsOn: 1 }), 'd MMM yyyy', { locale: es })}
+                  </h3>
+
+                  <button
+                    onClick={() => setCurrentWeekStart(addWeeks(currentWeekStart, 1))}
+                    className="p-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 transition-all duration-200 border border-purple-400/30 hover:border-purple-400/50"
+                    title="Semana siguiente"
+                  >
+                    <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Días de la semana */}
+                <div className="p-6 space-y-4">
+                  {getCurrentWeekDays().map((day, index) => (
+                    <div
+                      key={index}
+                      className={`
+                        rounded-xl p-4 border transition-all duration-200 cursor-pointer
+                        ${day.isToday
+                          ? 'bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-400/30'
+                          : 'bg-white/5 border-purple-400/20 hover:bg-white/10 hover:border-purple-400/30'
+                        }
+                      `}
+                      onClick={() => {
+                        setSelectedDate(day.date);
+                        setCalendarView('dia');
+                      }}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className={`
+                            text-center
+                            ${day.isToday ? 'text-yellow-300' : 'text-purple-300'}
+                          `}>
+                            <div className="text-xs font-semibold uppercase">{day.dayName}</div>
+                            <div className="text-2xl font-bold">{day.dayNumber}</div>
+                            <div className="text-xs">{day.monthName}</div>
+                          </div>
+
+                          <div className={`text-sm font-medium ${day.isToday ? 'text-yellow-200' : 'text-white'}`}>
+                            {day.hasEvents ? `${day.events.length} evento${day.events.length > 1 ? 's' : ''}` : 'Sin eventos'}
+                          </div>
+                        </div>
+
+                        {day.isToday && (
+                          <span className="bg-yellow-400/80 text-black text-xs font-bold px-2 py-1 rounded-full">
+                            HOY
+                          </span>
+                        )}
                       </div>
-                    ))}
-                  </div>
+
+                      {day.hasEvents && (
+                        <div className="space-y-2">
+                          {day.events.slice(0, 3).map((event, eventIndex) => (
+                            <div
+                              key={eventIndex}
+                              className="bg-white/5 rounded-lg p-2 border border-white/10"
+                            >
+                              <div className="flex items-start gap-2">
+                                <span className="text-sm flex-shrink-0">{getEventIcon(event.type, event.priority)}</span>
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-white text-sm font-medium">{event.title}</div>
+                                  {event.planet && event.sign && (
+                                    <div className="text-purple-300 text-xs">{event.planet} en {event.sign}</div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+
+                          {day.events.length > 3 && (
+                            <div className="text-purple-300 text-xs text-center">
+                              +{day.events.length - 3} evento{day.events.length - 3 > 1 ? 's' : ''} más
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
 
             {/* 📋 VISTA: DÍA */}
-            {calendarView === 'dia' && (
-              <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-sm rounded-2xl shadow-2xl border border-purple-400/20 p-8">
-                <div className="text-center text-white">
-                  <div className="text-6xl mb-4">📋</div>
-                  <h3 className="text-2xl font-bold mb-4">Vista Diaria Detallada</h3>
-                  <p className="text-gray-300 mb-6">Próximamente: Vista ultra-detallada del día seleccionado</p>
-
-                  <div className="max-w-3xl mx-auto space-y-4">
-                    <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-2xl p-6 border border-yellow-400/30">
-                      <h4 className="font-bold text-yellow-300 mb-2">🌟 Mantra del Día</h4>
-                      <p className="text-gray-200">Aquí aparecerá el mantra personalizado del día</p>
+            {calendarView === 'dia' && selectedDate && (
+              <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-sm rounded-2xl shadow-2xl border border-purple-400/20 overflow-hidden">
+                {/* Header del día */}
+                <div className="bg-gradient-to-r from-purple-700/30 to-indigo-700/30 p-6 border-b border-purple-400/20">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-3xl font-bold text-white">
+                        {format(selectedDate, 'EEEE d', { locale: es })}
+                      </h3>
+                      <p className="text-purple-200 text-sm mt-1">
+                        {format(selectedDate, 'MMMM yyyy', { locale: es })}
+                      </p>
                     </div>
 
-                    <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl p-6 border border-green-400/30">
-                      <h4 className="font-bold text-green-300 mb-2">🔥 Ritual del Día</h4>
-                      <p className="text-gray-200">Ritual breve de 5 minutos basado en la energía del día</p>
-                    </div>
-
-                    <div className="bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-2xl p-6 border border-blue-400/30">
-                      <h4 className="font-bold text-blue-300 mb-2">💪 Ejercicios Recomendados</h4>
-                      <p className="text-gray-200">Ejercicios prácticos según la interpretación del día</p>
-                    </div>
-
-                    <div className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded-2xl p-6 border border-pink-400/30">
-                      <h4 className="font-bold text-pink-300 mb-2">🎯 Eventos del Día</h4>
-                      <p className="text-gray-200">Lista completa de eventos astrológicos del día</p>
-                    </div>
+                    <button
+                      onClick={() => setCalendarView('mes')}
+                      className="bg-purple-500/20 hover:bg-purple-500/30 text-white px-4 py-2 rounded-lg border border-purple-400/30 transition-all duration-200 text-sm font-medium"
+                    >
+                      ← Volver al mes
+                    </button>
                   </div>
+                </div>
+
+                <div className="p-6 space-y-6">
+                  {/* Resumen del día */}
+                  {selectedDayEvents.length > 0 ? (
+                    <>
+                      {/* Mantra del día */}
+                      {selectedDayEvents.some(e => e.aiInterpretation?.mantra) && (
+                        <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-2xl p-6 border border-yellow-400/30">
+                          <h4 className="font-bold text-yellow-300 mb-3 text-lg flex items-center gap-2">
+                            <span>🌟</span>
+                            Mantra del Día
+                          </h4>
+                          <p className="text-white text-lg italic font-medium leading-relaxed">
+                            "{selectedDayEvents.find(e => e.aiInterpretation?.mantra)?.aiInterpretation?.mantra}"
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Ritual del día */}
+                      {selectedDayEvents.some(e => e.aiInterpretation?.ritual_breve) && (
+                        <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl p-6 border border-green-400/30">
+                          <h4 className="font-bold text-green-300 mb-3 text-lg flex items-center gap-2">
+                            <span>🔥</span>
+                            Ritual del Día (5 minutos)
+                          </h4>
+                          <p className="text-white leading-relaxed whitespace-pre-line">
+                            {selectedDayEvents.find(e => e.aiInterpretation?.ritual_breve)?.aiInterpretation?.ritual_breve || 'Ritual de 5 minutos para conectar con la energía del día'}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Consejo del día */}
+                      {selectedDayEvents.some(e => e.aiInterpretation?.advice) && (
+                        <div className="bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-2xl p-6 border border-blue-400/30">
+                          <h4 className="font-bold text-blue-300 mb-3 text-lg flex items-center gap-2">
+                            <span>💡</span>
+                            Consejo para Ti
+                          </h4>
+                          <p className="text-white leading-relaxed">
+                            {selectedDayEvents.find(e => e.aiInterpretation?.advice)?.aiInterpretation?.advice}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Pregunta clave */}
+                      {selectedDayEvents.some(e => e.aiInterpretation?.pregunta_clave) && (
+                        <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl p-6 border border-purple-400/30">
+                          <h4 className="font-bold text-purple-300 mb-3 text-lg flex items-center gap-2">
+                            <span>❓</span>
+                            Pregunta del Día
+                          </h4>
+                          <p className="text-white text-lg font-medium italic leading-relaxed">
+                            {selectedDayEvents.find(e => e.aiInterpretation?.pregunta_clave)?.aiInterpretation?.pregunta_clave}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Eventos del día */}
+                      <div className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded-2xl p-6 border border-pink-400/30">
+                        <h4 className="font-bold text-pink-300 mb-4 text-lg flex items-center gap-2">
+                          <span>🎯</span>
+                          Eventos Astrológicos del Día ({selectedDayEvents.length})
+                        </h4>
+
+                        <div className="space-y-3">
+                          {selectedDayEvents.map((event, index) => (
+                            <div
+                              key={index}
+                              className="bg-white/5 rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all duration-200 cursor-pointer"
+                              onClick={() => {
+                                setModalEvent(event);
+                                setShowEventModal(true);
+                              }}
+                            >
+                              <div className="flex items-start gap-3">
+                                <span className="text-2xl flex-shrink-0">{getEventIcon(event.type, event.priority)}</span>
+                                <div className="flex-1">
+                                  <h5 className="text-white font-bold mb-1">{event.title}</h5>
+                                  {event.planet && event.sign && (
+                                    <p className="text-purple-300 text-sm mb-2">{event.planet} en {event.sign}</p>
+                                  )}
+                                  <p className="text-gray-300 text-sm line-clamp-2">{event.description}</p>
+
+                                  {event.aiInterpretation && (
+                                    <div className="mt-2 text-purple-200 text-xs">
+                                      Click para ver interpretación completa ✨
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="text-6xl mb-4">🌙</div>
+                      <h4 className="text-2xl font-bold text-white mb-2">Día sin eventos especiales</h4>
+                      <p className="text-gray-300">
+                        Este día no tiene eventos astrológicos destacados. ¡Perfecto para descansar y consolidar!
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -2154,7 +2361,7 @@ const AgendaPersonalizada = () => {
             </div>
           </div>
         </div>
-          </>
+        </>
         )}
 
         {/* TOOLTIP ÉPICO */}
