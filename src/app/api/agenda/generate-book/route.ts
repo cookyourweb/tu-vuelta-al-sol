@@ -174,13 +174,36 @@ export async function POST(request: NextRequest) {
     const eventInterpretations: { [eventId: string]: any } = {};
 
     // Extraer solo eventos clave (lunas nuevas, lunas llenas)
-    // TODO: Agregar eclipses cuando EventInterpretation model soporte esos tipos
     const keyEvents = yearEvents.filter(e =>
       e.type === 'luna-nueva' ||
       e.type === 'luna-llena'
     );
 
-    console.log(`📌 Key events to interpret: ${keyEvents.length}`);
+    // 🔒 SISTEMA DE LÍMITES: Control de costos API
+    const isAdmin = user?.email?.includes('@admin') || user?.email?.includes('cookyourweb');
+    const hasSubscription = user?.subscription?.status === 'active' || user?.hasPurchasedAgenda === true;
+
+    // Definir límite de meses con interpretación IA
+    let monthsWithAI = 12; // Por defecto todo el año
+
+    if (!isAdmin && !hasSubscription) {
+      monthsWithAI = 3; // Solo 3 meses para usuarios gratuitos
+      console.log('🆓 FREE USER: Limiting AI interpretations to 3 months');
+    } else {
+      console.log('💎 PREMIUM USER: Full year AI interpretations enabled');
+    }
+
+    // Filtrar eventos solo de los primeros N meses
+    const cutoffDate = new Date(startDate);
+    cutoffDate.setMonth(cutoffDate.getMonth() + monthsWithAI);
+
+    const eventsWithinLimit = keyEvents.filter(e => {
+      const eventDate = new Date(e.date);
+      return eventDate < cutoffDate;
+    });
+
+    console.log(`📌 Total key events: ${keyEvents.length}`);
+    console.log(`✅ Events within AI limit (${monthsWithAI} months): ${eventsWithinLimit.length}`);
 
     // Verificar que tengamos natal interpretation (ya fue consultada arriba en línea 81)
     if (!natalInterpretation) {
@@ -190,8 +213,8 @@ export async function POST(request: NextRequest) {
       const { generateEventInterpretationPrompt } = require('@/utils/prompts/eventInterpretationPrompt');
       const { calculateExpirationDate } = require('@/models/EventInterpretation');
 
-      // Para cada evento clave, buscar o generar interpretación
-      for (const event of keyEvents) {
+      // Para cada evento dentro del límite, buscar o generar interpretación
+      for (const event of eventsWithinLimit) {
         try {
           // Normalizar tipo de evento para generateEventId (usar underscore)
           const eventType = event.type.replace('-', '_') as 'luna_nueva' | 'luna_llena';
