@@ -48,33 +48,38 @@ export default function RegisterPage() {
               </div>
               
               <h1 className="text-4xl md:text-5xl font-black mb-4">
-                Tu viaje cósmico
+                Bienvenido/a a
               </h1>
-              
-              <h2 className="text-2xl md:text-3xl font-bold mb-6">
-                <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">comienza aquí</span>
+
+              <h2 className="text-3xl md:text-4xl font-bold mb-6 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
+                Tu Vuelta al Sol
               </h2>
-              
-              <p className="text-gray-300 text-lg leading-relaxed">
-                Únete a miles de personas que han descubierto su verdadero propósito en las estrellas.
+
+              <p className="text-xl text-purple-300 font-semibold mb-4">
+                Tu agenda astrológica personalizada
+              </p>
+
+              <p className="text-gray-300 text-base leading-relaxed">
+                No es un horóscopo genérico.<br/>
+                Es una herramienta para entenderte mejor y vivir con más sentido.
               </p>
             </div>
 
             {/* Beneficios rápidos */}
             <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="bg-gradient-to-br from-pink-400/10 to-red-500/10 border border-pink-400/30 rounded-2xl p-4 text-center backdrop-blur-sm">
-                <Heart className="w-6 h-6 text-pink-400 mx-auto mb-2" />
-                <p className="text-pink-300 text-xs font-semibold">Encuentra el amor</p>
+              <div className="bg-gradient-to-br from-blue-400/10 to-cyan-500/10 border border-blue-400/30 rounded-2xl p-4 text-center backdrop-blur-sm">
+                <Moon className="w-6 h-6 text-blue-400 mx-auto mb-2" />
+                <p className="text-blue-300 text-xs font-semibold">Tu carta natal</p>
               </div>
-              
+
               <div className="bg-gradient-to-br from-yellow-400/10 to-orange-500/10 border border-yellow-400/30 rounded-2xl p-4 text-center backdrop-blur-sm">
-                <Zap className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
-                <p className="text-yellow-300 text-xs font-semibold">Descubre tu propósito</p>
+                <Star className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
+                <p className="text-yellow-300 text-xs font-semibold">Retorno solar</p>
               </div>
-              
-              <div className="bg-gradient-to-br from-purple-400/10 to-blue-500/10 border border-purple-400/30 rounded-2xl p-4 text-center backdrop-blur-sm">
-                <Moon className="w-6 h-6 text-purple-400 mx-auto mb-2" />
-                <p className="text-purple-300 text-xs font-semibold">Sana tu alma</p>
+
+              <div className="bg-gradient-to-br from-purple-400/10 to-pink-500/10 border border-purple-400/30 rounded-2xl p-4 text-center backdrop-blur-sm">
+                <Zap className="w-6 h-6 text-purple-400 mx-auto mb-2" />
+                <p className="text-purple-300 text-xs font-semibold">Agenda personal</p>
               </div>
             </div>
 
@@ -100,22 +105,15 @@ export default function RegisterPage() {
             </div>
 
             {/* Mensaje inspiracional */}
-            <div className="bg-gradient-to-r from-purple-400/10 to-pink-500/10 border border-purple-400/30 rounded-2xl p-6 backdrop-blur-sm text-center">
+            <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/20 border border-purple-400/30 rounded-2xl p-6 backdrop-blur-sm text-center">
               <div className="flex items-center justify-center mb-3">
                 <Sparkles className="w-5 h-5 text-purple-400 mr-2" />
-                <span className="font-semibold text-purple-300">Tu Destino Te Llama</span>
+                <span className="font-semibold text-purple-300">¿Para quién es?</span>
               </div>
-              <p className="text-gray-300 text-sm">
-                "En el momento exacto que naciste, el universo escribió tu historia. Es hora de leerla."
+              <p className="text-gray-300 text-sm leading-relaxed">
+                Para personas que sienten que este año no va de correr más,<br/>
+                <span className="text-purple-300 font-medium">sino de vivir con más sentido.</span>
               </p>
-            </div>
-
-            {/* Testimonial rápido */}
-            <div className="bg-gradient-to-r from-green-400/10 to-emerald-500/10 border border-green-400/30 rounded-2xl p-4 backdrop-blur-sm">
-              <p className="text-gray-300 text-sm italic text-center">
-                "Registrarme fue la mejor decisión que tomé. Ahora entiendo por qué las cosas pasaron como pasaron."
-              </p>
-              <p className="text-green-400 text-xs text-center mt-2 font-semibold">- Elena M.</p>
             </div>
           </div>
         </div>
