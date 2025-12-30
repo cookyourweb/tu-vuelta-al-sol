@@ -3,7 +3,7 @@
 // GET /api/interpretations?userId=xxx&chartType=natal|solar-return
 
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
+import connectDB from '@/lib/db';
 import Interpretation from '@/models/Interpretation';
 
 export async function GET(request: NextRequest) {
