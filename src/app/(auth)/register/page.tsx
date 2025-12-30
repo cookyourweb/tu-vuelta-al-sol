@@ -47,39 +47,66 @@ export default function RegisterPage() {
                 </div>
               </div>
               
-              <h1 className="text-4xl md:text-5xl font-black mb-4">
-                Bienvenido/a a
+              <h1 className="text-3xl md:text-4xl font-bold mb-3 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
+                Tu Vuelta al Sol
               </h1>
 
-              <h2 className="text-3xl md:text-4xl font-bold mb-6 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
-                Tu Vuelta al Sol
-              </h2>
-
-              <p className="text-xl text-purple-300 font-semibold mb-4">
-                Tu agenda astrológica personalizada
+              <p className="text-lg text-purple-300 font-semibold mb-6">
+                Agenda astrológica personalizada
               </p>
 
-              <p className="text-gray-300 text-base leading-relaxed">
-                No es un horóscopo genérico.<br/>
-                Es una herramienta para entenderte mejor y vivir con más sentido.
-              </p>
-            </div>
+              <div className="max-w-lg mx-auto space-y-6 text-left">
+                <p className="text-base text-gray-200 leading-relaxed">
+                  Una experiencia creada a partir de tu carta natal y tu retorno solar, diseñada para acompañarte durante todo el año.
+                </p>
 
-            {/* Beneficios rápidos */}
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="bg-gradient-to-br from-blue-400/10 to-cyan-500/10 border border-blue-400/30 rounded-2xl p-4 text-center backdrop-blur-sm">
-                <Star className="w-6 h-6 text-blue-400 mx-auto mb-2" />
-                <p className="text-blue-300 text-xs font-semibold">Carta Natal</p>
-              </div>
+                <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/20 border border-purple-400/20 rounded-2xl p-4">
+                  <p className="text-base text-white font-medium mb-2">
+                    No es un horóscopo genérico.
+                  </p>
+                  <p className="text-sm text-gray-300">
+                    Es una guía personal para entender tus ciclos, tomar decisiones con más conciencia y vivir el año alineada contigo.
+                  </p>
+                </div>
 
-              <div className="bg-gradient-to-br from-yellow-400/10 to-orange-500/10 border border-yellow-400/30 rounded-2xl p-4 text-center backdrop-blur-sm">
-                <Sun className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
-                <p className="text-yellow-300 text-xs font-semibold">Retorno Solar</p>
-              </div>
+                <div className="space-y-4">
+                  <p className="text-sm font-semibold text-purple-300">✨ Incluye:</p>
 
-              <div className="bg-gradient-to-br from-purple-400/10 to-pink-500/10 border border-purple-400/30 rounded-2xl p-4 text-center backdrop-blur-sm">
-                <Calendar className="w-6 h-6 text-purple-400 mx-auto mb-2" />
-                <p className="text-purple-300 text-xs font-semibold">Agenda Personal</p>
+                  <div className="space-y-3">
+                    <div className="flex items-start">
+                      <Star className="w-5 h-5 text-blue-400 mr-3 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="text-sm font-semibold text-blue-300">Carta Natal</p>
+                        <p className="text-xs text-gray-400">tu esencia y patrones personales</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start">
+                      <Sun className="w-5 h-5 text-yellow-400 mr-3 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="text-sm font-semibold text-yellow-300">Retorno Solar</p>
+                        <p className="text-xs text-gray-400">las energías activas de este año</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start">
+                      <Calendar className="w-5 h-5 text-purple-400 mr-3 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="text-sm font-semibold text-purple-300">Agenda personalizada</p>
+                        <p className="text-xs text-gray-400">ciclos, fechas clave y espacios de reflexión</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-r from-pink-900/20 to-purple-900/20 border border-pink-400/20 rounded-2xl p-4 text-center">
+                  <p className="text-base text-white font-medium mb-1">
+                    Este año no va de hacer más.
+                  </p>
+                  <p className="text-base text-purple-300 font-semibold">
+                    Va de vivir con sentido.
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -95,24 +122,12 @@ export default function RegisterPage() {
             <div className="text-center">
               <p className="text-gray-400">
                 ¿Ya tienes cuenta?{' '}
-                <Link 
+                <Link
                   href="/login"
                   className="text-yellow-400 hover:text-yellow-300 font-semibold transition-colors duration-300"
                 >
-                  Accede a tu universo
+                  Inicia sesión
                 </Link>
-              </p>
-            </div>
-
-            {/* Mensaje inspiracional */}
-            <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/20 border border-purple-400/30 rounded-2xl p-6 backdrop-blur-sm text-center">
-              <div className="flex items-center justify-center mb-3">
-                <Sparkles className="w-5 h-5 text-purple-400 mr-2" />
-                <span className="font-semibold text-purple-300">¿Para quién es?</span>
-              </div>
-              <p className="text-gray-300 text-sm leading-relaxed">
-                Para personas que sienten que este año no va de correr más,<br/>
-                <span className="text-purple-300 font-medium">sino de vivir con más sentido.</span>
               </p>
             </div>
           </div>
