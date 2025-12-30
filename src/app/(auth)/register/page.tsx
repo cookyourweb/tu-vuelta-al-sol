@@ -1,7 +1,7 @@
 // src/app/(auth)/register/page.tsx
 import RegisterForm from '@/components/auth/RegisterForm';
 import Link from 'next/link';
-import { Star, Sparkles, ArrowLeft, Sun, Calendar } from 'lucide-react';
+import { Sparkles, ArrowLeft } from 'lucide-react';
 
 export default function RegisterPage() {
   return (
@@ -37,77 +37,23 @@ export default function RegisterPage() {
         <div className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
           <div className="max-w-md w-full space-y-8">
             
-            {/* Header inspiracional */}
+            {/* Header simple */}
             <div className="text-center">
               <div className="flex justify-center items-center mb-8">
                 <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 border border-yellow-400/30 rounded-full p-8 backdrop-blur-sm relative">
                   <div className="absolute -top-2 -right-2 w-4 h-4 bg-yellow-400 rounded-full animate-pulse"></div>
                   <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-orange-400 rounded-full animate-bounce"></div>
-                  <Star className="w-12 h-12 text-yellow-400" />
+                  <Sparkles className="w-12 h-12 text-yellow-400" />
                 </div>
               </div>
-              
-              <h1 className="text-3xl md:text-4xl font-bold mb-3 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
-                Tu Vuelta al Sol
+
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
+                Crear cuenta
               </h1>
 
-              <p className="text-lg text-purple-300 font-semibold mb-6">
-                Agenda astrológica personalizada
+              <p className="text-xl text-gray-300">
+                Comienza tu viaje astrológico
               </p>
-
-              <div className="max-w-lg mx-auto space-y-6 text-left">
-                <p className="text-base text-gray-200 leading-relaxed">
-                  Una experiencia creada a partir de tu carta natal y tu retorno solar, diseñada para acompañarte durante todo el año.
-                </p>
-
-                <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/20 border border-purple-400/20 rounded-2xl p-4">
-                  <p className="text-base text-white font-medium mb-2">
-                    No es un horóscopo genérico.
-                  </p>
-                  <p className="text-sm text-gray-300">
-                    Es una guía personal para entender tus ciclos, tomar decisiones con más conciencia y vivir el año alineada contigo.
-                  </p>
-                </div>
-
-                <div className="space-y-4">
-                  <p className="text-sm font-semibold text-purple-300">✨ Incluye:</p>
-
-                  <div className="space-y-3">
-                    <div className="flex items-start">
-                      <Star className="w-5 h-5 text-blue-400 mr-3 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-sm font-semibold text-blue-300">Carta Natal</p>
-                        <p className="text-xs text-gray-400">tu esencia y patrones personales</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start">
-                      <Sun className="w-5 h-5 text-yellow-400 mr-3 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-sm font-semibold text-yellow-300">Retorno Solar</p>
-                        <p className="text-xs text-gray-400">las energías activas de este año</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start">
-                      <Calendar className="w-5 h-5 text-purple-400 mr-3 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-sm font-semibold text-purple-300">Agenda personalizada</p>
-                        <p className="text-xs text-gray-400">ciclos, fechas clave y espacios de reflexión</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-r from-pink-900/20 to-purple-900/20 border border-pink-400/20 rounded-2xl p-4 text-center">
-                  <p className="text-base text-white font-medium mb-1">
-                    Este año no va de hacer más.
-                  </p>
-                  <p className="text-base text-purple-300 font-semibold">
-                    Va de vivir con sentido.
-                  </p>
-                </div>
-              </div>
             </div>
 
             {/* Formulario de registro */}
