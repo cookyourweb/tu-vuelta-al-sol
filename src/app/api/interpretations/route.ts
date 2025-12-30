@@ -55,10 +55,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       exists: true,
-      interpretation: interpretation.interpretation,
-      generatedAt: interpretation.generatedAt,
-      method: interpretation.method,
-      cached: interpretation.cached
+      interpretation: (interpretation as any).interpretation,
+      generatedAt: (interpretation as any).generatedAt,
+      method: (interpretation as any).method,
+      cached: (interpretation as any).cached
     });
 
   } catch (error: any) {
