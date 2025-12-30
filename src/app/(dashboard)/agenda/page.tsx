@@ -48,6 +48,7 @@ const AgendaPersonalizada = () => {
   const [activeTab, setActiveTab] = useState<'mi-anio' | 'mi-carta' | 'calendario' | 'eventos'>('calendario');
   const [calendarView, setCalendarView] = useState<'mes' | 'semana' | 'dia'>('mes');
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(new Date());
+  const [eventFilter, setEventFilter] = useState<'all' | 'moon_phase' | 'eclipse' | 'retrograde' | 'high_priority'>('all');
 
   // Perfil de usuario REAL (no datos de prueba)
   const [userProfile, setUserProfile] = React.useState<UserProfile | null>(null);
@@ -1704,26 +1705,157 @@ const AgendaPersonalizada = () => {
                 Todos los Eventos del Año
               </h2>
 
-              <div className="space-y-4">
+              {/* Filtros */}
+              <div className="mb-6">
                 <div className="flex gap-2 flex-wrap">
-                  <button className="px-4 py-2 bg-purple-500/30 hover:bg-purple-500/50 rounded-lg text-white font-medium transition-colors">
-                    Todos
+                  <button
+                    onClick={() => setEventFilter('all')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      eventFilter === 'all'
+                        ? 'bg-purple-500/50 text-white'
+                        : 'bg-white/5 hover:bg-white/10 text-purple-200'
+                    }`}
+                  >
+                    Todos ({events.length})
                   </button>
-                  <button className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-purple-200 font-medium transition-colors">
-                    Fases Lunares
+                  <button
+                    onClick={() => setEventFilter('moon_phase')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      eventFilter === 'moon_phase'
+                        ? 'bg-purple-500/50 text-white'
+                        : 'bg-white/5 hover:bg-white/10 text-purple-200'
+                    }`}
+                  >
+                    🌙 Fases Lunares ({events.filter(e => e.type === 'moon_phase').length})
                   </button>
-                  <button className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-purple-200 font-medium transition-colors">
-                    Eclipses
+                  <button
+                    onClick={() => setEventFilter('eclipse')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      eventFilter === 'eclipse'
+                        ? 'bg-purple-500/50 text-white'
+                        : 'bg-white/5 hover:bg-white/10 text-purple-200'
+                    }`}
+                  >
+                    🌑 Eclipses ({events.filter(e => e.type === 'eclipse').length})
                   </button>
-                  <button className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-purple-200 font-medium transition-colors">
-                    Retrogrados
+                  <button
+                    onClick={() => setEventFilter('retrograde')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      eventFilter === 'retrograde'
+                        ? 'bg-purple-500/50 text-white'
+                        : 'bg-white/5 hover:bg-white/10 text-purple-200'
+                    }`}
+                  >
+                    ↩️ Retrogrados ({events.filter(e => e.type === 'retrograde').length})
                   </button>
-                </div>
-
-                <div className="bg-white/5 rounded-2xl p-6 text-center text-gray-300">
-                  <p>Timeline de eventos - se poblará con la lista completa de eventos astrológicos</p>
+                  <button
+                    onClick={() => setEventFilter('high_priority')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      eventFilter === 'high_priority'
+                        ? 'bg-purple-500/50 text-white'
+                        : 'bg-white/5 hover:bg-white/10 text-purple-200'
+                    }`}
+                  >
+                    ⭐ Prioritarios ({events.filter(e => e.priority === 'high').length})
+                  </button>
                 </div>
               </div>
+
+              {/* Timeline de eventos */}
+              <div className="space-y-3 max-h-[800px] overflow-y-auto">
+                {events.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-6xl mb-4">🌌</div>
+                    <h4 className="text-2xl font-bold text-white mb-2">No hay eventos cargados</h4>
+                    <p className="text-gray-300">
+                      Carga los eventos desde el botón "Regenerar Mes" en la vista de calendario
+                    </p>
+                  </div>
+                ) : (
+                  events
+                    .filter(event => {
+                      if (eventFilter === 'all') return true;
+                      if (eventFilter === 'high_priority') return event.priority === 'high';
+                      return event.type === eventFilter;
+                    })
+                    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                    .map((event, index) => (
+                      <div
+                        key={index}
+                        className={`
+                          relative pl-8 pb-6 border-l-2 transition-all duration-200 cursor-pointer hover:scale-[1.02]
+                          ${event.priority === 'high' ? 'border-yellow-400' : 'border-purple-400/30'}
+                        `}
+                        onClick={() => {
+                          setSelectedDate(new Date(event.date));
+                          setActiveTab('calendario');
+                          setCalendarView('dia');
+                        }}
+                      >
+                        {/* Dot en la línea de tiempo */}
+                        <div className={`
+                          absolute left-[-8px] top-0 w-4 h-4 rounded-full border-2
+                          ${event.priority === 'high'
+                            ? 'bg-yellow-400 border-yellow-300 animate-pulse'
+                            : 'bg-purple-500 border-purple-400'
+                          }
+                        `}></div>
+
+                        {/* Contenido del evento */}
+                        <div className={`
+                          bg-gradient-to-r rounded-xl p-4 border
+                          ${getEventColor(event.type, event.priority)}/20
+                          ${event.priority === 'high' ? 'border-yellow-400/30' : 'border-purple-400/20'}
+                        `}>
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-start gap-3 flex-1">
+                              <span className="text-2xl flex-shrink-0">{getEventIcon(event.type, event.priority)}</span>
+                              <div className="flex-1">
+                                <h4 className="text-white font-bold text-lg mb-1">{event.title}</h4>
+                                <p className="text-purple-200 text-sm">
+                                  {format(new Date(event.date), "EEEE d 'de' MMMM yyyy", { locale: es })}
+                                </p>
+                                {event.planet && event.sign && (
+                                  <p className="text-purple-300 text-sm mt-1">{event.planet} en {event.sign}</p>
+                                )}
+                              </div>
+                            </div>
+
+                            {event.priority === 'high' && (
+                              <span className="bg-yellow-400/80 text-black text-xs font-bold px-2 py-1 rounded-full animate-pulse flex-shrink-0">
+                                PRIORITARIO
+                              </span>
+                            )}
+                          </div>
+
+                          <p className="text-gray-200 text-sm leading-relaxed mb-3 line-clamp-2">
+                            {event.description}
+                          </p>
+
+                          {event.aiInterpretation && (
+                            <div className="mt-3 flex items-center gap-2 text-purple-300 text-xs">
+                              <span>✨</span>
+                              <span>Interpretación personalizada disponible</span>
+                            </div>
+                          )}
+
+                          <div className="mt-3 text-purple-400 text-xs">
+                            Click para ver el día completo →
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                )}
+              </div>
+
+              {events.length > 0 && eventFilter !== 'all' && (
+                <div className="mt-4 text-center text-gray-400 text-sm">
+                  Mostrando {events.filter(event => {
+                    if (eventFilter === 'high_priority') return event.priority === 'high';
+                    return event.type === eventFilter;
+                  }).length} de {events.length} eventos totales
+                </div>
+              )}
             </div>
           </div>
         )}
