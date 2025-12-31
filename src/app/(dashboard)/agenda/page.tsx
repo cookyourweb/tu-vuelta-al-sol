@@ -891,7 +891,7 @@ const AgendaPersonalizada = () => {
         // ⚡ FILTRAR solo eventos importantes para evitar saturación
         const importantEvents = yearEvents.filter((e: AstrologicalEvent) => {
           return (
-            e.type === 'moon_phase' ||  // Lunas nuevas/llenas
+            e.type === 'lunar_phase' ||  // Lunas nuevas/llenas
             e.type === 'eclipse' ||      // Eclipses
             e.type === 'retrograde' ||   // Retrógradas
             e.priority === 'high'        // Alta prioridad
@@ -1087,7 +1087,7 @@ const AgendaPersonalizada = () => {
       // Cargar interpretaciones para cada evento importante
       for (const event of events) {
         // Si ya tiene interpretación personalizada, skip
-        if (event.aiInterpretation?.capa_2_aplicado) continue;
+        if (event.aiInterpretation && 'capa_2_aplicado' in event.aiInterpretation && (event.aiInterpretation as any).capa_2_aplicado) continue;
 
         try {
           const response = await fetch('/api/interpretations/event', {
@@ -1800,7 +1800,7 @@ const AgendaPersonalizada = () => {
                         // ⚡ FILTRAR solo eventos importantes
                         const importantEvents = yearEvents.filter((e: AstrologicalEvent) => {
                           return (
-                            e.type === 'moon_phase' ||
+                            e.type === 'lunar_phase' ||
                             e.type === 'eclipse' ||
                             e.type === 'retrograde' ||
                             e.priority === 'high'
@@ -2140,14 +2140,14 @@ const AgendaPersonalizada = () => {
                       )}
 
                       {/* Ritual del día */}
-                      {selectedDayEvents.some(e => e.aiInterpretation?.ritual_breve) && (
+                      {selectedDayEvents.some(e => e.aiInterpretation?.ritual) && (
                         <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl p-6 border border-green-400/30">
                           <h4 className="font-bold text-green-300 mb-3 text-lg flex items-center gap-2">
                             <span>🔥</span>
                             Ritual del Día (5 minutos)
                           </h4>
                           <p className="text-white leading-relaxed whitespace-pre-line">
-                            {selectedDayEvents.find(e => e.aiInterpretation?.ritual_breve)?.aiInterpretation?.ritual_breve || 'Ritual de 5 minutos para conectar con la energía del día'}
+                            {selectedDayEvents.find(e => e.aiInterpretation?.ritual)?.aiInterpretation?.ritual || 'Ritual de 5 minutos para conectar con la energía del día'}
                           </p>
                         </div>
                       )}
@@ -2166,14 +2166,14 @@ const AgendaPersonalizada = () => {
                       )}
 
                       {/* Pregunta clave */}
-                      {selectedDayEvents.some(e => e.aiInterpretation?.pregunta_clave) && (
+                      {selectedDayEvents.some(e => e.aiInterpretation && 'pregunta_clave' in e.aiInterpretation && (e.aiInterpretation as any).pregunta_clave) && (
                         <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl p-6 border border-purple-400/30">
                           <h4 className="font-bold text-purple-300 mb-3 text-lg flex items-center gap-2">
                             <span>❓</span>
                             Pregunta del Día
                           </h4>
                           <p className="text-white text-lg font-medium italic leading-relaxed">
-                            {selectedDayEvents.find(e => e.aiInterpretation?.pregunta_clave)?.aiInterpretation?.pregunta_clave}
+                            {(selectedDayEvents.find(e => e.aiInterpretation && 'pregunta_clave' in e.aiInterpretation)?.aiInterpretation as any)?.pregunta_clave}
                           </p>
                         </div>
                       )}
@@ -2278,56 +2278,56 @@ const AgendaPersonalizada = () => {
               {selectedDate && selectedDayEvents.length > 0 && (
                 <div className="space-y-4 mb-6">
                   {/* 🔮 INTERPRETACIÓN PERSONALIZADA - CAPA 2 */}
-                  {selectedDayEvents.some(e => e.aiInterpretation?.capa_2_aplicado) && (
+                  {selectedDayEvents.some(e => (e.aiInterpretation as any)?.capa_2_aplicado) && (
                     <>
                       {/* Cómo Se Vive en Ti */}
-                      {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.como_se_vive_en_ti) && (
+                      {selectedDayEvents.find(e => (e.aiInterpretation as any)?.capa_2_aplicado?.como_se_vive_en_ti) && (
                         <div className="bg-gradient-to-r from-violet-500/20 to-purple-500/20 backdrop-blur-sm rounded-2xl p-4 border border-violet-400/30">
                           <h4 className="text-violet-300 font-bold text-sm mb-2 flex items-center">
                             <span className="mr-2">💫</span>
                             Cómo Se Vive en Ti
                           </h4>
                           <p className="text-white text-sm leading-relaxed">
-                            {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.como_se_vive_en_ti)?.aiInterpretation?.capa_2_aplicado?.como_se_vive_en_ti}
+                            {selectedDayEvents.find(e => (e.aiInterpretation as any)?.capa_2_aplicado?.como_se_vive_en_ti) ? ((selectedDayEvents.find(e => (e.aiInterpretation as any)?.capa_2_aplicado?.como_se_vive_en_ti)?.aiInterpretation as any)?.capa_2_aplicado?.como_se_vive_en_ti) : ''}
                           </p>
                         </div>
                       )}
 
                       {/* Uso Consciente */}
-                      {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.uso_consciente_consejo_aplicado) && (
+                      {selectedDayEvents.find(e => (e.aiInterpretation as any)?.capa_2_aplicado?.uso_consciente_consejo_aplicado) && (
                         <div className="bg-gradient-to-r from-emerald-500/20 to-green-500/20 backdrop-blur-sm rounded-2xl p-4 border border-emerald-400/30">
                           <h4 className="text-emerald-300 font-bold text-sm mb-2 flex items-center">
                             <span className="mr-2">✅</span>
                             Uso Consciente
                           </h4>
                           <p className="text-white text-sm leading-relaxed">
-                            {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.uso_consciente_consejo_aplicado)?.aiInterpretation?.capa_2_aplicado?.uso_consciente_consejo_aplicado}
+                            {selectedDayEvents.find(e => (e.aiInterpretation as any)?.capa_2_aplicado?.uso_consciente_consejo_aplicado) ? ((selectedDayEvents.find(e => (e.aiInterpretation as any)?.capa_2_aplicado?.uso_consciente_consejo_aplicado)?.aiInterpretation as any)?.capa_2_aplicado?.uso_consciente_consejo_aplicado) : ''}
                           </p>
                         </div>
                       )}
 
                       {/* Acción Práctica */}
-                      {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.accion_practica_sugerida) && (
+                      {selectedDayEvents.find(e => (e.aiInterpretation as any)?.capa_2_aplicado?.accion_practica_sugerida) && (
                         <div className="bg-gradient-to-r from-blue-500/20 to-indigo-500/20 backdrop-blur-sm rounded-2xl p-4 border border-blue-400/30">
                           <h4 className="text-blue-300 font-bold text-sm mb-2 flex items-center">
                             <span className="mr-2">🎯</span>
                             Acción Práctica
                           </h4>
                           <p className="text-white text-sm leading-relaxed">
-                            {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.accion_practica_sugerida)?.aiInterpretation?.capa_2_aplicado?.accion_practica_sugerida}
+                            {selectedDayEvents.find(e => (e.aiInterpretation as any)?.capa_2_aplicado?.accion_practica_sugerida) ? ((selectedDayEvents.find(e => (e.aiInterpretation as any)?.capa_2_aplicado?.accion_practica_sugerida)?.aiInterpretation as any)?.capa_2_aplicado?.accion_practica_sugerida) : ''}
                           </p>
                         </div>
                       )}
 
                       {/* Síntesis/Mantra */}
-                      {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.sintesis_final) && (
+                      {selectedDayEvents.find(e => (e.aiInterpretation as any)?.capa_2_aplicado?.sintesis_final) && (
                         <div className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 backdrop-blur-sm rounded-2xl p-4 border border-amber-400/30">
                           <h4 className="text-amber-300 font-bold text-sm mb-2 flex items-center">
                             <span className="mr-2">✨</span>
                             Tu Mantra
                           </h4>
                           <p className="text-white text-sm italic font-bold text-center">
-                            "{selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.sintesis_final)?.aiInterpretation?.capa_2_aplicado?.sintesis_final}"
+                            "{selectedDayEvents.find(e => (e.aiInterpretation as any)?.capa_2_aplicado?.sintesis_final)?.aiInterpretation ? ((selectedDayEvents.find(e => (e.aiInterpretation as any)?.capa_2_aplicado?.sintesis_final)?.aiInterpretation as any)?.capa_2_aplicado?.sintesis_final) : ''}"
                           </p>
                         </div>
                       )}
@@ -2335,7 +2335,7 @@ const AgendaPersonalizada = () => {
                   )}
 
                   {/* FALLBACK: Mostrar interpretaciones genéricas si no hay personalizadas */}
-                  {!selectedDayEvents.some(e => e.aiInterpretation?.capa_2_aplicado) && (
+                  {!selectedDayEvents.some(e => (e.aiInterpretation as any)?.capa_2_aplicado) && (
                     <>
                       {/* Mantra del día */}
                       {selectedDayEvents.some(e => e.aiInterpretation?.mantra) && (
@@ -2351,14 +2351,14 @@ const AgendaPersonalizada = () => {
                   )}
 
                   {/* Ritual del día */}
-                  {selectedDayEvents.some(e => e.aiInterpretation?.ritual_breve) && (
+                  {selectedDayEvents.some(e => e.aiInterpretation?.ritual) && (
                     <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm rounded-2xl p-4 border border-green-400/30">
                       <h4 className="text-green-300 font-bold text-sm mb-2 flex items-center">
                         <span className="mr-2">🔥</span>
                         Ritual del Día
                       </h4>
                       <p className="text-white text-sm leading-relaxed">
-                        {selectedDayEvents.find(e => e.aiInterpretation?.ritual_breve)?.aiInterpretation?.ritual_breve || 'Ritual de 5 minutos para conectar con la energía del día'}
+                        {selectedDayEvents.find(e => e.aiInterpretation?.ritual)?.aiInterpretation?.ritual || 'Ritual de 5 minutos para conectar con la energía del día'}
                       </p>
                     </div>
                   )}
@@ -2377,14 +2377,14 @@ const AgendaPersonalizada = () => {
                   )}
 
                   {/* Pregunta clave */}
-                  {selectedDayEvents.some(e => e.aiInterpretation?.pregunta_clave) && (
+                  {selectedDayEvents.some(e => e.aiInterpretation && 'pregunta_clave' in e.aiInterpretation && (e.aiInterpretation as any).pregunta_clave) && (
                     <div className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 backdrop-blur-sm rounded-2xl p-4 border border-pink-400/30">
                       <h4 className="text-pink-300 font-bold text-sm mb-2 flex items-center">
                         <span className="mr-2">❓</span>
                         Pregunta del Día
                       </h4>
                       <p className="text-white text-sm leading-relaxed font-medium italic">
-                        {selectedDayEvents.find(e => e.aiInterpretation?.pregunta_clave)?.aiInterpretation?.pregunta_clave}
+                        {(selectedDayEvents.find(e => e.aiInterpretation && 'pregunta_clave' in e.aiInterpretation)?.aiInterpretation as any)?.pregunta_clave}
                       </p>
                     </div>
                   )}
@@ -2693,9 +2693,7 @@ const AgendaPersonalizada = () => {
         )}
 
       </div>
-      </div>
-    </div>
-  );
-};
-
+    );
+  }
+  
 export default AgendaPersonalizada;
