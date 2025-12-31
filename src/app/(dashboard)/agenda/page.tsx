@@ -2684,7 +2684,6 @@ const AgendaPersonalizada = () => {
             </div>
           </>
         )}
-      )}
 
       </div>
   );
