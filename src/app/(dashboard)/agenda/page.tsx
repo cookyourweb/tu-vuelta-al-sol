@@ -1541,96 +1541,203 @@ const AgendaPersonalizada = () => {
                   </button>
                 </div>
               ) : (
-                <div className="space-y-6 text-white">
-                  {/* 🔍 DEBUG: Mostrar estructura completa del objeto */}
-                  <details className="bg-slate-800/50 rounded-xl p-4 border border-slate-600/30 mb-6">
-                    <summary className="text-slate-300 font-semibold cursor-pointer hover:text-white">
-                      🔍 DEBUG: Ver estructura de datos (click para expandir)
-                    </summary>
-                    <pre className="mt-4 text-xs text-slate-400 overflow-x-auto">
-                      {JSON.stringify(solarReturnInterpretation, null, 2)}
-                    </pre>
-                  </details>
+                <div className="space-y-8 text-white">
+                  {/* 🌟 CAPA 1: APERTURA ANUAL */}
+                  {solarReturnInterpretation.apertura_anual && (
+                    <div className="space-y-4">
+                      <div className="bg-gradient-to-r from-yellow-500/30 to-orange-500/30 rounded-3xl p-8 border-2 border-yellow-400/40">
+                        <h2 className="text-3xl font-bold mb-6 text-yellow-300 flex items-center gap-3">
+                          <span>🌟</span>
+                          Apertura Anual {solarReturnInterpretation.apertura_anual.ano_solar}
+                        </h2>
 
-                  {/* Esencia Revolucionaria Anual */}
-                  {solarReturnInterpretation.esencia_revolucionaria_anual && (
-                    <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-2xl p-6 border border-yellow-400/30">
-                      <h3 className="text-xl font-bold mb-3 text-yellow-300">🌟 Portal de Entrada</h3>
-                      <p className="text-gray-200 leading-relaxed whitespace-pre-line">
-                        {solarReturnInterpretation.esencia_revolucionaria_anual}
-                      </p>
+                        <div className="space-y-4">
+                          {solarReturnInterpretation.apertura_anual.tema_central && (
+                            <div className="bg-black/20 rounded-xl p-4">
+                              <h3 className="text-xl font-bold text-yellow-200 mb-2">🎯 Tema Central</h3>
+                              <p className="text-gray-200 leading-relaxed">{solarReturnInterpretation.apertura_anual.tema_central}</p>
+                            </div>
+                          )}
+
+                          {solarReturnInterpretation.apertura_anual.eje_del_ano && (
+                            <div className="bg-black/20 rounded-xl p-4">
+                              <h3 className="text-xl font-bold text-orange-200 mb-2">⚡ Eje del Año</h3>
+                              <p className="text-gray-200 leading-relaxed">{solarReturnInterpretation.apertura_anual.eje_del_ano}</p>
+                            </div>
+                          )}
+
+                          {solarReturnInterpretation.apertura_anual.como_se_siente && (
+                            <div className="bg-black/20 rounded-xl p-4">
+                              <h3 className="text-xl font-bold text-yellow-200 mb-2">💫 Cómo Se Siente Este Año</h3>
+                              <p className="text-gray-200 leading-relaxed">{solarReturnInterpretation.apertura_anual.como_se_siente}</p>
+                            </div>
+                          )}
+
+                          {solarReturnInterpretation.apertura_anual.conexion_natal && (
+                            <div className="bg-black/20 rounded-xl p-4">
+                              <h3 className="text-xl font-bold text-orange-200 mb-2">🔗 Conexión con Tu Carta Natal</h3>
+                              <p className="text-gray-200 leading-relaxed">{solarReturnInterpretation.apertura_anual.conexion_natal}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   )}
 
-                  {/* Tema Central del Año */}
-                  {solarReturnInterpretation.tema_central_del_anio && (
-                    <div className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded-2xl p-6 border border-pink-400/30">
-                      <h3 className="text-xl font-bold mb-3 text-pink-300">🎯 Tema Central del Año</h3>
-                      <p className="text-gray-200 leading-relaxed whitespace-pre-line">
-                        {solarReturnInterpretation.tema_central_del_anio}
-                      </p>
+                  {/* 🎭 CAPA 2: CÓMO SE VIVE SIENDO TÚ */}
+                  {solarReturnInterpretation.como_se_vive_siendo_tu && (
+                    <div className="bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-3xl p-8 border-2 border-purple-400/40">
+                      <h2 className="text-3xl font-bold mb-6 text-purple-300 flex items-center gap-3">
+                        <span>🎭</span>
+                        Cómo Se Vive Siendo Tú
+                      </h2>
+
+                      <div className="space-y-4">
+                        {solarReturnInterpretation.como_se_vive_siendo_tu.facilidad && (
+                          <div className="bg-black/20 rounded-xl p-4">
+                            <p className="text-gray-200 leading-relaxed">{solarReturnInterpretation.como_se_vive_siendo_tu.facilidad}</p>
+                          </div>
+                        )}
+
+                        {solarReturnInterpretation.como_se_vive_siendo_tu.incomodidad && (
+                          <div className="bg-black/20 rounded-xl p-4">
+                            <p className="text-gray-200 leading-relaxed">{solarReturnInterpretation.como_se_vive_siendo_tu.incomodidad}</p>
+                          </div>
+                        )}
+
+                        {solarReturnInterpretation.como_se_vive_siendo_tu.medida_del_ano && (
+                          <div className="bg-black/20 rounded-xl p-4 border-l-4 border-purple-400">
+                            <p className="text-purple-200 font-semibold leading-relaxed">{solarReturnInterpretation.como_se_vive_siendo_tu.medida_del_ano}</p>
+                          </div>
+                        )}
+
+                        {solarReturnInterpretation.como_se_vive_siendo_tu.reflejos_obsoletos && (
+                          <div className="bg-red-900/20 rounded-xl p-4 border border-red-500/30">
+                            <h3 className="text-lg font-bold text-red-300 mb-2">❌ Reflejos Obsoletos</h3>
+                            <p className="text-gray-200 leading-relaxed">{solarReturnInterpretation.como_se_vive_siendo_tu.reflejos_obsoletos}</p>
+                          </div>
+                        )}
+
+                        {solarReturnInterpretation.como_se_vive_siendo_tu.actitud_nueva && (
+                          <div className="bg-green-900/20 rounded-xl p-4 border border-green-500/30">
+                            <h3 className="text-lg font-bold text-green-300 mb-2">✅ Actitud Nueva</h3>
+                            <p className="text-gray-200 leading-relaxed">{solarReturnInterpretation.como_se_vive_siendo_tu.actitud_nueva}</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
 
-                  {/* Propósito de Vida Anual */}
-                  {solarReturnInterpretation.proposito_vida_anual && (
-                    <div className="bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-2xl p-6 border border-blue-400/30">
-                      <h3 className="text-xl font-bold mb-3 text-blue-300">🎨 Propósito del Año</h3>
-                      <p className="text-gray-200 leading-relaxed whitespace-pre-line">
-                        {solarReturnInterpretation.proposito_vida_anual}
-                      </p>
+                  {/* 🪐 CAPA 3: COMPARACIONES PLANETARIAS */}
+                  {solarReturnInterpretation.comparaciones_planetarias && (
+                    <div className="space-y-4">
+                      <h2 className="text-3xl font-bold text-cyan-300 flex items-center gap-3">
+                        <span>🪐</span>
+                        Energías Planetarias del Año
+                      </h2>
+
+                      {Object.entries(solarReturnInterpretation.comparaciones_planetarias).map(([planeta, data]: [string, any]) => (
+                        <details key={planeta} className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-2xl border border-cyan-400/30 overflow-hidden">
+                          <summary className="px-6 py-4 cursor-pointer hover:bg-white/5 transition-colors font-bold text-xl text-cyan-200 capitalize">
+                            {planeta === 'sol' && '☀️'} {planeta === 'luna' && '🌙'} {planeta === 'mercurio' && '☿️'}
+                            {planeta === 'venus' && '♀️'} {planeta === 'marte' && '♂️'} {planeta === 'jupiter' && '♃'}
+                            {planeta === 'saturno' && '♄'} {planeta.toUpperCase()}
+                          </summary>
+
+                          <div className="px-6 pb-6 space-y-3">
+                            {data.natal && (
+                              <div className="bg-black/30 rounded-lg p-4">
+                                <h4 className="text-sm font-bold text-cyan-300 mb-1">📍 En Tu Carta Natal</h4>
+                                <p className="text-xs text-gray-400 mb-2">{data.natal.posicion}</p>
+                                <p className="text-gray-200 text-sm">{data.natal.descripcion}</p>
+                              </div>
+                            )}
+
+                            {data.solar_return && (
+                              <div className="bg-black/30 rounded-lg p-4">
+                                <h4 className="text-sm font-bold text-yellow-300 mb-1">🔄 En Tu Retorno Solar</h4>
+                                <p className="text-xs text-gray-400 mb-2">{data.solar_return.posicion}</p>
+                                <p className="text-gray-200 text-sm">{data.solar_return.descripcion}</p>
+                              </div>
+                            )}
+
+                            {data.choque && (
+                              <div className="bg-orange-900/30 rounded-lg p-4 border border-orange-500/30">
+                                <h4 className="text-sm font-bold text-orange-300 mb-2">⚡ El Choque</h4>
+                                <p className="text-gray-200 text-sm">{data.choque}</p>
+                              </div>
+                            )}
+
+                            {data.que_hacer && (
+                              <div className="bg-green-900/30 rounded-lg p-4 border border-green-500/30">
+                                <h4 className="text-sm font-bold text-green-300 mb-2">✅ Qué Hacer</h4>
+                                <p className="text-gray-200 text-sm">{data.que_hacer}</p>
+                              </div>
+                            )}
+
+                            {data.mandato_del_ano && (
+                              <div className="bg-purple-900/30 rounded-lg p-4 border-l-4 border-purple-400">
+                                <p className="text-purple-200 font-semibold text-sm italic">"{data.mandato_del_ano}"</p>
+                              </div>
+                            )}
+                          </div>
+                        </details>
+                      ))}
                     </div>
                   )}
 
-                  {/* Rituales Recomendados */}
-                  {solarReturnInterpretation.rituales_recomendados && solarReturnInterpretation.rituales_recomendados.length > 0 && (
-                    <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl p-6 border border-green-400/30">
-                      <h3 className="text-xl font-bold mb-3 text-green-300">🔥 Rituales del Año</h3>
+                  {/* ⏰ CAPA 4: LÍNEA DE TIEMPO ANUAL */}
+                  {solarReturnInterpretation.linea_tiempo_anual && (
+                    <div className="bg-gradient-to-r from-indigo-500/30 to-purple-500/30 rounded-3xl p-8 border-2 border-indigo-400/40">
+                      <h2 className="text-3xl font-bold mb-6 text-indigo-300 flex items-center gap-3">
+                        <span>⏰</span>
+                        Línea de Tiempo del Año
+                      </h2>
+
+                      <div className="space-y-4">
+                        {Object.entries(solarReturnInterpretation.linea_tiempo_anual).map(([periodo, data]: [string, any]) => (
+                          <div key={periodo} className="bg-black/20 rounded-xl p-4 border-l-4 border-indigo-400">
+                            <h3 className="text-lg font-bold text-indigo-200 mb-2">{data.titulo}</h3>
+                            <p className="text-gray-200 mb-3">{data.descripcion}</p>
+                            <div className="bg-indigo-900/30 rounded-lg px-4 py-2 inline-block">
+                              <span className="text-indigo-300 font-semibold text-sm">🎯 {data.accion_clave}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 🌑 SOMBRAS DEL AÑO */}
+                  {solarReturnInterpretation.sombras_del_ano && solarReturnInterpretation.sombras_del_ano.length > 0 && (
+                    <div className="bg-gradient-to-r from-gray-700/30 to-gray-900/30 rounded-2xl p-6 border border-gray-500/30">
+                      <h3 className="text-2xl font-bold mb-4 text-gray-300 flex items-center gap-3">
+                        <span>🌑</span>
+                        Sombras del Año
+                      </h3>
                       <ul className="space-y-2">
-                        {solarReturnInterpretation.rituales_recomendados.map((ritual: string, index: number) => (
+                        {solarReturnInterpretation.sombras_del_ano.map((sombra: string, index: number) => (
                           <li key={index} className="text-gray-200 leading-relaxed flex items-start gap-2">
-                            <span className="text-green-400 flex-shrink-0">•</span>
-                            <span>{ritual}</span>
+                            <span className="text-gray-400 flex-shrink-0">⚠️</span>
+                            <span>{sombra}</span>
                           </li>
                         ))}
                       </ul>
                     </div>
                   )}
 
-                  {/* Declaración de Poder */}
-                  {solarReturnInterpretation.declaracion_poder_anual && (
-                    <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl p-6 border border-purple-400/30">
-                      <h3 className="text-xl font-bold mb-3 text-purple-300">💪 Declaración de Poder</h3>
-                      <p className="text-white text-lg font-semibold italic leading-relaxed whitespace-pre-line">
-                        "{solarReturnInterpretation.declaracion_poder_anual}"
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Insights Transformacionales */}
-                  {solarReturnInterpretation.insights_transformacionales && solarReturnInterpretation.insights_transformacionales.length > 0 && (
-                    <div className="bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-2xl p-6 border border-indigo-400/30">
-                      <h3 className="text-xl font-bold mb-3 text-indigo-300">💡 Insights Transformacionales</h3>
+                  {/* 🔑 CLAVES DE INTEGRACIÓN */}
+                  {solarReturnInterpretation.claves_integracion && solarReturnInterpretation.claves_integracion.length > 0 && (
+                    <div className="bg-gradient-to-r from-emerald-500/30 to-teal-500/30 rounded-2xl p-6 border border-emerald-400/30">
+                      <h3 className="text-2xl font-bold mb-4 text-emerald-300 flex items-center gap-3">
+                        <span>🔑</span>
+                        Claves de Integración
+                      </h3>
                       <ul className="space-y-2">
-                        {solarReturnInterpretation.insights_transformacionales.map((insight: string, index: number) => (
+                        {solarReturnInterpretation.claves_integracion.map((clave: string, index: number) => (
                           <li key={index} className="text-gray-200 leading-relaxed flex items-start gap-2">
-                            <span className="text-indigo-400 flex-shrink-0">•</span>
-                            <span>{insight}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Advertencias */}
-                  {solarReturnInterpretation.advertencias && solarReturnInterpretation.advertencias.length > 0 && (
-                    <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-2xl p-6 border border-orange-400/30">
-                      <h3 className="text-xl font-bold mb-3 text-orange-300">⚠️ Aspectos a Cuidar</h3>
-                      <ul className="space-y-2">
-                        {solarReturnInterpretation.advertencias.map((advertencia: string, index: number) => (
-                          <li key={index} className="text-gray-200 leading-relaxed flex items-start gap-2">
-                            <span className="text-orange-400 flex-shrink-0">•</span>
-                            <span>{advertencia}</span>
+                            <span className="text-emerald-400 flex-shrink-0">✨</span>
+                            <span>{clave}</span>
                           </li>
                         ))}
                       </ul>
