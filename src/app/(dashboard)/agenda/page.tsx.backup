@@ -44,8 +44,8 @@ const AgendaPersonalizada = () => {
   const [weekData, setWeekData] = useState<any | null>(null);
   const [loadingWeekData, setLoadingWeekData] = useState(false);
 
-  // Estados para tabs principales (SOLO 3 TABS - eventos integrados en calendario)
-  const [activeTab, setActiveTab] = useState<'mi-anio' | 'mi-carta' | 'calendario'>('calendario');
+  // Estados para tabs principales
+  const [activeTab, setActiveTab] = useState<'mi-anio' | 'mi-carta' | 'calendario' | 'eventos'>('calendario');
   const [calendarView, setCalendarView] = useState<'mes' | 'semana' | 'dia'>('mes');
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(new Date());
   const [eventFilter, setEventFilter] = useState<'all' | 'moon_phase' | 'eclipse' | 'retrograde' | 'high_priority'>('all');
@@ -888,18 +888,7 @@ const AgendaPersonalizada = () => {
         const yearEvents = await fetchYearEvents();
         console.log(`✅ [AGENDA] Loaded ${yearEvents.length} events for the complete year`);
 
-        // ⚡ FILTRAR solo eventos importantes para evitar saturación
-        const importantEvents = yearEvents.filter((e: AstrologicalEvent) => {
-          return (
-            e.type === 'moon_phase' ||  // Lunas nuevas/llenas
-            e.type === 'eclipse' ||      // Eclipses
-            e.type === 'retrograde' ||   // Retrógradas
-            e.priority === 'high'        // Alta prioridad
-          );
-        });
-        console.log(`✅ [AGENDA] Filtered to ${importantEvents.length} important events`);
-
-        setEvents(importantEvents);
+        setEvents(yearEvents);
       } catch (error) {
         console.error('❌ [AGENDA] Error loading year events:', error);
         console.error('❌ [AGENDA] Error details:', error instanceof Error ? error.message : String(error));
@@ -1062,74 +1051,9 @@ const AgendaPersonalizada = () => {
 
 
 
-  const handleDayClick = async (day: AstronomicalDay) => {
+  const handleDayClick = (day: AstronomicalDay) => {
     setSelectedDate(day.date);
     setSelectedDayEvents(day.events);
-
-    // 🌟 NUEVO: Cargar interpretaciones personalizadas para eventos HIGH/MEDIUM
-    const importantEvents = day.events.filter(e => e.priority === 'high' || e.priority === 'medium');
-
-    if (importantEvents.length > 0 && user && userProfile) {
-      console.log(`🔮 [INTERPRETATIONS] Loading personalized interpretations for ${importantEvents.length} events`);
-
-      // Cargar interpretaciones en background (no bloquear UI)
-      loadEventInterpretations(importantEvents);
-    }
-  };
-
-  // 🔮 Cargar interpretaciones personalizadas para eventos
-  const loadEventInterpretations = async (events: AstrologicalEvent[]) => {
-    if (!user) return;
-
-    try {
-      const token = await user.getIdToken();
-
-      // Cargar interpretaciones para cada evento importante
-      for (const event of events) {
-        // Si ya tiene interpretación personalizada, skip
-        if (event.aiInterpretation?.capa_2_aplicado) continue;
-
-        try {
-          const response = await fetch('/api/interpretations/event', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-              event: {
-                type: event.type === 'lunar_phase' ? 'luna_nueva' :
-                      event.type === 'retrograde' ? 'transito' :
-                      event.type === 'eclipse' ? 'transito' : 'aspecto',
-                date: event.date,
-                sign: event.sign,
-                house: 1, // TODO: calcular casa real basada en carta natal
-                planetsInvolved: event.planet ? [event.planet] : [],
-                transitingPlanet: event.planet,
-              },
-              regenerate: false
-            })
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-
-            // Actualizar el evento con la interpretación personalizada
-            setSelectedDayEvents(prev => prev.map(e =>
-              e.id === event.id
-                ? { ...e, aiInterpretation: data.interpretation }
-                : e
-            ));
-
-            console.log(`✅ [INTERPRETATIONS] Loaded for ${event.title}`);
-          }
-        } catch (err) {
-          console.error(`❌ [INTERPRETATIONS] Error loading for ${event.title}:`, err);
-        }
-      }
-    } catch (error) {
-      console.error('❌ [INTERPRETATIONS] Error getting token:', error);
-    }
   };
 
   // Modal handlers (reemplaza tooltip)
@@ -1474,6 +1398,21 @@ const AgendaPersonalizada = () => {
                 <span className="text-xl">📅</span>
                 <span className="hidden sm:inline">Calendario</span>
               </button>
+
+              {/* Tab: Todos los Eventos */}
+              <button
+                onClick={() => setActiveTab('eventos')}
+                className={`
+                  flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300
+                  ${activeTab === 'eventos'
+                    ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg shadow-yellow-500/30'
+                    : 'bg-white/5 text-purple-200 hover:bg-white/10 hover:text-white'
+                  }
+                `}
+              >
+                <span className="text-xl">📔</span>
+                <span className="hidden sm:inline">Eventos</span>
+              </button>
             </div>
           </div>
         </div>
@@ -1542,16 +1481,6 @@ const AgendaPersonalizada = () => {
                 </div>
               ) : (
                 <div className="space-y-6 text-white">
-                  {/* 🔍 DEBUG: Mostrar estructura completa del objeto */}
-                  <details className="bg-slate-800/50 rounded-xl p-4 border border-slate-600/30 mb-6">
-                    <summary className="text-slate-300 font-semibold cursor-pointer hover:text-white">
-                      🔍 DEBUG: Ver estructura de datos (click para expandir)
-                    </summary>
-                    <pre className="mt-4 text-xs text-slate-400 overflow-x-auto">
-                      {JSON.stringify(solarReturnInterpretation, null, 2)}
-                    </pre>
-                  </details>
-
                   {/* Esencia Revolucionaria Anual */}
                   {solarReturnInterpretation.esencia_revolucionaria_anual && (
                     <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-2xl p-6 border border-yellow-400/30">
@@ -1767,6 +1696,170 @@ const AgendaPersonalizada = () => {
           </div>
         )}
 
+        {/* 📔 TAB: TODOS LOS EVENTOS */}
+        {activeTab === 'eventos' && (
+          <div className="max-w-5xl mx-auto">
+            <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-sm rounded-3xl p-8 border border-purple-400/30">
+              <h2 className="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+                <span className="text-4xl">📔</span>
+                Todos los Eventos del Año
+              </h2>
+
+              {/* Filtros */}
+              <div className="mb-6">
+                <div className="flex gap-2 flex-wrap">
+                  <button
+                    onClick={() => setEventFilter('all')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      eventFilter === 'all'
+                        ? 'bg-purple-500/50 text-white'
+                        : 'bg-white/5 hover:bg-white/10 text-purple-200'
+                    }`}
+                  >
+                    Todos ({events.length})
+                  </button>
+                  <button
+                    onClick={() => setEventFilter('moon_phase')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      eventFilter === 'moon_phase'
+                        ? 'bg-purple-500/50 text-white'
+                        : 'bg-white/5 hover:bg-white/10 text-purple-200'
+                    }`}
+                  >
+                    🌙 Fases Lunares ({events.filter(e => e.type === 'moon_phase').length})
+                  </button>
+                  <button
+                    onClick={() => setEventFilter('eclipse')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      eventFilter === 'eclipse'
+                        ? 'bg-purple-500/50 text-white'
+                        : 'bg-white/5 hover:bg-white/10 text-purple-200'
+                    }`}
+                  >
+                    🌑 Eclipses ({events.filter(e => e.type === 'eclipse').length})
+                  </button>
+                  <button
+                    onClick={() => setEventFilter('retrograde')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      eventFilter === 'retrograde'
+                        ? 'bg-purple-500/50 text-white'
+                        : 'bg-white/5 hover:bg-white/10 text-purple-200'
+                    }`}
+                  >
+                    ↩️ Retrogrados ({events.filter(e => e.type === 'retrograde').length})
+                  </button>
+                  <button
+                    onClick={() => setEventFilter('high_priority')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      eventFilter === 'high_priority'
+                        ? 'bg-purple-500/50 text-white'
+                        : 'bg-white/5 hover:bg-white/10 text-purple-200'
+                    }`}
+                  >
+                    ⭐ Prioritarios ({events.filter(e => e.priority === 'high').length})
+                  </button>
+                </div>
+              </div>
+
+              {/* Timeline de eventos */}
+              <div className="space-y-3 max-h-[800px] overflow-y-auto">
+                {events.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-6xl mb-4">🌌</div>
+                    <h4 className="text-2xl font-bold text-white mb-2">No hay eventos cargados</h4>
+                    <p className="text-gray-300">
+                      Carga los eventos desde el botón "Regenerar Mes" en la vista de calendario
+                    </p>
+                  </div>
+                ) : (
+                  events
+                    .filter(event => {
+                      if (eventFilter === 'all') return true;
+                      if (eventFilter === 'high_priority') return event.priority === 'high';
+                      return event.type === eventFilter;
+                    })
+                    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                    .map((event, index) => (
+                      <div
+                        key={index}
+                        className={`
+                          relative pl-8 pb-6 border-l-2 transition-all duration-200 cursor-pointer hover:scale-[1.02]
+                          ${event.priority === 'high' ? 'border-yellow-400' : 'border-purple-400/30'}
+                        `}
+                        onClick={() => {
+                          setSelectedDate(new Date(event.date));
+                          setActiveTab('calendario');
+                          setCalendarView('dia');
+                        }}
+                      >
+                        {/* Dot en la línea de tiempo */}
+                        <div className={`
+                          absolute left-[-8px] top-0 w-4 h-4 rounded-full border-2
+                          ${event.priority === 'high'
+                            ? 'bg-yellow-400 border-yellow-300 animate-pulse'
+                            : 'bg-purple-500 border-purple-400'
+                          }
+                        `}></div>
+
+                        {/* Contenido del evento */}
+                        <div className={`
+                          bg-gradient-to-r rounded-xl p-4 border
+                          ${getEventColor(event.type, event.priority)}/20
+                          ${event.priority === 'high' ? 'border-yellow-400/30' : 'border-purple-400/20'}
+                        `}>
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-start gap-3 flex-1">
+                              <span className="text-2xl flex-shrink-0">{getEventIcon(event.type, event.priority)}</span>
+                              <div className="flex-1">
+                                <h4 className="text-white font-bold text-lg mb-1">{event.title}</h4>
+                                <p className="text-purple-200 text-sm">
+                                  {format(new Date(event.date), "EEEE d 'de' MMMM yyyy", { locale: es })}
+                                </p>
+                                {event.planet && event.sign && (
+                                  <p className="text-purple-300 text-sm mt-1">{event.planet} en {event.sign}</p>
+                                )}
+                              </div>
+                            </div>
+
+                            {event.priority === 'high' && (
+                              <span className="bg-yellow-400/80 text-black text-xs font-bold px-2 py-1 rounded-full animate-pulse flex-shrink-0">
+                                PRIORITARIO
+                              </span>
+                            )}
+                          </div>
+
+                          <p className="text-gray-200 text-sm leading-relaxed mb-3 line-clamp-2">
+                            {event.description}
+                          </p>
+
+                          {event.aiInterpretation && (
+                            <div className="mt-3 flex items-center gap-2 text-purple-300 text-xs">
+                              <span>✨</span>
+                              <span>Interpretación personalizada disponible</span>
+                            </div>
+                          )}
+
+                          <div className="mt-3 text-purple-400 text-xs">
+                            Click para ver el día completo →
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                )}
+              </div>
+
+              {events.length > 0 && eventFilter !== 'all' && (
+                <div className="mt-4 text-center text-gray-400 text-sm">
+                  Mostrando {events.filter(event => {
+                    if (eventFilter === 'high_priority') return event.priority === 'high';
+                    return event.type === eventFilter;
+                  }).length} de {events.length} eventos totales
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* 📅 TAB: CALENDARIO */}
         {activeTab === 'calendario' && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -1797,19 +1890,25 @@ const AgendaPersonalizada = () => {
                         const yearEvents = await fetchYearEvents();
                         console.log(`✅ [REGENERATE-MONTH] Fetched ${yearEvents.length} total events`);
 
-                        // ⚡ FILTRAR solo eventos importantes
-                        const importantEvents = yearEvents.filter((e: AstrologicalEvent) => {
-                          return (
-                            e.type === 'moon_phase' ||
-                            e.type === 'eclipse' ||
-                            e.type === 'retrograde' ||
-                            e.priority === 'high'
-                          );
+                        // Filtrar solo los del mes actual
+                        const monthStart = startOfMonth(currentMonth);
+                        const monthEnd = endOfMonth(currentMonth);
+                        const monthEvents = yearEvents.filter(event => {
+                          const eventDate = new Date(event.date);
+                          return eventDate >= monthStart && eventDate <= monthEnd;
                         });
-                        console.log(`✅ [REGENERATE-MONTH] Filtered to ${importantEvents.length} important events`);
 
-                        // Actualizar eventos filtrados
-                        setEvents(importantEvents);
+                        console.log(`✅ [REGENERATE-MONTH] Found ${monthEvents.length} events for ${monthName}`);
+                        console.log('🔍 [REGENERATE-MONTH] Month events sample:', monthEvents.slice(0, 5).map(e => ({
+                          date: e.date,
+                          title: e.title,
+                          sign: e.sign,
+                          planet: e.planet,
+                          type: e.type
+                        })));
+
+                        // Actualizar todos los eventos (para mantener consistencia)
+                        setEvents(yearEvents);
                       } catch (error) {
                         console.error('❌ [REGENERATE-MONTH] Error:', error);
                       } finally {
@@ -1943,13 +2042,10 @@ const AgendaPersonalizada = () => {
                             {day.date.getDate()}
                           </div>
 
-                          {/* Eventos del día con iconos - FILTRADO SOLO HIGH/MEDIUM PRIORITY */}
+                          {/* Eventos del día con iconos */}
                           {day.hasEvents && (
                             <div className="space-y-1">
-                              {day.events
-                                .filter(e => e.priority === 'high' || e.priority === 'medium')
-                                .slice(0, 2)
-                                .map((event, eventIndex) => (
+                              {day.events.slice(0, 2).map((event, eventIndex) => (
                                 <div
                                   key={eventIndex}
                                   onClick={(e) => {
@@ -1976,9 +2072,9 @@ const AgendaPersonalizada = () => {
                                 </div>
                               ))}
 
-                              {day.events.filter(e => e.priority === 'high' || e.priority === 'medium').length > 2 && (
+                              {day.events.length > 2 && (
                                 <div className="text-purple-300 text-xs font-medium text-center bg-purple-600/20 rounded px-1 py-0.5">
-                                  +{day.events.filter(e => e.priority === 'high' || e.priority === 'medium').length - 2}
+                                  +{day.events.length - 2}
                                 </div>
                               )}
                             </div>
@@ -2065,10 +2161,7 @@ const AgendaPersonalizada = () => {
 
                       {day.hasEvents && (
                         <div className="space-y-2">
-                          {day.events
-                            .filter(e => e.priority === 'high' || e.priority === 'medium')
-                            .slice(0, 3)
-                            .map((event, eventIndex) => (
+                          {day.events.slice(0, 3).map((event, eventIndex) => (
                             <div
                               key={eventIndex}
                               className="bg-white/5 rounded-lg p-2 border border-white/10"
@@ -2274,71 +2367,11 @@ const AgendaPersonalizada = () => {
                 </p>
               </div>
 
-              {/* 🌟 INFORMACIÓN DEL DÍA: Interpretaciones Personalizadas */}
+              {/* 🌟 INFORMACIÓN DEL DÍA: Mantra, Ritual, Ejercicios */}
               {selectedDate && selectedDayEvents.length > 0 && (
                 <div className="space-y-4 mb-6">
-                  {/* 🔮 INTERPRETACIÓN PERSONALIZADA - CAPA 2 */}
-                  {selectedDayEvents.some(e => e.aiInterpretation?.capa_2_aplicado) && (
-                    <>
-                      {/* Cómo Se Vive en Ti */}
-                      {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.como_se_vive_en_ti) && (
-                        <div className="bg-gradient-to-r from-violet-500/20 to-purple-500/20 backdrop-blur-sm rounded-2xl p-4 border border-violet-400/30">
-                          <h4 className="text-violet-300 font-bold text-sm mb-2 flex items-center">
-                            <span className="mr-2">💫</span>
-                            Cómo Se Vive en Ti
-                          </h4>
-                          <p className="text-white text-sm leading-relaxed">
-                            {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.como_se_vive_en_ti)?.aiInterpretation?.capa_2_aplicado?.como_se_vive_en_ti}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Uso Consciente */}
-                      {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.uso_consciente_consejo_aplicado) && (
-                        <div className="bg-gradient-to-r from-emerald-500/20 to-green-500/20 backdrop-blur-sm rounded-2xl p-4 border border-emerald-400/30">
-                          <h4 className="text-emerald-300 font-bold text-sm mb-2 flex items-center">
-                            <span className="mr-2">✅</span>
-                            Uso Consciente
-                          </h4>
-                          <p className="text-white text-sm leading-relaxed">
-                            {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.uso_consciente_consejo_aplicado)?.aiInterpretation?.capa_2_aplicado?.uso_consciente_consejo_aplicado}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Acción Práctica */}
-                      {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.accion_practica_sugerida) && (
-                        <div className="bg-gradient-to-r from-blue-500/20 to-indigo-500/20 backdrop-blur-sm rounded-2xl p-4 border border-blue-400/30">
-                          <h4 className="text-blue-300 font-bold text-sm mb-2 flex items-center">
-                            <span className="mr-2">🎯</span>
-                            Acción Práctica
-                          </h4>
-                          <p className="text-white text-sm leading-relaxed">
-                            {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.accion_practica_sugerida)?.aiInterpretation?.capa_2_aplicado?.accion_practica_sugerida}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Síntesis/Mantra */}
-                      {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.sintesis_final) && (
-                        <div className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 backdrop-blur-sm rounded-2xl p-4 border border-amber-400/30">
-                          <h4 className="text-amber-300 font-bold text-sm mb-2 flex items-center">
-                            <span className="mr-2">✨</span>
-                            Tu Mantra
-                          </h4>
-                          <p className="text-white text-sm italic font-bold text-center">
-                            "{selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.sintesis_final)?.aiInterpretation?.capa_2_aplicado?.sintesis_final}"
-                          </p>
-                        </div>
-                      )}
-                    </>
-                  )}
-
-                  {/* FALLBACK: Mostrar interpretaciones genéricas si no hay personalizadas */}
-                  {!selectedDayEvents.some(e => e.aiInterpretation?.capa_2_aplicado) && (
-                    <>
-                      {/* Mantra del día */}
-                      {selectedDayEvents.some(e => e.aiInterpretation?.mantra) && (
+                  {/* Mantra del día */}
+                  {selectedDayEvents.some(e => e.aiInterpretation?.mantra) && (
                     <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-sm rounded-2xl p-4 border border-yellow-400/30">
                       <h4 className="text-yellow-300 font-bold text-sm mb-2 flex items-center">
                         <span className="mr-2">🌟</span>
@@ -2387,8 +2420,6 @@ const AgendaPersonalizada = () => {
                         {selectedDayEvents.find(e => e.aiInterpretation?.pregunta_clave)?.aiInterpretation?.pregunta_clave}
                       </p>
                     </div>
-                  )}
-                    </>
                   )}
                 </div>
               )}
@@ -2460,6 +2491,8 @@ const AgendaPersonalizada = () => {
             </div>
           </div>
         </div>
+          </div>
+        )}
 
         {/* TOOLTIP ÉPICO */}
         {hoveredEvent && hoveredEvent?.aiInterpretation && (
