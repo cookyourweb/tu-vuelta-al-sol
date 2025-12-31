@@ -44,8 +44,8 @@ const AgendaPersonalizada = () => {
   const [weekData, setWeekData] = useState<any | null>(null);
   const [loadingWeekData, setLoadingWeekData] = useState(false);
 
-  // Estados para tabs principales
-  const [activeTab, setActiveTab] = useState<'mi-anio' | 'mi-carta' | 'calendario' | 'eventos'>('calendario');
+  // Estados para tabs principales (SOLO 3 TABS - SIN EVENTOS)
+  const [activeTab, setActiveTab] = useState<'mi-anio' | 'mi-carta' | 'calendario'>('calendario');
   const [calendarView, setCalendarView] = useState<'mes' | 'semana' | 'dia'>('mes');
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(new Date());
   const [eventFilter, setEventFilter] = useState<'all' | 'moon_phase' | 'eclipse' | 'retrograde' | 'high_priority'>('all');
@@ -888,7 +888,18 @@ const AgendaPersonalizada = () => {
         const yearEvents = await fetchYearEvents();
         console.log(`✅ [AGENDA] Loaded ${yearEvents.length} events for the complete year`);
 
-        setEvents(yearEvents);
+        // ⚡ FILTRAR solo eventos importantes para evitar saturación
+        const importantEvents = yearEvents.filter((e: AstrologicalEvent) => {
+          return (
+            e.type === 'moon_phase' ||  // Lunas nuevas/llenas
+            e.type === 'eclipse' ||      // Eclipses
+            e.type === 'retrograde' ||   // Retrógradas
+            e.priority === 'high'        // Alta prioridad
+          );
+        });
+        console.log(`✅ [AGENDA] Filtered to ${importantEvents.length} important events`);
+
+        setEvents(importantEvents);
       } catch (error) {
         console.error('❌ [AGENDA] Error loading year events:', error);
         console.error('❌ [AGENDA] Error details:', error instanceof Error ? error.message : String(error));
@@ -1398,21 +1409,6 @@ const AgendaPersonalizada = () => {
                 <span className="text-xl">📅</span>
                 <span className="hidden sm:inline">Calendario</span>
               </button>
-
-              {/* Tab: Todos los Eventos */}
-              <button
-                onClick={() => setActiveTab('eventos')}
-                className={`
-                  flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300
-                  ${activeTab === 'eventos'
-                    ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg shadow-yellow-500/30'
-                    : 'bg-white/5 text-purple-200 hover:bg-white/10 hover:text-white'
-                  }
-                `}
-              >
-                <span className="text-xl">📔</span>
-                <span className="hidden sm:inline">Eventos</span>
-              </button>
             </div>
           </div>
         </div>
@@ -1696,170 +1692,6 @@ const AgendaPersonalizada = () => {
           </div>
         )}
 
-        {/* 📔 TAB: TODOS LOS EVENTOS */}
-        {activeTab === 'eventos' && (
-          <div className="max-w-5xl mx-auto">
-            <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-sm rounded-3xl p-8 border border-purple-400/30">
-              <h2 className="text-3xl font-bold text-white mb-6 flex items-center gap-3">
-                <span className="text-4xl">📔</span>
-                Todos los Eventos del Año
-              </h2>
-
-              {/* Filtros */}
-              <div className="mb-6">
-                <div className="flex gap-2 flex-wrap">
-                  <button
-                    onClick={() => setEventFilter('all')}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                      eventFilter === 'all'
-                        ? 'bg-purple-500/50 text-white'
-                        : 'bg-white/5 hover:bg-white/10 text-purple-200'
-                    }`}
-                  >
-                    Todos ({events.length})
-                  </button>
-                  <button
-                    onClick={() => setEventFilter('moon_phase')}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                      eventFilter === 'moon_phase'
-                        ? 'bg-purple-500/50 text-white'
-                        : 'bg-white/5 hover:bg-white/10 text-purple-200'
-                    }`}
-                  >
-                    🌙 Fases Lunares ({events.filter(e => e.type === 'moon_phase').length})
-                  </button>
-                  <button
-                    onClick={() => setEventFilter('eclipse')}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                      eventFilter === 'eclipse'
-                        ? 'bg-purple-500/50 text-white'
-                        : 'bg-white/5 hover:bg-white/10 text-purple-200'
-                    }`}
-                  >
-                    🌑 Eclipses ({events.filter(e => e.type === 'eclipse').length})
-                  </button>
-                  <button
-                    onClick={() => setEventFilter('retrograde')}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                      eventFilter === 'retrograde'
-                        ? 'bg-purple-500/50 text-white'
-                        : 'bg-white/5 hover:bg-white/10 text-purple-200'
-                    }`}
-                  >
-                    ↩️ Retrogrados ({events.filter(e => e.type === 'retrograde').length})
-                  </button>
-                  <button
-                    onClick={() => setEventFilter('high_priority')}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                      eventFilter === 'high_priority'
-                        ? 'bg-purple-500/50 text-white'
-                        : 'bg-white/5 hover:bg-white/10 text-purple-200'
-                    }`}
-                  >
-                    ⭐ Prioritarios ({events.filter(e => e.priority === 'high').length})
-                  </button>
-                </div>
-              </div>
-
-              {/* Timeline de eventos */}
-              <div className="space-y-3 max-h-[800px] overflow-y-auto">
-                {events.length === 0 ? (
-                  <div className="text-center py-12">
-                    <div className="text-6xl mb-4">🌌</div>
-                    <h4 className="text-2xl font-bold text-white mb-2">No hay eventos cargados</h4>
-                    <p className="text-gray-300">
-                      Carga los eventos desde el botón "Regenerar Mes" en la vista de calendario
-                    </p>
-                  </div>
-                ) : (
-                  events
-                    .filter(event => {
-                      if (eventFilter === 'all') return true;
-                      if (eventFilter === 'high_priority') return event.priority === 'high';
-                      return event.type === eventFilter;
-                    })
-                    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-                    .map((event, index) => (
-                      <div
-                        key={index}
-                        className={`
-                          relative pl-8 pb-6 border-l-2 transition-all duration-200 cursor-pointer hover:scale-[1.02]
-                          ${event.priority === 'high' ? 'border-yellow-400' : 'border-purple-400/30'}
-                        `}
-                        onClick={() => {
-                          setSelectedDate(new Date(event.date));
-                          setActiveTab('calendario');
-                          setCalendarView('dia');
-                        }}
-                      >
-                        {/* Dot en la línea de tiempo */}
-                        <div className={`
-                          absolute left-[-8px] top-0 w-4 h-4 rounded-full border-2
-                          ${event.priority === 'high'
-                            ? 'bg-yellow-400 border-yellow-300 animate-pulse'
-                            : 'bg-purple-500 border-purple-400'
-                          }
-                        `}></div>
-
-                        {/* Contenido del evento */}
-                        <div className={`
-                          bg-gradient-to-r rounded-xl p-4 border
-                          ${getEventColor(event.type, event.priority)}/20
-                          ${event.priority === 'high' ? 'border-yellow-400/30' : 'border-purple-400/20'}
-                        `}>
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex items-start gap-3 flex-1">
-                              <span className="text-2xl flex-shrink-0">{getEventIcon(event.type, event.priority)}</span>
-                              <div className="flex-1">
-                                <h4 className="text-white font-bold text-lg mb-1">{event.title}</h4>
-                                <p className="text-purple-200 text-sm">
-                                  {format(new Date(event.date), "EEEE d 'de' MMMM yyyy", { locale: es })}
-                                </p>
-                                {event.planet && event.sign && (
-                                  <p className="text-purple-300 text-sm mt-1">{event.planet} en {event.sign}</p>
-                                )}
-                              </div>
-                            </div>
-
-                            {event.priority === 'high' && (
-                              <span className="bg-yellow-400/80 text-black text-xs font-bold px-2 py-1 rounded-full animate-pulse flex-shrink-0">
-                                PRIORITARIO
-                              </span>
-                            )}
-                          </div>
-
-                          <p className="text-gray-200 text-sm leading-relaxed mb-3 line-clamp-2">
-                            {event.description}
-                          </p>
-
-                          {event.aiInterpretation && (
-                            <div className="mt-3 flex items-center gap-2 text-purple-300 text-xs">
-                              <span>✨</span>
-                              <span>Interpretación personalizada disponible</span>
-                            </div>
-                          )}
-
-                          <div className="mt-3 text-purple-400 text-xs">
-                            Click para ver el día completo →
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                )}
-              </div>
-
-              {events.length > 0 && eventFilter !== 'all' && (
-                <div className="mt-4 text-center text-gray-400 text-sm">
-                  Mostrando {events.filter(event => {
-                    if (eventFilter === 'high_priority') return event.priority === 'high';
-                    return event.type === eventFilter;
-                  }).length} de {events.length} eventos totales
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
         {/* 📅 TAB: CALENDARIO */}
         {activeTab === 'calendario' && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -1890,25 +1722,19 @@ const AgendaPersonalizada = () => {
                         const yearEvents = await fetchYearEvents();
                         console.log(`✅ [REGENERATE-MONTH] Fetched ${yearEvents.length} total events`);
 
-                        // Filtrar solo los del mes actual
-                        const monthStart = startOfMonth(currentMonth);
-                        const monthEnd = endOfMonth(currentMonth);
-                        const monthEvents = yearEvents.filter(event => {
-                          const eventDate = new Date(event.date);
-                          return eventDate >= monthStart && eventDate <= monthEnd;
+                        // ⚡ FILTRAR solo eventos importantes
+                        const importantEvents = yearEvents.filter((e: AstrologicalEvent) => {
+                          return (
+                            e.type === 'moon_phase' ||
+                            e.type === 'eclipse' ||
+                            e.type === 'retrograde' ||
+                            e.priority === 'high'
+                          );
                         });
+                        console.log(`✅ [REGENERATE-MONTH] Filtered to ${importantEvents.length} important events`);
 
-                        console.log(`✅ [REGENERATE-MONTH] Found ${monthEvents.length} events for ${monthName}`);
-                        console.log('🔍 [REGENERATE-MONTH] Month events sample:', monthEvents.slice(0, 5).map(e => ({
-                          date: e.date,
-                          title: e.title,
-                          sign: e.sign,
-                          planet: e.planet,
-                          type: e.type
-                        })));
-
-                        // Actualizar todos los eventos (para mantener consistencia)
-                        setEvents(yearEvents);
+                        // Actualizar eventos filtrados
+                        setEvents(importantEvents);
                       } catch (error) {
                         console.error('❌ [REGENERATE-MONTH] Error:', error);
                       } finally {
