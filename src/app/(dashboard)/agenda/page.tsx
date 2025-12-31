@@ -2679,87 +2679,84 @@ const AgendaPersonalizada = () => {
 
                 {/* Contenido del modal con scroll */}
                 <div className="p-6 max-h-[60vh] overflow-y-auto">
-                  {/* Descripción */}
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
-                      <span className="text-purple-300 mr-2">📝</span>
-                      Descripción del Evento
-                    </h3>
-                    <p className="text-gray-200 leading-relaxed">{modalEvent.description}</p>
+                  {/* Descripción síntesis */}
+                  <div className="mb-6 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-l-4 border-yellow-400 rounded-lg p-4">
+                    <p className="text-white text-lg font-semibold leading-relaxed">{modalEvent.description}</p>
                   </div>
 
-                  {/* Interpretación personalizada */}
+                  {/* Interpretación personalizada con NUEVA ESTRUCTURA */}
                   {modalEvent.aiInterpretation && (
-                    <div className="space-y-6">
-                      {/* Significado épico */}
-                      <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-400/20 rounded-2xl p-5">
-                        <h3 className="text-lg font-semibold text-yellow-300 mb-3 flex items-center">
-                          <span className="mr-2">🔥</span>
-                          SIGNIFICADO ÉPICO
-                        </h3>
-                        <p className="text-white leading-relaxed">{modalEvent.aiInterpretation.meaning}</p>
-                      </div>
-
-                      {/* Consejo revolucionario */}
-                      <div className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-400/20 rounded-2xl p-5">
-                        <h3 className="text-lg font-semibold text-emerald-300 mb-3 flex items-center">
-                          <span className="mr-2">⚡</span>
-                          CONSEJO REVOLUCIONARIO
-                        </h3>
-                        <p className="text-white leading-relaxed">{modalEvent.aiInterpretation.advice}</p>
-                      </div>
-
-                      {/* Mantra */}
-                      {modalEvent.aiInterpretation.mantra && (
-                        <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-400/20 rounded-2xl p-5 text-center">
-                          <h3 className="text-lg font-semibold text-purple-300 mb-3 flex items-center justify-center">
-                            <span className="mr-2">✨</span>
-                            MANTRA DE PODER
+                    <div className="space-y-5">
+                      {/* ENERGÍA DOMINANTE DEL DÍA - Planeta líder */}
+                      {modalEvent.aiInterpretation.meaning && (
+                        <div className="bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border border-purple-400/30 rounded-2xl p-5">
+                          <h3 className="text-lg font-bold text-purple-300 mb-3 flex items-center">
+                            <span className="mr-2">🧠</span>
+                            ENERGÍA DOMINANTE DEL DÍA
                           </h3>
-                          <p className="text-white text-lg font-medium italic">
-                            "{modalEvent.aiInterpretation.mantra}"
-                          </p>
+                          <p className="text-white leading-relaxed">{modalEvent.aiInterpretation.meaning}</p>
                         </div>
                       )}
 
-                      {/* Ritual opcional */}
+                      {/* CÓMO VIVIR ESTE DÍA SIENDO TÚ */}
+                      {modalEvent.aiInterpretation.advice && (
+                        <div className="bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-400/30 rounded-2xl p-5">
+                          <h3 className="text-lg font-bold text-emerald-300 mb-3 flex items-center">
+                            <span className="mr-2">🧭</span>
+                            CÓMO VIVIR ESTE DÍA SIENDO TÚ
+                          </h3>
+                          <p className="text-white leading-relaxed">{modalEvent.aiInterpretation.advice}</p>
+                        </div>
+                      )}
+
+                      {/* ACCIÓN CONSCIENTE RECOMENDADA */}
                       {modalEvent.aiInterpretation.ritual && (
-                        <div className="bg-gradient-to-r from-indigo-500/10 to-blue-500/10 border border-indigo-400/20 rounded-2xl p-5">
-                          <h3 className="text-lg font-semibold text-indigo-300 mb-3 flex items-center">
-                            <span className="mr-2">🔮</span>
-                            RITUAL RECOMENDADO
+                        <div className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/30 rounded-2xl p-5">
+                          <h3 className="text-lg font-bold text-cyan-300 mb-3 flex items-center">
+                            <span className="mr-2">✨</span>
+                            ACCIÓN CONSCIENTE RECOMENDADA
                           </h3>
-                          <p className="text-white leading-relaxed">{modalEvent.aiInterpretation.ritual}</p>
+                          <div className="text-white leading-relaxed whitespace-pre-line">{modalEvent.aiInterpretation.ritual}</div>
                         </div>
                       )}
 
-                      {/* Áreas de vida activadas */}
-                      {modalEvent.aiInterpretation.lifeAreas && (
-                        <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-400/20 rounded-2xl p-5">
-                          <h3 className="text-lg font-semibold text-cyan-300 mb-3 flex items-center">
-                            <span className="mr-2">🎯</span>
-                            ÁREAS DE VIDA ACTIVADAS
+                      {/* SOMBRA A OBSERVAR HOY */}
+                      {modalEvent.aiInterpretation.lifeAreas && modalEvent.aiInterpretation.lifeAreas.length > 0 && (
+                        <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-400/30 rounded-2xl p-5">
+                          <h3 className="text-lg font-bold text-orange-300 mb-3 flex items-center">
+                            <span className="mr-2">⚠️</span>
+                            SOMBRA A OBSERVAR HOY
                           </h3>
                           <div className="flex flex-wrap gap-2">
                             {modalEvent.aiInterpretation.lifeAreas.map((area: string, index: number) => (
-                              <span key={index} className="bg-cyan-500/20 border border-cyan-400/30 text-cyan-200 px-3 py-1 rounded-full text-sm">
-                                {area}
+                              <span key={index} className="text-orange-200 leading-relaxed block">
+                                • {area}
                               </span>
                             ))}
                           </div>
                         </div>
                       )}
 
-                      {/* 🌟 INTERPRETACIÓN PERSONALIZADA PROFUNDA (NUEVO) */}
+                      {/* FRASE ANCLA DEL DÍA */}
+                      {modalEvent.aiInterpretation.mantra && (
+                        <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-2 border-purple-400/40 rounded-2xl p-6 text-center">
+                          <h3 className="text-base font-bold text-purple-300 mb-3">🔑 FRASE ANCLA DEL DÍA</h3>
+                          <p className="text-white text-xl font-bold italic leading-relaxed">
+                            "{modalEvent.aiInterpretation.mantra}"
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Botón interpretación ultra personalizada */}
                       {user?.uid && modalEvent && (
-                        <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-2 border-purple-400/30 rounded-2xl p-6">
+                        <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-400/20 rounded-2xl p-5">
                           <div className="mb-4">
-                            <h3 className="text-lg font-semibold text-purple-300 mb-2 flex items-center">
-                              <span className="mr-2">✨</span>
-                              ¿Quieres una interpretación ULTRA PERSONALIZADA?
+                            <h3 className="text-base font-semibold text-indigo-300 mb-2 flex items-center">
+                              <span className="mr-2">🌟</span>
+                              Interpretación Ultra Personalizada
                             </h3>
-                            <p className="text-purple-200 text-sm mb-4">
-                              Genera una interpretación única basada en TU carta natal + Solar Return que analiza cómo este evento te afecta específicamente, incluyendo tus fortalezas a usar, bloqueos a transformar, mantras personalizados y ejercicios concretos.
+                            <p className="text-indigo-200 text-sm mb-4">
+                              Genera una interpretación única con TU carta natal + Solar Return, analizando planetas activados, fortalezas, sombras y ejercicios específicos para ti.
                             </p>
                           </div>
 
