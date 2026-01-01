@@ -2696,7 +2696,9 @@ const AgendaPersonalizada = () => {
             </div>
           </div>
         </div>
+      </div>
         )}
+
 
         {/* TOOLTIP ÉPICO */}
         {hoveredEvent && hoveredEvent?.aiInterpretation && (
@@ -2984,7 +2986,7 @@ const AgendaPersonalizada = () => {
         )}
 
       </div>
-    );
-  }
-  
+  );
+};
+
 export default AgendaPersonalizada;
