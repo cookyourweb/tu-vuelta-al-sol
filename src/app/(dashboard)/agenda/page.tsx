@@ -11,6 +11,10 @@ import type { UserProfile, AstrologicalEvent, EventType } from '@/types/astrolog
 import EventsLoadingModal from '@/components/astrology/EventsLoadingModal';
 import EventInterpretationButton from '@/components/agenda/EventInterpretationButton';
 import AgendaBookGenerator from '@/components/agenda/AgendaBookGenerator';
+import AperturaAnual from '@/components/agenda/AperturaAnual';
+import FichasPlanetarias from '@/components/agenda/FichasPlanetarias';
+import CalendarioSidebar from '@/components/agenda/CalendarioSidebar';
+import EventModal from '@/components/agenda/EventModal';
 
 interface AstronomicalDay {
   date: Date;
@@ -44,8 +48,7 @@ const AgendaPersonalizada = () => {
   const [weekData, setWeekData] = useState<any | null>(null);
   const [loadingWeekData, setLoadingWeekData] = useState(false);
 
-  // Estados para tabs principales (SOLO 3 TABS - eventos integrados en calendario)
-  const [activeTab, setActiveTab] = useState<'mi-anio' | 'mi-carta' | 'calendario'>('calendario');
+  // Estados para vista de calendario
   const [calendarView, setCalendarView] = useState<'mes' | 'semana' | 'dia'>('mes');
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(new Date());
   const [eventFilter, setEventFilter] = useState<'all' | 'moon_phase' | 'eclipse' | 'retrograde' | 'high_priority'>('all');
@@ -141,11 +144,9 @@ const AgendaPersonalizada = () => {
       }
     };
 
-    // Solo cargar cuando el usuario visite tabs de "mi-anio" o "mi-carta"
-    if (activeTab === 'mi-anio' || activeTab === 'mi-carta') {
-      fetchInterpretations();
-    }
-  }, [user, activeTab]);
+    // Cargar interpretaciones para la apertura anual
+    fetchInterpretations();
+  }, [user]);
 
   // 🌟 Cargar planetas activos del año
   React.useEffect(() => {
@@ -172,11 +173,11 @@ const AgendaPersonalizada = () => {
       }
     };
 
-    // Solo cargar cuando el usuario esté en el tab de calendario
-    if (activeTab === 'calendario' && user?.uid) {
+    // Cargar planetas activos para las fichas
+    if (user?.uid) {
       fetchActivePlanets();
     }
-  }, [user, activeTab]);
+  }, [user]);
 
   // 🔧 NUEVO: Cargar datos de carta progresada si vienen desde esa página
   React.useEffect(() => {
@@ -1500,58 +1501,6 @@ const AgendaPersonalizada = () => {
           </div>
         </div>
 
-        {/* 🎨 NAVEGACIÓN DE TABS PRINCIPALES */}
-        <div className="mb-8">
-          <div className="bg-gradient-to-r from-purple-900/40 to-indigo-900/40 backdrop-blur-sm rounded-2xl p-2 border border-purple-400/30">
-            <div className="flex flex-wrap gap-2 justify-center">
-              {/* Tab: Mi Año */}
-              <button
-                onClick={() => setActiveTab('mi-anio')}
-                className={`
-                  flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300
-                  ${activeTab === 'mi-anio'
-                    ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg shadow-yellow-500/30'
-                    : 'bg-white/5 text-purple-200 hover:bg-white/10 hover:text-white'
-                  }
-                `}
-              >
-                <span className="text-xl">📖</span>
-                <span className="hidden sm:inline">Mi Año</span>
-              </button>
-
-              {/* Tab: Mi Carta */}
-              <button
-                onClick={() => setActiveTab('mi-carta')}
-                className={`
-                  flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300
-                  ${activeTab === 'mi-carta'
-                    ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg shadow-yellow-500/30'
-                    : 'bg-white/5 text-purple-200 hover:bg-white/10 hover:text-white'
-                  }
-                `}
-              >
-                <span className="text-xl">🌟</span>
-                <span className="hidden sm:inline">Mi Carta</span>
-              </button>
-
-              {/* Tab: Calendario */}
-              <button
-                onClick={() => setActiveTab('calendario')}
-                className={`
-                  flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300
-                  ${activeTab === 'calendario'
-                    ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg shadow-yellow-500/30'
-                    : 'bg-white/5 text-purple-200 hover:bg-white/10 hover:text-white'
-                  }
-                `}
-              >
-                <span className="text-xl">📅</span>
-                <span className="hidden sm:inline">Calendario</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
         {/* ERROR BANNER - Si hay errores cargando eventos */}
         {error && (
           <div className="mb-6 bg-red-900/50 border border-red-500/50 rounded-xl p-4 backdrop-blur-sm">
@@ -1587,6 +1536,18 @@ const AgendaPersonalizada = () => {
             </div>
           </div>
         )}
+
+        {/* A. APERTURA ANUAL */}
+        <AperturaAnual
+          userProfile={userProfile}
+          solarReturnInterpretation={solarReturnInterpretation}
+        />
+
+        {/* B. FICHAS PLANETARIAS */}
+        <FichasPlanetarias
+          activePlanets={activePlanets}
+          loadingActivePlanets={loadingActivePlanets}
+        />
 
         {/* 📖 TAB: MI AÑO */}
         {activeTab === 'mi-anio' && (
