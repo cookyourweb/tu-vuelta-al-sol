@@ -888,16 +888,20 @@ const AgendaPersonalizada = () => {
         const yearEvents = await fetchYearEvents();
         console.log(`✅ [AGENDA] Loaded ${yearEvents.length} events for the complete year`);
 
-        // ⚡ FILTRAR solo eventos importantes para evitar saturación
+        // ⚡ FILTRAR eventos importantes (pero incluir retrogradaciones, tránsitos y aspectos clave)
         const importantEvents = yearEvents.filter((e: AstrologicalEvent) => {
           return (
-            e.type === 'lunar_phase' ||  // Lunas nuevas/llenas
-            e.type === 'eclipse' ||      // Eclipses
-            e.type === 'retrograde' ||   // Retrógradas
-            e.priority === 'high'        // Alta prioridad
+            e.type === 'lunar_phase' ||      // Lunas nuevas/llenas
+            e.type === 'eclipse' ||          // Eclipses
+            e.type === 'retrograde' ||       // Planetas retrógrados
+            e.type === 'direct' ||           // Planetas directos (fin de retrogradación)
+            e.type === 'planetary_transit' || // Cambios de signo (Júpiter, Saturno, etc.)
+            e.type === 'seasonal' ||         // Equinoccios y solsticios
+            e.type === 'aspect' ||           // Aspectos planetarios importantes
+            e.priority === 'high'            // Cualquier evento de alta prioridad
           );
         });
-        console.log(`✅ [AGENDA] Filtered to ${importantEvents.length} important events`);
+        console.log(`✅ [AGENDA] Filtered to ${importantEvents.length} important events (lunas, eclipses, retrogradaciones, tránsitos, aspectos)`);
 
         setEvents(importantEvents);
       } catch (error) {
@@ -2640,7 +2644,7 @@ const AgendaPersonalizada = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <span className="text-4xl">{modalEvent ? getEventIcon(modalEvent.type, modalEvent.priority) : ''}</span>
-                      <div>
+                      <div className="flex-1">
                         <h2 className="text-2xl font-bold text-white">{modalEvent.title}</h2>
                         <p className="text-purple-200 text-sm">
                           {new Date(modalEvent.date).toLocaleDateString('es-ES', {
@@ -2654,6 +2658,24 @@ const AgendaPersonalizada = () => {
                           <p className="text-purple-300 text-xs mt-1">
                             {modalEvent.planet} en {modalEvent.sign}
                           </p>
+                        )}
+                        {/* DURACIÓN del evento */}
+                        {(modalEvent as any).duration && (
+                          <div className="mt-2 inline-block bg-yellow-500/20 border border-yellow-400/30 rounded-lg px-3 py-1">
+                            <p className="text-yellow-200 text-xs font-semibold">
+                              ⏱️ Duración: {(modalEvent as any).duration}
+                            </p>
+                          </div>
+                        )}
+                        {/* TIPO DE TRÁNSITO */}
+                        {(modalEvent as any).transitType && (
+                          <div className="mt-2 inline-block bg-cyan-500/20 border border-cyan-400/30 rounded-lg px-3 py-1 ml-2">
+                            <p className="text-cyan-200 text-xs font-semibold">
+                              {(modalEvent as any).transitType === 'lento' && '🐢 Tránsito Lento (generacional)'}
+                              {(modalEvent as any).transitType === 'mediano' && '🏃 Tránsito Mediano (anual)'}
+                              {(modalEvent as any).transitType === 'rápido' && '⚡ Tránsito Rápido (mensual)'}
+                            </p>
+                          </div>
                         )}
                       </div>
                     </div>

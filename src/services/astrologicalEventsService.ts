@@ -276,39 +276,52 @@ export async function getAstrologicalEvents(
         priority: lunar.intensity as 'high' | 'medium' | 'low'
       }));
     
-    // 2. AGREGAR RETROGRADACIONES Y MOVIMIENTOS DIRECTOS
+    // 2. AGREGAR RETROGRADACIONES Y MOVIMIENTOS DIRECTOS CON DURACIÓN
     const retrogradeEvents = RETROGRADE_EVENTS
       .filter(retro => {
         const retroDate = new Date(retro.date);
         return retroDate >= start && retroDate <= end;
       })
-      .map(retro => ({
-        id: `${retro.type}_${retro.planet}_${retro.date}`,
-        type: retro.type as AstrologicalEvent['type'],
-        date: retro.date,
-        title: `${retro.planet} ${retro.type === 'retrograde' ? 'Retrógrado' : 'Directo'} en ${retro.sign}`,
-        description: retro.description,
-        planet: retro.planet,
-        sign: retro.sign,
-        priority: getPlanetaryPriority(retro.planet, retro.type)
-      }));
+      .map(retro => {
+        // Calcular duración de la retrogradación
+        const duration = calculateRetrogradeDuration(retro);
+
+        return {
+          id: `${retro.type}_${retro.planet}_${retro.date}`,
+          type: retro.type as AstrologicalEvent['type'],
+          date: retro.date,
+          title: `${retro.planet} ${retro.type === 'retrograde' ? 'Retrógrado' : 'Directo'} en ${retro.sign}`,
+          description: retro.description,
+          planet: retro.planet,
+          sign: retro.sign,
+          priority: getPlanetaryPriority(retro.planet, retro.type),
+          duration: duration // Nueva metadata
+        };
+      });
     
-    // 3. AGREGAR TRÁNSITOS PLANETARIOS
+    // 3. AGREGAR TRÁNSITOS PLANETARIOS CON DURACIÓN
     const transitEvents = PLANETARY_TRANSITS
       .filter(transit => {
         const transitDate = new Date(transit.date);
         return transitDate >= start && transitDate <= end;
       })
-      .map(transit => ({
-        id: `transit_${transit.planet}_${transit.date}`,
-        type: transit.type as AstrologicalEvent['type'],
-        date: transit.date,
-        title: `${transit.planet} entra en ${transit.sign}`,
-        description: transit.description,
-        planet: transit.planet,
-        sign: transit.sign,
-        priority: getTransitPriority(transit.planet, transit.type)
-      }));
+      .map(transit => {
+        // Calcular duración del tránsito
+        const duration = calculateTransitDuration(transit.planet, transit.date);
+
+        return {
+          id: `transit_${transit.planet}_${transit.date}`,
+          type: transit.type as AstrologicalEvent['type'],
+          date: transit.date,
+          title: `${transit.planet} entra en ${transit.sign}`,
+          description: transit.description,
+          planet: transit.planet,
+          sign: transit.sign,
+          priority: getTransitPriority(transit.planet, transit.type),
+          duration: duration, // Nueva metadata
+          transitType: getTransitType(transit.planet) // Rápido, mediano o lento
+        };
+      });
     
     // 4. AGREGAR ECLIPSES
     const eclipseEvents = ECLIPSES
@@ -467,6 +480,76 @@ function calculateEventStats(events: AstrologicalEvent[]): Record<string, number
   });
   
   return stats;
+}
+
+// ==========================================
+// 📅 CÁLCULO DE DURACIONES
+// ==========================================
+
+function calculateRetrogradeDuration(retro: any): string {
+  // Buscar el evento "direct" correspondiente
+  const directEvent = RETROGRADE_EVENTS.find(e =>
+    e.planet === retro.planet &&
+    e.type === 'direct' &&
+    new Date(e.date) > new Date(retro.date)
+  );
+
+  if (retro.type === 'retrograde' && directEvent) {
+    const startDate = new Date(retro.date);
+    const endDate = new Date(directEvent.date);
+    const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    const weeks = Math.ceil(days / 7);
+
+    if (days < 30) {
+      return `${weeks} semanas`;
+    } else {
+      const months = Math.ceil(days / 30);
+      return `${months} meses`;
+    }
+  } else if (retro.type === 'direct') {
+    // Para eventos "direct", mostrar cuándo empezó la retrogradación
+    const retrogradeEvent = RETROGRADE_EVENTS.find(e =>
+      e.planet === retro.planet &&
+      e.type === 'retrograde' &&
+      new Date(e.date) < new Date(retro.date)
+    );
+
+    if (retrogradeEvent) {
+      const startDate = new Date(retrogradeEvent.date);
+      return `Empezó: ${startDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}`;
+    }
+  }
+
+  return '';
+}
+
+function calculateTransitDuration(planet: string, date: string): string {
+  // Duraciones aproximadas de planetas en un signo
+  const durations: Record<string, string> = {
+    'Sol': '1 mes',
+    'Mercurio': '2-3 semanas',
+    'Venus': '3-4 semanas',
+    'Marte': '6 semanas',
+    'Júpiter': '1 año',
+    'Saturno': '2.5 años',
+    'Urano': '7 años',
+    'Neptuno': '14 años',
+    'Plutón': '12-30 años'
+  };
+
+  return durations[planet] || '';
+}
+
+function getTransitType(planet: string): 'rápido' | 'mediano' | 'lento' {
+  const fastPlanets = ['Sol', 'Mercurio', 'Venus', 'Marte'];
+  const mediumPlanets = ['Júpiter', 'Saturno'];
+  const slowPlanets = ['Urano', 'Neptuno', 'Plutón'];
+
+  if (fastPlanets.includes(planet)) return 'rápido';
+  if (mediumPlanets.includes(planet)) return 'mediano';
+  if (slowPlanets.includes(planet)) return 'lento';
+
+  return 'mediano';
 }
 
 function generateMinimalEvents(startDate: string, endDate: string): AstrologicalEvent[] {
