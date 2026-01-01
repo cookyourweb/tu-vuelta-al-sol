@@ -58,6 +58,10 @@ const AgendaPersonalizada = () => {
   const [natalInterpretation, setNatalInterpretation] = useState<any | null>(null);
   const [loadingInterpretations, setLoadingInterpretations] = useState(false);
 
+  // Estados para planetas activos del año
+  const [activePlanets, setActivePlanets] = useState<any[]>([]);
+  const [loadingActivePlanets, setLoadingActivePlanets] = useState(false);
+
   React.useEffect(() => {
     const fetchUserProfile = async () => {
       if (!user?.uid) return;
@@ -136,6 +140,37 @@ const AgendaPersonalizada = () => {
     // Solo cargar cuando el usuario visite tabs de "mi-anio" o "mi-carta"
     if (activeTab === 'mi-anio' || activeTab === 'mi-carta') {
       fetchInterpretations();
+    }
+  }, [user, activeTab]);
+
+  // 🌟 Cargar planetas activos del año
+  React.useEffect(() => {
+    const fetchActivePlanets = async () => {
+      if (!user?.uid) return;
+
+      setLoadingActivePlanets(true);
+
+      try {
+        const currentYear = new Date().getFullYear();
+        const res = await fetch(`/api/agenda/planetary-activation?userId=${user.uid}&year=${currentYear}`);
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.planetas_activos) {
+            console.log('✅ [PLANETAS ACTIVOS] Loaded:', data.planetas_activos);
+            setActivePlanets(data.planetas_activos);
+          }
+        }
+      } catch (error) {
+        console.error('❌ [PLANETAS ACTIVOS] Error fetching active planets:', error);
+      } finally {
+        setLoadingActivePlanets(false);
+      }
+    };
+
+    // Solo cargar cuando el usuario esté en el tab de calendario
+    if (activeTab === 'calendario' && user?.uid) {
+      fetchActivePlanets();
     }
   }, [user, activeTab]);
 
@@ -2366,12 +2401,90 @@ const AgendaPersonalizada = () => {
 
           {/* SIDEBAR INFO DEL DÍA - 1/3 en desktop */}
           <div className="lg:col-span-1">
-            <div className="sticky top-8">
+            <div className="sticky top-8 space-y-6">
 
-              {/* Header del sidebar */}
-              <div className="bg-gradient-to-r from-pink-600/30 to-purple-600/30 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-pink-400/30">
+              {/* 📅 SELECTOR DE FECHA */}
+              <div className="bg-gradient-to-r from-yellow-600/30 to-orange-600/30 backdrop-blur-sm rounded-2xl p-6 border border-yellow-400/30">
+                <h3 className="text-lg font-bold text-white mb-3 flex items-center">
+                  <span className="mr-2">📅</span>
+                  Ir a una fecha
+                </h3>
+                <input
+                  type="date"
+                  value={selectedDate ? format(selectedDate, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd')}
+                  onChange={(e) => {
+                    const newDate = new Date(e.target.value);
+                    setSelectedDate(newDate);
+                    setCurrentMonth(newDate);
+                    // Buscar eventos del día seleccionado
+                    const dayEvents = events.filter(event =>
+                      isSameDay(new Date(event.date), newDate)
+                    );
+                    setSelectedDayEvents(dayEvents);
+                  }}
+                  className="w-full px-4 py-3 rounded-lg bg-purple-900/50 border border-yellow-400/30 text-white font-medium focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                />
+              </div>
+
+              {/* 🪐 PLANETAS ACTIVOS DEL AÑO */}
+              {loadingActivePlanets ? (
+                <div className="bg-gradient-to-r from-purple-600/30 to-indigo-600/30 backdrop-blur-sm rounded-2xl p-6 border border-purple-400/30">
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                  </div>
+                </div>
+              ) : activePlanets.length > 0 && (
+                <div className="bg-gradient-to-r from-purple-600/30 to-indigo-600/30 backdrop-blur-sm rounded-2xl p-6 border border-purple-400/30">
+                  <h3 className="text-lg font-bold text-white mb-3 flex items-center">
+                    <span className="mr-2">🪐</span>
+                    Planetas Activos {new Date().getFullYear()}
+                  </h3>
+                  <div className="space-y-3">
+                    {activePlanets.filter(p => p.prioridad === 1).slice(0, 3).map((planet, idx) => (
+                      <div key={idx} className="bg-purple-900/40 rounded-lg p-3 border border-purple-400/20">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-white font-bold text-sm">{planet.planet}</span>
+                          <span className="text-xs text-yellow-400 font-semibold">⭐ Alta</span>
+                        </div>
+                        <p className="text-purple-200 text-xs line-clamp-2">
+                          {planet.traduccion_practica}
+                        </p>
+                      </div>
+                    ))}
+                    {activePlanets.length > 3 && (
+                      <p className="text-purple-300 text-xs text-center mt-2">
+                        + {activePlanets.length - 3} planetas más activos
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* 📖 AGENDA IMPRIMIBLE */}
+              <div className="bg-gradient-to-r from-green-600/30 to-emerald-600/30 backdrop-blur-sm rounded-2xl p-6 border border-green-400/30">
+                <h3 className="text-lg font-bold text-white mb-3 flex items-center">
+                  <span className="mr-2">📖</span>
+                  Tu Agenda Física
+                </h3>
+                <div className="space-y-3">
+                  <AgendaBookGenerator />
+                  <button
+                    onClick={() => window.print()}
+                    className="w-full bg-gradient-to-r from-green-500/80 to-emerald-500/80 hover:from-green-400/90 hover:to-emerald-400/90 transition-all duration-200 shadow-lg hover:shadow-green-500/25 border border-white/10 p-3 rounded-lg group"
+                    title="Imprimir agenda actual"
+                  >
+                    <svg className="h-5 w-5 text-white group-hover:scale-110 transition-transform inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                    <span className="text-sm font-semibold">Imprimir Vista Actual</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Header del sidebar - Día seleccionado */}
+              <div className="bg-gradient-to-r from-pink-600/30 to-purple-600/30 backdrop-blur-sm rounded-2xl p-6 border border-pink-400/30">
                 <h3 className="text-xl font-bold text-white mb-2 flex items-center">
-                  <span className="mr-3">📅</span>
+                  <span className="mr-3">🌙</span>
                   {selectedDate
                     ? `${selectedDate.getDate()} de ${format(selectedDate, 'MMMM', { locale: es })}`
                     : 'Selecciona un día'
@@ -2545,29 +2658,6 @@ const AgendaPersonalizada = () => {
                 </div>
               )}
 
-              {/* CTA inspirado en Dididaze */}
-              <div className="mt-6 bg-gradient-to-r from-purple-600/40 to-pink-600/40 backdrop-blur-sm rounded-2xl p-6 border border-purple-400/30 text-center">
-                <div className="text-2xl mb-3">🔮</div>
-                <h4 className="text-white font-bold mb-2">¿Quieres más magia?</h4>
-                <p className="text-purple-200 text-sm mb-4">
-                  Descubre interpretaciones aún más profundas de tu carta natal
-                </p>
-                <div className="flex flex-col gap-3">
-                  {/* Botón Generar Libro Completo */}
-                  <AgendaBookGenerator />
-
-                  <button
-                    onClick={() => window.print()}
-                    className="bg-gradient-to-r from-green-500/80 to-emerald-500/80 hover:from-green-400/90 hover:to-emerald-400/90 transition-all duration-200 shadow-lg hover:shadow-green-500/25 border border-white/10 p-3 rounded-full group"
-                    title="Imprimir agenda actual"
-                  >
-                    <svg className="h-5 w-5 text-white group-hover:scale-110 transition-transform inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                    </svg>
-                    Imprimir Vista Actual
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
         </div>
