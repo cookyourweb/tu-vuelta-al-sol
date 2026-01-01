@@ -2695,12 +2695,8 @@ const AgendaPersonalizada = () => {
 
             </div>
           </div>
-<<<<<<< HEAD
         </div>
       </div>
-=======
-          </div>
->>>>>>> 18818c200bcfd3be8be6b507348f15db4d3bf6c9
         )}
 
 
