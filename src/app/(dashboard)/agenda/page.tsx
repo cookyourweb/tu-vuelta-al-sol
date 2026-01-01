@@ -10,6 +10,7 @@ import type { UserProfile, AstrologicalEvent, EventType } from '@/types/astrolog
 
 import EventsLoadingModal from '@/components/astrology/EventsLoadingModal';
 import EventInterpretationButton from '@/components/agenda/EventInterpretationButton';
+import PlanetaryCards from '@/components/agenda/PlanetaryCards';
 import { mapAstrologicalEventToEventData } from '@/utils/eventMapping';
 
 interface AstronomicalDay {
@@ -1099,6 +1100,11 @@ const AgendaPersonalizada = () => {
             </div>
           </div>
         )}
+
+        {/* PLANETARY CARDS - Contexto anual */}
+        <div className="mb-8">
+          <PlanetaryCards />
+        </div>
 
         {/* LAYOUT DESKTOP/MOBILE */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
