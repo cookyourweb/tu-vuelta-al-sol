@@ -62,6 +62,10 @@ const AgendaPersonalizada = () => {
   const [activePlanets, setActivePlanets] = useState<any[]>([]);
   const [loadingActivePlanets, setLoadingActivePlanets] = useState(false);
 
+  // Estados para interpretación V3 cruzada del evento
+  const [crossedInterpretation, setCrossedInterpretation] = useState<any | null>(null);
+  const [loadingCrossedInterpretation, setLoadingCrossedInterpretation] = useState(false);
+
   React.useEffect(() => {
     const fetchUserProfile = async () => {
       if (!user?.uid) return;
@@ -1172,14 +1176,45 @@ const AgendaPersonalizada = () => {
   };
 
   // Modal handlers (reemplaza tooltip)
-  const handleEventClick = (event: AstrologicalEvent) => {
+  const handleEventClick = async (event: AstrologicalEvent) => {
     setModalEvent(event);
     setShowEventModal(true);
+
+    // ✅ Cargar interpretación V3 cruzada si hay planetas activos
+    if (user?.uid && activePlanets.length > 0) {
+      setLoadingCrossedInterpretation(true);
+      setCrossedInterpretation(null); // Reset previous
+
+      try {
+        const res = await fetch('/api/agenda/event-crossed', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: user.uid,
+            event: event,
+            skipCache: false
+          })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.interpretation) {
+            console.log('✅ [V3 CROSSED] Loaded interpretation:', data.interpretation);
+            setCrossedInterpretation(data.interpretation);
+          }
+        }
+      } catch (error) {
+        console.error('❌ [V3 CROSSED] Error loading interpretation:', error);
+      } finally {
+        setLoadingCrossedInterpretation(false);
+      }
+    }
   };
 
   const closeEventModal = () => {
     setShowEventModal(false);
     setModalEvent(null);
+    setCrossedInterpretation(null);
   };
 
   // Tooltip handlers
@@ -2796,53 +2831,86 @@ const AgendaPersonalizada = () => {
                     <p className="text-white text-lg font-semibold leading-relaxed">{modalEvent.description}</p>
                   </div>
 
-                  {/* Interpretación personalizada con NUEVA ESTRUCTURA */}
-                  {modalEvent.aiInterpretation && (
+                  {/* ✨ INTERPRETACIÓN V3 CRUZADA (Nueva Metodología) */}
+                  {loadingCrossedInterpretation ? (
+                    <div className="flex items-center justify-center py-12">
+                      <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+                        <p className="text-purple-300 text-sm">Generando interpretación cruzada...</p>
+                      </div>
+                    </div>
+                  ) : crossedInterpretation ? (
                     <div className="space-y-5">
-                      {/* ENERGÍA DOMINANTE DEL DÍA - Planeta líder */}
-                      {modalEvent.aiInterpretation.meaning && (
-                        <div className="bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border border-purple-400/30 rounded-2xl p-5">
-                          <h3 className="text-lg font-bold text-purple-300 mb-3 flex items-center">
-                            <span className="mr-2">🧠</span>
-                            ENERGÍA DOMINANTE DEL DÍA
+                      {/* ENERGÍA DOMINANTE DEL DÍA */}
+                      <div className="bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border border-purple-400/30 rounded-2xl p-5">
+                        <h3 className="text-lg font-bold text-purple-300 mb-3 flex items-center">
+                          <span className="mr-2">🔥</span>
+                          ENERGÍA DOMINANTE DEL DÍA
+                        </h3>
+                        <p className="text-white leading-relaxed">{crossedInterpretation.energia_dominante}</p>
+                      </div>
+
+                      {/* INTERPRETACIÓN CRUZADA - Preguntas por Planeta Activo */}
+                      {crossedInterpretation.interpretacion_cruzada && crossedInterpretation.interpretacion_cruzada.length > 0 && (
+                        <div className="bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border border-indigo-400/30 rounded-2xl p-5">
+                          <h3 className="text-lg font-bold text-indigo-300 mb-4 flex items-center">
+                            <span className="mr-2">🪐</span>
+                            INTERPRETACIÓN CRUZADA
                           </h3>
-                          <p className="text-white leading-relaxed">{modalEvent.aiInterpretation.meaning}</p>
+                          <div className="space-y-4">
+                            {crossedInterpretation.interpretacion_cruzada.map((planetQ: any, idx: number) => (
+                              <div key={idx} className="bg-white/5 rounded-xl p-4 border border-white/10">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <span className="text-yellow-400 font-bold text-sm">{planetQ.planet}</span>
+                                  <span className="text-indigo-300 text-xs">({planetQ.context})</span>
+                                </div>
+                                <p className="text-white font-semibold italic">
+                                  {planetQ.question}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       )}
 
                       {/* CÓMO VIVIR ESTE DÍA SIENDO TÚ */}
-                      {modalEvent.aiInterpretation.advice && (
-                        <div className="bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-400/30 rounded-2xl p-5">
-                          <h3 className="text-lg font-bold text-emerald-300 mb-3 flex items-center">
-                            <span className="mr-2">🧭</span>
-                            CÓMO VIVIR ESTE DÍA SIENDO TÚ
-                          </h3>
-                          <p className="text-white leading-relaxed">{modalEvent.aiInterpretation.advice}</p>
-                        </div>
-                      )}
+                      <div className="bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-400/30 rounded-2xl p-5">
+                        <h3 className="text-lg font-bold text-emerald-300 mb-3 flex items-center">
+                          <span className="mr-2">🧭</span>
+                          CÓMO VIVIR ESTE DÍA SIENDO TÚ
+                        </h3>
+                        <p className="text-white leading-relaxed">{crossedInterpretation.como_vivir_siendo_tu}</p>
+                      </div>
 
                       {/* ACCIÓN CONSCIENTE RECOMENDADA */}
-                      {modalEvent.aiInterpretation.ritual && (
+                      {crossedInterpretation.accion_recomendada && crossedInterpretation.accion_recomendada.length > 0 && (
                         <div className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/30 rounded-2xl p-5">
                           <h3 className="text-lg font-bold text-cyan-300 mb-3 flex items-center">
                             <span className="mr-2">✨</span>
                             ACCIÓN CONSCIENTE RECOMENDADA
                           </h3>
-                          <div className="text-white leading-relaxed whitespace-pre-line">{modalEvent.aiInterpretation.ritual}</div>
+                          <ul className="space-y-2">
+                            {crossedInterpretation.accion_recomendada.map((action: string, idx: number) => (
+                              <li key={idx} className="text-white leading-relaxed flex items-start">
+                                <span className="text-cyan-400 mr-2">•</span>
+                                <span>{action}</span>
+                              </li>
+                            ))}
+                          </ul>
                         </div>
                       )}
 
-                      {/* SOMBRA A OBSERVAR HOY */}
-                      {modalEvent.aiInterpretation.lifeAreas && modalEvent.aiInterpretation.lifeAreas.length > 0 && (
+                      {/* SOMBRA A EVITAR HOY */}
+                      {crossedInterpretation.sombra_a_evitar && crossedInterpretation.sombra_a_evitar.length > 0 && (
                         <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-400/30 rounded-2xl p-5">
                           <h3 className="text-lg font-bold text-orange-300 mb-3 flex items-center">
                             <span className="mr-2">⚠️</span>
                             SOMBRA A OBSERVAR HOY
                           </h3>
                           <div className="flex flex-wrap gap-2">
-                            {modalEvent.aiInterpretation.lifeAreas.map((area: string, index: number) => (
-                              <span key={index} className="text-orange-200 leading-relaxed block">
-                                • {area}
+                            {crossedInterpretation.sombra_a_evitar.map((sombra: string, idx: number) => (
+                              <span key={idx} className="bg-orange-500/20 border border-orange-400/30 rounded-full px-3 py-1 text-orange-200 text-sm">
+                                {sombra}
                               </span>
                             ))}
                           </div>
@@ -2850,42 +2918,50 @@ const AgendaPersonalizada = () => {
                       )}
 
                       {/* FRASE ANCLA DEL DÍA */}
-                      {modalEvent.aiInterpretation.mantra && (
-                        <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-2 border-purple-400/40 rounded-2xl p-6 text-center">
-                          <h3 className="text-base font-bold text-purple-300 mb-3">🔑 FRASE ANCLA DEL DÍA</h3>
-                          <p className="text-white text-xl font-bold italic leading-relaxed">
-                            "{modalEvent.aiInterpretation.mantra}"
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Botón interpretación ultra personalizada */}
-                      {user?.uid && modalEvent && (
-                        <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-400/20 rounded-2xl p-5">
-                          <div className="mb-4">
-                            <h3 className="text-base font-semibold text-indigo-300 mb-2 flex items-center">
-                              <span className="mr-2">🌟</span>
-                              Interpretación Ultra Personalizada
+                      <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-2 border-purple-400/40 rounded-2xl p-6 text-center">
+                        <h3 className="text-base font-bold text-purple-300 mb-3">🔑 FRASE ANCLA DEL DÍA</h3>
+                        <p className="text-white text-xl font-bold italic leading-relaxed">
+                          "{crossedInterpretation.frase_ancla}"
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    /* Fallback: Interpretación antigua si no hay V3 */
+                    modalEvent.aiInterpretation && (
+                      <div className="space-y-5">
+                        {/* ENERGÍA DOMINANTE DEL DÍA - Planeta líder */}
+                        {modalEvent.aiInterpretation.meaning && (
+                          <div className="bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border border-purple-400/30 rounded-2xl p-5">
+                            <h3 className="text-lg font-bold text-purple-300 mb-3 flex items-center">
+                              <span className="mr-2">🧠</span>
+                              ENERGÍA DOMINANTE DEL DÍA
                             </h3>
-                            <p className="text-indigo-200 text-sm mb-4">
-                              Genera una interpretación única con TU carta natal + Solar Return, analizando planetas activados, fortalezas, sombras y ejercicios específicos para ti.
+                            <p className="text-white leading-relaxed">{modalEvent.aiInterpretation.meaning}</p>
+                          </div>
+                        )}
+
+                        {/* CÓMO VIVIR ESTE DÍA SIENDO TÚ */}
+                        {modalEvent.aiInterpretation.advice && (
+                          <div className="bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-400/30 rounded-2xl p-5">
+                            <h3 className="text-lg font-bold text-emerald-300 mb-3 flex items-center">
+                              <span className="mr-2">🧭</span>
+                              CÓMO VIVIR ESTE DÍA SIENDO TÚ
+                            </h3>
+                            <p className="text-white leading-relaxed">{modalEvent.aiInterpretation.advice}</p>
+                          </div>
+                        )}
+
+                        {/* FRASE ANCLA DEL DÍA */}
+                        {modalEvent.aiInterpretation.mantra && (
+                          <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-2 border-purple-400/40 rounded-2xl p-6 text-center">
+                            <h3 className="text-base font-bold text-purple-300 mb-3">🔑 FRASE ANCLA DEL DÍA</h3>
+                            <p className="text-white text-xl font-bold italic leading-relaxed">
+                              "{modalEvent.aiInterpretation.mantra}"
                             </p>
                           </div>
-
-                          <EventInterpretationButton
-                            userId={user.uid}
-                            event={{
-                              type: mapEventTypeToInterpretation(modalEvent).type,
-                              date: modalEvent.date,
-                              sign: modalEvent.sign || 'Desconocido',
-                              house: mapEventTypeToInterpretation(modalEvent).house,
-                              planetsInvolved: modalEvent.planet ? [modalEvent.planet] : []
-                            }}
-                            className="w-full"
-                          />
-                        </div>
-                      )}
-                    </div>
+                        )}
+                      </div>
+                    )
                   )}
                 </div>
 
