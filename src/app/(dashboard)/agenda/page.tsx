@@ -69,6 +69,9 @@ const AgendaPersonalizada = () => {
   const [crossedInterpretation, setCrossedInterpretation] = useState<any | null>(null);
   const [loadingCrossedInterpretation, setLoadingCrossedInterpretation] = useState(false);
 
+  // Estado para manejar las tabs activas
+  const [activeTab, setActiveTab] = useState<'calendario' | 'mi-anio' | 'mi-carta'>('calendario');
+
   React.useEffect(() => {
     const fetchUserProfile = async () => {
       if (!user?.uid) return;
@@ -1539,7 +1542,11 @@ const AgendaPersonalizada = () => {
 
         {/* A. APERTURA ANUAL */}
         <AperturaAnual
-          userProfile={userProfile}
+          userProfile={userProfile && userProfile.name ? {
+            name: userProfile.name,
+            currentAge: userProfile.currentAge,
+            birthDate: userProfile.birthDate
+          } : null}
           solarReturnInterpretation={solarReturnInterpretation}
         />
 
