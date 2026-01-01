@@ -116,6 +116,15 @@ const EventInterpretationSchema = new Schema<IEventInterpretation>(
       enum: ['openai', 'anthropic', 'cached']
     },
 
+    version: {
+      type: String,
+      enum: ['v1', 'v2', 'v3_crossed'],
+      default: 'v2'
+      // v1: Primera versión básica
+      // v2: Ultra personalizada con natal + SR
+      // v3_crossed: Metodología cruzada con planetas activos
+    },
+
     cached: {
       type: Boolean,
       default: false
