@@ -25,17 +25,51 @@ export interface CrossedEventInterpretation {
   title: string;
   date: string;
 
-  // ESTRUCTURA DEFINITIVA DE LA AGENDA
-  energia_dominante: string;                   // Qué energía domina este día
-  interpretacion_cruzada: PlanetQuestion[];    // Preguntas por planeta activo
-  como_vivir_siendo_tu: string;                // Cómo vivir este día siendo tú
-  accion_recomendada: string[];                // Acciones concretas (3-4 items)
-  sombra_a_evitar: string[];                   // Sombras (3-4 items)
+  // ESTRUCTURA DEFINITIVA DE LA AGENDA (FORMATO EXTENDIDO)
+  clima_del_dia: string[];                     // Keywords del clima (ej: ["cierre", "madurez", "resultados visibles"])
+  energias_activas: string[];                  // Planetas activos este año con símbolos (ej: ["♂ Marte", "♀ Venus", "♄ Saturno"])
+  mensaje_sintesis: string;                    // 1-2 frases potentes de síntesis
+
+  como_te_afecta: string;                      // Párrafo largo explicando cómo vive ESTA PERSONA el evento (200-300 palabras)
+  interpretacion_practica: PlanetaryPracticalContext[];  // Por cada planeta activo, cómo se relaciona con el evento
+
+  accion_concreta: ActionExercise;             // Ejercicio estructurado con pasos
+  sombra_a_evitar: ShadowWarning[];            // Sombras con explicación
   frase_ancla: string;                         // Frase ancla del día
+
+  apoyo_energetico?: EnergySuppport[];         // OPCIONAL: Velas, piedras, ejercicios
+  cierre_del_dia: string;                      // Mensaje de cierre (2-3 líneas)
+
+  // Deprecated (mantener para compatibilidad)
+  energia_dominante?: string;
+  interpretacion_cruzada?: PlanetQuestion[];
+  como_vivir_siendo_tu?: string;
+  accion_recomendada?: string[];
 
   // Metadata
   cached: boolean;
   generatedAt: Date;
+}
+
+export interface PlanetaryPracticalContext {
+  planet: string;                // "Marte activo"
+  interpretation: string;        // "tu cuerpo y tu energía ya saben qué no quieren empujar más"
+}
+
+export interface ActionExercise {
+  title: string;                 // "Ejercicio de cierre consciente"
+  steps: string[];               // Pasos detallados del ejercicio
+}
+
+export interface ShadowWarning {
+  shadow: string;                // "Exigirte más de lo necesario"
+  explanation?: string;          // Explicación adicional (opcional)
+}
+
+export interface EnergySuppport {
+  type: 'vela' | 'piedra' | 'ejercicio';
+  item: string;                  // "Vela marrón o negra"
+  purpose: string;               // "estructura y cierre consciente"
 }
 
 /**
@@ -148,7 +182,7 @@ ${card.planet} ACTIVO ESTE AÑO:
 - Regla: ${card.regla_del_ano}`;
   }).join('\n');
 
-  const prompt = `Genera una interpretación de evento astrológico usando METODOLOGÍA CRUZADA PROFESIONAL.
+  const prompt = `Genera una interpretación ULTRA DETALLADA de evento astrológico usando METODOLOGÍA CRUZADA PROFESIONAL.
 
 Esta metodología cruza:
 1. Quién es la persona (natal)
@@ -173,57 +207,85 @@ EVENTO DEL DÍA:
 ${event.planet ? `- Planeta: ${event.planet}` : ''}
 ${event.description ? `- Descripción: ${event.description}` : ''}
 
-ESTRUCTURA OBLIGATORIA (JSON):
+ESTRUCTURA OBLIGATORIA (JSON EXTENDIDO):
 
 {
-  "energia_dominante": "[40-60 palabras] Qué energía domina este día. NO explicar astrología, sino traducir a experiencia. Ejemplo: 'Hoy el cielo pide DECISIONES CONCRETAS, no planes abstractos. La energía empuja hacia lo tangible, lo que puedes tocar y verificar.'",
+  "clima_del_dia": ["[keyword 1]", "[keyword 2]", "[keyword 3]"],
+  "energias_activas": ["♂ Marte", "♀ Venus", "♄ Saturno"],
+  "mensaje_sintesis": "[1-2 frases MUY potentes que resumen lo esencial del día. NO genérico. Ej: 'Cerrar con responsabilidad lo que ya ha cumplido su función. Hoy no se trata de sentir más, sino de asumir una decisión clara.']",
 
-  "interpretacion_cruzada": [
+  "como_te_afecta": "[200-300 palabras] PÁRRAFO LARGO Y ULTRA PERSONALIZADO. Explicar cómo ESTA PERSONA ESPECÍFICA vive este evento basado en su natal y sus planetas activos.
+
+Estructura sugerida:
+- Párrafo 1: Quién eres tú naturalmente (usar su Sol, Luna, Ascendente si están en el resumen natal)
+- Párrafo 2: Qué te piden los planetas activos ESTE AÑO
+- Párrafo 3: Qué punto clave activa este evento
+- Bullets: 3-4 preguntas o puntos clave (usando ¿Dónde...? ¿Qué...?)
+
+Ejemplo:
+'Tú eres una persona constante, que avanza despacio pero con determinación.
+Este año Marte te está pidiendo acción sostenida, Venus revisar qué valoras de verdad y Saturno poner límites firmes.
+
+Esta Luna Llena activa un punto clave:
+👉 ¿Dónde sigues sosteniendo algo solo por responsabilidad, no por convicción?
+
+Hoy se ve con claridad:
+• Qué esfuerzo sí merece la pena
+• Qué compromiso se ha convertido en peso
+• Qué estructura necesita un cierre definitivo'",
+
+  "interpretacion_practica": [
     {
-      "planet": "[Nombre del planeta activo 1]",
-      "question": "[Pregunta específica basada en este planeta y el evento. Ej: ¿Dónde estás sosteniendo algo que ya no avanza?]",
-      "context": "[20-30 palabras] Por qué este planeta es relevante hoy. Ej: Con Marte activo este año en tu casa 10, este evento toca directamente tu forma de actuar en lo público."
+      "planet": "Marte activo",
+      "interpretation": "tu cuerpo y tu energía ya saben qué no quieren empujar más"
     },
     {
-      "planet": "[Nombre del planeta activo 2]",
-      "question": "[Pregunta específica]",
-      "context": "[20-30 palabras] Relevancia"
+      "planet": "Venus activo",
+      "interpretation": "tu sistema interno pide coherencia entre lo que das y lo que recibes"
     },
     {
-      "planet": "[Nombre del planeta activo 3]",
-      "question": "[Pregunta específica]",
-      "context": "[20-30 palabras] Relevancia"
+      "planet": "Saturno activo",
+      "interpretation": "la vida te pide una decisión adulta, no una excusa"
     }
   ],
 
-  "como_vivir_siendo_tu": "[80-100 palabras] Cómo vivir este día siendo TÚ específicamente. Integrar tu natal con el evento. NO genérico. Ej: 'Con tu Sol en Tauro y Luna en Escorpio, este evento no te pide acelerar, te pide SOSTENER con intensidad. Tu naturaleza construye despacio pero profundo. Hoy usa eso: no agregues tareas, profundiza en las que ya tienes. No busques respuestas nuevas, confirma las que ya sabes.'",
-
-  "accion_recomendada": [
-    "[Acción concreta 1 - NO genérica. Ej: Revisa compromisos laborales y elimina uno que solo sostienes por obligación]",
-    "[Acción concreta 2 - Ej: Escribe en 5 minutos qué responsabilidad estás evitando asumir]",
-    "[Acción concreta 3 - Ej: Define UN límite claro con alguien que te pide más de lo que puedes dar]"
-  ],
+  "accion_concreta": {
+    "title": "Ejercicio de cierre consciente",
+    "steps": [
+      "Completa por escrito: 'Hoy dejo de sostener ____________________ porque ya no me construye ni me representa.'",
+      "Después, escribe: 'Elijo comprometerme con ____________________ desde la calma y no desde la obligación.'"
+    ]
+  },
 
   "sombra_a_evitar": [
-    "[Sombra 1 - Palabra o frase corta. Ej: Rigidez]",
-    "[Sombra 2 - Ej: Autoexigencia excesiva]",
-    "[Sombra 3 - Ej: Culpa por descansar]"
+    { "shadow": "Exigirte más de lo necesario", "explanation": "" },
+    { "shadow": "Culpabilizarte por descansar", "explanation": "" },
+    { "shadow": "Pensar que soltar es fracasar", "explanation": "Soltar hoy es ordenar tu energía, no rendirte." }
   ],
 
-  "frase_ancla": "[8-12 palabras máximo] Frase potente e integradora que resume el día. Ej: 'Sostenerme también es avanzar.'"
+  "frase_ancla": "Puedo ser responsable sin cargar con todo.",
+
+  "apoyo_energetico": [
+    { "type": "vela", "item": "Vela marrón o negra", "purpose": "estructura y cierre consciente" },
+    { "type": "piedra", "item": "Ónix u obsidiana", "purpose": "límites y protección energética" },
+    { "type": "ejercicio", "item": "5 minutos de respiración lenta antes de dormir", "purpose": "calmar el sistema nervioso" }
+  ],
+
+  "cierre_del_dia": "Esta Luna Llena no viene a quitarte nada. Viene a devolverte espacio, foco y autoridad personal."
 }
 
 REGLAS CRÍTICAS:
-- NO explicar astrología. Traducir a experiencia.
-- NO lenguaje poético. Lenguaje DIRECTO.
-- Usar datos reales: planetas activos, natal, evento.
-- Interpretación cruzada: mínimo 2 planetas, máximo 4 (solo los MÁS relevantes para este evento).
-- Acciones CONCRETAS y ESPECÍFICAS (no "dedica tiempo a...", sino "escribe en 5 minutos...")
-- Sombras en 1-3 palabras cada una.
-- Frase ancla: corta, potente, memorable.
-- Tono: OBSERVADOR, no imperativo. "Este día funciona mejor cuando..." en vez de "Debes hacer..."
+- NO explicar astrología. Traducir a experiencia VIVIDA.
+- NO lenguaje poético. Lenguaje DIRECTO y ESPECÍFICO.
+- "como_te_afecta" debe ser LARGO (200-300 palabras) y ULTRA PERSONALIZADO
+- "interpretacion_practica" debe tener una línea por cada planeta activo RELEVANTE a este evento
+- "accion_concreta" debe ser un EJERCICIO ESTRUCTURADO con pasos claros (no genérico)
+- "sombra_a_evitar" puede tener explicación en la última sombra si es necesario
+- "apoyo_energetico" es OPCIONAL pero muy valorado (3 items: vela, piedra, ejercicio)
+- "cierre_del_dia" debe ser 2-3 líneas de mensaje positivo y empoderante
+- Tono: OBSERVADOR pero POTENTE. No imperativo, pero SÍ claro.
 
-OBJETIVO: Que ${userName} sienta que este evento cruza perfectamente quién es (natal) + qué activa el año + qué pide el momento.`;
+OBJETIVO: Que ${userName} sienta que esta interpretación es TAN ESPECÍFICA que solo puede ser para él/ella.`;
 
   return prompt;
 }
@@ -286,12 +348,25 @@ export async function generateCrossedInterpretation(
       eventId,
       title: event.title,
       date: event.date,
-      energia_dominante: parsed.energia_dominante || '',
-      interpretacion_cruzada: parsed.interpretacion_cruzada || [],
-      como_vivir_siendo_tu: parsed.como_vivir_siendo_tu || '',
-      accion_recomendada: parsed.accion_recomendada || [],
+
+      // Nuevo formato extendido
+      clima_del_dia: parsed.clima_del_dia || [],
+      energias_activas: parsed.energias_activas || [],
+      mensaje_sintesis: parsed.mensaje_sintesis || '',
+      como_te_afecta: parsed.como_te_afecta || '',
+      interpretacion_practica: parsed.interpretacion_practica || [],
+      accion_concreta: parsed.accion_concreta || { title: '', steps: [] },
       sombra_a_evitar: parsed.sombra_a_evitar || [],
       frase_ancla: parsed.frase_ancla || '',
+      apoyo_energetico: parsed.apoyo_energetico || [],
+      cierre_del_dia: parsed.cierre_del_dia || '',
+
+      // Campos deprecated (mantener por compatibilidad)
+      energia_dominante: parsed.energia_dominante,
+      interpretacion_cruzada: parsed.interpretacion_cruzada,
+      como_vivir_siendo_tu: parsed.como_vivir_siendo_tu,
+      accion_recomendada: parsed.accion_recomendada,
+
       cached: false,
       generatedAt: new Date()
     };
@@ -321,6 +396,31 @@ function generateFallbackCrossedInterpretation(
     eventId: `${event.id}_${event.date}`,
     title: event.title,
     date: event.date,
+
+    // Nuevo formato extendido
+    clima_del_dia: ['reflexión', 'pausa', 'ajuste'],
+    energias_activas: [],
+    mensaje_sintesis: 'Momento de reflexión y ajuste consciente. Confía en tu intuición sobre qué significa este evento para ti.',
+    como_te_afecta: `Este evento ${event.title} te invita a pausar y observar. Cada persona lo vive según su carta natal, así que confía en tu intuición sobre qué significa para ti. Hoy es un día para escuchar tu voz interior y reconocer qué necesitas realmente.`,
+    interpretacion_practica: [],
+    accion_concreta: {
+      title: 'Reflexión consciente',
+      steps: [
+        'Dedica 10 minutos a reflexionar sobre este evento',
+        'Anota qué emociones surgen hoy',
+        'Observa sin juzgar'
+      ]
+    },
+    sombra_a_evitar: [
+      { shadow: 'Prisa', explanation: '' },
+      { shadow: 'Comparación con otros', explanation: '' },
+      { shadow: 'Autoexigencia', explanation: 'Confía en tu ritmo.' }
+    ],
+    frase_ancla: 'Confía en tu ritmo.',
+    apoyo_energetico: [],
+    cierre_del_dia: 'Este día te invita a confiar en tu propio proceso.',
+
+    // Deprecated fields
     energia_dominante: `${event.title} - Momento de reflexión y ajuste consciente.`,
     interpretacion_cruzada: [
       {
@@ -329,18 +429,9 @@ function generateFallbackCrossedInterpretation(
         context: 'El Sol siempre pide autenticidad.'
       }
     ],
-    como_vivir_siendo_tu: `Este evento ${event.title} te invita a pausar y observar. Cada persona lo vive según su carta natal, así que confía en tu intuición sobre qué significa para ti.`,
-    accion_recomendada: [
-      'Dedica 10 minutos a reflexionar sobre este evento',
-      'Anota qué emociones surgen hoy',
-      'Observa sin juzgar'
-    ],
-    sombra_a_evitar: [
-      'Prisa',
-      'Comparación con otros',
-      'Autoexigencia'
-    ],
-    frase_ancla: 'Confía en tu ritmo.',
+    como_vivir_siendo_tu: `Este evento ${event.title} te invita a pausar y observar.`,
+    accion_recomendada: ['Dedica 10 minutos a reflexionar', 'Anota qué emociones surgen', 'Observa sin juzgar'],
+
     cached: false,
     generatedAt: new Date()
   };
