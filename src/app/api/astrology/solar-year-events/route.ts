@@ -7,6 +7,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { calculateSolarYearEvents } from '@/utils/astrology/solarYearEvents';
+import { calculateHouseForEvent, signAndDegreeToLongitude } from '@/utils/eventMapping';
+import connectDB from '@/lib/db';
+import NatalChart from '@/models/NatalChart';
 
 // =============================================================================
 // GET - Calculate Solar Year Events
@@ -91,7 +94,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { birthDate, birthTime, birthPlace, currentYear } = body;
+    const { birthDate, birthTime, birthPlace, currentYear, userId } = body;
 
     if (!birthDate) {
       return NextResponse.json(
@@ -101,6 +104,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('🌟 [POST] Calculating solar year events for:', birthDate);
+    console.log('👤 [POST] User ID:', userId || 'Not provided');
 
     // Parse birth date and time
     const dateObj = new Date(birthDate);
@@ -140,34 +144,56 @@ export async function POST(request: NextRequest) {
       seasonalEvents: events.seasonalEvents.length
     });
 
+    // 🏠 CALCULATE HOUSES FOR EVENTS (if userId provided)
+    let natalChart = null;
+    if (userId) {
+      try {
+        await connectDB();
+        const natalDoc = await NatalChart.findOne({ userId }).lean();
+        if (natalDoc) {
+          natalChart = natalDoc.natalChart || natalDoc;
+          console.log('✅ Natal chart loaded for house calculations');
+        } else {
+          console.warn('⚠️ No natal chart found for user:', userId);
+        }
+      } catch (error) {
+        console.error('❌ Error loading natal chart:', error);
+      }
+    }
+
     // Convert Date objects to ISO strings for JSON serialization
     const serializedEvents = {
       lunarPhases: events.lunarPhases.map(p => ({
         ...p,
         date: p.date instanceof Date ? p.date.toISOString() : p.date,
         phase: p.type === 'new_moon' ? 'Luna Nueva' : 'Luna Llena',
-        zodiacSign: p.sign
+        zodiacSign: p.sign,
+        house: natalChart ? calculateHouseForEvent(p.sign, p.degree || 0, natalChart) : undefined
       })),
       retrogrades: events.retrogrades.map(r => ({
         ...r,
         startDate: r.startDate instanceof Date ? r.startDate.toISOString() : r.startDate,
         endDate: r.endDate instanceof Date ? r.endDate.toISOString() : r.endDate,
-        sign: r.startSign
+        sign: r.startSign,
+        house: natalChart ? calculateHouseForEvent(r.startSign, r.startDegree || 0, natalChart) : undefined
       })),
       eclipses: events.eclipses.map(e => ({
         ...e,
         date: e.date instanceof Date ? e.date.toISOString() : e.date,
-        zodiacSign: e.sign
+        zodiacSign: e.sign,
+        house: natalChart ? calculateHouseForEvent(e.sign, e.degree || 0, natalChart) : undefined
       })),
       planetaryIngresses: events.planetaryIngresses.map(i => ({
         ...i,
         date: i.date instanceof Date ? i.date.toISOString() : i.date,
         newSign: i.toSign,
-        previousSign: i.fromSign
+        previousSign: i.fromSign,
+        house: natalChart ? calculateHouseForEvent(i.toSign, i.toDegree || 0, natalChart) : undefined
       })),
       seasonalEvents: events.seasonalEvents.map(s => ({
         ...s,
-        date: s.date instanceof Date ? s.date.toISOString() : s.date
+        date: s.date instanceof Date ? s.date.toISOString() : s.date,
+        house: natalChart && s.sign ? calculateHouseForEvent(s.sign, s.degree || 0, natalChart) : undefined
       }))
     };
 

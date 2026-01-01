@@ -10,6 +10,7 @@ import type { UserProfile, AstrologicalEvent, EventType } from '@/types/astrolog
 
 import EventsLoadingModal from '@/components/astrology/EventsLoadingModal';
 import EventInterpretationButton from '@/components/agenda/EventInterpretationButton';
+import { mapAstrologicalEventToEventData } from '@/utils/eventMapping';
 
 interface AstronomicalDay {
   date: Date;
@@ -161,7 +162,8 @@ const AgendaPersonalizada = () => {
           birthDate: userProfile.birthDate,
           birthTime: userProfile.birthTime,
           birthPlace: userProfile.birthPlace,
-          currentYear: startDate.getFullYear()
+          currentYear: startDate.getFullYear(),
+          userId: user?.uid // ✅ Enviar userId para cálculo de casas
         })
       });
 
@@ -957,26 +959,19 @@ const AgendaPersonalizada = () => {
 
 
   // ✅ HELPER: Mapear tipo de evento a formato de EventInterpretationButton
+  // Ahora usa la función de mapeo completo de utils
   const mapEventTypeToInterpretation = (event: AstrologicalEvent): {
     type: 'luna_nueva' | 'luna_llena' | 'transito' | 'aspecto';
     house: number;
   } => {
-    let type: 'luna_nueva' | 'luna_llena' | 'transito' | 'aspecto';
-    let house = 1; // Default casa 1 (TODO: calcular casa real basado en carta natal)
+    const eventData = mapAstrologicalEventToEventData(event, {
+      defaultHouse: 1 // Fallback si no hay casa calculada
+    });
 
-    // Mapear tipo de evento
-    if (event.type === 'lunar_phase') {
-      // Determinar si es Luna Nueva o Llena basado en el título
-      type = event.title.toLowerCase().includes('nueva') ? 'luna_nueva' : 'luna_llena';
-    } else if (event.type === 'retrograde' || event.type === 'planetary_transit') {
-      type = 'transito';
-    } else if (event.type === 'eclipse' || event.type === 'aspect') {
-      type = 'aspecto';
-    } else {
-      type = 'aspecto'; // Default
-    }
-
-    return { type, house };
+    return {
+      type: eventData.type,
+      house: eventData.house
+    };
   };
 
   return (
@@ -1534,6 +1529,7 @@ const AgendaPersonalizada = () => {
                         {modalEvent.planet && modalEvent.sign && (
                           <p className="text-purple-300 text-xs mt-1">
                             {modalEvent.planet} en {modalEvent.sign}
+                            {modalEvent.house && ` • Casa ${modalEvent.house}`}
                           </p>
                         )}
                       </div>
@@ -1637,11 +1633,24 @@ const AgendaPersonalizada = () => {
                           <div className="mb-4">
                             <h3 className="text-lg font-semibold text-purple-300 mb-2 flex items-center">
                               <span className="mr-2">✨</span>
-                              ¿Quieres una interpretación ULTRA PERSONALIZADA?
+                              Interpretación ULTRA Personalizada
                             </h3>
                             <p className="text-purple-200 text-sm mb-4">
-                              Genera una interpretación única basada en TU carta natal + Solar Return que analiza cómo este evento te afecta específicamente, incluyendo tus fortalezas a usar, bloqueos a transformar, mantras personalizados y ejercicios concretos.
+                              Genera una interpretación única cruzando <strong>TU carta natal + Solar Return + Este evento</strong> que analiza:
                             </p>
+                            <ul className="text-purple-200 text-sm space-y-1 mb-4 ml-4">
+                              <li>✓ Cómo este evento te afecta específicamente</li>
+                              <li>✓ Qué fortalezas de tu carta usar</li>
+                              <li>✓ Qué bloqueos transformar</li>
+                              <li>✓ Ejercicios concretos para este momento</li>
+                              <li>✓ Mantra personalizado con tus posiciones planetarias</li>
+                              <li>✓ Timing evolutivo preciso</li>
+                            </ul>
+                            {modalEvent.house && (
+                              <div className="bg-purple-700/30 rounded-lg p-3 text-sm text-purple-100 mb-4">
+                                <strong>📍 Casa Activada:</strong> Casa {modalEvent.house} de tu carta natal
+                              </div>
+                            )}
                           </div>
 
                           <EventInterpretationButton
