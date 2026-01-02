@@ -979,6 +979,20 @@ const AgendaPersonalizada = () => {
     };
   };
 
+  // Si está en modo Agenda Libro, mostrar solo eso
+  if (showAgendaLibro && userProfile && yearRange) {
+    return (
+      <StyleProvider>
+        <AgendaLibro
+          onClose={() => setShowAgendaLibro(false)}
+          userName={userProfile.name || 'Usuario'}
+          startDate={yearRange.start}
+          endDate={yearRange.end}
+        />
+      </StyleProvider>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 relative overflow-hidden">
 
@@ -1695,18 +1709,6 @@ const AgendaPersonalizada = () => {
               </div>
             </div>
           </>
-        )}
-
-        {/* AGENDA LIBRO MODAL */}
-        {showAgendaLibro && userProfile && yearRange && (
-          <StyleProvider>
-            <AgendaLibro
-              onClose={() => setShowAgendaLibro(false)}
-              userName={userProfile.name || 'Usuario'}
-              startDate={yearRange.start}
-              endDate={yearRange.end}
-            />
-          </StyleProvider>
         )}
 
       </div>

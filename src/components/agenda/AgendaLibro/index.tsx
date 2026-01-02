@@ -27,9 +27,9 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
   };
 
   return (
-    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 overflow-y-auto">
+    <div className="min-h-screen bg-white">
       {/* Header de controles - NO se imprime */}
-      <div className={`no-print sticky top-0 z-50 backdrop-blur border-b border-purple-400/30 ${config.headerBg} ${config.headerText} p-4`}>
+      <div className={`no-print sticky top-0 z-50 backdrop-blur border-b ${config.headerBg} ${config.headerText} p-4`}>
         <div className="container mx-auto flex items-center justify-between">
           <button
             onClick={onClose}
@@ -57,7 +57,7 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
       </div>
 
       {/* Contenido del libro */}
-      <div ref={printRef} className="container mx-auto pt-20 pb-8 lg:pt-28 print:pt-0 print:pb-0 print:container-none space-y-0">
+      <div ref={printRef} className="container mx-auto py-8 space-y-0 print:p-0">
 
         {/* 1. PORTAL DE ENTRADA */}
         <PortadaPersonalizada
