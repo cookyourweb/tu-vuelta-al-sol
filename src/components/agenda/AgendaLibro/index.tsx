@@ -10,6 +10,7 @@ import { Printer, X } from 'lucide-react';
 // Secciones del libro
 import { PortadaPersonalizada, PaginaIntencion } from './PortalEntrada';
 import { CartaBienvenida, TemaCentralAnio, LoQueVieneAMover, LoQuePideSoltar, PaginaIntencionAnual } from './TuAnioTuViaje';
+import { EsenciaNatal, NodoNorte, NodoSur, PlanetasDominantes, PatronesEmocionales } from './SoulChart';
 
 interface AgendaLibroProps {
   onClose: () => void;
@@ -74,6 +75,13 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
         <LoQuePideSoltar />
         <PaginaIntencionAnual />
 
+        {/* 3. SOUL CHART */}
+        <EsenciaNatal />
+        <NodoNorte />
+        <NodoSur />
+        <PlanetasDominantes />
+        <PatronesEmocionales />
+
         {/* Placeholder para contenido futuro */}
         <div className="print-page bg-white p-10 text-center flex items-center justify-center">
           <div>
@@ -86,7 +94,7 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
             <ul className="text-left inline-block mt-6 space-y-2 text-gray-600">
               <li>✅ Portal de Entrada</li>
               <li>✅ Tu Año, Tu Viaje</li>
-              <li>⏳ Soul Chart</li>
+              <li>✅ Soul Chart</li>
               <li>⏳ Retorno Solar</li>
               <li>⏳ Ejemplo Enero 2026</li>
               <li>⏳ Meses 2-12</li>
