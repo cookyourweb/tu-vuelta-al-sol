@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { format, addMonths, subMonths, isSameMonth, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, addWeeks, subWeeks, getDay } from 'date-fns';
+import { format, addMonths, subMonths, isSameMonth, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -10,7 +10,10 @@ import type { UserProfile, AstrologicalEvent, EventType } from '@/types/astrolog
 
 import EventsLoadingModal from '@/components/astrology/EventsLoadingModal';
 import EventInterpretationButton from '@/components/agenda/EventInterpretationButton';
-import AgendaBookGenerator from '@/components/agenda/AgendaBookGenerator';
+import PlanetaryCards from '@/components/agenda/PlanetaryCards';
+import { AgendaLibro } from '@/components/agenda/AgendaLibro';
+import { StyleProvider } from '@/context/StyleContext';
+import { mapAstrologicalEventToEventData } from '@/utils/eventMapping';
 
 interface AstronomicalDay {
   date: Date;
@@ -41,24 +44,9 @@ const AgendaPersonalizada = () => {
   const [loadedMonths, setLoadedMonths] = useState<Set<string>>(new Set());
   const [loadingMonthlyEvents, setLoadingMonthlyEvents] = useState(false);
   const [loadingMonthName, setLoadingMonthName] = useState<string>('');
-  // Estados para vista mensual/semanal
-  const [viewMode, setViewMode] = useState<'month' | 'week'>('month');
-  const [weekData, setWeekData] = useState<any | null>(null);
-  const [loadingWeekData, setLoadingWeekData] = useState(false);
-
-  // Estados para tabs principales (ELIMINADO 'eventos' - se muestran en calendario)
-  const [activeTab, setActiveTab] = useState<'mi-anio' | 'mi-carta' | 'calendario'>('calendario');
-  const [calendarView, setCalendarView] = useState<'mes' | 'semana' | 'dia'>('mes');
-  const [currentWeekStart, setCurrentWeekStart] = useState<Date>(new Date());
-  const [eventFilter, setEventFilter] = useState<'all' | 'moon_phase' | 'eclipse' | 'retrograde' | 'high_priority'>('all');
 
   // Perfil de usuario REAL (no datos de prueba)
   const [userProfile, setUserProfile] = React.useState<UserProfile | null>(null);
-
-  // Estados para interpretaciones
-  const [solarReturnInterpretation, setSolarReturnInterpretation] = useState<any | null>(null);
-  const [natalInterpretation, setNatalInterpretation] = useState<any | null>(null);
-  const [loadingInterpretations, setLoadingInterpretations] = useState(false);
 
   React.useEffect(() => {
     const fetchUserProfile = async () => {
@@ -100,46 +88,6 @@ const AgendaPersonalizada = () => {
 
     fetchUserProfile();
   }, [user]);
-
-  // 🌟 Cargar interpretaciones (Retorno Solar y Carta Natal)
-  React.useEffect(() => {
-    const fetchInterpretations = async () => {
-      if (!user?.uid) return;
-
-      setLoadingInterpretations(true);
-
-      try {
-        // Fetch Retorno Solar
-        const srRes = await fetch(`/api/interpretations?userId=${user.uid}&chartType=solar-return`);
-        if (srRes.ok) {
-          const srData = await srRes.json();
-          if (srData && srData.interpretation) {
-            console.log('✅ [INTERPRETATIONS] Solar Return loaded:', srData.interpretation);
-            setSolarReturnInterpretation(srData.interpretation);
-          }
-        }
-
-        // Fetch Carta Natal
-        const natalRes = await fetch(`/api/interpretations?userId=${user.uid}&chartType=natal`);
-        if (natalRes.ok) {
-          const natalData = await natalRes.json();
-          if (natalData && natalData.interpretation) {
-            console.log('✅ [INTERPRETATIONS] Natal chart loaded:', natalData.interpretation);
-            setNatalInterpretation(natalData.interpretation);
-          }
-        }
-      } catch (error) {
-        console.error('❌ [INTERPRETATIONS] Error fetching interpretations:', error);
-      } finally {
-        setLoadingInterpretations(false);
-      }
-    };
-
-    // Solo cargar cuando el usuario visite tabs de "mi-anio" o "mi-carta"
-    if (activeTab === 'mi-anio' || activeTab === 'mi-carta') {
-      fetchInterpretations();
-    }
-  }, [user, activeTab]);
 
   // 🔧 NUEVO: Cargar datos de carta progresada si vienen desde esa página
   React.useEffect(() => {
@@ -193,74 +141,23 @@ const AgendaPersonalizada = () => {
     try {
       console.log('📅 [YEAR-EVENTS] Fetching complete year events from birthday to next birthday...');
 
-      // 🔧 FIX: Parse birth date carefully to avoid timezone issues
+      // Calcular el rango del año astrológico (cumpleaños actual al próximo)
       const birthDate = new Date(userProfile.birthDate);
-      const birthMonth = birthDate.getMonth(); // 0-indexed (0=Jan, 1=Feb, etc)
-      const birthDay = birthDate.getDate();
+      const currentYear = new Date().getFullYear();
 
+      // Fecha de cumpleaños de este año
+      const currentBirthday = new Date(currentYear, birthDate.getMonth(), birthDate.getDate());
+
+      // Si ya pasó el cumpleaños este año, usar el del próximo año
       const now = new Date();
-      const currentYear = now.getFullYear();
-      const currentMonth = now.getMonth();
-      const currentDay = now.getDate();
-
-      // 📊 DEBUG: Log current state
-      console.log('📊 [DEBUG] Current state:', {
-        now: now.toISOString(),
-        currentYear,
-        currentMonth,
-        currentDay,
-        birthMonth,
-        birthDay,
-        userProfileBirthDate: userProfile.birthDate
-      });
-
-      // Fecha de cumpleaños de este año (en hora local para evitar problemas de timezone)
-      const currentBirthday = new Date(currentYear, birthMonth, birthDay, 0, 0, 0, 0);
-
-      // 📊 DEBUG: Log comparison values
-      console.log('📊 [DEBUG] Birthday comparison:', {
-        currentBirthday: currentBirthday.toISOString(),
-        now: now.toISOString(),
-        hasBirthdayPassedThisYear: currentBirthday <= now
-      });
-
-      // Determinar el rango: siempre desde el ÚLTIMO cumpleaños hasta el PRÓXIMO
-      let startDate: Date;
-      let endDate: Date;
-
-      if (currentBirthday <= now) {
-        // El cumpleaños ya pasó este año
-        startDate = new Date(currentYear, birthMonth, birthDay, 0, 0, 0, 0); // Último cumpleaños (este año)
-        endDate = new Date(currentYear + 1, birthMonth, birthDay, 0, 0, 0, 0); // Próximo cumpleaños (año que viene)
-        console.log('✅ [YEAR-EVENTS] Birthday has passed this year');
-      } else {
-        // El cumpleaños todavía no llegó este año
-        startDate = new Date(currentYear - 1, birthMonth, birthDay, 0, 0, 0, 0); // Último cumpleaños (año pasado)
-        endDate = new Date(currentYear, birthMonth, birthDay, 0, 0, 0, 0); // Próximo cumpleaños (este año)
-        console.log('✅ [YEAR-EVENTS] Birthday has NOT passed yet this year');
-      }
+      const startDate = currentBirthday < now ? new Date(currentYear + 1, birthDate.getMonth(), birthDate.getDate()) : currentBirthday;
+      const endDate = new Date(startDate.getFullYear() + 1, birthDate.getMonth(), birthDate.getDate());
 
       setYearRange({ start: startDate, end: endDate });
 
-      // 🔧 FIX: Use date-fns format to avoid timezone conversion issues
-      const startDateStr = format(startDate, 'yyyy-MM-dd');
-      const endDateStr = format(endDate, 'yyyy-MM-dd');
-
-      console.log('📅 [YEAR-EVENTS] Year range (LOCAL):', {
-        start: startDateStr,
-        end: endDateStr,
-        startYear: startDate.getFullYear(),
-        endYear: endDate.getFullYear()
-      });
-
-      const yearToFetch = startDate.getFullYear();
-
-      console.log('📤 [YEAR-EVENTS] Sending request to API:', {
-        birthDate: userProfile.birthDate,
-        birthTime: userProfile.birthTime,
-        birthPlace: userProfile.birthPlace,
-        currentYear: yearToFetch,
-        expectedRange: `${startDateStr} to ${endDateStr}`
+      console.log('📅 [YEAR-EVENTS] Year range:', {
+        start: startDate.toISOString().split('T')[0],
+        end: endDate.toISOString().split('T')[0]
       });
 
       const response = await fetch('/api/astrology/solar-year-events', {
@@ -270,41 +167,19 @@ const AgendaPersonalizada = () => {
           birthDate: userProfile.birthDate,
           birthTime: userProfile.birthTime,
           birthPlace: userProfile.birthPlace,
-          currentYear: yearToFetch
+          currentYear: startDate.getFullYear(),
+          userId: user?.uid // ✅ Enviar userId para cálculo de casas
         })
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
         console.error('❌ [YEAR-EVENTS] Failed to fetch solar year events');
-        console.error('❌ [YEAR-EVENTS] Error response:', errorText);
         return generateExampleEvents();
       }
 
       const result = await response.json();
       console.log('✅ [YEAR-EVENTS] Solar year events fetched successfully');
       console.log('📊 [YEAR-EVENTS] Stats:', result.stats);
-      console.log('📊 [YEAR-EVENTS] API returned period:', result.period);
-
-      // 🔍 DEBUG: Log sample events to verify zodiac signs (tropical vs vedic)
-      console.log('🔍 [DEBUG] Sample Lunar Phases:', result.data.events.lunarPhases?.slice(0, 3).map((p: any) => ({
-        date: p.date,
-        phase: p.phase,
-        sign: p.zodiacSign,
-        type: p.type
-      })));
-      console.log('🔍 [DEBUG] Sample Retrogrades:', result.data.events.retrogrades?.slice(0, 2).map((r: any) => ({
-        planet: r.planet,
-        startDate: r.startDate,
-        endDate: r.endDate,
-        sign: r.sign || r.startSign
-      })));
-      console.log('🔍 [DEBUG] Sample Planetary Ingresses:', result.data.events.planetaryIngresses?.slice(0, 3).map((i: any) => ({
-        planet: i.planet,
-        date: i.date,
-        fromSign: i.fromSign,
-        toSign: i.toSign || i.newSign
-      })));
 
       // Transform API events to AstrologicalEvent format (igual que antes)
       const transformedEvents: AstrologicalEvent[] = [];
@@ -908,13 +783,11 @@ const AgendaPersonalizada = () => {
     loadYearEvents();
   }, [userProfile]);
 
-  // 📅 Inicializar currentMonth al mes actual (no al cumpleaños)
+  // 🎂 Inicializar currentMonth al mes del cumpleaños cuando se calcula yearRange
   useEffect(() => {
-    if (yearRange) {
-      const now = new Date();
-      console.log('📅 [AGENDA] Setting currentMonth to current month:', now);
-      // Ya está inicializado en useState con new Date(), pero lo reforzamos
-      setCurrentMonth(now);
+    if (yearRange && yearRange.start) {
+      console.log('🎂 [AGENDA] Setting currentMonth to birthday month:', yearRange.start);
+      setCurrentMonth(yearRange.start);
     }
   }, [yearRange]);
 
@@ -978,33 +851,6 @@ const AgendaPersonalizada = () => {
     return daysWithEvents;
   };
 
-  // 📆 Obtener días de la semana actual con eventos (para vista semanal)
-  const getCurrentWeekDays = () => {
-    const weekStart = startOfWeek(currentWeekStart, { weekStartsOn: 1 }); // Lunes
-    const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 1 }); // Domingo
-
-    const days = eachDayOfInterval({ start: weekStart, end: weekEnd });
-
-    const daysWithEvents = days.map(day => {
-      const dayEvents = events.filter(event => {
-        const eventDate = new Date(event.date);
-        return isSameDay(day, eventDate);
-      });
-
-      return {
-        date: day,
-        dayName: format(day, 'EEEE', { locale: es }),
-        dayNumber: format(day, 'd'),
-        monthName: format(day, 'MMM', { locale: es }),
-        events: dayEvents,
-        isToday: isSameDay(day, new Date()),
-        hasEvents: dayEvents.length > 0
-      };
-    });
-
-    return daysWithEvents;
-  };
-
   // Vista completa del año - generar todos los meses
   const getYearView = () => {
     if (!yearRange) return [];
@@ -1053,74 +899,9 @@ const AgendaPersonalizada = () => {
 
 
 
-  const handleDayClick = async (day: AstronomicalDay) => {
+  const handleDayClick = (day: AstronomicalDay) => {
     setSelectedDate(day.date);
     setSelectedDayEvents(day.events);
-
-    // 🌟 NUEVO: Cargar interpretaciones personalizadas para eventos HIGH/MEDIUM
-    const importantEvents = day.events.filter(e => e.priority === 'high' || e.priority === 'medium');
-
-    if (importantEvents.length > 0 && user && userProfile) {
-      console.log(`🔮 [INTERPRETATIONS] Loading personalized interpretations for ${importantEvents.length} events`);
-
-      // Cargar interpretaciones en background (no bloquear UI)
-      loadEventInterpretations(importantEvents);
-    }
-  };
-
-  // 🔮 Cargar interpretaciones personalizadas para eventos
-  const loadEventInterpretations = async (events: AstrologicalEvent[]) => {
-    if (!user) return;
-
-    try {
-      const token = await user.getIdToken();
-
-      // Cargar interpretaciones para cada evento importante
-      for (const event of events) {
-        // Si ya tiene interpretación personalizada, skip
-        if (event.aiInterpretation?.capa_2_aplicado) continue;
-
-        try {
-          const response = await fetch('/api/interpretations/event', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-              event: {
-                type: event.type === 'lunar_phase' ? 'luna_nueva' :
-                      event.type === 'retrograde' ? 'transito' :
-                      event.type === 'eclipse' ? 'transito' : 'aspecto',
-                date: event.date,
-                sign: event.sign,
-                house: 1, // TODO: calcular casa real basada en carta natal
-                planetsInvolved: event.planet ? [event.planet] : [],
-                transitingPlanet: event.planet,
-              },
-              regenerate: false
-            })
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-
-            // Actualizar el evento con la interpretación personalizada
-            setSelectedDayEvents(prev => prev.map(e =>
-              e.id === event.id
-                ? { ...e, aiInterpretation: data.interpretation }
-                : e
-            ));
-
-            console.log(`✅ [INTERPRETATIONS] Loaded for ${event.title}`);
-          }
-        } catch (err) {
-          console.error(`❌ [INTERPRETATIONS] Error loading for ${event.title}:`, err);
-        }
-      }
-    } catch (error) {
-      console.error('❌ [INTERPRETATIONS] Error getting token:', error);
-    }
   };
 
   // Modal handlers (reemplaza tooltip)
@@ -1186,156 +967,16 @@ const AgendaPersonalizada = () => {
   // Ahora usa la función de mapeo completo de utils
   const mapEventTypeToInterpretation = (event: AstrologicalEvent): {
     type: 'luna_nueva' | 'luna_llena' | 'transito' | 'aspecto';
-    date: string;
-    sign?: string;
     house: number;
-    planetsInvolved?: string[];
-    transitingPlanet?: string;
-    natalPlanet?: string;
-    aspectType?: string;
   } => {
-    let type: 'luna_nueva' | 'luna_llena' | 'transito' | 'aspecto';
-    let sign = event.sign;
-    let planetsInvolved: string[] = [];
-    let transitingPlanet: string | undefined;
-    let natalPlanet: string | undefined;
-    let aspectType: string | undefined;
-
-    // Mapear tipo de evento y extraer información específica
-    if (event.type === 'lunar_phase') {
-      // Determinar si es Luna Nueva o Llena basado en el título o descripción
-      type = event.title.toLowerCase().includes('nueva') || event.phase?.toLowerCase().includes('nueva') ? 'luna_nueva' : 'luna_llena';
-      planetsInvolved = ['Luna'];
-      if (event.planet && event.planet !== 'Luna') {
-        planetsInvolved.push(event.planet);
-      }
-    } else if (event.type === 'retrograde') {
-      type = 'transito';
-      transitingPlanet = event.planet;
-      natalPlanet = event.planet; // Para retrógrados, el planeta natal es el mismo
-      aspectType = 'retrógrado';
-    } else if (event.type === 'planetary_transit') {
-      type = 'transito';
-      transitingPlanet = event.planet;
-      // Para tránsitos, intentar identificar el planeta natal basado en el contexto
-      if (event.description) {
-        // Buscar menciones de planetas en la descripción
-        const planetMatches = event.description.match(/(Sol|Luna|Mercurio|Venus|Marte|Júpiter|Saturno|Urano|Neptuno|Plutón)/g);
-        if (planetMatches && planetMatches.length > 0) {
-          natalPlanet = planetMatches[0];
-        }
-      }
-      aspectType = 'tránsito';
-    } else if (event.type === 'aspect') {
-      type = 'aspecto';
-      transitingPlanet = event.planet;
-      aspectType = 'aspecto';
-    } else if (event.type === 'eclipse') {
-      type = 'aspecto'; // Los eclipses se tratan como aspectos especiales
-      planetsInvolved = ['Sol', 'Luna'];
-      aspectType = event.title.toLowerCase().includes('solar') ? 'eclipse_solar' : 'eclipse_lunar';
-    } else {
-      type = 'aspecto'; // Default
-    }
-
-    // ✅ Calcular casa: usar la del evento si existe, o calcular basándose en el signo
-    let house: number;
-    if (event.house && event.house >= 1 && event.house <= 12) {
-      house = event.house;
-    } else if (event.sign && userProfile?.astrological?.signs?.ascendant) {
-      // Calcular casa aproximada basándose en el signo del evento y el ascendente
-      house = calculateHouseFromSign(event.sign, userProfile.astrological.signs.ascendant);
-    } else {
-      // Default: usar casa 1
-      house = 1;
-    }
+    const eventData = mapAstrologicalEventToEventData(event, {
+      defaultHouse: 1 // Fallback si no hay casa calculada
+    });
 
     return {
-      type,
-      date: event.date,
-      sign,
-      house,
-      planetsInvolved: planetsInvolved.length > 0 ? planetsInvolved : undefined,
-      transitingPlanet,
-      natalPlanet,
-      aspectType
+      type: eventData.type,
+      house: eventData.house
     };
-  };
-
-  // Helper para calcular casa aproximada desde signo (simple: asume casas enteras)
-  const calculateHouseFromSign = (eventSign: string, ascendantSign: string): number => {
-    const signs = ['Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'];
-    const eventIndex = signs.findIndex(s => s.toLowerCase() === eventSign.toLowerCase());
-    const ascIndex = signs.findIndex(s => s.toLowerCase() === ascendantSign.toLowerCase());
-
-    if (eventIndex === -1 || ascIndex === -1) return 1;
-
-    // Casa = distancia desde el ascendente + 1
-    let house = ((eventIndex - ascIndex + 12) % 12) + 1;
-    return house;
-  };
-
-  const generatePages = () => {
-    const allDays = getYearView().flatMap(month => month.days.filter(day => day.isCurrentMonth && day.hasEvents));
-    const daysPerPage = 3; // 3 días por página
-    const pages = [];
-
-    for (let i = 0; i < allDays.length; i += daysPerPage) {
-      const pageDays = allDays.slice(i, i + daysPerPage);
-      pages.push(
-        <div key={i} className="print-day-page">
-          <div className="print-days-grid">
-            {pageDays.map((day) => (
-              <div key={day.date.getTime()} className="print-day-card">
-                <div className="print-day-header">
-                  {day.date.getDate()} de {format(day.date, 'MMMM', { locale: es })}
-                </div>
-
-                {day.hasEvents && (
-                  <div className="print-day-events">
-                    {day.events.map((event, eventIndex) => (
-                      <div key={eventIndex} className="print-day-event">
-                        <div className="font-semibold text-purple-800">
-                          {getEventIcon(event.type, event.priority)} {event.title}
-                        </div>
-                        <div className="text-gray-600 text-xs mt-1">
-                          {event.description}
-                        </div>
-                        {event.planet && event.sign && (
-                          <div className="text-purple-600 text-xs mt-1">
-                            {event.planet} en {event.sign}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <div className="print-exercises-space">
-                  <div className="print-exercises-title">
-                    📝 Ejercicios y tareas para hoy:
-                  </div>
-                  <div className="print-exercises-lines">
-                    1. ________________________________________________________________<br/>
-                    2. ________________________________________________________________<br/>
-                    3. ________________________________________________________________<br/>
-                    4. ________________________________________________________________<br/>
-                    5. ________________________________________________________________<br/>
-                    <br/>
-                    Notas adicionales:<br/>
-                    ________________________________________________________________<br/>
-                    ________________________________________________________________<br/>
-                    ________________________________________________________________<br/>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    }
-
-    return pages;
   };
 
   // Si está en modo Agenda Libro, mostrar solo eso
@@ -1353,7 +994,17 @@ const AgendaPersonalizada = () => {
   }
 
   return (
-    <div className="relative max-w-7xl mx-auto p-4 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 relative overflow-hidden">
+
+      {/* Partículas mágicas de fondo */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-10 left-10 w-2 h-2 bg-yellow-400 rounded-full animate-pulse opacity-60"></div>
+        <div className="absolute top-20 right-20 w-1 h-1 bg-pink-400 rounded-full animate-ping opacity-40"></div>
+        <div className="absolute bottom-20 left-20 w-3 h-3 bg-purple-400 rounded-full animate-pulse opacity-50"></div>
+        <div className="absolute bottom-10 right-10 w-2 h-2 bg-cyan-400 rounded-full animate-ping opacity-60"></div>
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto p-4 lg:p-8">
 
         {/* HEADER ÉPICO INSPIRADO EN DASHBOARD */}
         <div className="text-center mb-16">
@@ -1432,58 +1083,6 @@ const AgendaPersonalizada = () => {
           </div>
         </div>
 
-        {/* 🎨 NAVEGACIÓN DE TABS PRINCIPALES */}
-        <div className="mb-8">
-          <div className="bg-gradient-to-r from-purple-900/40 to-indigo-900/40 backdrop-blur-sm rounded-2xl p-2 border border-purple-400/30">
-            <div className="flex flex-wrap gap-2 justify-center">
-              {/* Tab: Mi Año */}
-              <button
-                onClick={() => setActiveTab('mi-anio')}
-                className={`
-                  flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300
-                  ${activeTab === 'mi-anio'
-                    ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg shadow-yellow-500/30'
-                    : 'bg-white/5 text-purple-200 hover:bg-white/10 hover:text-white'
-                  }
-                `}
-              >
-                <span className="text-xl">📖</span>
-                <span className="hidden sm:inline">Mi Año</span>
-              </button>
-
-              {/* Tab: Mi Carta */}
-              <button
-                onClick={() => setActiveTab('mi-carta')}
-                className={`
-                  flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300
-                  ${activeTab === 'mi-carta'
-                    ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg shadow-yellow-500/30'
-                    : 'bg-white/5 text-purple-200 hover:bg-white/10 hover:text-white'
-                  }
-                `}
-              >
-                <span className="text-xl">🌟</span>
-                <span className="hidden sm:inline">Mi Carta</span>
-              </button>
-
-              {/* Tab: Calendario */}
-              <button
-                onClick={() => setActiveTab('calendario')}
-                className={`
-                  flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300
-                  ${activeTab === 'calendario'
-                    ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg shadow-yellow-500/30'
-                    : 'bg-white/5 text-purple-200 hover:bg-white/10 hover:text-white'
-                  }
-                `}
-              >
-                <span className="text-xl">📅</span>
-                <span className="hidden sm:inline">Calendario</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
         {/* ERROR BANNER - Si hay errores cargando eventos */}
         {error && (
           <div className="mb-6 bg-red-900/50 border border-red-500/50 rounded-xl p-4 backdrop-blur-sm">
@@ -1520,404 +1119,59 @@ const AgendaPersonalizada = () => {
           </div>
         )}
 
-        {/* 📖 TAB: MI AÑO */}
-        {activeTab === 'mi-anio' && (
-          <div className="max-w-5xl mx-auto">
-            <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-sm rounded-3xl p-8 border border-purple-400/30">
-              <h2 className="text-3xl font-bold text-white mb-6 flex items-center gap-3">
-                <span className="text-4xl">📖</span>
-                Mi Año Cósmico
-              </h2>
+        {/* PLANETARY CARDS - Contexto anual */}
+        <div className="mb-8">
+          <PlanetaryCards />
+        </div>
 
-              {loadingInterpretations ? (
-                <div className="text-center py-12">
-                  <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-400 mb-4"></div>
-                  <p className="text-white">Cargando tu interpretación del año...</p>
-                </div>
-              ) : !solarReturnInterpretation ? (
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-4">🌟</div>
-                  <h3 className="text-2xl font-bold text-white mb-4">No tienes interpretación de Retorno Solar aún</h3>
-                  <p className="text-gray-300 mb-6">Genera tu Retorno Solar para ver el contenido de tu año cósmico</p>
-                  <button
-                    onClick={() => window.location.href = '/solar-return'}
-                    className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg"
-                  >
-                    Generar Retorno Solar
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-6 text-white">
-                  {/* 🔍 DEBUG: Mostrar estructura completa del objeto */}
-                  <details className="bg-slate-800/50 rounded-xl p-4 border border-slate-600/30 mb-6">
-                    <summary className="text-slate-300 font-semibold cursor-pointer hover:text-white">
-                      🔍 DEBUG: Ver estructura de datos (click para expandir)
-                    </summary>
-                    <pre className="mt-4 text-xs text-slate-400 overflow-x-auto">
-                      {JSON.stringify(solarReturnInterpretation, null, 2)}
-                    </pre>
-                  </details>
-
-                  {/* Esencia Revolucionaria Anual */}
-                  {solarReturnInterpretation.esencia_revolucionaria_anual && (
-                    <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-2xl p-6 border border-yellow-400/30">
-                      <h3 className="text-xl font-bold mb-3 text-yellow-300">🌟 Portal de Entrada</h3>
-                      <p className="text-gray-200 leading-relaxed whitespace-pre-line">
-                        {solarReturnInterpretation.esencia_revolucionaria_anual}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Tema Central del Año */}
-                  {solarReturnInterpretation.tema_central_del_anio && (
-                    <div className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded-2xl p-6 border border-pink-400/30">
-                      <h3 className="text-xl font-bold mb-3 text-pink-300">🎯 Tema Central del Año</h3>
-                      <p className="text-gray-200 leading-relaxed whitespace-pre-line">
-                        {solarReturnInterpretation.tema_central_del_anio}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Propósito de Vida Anual */}
-                  {solarReturnInterpretation.proposito_vida_anual && (
-                    <div className="bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-2xl p-6 border border-blue-400/30">
-                      <h3 className="text-xl font-bold mb-3 text-blue-300">🎨 Propósito del Año</h3>
-                      <p className="text-gray-200 leading-relaxed whitespace-pre-line">
-                        {solarReturnInterpretation.proposito_vida_anual}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Rituales Recomendados */}
-                  {solarReturnInterpretation.rituales_recomendados && solarReturnInterpretation.rituales_recomendados.length > 0 && (
-                    <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl p-6 border border-green-400/30">
-                      <h3 className="text-xl font-bold mb-3 text-green-300">🔥 Rituales del Año</h3>
-                      <ul className="space-y-2">
-                        {solarReturnInterpretation.rituales_recomendados.map((ritual: string, index: number) => (
-                          <li key={index} className="text-gray-200 leading-relaxed flex items-start gap-2">
-                            <span className="text-green-400 flex-shrink-0">•</span>
-                            <span>{ritual}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Declaración de Poder */}
-                  {solarReturnInterpretation.declaracion_poder_anual && (
-                    <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl p-6 border border-purple-400/30">
-                      <h3 className="text-xl font-bold mb-3 text-purple-300">💪 Declaración de Poder</h3>
-                      <p className="text-white text-lg font-semibold italic leading-relaxed whitespace-pre-line">
-                        "{solarReturnInterpretation.declaracion_poder_anual}"
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Insights Transformacionales */}
-                  {solarReturnInterpretation.insights_transformacionales && solarReturnInterpretation.insights_transformacionales.length > 0 && (
-                    <div className="bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-2xl p-6 border border-indigo-400/30">
-                      <h3 className="text-xl font-bold mb-3 text-indigo-300">💡 Insights Transformacionales</h3>
-                      <ul className="space-y-2">
-                        {solarReturnInterpretation.insights_transformacionales.map((insight: string, index: number) => (
-                          <li key={index} className="text-gray-200 leading-relaxed flex items-start gap-2">
-                            <span className="text-indigo-400 flex-shrink-0">•</span>
-                            <span>{insight}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Advertencias */}
-                  {solarReturnInterpretation.advertencias && solarReturnInterpretation.advertencias.length > 0 && (
-                    <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-2xl p-6 border border-orange-400/30">
-                      <h3 className="text-xl font-bold mb-3 text-orange-300">⚠️ Aspectos a Cuidar</h3>
-                      <ul className="space-y-2">
-                        {solarReturnInterpretation.advertencias.map((advertencia: string, index: number) => (
-                          <li key={index} className="text-gray-200 leading-relaxed flex items-start gap-2">
-                            <span className="text-orange-400 flex-shrink-0">•</span>
-                            <span>{advertencia}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* 🌟 TAB: MI CARTA */}
-        {activeTab === 'mi-carta' && (
-          <div className="max-w-5xl mx-auto">
-            <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-sm rounded-3xl p-8 border border-purple-400/30">
-              <h2 className="text-3xl font-bold text-white mb-6 flex items-center gap-3">
-                <span className="text-4xl">🌟</span>
-                Mi Carta Natal
-              </h2>
-
-              {loadingInterpretations ? (
-                <div className="text-center py-12">
-                  <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-400 mb-4"></div>
-                  <p className="text-white">Cargando tu interpretación natal...</p>
-                </div>
-              ) : !natalInterpretation ? (
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-4">⭐</div>
-                  <h3 className="text-2xl font-bold text-white mb-4">No tienes interpretación de Carta Natal aún</h3>
-                  <p className="text-gray-300 mb-6">Genera tu Carta Natal para descubrir tu propósito de vida</p>
-                  <button
-                    onClick={() => window.location.href = '/natal-chart'}
-                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg"
-                  >
-                    Generar Carta Natal
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-6 text-white">
-                  {/* Esencia Revolucionaria */}
-                  {natalInterpretation.esencia_revolucionaria && (
-                    <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-2xl p-6 border border-yellow-400/30">
-                      <h3 className="text-xl font-bold mb-3 text-yellow-300">✨ Tu Esencia</h3>
-                      <p className="text-gray-200 leading-relaxed whitespace-pre-line">
-                        {natalInterpretation.esencia_revolucionaria}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Propósito de Vida */}
-                  {natalInterpretation.proposito_vida && (
-                    <div className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded-2xl p-6 border border-pink-400/30">
-                      <h3 className="text-xl font-bold mb-3 text-pink-300">🎯 Propósito de Vida</h3>
-                      <p className="text-gray-200 leading-relaxed whitespace-pre-line">
-                        {natalInterpretation.proposito_vida}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Misión de Vida */}
-                  {natalInterpretation.mision_vida && (
-                    <div className="bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-2xl p-6 border border-blue-400/30">
-                      <h3 className="text-xl font-bold mb-3 text-blue-300">🚀 Misión de Vida</h3>
-                      <p className="text-gray-200 leading-relaxed whitespace-pre-line">
-                        {natalInterpretation.mision_vida}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Poder Magnético */}
-                  {natalInterpretation.poder_magnetico && (
-                    <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl p-6 border border-purple-400/30">
-                      <h3 className="text-xl font-bold mb-3 text-purple-300">⚡ Poder Magnético</h3>
-                      <p className="text-gray-200 leading-relaxed whitespace-pre-line">
-                        {natalInterpretation.poder_magnetico}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Super Poderes */}
-                  {natalInterpretation.super_poderes && natalInterpretation.super_poderes.length > 0 && (
-                    <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl p-6 border border-green-400/30">
-                      <h3 className="text-xl font-bold mb-3 text-green-300">💪 Tus Super Poderes</h3>
-                      <ul className="space-y-2">
-                        {natalInterpretation.super_poderes.map((poder: string, index: number) => (
-                          <li key={index} className="text-gray-200 leading-relaxed flex items-start gap-2">
-                            <span className="text-green-400 flex-shrink-0">✨</span>
-                            <span>{poder}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Desafíos Evolutivos */}
-                  {natalInterpretation.desafios_evolutivos && natalInterpretation.desafios_evolutivos.length > 0 && (
-                    <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-2xl p-6 border border-orange-400/30">
-                      <h3 className="text-xl font-bold mb-3 text-orange-300">🎓 Desafíos Evolutivos</h3>
-                      <ul className="space-y-2">
-                        {natalInterpretation.desafios_evolutivos.map((desafio: string, index: number) => (
-                          <li key={index} className="text-gray-200 leading-relaxed flex items-start gap-2">
-                            <span className="text-orange-400 flex-shrink-0">•</span>
-                            <span>{desafio}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Planeta Dominante y Elemento */}
-                  {(natalInterpretation.planeta_dominante || natalInterpretation.elemento_dominante) && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {natalInterpretation.planeta_dominante && (
-                        <div className="bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-2xl p-6 border border-indigo-400/30">
-                          <h3 className="text-lg font-bold mb-2 text-indigo-300">🪐 Planeta Dominante</h3>
-                          <p className="text-white font-semibold text-xl">
-                            {natalInterpretation.planeta_dominante}
-                          </p>
-                        </div>
-                      )}
-                      {natalInterpretation.elemento_dominante && (
-                        <div className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-2xl p-6 border border-cyan-400/30">
-                          <h3 className="text-lg font-bold mb-2 text-cyan-300">🌊 Elemento Dominante</h3>
-                          <p className="text-white font-semibold text-xl">
-                            {natalInterpretation.elemento_dominante}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* 📅 TAB: CALENDARIO */}
-        {activeTab === 'calendario' && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* LAYOUT DESKTOP/MOBILE */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
             {/* CALENDARIO PRINCIPAL - 2/3 en desktop */}
           <div className="lg:col-span-2">
 
             {/* Header del calendario */}
             <div className="bg-gradient-to-r from-purple-600/30 to-indigo-600/30 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-purple-400/30">
-              <div className="flex flex-col gap-4">
-                <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
-                  <h2 className="text-2xl lg:text-3xl font-bold text-white capitalize flex items-center">
-                    <span className="mr-3">🗓️</span>
-                    Agenda Cósmica
-                  </h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl lg:text-3xl font-bold text-white capitalize flex items-center">
+                  <span className="mr-3">🗓️</span>
+                  Agenda Cósmica
+                </h2>
 
-                  <div className="flex items-center gap-4 flex-wrap justify-center">
-                  {/* Botón regenerar eventos DEL MES ACTUAL */}
+                {/* Navegación de meses */}
+                <div className="flex items-center gap-4">
                   <button
-                    onClick={async () => {
-                      const monthName = format(currentMonth, 'MMMM yyyy', { locale: es });
-                      console.log(`🔄 [REGENERATE-MONTH] Regenerating events for ${monthName}`);
-                      setLoadingMonthlyEvents(true);
-                      setLoadingMonthName(monthName);
-
-                      try {
-                        // Re-fetch todos los eventos del año
-                        const yearEvents = await fetchYearEvents();
-                        console.log(`✅ [REGENERATE-MONTH] Fetched ${yearEvents.length} total events`);
-
-                        // Filtrar solo los del mes actual
-                        const monthStart = startOfMonth(currentMonth);
-                        const monthEnd = endOfMonth(currentMonth);
-                        const monthEvents = yearEvents.filter(event => {
-                          const eventDate = new Date(event.date);
-                          return eventDate >= monthStart && eventDate <= monthEnd;
-                        });
-
-                        console.log(`✅ [REGENERATE-MONTH] Found ${monthEvents.length} events for ${monthName}`);
-                        console.log('🔍 [REGENERATE-MONTH] Month events sample:', monthEvents.slice(0, 5).map(e => ({
-                          date: e.date,
-                          title: e.title,
-                          sign: e.sign,
-                          planet: e.planet,
-                          type: e.type
-                        })));
-
-                        // Actualizar todos los eventos (para mantener consistencia)
-                        setEvents(yearEvents);
-                      } catch (error) {
-                        console.error('❌ [REGENERATE-MONTH] Error:', error);
-                      } finally {
-                        setLoadingMonthlyEvents(false);
-                        setLoadingMonthName('');
-                      }
-                    }}
-                    disabled={loading || loadingMonthlyEvents}
-                    className="px-3 py-2 rounded-lg bg-green-500/20 hover:bg-green-500/30 transition-all duration-200 border border-green-400/30 hover:border-green-400/50 text-white text-xs lg:text-sm font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    title="Regenerar eventos de este mes"
+                    onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+                    className="p-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 transition-all duration-200 border border-purple-400/30 hover:border-purple-400/50"
+                    title="Mes anterior"
                   >
-                    <svg className={`h-4 w-4 ${(loading || loadingMonthlyEvents) ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
-                    <span className="hidden sm:inline">{loadingMonthlyEvents ? `Cargando...` : 'Regenerar Mes'}</span>
-                    <span className="sm:hidden">🔄</span>
                   </button>
 
-                  {/* Navegación de meses */}
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                      className="p-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 transition-all duration-200 border border-purple-400/30 hover:border-purple-400/50"
-                      title="Mes anterior"
-                    >
-                      <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                      </svg>
-                    </button>
-
-                    <span className="text-white font-semibold min-w-[120px] text-center text-sm lg:text-base">
-                      {format(currentMonth, 'MMMM yyyy', { locale: es })}
-                    </span>
-
-                    <button
-                      onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                      className="p-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 transition-all duration-200 border border-purple-400/30 hover:border-purple-400/50"
-                      title="Mes siguiente"
-                    >
-                      <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Subtabs para vistas de calendario */}
-                <div className="flex justify-center gap-2">
-                  <button
-                    onClick={() => setCalendarView('mes')}
-                    className={`
-                      px-4 py-2 rounded-lg font-medium transition-all duration-200
-                      ${calendarView === 'mes'
-                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                        : 'bg-white/5 text-purple-200 hover:bg-white/10 hover:text-white'
-                      }
-                    `}
-                  >
-                    📅 Mes
-                  </button>
+                  <span className="text-white font-semibold min-w-[120px] text-center">
+                    {format(currentMonth, 'MMMM yyyy', { locale: es })}
+                  </span>
 
                   <button
-                    onClick={() => setCalendarView('semana')}
-                    className={`
-                      px-4 py-2 rounded-lg font-medium transition-all duration-200
-                      ${calendarView === 'semana'
-                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                        : 'bg-white/5 text-purple-200 hover:bg-white/10 hover:text-white'
-                      }
-                    `}
+                    onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+                    className="p-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 transition-all duration-200 border border-purple-400/30 hover:border-purple-400/50"
+                    title="Mes siguiente"
                   >
-                    📆 Semana
-                  </button>
-
-                  <button
-                    onClick={() => setCalendarView('dia')}
-                    className={`
-                      px-4 py-2 rounded-lg font-medium transition-all duration-200
-                      ${calendarView === 'dia'
-                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                        : 'bg-white/5 text-purple-200 hover:bg-white/10 hover:text-white'
-                      }
-                    `}
-                  >
-                    📋 Día
+                    <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* 📅 VISTA: MES */}
-            {calendarView === 'mes' && (
-              <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-sm rounded-2xl shadow-2xl border border-purple-400/20 overflow-hidden">
+            {/* Calendario mensual */}
+            <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-sm rounded-2xl shadow-2xl border border-purple-400/20 overflow-hidden">
 
-                {/* Días de la semana */}
-                <div className="grid grid-cols-7 bg-gradient-to-r from-purple-700/30 to-indigo-700/30">
+              {/* Días de la semana */}
+              <div className="grid grid-cols-7 bg-gradient-to-r from-purple-700/30 to-indigo-700/30">
                 {weekDays.map((day, index) => (
                   <div key={index} className="py-3 text-center text-sm font-bold text-purple-100 border-r border-purple-400/20 last:border-r-0">
                     {day}
@@ -1955,13 +1209,10 @@ const AgendaPersonalizada = () => {
                             {day.date.getDate()}
                           </div>
 
-                          {/* Eventos del día con iconos - FILTRADO SOLO HIGH/MEDIUM PRIORITY */}
+                          {/* Eventos del día con iconos */}
                           {day.hasEvents && (
                             <div className="space-y-1">
-                              {day.events
-                                .filter(e => e.priority === 'high' || e.priority === 'medium')
-                                .slice(0, 2)
-                                .map((event, eventIndex) => (
+                              {day.events.slice(0, 2).map((event, eventIndex) => (
                                 <div
                                   key={eventIndex}
                                   onClick={(e) => {
@@ -1969,28 +1220,24 @@ const AgendaPersonalizada = () => {
                                     handleEventClick(event);
                                   }}
                                   className={`
-                                    p-1.5 rounded cursor-pointer transition-all duration-200 group-hover:scale-105
+                                    flex items-center gap-1 p-1 rounded cursor-pointer transition-all duration-200 group-hover:scale-105
                                     bg-gradient-to-r ${getEventColor(event.type, event.priority)} bg-opacity-80 backdrop-blur-sm
                                     hover:shadow-lg hover:shadow-purple-500/30
                                   `}
                                 >
-                                  <div className="flex items-start gap-1">
-                                    <span className="text-xs flex-shrink-0">{getEventIcon(event.type, event.priority)}</span>
-                                    <div className="flex-1 min-w-0">
-                                      <span className="text-white text-xs font-medium leading-tight block">
-                                        {event.title}
-                                      </span>
-                                      {event.priority === 'high' && (
-                                        <span className="text-yellow-300 text-xs animate-pulse block">!</span>
-                                      )}
-                                    </div>
-                                  </div>
+                                  <span className="text-xs">{getEventIcon(event.type, event.priority)}</span>
+                                  <span className="text-white text-xs font-medium truncate flex-1">
+                                    {event.title}
+                                  </span>
+                                  {event.priority === 'high' && (
+                                    <span className="text-yellow-300 text-xs animate-pulse">!</span>
+                                  )}
                                 </div>
                               ))}
 
-                              {day.events.filter(e => e.priority === 'high' || e.priority === 'medium').length > 2 && (
+                              {day.events.length > 2 && (
                                 <div className="text-purple-300 text-xs font-medium text-center bg-purple-600/20 rounded px-1 py-0.5">
-                                  +{day.events.filter(e => e.priority === 'high' || e.priority === 'medium').length - 2}
+                                  +{day.events.length - 2}
                                 </div>
                               )}
                             </div>
@@ -2003,243 +1250,6 @@ const AgendaPersonalizada = () => {
                     })}
               </div>
             </div>
-            )}
-
-            {/* 📆 VISTA: SEMANA */}
-            {calendarView === 'semana' && (
-              <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-sm rounded-2xl shadow-2xl border border-purple-400/20 overflow-hidden">
-                {/* Header de navegación semanal */}
-                <div className="bg-gradient-to-r from-purple-700/30 to-indigo-700/30 p-4 flex items-center justify-between">
-                  <button
-                    onClick={() => setCurrentWeekStart(subWeeks(currentWeekStart, 1))}
-                    className="p-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 transition-all duration-200 border border-purple-400/30 hover:border-purple-400/50"
-                    title="Semana anterior"
-                  >
-                    <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                  </button>
-
-                  <h3 className="text-white font-bold text-lg">
-                    Semana del {format(startOfWeek(currentWeekStart, { weekStartsOn: 1 }), 'd MMM', { locale: es })} - {format(endOfWeek(currentWeekStart, { weekStartsOn: 1 }), 'd MMM yyyy', { locale: es })}
-                  </h3>
-
-                  <button
-                    onClick={() => setCurrentWeekStart(addWeeks(currentWeekStart, 1))}
-                    className="p-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 transition-all duration-200 border border-purple-400/30 hover:border-purple-400/50"
-                    title="Semana siguiente"
-                  >
-                    <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
-                </div>
-
-                {/* Días de la semana */}
-                <div className="p-6 space-y-4">
-                  {getCurrentWeekDays().map((day, index) => (
-                    <div
-                      key={index}
-                      className={`
-                        rounded-xl p-4 border transition-all duration-200 cursor-pointer
-                        ${day.isToday
-                          ? 'bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-400/30'
-                          : 'bg-white/5 border-purple-400/20 hover:bg-white/10 hover:border-purple-400/30'
-                        }
-                      `}
-                      onClick={() => {
-                        setSelectedDate(day.date);
-                        setCalendarView('dia');
-                      }}
-                    >
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <div className={`
-                            text-center
-                            ${day.isToday ? 'text-yellow-300' : 'text-purple-300'}
-                          `}>
-                            <div className="text-xs font-semibold uppercase">{day.dayName}</div>
-                            <div className="text-2xl font-bold">{day.dayNumber}</div>
-                            <div className="text-xs">{day.monthName}</div>
-                          </div>
-
-                          <div className={`text-sm font-medium ${day.isToday ? 'text-yellow-200' : 'text-white'}`}>
-                            {day.hasEvents ? `${day.events.length} evento${day.events.length > 1 ? 's' : ''}` : 'Sin eventos'}
-                          </div>
-                        </div>
-
-                        {day.isToday && (
-                          <span className="bg-yellow-400/80 text-black text-xs font-bold px-2 py-1 rounded-full">
-                            HOY
-                          </span>
-                        )}
-                      </div>
-
-                      {day.hasEvents && (
-                        <div className="space-y-2">
-                          {day.events
-                            .filter(e => e.priority === 'high' || e.priority === 'medium')
-                            .slice(0, 3)
-                            .map((event, eventIndex) => (
-                            <div
-                              key={eventIndex}
-                              className="bg-white/5 rounded-lg p-2 border border-white/10"
-                            >
-                              <div className="flex items-start gap-2">
-                                <span className="text-sm flex-shrink-0">{getEventIcon(event.type, event.priority)}</span>
-                                <div className="flex-1 min-w-0">
-                                  <div className="text-white text-sm font-medium">{event.title}</div>
-                                  {event.planet && event.sign && (
-                                    <div className="text-purple-300 text-xs">{event.planet} en {event.sign}</div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-
-                          {day.events.length > 3 && (
-                            <div className="text-purple-300 text-xs text-center">
-                              +{day.events.length - 3} evento{day.events.length - 3 > 1 ? 's' : ''} más
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* 📋 VISTA: DÍA */}
-            {calendarView === 'dia' && selectedDate && (
-              <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-sm rounded-2xl shadow-2xl border border-purple-400/20 overflow-hidden">
-                {/* Header del día */}
-                <div className="bg-gradient-to-r from-purple-700/30 to-indigo-700/30 p-6 border-b border-purple-400/20">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-3xl font-bold text-white">
-                        {format(selectedDate, 'EEEE d', { locale: es })}
-                      </h3>
-                      <p className="text-purple-200 text-sm mt-1">
-                        {format(selectedDate, 'MMMM yyyy', { locale: es })}
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={() => setCalendarView('mes')}
-                      className="bg-purple-500/20 hover:bg-purple-500/30 text-white px-4 py-2 rounded-lg border border-purple-400/30 transition-all duration-200 text-sm font-medium"
-                    >
-                      ← Volver al mes
-                    </button>
-                  </div>
-                </div>
-
-                <div className="p-6 space-y-6">
-                  {/* Resumen del día */}
-                  {selectedDayEvents.length > 0 ? (
-                    <>
-                      {/* Mantra del día */}
-                      {selectedDayEvents.some(e => e.aiInterpretation?.mantra) && (
-                        <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-2xl p-6 border border-yellow-400/30">
-                          <h4 className="font-bold text-yellow-300 mb-3 text-lg flex items-center gap-2">
-                            <span>🌟</span>
-                            Mantra del Día
-                          </h4>
-                          <p className="text-white text-lg italic font-medium leading-relaxed">
-                            "{selectedDayEvents.find(e => e.aiInterpretation?.mantra)?.aiInterpretation?.mantra}"
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Ritual del día */}
-                      {selectedDayEvents.some(e => e.aiInterpretation?.ritual_breve) && (
-                        <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl p-6 border border-green-400/30">
-                          <h4 className="font-bold text-green-300 mb-3 text-lg flex items-center gap-2">
-                            <span>🔥</span>
-                            Ritual del Día (5 minutos)
-                          </h4>
-                          <p className="text-white leading-relaxed whitespace-pre-line">
-                            {selectedDayEvents.find(e => e.aiInterpretation?.ritual_breve)?.aiInterpretation?.ritual_breve || 'Ritual de 5 minutos para conectar con la energía del día'}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Consejo del día */}
-                      {selectedDayEvents.some(e => e.aiInterpretation?.advice) && (
-                        <div className="bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-2xl p-6 border border-blue-400/30">
-                          <h4 className="font-bold text-blue-300 mb-3 text-lg flex items-center gap-2">
-                            <span>💡</span>
-                            Consejo para Ti
-                          </h4>
-                          <p className="text-white leading-relaxed">
-                            {selectedDayEvents.find(e => e.aiInterpretation?.advice)?.aiInterpretation?.advice}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Pregunta clave */}
-                      {selectedDayEvents.some(e => e.aiInterpretation?.pregunta_clave) && (
-                        <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl p-6 border border-purple-400/30">
-                          <h4 className="font-bold text-purple-300 mb-3 text-lg flex items-center gap-2">
-                            <span>❓</span>
-                            Pregunta del Día
-                          </h4>
-                          <p className="text-white text-lg font-medium italic leading-relaxed">
-                            {selectedDayEvents.find(e => e.aiInterpretation?.pregunta_clave)?.aiInterpretation?.pregunta_clave}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Eventos del día */}
-                      <div className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded-2xl p-6 border border-pink-400/30">
-                        <h4 className="font-bold text-pink-300 mb-4 text-lg flex items-center gap-2">
-                          <span>🎯</span>
-                          Eventos Astrológicos del Día ({selectedDayEvents.length})
-                        </h4>
-
-                        <div className="space-y-3">
-                          {selectedDayEvents.map((event, index) => (
-                            <div
-                              key={index}
-                              className="bg-white/5 rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all duration-200 cursor-pointer"
-                              onClick={() => {
-                                setModalEvent(event);
-                                setShowEventModal(true);
-                              }}
-                            >
-                              <div className="flex items-start gap-3">
-                                <span className="text-2xl flex-shrink-0">{getEventIcon(event.type, event.priority)}</span>
-                                <div className="flex-1">
-                                  <h5 className="text-white font-bold mb-1">{event.title}</h5>
-                                  {event.planet && event.sign && (
-                                    <p className="text-purple-300 text-sm mb-2">{event.planet} en {event.sign}</p>
-                                  )}
-                                  <p className="text-gray-300 text-sm line-clamp-2">{event.description}</p>
-
-                                  {event.aiInterpretation && (
-                                    <div className="mt-2 text-purple-200 text-xs">
-                                      Click para ver interpretación completa ✨
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-center py-12">
-                      <div className="text-6xl mb-4">🌙</div>
-                      <h4 className="text-2xl font-bold text-white mb-2">Día sin eventos especiales</h4>
-                      <p className="text-gray-300">
-                        Este día no tiene eventos astrológicos destacados. ¡Perfecto para descansar y consolidar!
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
 
             {/* CONTENIDO DE IMPRESIÓN OCULTO - Solo visible al imprimir */}
             <div className="print-only hidden">
@@ -2260,14 +1270,120 @@ const AgendaPersonalizada = () => {
                 </div>
               </div>
 
-                  {/* Páginas de días individuales - Vista completa del año */}
-                  {generatePages()}
+              {/* Páginas de días individuales - Vista completa del año */}
+              {(() => {
+                const allDays = getYearView().flatMap(month => month.days.filter(day => day.isCurrentMonth && day.hasEvents));
+                const daysPerPage = 3; // 3 días por página
+                const pages = [];
+
+                for (let i = 0; i < allDays.length; i += daysPerPage) {
+                  const pageDays = allDays.slice(i, i + daysPerPage);
+                  pages.push(
+                    <div key={i} className="print-day-page">
+                      <div className="print-days-grid">
+                        {pageDays.map((day) => (
+                          <div key={day.date.getTime()} className="print-day-card">
+                            <div className="print-day-header">
+                              {day.date.getDate()} de {format(day.date, 'MMMM', { locale: es })}
+                            </div>
+
+                            {day.hasEvents && (
+                              <div className="print-day-events">
+                                {day.events.map((event, eventIndex) => (
+                                  <div key={eventIndex} className="print-day-event">
+                                    <div className="font-semibold text-purple-800">
+                                      {getEventIcon(event.type, event.priority)} {event.title}
+                                    </div>
+                                    <div className="text-gray-600 text-xs mt-1">
+                                      {event.description}
+                                    </div>
+                                    {event.planet && event.sign && (
+                                      <div className="text-purple-600 text-xs mt-1">
+                                        {event.planet} en {event.sign}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            <div className="print-exercises-space">
+                              <div className="print-exercises-title">
+                                📝 Ejercicios y tareas para hoy:
+                              </div>
+                              <div className="print-exercises-lines">
+                                1. ________________________________________________________________<br/>
+                                2. ________________________________________________________________<br/>
+                                3. ________________________________________________________________<br/>
+                                4. ________________________________________________________________<br/>
+                                5. ________________________________________________________________<br/>
+                                <br/>
+                                Notas adicionales:<br/>
+                                ________________________________________________________________<br/>
+                                ________________________________________________________________<br/>
+                                ________________________________________________________________<br/>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+
+                return pages;
+              })()}
             </div>
           </div>
 
-          {/* SIDEBAR INFO DEL DÍA - 1/3 en desktop */}
+          {/* SIDEBAR EVENTOS - 1/3 en desktop */}
           <div className="lg:col-span-1">
             <div className="sticky top-8">
+
+              {/* Info del usuario - MOVIDO ARRIBA */}
+              {userProfile && (
+                <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-3xl p-6 mb-6 relative overflow-hidden">
+                  <div className="absolute top-4 right-4 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                  <div className="absolute bottom-4 left-4 w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+
+                  <div className="flex items-center mb-4">
+                    <div className="bg-gradient-to-r from-green-400/20 to-blue-500/20 border border-green-400/30 rounded-full p-3 backdrop-blur-sm mr-4">
+                      <span className="text-2xl">👤</span>
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-bold text-white">{userProfile.name || 'Usuario'}</h4>
+                      <p className="text-gray-300 text-sm">{userProfile.currentAge || 0} años</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="bg-black/30 rounded-xl p-3 border border-white/10">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-400 text-xs">Lugar</span>
+                        <span className="text-white text-sm">📍 {userProfile.place || 'Sin ubicación'}</span>
+                      </div>
+                    </div>
+
+                    <div className="bg-black/30 rounded-xl p-3 border border-white/10">
+                      <div className="text-gray-400 text-xs mb-2">Signos Astrológicos</div>
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-yellow-300 text-xs">☉ Sol</span>
+                          <span className="text-white text-sm">{userProfile.astrological?.signs?.sun || 'N/A'}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-blue-300 text-xs">☽ Luna</span>
+                          <span className="text-white text-sm">{userProfile.astrological?.signs?.moon || 'N/A'}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-purple-300 text-xs">↗ Ascendente</span>
+                          <span className="text-white text-sm">{userProfile.astrological?.signs?.ascendant || 'N/A'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Header del sidebar */}
               <div className="bg-gradient-to-r from-pink-600/30 to-purple-600/30 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-pink-400/30">
@@ -2285,125 +1401,6 @@ const AgendaPersonalizada = () => {
                   }
                 </p>
               </div>
-
-              {/* 🌟 INFORMACIÓN DEL DÍA: Interpretaciones Personalizadas */}
-              {selectedDate && selectedDayEvents.length > 0 && (
-                <div className="space-y-4 mb-6">
-                  {/* 🔮 INTERPRETACIÓN PERSONALIZADA - CAPA 2 */}
-                  {selectedDayEvents.some(e => e.aiInterpretation?.capa_2_aplicado) && (
-                    <>
-                      {/* Cómo Se Vive en Ti */}
-                      {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.como_se_vive_en_ti) && (
-                        <div className="bg-gradient-to-r from-violet-500/20 to-purple-500/20 backdrop-blur-sm rounded-2xl p-4 border border-violet-400/30">
-                          <h4 className="text-violet-300 font-bold text-sm mb-2 flex items-center">
-                            <span className="mr-2">💫</span>
-                            Cómo Se Vive en Ti
-                          </h4>
-                          <p className="text-white text-sm leading-relaxed">
-                            {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.como_se_vive_en_ti)?.aiInterpretation?.capa_2_aplicado?.como_se_vive_en_ti}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Uso Consciente */}
-                      {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.uso_consciente_consejo_aplicado) && (
-                        <div className="bg-gradient-to-r from-emerald-500/20 to-green-500/20 backdrop-blur-sm rounded-2xl p-4 border border-emerald-400/30">
-                          <h4 className="text-emerald-300 font-bold text-sm mb-2 flex items-center">
-                            <span className="mr-2">✅</span>
-                            Uso Consciente
-                          </h4>
-                          <p className="text-white text-sm leading-relaxed">
-                            {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.uso_consciente_consejo_aplicado)?.aiInterpretation?.capa_2_aplicado?.uso_consciente_consejo_aplicado}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Acción Práctica */}
-                      {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.accion_practica_sugerida) && (
-                        <div className="bg-gradient-to-r from-blue-500/20 to-indigo-500/20 backdrop-blur-sm rounded-2xl p-4 border border-blue-400/30">
-                          <h4 className="text-blue-300 font-bold text-sm mb-2 flex items-center">
-                            <span className="mr-2">🎯</span>
-                            Acción Práctica
-                          </h4>
-                          <p className="text-white text-sm leading-relaxed">
-                            {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.accion_practica_sugerida)?.aiInterpretation?.capa_2_aplicado?.accion_practica_sugerida}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Síntesis/Mantra */}
-                      {selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.sintesis_final) && (
-                        <div className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 backdrop-blur-sm rounded-2xl p-4 border border-amber-400/30">
-                          <h4 className="text-amber-300 font-bold text-sm mb-2 flex items-center">
-                            <span className="mr-2">✨</span>
-                            Tu Mantra
-                          </h4>
-                          <p className="text-white text-sm italic font-bold text-center">
-                            "{selectedDayEvents.find(e => e.aiInterpretation?.capa_2_aplicado?.sintesis_final)?.aiInterpretation?.capa_2_aplicado?.sintesis_final}"
-                          </p>
-                        </div>
-                      )}
-                    </>
-                  )}
-
-                  {/* FALLBACK: Mostrar interpretaciones genéricas si no hay personalizadas */}
-                  {!selectedDayEvents.some(e => e.aiInterpretation?.capa_2_aplicado) && (
-                    <>
-                      {/* Mantra del día */}
-                      {selectedDayEvents.some(e => e.aiInterpretation?.mantra) && (
-                    <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-sm rounded-2xl p-4 border border-yellow-400/30">
-                      <h4 className="text-yellow-300 font-bold text-sm mb-2 flex items-center">
-                        <span className="mr-2">🌟</span>
-                        Mantra del Día
-                      </h4>
-                      <p className="text-white text-sm italic font-medium">
-                        "{selectedDayEvents.find(e => e.aiInterpretation?.mantra)?.aiInterpretation?.mantra}"
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Ritual del día */}
-                  {selectedDayEvents.some(e => e.aiInterpretation?.ritual_breve) && (
-                    <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm rounded-2xl p-4 border border-green-400/30">
-                      <h4 className="text-green-300 font-bold text-sm mb-2 flex items-center">
-                        <span className="mr-2">🔥</span>
-                        Ritual del Día
-                      </h4>
-                      <p className="text-white text-sm leading-relaxed">
-                        {selectedDayEvents.find(e => e.aiInterpretation?.ritual_breve)?.aiInterpretation?.ritual_breve || 'Ritual de 5 minutos para conectar con la energía del día'}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Consejo del día */}
-                  {selectedDayEvents.some(e => e.aiInterpretation?.advice) && (
-                    <div className="bg-gradient-to-r from-blue-500/20 to-indigo-500/20 backdrop-blur-sm rounded-2xl p-4 border border-blue-400/30">
-                      <h4 className="text-blue-300 font-bold text-sm mb-2 flex items-center">
-                        <span className="mr-2">💡</span>
-                        Consejo del Día
-                      </h4>
-                      <p className="text-white text-sm leading-relaxed">
-                        {selectedDayEvents.find(e => e.aiInterpretation?.advice)?.aiInterpretation?.advice}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Pregunta clave */}
-                  {selectedDayEvents.some(e => e.aiInterpretation?.pregunta_clave) && (
-                    <div className="bg-gradient-to-r from-pink-500/20 to-purple-500/20 backdrop-blur-sm rounded-2xl p-4 border border-pink-400/30">
-                      <h4 className="text-pink-300 font-bold text-sm mb-2 flex items-center">
-                        <span className="mr-2">❓</span>
-                        Pregunta del Día
-                      </h4>
-                      <p className="text-white text-sm leading-relaxed font-medium italic">
-                        {selectedDayEvents.find(e => e.aiInterpretation?.pregunta_clave)?.aiInterpretation?.pregunta_clave}
-                      </p>
-                    </div>
-                  )}
-                    </>
-                  )}
-                </div>
-              )}
 
               {/* Lista de eventos */}
               {selectedDayEvents.length > 0 && (
@@ -2454,18 +1451,16 @@ const AgendaPersonalizada = () => {
                   Descubre interpretaciones aún más profundas de tu carta natal
                 </p>
                 <div className="flex flex-col gap-3">
-                  {/* Botón Generar Libro Completo */}
-                  <AgendaBookGenerator />
-
+                  <button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-full font-semibold hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg hover:shadow-xl">
+                    Explorar más ✨
+                  </button>
                   <button
-                    onClick={() => window.print()}
-                    className="bg-gradient-to-r from-green-500/80 to-emerald-500/80 hover:from-green-400/90 hover:to-emerald-400/90 transition-all duration-200 shadow-lg hover:shadow-green-500/25 border border-white/10 p-3 rounded-full group"
-                    title="Imprimir agenda actual"
+                    onClick={() => setShowAgendaLibro(true)}
+                    className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 transition-all duration-200 shadow-lg hover:shadow-yellow-500/25 border border-white/10 p-3 rounded-full group"
+                    title="Ver tu agenda en formato libro"
                   >
-                    <svg className="h-5 w-5 text-white group-hover:scale-110 transition-transform inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                    </svg>
-                    Imprimir Vista Actual
+                    <span className="text-xl mr-2">📖</span>
+                    <span className="text-white font-bold">Ver Agenda Libro</span>
                   </button>
                 </div>
               </div>
@@ -2474,7 +1469,7 @@ const AgendaPersonalizada = () => {
         </div>
 
         {/* TOOLTIP ÉPICO */}
-        {hoveredEvent && hoveredEvent?.aiInterpretation && (
+        {hoveredEvent && hoveredEvent.aiInterpretation && (
           <div
             className="fixed bg-gradient-to-r from-purple-900/95 to-pink-900/95 backdrop-blur-sm border border-purple-400/40 rounded-2xl p-6 shadow-2xl max-w-sm pointer-events-none z-50"
             style={{
@@ -2485,11 +1480,11 @@ const AgendaPersonalizada = () => {
           >
             {/* Header */}
             <div className="flex items-center mb-4">
-              <span className="text-2xl mr-3">{getEventIcon(hoveredEvent!.type, hoveredEvent!.priority)}</span>
+              <span className="text-2xl mr-3">{getEventIcon(hoveredEvent.type, hoveredEvent.priority)}</span>
               <div>
-                <div className="text-white font-bold">{hoveredEvent!.title}</div>
+                <div className="text-white font-bold">{hoveredEvent.title}</div>
                 <div className="text-purple-200 text-sm">
-                  {hoveredEvent!.planet && hoveredEvent!.sign && `${hoveredEvent!.planet} en ${hoveredEvent!.sign}`}
+                  {hoveredEvent.planet && hoveredEvent.sign && `${hoveredEvent.planet} en ${hoveredEvent.sign}`}
                 </div>
               </div>
             </div>
@@ -2501,7 +1496,7 @@ const AgendaPersonalizada = () => {
                   <span className="mr-2">🔥</span>SIGNIFICADO:
                 </div>
                 <div className="text-white text-sm leading-relaxed">
-                  {hoveredEvent?.aiInterpretation?.meaning}
+                  {hoveredEvent.aiInterpretation.meaning}
                 </div>
               </div>
 
@@ -2510,15 +1505,15 @@ const AgendaPersonalizada = () => {
                   <span className="mr-2">⚡</span>CONSEJO:
                 </div>
                 <div className="text-white text-sm leading-relaxed">
-                  {hoveredEvent?.aiInterpretation?.advice}
+                  {hoveredEvent.aiInterpretation.advice}
                 </div>
               </div>
 
-              {hoveredEvent?.aiInterpretation?.mantra && (
+              {hoveredEvent.aiInterpretation.mantra && (
                 <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-400/30 rounded-lg p-3 text-center">
                   <div className="text-yellow-300 font-semibold text-sm mb-1">✨ MANTRA:</div>
                   <div className="text-white text-sm font-medium italic">
-                    "{hoveredEvent?.aiInterpretation?.mantra}"
+                    "{hoveredEvent.aiInterpretation.mantra}"
                   </div>
                 </div>
               )}
@@ -2531,18 +1526,18 @@ const AgendaPersonalizada = () => {
           <>
             {/* Overlay */}
             <div
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
               onClick={closeEventModal}
             />
 
             {/* Modal centrado */}
-            <div className="fixed inset-0 flex items-center justify-center z-[101] p-4">
+            <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
               <div className="bg-gradient-to-br from-purple-900/95 to-pink-900/95 backdrop-blur-sm border border-purple-400/40 rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
                 {/* Header del modal */}
                 <div className="bg-gradient-to-r from-purple-600/80 to-pink-600/80 p-6 border-b border-white/20">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <span className="text-4xl">{modalEvent ? getEventIcon(modalEvent.type, modalEvent.priority) : ''}</span>
+                      <span className="text-4xl">{getEventIcon(modalEvent.type, modalEvent.priority)}</span>
                       <div>
                         <h2 className="text-2xl font-bold text-white">{modalEvent.title}</h2>
                         <p className="text-purple-200 text-sm">
@@ -2717,6 +1712,7 @@ const AgendaPersonalizada = () => {
         )}
 
       </div>
+    </div>
   );
 };
 
