@@ -41,3 +41,56 @@ body {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(147, 51, 234, 0.8);
 }
+
+/* ========================================
+   ESTILOS DE IMPRESIÓN PARA AGENDA LIBRO
+   ======================================== */
+
+/* Estilos de impresión para libro A5 */
+@media print {
+  @page {
+    size: A5;
+    margin: 0;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Ocultar elementos que no deben imprimirse */
+  .no-print {
+    display: none !important;
+  }
+
+  /* Cada página del libro */
+  .print-page {
+    page-break-after: always;
+    width: 148mm;
+    height: 210mm;
+    position: relative;
+    overflow: hidden;
+    background: white;
+  }
+
+  /* La última página no debe tener salto */
+  .print-page:last-child {
+    page-break-after: auto;
+  }
+
+  /* Optimizaciones de impresión */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Evitar rupturas indeseadas */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+
+  img {
+    page-break-inside: avoid;
+  }
+}

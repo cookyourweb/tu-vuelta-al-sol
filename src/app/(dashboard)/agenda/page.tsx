@@ -11,6 +11,8 @@ import type { UserProfile, AstrologicalEvent, EventType } from '@/types/astrolog
 import EventsLoadingModal from '@/components/astrology/EventsLoadingModal';
 import EventInterpretationButton from '@/components/agenda/EventInterpretationButton';
 import PlanetaryCards from '@/components/agenda/PlanetaryCards';
+import { AgendaLibro } from '@/components/agenda/AgendaLibro';
+import { StyleProvider } from '@/context/StyleContext';
 import { mapAstrologicalEventToEventData } from '@/utils/eventMapping';
 
 interface AstronomicalDay {
@@ -34,6 +36,8 @@ const AgendaPersonalizada = () => {
   const [hoveredEvent, setHoveredEvent] = useState<AstrologicalEvent | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showPersonalityModal, setShowPersonalityModal] = useState(false);
+  // Estado para mostrar Agenda Libro
+  const [showAgendaLibro, setShowAgendaLibro] = useState(false);
   // Estados para carga de agenda completa (birthday to next birthday)
   const [loadingYearEvents, setLoadingYearEvents] = useState(false);
   const [yearRange, setYearRange] = useState<{start: Date, end: Date} | null>(null);
@@ -1437,14 +1441,12 @@ const AgendaPersonalizada = () => {
                     Explorar más ✨
                   </button>
                   <button
-                    onClick={() => window.print()}
-                    className="bg-gradient-to-r from-green-500/80 to-emerald-500/80 hover:from-green-400/90 hover:to-emerald-400/90 transition-all duration-200 shadow-lg hover:shadow-green-500/25 border border-white/10 p-3 rounded-full group"
-                    title="Imprimir agenda como libro A5"
+                    onClick={() => setShowAgendaLibro(true)}
+                    className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 transition-all duration-200 shadow-lg hover:shadow-yellow-500/25 border border-white/10 p-3 rounded-full group"
+                    title="Ver tu agenda en formato libro"
                   >
-                    <svg className="h-5 w-5 text-white group-hover:scale-110 transition-transform inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                    </svg>
-                    Imprimir Agenda
+                    <span className="text-xl mr-2">📖</span>
+                    <span className="text-white font-bold">Ver Agenda Libro</span>
                   </button>
                 </div>
               </div>
@@ -1693,6 +1695,18 @@ const AgendaPersonalizada = () => {
               </div>
             </div>
           </>
+        )}
+
+        {/* AGENDA LIBRO MODAL */}
+        {showAgendaLibro && userProfile && yearRange && (
+          <StyleProvider>
+            <AgendaLibro
+              onClose={() => setShowAgendaLibro(false)}
+              userName={userProfile.name || 'Usuario'}
+              startDate={yearRange.start}
+              endDate={yearRange.end}
+            />
+          </StyleProvider>
         )}
 
       </div>
