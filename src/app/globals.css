@@ -45,99 +45,185 @@ body {
 }
 
 /* ========================================
-   PRINT STYLES - LIBRO-AGENDA A5
+   PRINT STYLES - LIBRO-AGENDA A4
    ======================================== */
 @media print {
   @page {
-    size: A5;
-    margin: 15mm 10mm;
+    size: A4;
+    margin: 0;
   }
 
-  * {
+  html, body {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     color-adjust: exact !important;
   }
 
   body {
-    background: white !important;
-    color: black !important;
+    background: hsl(40 30% 97%) !important;
   }
 
-  /* Ocultar elementos no imprimibles */
-  header,
-  nav,
-  .no-print,
-  button,
-  [role="button"] {
+  .no-print {
     display: none !important;
   }
 
-  /* Cada página del libro */
   .print-page {
     page-break-after: always;
     page-break-inside: avoid;
-    width: 100%;
-    height: auto;
-    margin: 0;
-    padding: 10mm 8mm !important;
+    break-after: page;
+    break-inside: avoid;
+    width: 210mm;
+    min-height: 297mm;
+    max-height: 297mm;
+    overflow: hidden;
+    box-sizing: border-box;
   }
 
   .print-page:last-child {
     page-break-after: auto;
+    break-after: auto;
   }
+}
 
-  /* Evitar romper elementos importantes */
-  h1, h2, h3, h4, h5, h6 {
-    page-break-after: avoid;
-    page-break-inside: avoid;
+/* Screen preview styling for print pages */
+@media screen {
+  .print-page {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto 2rem;
+    box-shadow: 0 8px 40px hsl(260 50% 20% / 0.15);
+    border-radius: 4px;
+    overflow: hidden;
   }
+}
+/* ========================================
+   COLORES CÓSMICOS PERSONALIZADOS
+   ======================================== */
+:root {
+  --cosmic-purple: 260 70% 25%;
+  --cosmic-purple-light: 260 50% 40%;
+  --cosmic-gold: 38 95% 55%;
+  --cosmic-gold-light: 45 90% 70%;
+  --cosmic-amber: 30 100% 50%;
+  --cosmic-violet: 280 70% 50%;
+  --cosmic-star: 45 100% 85%;
+  --cosmic-rose: 330 85% 55%;
+  --cosmic-teal: 175 70% 40%;
+}
 
-  img {
-    page-break-inside: avoid;
-  }
+/* Paletas por estilo */
+.agenda-style-elegante {
+  --cosmic-purple: 215 28% 17%;
+  --cosmic-purple-light: 215 20% 35%;
+  --cosmic-gold: 38 92% 45%;
+  --cosmic-gold-light: 45 90% 70%;
+  --cosmic-rose: 345 70% 45%;
+}
 
-  table, pre {
-    page-break-inside: avoid;
-  }
+.agenda-style-creativo {
+  --cosmic-purple: 270 75% 30%;
+  --cosmic-purple-light: 270 65% 45%;
+  --cosmic-gold: 292 84% 55%;
+  --cosmic-rose: 320 85% 60%;
+}
 
-  /* Ajustar tamaños de fuente para A5 */
-  .font-display {
-    font-size: 0.85em !important;
-  }
+.agenda-style-minimalista {
+  --cosmic-purple: 240 6% 25%;
+  --cosmic-purple-light: 240 5% 45%;
+  --cosmic-gold: 240 6% 20%;
+  --cosmic-rose: 173 65% 35%;
+}
 
-  .text-3xl {
-    font-size: 1.5rem !important;
-  }
+.agenda-style-bohemio {
+  --cosmic-purple: 24 55% 25%;
+  --cosmic-purple-light: 24 45% 45%;
+  --cosmic-gold: 38 95% 55%;
+  --cosmic-rose: 330 80% 55%;
+}
 
-  .text-2xl {
-    font-size: 1.25rem !important;
-  }
+/* ========================================
+   ESTILOS DECORATIVOS
+   ======================================== */
+.pattern-dots {
+  background-image: radial-gradient(hsl(260 70% 25% / 0.15) 2px, transparent 2px);
+  background-size: 24px 24px;
+}
 
-  .text-xl {
-    font-size: 1.125rem !important;
-  }
+.pattern-lines {
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 23px,
+    hsl(260 30% 80% / 0.5) 23px,
+    hsl(260 30% 80% / 0.5) 24px
+  );
+}
 
-  .text-lg {
-    font-size: 1rem !important;
-  }
+.pattern-cosmic-circles {
+  background-image: 
+    radial-gradient(circle at 10% 20%, hsl(330 85% 55% / 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 90% 80%, hsl(38 95% 55% / 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, hsl(260 70% 25% / 0.05) 0%, transparent 70%);
+}
 
-  /* Reducir paddings para A5 */
-  .p-12 {
-    padding: 1rem !important;
-  }
+.pattern-gradient-mesh {
+  background-image: 
+    radial-gradient(at 40% 20%, hsl(330 85% 55% / 0.12) 0px, transparent 50%),
+    radial-gradient(at 80% 80%, hsl(175 70% 40% / 0.1) 0px, transparent 50%),
+    radial-gradient(at 0% 50%, hsl(38 95% 55% / 0.1) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, hsl(260 70% 25% / 0.1) 0px, transparent 50%);
+}
 
-  .p-8 {
-    padding: 0.75rem !important;
-  }
+/* Iconos con color */
+.icon-cosmic {
+  color: hsl(260 70% 35%);
+  filter: drop-shadow(0 2px 6px hsl(260 50% 20% / 0.3));
+}
 
-  .mb-12, .mt-12 {
-    margin-bottom: 1rem !important;
-    margin-top: 1rem !important;
-  }
+.icon-gold {
+  color: hsl(38 95% 50%);
+  filter: drop-shadow(0 2px 6px hsl(38 95% 55% / 0.4));
+}
 
-  .mb-8, .mt-8 {
-    margin-bottom: 0.75rem !important;
-    margin-top: 0.75rem !important;
-  }
+.icon-accent {
+  color: hsl(330 85% 50%);
+  filter: drop-shadow(0 2px 6px hsl(330 85% 55% / 0.4));
+}
+
+/* Gradientes de texto */
+.text-gradient-cosmic {
+  background: linear-gradient(135deg, hsl(260 70% 30%), hsl(330 70% 45%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, hsl(38 95% 45%), hsl(30 100% 50%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Badges */
+.badge-gold {
+  background: linear-gradient(135deg, hsl(38 95% 55%) 0%, hsl(30 100% 50%) 100%);
+  color: white;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-rose {
+  background: linear-gradient(135deg, hsl(330 85% 55%) 0%, hsl(280 70% 50%) 100%);
+  color: white;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
