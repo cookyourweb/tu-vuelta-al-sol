@@ -7,6 +7,10 @@ import { useStyle } from '@/context/StyleContext';
 import { StyleSwitcher } from '@/components/agenda/StyleSwitcher';
 import { Printer, X } from 'lucide-react';
 
+// Secciones del libro
+import { PortadaPersonalizada, PaginaIntencion } from './PortalEntrada';
+import { CartaBienvenida, TemaCentralAnio, LoQueVieneAMover, LoQuePideSoltar, PaginaIntencionAnual } from './TuAnioTuViaje';
+
 interface AgendaLibroProps {
   onClose: () => void;
   userName: string;
@@ -55,38 +59,20 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
       {/* Contenido del libro */}
       <div ref={printRef} className="container mx-auto py-8 space-y-0 print:p-0">
 
-        {/* Portada simple */}
-        <div className={`print-page bg-white p-10 flex flex-col items-center justify-center relative overflow-hidden ${config.pattern}`}>
-          <div className="text-center relative z-10">
-            <div className="mb-8">
-              <span className="text-6xl">🌟</span>
-            </div>
+        {/* 1. PORTAL DE ENTRADA */}
+        <PortadaPersonalizada
+          name={userName}
+          startDate={startDate}
+          endDate={endDate}
+        />
+        <PaginaIntencion />
 
-            <h1 className={`text-5xl font-bold mb-4 ${config.titleGradient}`}>
-              Tu Vuelta al Sol
-            </h1>
-
-            <div className={`${config.divider} w-40 mx-auto my-6`} />
-
-            <h2 className="text-3xl font-semibold text-gray-700 mb-2">
-              {userName}
-            </h2>
-
-            <p className="text-lg text-gray-500 mt-4">
-              {format(startDate, "d 'de' MMMM 'de' yyyy", { locale: es })}
-              <br />
-              al
-              <br />
-              {format(endDate, "d 'de' MMMM 'de' yyyy", { locale: es })}
-            </p>
-
-            <div className="mt-12">
-              <p className="text-sm text-gray-400 italic">
-                Tu agenda astrológica personalizada
-              </p>
-            </div>
-          </div>
-        </div>
+        {/* 2. TU AÑO, TU VIAJE */}
+        <CartaBienvenida name={userName} />
+        <TemaCentralAnio />
+        <LoQueVieneAMover />
+        <LoQuePideSoltar />
+        <PaginaIntencionAnual />
 
         {/* Placeholder para contenido futuro */}
         <div className="print-page bg-white p-10 text-center flex items-center justify-center">
@@ -95,11 +81,11 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
               📅 Contenido en Desarrollo
             </h2>
             <p className="text-gray-500">
-              Las secciones de la agenda se agregarán en los siguientes pasos:
+              Próximas secciones:
             </p>
             <ul className="text-left inline-block mt-6 space-y-2 text-gray-600">
               <li>✅ Portal de Entrada</li>
-              <li>⏳ Tu Año, Tu Viaje</li>
+              <li>✅ Tu Año, Tu Viaje</li>
               <li>⏳ Soul Chart</li>
               <li>⏳ Retorno Solar</li>
               <li>⏳ Ejemplo Enero 2026</li>
