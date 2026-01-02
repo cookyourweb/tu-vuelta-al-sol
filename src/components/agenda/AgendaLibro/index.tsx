@@ -12,6 +12,22 @@ import { PortadaPersonalizada, PaginaIntencion } from './PortalEntrada';
 import { CartaBienvenida, TemaCentralAnio, LoQueVieneAMover, LoQuePideSoltar, PaginaIntencionAnual } from './TuAnioTuViaje';
 import { EsenciaNatal, NodoNorte, NodoSur, PlanetasDominantes, PatronesEmocionales } from './SoulChart';
 import { QueEsRetornoSolar, AscendenteAnio, SolRetorno, LunaRetorno, EjesDelAnio, EjesDelAnio2, IntegracionEjes, RitualCumpleanos, MantraAnual } from './RetornoSolar';
+import {
+  AperturaEneroIzquierda,
+  AperturaEneroDerecha,
+  CalendarioVisualEnero,
+  InterpretacionLunaNuevaEnero,
+  InterpretacionLunaLlenaEnero,
+  EjerciciosEnero,
+  MantraEnero,
+  Semana1Enero,
+  Semana2Enero,
+  Semana3Enero,
+  Semana4Enero,
+  CierreEnero
+} from './EjemploEnero';
+import { EscrituraTerapeutica, Visualizacion, RitualSimbolico, TrabajoEmocional } from './TerapiasCreativas';
+import { QuienEraQuienSoy, PreparacionProximaVuelta, CartaCierre, PaginaFinalBlanca, Contraportada } from './CierreCiclo';
 
 interface AgendaLibroProps {
   onClose: () => void;
@@ -94,27 +110,47 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
         <RitualCumpleanos />
         <MantraAnual />
 
-        {/* Placeholder para contenido futuro */}
+        {/* 5. EJEMPLO ENERO 2026 - MES COMPLETO */}
+        <AperturaEneroIzquierda />
+        <AperturaEneroDerecha />
+        <CalendarioVisualEnero />
+        <InterpretacionLunaNuevaEnero />
+        <InterpretacionLunaLlenaEnero />
+        <EjerciciosEnero />
+        <MantraEnero />
+        <Semana1Enero />
+        <Semana2Enero />
+        <Semana3Enero />
+        <Semana4Enero />
+        <CierreEnero />
+
+        {/* Placeholder para meses 2-12 */}
         <div className="print-page bg-white p-10 text-center flex items-center justify-center">
           <div>
             <h2 className="text-2xl font-bold text-gray-600 mb-4">
-              📅 Contenido en Desarrollo
+              📅 Meses Febrero - Diciembre
             </h2>
             <p className="text-gray-500">
-              Próximas secciones:
+              Próximamente con tus eventos personalizados
             </p>
-            <ul className="text-left inline-block mt-6 space-y-2 text-gray-600">
-              <li>✅ Portal de Entrada</li>
-              <li>✅ Tu Año, Tu Viaje</li>
-              <li>✅ Soul Chart</li>
-              <li>✅ Retorno Solar</li>
-              <li>⏳ Ejemplo Enero 2026</li>
-              <li>⏳ Meses 2-12</li>
-              <li>⏳ Terapias Creativas</li>
-              <li>⏳ Cierre de Ciclo</li>
-            </ul>
+            <p className="text-gray-400 text-sm mt-4">
+              (Fase 2: Personalización con datos reales)
+            </p>
           </div>
         </div>
+
+        {/* 6. TERAPIAS CREATIVAS */}
+        <EscrituraTerapeutica />
+        <Visualizacion />
+        <RitualSimbolico />
+        <TrabajoEmocional />
+
+        {/* 7. CIERRE DE CICLO */}
+        <QuienEraQuienSoy />
+        <PreparacionProximaVuelta />
+        <CartaCierre name={userName} />
+        <PaginaFinalBlanca />
+        <Contraportada />
 
       </div>
     </div>
