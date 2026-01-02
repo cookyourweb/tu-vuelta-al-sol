@@ -176,13 +176,16 @@ export class ProkeralaClient {
   
   /**
    * Get astrological events for a date range
+   * ✅ CONFIGURADO PARA ASTROLOGÍA OCCIDENTAL TROPICAL
    */
   async getAstronomicalEvents(startDate: string, endDate: string) {
     try {
       const token = await this.getToken();
-      
+
+      // ✅ CRÍTICO: ayanamsa=0 para zodiaco TROPICAL (occidental)
+      // Sin este parámetro, ProKerala devuelve datos SIDERALES (védicos)
       const response = await axios.get(
-        `${API_BASE_URL}/astrology/astronomical-events?start_date=${startDate}&end_date=${endDate}&la=es`,
+        `${API_BASE_URL}/astrology/astronomical-events?start_date=${startDate}&end_date=${endDate}&la=es&ayanamsa=0`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -190,7 +193,7 @@ export class ProkeralaClient {
           }
         }
       );
-      
+
       return response.data;
     } catch (error) {
       console.error('Error fetching astronomical events:', error);

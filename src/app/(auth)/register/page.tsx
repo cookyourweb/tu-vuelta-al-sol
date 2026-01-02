@@ -1,7 +1,7 @@
 // src/app/(auth)/register/page.tsx
 import RegisterForm from '@/components/auth/RegisterForm';
 import Link from 'next/link';
-import { Star, Sparkles, ArrowLeft, Heart, Zap, Moon } from 'lucide-react';
+import { Sparkles, ArrowLeft } from 'lucide-react';
 
 export default function RegisterPage() {
   return (
@@ -37,45 +37,23 @@ export default function RegisterPage() {
         <div className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
           <div className="max-w-md w-full space-y-8">
             
-            {/* Header inspiracional */}
+            {/* Header simple */}
             <div className="text-center">
               <div className="flex justify-center items-center mb-8">
                 <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 border border-yellow-400/30 rounded-full p-8 backdrop-blur-sm relative">
                   <div className="absolute -top-2 -right-2 w-4 h-4 bg-yellow-400 rounded-full animate-pulse"></div>
                   <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-orange-400 rounded-full animate-bounce"></div>
-                  <Star className="w-12 h-12 text-yellow-400" />
+                  <Sparkles className="w-12 h-12 text-yellow-400" />
                 </div>
               </div>
-              
-              <h1 className="text-4xl md:text-5xl font-black mb-4">
-                Tu viaje cósmico
-              </h1>
-              
-              <h2 className="text-2xl md:text-3xl font-bold mb-6">
-                <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">comienza aquí</span>
-              </h2>
-              
-              <p className="text-gray-300 text-lg leading-relaxed">
-                Únete a miles de personas que han descubierto su verdadero propósito en las estrellas.
-              </p>
-            </div>
 
-            {/* Beneficios rápidos */}
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="bg-gradient-to-br from-pink-400/10 to-red-500/10 border border-pink-400/30 rounded-2xl p-4 text-center backdrop-blur-sm">
-                <Heart className="w-6 h-6 text-pink-400 mx-auto mb-2" />
-                <p className="text-pink-300 text-xs font-semibold">Encuentra el amor</p>
-              </div>
-              
-              <div className="bg-gradient-to-br from-yellow-400/10 to-orange-500/10 border border-yellow-400/30 rounded-2xl p-4 text-center backdrop-blur-sm">
-                <Zap className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
-                <p className="text-yellow-300 text-xs font-semibold">Descubre tu propósito</p>
-              </div>
-              
-              <div className="bg-gradient-to-br from-purple-400/10 to-blue-500/10 border border-purple-400/30 rounded-2xl p-4 text-center backdrop-blur-sm">
-                <Moon className="w-6 h-6 text-purple-400 mx-auto mb-2" />
-                <p className="text-purple-300 text-xs font-semibold">Sana tu alma</p>
-              </div>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
+                Crear cuenta
+              </h1>
+
+              <p className="text-xl text-gray-300">
+                Comienza tu viaje astrológico
+              </p>
             </div>
 
             {/* Formulario de registro */}
@@ -90,32 +68,13 @@ export default function RegisterPage() {
             <div className="text-center">
               <p className="text-gray-400">
                 ¿Ya tienes cuenta?{' '}
-                <Link 
+                <Link
                   href="/login"
                   className="text-yellow-400 hover:text-yellow-300 font-semibold transition-colors duration-300"
                 >
-                  Accede a tu universo
+                  Inicia sesión
                 </Link>
               </p>
-            </div>
-
-            {/* Mensaje inspiracional */}
-            <div className="bg-gradient-to-r from-purple-400/10 to-pink-500/10 border border-purple-400/30 rounded-2xl p-6 backdrop-blur-sm text-center">
-              <div className="flex items-center justify-center mb-3">
-                <Sparkles className="w-5 h-5 text-purple-400 mr-2" />
-                <span className="font-semibold text-purple-300">Tu Destino Te Llama</span>
-              </div>
-              <p className="text-gray-300 text-sm">
-                "En el momento exacto que naciste, el universo escribió tu historia. Es hora de leerla."
-              </p>
-            </div>
-
-            {/* Testimonial rápido */}
-            <div className="bg-gradient-to-r from-green-400/10 to-emerald-500/10 border border-green-400/30 rounded-2xl p-4 backdrop-blur-sm">
-              <p className="text-gray-300 text-sm italic text-center">
-                "Registrarme fue la mejor decisión que tomé. Ahora entiendo por qué las cosas pasaron como pasaron."
-              </p>
-              <p className="text-green-400 text-xs text-center mt-2 font-semibold">- Elena M.</p>
             </div>
           </div>
         </div>

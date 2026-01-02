@@ -59,6 +59,27 @@ export default function SolarReturnPage() {
   const [loadingMessage, setLoadingMessage] = useState('☀️ Iniciando tu Vuelta al Sol...');
   const [loadingProgress, setLoadingProgress] = useState(0);
 
+  // ✅ FUNCIÓN: Filtrar planetas válidos (excluir Nodos con datos incompletos)
+  const filterValidPlanets = (planets: any[]) => {
+    return (planets || []).filter((planet: any) => {
+      // Si NO es un nodo, incluirlo siempre
+      if (!planet.name?.includes('Nodo')) {
+        return true;
+      }
+
+      // Si ES un nodo, solo incluirlo si tiene casa válida (número entre 1-12)
+      const hasValidHouse = typeof planet.house === 'number' && planet.house >= 1 && planet.house <= 12;
+      const hasValidSign = planet.sign && planet.sign !== 'Desconocido';
+
+      if (!hasValidHouse || !hasValidSign) {
+        console.log(`⚠️ [SR FILTER] Excluido ${planet.name}: casa=${planet.house}, signo=${planet.sign}`);
+        return false;
+      }
+
+      return true;
+    });
+  };
+
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -147,8 +168,13 @@ export default function SolarReturnPage() {
       const srResult = await srResponse.json();
 
       if (srResult.success && srResult.data?.solarReturnChart) {
-        setSolarReturnData(srResult.data.solarReturnChart);
-        setChartData(srResult.data.solarReturnChart);
+        // ✅ Filtrar planetas válidos antes de setear
+        const filteredChart = {
+          ...srResult.data.solarReturnChart,
+          planets: filterValidPlanets(srResult.data.solarReturnChart.planets)
+        };
+        setSolarReturnData(filteredChart);
+        setChartData(filteredChart);
       } else {
         setSolarReturnData(null);
         setChartData(null);
@@ -242,16 +268,26 @@ export default function SolarReturnPage() {
       });
 
       if (data.success && data.data?.solarReturnChart) {
-        setChartData(data.data.solarReturnChart);
-        setSolarReturnData(data.data.solarReturnChart);
+        // ✅ Filtrar planetas válidos antes de setear
+        const filteredChart = {
+          ...data.data.solarReturnChart,
+          planets: filterValidPlanets(data.data.solarReturnChart.planets)
+        };
+        setChartData(filteredChart);
+        setSolarReturnData(filteredChart);
         console.log('✅ [REGENERATE] Chart updated successfully');
 
         // Show success message
         alert('✅ Solar Return y su interpretación regenerados exitosamente.\n\n💡 Presiona el botón "Generar Interpretación Completa" para ver la nueva interpretación.');
       } else if (data.solarReturnChart) {
         // Fallback for different response structure
-        setChartData(data.solarReturnChart);
-        setSolarReturnData(data.solarReturnChart);
+        // ✅ Filtrar planetas válidos antes de setear
+        const filteredChart = {
+          ...data.solarReturnChart,
+          planets: filterValidPlanets(data.solarReturnChart.planets)
+        };
+        setChartData(filteredChart);
+        setSolarReturnData(filteredChart);
         console.log('✅ [REGENERATE] Chart updated successfully (fallback structure)');
         alert('✅ Solar Return y su interpretación regenerados exitosamente.\n\n💡 Presiona el botón "Generar Interpretación Completa" para ver la nueva interpretación.');
       } else {
@@ -511,6 +547,7 @@ export default function SolarReturnPage() {
                   solarReturnYear={new Date().getFullYear()}
                   solarReturnTheme="Revolución de Identidad y Empoderamiento Profesional"
                   ascSRInNatalHouse={10}
+                  natalChart={natalChart} // ⭐ CRITICAL: Pasar carta natal para conectar SR con natal
                   onOpenDrawer={openDrawer}
                   onCloseDrawer={closeDrawer}
                   drawerOpen={drawerOpen}

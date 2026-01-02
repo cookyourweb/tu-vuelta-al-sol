@@ -29,6 +29,7 @@ export interface ChartDisplayProps {
   solarReturnYear?: number;
   solarReturnTheme?: string;
   ascSRInNatalHouse?: number;
+  natalChart?: any; // ⭐ Carta natal para conectar SR con posiciones natales
 
   // ✅ ADDED: For drawer functionality
   onOpenDrawer?: (content: any) => void;

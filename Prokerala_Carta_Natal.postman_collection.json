@@ -1,1 +1,92 @@
-{ "info": { "name": "Prokerala - Carta Natal", "description": "Consulta de carta natal usando la API de Prokerala", "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json" }, "item": [ { "name": "Obtener carta natal", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }, { "key": "Content-Type", "value": "application/json", "type": "text" }, { "key": "Accept", "value": "application/json", "type": "text" } ], "url": { "raw": "{{baseUrl}}/astrology/natal-chart?datetime=1974-02-10T07:30:00%2B05:30&coordinates=10.21%2C78.09&birth_time_unknown=false&house_system=placidus&orb=default&birth_time_rectification=none&aspect_filter=all&la=es&ayanamsa=1", "host": [ "{{baseUrl}}" ], "path": [ "astrology", "natal-chart" ], "query": [ { "key": "datetime", "value": "1974-02-10T07:30:00+05:30" }, { "key": "coordinates", "value": "10.21,78.09" }, { "key": "birth_time_unknown", "value": "false" }, { "key": "house_system", "value": "placidus" }, { "key": "orb", "value": "default" }, { "key": "birth_time_rectification", "value": "none" }, { "key": "aspect_filter", "value": "all" }, { "key": "la", "value": "es" }, { "key": "ayanamsa", "value": "1" } ] } }, "response": [] } ], "variable": [ { "key": "baseUrl", "value": "https://api.prokerala.com/v2" }, { "key": "access_token", "value": " eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI2ODhlNzhmYi02ZWJkLTQzMWQtOWRlOC0xZTM1MTVmYTQ2YzYiLCJqdGkiOiI3NmM3YzhmZWQ5YmU1YTdmYWE2ZWFkY2VjNGRjODJkZGY1MDc5MDcwMWI2MzQzZjQ3NTVjZWEwN2JmOGI0OWRkZTcyNzg1YzhjYWMzYzI1NiIsImlhdCI6MTc0NjAxMDc5Mi4xMzMzNDQsIm5iZiI6MTc0NjAxMDc5Mi4xMzMzNDUsImV4cCI6MTc0NjAxNDM5Mi4xMzMyNTEsInN1YiI6IjkyZDNhZTQ3LTIyMDctNDU0OC05ZTViLWQ1ZGQyM2MzNzlhZSIsInNjb3BlcyI6W10sImNyZWRpdHNfcmVtYWluaW5nIjo0ODQyLCJyYXRlX2xpbWl0cyI6W3sicmF0ZSI6NSwiaW50ZXJ2YWwiOjYwfV19.ChRvzhUAuMbjyk6MZJo7w5vxecFFi7iWZnWO24hDcIWAIMrpE9CZQJJ1gKuhIUXkOItKhYNb-zU7Lz51t_MzeGxof1csxJU5OPQ5OXH-gRyxR9D2erEb7oTi6MzaLBQeXrXz1EAqJ63fTsCAmqf20iXsiez5S7ALG1zy4YyicWbsuOw3azhT4BvPS0_bKJgFayjBeMSxFmWbDmzj39QvWJjm7QMIl5mvfTKWTJMEiA3CJ9XLvk6VCWu4dvePR7MAms-PyR4kLL7FFnBC9ILmEvDUojhFjoBrwNhlwlnEuJY0hYEO9YRgEgWp-Jxph-xo6wkmIe7faZ0kVNziGkGWmA" } ] }{ "info": { "name": "Prokerala - Carta Natal", "description": "Consulta de carta natal usando la API de Prokerala", "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json" }, "item": [ { "name": "Obtener carta natal", "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}", "type": "text" }, { "key": "Content-Type", "value": "application/json", "type": "text" }, { "key": "Accept", "value": "application/json", "type": "text" } ], "url": { "raw": "{{baseUrl}}/astrology/natal-chart?datetime=1974-02-10T07:30:00%2B05:30&coordinates=10.21%2C78.09&birth_time_unknown=false&house_system=placidus&orb=default&birth_time_rectification=none&aspect_filter=all&la=es&ayanamsa=1", "host": [ "{{baseUrl}}" ], "path": [ "astrology", "natal-chart" ], "query": [ { "key": "datetime", "value": "1974-02-10T07:30:00+05:30" }, { "key": "coordinates", "value": "10.21,78.09" }, { "key": "birth_time_unknown", "value": "false" }, { "key": "house_system", "value": "placidus" }, { "key": "orb", "value": "default" }, { "key": "birth_time_rectification", "value": "none" }, { "key": "aspect_filter", "value": "all" }, { "key": "la", "value": "es" }, { "key": "ayanamsa", "value": "1" } ] } }, "response": [] } ], "variable": [ { "key": "baseUrl", "value": "https://api.prokerala.com/v2" }, { "key": "access_token", "value": " eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI2ODhlNzhmYi02ZWJkLTQzMWQtOWRlOC0xZTM1MTVmYTQ2YzYiLCJqdGkiOiI3NmM3YzhmZWQ5YmU1YTdmYWE2ZWFkY2VjNGRjODJkZGY1MDc5MDcwMWI2MzQzZjQ3NTVjZWEwN2JmOGI0OWRkZTcyNzg1YzhjYWMzYzI1NiIsImlhdCI6MTc0NjAxMDc5Mi4xMzMzNDQsIm5iZiI6MTc0NjAxMDc5Mi4xMzMzNDUsImV4cCI6MTc0NjAxNDM5Mi4xMzMyNTEsInN1YiI6IjkyZDNhZTQ3LTIyMDctNDU0OC05ZTViLWQ1ZGQyM2MzNzlhZSIsInNjb3BlcyI6W10sImNyZWRpdHNfcmVtYWluaW5nIjo0ODQyLCJyYXRlX2xpbWl0cyI6W3sicmF0ZSI6NSwiaW50ZXJ2YWwiOjYwfV19.ChRvzhUAuMbjyk6MZJo7w5vxecFFi7iWZnWO24hDcIWAIMrpE9CZQJJ1gKuhIUXkOItKhYNb-zU7Lz51t_MzeGxof1csxJU5OPQ5OXH-gRyxR9D2erEb7oTi6MzaLBQeXrXz1EAqJ63fTsCAmqf20iXsiez5S7ALG1zy4YyicWbsuOw3azhT4BvPS0_bKJgFayjBeMSxFmWbDmzj39QvWJjm7QMIl5mvfTKWTJMEiA3CJ9XLvk6VCWu4dvePR7MAms-PyR4kLL7FFnBC9ILmEvDUojhFjoBrwNhlwlnEuJY0hYEO9YRgEgWp-Jxph-xo6wkmIe7faZ0kVNziGkGWmA" } ] }
+{
+  "info": {
+    "name": "Prokerala - Carta Natal (TROPICAL - Occidental)",
+    "description": "✅ Consulta de carta natal usando ASTROLOGÍA TROPICAL OCCIDENTAL. IMPORTANTE: ayanamsa=0 para zodiaco tropical, flat-chart para sistema occidental.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "✅ Carta Natal TROPICAL (Occidental)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/astrology/natal-chart?datetime=1974-02-10T07:30:00%2B05:30&coordinates=10.21%2C78.09&birth_time_unknown=false&house_system=placidus&orb=default&birth_time_rectification=flat-chart&aspect_filter=all&la=es&ayanamsa=0",
+          "host": ["{{baseUrl}}"],
+          "path": ["astrology", "natal-chart"],
+          "query": [
+            {
+              "key": "datetime",
+              "value": "1974-02-10T07:30:00+05:30",
+              "description": "Fecha y hora de nacimiento en formato ISO8601"
+            },
+            {
+              "key": "coordinates",
+              "value": "10.21,78.09",
+              "description": "Latitud,Longitud del lugar de nacimiento"
+            },
+            {
+              "key": "birth_time_unknown",
+              "value": "false"
+            },
+            {
+              "key": "house_system",
+              "value": "placidus",
+              "description": "✅ Placidus para astrología occidental psicológica"
+            },
+            {
+              "key": "orb",
+              "value": "default",
+              "description": "✅ Orbes occidentales estándar"
+            },
+            {
+              "key": "birth_time_rectification",
+              "value": "flat-chart",
+              "description": "✅ CRÍTICO: flat-chart para occidental (NO true-sunrise-chart que es védico)"
+            },
+            {
+              "key": "aspect_filter",
+              "value": "all"
+            },
+            {
+              "key": "la",
+              "value": "es"
+            },
+            {
+              "key": "ayanamsa",
+              "value": "0",
+              "description": "✅ CRÍTICO: 0=TROPICAL (occidental), 1=Lahiri (védico)"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://api.prokerala.com/v2"
+    },
+    {
+      "key": "access_token",
+      "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI2ODhlNzhmYi02ZWJkLTQzMWQtOWRlOC0xZTM1MTVmYTQ2YzYiLCJqdGkiOiI3NmM3YzhmZWQ5YmU1YTdmYWE2ZWFkY2VjNGRjODJkZGY1MDc5MDcwMWI2MzQzZjQ3NTVjZWEwN2JmOGI0OWRkZTcyNzg1YzhjYWMzYzI1NiIsImlhdCI6MTc0NjAxMDc5Mi4xMzMzNDQsIm5iZiI6MTc0NjAxMDc5Mi4xMzMzNDUsImV4cCI6MTc0NjAxNDM5Mi4xMzMyNTEsInN1YiI6IjkyZDNhZTQ3LTIyMDctNDU0OC05ZTViLWQ1ZGQyM2MzNzlhZSIsInNjb3BlcyI6W10sImNyZWRpdHNfcmVtYWluaW5nIjo0ODQyLCJyYXRlX2xpbWl0cyI6W3sicmF0ZSI6NSwiaW50ZXJ2YWwiOjYwfV19.ChRvzhUAuMbjyk6MZJo7w5vxecFFi7iWZnWO24hDcIWAIMrpE9CZQJJ1gKuhIUXkOItKhYNb-zU7Lz51t_MzeGxof1csxJU5OPQ5OXH-gRyxR9D2erEb7oTi6MzaLBQeXrXz1EAqJ63fTsCAmqf20iXsiez5S7ALG1zy4YyicWbsuOw3azhT4BvPS0_bKJgFayjBeMSxFmWbDmzj39QvWJjm7QMIl5mvfTKWTJMEiA3CJ9XLvk6VCWu4dvePR7MAms-PyR4kLL7FFnBC9ILmEvDUojhFjoBrwNhlwlnEuJY0hYEO9YRgEgWp-Jxph-xo6wkmIe7faZ0kVNziGkGWmA"
+    }
+  ]
+}

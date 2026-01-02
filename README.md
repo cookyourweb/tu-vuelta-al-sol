@@ -2020,3 +2020,37 @@ vercel --prod
 **Última actualización**: 1 Octubre 2025
 **Versión**: 2.1.0
 **Estado**: Fase 2 en progreso - Correcciones UX responsive críticas
+
+---
+
+## 📚 DOCUMENTACIÓN
+
+Toda la documentación del proyecto está organizada en la carpeta `documentacion/`:
+
+### 📂 Estructura
+- **`documentacion/README.md`** - Índice completo de documentación
+- **`documentacion/BUGDEAPIS/`** - Bugs de ProKerala API y soluciones
+- **`documentacion/BUGDEAPIS/GUIA_TESTING_OSCAR.md`** ⭐ - Caso de prueba estándar
+
+### 🧪 Testing con Caso de Oscar
+**SIEMPRE** probar con este caso para verificar cálculos:
+```
+Nombre: Oscar
+Fecha: 25 noviembre 1966, 02:34 AM
+Lugar: Madrid, España
+
+Resultados esperados:
+✅ Ascendente: Virgo 24°
+✅ Medio Cielo: Virgo 23° (NO Géminis)
+✅ Mercurio: Virgo 17°R (NO Escorpio)
+✅ Júpiter: Cáncer 04°R (NO Leo)
+```
+
+Ver guía completa: `documentacion/BUGDEAPIS/GUIA_TESTING_OSCAR.md`
+
+### 🔧 Configuración ProKerala
+- `documentacion/PROKERALA_TROPICAL_CONFIG.md` - Configuración tropical verificada
+- `documentacion/LIMPIAR_CACHE_VEDICO.md` - Limpieza de caché védico
+
+### 🐛 Bugs Conocidos y Corregidos
+Ver: `documentacion/BUGDEAPIS/README.md`

@@ -118,10 +118,12 @@ export async function POST(request: NextRequest) {
     console.log('✅ [DEBUG] Perfil básico creado');
 
     // 🚀 FASE 2: Cálculo dinámico de eventos astrológicos REALES
+    // 📅 PERÍODO: Cumpleaños a cumpleaños (ej: 10 feb 2025 → 10 feb 2026)
+    // ✅ EVENTOS: Lunas, eclipses, retrogradaciones, TODOS los ingresos planetarios
     console.log('🌟 [DEBUG] Calculando eventos astrológicos reales del año solar...');
     const birthDate = new Date(datos_usuario.fecha_nacimiento);
 
-    // Calcular para el próximo año solar (desde próximo cumpleaños)
+    // Calcular próximo cumpleaños (inicio del año solar)
     const now = new Date();
     const nextBirthday = new Date(birthDate);
     nextBirthday.setFullYear(now.getFullYear());
@@ -129,7 +131,7 @@ export async function POST(request: NextRequest) {
       nextBirthday.setFullYear(now.getFullYear() + 1);
     }
 
-    console.log('📅 [DEBUG] Calculando eventos desde:', nextBirthday.toISOString());
+    console.log('📅 [DEBUG] Año solar desde:', nextBirthday.toISOString(), 'hasta:', new Date(nextBirthday.getFullYear() + 1, nextBirthday.getMonth(), nextBirthday.getDate()).toISOString());
     const solarYearEvents = await calculateSolarYearEvents(nextBirthday);
 
     // Transformar eventos a formato esperado por el sistema de interpretación
@@ -175,7 +177,8 @@ export async function POST(request: NextRequest) {
           sign: retro.startSign
         };
       }),
-      ...solarYearEvents.planetaryIngresses.slice(0, 20).map((ingress, idx) => {
+      // ✅ TODOS los ingresos planetarios (sin límite)
+      ...solarYearEvents.planetaryIngresses.map((ingress, idx) => {
         const dateStr = ingress.date instanceof Date ? ingress.date.toISOString().split('T')[0] : String(ingress.date).split('T')[0];
         return {
           id: `ingress_${idx}`,
@@ -195,8 +198,10 @@ export async function POST(request: NextRequest) {
       lunarPhases: solarYearEvents.lunarPhases.length,
       eclipses: solarYearEvents.eclipses.length,
       retrogrades: solarYearEvents.retrogrades.length,
-      ingresses: solarYearEvents.planetaryIngresses.length
+      planetaryIngresses: solarYearEvents.planetaryIngresses.length,
+      total: realEvents.length
     });
+    console.log('🔮 [DEBUG] Eventos incluyen: Mercurio, Venus, Marte, Júpiter, Saturno (TODOS los ingresos de signo + retrogradaciones)');
 
     // 🔒 FASE 3: Control de acceso y preview gratuito
     // TODO: En producción, verificar estado de pago real desde MongoDB

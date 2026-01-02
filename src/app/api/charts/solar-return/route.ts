@@ -133,14 +133,19 @@ async function callProkeralaSolarReturn(birthData: any, returnYear: number) {
     const offset = calculateTimezoneOffset(solarReturnDateStr, birthData.timezone || 'Europe/Madrid');
     const solarReturnDatetime = `${solarReturnDateStr}T${formattedBirthTime}${offset}`;
 
-    // Usar ubicación actual si existe, sino natal
-    const coordinates = birthData.livesInSamePlace !== false && birthData.currentLatitude
+    // ✅ FIX: Usar ubicación ACTUAL si vive en lugar DIFERENTE, sino usar natal
+    // Si livesInSamePlace es false (vive en otro lugar) Y tiene coordenadas actuales → usar actuales
+    // Si livesInSamePlace es true o undefined (vive en mismo lugar) → usar natales
+    const coordinates = birthData.livesInSamePlace === false && birthData.currentLatitude && birthData.currentLongitude
       ? `${birthData.currentLatitude},${birthData.currentLongitude}`
       : `${birthData.latitude},${birthData.longitude}`;
 
     console.log('☀️ Solar Return params:', {
       datetime: solarReturnDatetime,
       coordinates,
+      coordinatesType: birthData.livesInSamePlace === false ? 'CURRENT (different location)' : 'NATAL (same location)',
+      livesInSamePlace: birthData.livesInSamePlace,
+      hasCurrentCoords: !!(birthData.currentLatitude && birthData.currentLongitude),
       year: returnYear
     });
 

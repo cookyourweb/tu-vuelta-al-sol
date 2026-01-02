@@ -175,8 +175,8 @@ PERSONA:
 - Lugar: ${userProfile.birthPlace}
 
 PUNTOS CARDINALES:
-- Ascendente: ${chartData.ascendant.sign} ${chartData.ascendant.degree}°
-- Medio Cielo: ${chartData.midheaven.sign} ${chartData.midheaven.degree}°
+- Ascendente: ${chartData.ascendant?.sign || 'No disponible'} ${chartData.ascendant?.degree || 0}°
+- Medio Cielo: ${chartData.midheaven?.sign || 'No disponible'} ${chartData.midheaven?.degree || 0}°
 
 POSICIONES PLANETARIAS:
 ${formatPlanetsForPrompt(chartData.planets)}
@@ -205,8 +205,8 @@ Responde ÚNICAMENTE con un JSON válido:
   "puntos_fundamentales": {
     "sol": { "signo": "${sun?.sign}", "grado": ${sun?.degree || 0}, "casa": ${sun?.house || 1}, "poder": "[Descripción del poder solar]" },
     "luna": { "signo": "${moon?.sign}", "grado": ${moon?.degree || 0}, "casa": ${moon?.house || 1}, "poder": "[Descripción emocional]" },
-    "ascendente": { "signo": "${chartData.ascendant.sign}", "grado": ${chartData.ascendant.degree}, "casa": 1, "poder": "[Máscara al mundo]" },
-    "medio_cielo": { "signo": "${chartData.midheaven.sign}", "grado": ${chartData.midheaven.degree}, "casa": 10, "poder": "[Vocación]" },
+    "ascendente": { "signo": "${chartData.ascendant?.sign || 'No disponible'}", "grado": ${chartData.ascendant?.degree || 0}, "casa": 1, "poder": "[Máscara al mundo]" },
+    "medio_cielo": { "signo": "${chartData.midheaven?.sign || 'No disponible'}", "grado": ${chartData.midheaven?.degree || 0}, "casa": 10, "poder": "[Vocación]" },
     "nodo_norte": { "signo": "${northNode?.sign || 'No disponible'}", "grado": ${northNode?.degree || 0}, "casa": ${northNode?.house || 1}, "poder": "[Destino evolutivo]" }
   },
 
@@ -248,9 +248,9 @@ Responde ÚNICAMENTE con un JSON válido:
       "mantra": "[Frase sobre inteligencia emocional y autenticidad]"
     },
     "ascendente": {
-      "posicion": "${chartData.ascendant.sign} Casa 1",
+      "posicion": "${chartData.ascendant?.sign || 'No disponible'} Casa 1",
       "que_significa_casa": "[Una línea: 'Casa 1 = tu identidad visible; tu puerta de entrada al mundo; cómo impactas antes de hablar']",
-      "tu_esencia": "[2-3 párrafos POÉTICO-TRANSFORMATIONAL: 'Tu Ascendente es tu primera declaración. Antes de abrir la boca, tu presencia en ${chartData.ascendant.sign} ya está hablando. No es una máscara: es tu forma más instintiva de estar en el mundo. Donde otros se preguntan cómo entrar, tú [acción específica del signo]. Tu presencia es [metáfora]. El mundo te percibe como [característica] y responde con [tipo de feedback]. Perfecto. Usa esa respuesta como retroalimentación...']",
+      "tu_esencia": "[2-3 párrafos POÉTICO-TRANSFORMATIONAL: 'Tu Ascendente es tu primera declaración. Antes de abrir la boca, tu presencia en ${chartData.ascendant?.sign || 'tu signo ascendente'} ya está hablando. No es una máscara: es tu forma más instintiva de estar en el mundo. Donde otros se preguntan cómo entrar, tú [acción específica del signo]. Tu presencia es [metáfora]. El mundo te percibe como [característica] y responde con [tipo de feedback]. Perfecto. Usa esa respuesta como retroalimentación...']",
       "tu_sombra_transformational": "[2-3 líneas: 'A veces puedes sentir que proyectas [percepción] sin querer. No es error: es tu forma de FILTRAR experiencias. Solo atraes lo que puedes metabolizar y transformar...']",
       "tu_regalo_evolutivo": "[3 líneas: 'Tu presencia abre puertas a [tipo de experiencias]. Generas [reacción] en los demás sin esfuerzo. Eres portal hacia [posibilidad]...']",
       "mini_coach": "[3-4 acciones: '• Observa cómo la gente RESPONDE a ti sin que digas nada', '• Usa tu Ascendente conscientemente en [situación]', '• Cuando sientas resistencia externa, pregúntate: ¿qué estoy proyectando sin darme cuenta?']",
@@ -365,7 +365,7 @@ Responde ÚNICAMENTE con un JSON válido:
   },
 
   "integracion_carta": {
-    "hilo_de_oro": "[Párrafo POÉTICO-TRANSFORMATIONAL que UNE todo: 'Tu carta natal no es una sentencia: es un mapa de entrenamiento. Con Sol en ${sun?.sign}, Luna en ${moon?.sign}, y Ascendente ${chartData.ascendant.sign}, tu sistema está diseñado para crecer específicamente a través de [tipo de experiencias]. Las tensiones en tu carta no son defectos de fábrica: son gimnasios específicos. Tu cuadratura entre [X] y [Y] te entrena en [capacidad]. Tu trígono entre [A] y [B] te equipa con [don]. Donde otros ven contradicciones, tu carta revela ESTRATEGIA. Eres [metáfora arquitectónica] construyéndote a través de [proceso]...']",
+    "hilo_de_oro": "[Párrafo POÉTICO-TRANSFORMATIONAL que UNE todo: 'Tu carta natal no es una sentencia: es un mapa de entrenamiento. Con Sol en ${sun?.sign}, Luna en ${moon?.sign}, y Ascendente ${chartData.ascendant?.sign || 'tu signo ascendente'}, tu sistema está diseñado para crecer específicamente a través de [tipo de experiencias]. Las tensiones en tu carta no son defectos de fábrica: son gimnasios específicos. Tu cuadratura entre [X] y [Y] te entrena en [capacidad]. Tu trígono entre [A] y [B] te equipa con [don]. Donde otros ven contradicciones, tu carta revela ESTRATEGIA. Eres [metáfora arquitectónica] construyéndote a través de [proceso]...']",
     "sintesis": "[Frase POÉTICA síntesis: 'Eres [arquetipo] aprendiendo a [verbo transformacional] a través de [área/tema]. Tu carta dice: crecerás más en [situación] que en [situación opuesta]. Y eso está perfecto.']",
     "polaridades": [
       { "polo_a": "[Ej: Tu necesidad de libertad (Urano)]", "polo_b": "[Ej: Tu necesidad de estructura (Saturno)]", "integracion": "[POÉTICO-TRANSFORMATIONAL: 'Esta tensión entre [A] y [B] no es para resolverse: es para DANZAR con ella. A veces necesitarás [polo A] - en momentos de [contexto]. Otras veces, [polo B] - cuando [contexto opuesto]. Tu sabiduría está en saber cuándo activar cuál, no en forzar un balance artificial que ninguno de los dos polos quiere...']" }
@@ -421,7 +421,7 @@ Responde ÚNICAMENTE con un JSON válido:
     "duracion": "10-15 minutos",
     "mejor_momento": "Luna Llena (momento de claridad)",
     "preparacion": ["Espacio tranquilo sin distracciones", "Tu carta natal visible", "Cuaderno para reflexiones honestas"],
-    "texto": "[Texto POÉTICO-TRANSFORMATIONAL de 200-250 palabras: 'Cierra los ojos. Respira profundo tres veces. Tu carta natal no es un destino fijo: es un mapa de cómo creces mejor. Visualiza tu Sol en ${sun?.sign}: esta parte de ti se fortalece cuando [situación específica]. Tu luz brilla más intensamente en [área]. Ahora tu Luna en ${moon?.sign}: tu mundo emocional se nutre con [tipo de experiencia emocional]. No lo evites: permítelo. Tu Ascendente ${chartData.ascendant.sign} es tu puerta al mundo - proyectas [característica] y el mundo responde con [feedback]. Esto es información valiosa. Ahora pregúntate con honestidad amorosa: ¿Dónde estoy creciendo realmente? ¿Qué experiencias estoy evitando que podrían ser mis mejores maestras? ¿Dónde necesito más compromiso conmigo mismo/a? Respira. Siente. No juzgues. Solo observa. Tu carta no te pide perfección: te invita a ser consciente. Abre los ojos cuando estés listo/a. Escribe lo que descubriste.']"
+    "texto": "[Texto POÉTICO-TRANSFORMATIONAL de 200-250 palabras: 'Cierra los ojos. Respira profundo tres veces. Tu carta natal no es un destino fijo: es un mapa de cómo creces mejor. Visualiza tu Sol en ${sun?.sign}: esta parte de ti se fortalece cuando [situación específica]. Tu luz brilla más intensamente en [área]. Ahora tu Luna en ${moon?.sign}: tu mundo emocional se nutre con [tipo de experiencia emocional]. No lo evites: permítelo. Tu Ascendente ${chartData.ascendant?.sign || 'tu signo ascendente'} es tu puerta al mundo - proyectas [característica] y el mundo responde con [feedback]. Esto es información valiosa. Ahora pregúntate con honestidad amorosa: ¿Dónde estoy creciendo realmente? ¿Qué experiencias estoy evitando que podrían ser mis mejores maestras? ¿Dónde necesito más compromiso conmigo mismo/a? Respira. Siente. No juzgues. Solo observa. Tu carta no te pide perfección: te invita a ser consciente. Abre los ojos cuando estés listo/a. Escribe lo que descubriste.']"
   },
 
   "datos_para_agenda": {
@@ -437,14 +437,14 @@ Responde ÚNICAMENTE con un JSON válido:
     },
     "dias_poder": [
       { "cuando": "Luna transita ${sun?.sign}", "que_hacer": "[Actividades de poder]", "que_evitar": "[Qué evitar]" },
-      { "cuando": "Luna transita ${chartData.ascendant.sign}", "que_hacer": "[Actividades]", "que_evitar": "[Evitar]" }
+      { "cuando": "Luna transita ${chartData.ascendant?.sign || 'tu Ascendente'}", "que_hacer": "[Actividades]", "que_evitar": "[Evitar]" }
     ],
     "advertencias_cosmicas": [
       { "situacion": "Mercurio Retrógrado", "como_afecta": "[Específico para Mercurio en ${mercury?.sign}]", "precauciones": "[Cuidar]" }
     ]
   },
 
-  "declaracion_poder_final": "[Declaración POÉTICA Y EMPODERADORA de 5-6 líneas en primera persona: 'Mi carta natal no me limita: me revela. Con Sol en ${sun?.sign}, Luna en ${moon?.sign}, y Ascendente ${chartData.ascendant.sign}, mi sistema está diseñado para crecer a través de [tipo de experiencias]. Busco conscientemente experiencias que me desafían y fortalecen. Los desafíos en [área] me enseñan y me construyen. Estoy comprometido/a con mi propia evolución. Este es mi mapa de crecimiento. Soy [metáfora] que se fortalece con cada experiencia consciente.']",
+  "declaracion_poder_final": "[Declaración POÉTICA Y EMPODERADORA de 5-6 líneas en primera persona: 'Mi carta natal no me limita: me revela. Con Sol en ${sun?.sign}, Luna en ${moon?.sign}, y Ascendente ${chartData.ascendant?.sign || 'mi signo ascendente'}, mi sistema está diseñado para crecer a través de [tipo de experiencias]. Busco conscientemente experiencias que me desafían y fortalecen. Los desafíos en [área] me enseñan y me construyen. Estoy comprometido/a con mi propia evolución. Este es mi mapa de crecimiento. Soy [metáfora] que se fortalece con cada experiencia consciente.']",
 
   "mantra_personal": "[Mantra POÉTICO Y EMPODERADOR - inspirador y práctico: 'Crezco a través de [experiencia específica del área]. Los desafíos en [contexto] me fortalecen. Abrazo el cambio porque es mi forma de evolucionar.']"
 }
