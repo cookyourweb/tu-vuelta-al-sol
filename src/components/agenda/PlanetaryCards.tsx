@@ -8,39 +8,59 @@ interface PlanetaryCard {
   planeta: string;
   simbolo: string;
   quien_eres_natal: {
+    titulo?: string;
     posicion_completa: string;
     caracteristicas: string[];
     superpoder_natal: string;
   };
-  transito_activo_este_anio: {
+  que_se_activa_este_anio: {
+    titulo?: string;
+    periodo: string; // "marzo 2025 – marzo 2026"
     posicion_completa: string;
-    duracion: string;
-    que_pide: string[];
+    duracion_texto: string; // "Todo el año solar, no es puntual"
+    introduccion: string;
+    este_anio: string[];
   };
-  cruce_natal_mas_transito: {
-    tu_natal: string;
-    este_anio: string;
+  cruce_real: {
+    titulo?: string;
+    tu_naturaleza: string;
+    este_anio_pide: string;
     el_conflicto: string;
-    la_solucion: string;
+    la_clave: string;
   };
-  reglas_del_anio: string[];
-  como_afecta_a_eventos: {
-    lunas_nuevas: string;
-    lunas_llenas: string;
-    retrogradaciones: string;
-    eclipses: string;
+  reglas_del_anio: {
+    titulo?: string;
+    reglas: string[];
+    entrenamiento_anual: string;
   };
-  sombra_a_evitar: string[];
-  ejercicio_anual: {
-    titulo: string;
-    descripcion: string;
-    preguntas: string[];
+  como_se_activa_segun_momento: {
+    titulo?: string;
+    introduccion?: string;
+    en_lunas_nuevas: string;
+    en_lunas_llenas: string;
+    durante_retrogradaciones: string;
+    durante_eclipses: string;
   };
-  apoyo_fisico: Array<{
-    tipo: string;
-    elemento: string;
-    proposito: string;
-  }>;
+  sombras_a_vigilar: {
+    titulo?: string;
+    sombras: string[];
+    equilibrio: string;
+  };
+  ritmo_de_trabajo: {
+    titulo?: string;
+    frecuencia: string;
+    ejercicio_mensual: string;
+    preguntas_mensuales: string[];
+  };
+  apoyo_fisico: {
+    titulo?: string;
+    nota?: string;
+    items: Array<{
+      tipo: string;
+      elemento: string;
+      proposito: string;
+    }>;
+  };
   frase_ancla_del_anio: string;
   generatedAt?: Date;
   cached?: boolean;
@@ -189,7 +209,10 @@ export default function PlanetaryCards() {
                 <div className="text-left">
                   <h3 className="text-xl font-bold text-white">{card.planeta.toUpperCase()} DEL AÑO</h3>
                   <p className="text-purple-200 text-sm">
-                    {card.quien_eres_natal.posicion_completa} → {card.transito_activo_este_anio.posicion_completa}
+                    {card.quien_eres_natal.posicion_completa} → {card.que_se_activa_este_anio.posicion_completa}
+                  </p>
+                  <p className="text-yellow-300 text-xs mt-1">
+                    📅 {card.que_se_activa_este_anio.periodo}
                   </p>
                 </div>
               </div>
@@ -223,15 +246,18 @@ export default function PlanetaryCards() {
                   </p>
                 </div>
 
-                {/* 🌍 TRÁNSITO ACTIVO ESTE AÑO */}
+                {/* 🌍 QUÉ SE ACTIVA ESTE AÑO */}
                 <div className="border-t border-purple-400/20 pt-6">
                   <h4 className="text-lg font-semibold text-blue-100 mb-3 flex items-center gap-2">
-                    <span>🌍</span> TRÁNSITO ACTIVO ESTE AÑO
+                    <span>🌍</span> QUÉ SE ACTIVA ESTE AÑO
                   </h4>
-                  <p className="text-blue-300 font-semibold mb-2">{card.transito_activo_este_anio.posicion_completa}</p>
-                  <p className="text-blue-200 text-sm mb-3">Duración: {card.transito_activo_este_anio.duracion}</p>
+                  <p className="text-yellow-300 font-semibold mb-2 text-sm">({card.que_se_activa_este_anio.periodo})</p>
+                  <p className="text-blue-300 font-semibold mb-2">{card.que_se_activa_este_anio.posicion_completa}</p>
+                  <p className="text-blue-200 text-sm mb-3 italic">{card.que_se_activa_este_anio.duracion_texto}</p>
+                  <p className="text-white mb-3 leading-relaxed">{card.que_se_activa_este_anio.introduccion}</p>
+                  <p className="text-gray-300 text-sm mb-2 font-semibold">Este año:</p>
                   <ul className="space-y-1 text-gray-200">
-                    {card.transito_activo_este_anio.que_pide.map((p, i) => (
+                    {card.que_se_activa_este_anio.este_anio.map((p, i) => (
                       <li key={i} className="flex items-start gap-2">
                         <span className="text-blue-400 mt-1">→</span>
                         <span>{p}</span>
@@ -240,17 +266,17 @@ export default function PlanetaryCards() {
                   </ul>
                 </div>
 
-                {/* 🔄 CRUCE: NATAL + TRÁNSITO */}
+                {/* 🔄 CRUCE REAL */}
                 <div className="border-t border-purple-400/20 pt-6 bg-gradient-to-r from-orange-900/20 to-red-900/20 rounded-lg p-4">
                   <h4 className="text-lg font-semibold text-orange-100 mb-4 flex items-center gap-2">
-                    <span>🔄</span> CRUCE: TU NATAL + TRÁNSITO DEL AÑO
+                    <span>🔄</span> CRUCE REAL: TU BASE + EL AÑO
                   </h4>
                   <div className="space-y-3 text-gray-200">
-                    <p><strong className="text-orange-200">Tu natal:</strong> {card.cruce_natal_mas_transito.tu_natal}</p>
-                    <p><strong className="text-orange-200">Este año:</strong> {card.cruce_natal_mas_transito.este_anio}</p>
-                    <p><strong className="text-red-200">El conflicto:</strong> {card.cruce_natal_mas_transito.el_conflicto}</p>
+                    <p><strong className="text-orange-200">Tu naturaleza:</strong> {card.cruce_real.tu_naturaleza}</p>
+                    <p><strong className="text-orange-200">Este año pide:</strong> {card.cruce_real.este_anio_pide}</p>
+                    <p><strong className="text-red-200">El conflicto:</strong> {card.cruce_real.el_conflicto}</p>
                     <p className="bg-emerald-900/30 rounded-lg p-3">
-                      <strong className="text-emerald-200">La solución:</strong> {card.cruce_natal_mas_transito.la_solucion}
+                      <strong className="text-emerald-200">La clave:</strong> {card.cruce_real.la_clave}
                     </p>
                   </div>
                 </div>
@@ -258,65 +284,78 @@ export default function PlanetaryCards() {
                 {/* 🎯 REGLAS DEL AÑO */}
                 <div className="border-t border-purple-400/20 pt-6">
                   <h4 className="text-lg font-semibold text-yellow-100 mb-3 flex items-center gap-2">
-                    <span>🎯</span> REGLAS DEL AÑO CON {card.planeta.toUpperCase()}
+                    <span>🎯</span> REGLAS DE {card.planeta.toUpperCase()} PARA TODO EL AÑO
                   </h4>
-                  <ol className="space-y-2 text-gray-200 list-decimal list-inside">
-                    {card.reglas_del_anio.map((regla, i) => (
-                      <li key={i} className="leading-relaxed">{regla}</li>
+                  <ul className="space-y-2 text-gray-200 mb-4">
+                    {card.reglas_del_anio.reglas.map((regla, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <span className="text-yellow-400 mt-1">→</span>
+                        <span className="leading-relaxed">{regla}</span>
+                      </li>
                     ))}
-                  </ol>
+                  </ul>
+                  <p className="text-yellow-200 italic bg-yellow-900/20 rounded-lg p-3">
+                    👉 {card.reglas_del_anio.entrenamiento_anual}
+                  </p>
                 </div>
 
-                {/* 💡 CÓMO AFECTA A EVENTOS */}
+                {/* ⏱️ CÓMO SE ACTIVA SEGÚN EL MOMENTO */}
                 <div className="border-t border-purple-400/20 pt-6 bg-gradient-to-r from-cyan-900/20 to-blue-900/20 rounded-lg p-4">
-                  <h4 className="text-lg font-semibold text-cyan-100 mb-4 flex items-center gap-2">
-                    <span>💡</span> CÓMO ESTE TRÁNSITO AFECTA A TODOS LOS EVENTOS DEL AÑO
+                  <h4 className="text-lg font-semibold text-cyan-100 mb-2 flex items-center gap-2">
+                    <span>⏱️</span> CÓMO SE ACTIVA {card.planeta.toUpperCase()} SEGÚN EL MOMENTO
                   </h4>
+                  {card.como_se_activa_segun_momento.introduccion && (
+                    <p className="text-cyan-200 text-sm mb-4 italic">{card.como_se_activa_segun_momento.introduccion}</p>
+                  )}
                   <div className="space-y-3 text-gray-200">
                     <div>
-                      <p className="font-semibold text-cyan-200 mb-1">🌑 Cuando llegue una Luna Nueva:</p>
-                      <p className="pl-4">{card.como_afecta_a_eventos.lunas_nuevas}</p>
+                      <p className="font-semibold text-cyan-200 mb-1">🌑 En cada Luna Nueva</p>
+                      <p className="pl-4">{card.como_se_activa_segun_momento.en_lunas_nuevas}</p>
                     </div>
                     <div>
-                      <p className="font-semibold text-cyan-200 mb-1">🌕 Cuando llegue una Luna Llena:</p>
-                      <p className="pl-4">{card.como_afecta_a_eventos.lunas_llenas}</p>
+                      <p className="font-semibold text-cyan-200 mb-1">🌕 En cada Luna Llena</p>
+                      <p className="pl-4">{card.como_se_activa_segun_momento.en_lunas_llenas}</p>
                     </div>
                     <div>
-                      <p className="font-semibold text-cyan-200 mb-1">↩️ Cuando llegue una retrogradación:</p>
-                      <p className="pl-4">{card.como_afecta_a_eventos.retrogradaciones}</p>
+                      <p className="font-semibold text-cyan-200 mb-1">↩️ Durante retrogradaciones</p>
+                      <p className="pl-4">{card.como_se_activa_segun_momento.durante_retrogradaciones}</p>
                     </div>
                     <div>
-                      <p className="font-semibold text-cyan-200 mb-1">🌘 Cuando llegue un eclipse:</p>
-                      <p className="pl-4">{card.como_afecta_a_eventos.eclipses}</p>
+                      <p className="font-semibold text-cyan-200 mb-1">🌘 Durante eclipses</p>
+                      <p className="pl-4">{card.como_se_activa_segun_momento.durante_eclipses}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* ⚠️ SOMBRA A EVITAR */}
+                {/* ⚠️ SOMBRAS A VIGILAR */}
                 <div className="border-t border-purple-400/20 pt-6">
                   <h4 className="text-lg font-semibold text-red-100 mb-3 flex items-center gap-2">
-                    <span>⚠️</span> SOMBRA A EVITAR CON {card.planeta.toUpperCase()} ESTE AÑO
+                    <span>⚠️</span> SOMBRAS A VIGILAR ESTE AÑO
                   </h4>
-                  <ul className="space-y-2 text-gray-200">
-                    {card.sombra_a_evitar.map((sombra, i) => (
+                  <ul className="space-y-2 text-gray-200 mb-4">
+                    {card.sombras_a_vigilar.sombras.map((sombra, i) => (
                       <li key={i} className="flex items-start gap-2">
                         <span className="text-red-400 mt-1">{i + 1}.</span>
                         <span>{sombra}</span>
                       </li>
                     ))}
                   </ul>
+                  <p className="text-emerald-200 italic bg-emerald-900/20 rounded-lg p-3">
+                    👉 {card.sombras_a_vigilar.equilibrio}
+                  </p>
                 </div>
 
-                {/* ✨ EJERCICIO ANUAL */}
+                {/* ✨ RITMO DE TRABAJO */}
                 <div className="border-t border-purple-400/20 pt-6 bg-gradient-to-r from-green-900/20 to-emerald-900/20 rounded-lg p-4">
-                  <h4 className="text-lg font-semibold text-green-100 mb-3 flex items-center gap-2">
-                    <span>✨</span> {card.ejercicio_anual.titulo}
+                  <h4 className="text-lg font-semibold text-green-100 mb-2 flex items-center gap-2">
+                    <span>✨</span> RITMO DE TRABAJO CON {card.planeta.toUpperCase()} (agenda)
                   </h4>
-                  <p className="text-gray-200 mb-4">{card.ejercicio_anual.descripcion}</p>
+                  <p className="text-green-200 text-sm mb-3">Frecuencia: {card.ritmo_de_trabajo.frecuencia}</p>
+                  <p className="text-gray-200 mb-4">{card.ritmo_de_trabajo.ejercicio_mensual}</p>
                   <div className="space-y-2">
                     <p className="font-semibold text-green-200">Preguntas mensuales:</p>
                     <ol className="space-y-2 text-gray-200 list-decimal list-inside pl-2">
-                      {card.ejercicio_anual.preguntas.map((pregunta, i) => (
+                      {card.ritmo_de_trabajo.preguntas_mensuales.map((pregunta, i) => (
                         <li key={i} className="leading-relaxed">{pregunta}</li>
                       ))}
                     </ol>
@@ -325,13 +364,16 @@ export default function PlanetaryCards() {
 
                 {/* 🔮 APOYO FÍSICO */}
                 <div className="border-t border-purple-400/20 pt-6">
-                  <h4 className="text-lg font-semibold text-violet-100 mb-3 flex items-center gap-2">
-                    <span>🔮</span> APOYO FÍSICO PARA {card.planeta.toUpperCase()} ESTE AÑO
+                  <h4 className="text-lg font-semibold text-violet-100 mb-2 flex items-center gap-2">
+                    <span>🔮</span> APOYO FÍSICO (conexión tienda futura)
                   </h4>
+                  {card.apoyo_fisico.nota && (
+                    <p className="text-violet-200 text-sm mb-3 italic">{card.apoyo_fisico.nota}</p>
+                  )}
                   <div className="space-y-3">
-                    {card.apoyo_fisico.map((apoyo, i) => (
+                    {card.apoyo_fisico.items.map((apoyo, i) => (
                       <div key={i} className="flex items-start gap-3 text-white">
-                        <span className="text-xl">{apoyo.tipo}</span>
+                        <span className="text-xl">{apoyo.tipo.split(' ')[0]}</span>
                         <div>
                           <span className="font-semibold text-violet-200">{apoyo.elemento}</span>
                           <span className="text-gray-300"> → {apoyo.proposito}</span>

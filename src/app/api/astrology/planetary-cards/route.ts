@@ -125,6 +125,7 @@ export async function POST(request: NextRequest) {
     const userName = user?.fullName || user?.name || birthData?.fullName || 'Usuario';
     const userAge = user?.age || calculateAge(user?.birthDate || birthData?.birthDate);
     const userBirthPlace = user?.birthPlace || birthData?.birthPlace || 'Desconocido';
+    const birthDate = user?.birthDate || birthData?.birthDate || new Date().toISOString().split('T')[0];
 
     console.log(`👤 User: ${userName}, ${userAge} años`);
 
@@ -146,6 +147,7 @@ export async function POST(request: NextRequest) {
         userName,
         userAge,
         userBirthPlace,
+        birthDate, // Para calcular fechas del año solar
         planetName,
         natalChart: natalChart.natalChart || natalChart,
         solarReturn: solarReturn.interpretation || solarReturn,
