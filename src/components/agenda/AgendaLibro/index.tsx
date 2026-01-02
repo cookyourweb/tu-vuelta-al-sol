@@ -11,6 +11,7 @@ import { Printer, X } from 'lucide-react';
 import { PortadaPersonalizada, PaginaIntencion } from './PortalEntrada';
 import { CartaBienvenida, TemaCentralAnio, LoQueVieneAMover, LoQuePideSoltar, PaginaIntencionAnual } from './TuAnioTuViaje';
 import { EsenciaNatal, NodoNorte, NodoSur, PlanetasDominantes, PatronesEmocionales } from './SoulChart';
+import { QueEsRetornoSolar, AscendenteAnio, SolRetorno, LunaRetorno, EjesDelAnio, EjesDelAnio2, IntegracionEjes, RitualCumpleanos, MantraAnual } from './RetornoSolar';
 
 interface AgendaLibroProps {
   onClose: () => void;
@@ -82,6 +83,17 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
         <PlanetasDominantes />
         <PatronesEmocionales />
 
+        {/* 4. RETORNO SOLAR */}
+        <QueEsRetornoSolar />
+        <AscendenteAnio />
+        <SolRetorno />
+        <LunaRetorno />
+        <EjesDelAnio />
+        <EjesDelAnio2 />
+        <IntegracionEjes />
+        <RitualCumpleanos />
+        <MantraAnual />
+
         {/* Placeholder para contenido futuro */}
         <div className="print-page bg-white p-10 text-center flex items-center justify-center">
           <div>
@@ -95,7 +107,7 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
               <li>✅ Portal de Entrada</li>
               <li>✅ Tu Año, Tu Viaje</li>
               <li>✅ Soul Chart</li>
-              <li>⏳ Retorno Solar</li>
+              <li>✅ Retorno Solar</li>
               <li>⏳ Ejemplo Enero 2026</li>
               <li>⏳ Meses 2-12</li>
               <li>⏳ Terapias Creativas</li>
