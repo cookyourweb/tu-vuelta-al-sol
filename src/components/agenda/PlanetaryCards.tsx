@@ -22,6 +22,7 @@ interface PlanetaryCard {
     introduccion: string;
     este_anio: string[];
     integracion_signo_casa?: string;
+    contraste_con_natal?: string; // "Normalmente..., pero este ciclo..."
   };
   cruce_real: {
     titulo?: string;
@@ -284,6 +285,14 @@ export default function PlanetaryCards() {
                     <p className="text-blue-200 text-sm leading-relaxed bg-blue-900/20 rounded-lg p-3 border-l-4 border-blue-400 mt-3">
                       🔗 {card.que_se_activa_este_anio.integracion_signo_casa}
                     </p>
+                  )}
+                  {card.que_se_activa_este_anio.contraste_con_natal && (
+                    <div className="mt-4 bg-gradient-to-r from-orange-900/30 to-amber-900/30 rounded-lg p-4 border-l-4 border-amber-500">
+                      <p className="text-amber-200 font-semibold mb-2">⚡ El contraste clave del año:</p>
+                      <p className="text-gray-200 text-sm leading-relaxed italic">
+                        {card.que_se_activa_este_anio.contraste_con_natal}
+                      </p>
+                    </div>
                   )}
                 </div>
 
