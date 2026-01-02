@@ -12,6 +12,7 @@ interface PlanetaryCard {
     posicion_completa: string;
     caracteristicas: string[];
     superpoder_natal: string;
+    diferenciador_clave?: string;
   };
   que_se_activa_este_anio: {
     titulo?: string;
@@ -20,13 +21,21 @@ interface PlanetaryCard {
     duracion_texto: string; // "Todo el año solar, no es puntual"
     introduccion: string;
     este_anio: string[];
+    integracion_signo_casa?: string;
   };
   cruce_real: {
     titulo?: string;
-    tu_naturaleza: string;
-    este_anio_pide: string;
-    el_conflicto: string;
-    la_clave: string;
+    // Campos antiguos (compatibilidad hacia atrás)
+    tu_naturaleza?: string;
+    este_anio_pide?: string;
+    el_conflicto?: string;
+    la_clave?: string;
+    // Campos nuevos (calidad mejorada)
+    natal_especifico?: string;
+    sr_especifico?: string;
+    contraste_directo?: string;
+    aprendizaje_del_anio?: string;
+    frase_potente_cierre?: string;
   };
   reglas_del_anio: {
     titulo?: string;
@@ -51,6 +60,8 @@ interface PlanetaryCard {
     frecuencia: string;
     ejercicio_mensual: string;
     preguntas_mensuales: string[];
+    claves_practicas_diarias?: string[];
+    ritmos_semanales?: string;
   };
   apoyo_fisico: {
     titulo?: string;
@@ -241,9 +252,14 @@ export default function PlanetaryCards() {
                       </li>
                     ))}
                   </ul>
-                  <p className="text-white italic bg-purple-900/30 rounded-lg p-3">
+                  <p className="text-white italic bg-purple-900/30 rounded-lg p-3 mb-3">
                     {card.quien_eres_natal.superpoder_natal}
                   </p>
+                  {card.quien_eres_natal.diferenciador_clave && (
+                    <p className="text-purple-200 text-sm leading-relaxed bg-purple-800/20 rounded-lg p-3 border-l-4 border-purple-400">
+                      💡 {card.quien_eres_natal.diferenciador_clave}
+                    </p>
+                  )}
                 </div>
 
                 {/* 🌍 QUÉ SE ACTIVA ESTE AÑO */}
@@ -264,6 +280,11 @@ export default function PlanetaryCards() {
                       </li>
                     ))}
                   </ul>
+                  {card.que_se_activa_este_anio.integracion_signo_casa && (
+                    <p className="text-blue-200 text-sm leading-relaxed bg-blue-900/20 rounded-lg p-3 border-l-4 border-blue-400 mt-3">
+                      🔗 {card.que_se_activa_este_anio.integracion_signo_casa}
+                    </p>
+                  )}
                 </div>
 
                 {/* 🔄 CRUCE REAL */}
@@ -272,12 +293,44 @@ export default function PlanetaryCards() {
                     <span>🔄</span> CRUCE REAL: TU BASE + EL AÑO
                   </h4>
                   <div className="space-y-3 text-gray-200">
-                    <p><strong className="text-orange-200">Tu naturaleza:</strong> {card.cruce_real.tu_naturaleza}</p>
-                    <p><strong className="text-orange-200">Este año pide:</strong> {card.cruce_real.este_anio_pide}</p>
-                    <p><strong className="text-red-200">El conflicto:</strong> {card.cruce_real.el_conflicto}</p>
-                    <p className="bg-emerald-900/30 rounded-lg p-3">
-                      <strong className="text-emerald-200">La clave:</strong> {card.cruce_real.la_clave}
-                    </p>
+                    {/* Formato nuevo (mejorado) */}
+                    {card.cruce_real.natal_especifico && (
+                      <p className="bg-purple-900/20 rounded-lg p-3">
+                        <strong className="text-purple-200">Natal:</strong> {card.cruce_real.natal_especifico}
+                      </p>
+                    )}
+                    {card.cruce_real.sr_especifico && (
+                      <p className="bg-blue-900/20 rounded-lg p-3">
+                        <strong className="text-blue-200">Solar Return:</strong> {card.cruce_real.sr_especifico}
+                      </p>
+                    )}
+                    {card.cruce_real.contraste_directo && (
+                      <p className="bg-orange-900/30 rounded-lg p-3 border-l-4 border-orange-400">
+                        <strong className="text-orange-200">⚡ Contraste:</strong> {card.cruce_real.contraste_directo}
+                      </p>
+                    )}
+                    {card.cruce_real.aprendizaje_del_anio && (
+                      <p className="bg-yellow-900/20 rounded-lg p-3">
+                        <strong className="text-yellow-200">🎯 Aprendizaje del año:</strong> {card.cruce_real.aprendizaje_del_anio}
+                      </p>
+                    )}
+                    {card.cruce_real.frase_potente_cierre && (
+                      <p className="bg-emerald-900/30 rounded-lg p-4 border-2 border-emerald-500/30 text-center">
+                        <strong className="text-emerald-200 text-lg italic">"{card.cruce_real.frase_potente_cierre}"</strong>
+                      </p>
+                    )}
+
+                    {/* Formato antiguo (compatibilidad hacia atrás) */}
+                    {!card.cruce_real.natal_especifico && card.cruce_real.tu_naturaleza && (
+                      <>
+                        <p><strong className="text-orange-200">Tu naturaleza:</strong> {card.cruce_real.tu_naturaleza}</p>
+                        <p><strong className="text-orange-200">Este año pide:</strong> {card.cruce_real.este_anio_pide}</p>
+                        <p><strong className="text-red-200">El conflicto:</strong> {card.cruce_real.el_conflicto}</p>
+                        <p className="bg-emerald-900/30 rounded-lg p-3">
+                          <strong className="text-emerald-200">La clave:</strong> {card.cruce_real.la_clave}
+                        </p>
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -352,8 +405,33 @@ export default function PlanetaryCards() {
                   </h4>
                   <p className="text-green-200 text-sm mb-3">Frecuencia: {card.ritmo_de_trabajo.frecuencia}</p>
                   <p className="text-gray-200 mb-4">{card.ritmo_de_trabajo.ejercicio_mensual}</p>
+
+                  {/* Claves prácticas diarias */}
+                  {card.ritmo_de_trabajo.claves_practicas_diarias && card.ritmo_de_trabajo.claves_practicas_diarias.length > 0 && (
+                    <div className="mb-4 bg-green-800/20 rounded-lg p-3">
+                      <p className="font-semibold text-green-200 mb-2">🔑 Claves prácticas diarias:</p>
+                      <ul className="space-y-2 text-gray-200">
+                        {card.ritmo_de_trabajo.claves_practicas_diarias.map((clave, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <span className="text-green-400 mt-1">✓</span>
+                            <span className="leading-relaxed">{clave}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Ritmos semanales */}
+                  {card.ritmo_de_trabajo.ritmos_semanales && (
+                    <div className="mb-4 bg-emerald-800/20 rounded-lg p-3 border-l-4 border-emerald-400">
+                      <p className="font-semibold text-emerald-200 mb-2">📅 Ritmos semanales:</p>
+                      <p className="text-gray-200 text-sm leading-relaxed">{card.ritmo_de_trabajo.ritmos_semanales}</p>
+                    </div>
+                  )}
+
+                  {/* Preguntas mensuales */}
                   <div className="space-y-2">
-                    <p className="font-semibold text-green-200">Preguntas mensuales:</p>
+                    <p className="font-semibold text-green-200">❓ Preguntas mensuales:</p>
                     <ol className="space-y-2 text-gray-200 list-decimal list-inside pl-2">
                       {card.ritmo_de_trabajo.preguntas_mensuales.map((pregunta, i) => (
                         <li key={i} className="leading-relaxed">{pregunta}</li>
