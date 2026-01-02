@@ -57,7 +57,7 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
       </div>
 
       {/* Contenido del libro */}
-      <div ref={printRef} className="container mx-auto py-8 space-y-0 print:p-0">
+      <div ref={printRef} className="container mx-auto pt-20 pb-8 lg:pt-28 space-y-0 print:p-0">
 
         {/* 1. PORTAL DE ENTRADA */}
         <PortadaPersonalizada
