@@ -99,9 +99,28 @@ export function generatePlanetaryCardPrompt(data: PlanetaryCardPromptData): stri
 ## 📚 TU MISIÓN:
 Crear una FICHA PLANETARIA ANUAL para ${userName} que explique cómo ${planetName} modula TODOS los eventos de su año.
 
+**ARQUITECTURA CONCEPTUAL OBLIGATORIA:**
+
+🧬 **NATAL** = IDENTIDAD (quién eres siempre)
+   → Describe cómo funciona ${userName}, no qué es ${planetName}
+   → NO expliques astrología, describe experiencia directa
+
+🌍 **RETORNO SOLAR** = CLIMA ANUAL (dónde se canaliza tu energía este año)
+   → NO es nueva personalidad, es ÁREA donde fluye tu energía
+   → Lenguaje: "Este año tu energía se canaliza en...", NO "Este es un año de..."
+   → Deja claro: "aunque no sea lo habitual en ti"
+
+🔄 **CRUCE** = AJUSTE CONSCIENTE (cómo tu base + clima anual = experiencia)
+   → OBLIGATORIO: "Normalmente [natal], pero este año [SR]... La diferencia: [entonces]"
+   → Este es el oro de la ficha
+
+📅 **AGENDA** = ACCIÓN CONCRETA (qué haces hoy)
+   → Esto NO va aquí, va en eventos diarios del calendario
+   → Aquí: lenguaje narrativo observacional, NO listas "HAZ/EVITA"
+
 **IMPORTANTE:**
-- Esta ficha es un "manual de uso del año"
-- NO es un evento puntual, es un CONTEXTO que dura todo el año
+- Esta ficha es un "manual de uso del año" (CONTEXTO), no una acción puntual
+- NO es un evento puntual, es el TELÓN DE FONDO que dura todo el año
 - Explica cómo este tránsito largo TIÑE cada Luna Nueva, cada retrogradación, cada eclipse
 - Lenguaje directo, sin tecnicismos, aplicable
 
@@ -183,18 +202,18 @@ Responde ÚNICAMENTE con JSON válido en español (sin markdown, sin backticks, 
   },
 
   "que_se_activa_este_anio": {
-    "titulo": "🌍 QUÉ SE ACTIVA ESTE AÑO",
+    "titulo": "🌍 QUÉ SE ACTIVA ESTE AÑO (Clima anual, no nueva personalidad)",
     "periodo": "${solarYearPeriod}",
     "posicion_completa": "${planetName} en ${srSign} Casa ${srHouse}",
     "duracion_texto": "Todo el año solar, no es puntual",
-    "introduccion": "String de 2-3 frases NARRATIVAS (no imperativas). Lenguaje observacional. Ejemplo: 'Durante todo este año, la vida te empuja a [acción]. No se trata de cambiar quién eres, sino de poner tu energía en [área].'",
+    "introduccion": "String de 2-3 frases NARRATIVAS sobre DÓNDE se canaliza tu energía este año. ❌ 'Este es un año marcado por creatividad desbordante' (nueva personalidad) ✅ 'Este año tu energía [natal] se canaliza en [SR], aunque no sea lo habitual en ti' (clima anual). Ejemplo: 'Durante todo este año, tu acción natural se canaliza hacia la creatividad y autoexpresión, áreas que no siempre priorizas.'",
     "este_anio": [
-      "String: Qué activa 1 (INTEGRA ${srSign} + Casa ${srHouse}). ❌ NO listas imperativas. ✅ Descripción narrativa",
-      "String: Qué activa 2 (específico al SIGNO ${srSign}) en tono observacional",
-      "String: Qué activa 3 (específico a la CASA ${srHouse}) sin 'debes' ni 'evita'"
+      "String: DÓNDE se canaliza 1 (INTEGRA ${srSign} + Casa ${srHouse}). ❌ NO nuevas cualidades personales. ✅ Descripción de clima/área activada. Ejemplo: 'Tu energía se dirige a proyectos creativos'",
+      "String: DÓNDE se canaliza 2 (específico al SIGNO ${srSign}). Tono: 'Este año ${planetName} opera desde ${srSign}'",
+      "String: DÓNDE se canaliza 3 (específico a CASA ${srHouse}). Tono: 'Se activa el área de ${srHouseMeaning}'"
     ],
-    "integracion_signo_casa": "String de 1-2 frases: Al estar en ${srSign}, [cualidad del signo] se manifiesta en el área de ${srHouseMeaning}. ❌ Sin teoría general. ✅ Aplicado a la experiencia.",
-    "contraste_con_natal": "String de 2-3 frases: ESTE ES EL CRUCE CLAVE. Formato: 'Normalmente [cómo funciona el natal], pero este ciclo te pide [qué cambia en SR]. La diferencia este año es clara: [contraste explícito]. Ejemplo: 'normalmente expresas lo que percibes casi al instante, pero este ciclo te pide no decirlo todo todavía. No porque no sea válido, sino porque está madurando en capas más profundas.'"
+    "integracion_signo_casa": "String de 1-2 frases sobre cómo se manifiesta. ❌ Sin teoría general. ✅ Aplicado a experiencia. Ejemplo: 'Desde ${srSign}, tu ${planetName} se expresa en ${srHouseMeaning}, lo que implica...'",
+    "contraste_con_natal": "String de 2-3 frases: CRUCE OBLIGATORIO. Formato ESTRICTO: 'Normalmente [cómo actúas según natal], pero este año tu energía se canaliza en [área SR], aunque no sea lo habitual en ti. La diferencia este año es clara: [entonces qué pasa con este cambio de canal]'. Ejemplo: 'Normalmente actúas con paciencia y método en comunicación (Tauro Casa 3), pero este año tu energía se canaliza en creatividad y autoexpresión (Leo Casa 5), aunque no sea lo habitual en ti. La diferencia: pasar de comunicar con seguridad a exponerte creativamente.'"
   },
 
   "cruce_real": {
@@ -285,8 +304,9 @@ Responde ÚNICAMENTE con JSON válido en español (sin markdown, sin backticks, 
 1. **NO REPETIR TEXTO** - Cada sección debe tener información única. Si repites una idea, reformúlala completamente.
 2. **NO SER GENÉRICO** - "${natalSign} Casa ${natalHouse}" es DIFERENTE a "${natalSign} Casa 7". ESPECIFICA cómo se manifiesta la combinación SIGNO + CASA.
 3. **NO OLVIDAR EL SIGNO DEL SR** - "${srSign} Casa ${srHouse}" debe integrar AMBAS cualidades. No solo describas la casa.
-4. **NO EXPLICAR ASTROLOGÍA** - ❌ "Mercurio rige nuestra forma de pensar..." ❌ "Piscis, un signo de agua mutable..." ✅ "Tu forma de pensar no sigue lógica rígida"
-5. **NO LISTAS HAZ/EVITA EN INTERPRETACIÓN BASE** - Guarda listas imperativas para agenda diaria. Aquí: lenguaje narrativo y observacional. ❌ "Haz X" "Evita Y" ✅ "La vida te empuja a..." "Este año pide..."
+4. **NO EXPLICAR ASTROLOGÍA EN NATAL** - ❌ "Mercurio rige nuestra forma de pensar..." ❌ "Piscis, un signo de agua mutable..." ✅ "Tu forma de pensar no sigue lógica rígida" ✅ "Naturalmente tiendes a..."
+5. **NO TRATAR SR COMO NUEVA PERSONALIDAD** - ❌ "Este es un año marcado por creatividad desbordante..." (suena a nueva identidad) ✅ "Este año tu energía se canaliza en creatividad, aunque no sea lo habitual en ti" (clima anual). EL SR NO REDEFINE QUIÉN ERES, REDEFINE DÓNDE SE CANALIZA TU ENERGÍA ESTE AÑO.
+6. **NO LISTAS HAZ/EVITA EN INTERPRETACIÓN BASE** - ESTO ES CRÍTICO. Guarda listas imperativas SOLO para agenda diaria/eventos. En fichas base: lenguaje narrativo observacional. ❌ "HAZ: X, Y, Z" ❌ "EVITA: A, B, C" ✅ "La vida te empuja a..." ✅ "Este año pide..." ✅ "Puede generar tensión entre..."
 
 ### ✅ OBLIGATORIO
 1. **DESCRIBE EXPERIENCIA, NO TEORÍA** - ❌ "Mercurio rige..." ✅ "Tu forma de pensar..." (aplicado directamente)
@@ -324,12 +344,19 @@ Responde ÚNICAMENTE con JSON válido en español (sin markdown, sin backticks, 
 □ ¿Cada sección aporta información NUEVA y no repite lo anterior?
 
 ### 🎯 VERIFICACIÓN DE PERSONALIZACIÓN (Experiencia vs Teoría)
-□ ¿Las características hablan de CÓMO FUNCIONA ${userName}? (no "qué es ${planetName}")
-□ ❌ ¿Evité "Mercurio rige...", "Piscis es un signo..."? ✅ ¿Usé "Tu forma de...", "Naturalmente tiendes a..."?
+□ ¿Las características en NATAL hablan de CÓMO FUNCIONA ${userName}? (no "qué es ${planetName}")
+□ ❌ ¿Evité TODA explicación astrológica? ("${planetName} representa...", "${natalSign}, un signo de...")
+□ ✅ ¿Usé SOLO descripción directa? ("Tu forma de...", "Naturalmente tiendes a...", "Así actúas tú...")
 □ ¿Incluí "diferenciador_clave" SIN definir la casa, solo describiendo cómo opera en ${userName}?
 □ ¿Las características son ESPECÍFICAS a ${natalSign} + Casa ${natalHouse}? (no genéricas del signo)
+
+### 🌍 VERIFICACIÓN DE SR COMO CLIMA (NO como nueva personalidad)
+□ ❌ ¿Evité tratar SR como nueva identidad? ("Este es un año marcado por creatividad...")
+□ ✅ ¿Usé lenguaje de CANALIZACIÓN? ("Este año tu energía se canaliza en...", "Se activa el área de...")
+□ ✅ ¿Dejé claro que NO es habitual? ("...aunque no sea lo habitual en ti")
+□ ¿La introducción habla de DÓNDE se canaliza energía, no de quién es ahora?
 □ ¿Incluí "integracion_signo_casa" explicando cómo ${srSign} se manifiesta en ${srHouseMeaning}?
-□ ¿Las activaciones integran SIGNO + CASA del SR? (no solo la casa)
+□ ¿Las activaciones describen CLIMA/ÁREA activada? (no nuevas cualidades personales)
 
 ### 🔄 VERIFICACIÓN DE CRUCE EXPLÍCITO (EL "ENTONCES...")
 □ ¿Incluí "contraste_con_natal" en que_se_activa_este_anio con formato "Normalmente..., pero este ciclo... La diferencia este año es clara: [entonces]"?
@@ -338,11 +365,13 @@ Responde ÚNICAMENTE con JSON válido en español (sin markdown, sin backticks, 
 □ ¿Incluí "aprendizaje_del_anio" y "frase_potente_cierre"?
 □ ¿La "frase_potente_cierre" es memorable y sintetiza el aprendizaje?
 
-### 📖 VERIFICACIÓN DE TONO NARRATIVO (NO Imperativo)
-□ ❌ ¿Evité listas "HAZ/EVITA" en interpretación base? (guárdalas para agenda diaria)
-□ ✅ ¿Usé lenguaje observacional? ("la vida te empuja...", "este año pide...", "puede generar...")
-□ ❌ ¿Evité imperativos directos? ("Haz X", "No hagas Y", "Debes...")
-□ ✅ ¿Usé tono coach personal narrativo? (como escribir en agenda, no dar órdenes)
+### 📖 VERIFICACIÓN DE TONO NARRATIVO (NO Imperativo) - CRÍTICO
+□ ❌ ¿Evité ABSOLUTAMENTE listas "HAZ" y "EVITA"? (NINGUNA lista imperativa en base)
+□ ❌ ¿Evité secciones con formato "✅ HAZ: X, Y, Z" o "❌ EVITA: A, B, C"?
+□ ✅ ¿Usé SOLO lenguaje observacional narrativo? ("la vida te empuja...", "este año pide...", "puede generar tensión entre...")
+□ ❌ ¿Evité imperativos directos? ("Haz X", "No hagas Y", "Debes...", "Practica...")
+□ ✅ ¿Usé tono coach personal narrativo? (escribir en agenda, acompañar, no dar órdenes)
+□ ✅ ¿Las claves prácticas están SOLO en "claves_practicas_diarias" (no en otras secciones)?
 
 ### 🛠️ VERIFICACIÓN DE ANCLAJE PRÁCTICO
 □ ¿Incluí "claves_practicas_diarias" con 3 acciones CONCRETAS?
