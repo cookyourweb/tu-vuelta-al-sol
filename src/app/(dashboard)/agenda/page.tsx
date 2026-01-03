@@ -1027,50 +1027,102 @@ const AgendaPersonalizada = () => {
               aquí encontrarás tu calendario astrológico personalizado con eventos cósmicos importantes y momentos de poder personal.
             </p>
 
-            {/* Información del usuario - Layout horizontal */}
+            {/* Información del usuario - Estilo de la imagen con bullets */}
             {userProfile && (
-              <div className="mb-6 flex flex-wrap items-center justify-center gap-4 text-gray-300 text-sm">
-                <div className="flex items-center gap-2">
-                  <span className="text-purple-300 font-semibold">Nacimiento:</span>
-                  <span>
-                    {new Date(userProfile.birthDate).toLocaleDateString('es-ES', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric'
-                    })}
-                    {userProfile.birthTime && ` a las ${userProfile.birthTime}`}
-                    {` en ${userProfile.birthPlace || 'ubicación no especificada'}`}
-                  </span>
+              <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-3 max-w-4xl mx-auto">
+                {/* Fecha Nacimiento */}
+                <div className="bg-slate-800/80 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-700/50 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                    <div>
+                      <div className="text-gray-400 text-xs font-medium">Fecha Nacimiento</div>
+                      <div className="text-white text-sm font-semibold">
+                        {new Date(userProfile.birthDate).toLocaleDateString('es-ES', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric'
+                        })}
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                {userProfile.place && userProfile.place !== userProfile.birthPlace && (
-                  <>
-                    <span className="text-purple-400">•</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-purple-300 font-semibold">Ubicación actual:</span>
-                      <span>{userProfile.place}</span>
+                {/* Hora */}
+                {userProfile.birthTime && (
+                  <div className="bg-slate-800/80 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-700/50 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                      <div>
+                        <div className="text-gray-400 text-xs font-medium">Hora</div>
+                        <div className="text-white text-sm font-semibold">{userProfile.birthTime}</div>
+                      </div>
                     </div>
-                  </>
+                  </div>
                 )}
 
-                {userProfile.astrological?.signs && (
-                  <>
-                    <span className="text-purple-400">•</span>
-                    <div className="flex items-center gap-3">
-                      <span className="flex items-center gap-1">
-                        <span className="text-yellow-300">☉</span>
-                        <span>{userProfile.astrological.signs.sun || 'N/A'}</span>
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <span className="text-blue-300">☽</span>
-                        <span>{userProfile.astrological.signs.moon || 'N/A'}</span>
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <span className="text-purple-300">↗</span>
-                        <span>{userProfile.astrological.signs.ascendant || 'N/A'}</span>
-                      </span>
+                {/* Lugar */}
+                <div className="bg-slate-800/80 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-700/50 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-gray-400 text-xs font-medium">Lugar</div>
+                      <div className="text-white text-sm font-semibold truncate">
+                        {userProfile.birthPlace || 'No especificado'}
+                      </div>
                     </div>
-                  </>
+                  </div>
+                </div>
+
+                {/* Ubicación actual (si es diferente) */}
+                {userProfile.place && userProfile.place !== userProfile.birthPlace && (
+                  <div className="bg-slate-800/80 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-700/50 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-gray-400 text-xs font-medium">Ubicación Actual</div>
+                        <div className="text-white text-sm font-semibold truncate">{userProfile.place}</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Sol */}
+                {userProfile.astrological?.signs?.sun && (
+                  <div className="bg-slate-800/80 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-700/50 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="text-yellow-400 text-lg">☉</div>
+                      <div>
+                        <div className="text-gray-400 text-xs font-medium">Sol</div>
+                        <div className="text-white text-sm font-semibold">{userProfile.astrological.signs.sun}</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Luna */}
+                {userProfile.astrological?.signs?.moon && (
+                  <div className="bg-slate-800/80 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-700/50 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="text-blue-300 text-lg">☽</div>
+                      <div>
+                        <div className="text-gray-400 text-xs font-medium">Luna</div>
+                        <div className="text-white text-sm font-semibold">{userProfile.astrological.signs.moon}</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Ascendente */}
+                {userProfile.astrological?.signs?.ascendant && (
+                  <div className="bg-slate-800/80 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-700/50 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="text-purple-400 text-lg">↗</div>
+                      <div>
+                        <div className="text-gray-400 text-xs font-medium">Ascendente</div>
+                        <div className="text-white text-sm font-semibold">{userProfile.astrological.signs.ascendant}</div>
+                      </div>
+                    </div>
+                  </div>
                 )}
               </div>
             )}
