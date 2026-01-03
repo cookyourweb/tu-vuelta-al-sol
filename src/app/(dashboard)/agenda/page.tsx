@@ -341,12 +341,21 @@ const AgendaPersonalizada = () => {
       });
 
       // 🎂 EVENTOS ESPECIALES: Cumpleaños y día anterior
-      console.log('🎂 [BIRTHDAY] startDate:', startDate.toISOString().split('T')[0], 'Day:', startDate.getDate());
+      // Helper para formatear fecha sin problemas de zona horaria
+      const formatDateOnly = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
+      const birthdayDateStr = formatDateOnly(startDate);
+      console.log('🎂 [BIRTHDAY] startDate:', birthdayDateStr, 'Day:', startDate.getDate(), 'Month:', startDate.getMonth() + 1);
 
       // Día del cumpleaños (inicio del año solar)
       transformedEvents.push({
-        id: `birthday-${startDate.toISOString()}`,
-        date: startDate.toISOString().split('T')[0],
+        id: `birthday-${birthdayDateStr}`,
+        date: birthdayDateStr,
         title: '🎂 Tu Vuelta al Sol comienza hoy',
         description: `¡Feliz cumpleaños ${userProfile.name || ''}! Hoy comienza tu nuevo año solar, un ciclo de 365 días lleno de oportunidades cósmicas.`,
         type: 'ai_generated',
@@ -366,11 +375,12 @@ const AgendaPersonalizada = () => {
       // Día anterior al cumpleaños (cierre del año solar)
       const dayBeforeBirthday = new Date(startDate);
       dayBeforeBirthday.setDate(dayBeforeBirthday.getDate() - 1);
-      console.log('🌅 [PRE-BIRTHDAY] dayBeforeBirthday:', dayBeforeBirthday.toISOString().split('T')[0], 'Day:', dayBeforeBirthday.getDate());
+      const preBirthdayDateStr = formatDateOnly(dayBeforeBirthday);
+      console.log('🌅 [PRE-BIRTHDAY] dayBeforeBirthday:', preBirthdayDateStr, 'Day:', dayBeforeBirthday.getDate(), 'Month:', dayBeforeBirthday.getMonth() + 1);
 
       transformedEvents.push({
-        id: `pre-birthday-${dayBeforeBirthday.toISOString()}`,
-        date: dayBeforeBirthday.toISOString().split('T')[0],
+        id: `pre-birthday-${preBirthdayDateStr}`,
+        date: preBirthdayDateStr,
         title: '🌅 Tu ciclo solar termina hoy',
         description: `Mañana comienza tu nuevo año solar. Hoy es el momento perfecto para cerrar ciclos y prepararte para tu renacimiento.`,
         type: 'ai_generated',

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sparkles, Loader2, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -85,6 +85,25 @@ export default function PlanetaryCards() {
   const [error, setError] = useState<string | null>(null);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [showCards, setShowCards] = useState(false);
+  const [hasExistingCards, setHasExistingCards] = useState(false);
+
+  // Cargar fichas desde localStorage al montar el componente
+  useEffect(() => {
+    if (user?.uid) {
+      const storedCards = localStorage.getItem(`planetary-cards-${user.uid}`);
+      if (storedCards) {
+        try {
+          const parsedCards = JSON.parse(storedCards);
+          if (parsedCards && parsedCards.length > 0) {
+            setCards(parsedCards);
+            setHasExistingCards(true);
+          }
+        } catch (err) {
+          console.error('Error parsing stored cards:', err);
+        }
+      }
+    }
+  }, [user]);
 
   const handleGenerateCards = async () => {
     if (!user) {
@@ -114,6 +133,11 @@ export default function PlanetaryCards() {
       if (data.success) {
         setCards(data.cards);
         setShowCards(true);
+        setHasExistingCards(true);
+        // Guardar en localStorage
+        if (user?.uid) {
+          localStorage.setItem(`planetary-cards-${user.uid}`, JSON.stringify(data.cards));
+        }
       } else {
         setError(data.error || 'Error generando fichas planetarias');
       }
@@ -123,6 +147,10 @@ export default function PlanetaryCards() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleShowCards = () => {
+    setShowCards(true);
   };
 
   const toggleCard = (planeta: string) => {
@@ -148,7 +176,7 @@ export default function PlanetaryCards() {
         </p>
 
         <button
-          onClick={handleGenerateCards}
+          onClick={hasExistingCards ? handleShowCards : handleGenerateCards}
           disabled={loading}
           className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg
                      bg-gradient-to-r from-purple-600 to-pink-600
@@ -161,6 +189,11 @@ export default function PlanetaryCards() {
             <>
               <Loader2 className="w-5 h-5 animate-spin" />
               Generando fichas planetarias...
+            </>
+          ) : hasExistingCards ? (
+            <>
+              <Sparkles className="w-5 h-5" />
+              Ver Planetas
             </>
           ) : (
             <>
