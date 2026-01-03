@@ -40,6 +40,9 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
   const printRef = useRef<HTMLDivElement>(null);
   const { config } = useStyle();
 
+  // Extract solar year from startDate for dynamic year display
+  const solarYear = startDate.getFullYear();
+
   const handlePrint = () => {
     window.print();
   };
@@ -110,19 +113,19 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
         <RitualCumpleanos />
         <MantraAnual />
 
-        {/* 5. EJEMPLO ENERO 2026 - MES COMPLETO */}
-        <AperturaEneroIzquierda />
-        <AperturaEneroDerecha />
-        <CalendarioVisualEnero />
-        <InterpretacionLunaNuevaEnero />
-        <InterpretacionLunaLlenaEnero />
-        <EjerciciosEnero />
-        <MantraEnero />
-        <Semana1Enero />
-        <Semana2Enero />
-        <Semana3Enero />
-        <Semana4Enero />
-        <CierreEnero />
+        {/* 5. EJEMPLO ENERO - MES COMPLETO */}
+        <AperturaEneroIzquierda year={solarYear} />
+        <AperturaEneroDerecha year={solarYear} />
+        <CalendarioVisualEnero year={solarYear} />
+        <InterpretacionLunaNuevaEnero year={solarYear} />
+        <InterpretacionLunaLlenaEnero year={solarYear} />
+        <EjerciciosEnero year={solarYear} />
+        <MantraEnero year={solarYear} />
+        <Semana1Enero year={solarYear} />
+        <Semana2Enero year={solarYear} />
+        <Semana3Enero year={solarYear} />
+        <Semana4Enero year={solarYear} />
+        <CierreEnero year={solarYear} />
 
         {/* Placeholder para meses 2-12 */}
         <div className="print-page bg-white p-10 text-center flex items-center justify-center">

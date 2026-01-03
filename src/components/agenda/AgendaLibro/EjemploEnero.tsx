@@ -1,18 +1,22 @@
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth } from "date-fns";
 import { es } from "date-fns/locale";
-import { 
-  Moon, Sun, Target, Heart, Compass, Flame, 
-  Sparkles, PenLine, BookOpen, Calendar, 
+import {
+  Moon, Sun, Target, Heart, Compass, Flame,
+  Sparkles, PenLine, BookOpen, Calendar,
   CheckCircle2, Circle, ArrowRight, Lightbulb,
   Star, Zap, Waves, TreePine, Mountain
 } from "lucide-react";
 import { useStyle } from "@/context/StyleContext";
 
-// ENERO 2026 - EJEMPLO COMPLETO
+// ENERO - EJEMPLO COMPLETO (año dinámico)
+
+interface EneroComponentProps {
+  year: number;
+}
 
 // ============ 1. APERTURA DEL MES (2 páginas) ============
 
-export const AperturaEneroIzquierda = () => {
+export const AperturaEneroIzquierda = ({ year }: EneroComponentProps) => {
   const { config } = useStyle();
   
   return (
@@ -33,7 +37,7 @@ export const AperturaEneroIzquierda = () => {
             Mes 1
           </span>
         </div>
-        <h1 className={`font-display text-5xl ${config.titleGradient} mt-2`}>ENERO 2026</h1>
+        <h1 className={`font-display text-5xl ${config.titleGradient} mt-2`}>ENERO {year}</h1>
         <div className="flex items-center justify-center gap-3 mt-4">
           <Star className={`w-5 h-5 ${config.iconSecondary}`} fill="currentColor" />
           <span className={`text-4xl ${config.iconSecondary}`}>♑</span>
@@ -92,7 +96,7 @@ export const AperturaEneroIzquierda = () => {
   );
 };
 
-export const AperturaEneroDerecha = () => {
+export const AperturaEneroDerecha = ({ year }: EneroComponentProps) => {
   const { config } = useStyle();
   
   return (
@@ -178,21 +182,21 @@ export const AperturaEneroDerecha = () => {
 
 const weekDays = ["LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"];
 
-const enero2026Events: Record<number, { icon: React.ReactNode; label: string; color: string; bgColor: string }> = {
+const eneroEvents: Record<number, { icon: React.ReactNode; label: string; color: string; bgColor: string }> = {
   6: { icon: <Moon className="w-5 h-5" />, label: "Inicio", color: "text-white", bgColor: "bg-gradient-to-br from-primary to-cosmic-violet" },
   21: { icon: <Sun className="w-5 h-5" />, label: "Cierre", color: "text-white", bgColor: "bg-gradient-to-br from-cosmic-gold to-cosmic-amber" },
 };
 
-const generateEnero2026Weeks = () => {
-  const monthDate = new Date(2026, 0, 1);
+const generateEneroWeeks = (year: number) => {
+  const monthDate = new Date(year, 0, 1);
   const monthStart = startOfMonth(monthDate);
   const monthEnd = endOfMonth(monthDate);
   const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 });
   const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
-  
+
   const weeks: Date[][] = [];
   let currentDay = calendarStart;
-  
+
   while (currentDay <= calendarEnd) {
     const week: Date[] = [];
     for (let i = 0; i < 7; i++) {
@@ -201,14 +205,14 @@ const generateEnero2026Weeks = () => {
     }
     weeks.push(week);
   }
-  
+
   return weeks;
 };
 
-export const CalendarioVisualEnero = () => {
+export const CalendarioVisualEnero = ({ year }: EneroComponentProps) => {
   const { config } = useStyle();
-  const weeks = generateEnero2026Weeks();
-  const monthDate = new Date(2026, 0, 1);
+  const weeks = generateEneroWeeks(year);
+  const monthDate = new Date(year, 0, 1);
 
   return (
     <div className={`print-page bg-white p-8 flex flex-col relative overflow-hidden ${config.pattern}`}>
@@ -222,7 +226,7 @@ export const CalendarioVisualEnero = () => {
         <div className="flex items-center justify-center gap-4">
           <Star className={`w-6 h-6 ${config.iconSecondary}`} fill="currentColor" />
           <h2 className={`font-display text-3xl ${config.titleGradient}`}>
-            ENERO 2026
+            ENERO {year}
           </h2>
           <Star className={`w-6 h-6 ${config.iconSecondary}`} fill="currentColor" />
         </div>
@@ -250,7 +254,7 @@ export const CalendarioVisualEnero = () => {
             {week.map((day, dayIndex) => {
               const isCurrentMonth = isSameMonth(day, monthDate);
               const dayNum = day.getDate();
-              const event = isCurrentMonth ? enero2026Events[dayNum] : null;
+              const event = isCurrentMonth ? eneroEvents[dayNum] : null;
               const isWeekend = dayIndex >= 5;
               
               return (
@@ -296,7 +300,7 @@ export const CalendarioVisualEnero = () => {
 
 // ============ 3. INTERPRETACIÓN PERSONAL (2-3 páginas) ============
 
-export const InterpretacionLunaNuevaEnero = () => {
+export const InterpretacionLunaNuevaEnero = ({ year }: EneroComponentProps) => {
   const { config } = useStyle();
   
   return (
@@ -313,7 +317,7 @@ export const InterpretacionLunaNuevaEnero = () => {
         </div>
         <div>
           <h2 className={`font-display text-2xl ${config.titleGradient}`}>Luna Nueva</h2>
-          <span className={`${config.badgeSecondary} px-3 py-1 rounded-full text-xs font-semibold mt-1 inline-block`}>6 de enero de 2026</span>
+          <span className={`${config.badgeSecondary} px-3 py-1 rounded-full text-xs font-semibold mt-1 inline-block`}>6 de enero de {year}</span>
         </div>
       </div>
 
@@ -389,7 +393,7 @@ export const InterpretacionLunaNuevaEnero = () => {
   );
 };
 
-export const InterpretacionLunaLlenaEnero = () => {
+export const InterpretacionLunaLlenaEnero = ({ year }: EneroComponentProps) => {
   const { config } = useStyle();
   
   return (
@@ -406,7 +410,7 @@ export const InterpretacionLunaLlenaEnero = () => {
         </div>
         <div>
           <h2 className={`font-display text-2xl ${config.titleGradient}`}>Luna Llena</h2>
-          <span className={`${config.badgeAccent} px-3 py-1 rounded-full text-xs font-semibold mt-1 inline-block`}>21 de enero de 2026</span>
+          <span className={`${config.badgeAccent} px-3 py-1 rounded-full text-xs font-semibold mt-1 inline-block`}>21 de enero de {year}</span>
         </div>
       </div>
 
@@ -473,7 +477,7 @@ export const InterpretacionLunaLlenaEnero = () => {
 
 // ============ 4. EJERCICIOS Y MANTRA (1-2 páginas) ============
 
-export const EjerciciosEnero = () => {
+export const EjerciciosEnero = ({ year }: EneroComponentProps) => {
   const { config } = useStyle();
   
   return (
@@ -489,7 +493,7 @@ export const EjerciciosEnero = () => {
           <PenLine className="w-8 h-8 text-white" />
         </div>
         <h2 className={`font-display text-2xl ${config.titleGradient} mt-2`}>Ejercicio Central del Mes</h2>
-        <span className={`${config.badgePrimary} px-3 py-1 rounded-full text-xs font-semibold mt-2 inline-block`}>Enero 2026</span>
+        <span className={`${config.badgePrimary} px-3 py-1 rounded-full text-xs font-semibold mt-2 inline-block`}>Enero {year}</span>
         <div className={`${config.divider} w-32 mx-auto mt-4`} />
       </div>
 
@@ -547,7 +551,7 @@ export const EjerciciosEnero = () => {
   );
 };
 
-export const MantraEnero = () => {
+export const MantraEnero = ({ year }: EneroComponentProps) => {
   const { config } = useStyle();
   
   return (
@@ -566,7 +570,7 @@ export const MantraEnero = () => {
           <Sparkles className="w-8 h-8 text-white" />
         </div>
         <h2 className={`font-display text-2xl ${config.titleGradient} mt-2`}>Mantra del Mes</h2>
-        <span className={`${config.badgeAccent} px-3 py-1 rounded-full text-xs font-semibold mt-2 inline-block`}>Enero 2026</span>
+        <span className={`${config.badgeAccent} px-3 py-1 rounded-full text-xs font-semibold mt-2 inline-block`}>Enero {year}</span>
         <div className={`${config.divider} w-32 mx-auto mt-4`} />
       </div>
 
@@ -699,7 +703,7 @@ const SemanaEnero = ({ semanaNum, fechas, energia, clave, eventoActivo, microeje
   );
 };
 
-export const Semana1Enero = () => (
+export const Semana1Enero = ({ year }: EneroComponentProps) => (
   <SemanaEnero
     semanaNum={1}
     fechas="del 1 al 5 de enero"
@@ -709,14 +713,14 @@ export const Semana1Enero = () => (
   />
 );
 
-export const Semana2Enero = () => (
+export const Semana2Enero = ({ year }: EneroComponentProps) => (
   <SemanaEnero
     semanaNum={2}
     fechas="del 6 al 12 de enero"
     energia="Intención consciente"
     clave="Define solo 1 objetivo real"
-    eventoActivo={{ 
-      icon: <Moon className="w-5 h-5 text-white" />, 
+    eventoActivo={{
+      icon: <Moon className="w-5 h-5 text-white" />,
       nombre: "Luna Nueva",
       color: "bg-gradient-to-r from-primary to-cosmic-violet"
     }}
@@ -724,7 +728,7 @@ export const Semana2Enero = () => (
   />
 );
 
-export const Semana3Enero = () => (
+export const Semana3Enero = ({ year }: EneroComponentProps) => (
   <SemanaEnero
     semanaNum={3}
     fechas="del 13 al 19 de enero"
@@ -734,14 +738,14 @@ export const Semana3Enero = () => (
   />
 );
 
-export const Semana4Enero = () => (
+export const Semana4Enero = ({ year }: EneroComponentProps) => (
   <SemanaEnero
     semanaNum={4}
     fechas="del 20 al 26 de enero"
     energia="Liberación emocional"
     clave="Baja el ritmo, escucha emociones"
-    eventoActivo={{ 
-      icon: <Sun className="w-5 h-5 text-white" />, 
+    eventoActivo={{
+      icon: <Sun className="w-5 h-5 text-white" />,
       nombre: "Luna Llena",
       color: "bg-gradient-to-r from-cosmic-gold to-cosmic-amber"
     }}
@@ -751,7 +755,7 @@ export const Semana4Enero = () => (
 
 // ============ 6. CIERRE DEL MES ============
 
-export const CierreEnero = () => {
+export const CierreEnero = ({ year }: EneroComponentProps) => {
   const { config } = useStyle();
   
   return (

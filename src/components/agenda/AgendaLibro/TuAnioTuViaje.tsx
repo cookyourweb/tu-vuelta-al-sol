@@ -56,7 +56,15 @@ export const CartaBienvenida = ({ name }: TuAnioTuViajeProps) => {
       </div>
 
       <div className={`mt-auto text-right ${config.iconSecondary} opacity-60 italic ${config.fontBody}`}>
-        By Wunjo Creations
+        Con amor cósmico by{' '}
+        <a
+          href="https://wunjocreations.es"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:underline hover:opacity-100 transition-opacity"
+        >
+          Wunjo Creations
+        </a>
       </div>
     </div>
   );
