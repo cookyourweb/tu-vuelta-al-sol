@@ -28,6 +28,7 @@ import {
 } from './EjemploEnero';
 import { EscrituraTerapeutica, Visualizacion, RitualSimbolico, TrabajoEmocional } from './TerapiasCreativas';
 import { QuienEraQuienSoy, PreparacionProximaVuelta, CartaCierre, PaginaFinalBlanca, Contraportada } from './CierreCiclo';
+import { TuAnioResumen, CiclosDelAnio, ReflexionFinDeAnio } from './ReflexionAnual';
 
 interface AgendaLibroProps {
   onClose: () => void;
@@ -88,6 +89,10 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
         />
         <PaginaIntencion />
 
+        {/* 1.5. RESUMEN DEL AÑO */}
+        <TuAnioResumen year={solarYear} userName={userName} />
+        <CiclosDelAnio year={solarYear} />
+
         {/* 2. TU AÑO, TU VIAJE */}
         <CartaBienvenida name={userName} />
         <TemaCentralAnio />
@@ -147,6 +152,9 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
         <Visualizacion />
         <RitualSimbolico />
         <TrabajoEmocional />
+
+        {/* 6.5. REFLEXIÓN DE FIN DE AÑO */}
+        <ReflexionFinDeAnio year={solarYear + 1} userName={userName} />
 
         {/* 7. CIERRE DE CICLO */}
         <QuienEraQuienSoy />

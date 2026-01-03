@@ -6,61 +6,67 @@ interface PortalEntradaProps {
   name: string;
   startDate: Date;
   endDate: Date;
-  age?: number;
-  birthInfo?: string;
+  sunSign?: string;
+  moonSign?: string;
   ascendant?: string;
+  inspirationalQuote?: string;
 }
 
 export const PortadaPersonalizada = ({
   name,
   startDate,
   endDate,
-  age = 51,
-  birthInfo = "10 de febrero de 1974 · Madrid",
-  ascendant = "Ascendente Acuario"
+  sunSign = "Piscis",
+  moonSign = "Libra",
+  ascendant = "Leo",
+  inspirationalQuote = "Guiando almas a través de la transformación con sabiduría y amor"
 }: PortalEntradaProps) => {
   const startYear = startDate.getFullYear();
   const endYear = endDate.getFullYear();
   const { config } = useStyle();
 
   return (
-    <div className={`print-page flex flex-col items-center justify-center text-center p-12 relative overflow-hidden ${config.headerBg} ${config.pattern}`}>
-      {/* Decorative circles */}
-      <div className={`absolute top-20 left-20 w-32 h-32 border ${config.headerText} opacity-20 rounded-full`} />
-      <div className={`absolute bottom-20 right-20 w-48 h-48 border ${config.headerText} opacity-10 rounded-full`} />
-      <div className={`absolute top-1/2 left-1/4 w-64 h-64 border ${config.headerText} opacity-5 rounded-full -translate-y-1/2`} />
+    <div className={`print-page flex flex-col items-center justify-center text-center p-12 relative overflow-hidden
+      screen:${config.headerBg} print:bg-transparent ${config.pattern}`}>
 
-      <div className="relative z-10 space-y-8">
-        <div className={`${config.headerText} opacity-60 text-sm tracking-[0.5em] uppercase ${config.fontBody}`}>
-          Agenda Astrológica Personalizada
-        </div>
+      {/* Decorative star icon top */}
+      <div className={`relative z-10 mb-8 ${config.headerText} screen:opacity-80 print:opacity-60`}>
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+        </svg>
+      </div>
 
-        <h1 className={`${config.fontDisplay} text-6xl md:text-7xl ${config.headerText} tracking-wide`}>
+      <div className="relative z-10 space-y-6">
+        <h1 className={`${config.fontDisplay} text-5xl md:text-6xl ${config.headerText} tracking-wide font-bold`}>
           Tu Vuelta al Sol
         </h1>
 
-        <div className={`text-3xl md:text-4xl font-light ${config.headerText} opacity-90 ${config.fontBody}`}>
-          {startYear}–{endYear}
+        <div className={`${config.headerText} opacity-80 text-lg tracking-wider ${config.fontBody}`}>
+          Agenda Astrológica Personalizada
         </div>
 
-        <div className={config.divider + " w-24 mx-auto"} />
-
-        <div className={`text-2xl md:text-3xl ${config.fontDisplay} ${config.headerText} opacity-90 mt-8`}>
-          {name.toUpperCase()} · {age} años
+        <div className={`text-3xl font-light ${config.headerText} ${config.fontBody}`}>
+          {startYear}-{endYear}
         </div>
 
-        <div className={`text-base ${config.headerText} opacity-70 ${config.fontBody}`}>
-          ({birthInfo} · {ascendant})
+        {/* Iconos astronómicos */}
+        <div className={`flex items-center justify-center gap-6 text-3xl ${config.headerText} screen:opacity-70 print:opacity-50 my-6`}>
+          <span title="Sol">☉</span>
+          <span title="Luna">☽</span>
+          <span title="Ascendente">↗</span>
         </div>
 
-        <div className={`mt-12 text-lg ${config.headerText} opacity-70 italic max-w-md ${config.fontBody}`}>
-          "No todo fue fácil.<br />Pero todo tuvo sentido."
+        <div className={`text-3xl ${config.fontDisplay} ${config.headerText} mt-8`}>
+          {name}
         </div>
-      </div>
 
-      {/* Sun symbol */}
-      <div className={`absolute bottom-12 ${config.headerText} opacity-20 text-8xl`}>
-        ☉
+        <div className={`text-base ${config.headerText} screen:opacity-80 print:opacity-70 ${config.fontBody}`}>
+          Sol en {sunSign} · Luna en {moonSign} · Ascendente {ascendant}
+        </div>
+
+        <div className={`mt-10 text-base ${config.headerText} screen:opacity-75 print:opacity-65 italic max-w-lg mx-auto ${config.fontBody} leading-relaxed`}>
+          "{inspirationalQuote}"
+        </div>
       </div>
     </div>
   );

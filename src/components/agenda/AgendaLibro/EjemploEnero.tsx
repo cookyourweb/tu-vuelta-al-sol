@@ -214,74 +214,104 @@ export const CalendarioVisualEnero = ({ year }: EneroComponentProps) => {
   const weeks = generateEneroWeeks(year);
   const monthDate = new Date(year, 0, 1);
 
+  // Define eventos destacados del mes
+  const eventosDestacados = [
+    {
+      dia: 9,
+      titulo: "Retorno Solar",
+      descripcion: "Sol a 19°03' Piscis. Inicio de nuevo ciclo personal con énfasis en relaciones.",
+      ritual: "Gran Ritual de Retorno Solar",
+      hora: "15:30",
+      color: "bg-orange-50 border-l-4 border-orange-400",
+      icon: <Sun className="w-6 h-6 text-orange-500" />
+    },
+    {
+      dia: 14,
+      titulo: "Luna Nueva",
+      descripcion: "Momento perfecto para sembrar intenciones alineadas con tu Sol natal.",
+      ritual: "Luna Nueva en Piscis",
+      color: "bg-blue-50 border-l-4 border-blue-400",
+      icon: <Moon className="w-6 h-6 text-blue-500" />
+    },
+    {
+      dia: 20,
+      titulo: "Equinoccio",
+      descripcion: "Sol ingresa en Aries. Portal de inicio en sincronía con Sol progresado 1°12' Aries.",
+      ritual: "Portal de Primavera",
+      color: "bg-yellow-50 border-l-4 border-yellow-500",
+      icon: <Star className="w-6 h-6 text-yellow-600" fill="currentColor" />
+    },
+    {
+      dia: 28,
+      titulo: "Luna Llena",
+      descripcion: "Activa tu Luna natal. Culminación emocional y equilibrio en relaciones.",
+      ritual: "Luna Llena en Libra",
+      color: "bg-purple-50 border-l-4 border-purple-400",
+      icon: <Moon className="w-6 h-6 text-purple-500" />
+    }
+  ];
+
   return (
-    <div className={`print-page bg-white p-8 flex flex-col relative overflow-hidden ${config.pattern}`}>
-      {/* Decorative background */}
-      <div className="absolute top-4 right-4 opacity-[0.05]">
-        <Calendar className={`w-48 h-48 ${config.iconPrimary}`} />
-      </div>
-      
+    <div className={`print-page bg-white p-8 flex flex-col ${config.pattern}`}>
       {/* Header */}
-      <div className="text-center mb-4 relative z-10">
-        <div className="flex items-center justify-center gap-4">
-          <Star className={`w-6 h-6 ${config.iconSecondary}`} fill="currentColor" />
-          <h2 className={`font-display text-3xl ${config.titleGradient}`}>
-            ENERO {year}
-          </h2>
-          <Star className={`w-6 h-6 ${config.iconSecondary}`} fill="currentColor" />
-        </div>
-        <p className="text-gray-500 text-sm mt-2 flex items-center justify-center gap-2">
-          <span className={`text-2xl ${config.iconSecondary}`}>♑</span>
-          Calendario visual
+      <div className="text-center mb-4">
+        <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient} font-bold`}>
+          MARZO {year}
+        </h2>
+        <p className={`text-gray-500 text-sm mt-1 italic ${config.fontBody}`}>
+          Inicio de tu Ciclo Solar
         </p>
-        <div className={`${config.divider} w-32 mx-auto mt-3`} />
       </div>
-      
-      {/* Calendar Grid */}
-      <div className="flex-1 rounded-xl overflow-hidden shadow-lg border-2 border-gray-200 relative z-10">
+
+      {/* Calendar Grid - Compacto */}
+      <div className="mb-4">
         {/* Week day headers */}
-        <div className={`grid grid-cols-7 ${config.headerBg}`}>
+        <div className="grid grid-cols-7 bg-gray-100 border border-gray-300">
           {weekDays.map((day) => (
-            <div key={day} className={`text-center ${config.headerText} text-sm font-bold py-3 border-r border-white/20 last:border-r-0`}>
+            <div key={day} className={`text-center text-gray-700 text-xs font-bold py-2 border-r border-gray-300 last:border-r-0 ${config.fontBody}`}>
               {day}
             </div>
           ))}
         </div>
-        
+
         {/* Calendar weeks */}
         {weeks.map((week, weekIndex) => (
-          <div key={weekIndex} className="grid grid-cols-7 border-t border-gray-200" style={{ height: 'calc((100% - 44px) / 5)' }}>
+          <div key={weekIndex} className="grid grid-cols-7 border-b border-l border-r border-gray-300">
             {week.map((day, dayIndex) => {
               const isCurrentMonth = isSameMonth(day, monthDate);
               const dayNum = day.getDate();
-              const event = isCurrentMonth ? eneroEvents[dayNum] : null;
+              const evento = eventosDestacados.find(e => e.dia === dayNum);
               const isWeekend = dayIndex >= 5;
-              
+
               return (
                 <div
                   key={dayIndex}
                   className={`
-                    p-2 border-r border-gray-100 last:border-r-0 flex flex-col
+                    relative min-h-[50px] p-2 border-r border-gray-300 last:border-r-0 flex flex-col
                     ${isCurrentMonth ? 'bg-white' : 'bg-gray-50'}
-                    ${isWeekend && isCurrentMonth ? 'bg-gray-50' : ''}
-                    ${event ? config.highlightSecondary : ''}
+                    ${isWeekend && isCurrentMonth ? 'bg-gray-50/50' : ''}
+                    ${evento ? 'bg-gradient-to-br from-purple-50/30 to-transparent' : ''}
                   `}
                 >
                   <div className={`
-                    text-lg font-bold 
-                    ${isCurrentMonth ? 'text-gray-800' : 'text-gray-300'} 
-                    ${event ? config.iconPrimary : ''}
-                    ${isWeekend && isCurrentMonth && !event ? config.iconAccent : ''}
+                    text-base font-semibold
+                    ${isCurrentMonth ? 'text-gray-800' : 'text-gray-300'}
+                    ${evento ? config.iconPrimary + ' font-bold' : ''}
                   `}>
                     {format(day, "d")}
                   </div>
-                  
-                  {event && (
-                    <div className="flex-1 flex flex-col justify-center items-center mt-1">
-                      <div className={`w-8 h-8 rounded-full ${event.bgColor} flex items-center justify-center shadow-lg`}>
-                        <div className={event.color}>{event.icon}</div>
+
+                  {evento && (
+                    <div className="absolute top-1 right-1">
+                      <div className="w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"></div>
+                    </div>
+                  )}
+
+                  {evento && (
+                    <div className="mt-auto">
+                      <div className="text-[9px] font-bold text-gray-600 leading-tight">
+                        {evento.titulo}
                       </div>
-                      <span className={`text-xs ${config.iconPrimary} mt-1 text-center leading-tight font-bold`}>{event.label}</span>
                     </div>
                   )}
                 </div>
@@ -291,9 +321,39 @@ export const CalendarioVisualEnero = ({ year }: EneroComponentProps) => {
         ))}
       </div>
 
-      <p className="text-center text-gray-400 text-xs mt-3 italic relative z-10">
-        Solo mapa visual • La interpretación viene en las siguientes páginas
-      </p>
+      {/* Eventos Clave - Destacados abajo */}
+      <div className="space-y-2">
+        {eventosDestacados.map((evento, idx) => (
+          <div key={idx} className={`p-3 rounded-lg ${evento.color}`}>
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 mt-0.5">
+                {evento.icon}
+              </div>
+              <div className="flex-1">
+                <div className="flex items-baseline gap-2 mb-1">
+                  <span className={`font-bold ${config.iconPrimary} ${config.fontDisplay}`}>
+                    {evento.dia} Marzo
+                  </span>
+                  <span className={`text-sm font-semibold text-gray-700 ${config.fontBody}`}>
+                    {evento.titulo}
+                  </span>
+                </div>
+                <p className={`text-xs text-gray-700 leading-relaxed ${config.fontBody}`}>
+                  {evento.descripcion}
+                </p>
+                <p className={`text-xs ${config.iconSecondary} mt-1 font-medium`}>
+                  Ritual: {evento.ritual}
+                  {evento.hora && (
+                    <span className={`ml-2 ${config.iconAccent}`}>
+                      Hora óptima: {evento.hora}
+                    </span>
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
