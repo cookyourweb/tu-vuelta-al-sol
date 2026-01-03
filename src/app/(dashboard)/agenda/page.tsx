@@ -356,7 +356,7 @@ const AgendaPersonalizada = () => {
       transformedEvents.push({
         id: `birthday-${birthdayDateStr}`,
         date: birthdayDateStr,
-        title: '🎂 Tu Vuelta al Sol comienza hoy',
+        title: 'Primer día del Solar Return',
         description: `¡Feliz cumpleaños ${userProfile.name || ''}! Hoy comienza tu nuevo año solar, un ciclo de 365 días lleno de oportunidades cósmicas.`,
         type: 'ai_generated',
         priority: 'high',
@@ -381,7 +381,7 @@ const AgendaPersonalizada = () => {
       transformedEvents.push({
         id: `pre-birthday-${preBirthdayDateStr}`,
         date: preBirthdayDateStr,
-        title: '🌅 Tu ciclo solar termina hoy',
+        title: 'Último día del Solar Return',
         description: `Mañana comienza tu nuevo año solar. Hoy es el momento perfecto para cerrar ciclos y prepararte para tu renacimiento.`,
         type: 'ai_generated',
         priority: 'high',
