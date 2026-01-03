@@ -222,60 +222,72 @@ export const CalendarioVisualEnero = ({ year }: EneroComponentProps) => {
       descripcion: "Sol a 19°03' Piscis. Inicio de nuevo ciclo personal con énfasis en relaciones.",
       ritual: "Gran Ritual de Retorno Solar",
       hora: "15:30",
-      icon: <Sun className="w-5 h-5 text-orange-500" />
+      icon: "☀",
+      bgColor: "bg-amber-50",
+      textColor: "text-amber-700",
+      borderColor: "border-amber-200"
     },
     {
       dia: 14,
       titulo: "Luna Nueva",
       descripcion: "Momento perfecto para sembrar intenciones alineadas con tu Sol natal.",
       ritual: "Luna Nueva en Piscis",
-      icon: <Moon className="w-5 h-5 text-blue-500" />
+      icon: "☾",
+      bgColor: "bg-blue-50",
+      textColor: "text-blue-700",
+      borderColor: "border-blue-200"
     },
     {
       dia: 20,
       titulo: "Equinoccio",
       descripcion: "Sol ingresa en Aries. Portal de inicio en sincronía con Sol progresado 1°12' Aries.",
       ritual: "Portal de Primavera",
-      icon: <Star className="w-5 h-5 text-yellow-600" fill="currentColor" />
+      icon: "✦",
+      bgColor: "bg-green-50",
+      textColor: "text-green-700",
+      borderColor: "border-green-200"
     },
     {
       dia: 28,
       titulo: "Luna Llena",
       descripcion: "Activa tu Luna natal. Culminación emocional y equilibrio en relaciones.",
       ritual: "Luna Llena en Libra",
-      icon: <Moon className="w-5 h-5 text-purple-500" />
+      icon: "☾",
+      bgColor: "bg-purple-50",
+      textColor: "text-purple-700",
+      borderColor: "border-purple-200"
     }
   ];
 
   return (
-    <div className={`print-page bg-white p-8 flex flex-col ${config.pattern}`}>
+    <div className={`print-page bg-white p-10 flex flex-col ${config.pattern}`}>
       {/* Header */}
-      <div className="text-center mb-5">
-        <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient} font-bold mb-1`}>
+      <div className="text-center mb-6">
+        <h2 className={`${config.fontDisplay} text-4xl ${config.titleGradient} font-bold mb-2`}>
           MARZO {year}
         </h2>
-        <p className={`text-gray-500 text-sm italic ${config.fontBody}`}>
+        <p className={`text-gray-600 text-base italic ${config.fontBody}`}>
           Celebración Solar y Renacimiento
         </p>
       </div>
 
-      {/* Calendar Grid con bordes cuadrados */}
-      <div className="mb-4">
+      {/* Calendar Grid SIN bordes */}
+      <div className="mb-6">
         {/* Week day headers */}
-        <div className="grid grid-cols-7 border-t border-l border-gray-400">
+        <div className="grid grid-cols-7 mb-1">
           {weekDays.map((day) => (
             <div
               key={day}
-              className={`text-center text-gray-700 text-xs font-bold py-2 border-r border-b border-gray-400 bg-gray-100 ${config.fontBody}`}
+              className={`text-center text-gray-600 text-sm font-bold py-2 ${config.fontBody}`}
             >
               {day}
             </div>
           ))}
         </div>
 
-        {/* Calendar weeks */}
+        {/* Calendar weeks - SIN bordes */}
         {weeks.map((week, weekIndex) => (
-          <div key={weekIndex} className="grid grid-cols-7 border-l border-gray-400">
+          <div key={weekIndex} className="grid grid-cols-7 gap-1">
             {week.map((day, dayIndex) => {
               const isCurrentMonth = isSameMonth(day, monthDate);
               const dayNum = day.getDate();
@@ -286,30 +298,31 @@ export const CalendarioVisualEnero = ({ year }: EneroComponentProps) => {
                 <div
                   key={dayIndex}
                   className={`
-                    relative h-16 p-1 border-r border-b border-gray-400 flex flex-col
-                    ${isCurrentMonth ? 'bg-white' : 'bg-gray-50'}
-                    ${isWeekend && isCurrentMonth ? 'bg-gray-50/70' : ''}
+                    relative h-20 p-2 flex flex-col rounded
+                    ${!isCurrentMonth ? 'bg-gray-50 text-gray-300' : ''}
+                    ${isCurrentMonth && !evento ? 'bg-white' : ''}
+                    ${evento ? evento.bgColor : ''}
+                    ${isWeekend && isCurrentMonth && !evento ? 'bg-gray-50/50' : ''}
                   `}
                 >
                   <div className={`
-                    text-sm font-semibold
-                    ${isCurrentMonth ? 'text-gray-800' : 'text-gray-300'}
-                    ${evento ? config.iconPrimary + ' font-bold' : ''}
+                    text-base font-semibold
+                    ${!isCurrentMonth ? 'text-gray-300' : ''}
+                    ${isCurrentMonth && !evento ? 'text-gray-800' : ''}
+                    ${evento ? evento.textColor + ' font-bold' : ''}
                   `}>
                     {format(day, "d")}
                   </div>
 
                   {evento && (
-                    <>
-                      <div className="absolute top-1 right-1">
-                        <div className="w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"></div>
+                    <div className="flex-1 flex flex-col items-center justify-center">
+                      <div className={`text-2xl ${evento.textColor} mb-1`}>
+                        {evento.icon}
                       </div>
-                      <div className="mt-auto">
-                        <div className="text-[8px] font-bold text-gray-700 leading-tight">
-                          {evento.titulo}
-                        </div>
+                      <div className={`text-[9px] font-bold ${evento.textColor} leading-tight text-center`}>
+                        {evento.titulo}
                       </div>
-                    </>
+                    </div>
                   )}
                 </div>
               );
@@ -319,38 +332,30 @@ export const CalendarioVisualEnero = ({ year }: EneroComponentProps) => {
       </div>
 
       {/* Eventos Clave - Destacados abajo */}
-      <div className="space-y-2">
-        <h3 className={`${config.fontDisplay} text-sm ${config.iconPrimary} font-bold mb-2`}>
-          Eventos Clave:
-        </h3>
+      <div className="space-y-3">
         {eventosDestacados.map((evento, idx) => (
-          <div key={idx} className={`p-2 rounded-lg border-l-4 ${
-            idx === 0 ? 'bg-orange-50 border-orange-400' :
-            idx === 1 ? 'bg-blue-50 border-blue-400' :
-            idx === 2 ? 'bg-yellow-50 border-yellow-500' :
-            'bg-purple-50 border-purple-400'
-          }`}>
-            <div className="flex items-start gap-2">
-              <div className="flex-shrink-0 mt-0.5">
+          <div key={idx} className={`p-4 rounded-lg ${evento.bgColor}`}>
+            <div className="flex items-start gap-3">
+              <div className={`flex-shrink-0 text-2xl ${evento.textColor}`}>
                 {evento.icon}
               </div>
               <div className="flex-1">
-                <div className="flex items-baseline gap-2 mb-1">
-                  <span className={`font-bold ${config.iconPrimary} text-sm ${config.fontDisplay}`}>
+                <div className="flex items-baseline gap-2 mb-2">
+                  <span className={`font-bold ${evento.textColor} text-base ${config.fontDisplay}`}>
                     {evento.dia} Marzo
                   </span>
-                  <span className={`text-xs font-semibold text-gray-700 ${config.fontBody}`}>
+                  <span className={`text-sm font-semibold ${evento.textColor} ${config.fontBody}`}>
                     {evento.titulo}
                   </span>
                 </div>
-                <p className={`text-[10px] text-gray-700 leading-relaxed ${config.fontBody}`}>
+                <p className={`text-xs text-gray-700 leading-relaxed mb-2 ${config.fontBody}`}>
                   {evento.descripcion}
                 </p>
-                <p className={`text-[10px] ${config.iconSecondary} mt-1 font-medium`}>
+                <p className={`text-xs ${evento.textColor} font-medium ${config.fontBody}`}>
                   Ritual: {evento.ritual}
                   {evento.hora && (
-                    <span className={`ml-2 ${config.iconAccent}`}>
-                      Hora óptima: {evento.hora}
+                    <span className={`ml-2`}>
+                      · Hora óptima: {evento.hora}
                     </span>
                   )}
                 </p>
@@ -358,6 +363,22 @@ export const CalendarioVisualEnero = ({ year }: EneroComponentProps) => {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Energía del mes - Personalizada */}
+      <div className="mt-6 pt-6 border-t border-gray-200">
+        <div className="flex items-start gap-2 mb-3">
+          <span className={`${config.iconPrimary} text-xl`}>📅</span>
+          <h3 className={`${config.fontDisplay} text-base ${config.iconPrimary} font-bold`}>
+            Energía de Marzo {year}
+          </h3>
+        </div>
+        <p className={`text-sm text-gray-700 leading-relaxed ${config.fontBody}`}>
+          Marzo marca el inicio de tu nuevo ciclo solar con el Sol regresando a su posición natal en Piscis.
+          Con tu Sol progresado recién entrado en Aries (1°12'), experimentas una profunda conexión con tu
+          esencia intuitiva y una fase más asertiva. La Luna Nueva potencia nuevos comienzos mientras te enfocas
+          en relaciones, honrando tanto la profundidad intuitiva como la claridad de propósito que este año te invita a manifestar.
+        </p>
       </div>
     </div>
   );
