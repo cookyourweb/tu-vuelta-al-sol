@@ -149,11 +149,14 @@ const AgendaPersonalizada = () => {
       const birthMonth = parseInt(birthDateParts[1], 10) - 1; // Mes (0-indexed)
       const birthDay = parseInt(birthDateParts[2], 10); // Día
 
+      console.log('🔍 [DEBUG] Birth date parts:', { birthDateParts, birthMonth, birthDay });
+
       const now = new Date();
       const currentYear = now.getFullYear();
 
       // Fecha de cumpleaños de este año
       const currentBirthday = new Date(currentYear, birthMonth, birthDay);
+      console.log('🔍 [DEBUG] currentBirthday:', currentBirthday.toISOString().split('T')[0], 'Day:', currentBirthday.getDate());
 
       // Determinar si ya pasó el cumpleaños este año
       const hasHadBirthdayThisYear = now >= currentBirthday;
@@ -338,6 +341,8 @@ const AgendaPersonalizada = () => {
       });
 
       // 🎂 EVENTOS ESPECIALES: Cumpleaños y día anterior
+      console.log('🎂 [BIRTHDAY] startDate:', startDate.toISOString().split('T')[0], 'Day:', startDate.getDate());
+
       // Día del cumpleaños (inicio del año solar)
       transformedEvents.push({
         id: `birthday-${startDate.toISOString()}`,
@@ -361,6 +366,8 @@ const AgendaPersonalizada = () => {
       // Día anterior al cumpleaños (cierre del año solar)
       const dayBeforeBirthday = new Date(startDate);
       dayBeforeBirthday.setDate(dayBeforeBirthday.getDate() - 1);
+      console.log('🌅 [PRE-BIRTHDAY] dayBeforeBirthday:', dayBeforeBirthday.toISOString().split('T')[0], 'Day:', dayBeforeBirthday.getDate());
+
       transformedEvents.push({
         id: `pre-birthday-${dayBeforeBirthday.toISOString()}`,
         date: dayBeforeBirthday.toISOString().split('T')[0],
@@ -1110,26 +1117,33 @@ const AgendaPersonalizada = () => {
                 </div>
 
                 {/* Hora */}
-                {userProfile.birthTime && (
-                  <div className="flex items-center justify-between p-3 bg-black/30 rounded-lg border border-white/10">
-                    <div className="flex items-center">
-                      <Clock className="w-4 h-4 text-blue-400 mr-2" />
-                      <span className="text-gray-300 text-sm mr-4">Hora</span>
-                    </div>
-                    <span className="text-white font-semibold text-sm">
-                      {userProfile.birthTime}
-                    </span>
+                <div className="flex items-center justify-between p-3 bg-black/30 rounded-lg border border-white/10">
+                  <div className="flex items-center">
+                    <Clock className="w-4 h-4 text-blue-400 mr-2" />
+                    <span className="text-gray-300 text-sm mr-4">Hora</span>
                   </div>
-                )}
+                  <span className="text-white font-semibold text-sm">
+                    {userProfile.birthTime || 'No especificada'}
+                  </span>
+                </div>
 
-                {/* Lugar */}
-                <div className="flex items-center justify-between p-3 bg-black/30 rounded-lg border border-white/10 max-w-xs">
+                {/* Lugar - Solo ciudad */}
+                <div className="flex items-center justify-between p-3 bg-black/30 rounded-lg border border-white/10">
                   <div className="flex items-center">
                     <MapPin className="w-4 h-4 text-green-400 mr-2" />
                     <span className="text-gray-300 text-sm mr-4">Lugar</span>
                   </div>
-                  <span className="text-white font-semibold text-sm text-right truncate max-w-[200px]">
-                    {userProfile.birthPlace || 'No especificado'}
+                  <span className="text-white font-semibold text-sm">
+                    {(() => {
+                      const place = userProfile.birthPlace || 'No especificado';
+                      // Extraer solo la ciudad (buscar la palabra antes de "Comunidad" o usar la penúltima parte)
+                      const parts = place.split(',').map(p => p.trim());
+                      // Buscar "Madrid", "Barcelona", etc. (la ciudad principal)
+                      const cityIndex = parts.findIndex(p =>
+                        p.match(/^[A-Z][a-záéíóúñ]+$/) && !p.includes('Comunidad') && p.length > 3
+                      );
+                      return cityIndex >= 0 ? parts[cityIndex] : parts[0];
+                    })()}
                   </span>
                 </div>
               </div>
