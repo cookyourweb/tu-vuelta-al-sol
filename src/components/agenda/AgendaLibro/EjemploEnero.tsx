@@ -222,53 +222,52 @@ export const CalendarioVisualEnero = ({ year }: EneroComponentProps) => {
       descripcion: "Sol a 19°03' Piscis. Inicio de nuevo ciclo personal con énfasis en relaciones.",
       ritual: "Gran Ritual de Retorno Solar",
       hora: "15:30",
-      color: "bg-orange-50 border-l-4 border-orange-400",
-      icon: <Sun className="w-6 h-6 text-orange-500" />
+      icon: <Sun className="w-5 h-5 text-orange-500" />
     },
     {
       dia: 14,
       titulo: "Luna Nueva",
       descripcion: "Momento perfecto para sembrar intenciones alineadas con tu Sol natal.",
       ritual: "Luna Nueva en Piscis",
-      color: "bg-blue-50 border-l-4 border-blue-400",
-      icon: <Moon className="w-6 h-6 text-blue-500" />
+      icon: <Moon className="w-5 h-5 text-blue-500" />
     },
     {
       dia: 20,
       titulo: "Equinoccio",
       descripcion: "Sol ingresa en Aries. Portal de inicio en sincronía con Sol progresado 1°12' Aries.",
       ritual: "Portal de Primavera",
-      color: "bg-yellow-50 border-l-4 border-yellow-500",
-      icon: <Star className="w-6 h-6 text-yellow-600" fill="currentColor" />
+      icon: <Star className="w-5 h-5 text-yellow-600" fill="currentColor" />
     },
     {
       dia: 28,
       titulo: "Luna Llena",
       descripcion: "Activa tu Luna natal. Culminación emocional y equilibrio en relaciones.",
       ritual: "Luna Llena en Libra",
-      color: "bg-purple-50 border-l-4 border-purple-400",
-      icon: <Moon className="w-6 h-6 text-purple-500" />
+      icon: <Moon className="w-5 h-5 text-purple-500" />
     }
   ];
 
   return (
     <div className={`print-page bg-white p-8 flex flex-col ${config.pattern}`}>
       {/* Header */}
-      <div className="text-center mb-4">
-        <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient} font-bold`}>
+      <div className="text-center mb-5">
+        <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient} font-bold mb-1`}>
           MARZO {year}
         </h2>
-        <p className={`text-gray-500 text-sm mt-1 italic ${config.fontBody}`}>
-          Inicio de tu Ciclo Solar
+        <p className={`text-gray-500 text-sm italic ${config.fontBody}`}>
+          Celebración Solar y Renacimiento
         </p>
       </div>
 
-      {/* Calendar Grid - Compacto */}
+      {/* Calendar Grid con bordes cuadrados */}
       <div className="mb-4">
         {/* Week day headers */}
-        <div className="grid grid-cols-7 bg-gray-100 border border-gray-300">
+        <div className="grid grid-cols-7 border-t border-l border-gray-400">
           {weekDays.map((day) => (
-            <div key={day} className={`text-center text-gray-700 text-xs font-bold py-2 border-r border-gray-300 last:border-r-0 ${config.fontBody}`}>
+            <div
+              key={day}
+              className={`text-center text-gray-700 text-xs font-bold py-2 border-r border-b border-gray-400 bg-gray-100 ${config.fontBody}`}
+            >
               {day}
             </div>
           ))}
@@ -276,7 +275,7 @@ export const CalendarioVisualEnero = ({ year }: EneroComponentProps) => {
 
         {/* Calendar weeks */}
         {weeks.map((week, weekIndex) => (
-          <div key={weekIndex} className="grid grid-cols-7 border-b border-l border-r border-gray-300">
+          <div key={weekIndex} className="grid grid-cols-7 border-l border-gray-400">
             {week.map((day, dayIndex) => {
               const isCurrentMonth = isSameMonth(day, monthDate);
               const dayNum = day.getDate();
@@ -287,14 +286,13 @@ export const CalendarioVisualEnero = ({ year }: EneroComponentProps) => {
                 <div
                   key={dayIndex}
                   className={`
-                    relative min-h-[50px] p-2 border-r border-gray-300 last:border-r-0 flex flex-col
+                    relative h-16 p-1 border-r border-b border-gray-400 flex flex-col
                     ${isCurrentMonth ? 'bg-white' : 'bg-gray-50'}
-                    ${isWeekend && isCurrentMonth ? 'bg-gray-50/50' : ''}
-                    ${evento ? 'bg-gradient-to-br from-purple-50/30 to-transparent' : ''}
+                    ${isWeekend && isCurrentMonth ? 'bg-gray-50/70' : ''}
                   `}
                 >
                   <div className={`
-                    text-base font-semibold
+                    text-sm font-semibold
                     ${isCurrentMonth ? 'text-gray-800' : 'text-gray-300'}
                     ${evento ? config.iconPrimary + ' font-bold' : ''}
                   `}>
@@ -302,17 +300,16 @@ export const CalendarioVisualEnero = ({ year }: EneroComponentProps) => {
                   </div>
 
                   {evento && (
-                    <div className="absolute top-1 right-1">
-                      <div className="w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"></div>
-                    </div>
-                  )}
-
-                  {evento && (
-                    <div className="mt-auto">
-                      <div className="text-[9px] font-bold text-gray-600 leading-tight">
-                        {evento.titulo}
+                    <>
+                      <div className="absolute top-1 right-1">
+                        <div className="w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"></div>
                       </div>
-                    </div>
+                      <div className="mt-auto">
+                        <div className="text-[8px] font-bold text-gray-700 leading-tight">
+                          {evento.titulo}
+                        </div>
+                      </div>
+                    </>
                   )}
                 </div>
               );
@@ -323,25 +320,33 @@ export const CalendarioVisualEnero = ({ year }: EneroComponentProps) => {
 
       {/* Eventos Clave - Destacados abajo */}
       <div className="space-y-2">
+        <h3 className={`${config.fontDisplay} text-sm ${config.iconPrimary} font-bold mb-2`}>
+          Eventos Clave:
+        </h3>
         {eventosDestacados.map((evento, idx) => (
-          <div key={idx} className={`p-3 rounded-lg ${evento.color}`}>
-            <div className="flex items-start gap-3">
+          <div key={idx} className={`p-2 rounded-lg border-l-4 ${
+            idx === 0 ? 'bg-orange-50 border-orange-400' :
+            idx === 1 ? 'bg-blue-50 border-blue-400' :
+            idx === 2 ? 'bg-yellow-50 border-yellow-500' :
+            'bg-purple-50 border-purple-400'
+          }`}>
+            <div className="flex items-start gap-2">
               <div className="flex-shrink-0 mt-0.5">
                 {evento.icon}
               </div>
               <div className="flex-1">
                 <div className="flex items-baseline gap-2 mb-1">
-                  <span className={`font-bold ${config.iconPrimary} ${config.fontDisplay}`}>
+                  <span className={`font-bold ${config.iconPrimary} text-sm ${config.fontDisplay}`}>
                     {evento.dia} Marzo
                   </span>
-                  <span className={`text-sm font-semibold text-gray-700 ${config.fontBody}`}>
+                  <span className={`text-xs font-semibold text-gray-700 ${config.fontBody}`}>
                     {evento.titulo}
                   </span>
                 </div>
-                <p className={`text-xs text-gray-700 leading-relaxed ${config.fontBody}`}>
+                <p className={`text-[10px] text-gray-700 leading-relaxed ${config.fontBody}`}>
                   {evento.descripcion}
                 </p>
-                <p className={`text-xs ${config.iconSecondary} mt-1 font-medium`}>
+                <p className={`text-[10px] ${config.iconSecondary} mt-1 font-medium`}>
                   Ritual: {evento.ritual}
                   {evento.hora && (
                     <span className={`ml-2 ${config.iconAccent}`}>
@@ -676,87 +681,102 @@ export const MantraEnero = ({ year }: EneroComponentProps) => {
 
 interface SemanaEneroProps {
   semanaNum: number;
-  fechas: string;
+  dias: { dia: string; fecha: number }[]; // Array de 7 días: lun-dom
   energia: string;
   clave: string;
   eventoActivo?: { icon: React.ReactNode; nombre: string; color: string };
   microejercicio: string;
 }
 
-const SemanaEnero = ({ semanaNum, fechas, energia, clave, eventoActivo, microejercicio }: SemanaEneroProps) => {
+const SemanaEnero = ({ semanaNum, dias, energia, clave, eventoActivo, microejercicio }: SemanaEneroProps) => {
   const { config } = useStyle();
-  
+  const diasSemana = ["LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"];
+
   return (
     <div className={`print-page bg-white p-8 flex flex-col relative overflow-hidden ${config.pattern}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-4 relative z-10">
         <div className="flex items-center gap-3">
-          <div className={`w-14 h-14 rounded-full ${config.headerBg} flex items-center justify-center shadow-lg`}>
-            <span className="text-white font-display text-2xl">{semanaNum}</span>
+          <div className={`w-12 h-12 rounded-full ${config.headerBg} flex items-center justify-center shadow-lg`}>
+            <span className="text-white font-display text-xl">{semanaNum}</span>
           </div>
           <div>
             <h2 className={`font-display text-xl ${config.titleGradient}`}>Semana {semanaNum}</h2>
-            <p className="text-gray-500 font-medium">{fechas}</p>
+            <p className="text-gray-500 text-sm font-medium">{dias[0].fecha} - {dias[6].fecha} de Marzo</p>
           </div>
         </div>
         {eventoActivo && (
-          <div className={`flex items-center gap-2 ${eventoActivo.color} px-4 py-2 rounded-full shadow-lg`}>
+          <div className={`flex items-center gap-2 ${eventoActivo.color} px-3 py-1.5 rounded-full shadow-lg`}>
             {eventoActivo.icon}
-            <span className="text-white text-sm font-bold">{eventoActivo.nombre}</span>
+            <span className="text-white text-xs font-bold">{eventoActivo.nombre}</span>
           </div>
         )}
       </div>
 
-      <div className={`${config.divider} w-full mb-4 relative z-10`} />
+      {/* Grid de 7 días de la semana */}
+      <div className="grid grid-cols-7 gap-1 mb-4 relative z-10">
+        {dias.map((dia, idx) => (
+          <div
+            key={idx}
+            className={`
+              ${config.cardBorder} rounded-lg p-2 text-center
+              ${idx >= 5 ? config.highlightSecondary : config.highlightPrimary}
+            `}
+          >
+            <div className={`text-xs font-bold ${config.iconSecondary} mb-1`}>
+              {diasSemana[idx]}
+            </div>
+            <div className={`text-lg font-bold ${config.iconPrimary}`}>
+              {dia.fecha}
+            </div>
+            <div className="h-8 mt-1 text-[10px] text-gray-500">
+              {/* Espacio para notas */}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className={`${config.divider} w-full mb-3 relative z-10`} />
 
       {/* Energy and key */}
-      <div className="grid grid-cols-2 gap-4 mb-4 relative z-10">
-        <div className={`${config.highlightAccent} rounded-xl p-4`}>
-          <div className="flex items-center gap-2 mb-2">
-            <Flame className={`w-5 h-5 ${config.iconAccent}`} />
-            <h3 className={`${config.iconAccent} text-sm uppercase tracking-wider font-bold`}>Energía</h3>
+      <div className="grid grid-cols-2 gap-3 mb-3 relative z-10">
+        <div className={`${config.highlightAccent} rounded-lg p-3`}>
+          <div className="flex items-center gap-2 mb-1">
+            <Flame className={`w-4 h-4 ${config.iconAccent}`} />
+            <h3 className={`${config.iconAccent} text-xs uppercase tracking-wider font-bold`}>Energía</h3>
           </div>
-          <p className="text-gray-800 font-bold pl-7 text-lg">{energia}</p>
+          <p className="text-gray-800 font-bold text-sm">{energia}</p>
         </div>
-        <div className={`${config.highlightSecondary} rounded-xl p-4`}>
-          <div className="flex items-center gap-2 mb-2">
-            <Lightbulb className={`w-5 h-5 ${config.iconSecondary}`} />
-            <h3 className={`${config.iconSecondary} text-sm uppercase tracking-wider font-bold`}>Clave</h3>
+        <div className={`${config.highlightSecondary} rounded-lg p-3`}>
+          <div className="flex items-center gap-2 mb-1">
+            <Lightbulb className={`w-4 h-4 ${config.iconSecondary}`} />
+            <h3 className={`${config.iconSecondary} text-xs uppercase tracking-wider font-bold`}>Clave</h3>
           </div>
-          <p className="text-gray-800 font-bold pl-7 text-lg">{clave}</p>
+          <p className="text-gray-800 font-bold text-sm">{clave}</p>
         </div>
       </div>
 
       {/* Micro-exercise */}
-      <div className={`${config.highlightPrimary} rounded-xl p-4 mb-4 relative z-10`}>
-        <div className="flex items-center gap-2 mb-2">
-          <Target className={`w-5 h-5 ${config.iconPrimary}`} />
-          <h3 className={`${config.iconPrimary} text-sm uppercase tracking-wider font-bold`}>Micro-ejercicio</h3>
+      <div className={`${config.highlightPrimary} rounded-lg p-3 mb-3 relative z-10`}>
+        <div className="flex items-center gap-2 mb-1">
+          <Target className={`w-4 h-4 ${config.iconPrimary}`} />
+          <h3 className={`${config.iconPrimary} text-xs uppercase tracking-wider font-bold`}>Micro-ejercicio</h3>
         </div>
-        <p className="text-gray-800 font-medium pl-7">{microejercicio}</p>
+        <p className="text-gray-800 font-medium text-sm">{microejercicio}</p>
       </div>
 
       {/* Daily planning space */}
-      <div className={`flex-1 ${config.cardBorder} rounded-xl p-4 writing-area relative z-10`}>
-        <h3 className={`${config.iconPrimary} text-sm uppercase tracking-wider mb-3 flex items-center gap-2 font-bold`}>
-          <PenLine className={`w-4 h-4 ${config.iconSecondary}`} />
-          Planificación y reflexión
+      <div className={`flex-1 ${config.cardBorder} rounded-lg p-3 writing-area relative z-10`}>
+        <h3 className={`${config.iconPrimary} text-xs uppercase tracking-wider mb-2 flex items-center gap-2 font-bold`}>
+          <PenLine className={`w-3 h-3 ${config.iconSecondary}`} />
+          Notas y reflexión de la semana
         </h3>
-        <div className="grid grid-cols-2 gap-4 h-full writing-lines">
-          <div className="space-y-4">
-            <div className="h-8" />
-            <div className="h-8" />
-            <div className="h-8" />
-            <div className="h-8" />
-            <div className="h-8" />
-          </div>
-          <div className="space-y-4">
-            <div className="h-8" />
-            <div className="h-8" />
-            <div className="h-8" />
-            <div className="h-8" />
-            <div className="h-8" />
-          </div>
+        <div className="space-y-3 writing-lines">
+          <div className="h-6 border-b border-dashed border-gray-300" />
+          <div className="h-6 border-b border-dashed border-gray-300" />
+          <div className="h-6 border-b border-dashed border-gray-300" />
+          <div className="h-6 border-b border-dashed border-gray-300" />
+          <div className="h-6 border-b border-dashed border-gray-300" />
         </div>
       </div>
     </div>
@@ -766,9 +786,22 @@ const SemanaEnero = ({ semanaNum, fechas, energia, clave, eventoActivo, microeje
 export const Semana1Enero = ({ year }: EneroComponentProps) => (
   <SemanaEnero
     semanaNum={1}
-    fechas="del 1 al 5 de enero"
+    dias={[
+      { dia: "LUN", fecha: 3 },
+      { dia: "MAR", fecha: 4 },
+      { dia: "MIÉ", fecha: 5 },
+      { dia: "JUE", fecha: 6 },
+      { dia: "VIE", fecha: 7 },
+      { dia: "SÁB", fecha: 8 },
+      { dia: "DOM", fecha: 9 }
+    ]}
     energia="Preparación"
     clave="No acelerar"
+    eventoActivo={{
+      icon: <Sun className="w-4 h-4 text-white" />,
+      nombre: "Retorno Solar",
+      color: "bg-gradient-to-r from-orange-500 to-yellow-500"
+    }}
     microejercicio="Escribir qué NO quieres repetir este año"
   />
 );
@@ -776,13 +809,21 @@ export const Semana1Enero = ({ year }: EneroComponentProps) => (
 export const Semana2Enero = ({ year }: EneroComponentProps) => (
   <SemanaEnero
     semanaNum={2}
-    fechas="del 6 al 12 de enero"
+    dias={[
+      { dia: "LUN", fecha: 10 },
+      { dia: "MAR", fecha: 11 },
+      { dia: "MIÉ", fecha: 12 },
+      { dia: "JUE", fecha: 13 },
+      { dia: "VIE", fecha: 14 },
+      { dia: "SÁB", fecha: 15 },
+      { dia: "DOM", fecha: 16 }
+    ]}
     energia="Intención consciente"
     clave="Define solo 1 objetivo real"
     eventoActivo={{
-      icon: <Moon className="w-5 h-5 text-white" />,
+      icon: <Moon className="w-4 h-4 text-white" />,
       nombre: "Luna Nueva",
-      color: "bg-gradient-to-r from-primary to-cosmic-violet"
+      color: "bg-gradient-to-r from-blue-500 to-indigo-500"
     }}
     microejercicio="Escribir tu intención en una frase"
   />
@@ -791,9 +832,22 @@ export const Semana2Enero = ({ year }: EneroComponentProps) => (
 export const Semana3Enero = ({ year }: EneroComponentProps) => (
   <SemanaEnero
     semanaNum={3}
-    fechas="del 13 al 19 de enero"
+    dias={[
+      { dia: "LUN", fecha: 17 },
+      { dia: "MAR", fecha: 18 },
+      { dia: "MIÉ", fecha: 19 },
+      { dia: "JUE", fecha: 20 },
+      { dia: "VIE", fecha: 21 },
+      { dia: "SÁB", fecha: 22 },
+      { dia: "DOM", fecha: 23 }
+    ]}
     energia="Ajuste"
     clave="Menos hacer, más observar"
+    eventoActivo={{
+      icon: <Star className="w-4 h-4 text-white" fill="currentColor" />,
+      nombre: "Equinoccio",
+      color: "bg-gradient-to-r from-yellow-500 to-orange-500"
+    }}
     microejercicio="Observa qué pesa y ajusta ritmos"
   />
 );
@@ -801,13 +855,21 @@ export const Semana3Enero = ({ year }: EneroComponentProps) => (
 export const Semana4Enero = ({ year }: EneroComponentProps) => (
   <SemanaEnero
     semanaNum={4}
-    fechas="del 20 al 26 de enero"
+    dias={[
+      { dia: "LUN", fecha: 24 },
+      { dia: "MAR", fecha: 25 },
+      { dia: "MIÉ", fecha: 26 },
+      { dia: "JUE", fecha: 27 },
+      { dia: "VIE", fecha: 28 },
+      { dia: "SÁB", fecha: 29 },
+      { dia: "DOM", fecha: 30 }
+    ]}
     energia="Liberación emocional"
     clave="Baja el ritmo, escucha emociones"
     eventoActivo={{
-      icon: <Sun className="w-5 h-5 text-white" />,
+      icon: <Moon className="w-4 h-4 text-white" />,
       nombre: "Luna Llena",
-      color: "bg-gradient-to-r from-cosmic-gold to-cosmic-amber"
+      color: "bg-gradient-to-r from-purple-500 to-pink-500"
     }}
     microejercicio="¿Qué necesito soltar?"
   />
