@@ -27,10 +27,10 @@ export const PortadaPersonalizada = ({
 
   return (
     <div className={`print-page flex flex-col items-center justify-center text-center p-12 relative overflow-hidden
-      screen:${config.headerBg} print:bg-transparent ${config.pattern}`}>
+      ${config.headerBg} print:bg-transparent ${config.pattern}`}>
 
       {/* Decorative star icon top */}
-      <div className={`relative z-10 mb-8 ${config.headerText} screen:opacity-80 print:opacity-60`}>
+      <div className={`relative z-10 mb-8 ${config.headerText} opacity-80 print:opacity-60`}>
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
         </svg>
@@ -50,7 +50,7 @@ export const PortadaPersonalizada = ({
         </div>
 
         {/* Iconos astronómicos */}
-        <div className={`flex items-center justify-center gap-6 text-3xl ${config.headerText} screen:opacity-70 print:opacity-50 my-6`}>
+        <div className={`flex items-center justify-center gap-6 text-3xl ${config.headerText} opacity-70 print:opacity-50 my-6`}>
           <span title="Sol">☉</span>
           <span title="Luna">☽</span>
           <span title="Ascendente">↗</span>
@@ -60,11 +60,11 @@ export const PortadaPersonalizada = ({
           {name}
         </div>
 
-        <div className={`text-base ${config.headerText} screen:opacity-80 print:opacity-70 ${config.fontBody}`}>
+        <div className={`text-base ${config.headerText} opacity-80 print:opacity-70 ${config.fontBody}`}>
           Sol en {sunSign} · Luna en {moonSign} · Ascendente {ascendant}
         </div>
 
-        <div className={`mt-10 text-base ${config.headerText} screen:opacity-75 print:opacity-65 italic max-w-lg mx-auto ${config.fontBody} leading-relaxed`}>
+        <div className={`mt-10 text-base ${config.headerText} opacity-75 print:opacity-65 italic max-w-lg mx-auto ${config.fontBody} leading-relaxed`}>
           "{inspirationalQuote}"
         </div>
       </div>

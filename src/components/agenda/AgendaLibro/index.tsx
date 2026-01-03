@@ -9,6 +9,7 @@ import { Printer, X } from 'lucide-react';
 
 // Secciones del libro
 import { PortadaPersonalizada, PaginaIntencion } from './PortalEntrada';
+import { PaginaIndice } from './Indice';
 import { CartaBienvenida, TemaCentralAnio, LoQueVieneAMover, LoQuePideSoltar, PaginaIntencionAnual } from './TuAnioTuViaje';
 import { EsenciaNatal, NodoNorte, NodoSur, PlanetasDominantes, PatronesEmocionales } from './SoulChart';
 import { QueEsRetornoSolar, AscendenteAnio, SolRetorno, LunaRetorno, EjesDelAnio, EjesDelAnio2, IntegracionEjes, RitualCumpleanos, MantraAnual } from './RetornoSolar';
@@ -88,10 +89,7 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
           endDate={endDate}
         />
         <PaginaIntencion />
-
-        {/* 1.5. RESUMEN DEL AÑO */}
-        <TuAnioResumen year={solarYear} userName={userName} />
-        <CiclosDelAnio year={solarYear} />
+        <PaginaIndice />
 
         {/* 2. TU AÑO, TU VIAJE */}
         <CartaBienvenida name={userName} />
@@ -118,7 +116,7 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
         <RitualCumpleanos />
         <MantraAnual />
 
-        {/* 5. EJEMPLO ENERO - MES COMPLETO */}
+        {/* 5. EJEMPLO MARZO - MES DEL CUMPLEAÑOS (Hardcodeado) */}
         <AperturaEneroIzquierda year={solarYear} />
         <AperturaEneroDerecha year={solarYear} />
         <CalendarioVisualEnero year={solarYear} />
@@ -132,11 +130,11 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
         <Semana4Enero year={solarYear} />
         <CierreEnero year={solarYear} />
 
-        {/* Placeholder para meses 2-12 */}
+        {/* Placeholder para meses 2-11 (Abril - Diciembre del año solar) */}
         <div className="print-page bg-white p-10 text-center flex items-center justify-center">
           <div>
             <h2 className="text-2xl font-bold text-gray-600 mb-4">
-              📅 Meses Febrero - Diciembre
+              📅 Meses Abril - Diciembre {solarYear}
             </h2>
             <p className="text-gray-500">
               Próximamente con tus eventos personalizados
@@ -147,16 +145,18 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
           </div>
         </div>
 
-        {/* 6. TERAPIAS CREATIVAS */}
+        {/* 6. ENERO - REFLEXIÓN Y ANÁLISIS DEL AÑO */}
+        <ReflexionFinDeAnio year={solarYear + 1} userName={userName} />
+        <TuAnioResumen year={solarYear + 1} userName={userName} />
+        <CiclosDelAnio year={solarYear + 1} />
+
+        {/* 7. TERAPIAS CREATIVAS */}
         <EscrituraTerapeutica />
         <Visualizacion />
         <RitualSimbolico />
         <TrabajoEmocional />
 
-        {/* 6.5. REFLEXIÓN DE FIN DE AÑO */}
-        <ReflexionFinDeAnio year={solarYear + 1} userName={userName} />
-
-        {/* 7. CIERRE DE CICLO */}
+        {/* 8. CIERRE DE CICLO */}
         <QuienEraQuienSoy />
         <PreparacionProximaVuelta />
         <CartaCierre name={userName} />
