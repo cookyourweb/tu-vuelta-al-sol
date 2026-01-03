@@ -180,7 +180,7 @@ export const AperturaEneroDerecha = ({ year }: EneroComponentProps) => {
 
 // ============ 2. CALENDARIO VISUAL (2 páginas) ============
 
-const weekDays = ["LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"];
+const weekDays = ["L", "M", "X", "J", "V", "S", "D"];
 
 const eneroEvents: Record<number, { icon: React.ReactNode; label: string; color: string; bgColor: string }> = {
   6: { icon: <Moon className="w-5 h-5" />, label: "Inicio", color: "text-white", bgColor: "bg-gradient-to-br from-primary to-cosmic-violet" },
@@ -214,7 +214,7 @@ export const CalendarioVisualEnero = ({ year }: EneroComponentProps) => {
   const weeks = generateEneroWeeks(year);
   const monthDate = new Date(year, 0, 1);
 
-  // Define eventos destacados del mes
+  // Define eventos destacados del mes - usando colores del tema
   const eventosDestacados = [
     {
       dia: 9,
@@ -223,9 +223,8 @@ export const CalendarioVisualEnero = ({ year }: EneroComponentProps) => {
       ritual: "Gran Ritual de Retorno Solar",
       hora: "15:30",
       icon: "☀",
-      bgColor: "bg-amber-50",
-      textColor: "text-amber-700",
-      borderColor: "border-amber-200"
+      bgColor: config.highlightPrimary,
+      textColor: config.iconPrimary
     },
     {
       dia: 14,
@@ -233,9 +232,8 @@ export const CalendarioVisualEnero = ({ year }: EneroComponentProps) => {
       descripcion: "Momento perfecto para sembrar intenciones alineadas con tu Sol natal.",
       ritual: "Luna Nueva en Piscis",
       icon: "☾",
-      bgColor: "bg-blue-50",
-      textColor: "text-blue-700",
-      borderColor: "border-blue-200"
+      bgColor: config.highlightSecondary,
+      textColor: config.iconSecondary
     },
     {
       dia: 20,
@@ -243,9 +241,8 @@ export const CalendarioVisualEnero = ({ year }: EneroComponentProps) => {
       descripcion: "Sol ingresa en Aries. Portal de inicio en sincronía con Sol progresado 1°12' Aries.",
       ritual: "Portal de Primavera",
       icon: "✦",
-      bgColor: "bg-green-50",
-      textColor: "text-green-700",
-      borderColor: "border-green-200"
+      bgColor: config.highlightAccent,
+      textColor: config.iconAccent
     },
     {
       dia: 28,
@@ -253,9 +250,8 @@ export const CalendarioVisualEnero = ({ year }: EneroComponentProps) => {
       descripcion: "Activa tu Luna natal. Culminación emocional y equilibrio en relaciones.",
       ritual: "Luna Llena en Libra",
       icon: "☾",
-      bgColor: "bg-purple-50",
-      textColor: "text-purple-700",
-      borderColor: "border-purple-200"
+      bgColor: config.highlightPrimary,
+      textColor: config.iconPrimary
     }
   ];
 
@@ -298,7 +294,7 @@ export const CalendarioVisualEnero = ({ year }: EneroComponentProps) => {
                 <div
                   key={dayIndex}
                   className={`
-                    relative h-20 p-2 flex flex-col rounded
+                    relative h-20 flex flex-col rounded
                     ${!isCurrentMonth ? 'bg-gray-50 text-gray-300' : ''}
                     ${isCurrentMonth && !evento ? 'bg-white' : ''}
                     ${evento ? evento.bgColor : ''}
@@ -306,7 +302,7 @@ export const CalendarioVisualEnero = ({ year }: EneroComponentProps) => {
                   `}
                 >
                   <div className={`
-                    text-base font-semibold
+                    text-base font-semibold pt-1 px-1
                     ${!isCurrentMonth ? 'text-gray-300' : ''}
                     ${isCurrentMonth && !evento ? 'text-gray-800' : ''}
                     ${evento ? evento.textColor + ' font-bold' : ''}
@@ -315,11 +311,11 @@ export const CalendarioVisualEnero = ({ year }: EneroComponentProps) => {
                   </div>
 
                   {evento && (
-                    <div className="flex-1 flex flex-col items-center justify-center">
+                    <div className="flex-1 flex flex-col items-center justify-center pb-1">
                       <div className={`text-2xl ${evento.textColor} mb-1`}>
                         {evento.icon}
                       </div>
-                      <div className={`text-[9px] font-bold ${evento.textColor} leading-tight text-center`}>
+                      <div className={`text-[9px] font-bold ${evento.textColor} leading-tight text-center px-1`}>
                         {evento.titulo}
                       </div>
                     </div>
