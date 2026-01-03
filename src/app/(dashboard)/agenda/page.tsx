@@ -44,6 +44,8 @@ const AgendaPersonalizada = () => {
   const [loadedMonths, setLoadedMonths] = useState<Set<string>>(new Set());
   const [loadingMonthlyEvents, setLoadingMonthlyEvents] = useState(false);
   const [loadingMonthName, setLoadingMonthName] = useState<string>('');
+  // 🆕 Estado para selector de año solar (actual vs próximo)
+  const [solarYearOffset, setSolarYearOffset] = useState<0 | 1>(0); // 0 = año actual, 1 = próximo año
 
   // Perfil de usuario REAL (no datos de prueba)
   const [userProfile, setUserProfile] = React.useState<UserProfile | null>(null);
@@ -139,19 +141,34 @@ const AgendaPersonalizada = () => {
     }
 
     try {
-      console.log('📅 [YEAR-EVENTS] Fetching complete year events from birthday to next birthday...');
+      console.log(`📅 [YEAR-EVENTS] Fetching year events (offset: ${solarYearOffset})...`);
 
-      // Calcular el rango del año astrológico (cumpleaños actual al próximo)
+      // Calcular el rango del año astrológico con offset
       const birthDate = new Date(userProfile.birthDate);
-      const currentYear = new Date().getFullYear();
+      const now = new Date();
+      const currentYear = now.getFullYear();
 
       // Fecha de cumpleaños de este año
       const currentBirthday = new Date(currentYear, birthDate.getMonth(), birthDate.getDate());
 
-      // Si ya pasó el cumpleaños este año, usar el del próximo año
-      const now = new Date();
-      const startDate = currentBirthday < now ? new Date(currentYear + 1, birthDate.getMonth(), birthDate.getDate()) : currentBirthday;
-      const endDate = new Date(startDate.getFullYear() + 1, birthDate.getMonth(), birthDate.getDate());
+      // Determinar si ya pasó el cumpleaños este año
+      const hasHadBirthdayThisYear = now >= currentBirthday;
+
+      // Calcular el inicio del año solar según offset
+      let startDate: Date;
+      if (solarYearOffset === 0) {
+        // Año solar actual
+        startDate = hasHadBirthdayThisYear
+          ? currentBirthday  // Ya pasó el cumpleaños → empezó en febrero 2026
+          : new Date(currentYear - 1, birthDate.getMonth(), birthDate.getDate()); // No ha pasado → empezó en febrero 2025
+      } else {
+        // Próximo año solar
+        startDate = hasHadBirthdayThisYear
+          ? new Date(currentYear + 1, birthDate.getMonth(), birthDate.getDate()) // Próximo feb 2027
+          : currentBirthday; // Próximo feb 2026
+      }
+
+      const endDate = new Date(startDate.getFullYear() + 1, birthDate.getMonth(), birthDate.getDate() - 1);
 
       setYearRange({ start: startDate, end: endDate });
 
@@ -316,7 +333,50 @@ const AgendaPersonalizada = () => {
         }
       });
 
-      console.log(`✅ [YEAR-EVENTS] Loaded ${transformedEvents.length} events for the complete year`);
+      // 🎂 EVENTOS ESPECIALES: Cumpleaños y día anterior
+      // Día del cumpleaños (inicio del año solar)
+      transformedEvents.push({
+        id: `birthday-${startDate.toISOString()}`,
+        date: startDate.toISOString().split('T')[0],
+        title: '🎂 Tu Vuelta al Sol comienza hoy',
+        description: `¡Feliz cumpleaños ${userProfile.name || ''}! Hoy comienza tu nuevo año solar, un ciclo de 365 días lleno de oportunidades cósmicas.`,
+        type: 'ai_generated',
+        priority: 'high',
+        importance: 'high',
+        planet: 'Sol',
+        sign: userProfile.astrological?.signs?.sun || 'N/A',
+        aiInterpretation: {
+          meaning: `🎉 ¡HOY ES TU DÍA SOLAR ${userProfile.name?.toUpperCase()}! El Sol regresa exactamente a la misma posición que tenía cuando naciste. Es el momento más poderoso del año para manifestar tus intenciones y renovar tu energía vital.`,
+          advice: `CELEBRA tu existencia. Reflexiona sobre el año que termina y establece intenciones claras para tu nuevo ciclo solar. Este es TU momento de renacer.`,
+          mantra: 'SOY LUZ, SOY PODER, SOY RENOVACIÓN. MI NUEVO CICLO SOLAR COMIENZA HOY.',
+          ritual: `🎂 RITUAL DE RETORNO SOLAR:\n1. Enciende una vela dorada/amarilla\n2. Escribe 3 logros del año pasado\n3. Escribe 3 intenciones para tu nuevo año solar\n4. Medita 10 minutos visualizando tu año perfecto\n5. Sopla la vela y guarda tus intenciones`,
+          lifeAreas: ['Renovación', 'Renacimiento', 'Nuevos Comienzos', 'Poder Personal']
+        }
+      });
+
+      // Día anterior al cumpleaños (cierre del año solar)
+      const dayBeforeBirthday = new Date(startDate);
+      dayBeforeBirthday.setDate(dayBeforeBirthday.getDate() - 1);
+      transformedEvents.push({
+        id: `pre-birthday-${dayBeforeBirthday.toISOString()}`,
+        date: dayBeforeBirthday.toISOString().split('T')[0],
+        title: '🌅 Tu ciclo solar termina hoy',
+        description: `Mañana comienza tu nuevo año solar. Hoy es el momento perfecto para cerrar ciclos y prepararte para tu renacimiento.`,
+        type: 'ai_generated',
+        priority: 'high',
+        importance: 'high',
+        planet: 'Sol',
+        sign: userProfile.astrological?.signs?.sun || 'N/A',
+        aiInterpretation: {
+          meaning: `🌅 CIERRE DE CICLO SOLAR. El último día antes de tu cumpleaños es sagrado para soltar lo que ya no sirve y prepararte para el renacimiento de mañana.`,
+          advice: `REFLEXIONA sobre todo lo vivido este año. ¿Qué aprendiste? ¿Qué quieres soltar? ¿Qué quieres llevar contigo al nuevo ciclo?`,
+          mantra: 'AGRADEZCO TODO LO VIVIDO Y ME PREPARO PARA RENACER CON PODER.',
+          ritual: `🌅 RITUAL DE CIERRE:\n1. Escribe en papel todo lo que quieres soltar\n2. Quema el papel con seguridad (o rómpelo)\n3. Date un baño de sal para limpiar energías\n4. Duerme temprano para recibir mañana con energía renovada`,
+          lifeAreas: ['Cierre', 'Reflexión', 'Gratitud', 'Preparación']
+        }
+      });
+
+      console.log(`✅ [YEAR-EVENTS] Loaded ${transformedEvents.length} events for the complete year (including birthday events)`);
       return transformedEvents;
 
     } catch (error) {
@@ -781,7 +841,7 @@ const AgendaPersonalizada = () => {
     };
 
     loadYearEvents();
-  }, [userProfile]);
+  }, [userProfile, solarYearOffset]); // 🔄 Recargar cuando cambie el offset de año solar
 
   // 🎂 Inicializar currentMonth al mes del cumpleaños cuando se calcula yearRange
   useEffect(() => {
@@ -1165,6 +1225,30 @@ const AgendaPersonalizada = () => {
               </>
             )}
 
+            {/* Selector de Año Solar */}
+            <div className="flex justify-center items-center gap-4 mb-6">
+              <button
+                onClick={() => setSolarYearOffset(0)}
+                className={`px-6 py-2 rounded-full font-semibold transition-all duration-200 ${
+                  solarYearOffset === 0
+                    ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg'
+                    : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                }`}
+              >
+                Año Solar Actual
+              </button>
+              <button
+                onClick={() => setSolarYearOffset(1)}
+                className={`px-6 py-2 rounded-full font-semibold transition-all duration-200 ${
+                  solarYearOffset === 1
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                    : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                }`}
+              >
+                Próximo Año Solar
+              </button>
+            </div>
+
             {/* Estadísticas de progreso */}
             <div className="flex justify-center items-center space-x-6 text-sm mt-6">
               <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
@@ -1280,6 +1364,13 @@ const AgendaPersonalizada = () => {
                       const isToday = isSameDay(day.date, new Date());
                       const isSelected = selectedDate && isSameDay(day.date, selectedDate);
 
+                      // 🎂 Detectar si es el día del cumpleaños (retorno solar)
+                      const isBirthday = yearRange && isSameDay(day.date, yearRange.start);
+                      // 🌅 Detectar si es el día anterior al cumpleaños
+                      const dayBeforeBirthday = yearRange ? new Date(yearRange.start) : null;
+                      if (dayBeforeBirthday) dayBeforeBirthday.setDate(dayBeforeBirthday.getDate() - 1);
+                      const isPreBirthday = dayBeforeBirthday && isSameDay(day.date, dayBeforeBirthday);
+
                       return (
                         <div
                           key={index}
@@ -1287,7 +1378,11 @@ const AgendaPersonalizada = () => {
                           className={`
                             relative min-h-[80px] lg:min-h-[100px] p-2 cursor-pointer transition-all duration-300 border-r border-b border-purple-400/20 last:border-r-0 group
                             ${day.isCurrentMonth
-                              ? isToday
+                              ? isBirthday
+                                ? 'bg-gradient-to-br from-pink-600/40 to-purple-600/40 border-2 border-pink-400/70 shadow-xl shadow-pink-500/30 animate-pulse'
+                                : isPreBirthday
+                                ? 'bg-gradient-to-br from-orange-600/30 to-yellow-600/30 border-2 border-orange-400/60 shadow-lg shadow-orange-500/20'
+                                : isToday
                                 ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-2 border-yellow-400/50 shadow-lg shadow-yellow-500/20'
                                 : isSelected
                                 ? 'bg-gradient-to-br from-purple-500/30 to-pink-500/30 border-2 border-purple-400/60'
@@ -1299,9 +1394,11 @@ const AgendaPersonalizada = () => {
                           {/* Número del día */}
                           <div className={`
                             text-sm font-bold mb-1
-                            ${isToday ? 'text-yellow-300' : day.isCurrentMonth ? 'text-white' : 'text-gray-500'}
+                            ${isBirthday ? 'text-pink-200 text-lg' : isPreBirthday ? 'text-orange-200' : isToday ? 'text-yellow-300' : day.isCurrentMonth ? 'text-white' : 'text-gray-500'}
                           `}>
                             {day.date.getDate()}
+                            {isBirthday && <span className="ml-1">🎂</span>}
+                            {isPreBirthday && <span className="ml-1">🌅</span>}
                           </div>
 
                           {/* Eventos del día con iconos */}
