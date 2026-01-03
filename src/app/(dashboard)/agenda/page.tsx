@@ -1023,9 +1023,43 @@ const AgendaPersonalizada = () => {
 
           <div className="max-w-3xl mx-auto">
             <p className="text-xl text-gray-300 mb-6 leading-relaxed">
-              {userProfile?.name ? `✨ Hola ${userProfile.name}, ` : '✨ Hola, explorador cósmico, '}
+              {userProfile?.name ? `✨ Hola ${userProfile.name}, ` : '✨ Hola, '}
               aquí encontrarás tu calendario astrológico personalizado con eventos cósmicos importantes y momentos de poder personal.
             </p>
+
+            {/* Información del usuario - Datos de nacimiento y ubicación actual */}
+            {userProfile && (
+              <div className="mb-6 space-y-4">
+                {/* Datos de nacimiento */}
+                <p className="text-gray-300 text-base leading-relaxed">
+                  <span className="text-purple-300 font-semibold">Nacimiento:</span>{' '}
+                  {new Date(userProfile.birthDate).toLocaleDateString('es-ES', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                  })}{' '}
+                  {userProfile.birthTime && `a las ${userProfile.birthTime}`}{' '}
+                  en {userProfile.birthPlace || 'ubicación no especificada'}
+                </p>
+
+                {/* Ubicación actual (si es diferente) */}
+                {userProfile.place && userProfile.place !== userProfile.birthPlace && (
+                  <p className="text-gray-300 text-base leading-relaxed">
+                    <span className="text-purple-300 font-semibold">Ubicación actual:</span>{' '}
+                    {userProfile.place}
+                  </p>
+                )}
+
+                {/* Sol, Luna, Ascendente */}
+                {userProfile.astrological?.signs && (
+                  <p className="text-gray-300 text-base leading-relaxed">
+                    <span className="text-yellow-300">☉ Sol:</span> {userProfile.astrological.signs.sun || 'N/A'}{' • '}
+                    <span className="text-blue-300">☽ Luna:</span> {userProfile.astrological.signs.moon || 'N/A'}{' • '}
+                    <span className="text-purple-300">↗ Ascendente:</span> {userProfile.astrological.signs.ascendant || 'N/A'}
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Texto de personalidad con modal */}
             {userProfile && userProfile.astrological && (
@@ -1066,7 +1100,7 @@ const AgendaPersonalizada = () => {
             )}
 
             {/* Estadísticas de progreso */}
-            <div className="flex justify-center items-center space-x-6 text-sm">
+            <div className="flex justify-center items-center space-x-6 text-sm mt-6">
               <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
                 <span className="text-green-300">🌙</span>
                 <span className="text-green-300 ml-2">Fases Lunares</span>
@@ -1125,10 +1159,10 @@ const AgendaPersonalizada = () => {
         </div>
 
         {/* LAYOUT DESKTOP/MOBILE */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8">
 
-            {/* CALENDARIO PRINCIPAL - 2/3 en desktop */}
-          <div className="lg:col-span-2">
+            {/* CALENDARIO PRINCIPAL - Full width */}
+          <div>
 
             {/* Header del calendario */}
             <div className="bg-gradient-to-r from-purple-600/30 to-indigo-600/30 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-purple-400/30">
@@ -1334,137 +1368,67 @@ const AgendaPersonalizada = () => {
                 return pages;
               })()}
             </div>
-          </div>
 
-          {/* SIDEBAR EVENTOS - 1/3 en desktop */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-8">
-
-              {/* Info del usuario - MOVIDO ARRIBA */}
-              {userProfile && (
-                <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-3xl p-6 mb-6 relative overflow-hidden">
-                  <div className="absolute top-4 right-4 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                  <div className="absolute bottom-4 left-4 w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
-
-                  <div className="flex items-center mb-4">
-                    <div className="bg-gradient-to-r from-green-400/20 to-blue-500/20 border border-green-400/30 rounded-full p-3 backdrop-blur-sm mr-4">
-                      <span className="text-2xl">👤</span>
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-bold text-white">{userProfile.name || 'Usuario'}</h4>
-                      <p className="text-gray-300 text-sm">{userProfile.currentAge || 0} años</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="bg-black/30 rounded-xl p-3 border border-white/10">
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-400 text-xs">Lugar</span>
-                        <span className="text-white text-sm">📍 {userProfile.place || 'Sin ubicación'}</span>
-                      </div>
-                    </div>
-
-                    <div className="bg-black/30 rounded-xl p-3 border border-white/10">
-                      <div className="text-gray-400 text-xs mb-2">Signos Astrológicos</div>
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-yellow-300 text-xs">☉ Sol</span>
-                          <span className="text-white text-sm">{userProfile.astrological?.signs?.sun || 'N/A'}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-blue-300 text-xs">☽ Luna</span>
-                          <span className="text-white text-sm">{userProfile.astrological?.signs?.moon || 'N/A'}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-purple-300 text-xs">↗ Ascendente</span>
-                          <span className="text-white text-sm">{userProfile.astrological?.signs?.ascendant || 'N/A'}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Header del sidebar */}
-              <div className="bg-gradient-to-r from-pink-600/30 to-purple-600/30 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-pink-400/30">
-                <h3 className="text-xl font-bold text-white mb-2 flex items-center">
-                  <span className="mr-3">📅</span>
-                  {selectedDate
-                    ? `${selectedDate.getDate()} de ${format(selectedDate, 'MMMM', { locale: es })}`
-                    : 'Selecciona un día'
-                  }
-                </h3>
-                <p className="text-pink-200 text-sm">
-                  {selectedDayEvents.length === 0
-                    ? 'Haz click en un día para ver sus eventos'
-                    : `${selectedDayEvents.length} evento${selectedDayEvents.length > 1 ? 's' : ''} cósmico${selectedDayEvents.length > 1 ? 's' : ''}`
-                  }
-                </p>
-              </div>
-
-              {/* Lista de eventos */}
-              {selectedDayEvents.length > 0 && (
-                <div className="space-y-4 max-h-[600px] overflow-y-auto">
-                  {selectedDayEvents.map((event) => (
-                    <div
-                      key={event.id}
-                      className={`
-                        bg-gradient-to-r ${getEventColor(event.type, event.priority)}/20 backdrop-blur-sm
-                        rounded-2xl p-4 border border-white/20 hover:shadow-lg transition-all duration-200
-                        cursor-pointer hover:scale-105
-                      `}
-                      onMouseEnter={(e) => handleEventHover(event, e)}
-                      onMouseLeave={handleEventLeave}
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl">{getEventIcon(event.type, event.priority)}</span>
-                          <div>
-                            <h4 className="font-bold text-white text-sm lg:text-base">{event.title}</h4>
+            {/* EVENTOS DEL MES - Ampliados debajo del calendario */}
+            {getCurrentMonthDays().some(day => day.hasEvents) && (
+              <div className="mt-8">
+                <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
+                  <span className="mr-3">✨</span>
+                  Eventos del Mes
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {getCurrentMonthDays()
+                    .filter(day => day.hasEvents && day.isCurrentMonth)
+                    .flatMap(day => day.events.map(event => ({ ...event, date: day.date })))
+                    .map((event, index) => (
+                      <div
+                        key={index}
+                        onClick={() => handleEventClick(event)}
+                        className={`
+                          bg-gradient-to-r ${getEventColor(event.type, event.priority)}/20 backdrop-blur-sm
+                          rounded-2xl p-5 border border-white/20 hover:shadow-lg transition-all duration-200
+                          cursor-pointer hover:scale-105
+                        `}
+                      >
+                        <div className="flex items-start gap-3 mb-3">
+                          <span className="text-3xl">{getEventIcon(event.type, event.priority)}</span>
+                          <div className="flex-1">
+                            <div className="text-purple-200 text-xs mb-1">
+                              {format(new Date(event.date), "d 'de' MMMM", { locale: es })}
+                            </div>
+                            <h4 className="font-bold text-white text-base mb-1">{event.title}</h4>
                             {event.planet && event.sign && (
                               <p className="text-purple-200 text-xs">{event.planet} en {event.sign}</p>
                             )}
                           </div>
+                          {event.priority === 'high' && (
+                            <span className="bg-red-500/80 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
+                              !
+                            </span>
+                          )}
                         </div>
-                        {event.priority === 'high' && (
-                          <span className="bg-red-500/80 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
-                            CRÍTICO
-                          </span>
+
+                        <p className="text-gray-200 text-sm leading-relaxed">
+                          {event.description}
+                        </p>
+
+                        {event.aiInterpretation?.meaning && (
+                          <div className="mt-3 pt-3 border-t border-white/10">
+                            <p className="text-gray-300 text-xs line-clamp-2">
+                              {event.aiInterpretation.meaning}
+                            </p>
+                          </div>
                         )}
+
+                        <div className="mt-3 text-purple-300 text-xs italic text-center">
+                          Click para ver más ✨
+                        </div>
                       </div>
-
-                      <p className="text-gray-200 text-sm mb-3 line-clamp-2">{event.description}</p>
-
-                      <div className="text-purple-300 text-xs italic">
-                        Hover para ver interpretación completa ✨
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* CTA inspirado en Dididaze */}
-              <div className="mt-6 bg-gradient-to-r from-purple-600/40 to-pink-600/40 backdrop-blur-sm rounded-2xl p-6 border border-purple-400/30 text-center">
-                <div className="text-2xl mb-3">🔮</div>
-                <h4 className="text-white font-bold mb-2">¿Quieres más magia?</h4>
-                <p className="text-purple-200 text-sm mb-4">
-                  Descubre interpretaciones aún más profundas de tu carta natal
-                </p>
-                <div className="flex flex-col gap-3">
-                  <button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-full font-semibold hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg hover:shadow-xl">
-                    Explorar más ✨
-                  </button>
-                  <button
-                    onClick={() => setShowAgendaLibro(true)}
-                    className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 transition-all duration-200 shadow-lg hover:shadow-yellow-500/25 border border-white/10 p-3 rounded-full group"
-                    title="Ver tu agenda en formato libro"
-                  >
-                    <span className="text-xl mr-2">📖</span>
-                    <span className="text-white font-bold">Ver Agenda Libro</span>
-                  </button>
+                    ))}
                 </div>
               </div>
-            </div>
+            )}
+
           </div>
         </div>
 
