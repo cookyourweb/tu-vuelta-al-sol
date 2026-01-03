@@ -6,6 +6,7 @@ import { format, addMonths, subMonths, isSameMonth, isSameDay, startOfMonth, end
 import { es } from 'date-fns/locale';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Calendar, MapPin, Clock, Sun as SunIcon } from 'lucide-react';
 import type { UserProfile, AstrologicalEvent, EventType } from '@/types/astrology/unified-types';
 
 import EventsLoadingModal from '@/components/astrology/EventsLoadingModal';
@@ -144,12 +145,15 @@ const AgendaPersonalizada = () => {
       console.log(`📅 [YEAR-EVENTS] Fetching year events (offset: ${solarYearOffset})...`);
 
       // Calcular el rango del año astrológico con offset
-      const birthDate = new Date(userProfile.birthDate);
+      const birthDateParts = userProfile.birthDate.split('T')[0].split('-'); // "1974-02-10" -> ["1974", "02", "10"]
+      const birthMonth = parseInt(birthDateParts[1], 10) - 1; // Mes (0-indexed)
+      const birthDay = parseInt(birthDateParts[2], 10); // Día
+
       const now = new Date();
       const currentYear = now.getFullYear();
 
       // Fecha de cumpleaños de este año
-      const currentBirthday = new Date(currentYear, birthDate.getMonth(), birthDate.getDate());
+      const currentBirthday = new Date(currentYear, birthMonth, birthDay);
 
       // Determinar si ya pasó el cumpleaños este año
       const hasHadBirthdayThisYear = now >= currentBirthday;
@@ -160,15 +164,15 @@ const AgendaPersonalizada = () => {
         // Año solar actual
         startDate = hasHadBirthdayThisYear
           ? currentBirthday  // Ya pasó el cumpleaños → empezó en febrero 2026
-          : new Date(currentYear - 1, birthDate.getMonth(), birthDate.getDate()); // No ha pasado → empezó en febrero 2025
+          : new Date(currentYear - 1, birthMonth, birthDay); // No ha pasado → empezó en febrero 2025
       } else {
         // Próximo año solar
         startDate = hasHadBirthdayThisYear
-          ? new Date(currentYear + 1, birthDate.getMonth(), birthDate.getDate()) // Próximo feb 2027
+          ? new Date(currentYear + 1, birthMonth, birthDay) // Próximo feb 2027
           : currentBirthday; // Próximo feb 2026
       }
 
-      const endDate = new Date(startDate.getFullYear() + 1, birthDate.getMonth(), birthDate.getDate() - 1);
+      const endDate = new Date(startDate.getFullYear() + 1, birthMonth, birthDay - 1);
 
       setYearRange({ start: startDate, end: endDate });
 
@@ -1087,103 +1091,47 @@ const AgendaPersonalizada = () => {
               aquí encontrarás tu calendario astrológico personalizado con eventos cósmicos importantes y momentos de poder personal.
             </p>
 
-            {/* Información del usuario - Estilo de la imagen con bullets */}
+            {/* Información del usuario - Estilo Tu Momento Cósmico en horizontal */}
             {userProfile && (
-              <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-3 max-w-4xl mx-auto">
+              <div className="mb-6 flex flex-wrap items-center justify-center gap-3 max-w-5xl mx-auto">
                 {/* Fecha Nacimiento */}
-                <div className="bg-slate-800/80 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-700/50 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                    <div>
-                      <div className="text-gray-400 text-xs font-medium">Fecha Nacimiento</div>
-                      <div className="text-white text-sm font-semibold">
-                        {new Date(userProfile.birthDate).toLocaleDateString('es-ES', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric'
-                        })}
-                      </div>
-                    </div>
+                <div className="flex items-center justify-between p-3 bg-black/30 rounded-lg border border-white/10">
+                  <div className="flex items-center">
+                    <Calendar className="w-4 h-4 text-yellow-400 mr-2" />
+                    <span className="text-gray-300 text-sm mr-4">Fecha</span>
                   </div>
+                  <span className="text-white font-semibold text-sm">
+                    {new Date(userProfile.birthDate).toLocaleDateString('es-ES', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric'
+                    })}
+                  </span>
                 </div>
 
                 {/* Hora */}
                 {userProfile.birthTime && (
-                  <div className="bg-slate-800/80 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-700/50 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                      <div>
-                        <div className="text-gray-400 text-xs font-medium">Hora</div>
-                        <div className="text-white text-sm font-semibold">{userProfile.birthTime}</div>
-                      </div>
+                  <div className="flex items-center justify-between p-3 bg-black/30 rounded-lg border border-white/10">
+                    <div className="flex items-center">
+                      <Clock className="w-4 h-4 text-blue-400 mr-2" />
+                      <span className="text-gray-300 text-sm mr-4">Hora</span>
                     </div>
+                    <span className="text-white font-semibold text-sm">
+                      {userProfile.birthTime}
+                    </span>
                   </div>
                 )}
 
                 {/* Lugar */}
-                <div className="bg-slate-800/80 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-700/50 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-gray-400 text-xs font-medium">Lugar</div>
-                      <div className="text-white text-sm font-semibold truncate">
-                        {userProfile.birthPlace || 'No especificado'}
-                      </div>
-                    </div>
+                <div className="flex items-center justify-between p-3 bg-black/30 rounded-lg border border-white/10 max-w-xs">
+                  <div className="flex items-center">
+                    <MapPin className="w-4 h-4 text-green-400 mr-2" />
+                    <span className="text-gray-300 text-sm mr-4">Lugar</span>
                   </div>
+                  <span className="text-white font-semibold text-sm text-right truncate max-w-[200px]">
+                    {userProfile.birthPlace || 'No especificado'}
+                  </span>
                 </div>
-
-                {/* Ubicación actual (si es diferente) */}
-                {userProfile.place && userProfile.place !== userProfile.birthPlace && (
-                  <div className="bg-slate-800/80 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-700/50 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-gray-400 text-xs font-medium">Ubicación Actual</div>
-                        <div className="text-white text-sm font-semibold truncate">{userProfile.place}</div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Sol */}
-                {userProfile.astrological?.signs?.sun && (
-                  <div className="bg-slate-800/80 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-700/50 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="text-yellow-400 text-lg">☉</div>
-                      <div>
-                        <div className="text-gray-400 text-xs font-medium">Sol</div>
-                        <div className="text-white text-sm font-semibold">{userProfile.astrological.signs.sun}</div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Luna */}
-                {userProfile.astrological?.signs?.moon && (
-                  <div className="bg-slate-800/80 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-700/50 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="text-blue-300 text-lg">☽</div>
-                      <div>
-                        <div className="text-gray-400 text-xs font-medium">Luna</div>
-                        <div className="text-white text-sm font-semibold">{userProfile.astrological.signs.moon}</div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Ascendente */}
-                {userProfile.astrological?.signs?.ascendant && (
-                  <div className="bg-slate-800/80 backdrop-blur-sm rounded-xl px-4 py-3 border border-slate-700/50 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="text-purple-400 text-lg">↗</div>
-                      <div>
-                        <div className="text-gray-400 text-xs font-medium">Ascendente</div>
-                        <div className="text-white text-sm font-semibold">{userProfile.astrological.signs.ascendant}</div>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
             )}
 
@@ -1393,11 +1341,11 @@ const AgendaPersonalizada = () => {
                         >
                           {/* Número del día */}
                           <div className={`
-                            text-sm font-bold mb-1
+                            text-sm font-bold mb-1 flex items-center gap-1
                             ${isBirthday ? 'text-pink-200 text-lg' : isPreBirthday ? 'text-orange-200' : isToday ? 'text-yellow-300' : day.isCurrentMonth ? 'text-white' : 'text-gray-500'}
                           `}>
                             {day.date.getDate()}
-                            {isBirthday && <span className="ml-1">🎂</span>}
+                            {isBirthday && <SunIcon className="w-4 h-4 text-yellow-400 animate-pulse" />}
                             {isPreBirthday && <span className="ml-1">🌅</span>}
                           </div>
 
