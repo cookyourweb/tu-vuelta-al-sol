@@ -1027,36 +1027,50 @@ const AgendaPersonalizada = () => {
               aquí encontrarás tu calendario astrológico personalizado con eventos cósmicos importantes y momentos de poder personal.
             </p>
 
-            {/* Información del usuario - Datos de nacimiento y ubicación actual */}
+            {/* Información del usuario - Layout horizontal */}
             {userProfile && (
-              <div className="mb-6 space-y-4">
-                {/* Datos de nacimiento */}
-                <p className="text-gray-300 text-base leading-relaxed">
-                  <span className="text-purple-300 font-semibold">Nacimiento:</span>{' '}
-                  {new Date(userProfile.birthDate).toLocaleDateString('es-ES', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                  })}{' '}
-                  {userProfile.birthTime && `a las ${userProfile.birthTime}`}{' '}
-                  en {userProfile.birthPlace || 'ubicación no especificada'}
-                </p>
+              <div className="mb-6 flex flex-wrap items-center justify-center gap-4 text-gray-300 text-sm">
+                <div className="flex items-center gap-2">
+                  <span className="text-purple-300 font-semibold">Nacimiento:</span>
+                  <span>
+                    {new Date(userProfile.birthDate).toLocaleDateString('es-ES', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric'
+                    })}
+                    {userProfile.birthTime && ` a las ${userProfile.birthTime}`}
+                    {` en ${userProfile.birthPlace || 'ubicación no especificada'}`}
+                  </span>
+                </div>
 
-                {/* Ubicación actual (si es diferente) */}
                 {userProfile.place && userProfile.place !== userProfile.birthPlace && (
-                  <p className="text-gray-300 text-base leading-relaxed">
-                    <span className="text-purple-300 font-semibold">Ubicación actual:</span>{' '}
-                    {userProfile.place}
-                  </p>
+                  <>
+                    <span className="text-purple-400">•</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-purple-300 font-semibold">Ubicación actual:</span>
+                      <span>{userProfile.place}</span>
+                    </div>
+                  </>
                 )}
 
-                {/* Sol, Luna, Ascendente */}
                 {userProfile.astrological?.signs && (
-                  <p className="text-gray-300 text-base leading-relaxed">
-                    <span className="text-yellow-300">☉ Sol:</span> {userProfile.astrological.signs.sun || 'N/A'}{' • '}
-                    <span className="text-blue-300">☽ Luna:</span> {userProfile.astrological.signs.moon || 'N/A'}{' • '}
-                    <span className="text-purple-300">↗ Ascendente:</span> {userProfile.astrological.signs.ascendant || 'N/A'}
-                  </p>
+                  <>
+                    <span className="text-purple-400">•</span>
+                    <div className="flex items-center gap-3">
+                      <span className="flex items-center gap-1">
+                        <span className="text-yellow-300">☉</span>
+                        <span>{userProfile.astrological.signs.sun || 'N/A'}</span>
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <span className="text-blue-300">☽</span>
+                        <span>{userProfile.astrological.signs.moon || 'N/A'}</span>
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <span className="text-purple-300">↗</span>
+                        <span>{userProfile.astrological.signs.ascendant || 'N/A'}</span>
+                      </span>
+                    </div>
+                  </>
                 )}
               </div>
             )}
@@ -1153,16 +1167,11 @@ const AgendaPersonalizada = () => {
           </div>
         )}
 
-        {/* PLANETARY CARDS - Contexto anual */}
-        <div className="mb-8">
-          <PlanetaryCards />
-        </div>
-
         {/* LAYOUT DESKTOP/MOBILE */}
-        <div className="grid grid-cols-1 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-            {/* CALENDARIO PRINCIPAL - Full width */}
-          <div>
+            {/* CALENDARIO PRINCIPAL - 2/3 en desktop */}
+          <div className="lg:col-span-2">
 
             {/* Header del calendario */}
             <div className="bg-gradient-to-r from-purple-600/30 to-indigo-600/30 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-purple-400/30">
@@ -1429,6 +1438,44 @@ const AgendaPersonalizada = () => {
               </div>
             )}
 
+          </div>
+
+          {/* SIDEBAR DERECHO - 1/3 en desktop */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-8 space-y-6">
+
+              {/* Planetas Activos */}
+              <div>
+                <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+                  <span className="mr-3">🪐</span>
+                  Planetas Activos
+                </h3>
+                <PlanetaryCards />
+              </div>
+
+              {/* Ver Agenda Libro */}
+              <button
+                onClick={() => setShowAgendaLibro(true)}
+                className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 transition-all duration-200 shadow-lg hover:shadow-yellow-500/25 border border-white/10 p-4 rounded-2xl group"
+                title="Ver tu agenda en formato libro"
+              >
+                <span className="text-2xl mr-2">📖</span>
+                <span className="text-white font-bold">Ver Agenda Libro</span>
+              </button>
+
+              {/* ¿Quieres más magia? */}
+              <div className="bg-gradient-to-r from-purple-600/40 to-pink-600/40 backdrop-blur-sm rounded-2xl p-6 border border-purple-400/30 text-center">
+                <div className="text-2xl mb-3">🔮</div>
+                <h4 className="text-white font-bold mb-2">¿Quieres más magia?</h4>
+                <p className="text-purple-200 text-sm mb-4">
+                  Descubre interpretaciones aún más profundas de tu carta natal
+                </p>
+                <button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-full font-semibold hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg hover:shadow-xl">
+                  Explorar más ✨
+                </button>
+              </div>
+
+            </div>
           </div>
         </div>
 
