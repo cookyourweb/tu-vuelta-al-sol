@@ -1467,6 +1467,7 @@ const AgendaPersonalizada = () => {
             </div>
           </div>
         </div>
+        </div>
 
         {/* ERROR BANNER - Si hay errores cargando eventos */}
         {error && (
@@ -2508,6 +2509,7 @@ const AgendaPersonalizada = () => {
               )}
             </div>
           </div>
+        </div>
         )}
 
         {/* MODAL CENTRADO CON OVERLAY */}
