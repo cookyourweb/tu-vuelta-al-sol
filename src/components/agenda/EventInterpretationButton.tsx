@@ -176,17 +176,17 @@ export default function EventInterpretationButton({
               {/* CONTENT - Sin restricciones de altura */}
               <div className="p-6 md:p-8 space-y-8">
                 {/* ==========================================
-                    📊 NIVEL 1: ANÁLISIS OBJETIVO
+                    🧱 CAPA 1: ANÁLISIS DESCRIPTIVO (ESTRUCTURA)
                     ========================================== */}
-                {(interpretation.nivel_1_analisis_objetivo || interpretation.capa_1_descriptivo) && (
+                {interpretation.capa_1_descriptivo && (
                   <div className="space-y-6">
-                    {/* Título de Nivel 1 */}
+                    {/* Título de Capa 1 */}
                     <div className="border-l-4 border-blue-400 pl-4 py-2 bg-blue-950/30">
                       <h2 className="text-2xl font-bold text-blue-100">
-                        📊 Análisis Objetivo
+                        🧱 Análisis Descriptivo
                       </h2>
                       <p className="text-blue-300 text-sm mt-1">
-                        ¿Qué pasa astronómicamente? (Sin interpretar)
+                        Estructura objetiva del evento y qué se activa en tu carta
                       </p>
                     </div>
 
