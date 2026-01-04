@@ -1467,7 +1467,6 @@ const AgendaPersonalizada = () => {
             </div>
           </div>
         </div>
-        </div>
 
         {/* ERROR BANNER - Si hay errores cargando eventos */}
         {error && (
