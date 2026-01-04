@@ -2682,10 +2682,11 @@ const AgendaPersonalizada = () => {
                     </button>
                   </div>
                 </div>
-              </Draggable>
-            </div>
-          </>
-        )}
+              </div>
+            </Draggable>
+          </div>
+        </>
+      )}
 
       </div>
   );
