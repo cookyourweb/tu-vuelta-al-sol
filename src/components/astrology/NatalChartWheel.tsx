@@ -60,6 +60,7 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
 }) => {
   const [hoveredPlanet, setHoveredPlanet] = useState<string | null>(null);
   const [hoveredAspect, setHoveredAspect] = useState<string | null>(null);
+  const [pinnedAspect, setPinnedAspect] = useState<string | null>(null);
   const aspectHoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Manejar hover de aspectos con delay para dar tiempo a mover mouse al tooltip
@@ -73,10 +74,24 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
   };
 
   const handleAspectMouseLeave = () => {
-    // Agregar delay de 800ms antes de ocultar - tiempo suficiente para mover mouse al tooltip
+    // Agregar delay de 300ms antes de ocultar - tiempo reducido para mejor UX
     aspectHoverTimeoutRef.current = setTimeout(() => {
+      // No ocultar si está pinneado
+      if (hoveredAspect !== pinnedAspect) {
+        setHoveredAspect(null);
+      }
+    }, 300);
+  };
+
+  const handleAspectClick = (aspectId: string) => {
+    // Toggle pin/unpin
+    if (pinnedAspect === aspectId) {
+      setPinnedAspect(null);
       setHoveredAspect(null);
-    }, 800);
+    } else {
+      setPinnedAspect(aspectId);
+      setHoveredAspect(aspectId);
+    }
   };
 
   const cancelAspectHideTimeout = () => {
@@ -527,6 +542,7 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
             }}
             onMouseEnter={() => handleAspectMouseEnter(aspectId)}
             onMouseLeave={() => handleAspectMouseLeave()}
+            onClick={() => handleAspectClick(aspectId)}
           />
           
           {/* Tooltip para aspecto */}
@@ -541,8 +557,18 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
                 rx="5"
                 ry="5"
                 stroke={style.color}
-                strokeWidth="1"
+                strokeWidth={pinnedAspect === aspectId ? "2" : "1"}
               />
+              {pinnedAspect === aspectId && (
+                <text
+                  x={(pos1.x + pos2.x) / 2 + 48}
+                  y={(pos1.y + pos2.y) / 2 - 22}
+                  fontSize="12"
+                  fill="#FFD700"
+                >
+                  📌
+                </text>
+              )}
               <text
                 x={(pos1.x + pos2.x) / 2}
                 y={(pos1.y + pos2.y) / 2 - 15}
@@ -990,10 +1016,11 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
         {/* Estado de la carta */}
         <div className="mt-4 pt-4 border-t border-gray-200">
           <div className="flex justify-center items-center space-x-4 text-sm">
-            <button 
+            <button
               onClick={() => {
                 setHoveredPlanet(null);
                 setHoveredAspect(null);
+                setPinnedAspect(null);
               }}
               className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
             >

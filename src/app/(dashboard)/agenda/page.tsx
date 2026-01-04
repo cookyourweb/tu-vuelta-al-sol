@@ -11,6 +11,7 @@ import type { UserProfile, AstrologicalEvent, EventType } from '@/types/astrolog
 import EventsLoadingModal from '@/components/astrology/EventsLoadingModal';
 import EventInterpretationButton from '@/components/agenda/EventInterpretationButton';
 import AgendaBookGenerator from '@/components/agenda/AgendaBookGenerator';
+import Draggable from 'react-draggable';
 
 interface AstronomicalDay {
   date: Date;
@@ -2519,11 +2520,12 @@ const AgendaPersonalizada = () => {
             />
 
             {/* Modal centrado */}
-            <div className="fixed inset-0 flex items-center justify-center z-[101] p-4">
-              <div className="bg-gradient-to-br from-purple-900/95 to-pink-900/95 backdrop-blur-sm border border-purple-400/40 rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
-                {/* Header del modal */}
-                <div className="bg-gradient-to-r from-purple-600/80 to-pink-600/80 p-6 border-b border-white/20">
-                  <div className="flex items-center justify-between">
+            <div className="fixed inset-0 flex items-center justify-center z-[101] p-4 pointer-events-none">
+              <Draggable handle=".drag-handle" defaultPosition={{x: 0, y: 0}}>
+                <div className="bg-gradient-to-br from-purple-900/95 to-pink-900/95 backdrop-blur-sm border border-purple-400/40 rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden pointer-events-auto">
+                  {/* Header del modal */}
+                  <div className="drag-handle bg-gradient-to-r from-purple-600/80 to-pink-600/80 p-6 border-b border-white/20 cursor-move">
+                    <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <span className="text-4xl">{modalEvent ? getEventIcon(modalEvent.type, modalEvent.priority) : ''}</span>
                       <div>
@@ -2680,7 +2682,7 @@ const AgendaPersonalizada = () => {
                     </button>
                   </div>
                 </div>
-              </div>
+              </Draggable>
             </div>
           </>
         )}
