@@ -74,13 +74,13 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
   };
 
   const handleAspectMouseLeave = () => {
-    // Agregar delay de 300ms antes de ocultar - tiempo reducido para mejor UX
+    // Agregar delay de 800ms antes de ocultar - tiempo suficiente para llegar al tooltip
     aspectHoverTimeoutRef.current = setTimeout(() => {
       // No ocultar si está pinneado
       if (hoveredAspect !== pinnedAspect) {
         setHoveredAspect(null);
       }
-    }, 300);
+    }, 800);
   };
 
   const handleAspectClick = (aspectId: string) => {
@@ -545,9 +545,14 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
             onClick={() => handleAspectClick(aspectId)}
           />
           
-          {/* Tooltip para aspecto */}
+          {/* Tooltip para aspecto - con handlers para mantenerlo visible */}
           {isHovered && (
-            <g>
+            <g
+              onMouseEnter={cancelAspectHideTimeout}
+              onMouseLeave={handleAspectMouseLeave}
+              onClick={() => handleAspectClick(aspectId)}
+              style={{ cursor: 'pointer' }}
+            >
               <rect
                 x={(pos1.x + pos2.x) / 2 - 60}
                 y={(pos1.y + pos2.y) / 2 - 30}
@@ -565,6 +570,7 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
                   y={(pos1.y + pos2.y) / 2 - 22}
                   fontSize="12"
                   fill="#FFD700"
+                  style={{ pointerEvents: 'none' }}
                 >
                   📌
                 </text>
@@ -577,6 +583,7 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
                 fontSize="12"
                 fill="white"
                 fontWeight="bold"
+                style={{ pointerEvents: 'none' }}
               >
                 {aspect.type.toUpperCase()}
               </text>
@@ -587,6 +594,7 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
                 dominantBaseline="middle"
                 fontSize="10"
                 fill={style.color}
+                style={{ pointerEvents: 'none' }}
               >
                 {aspect.planet1} ↔ {aspect.planet2}
               </text>
@@ -597,6 +605,7 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
                 dominantBaseline="middle"
                 fontSize="9"
                 fill="#FFD700"
+                style={{ pointerEvents: 'none' }}
               >
                 Orbe: {aspect.orb.toFixed(1)}°
               </text>
