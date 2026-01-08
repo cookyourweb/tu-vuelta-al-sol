@@ -116,6 +116,21 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
       const isDrawer = target && typeof target.closest === 'function' ? target.closest('.interpretation-drawer') : null;
       const isChart = target && typeof target.closest === 'function' ? target.closest('.chart-container') : null;
 
+      console.log('🔍 handleClickOutside EJECUTADO');
+      console.log('  - target:', target?.className);
+      console.log('  - isTooltip:', !!isTooltip);
+      console.log('  - isDrawer:', !!isDrawer);
+      console.log('  - isChart:', !!isChart);
+      console.log('  - tooltipLocked:', tooltipLocked);
+      console.log('  - isGenerating:', isGenerating);
+
+      // ⭐ CRÍTICO FIX: SIEMPRE respetar si el click fue dentro del tooltip
+      // Esto previene la race condition donde handleClickOutside se ejecuta ANTES que onMouseDown del tooltip
+      if (isTooltip) {
+        console.log('✅ Click DENTRO del tooltip - NO CERRAR');
+        return;
+      }
+
       // ⭐ CRÍTICO: NO cerrar si está generando
       if (isGenerating) {
         console.log('🔒 GENERANDO - NO CERRAR TOOLTIP');
@@ -124,8 +139,8 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
       // ⭐ Si el tooltip está "locked" (porque se abrió el drawer), solo cerrar si se hace click fuera del tooltip Y fuera del drawer
       if (tooltipLocked) {
-        if (!isTooltip && !isDrawer) {
-          console.log('🔓 Desbloqueando tooltip y cerrando');
+        if (!isDrawer) {
+          console.log('🔓 Desbloqueando tooltip y cerrando (locked pero click fuera)');
           setHoveredPlanet(null);
           setHoveredAspect(null);
           setHoveredHouse(null);
@@ -138,7 +153,7 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
       }
 
       // Comportamiento normal: cerrar si se hace click fuera de tooltip, drawer y chart
-      if (!isTooltip && !isDrawer && !isChart) {
+      if (!isDrawer && !isChart) {
         console.log('🎯 Click fuera - cerrando todos los tooltips');
         setHoveredPlanet(null);
         setHoveredAspect(null);
