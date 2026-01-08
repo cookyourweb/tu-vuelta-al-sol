@@ -24,8 +24,6 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
-
-/* Scrollbar personalizado */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
@@ -45,99 +43,64 @@ body {
 }
 
 /* ========================================
-   PRINT STYLES - LIBRO-AGENDA A5
+   ESTILOS DE IMPRESIÓN PARA AGENDA LIBRO
    ======================================== */
+
+/* Estilos de impresión para libro A5 */
 @media print {
   @page {
     size: A5;
-    margin: 15mm 10mm;
+    margin: 0;
   }
 
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Ocultar elementos que no deben imprimirse */
+  .no-print {
+    display: none !important;
+  }
+
+  /* Eliminar container padding/margin en impresión */
+  .container {
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Cada página del libro */
+  .print-page {
+    page-break-after: always;
+    width: 148mm;
+    height: 210mm;
+    position: relative;
+    overflow: hidden;
+    background: white;
+    margin: 0 !important;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  /* La última página no debe tener salto */
+  .print-page:last-child {
+    page-break-after: auto;
+  }
+
+  /* Optimizaciones de impresión */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     color-adjust: exact !important;
   }
 
-  body {
-    background: white !important;
-    color: black !important;
-  }
-
-  /* Ocultar elementos no imprimibles */
-  header,
-  nav,
-  .no-print,
-  button,
-  [role="button"] {
-    display: none !important;
-  }
-
-  /* Cada página del libro */
-  .print-page {
-    page-break-after: always;
-    page-break-inside: avoid;
-    width: 100%;
-    height: auto;
-    margin: 0;
-    padding: 10mm 8mm !important;
-  }
-
-  .print-page:last-child {
-    page-break-after: auto;
-  }
-
-  /* Evitar romper elementos importantes */
+  /* Evitar rupturas indeseadas */
   h1, h2, h3, h4, h5, h6 {
     page-break-after: avoid;
-    page-break-inside: avoid;
   }
 
   img {
     page-break-inside: avoid;
-  }
-
-  table, pre {
-    page-break-inside: avoid;
-  }
-
-  /* Ajustar tamaños de fuente para A5 */
-  .font-display {
-    font-size: 0.85em !important;
-  }
-
-  .text-3xl {
-    font-size: 1.5rem !important;
-  }
-
-  .text-2xl {
-    font-size: 1.25rem !important;
-  }
-
-  .text-xl {
-    font-size: 1.125rem !important;
-  }
-
-  .text-lg {
-    font-size: 1rem !important;
-  }
-
-  /* Reducir paddings para A5 */
-  .p-12 {
-    padding: 1rem !important;
-  }
-
-  .p-8 {
-    padding: 0.75rem !important;
-  }
-
-  .mb-12, .mt-12 {
-    margin-bottom: 1rem !important;
-    margin-top: 1rem !important;
-  }
-
-  .mb-8, .mt-8 {
-    margin-bottom: 0.75rem !important;
-    margin-top: 0.75rem !important;
   }
 }
