@@ -51,6 +51,8 @@ interface ChartTooltipsProps {
   setCardHoverTimer?: (timer: NodeJS.Timeout | null) => void;
   aspectLineHoverTimer?: NodeJS.Timeout | null;
   setAspectLineHoverTimer?: (timer: NodeJS.Timeout | null) => void;
+  planetCircleHoverTimer?: NodeJS.Timeout | null;
+  setPlanetCircleHoverTimer?: (timer: NodeJS.Timeout | null) => void;
 }
 
 const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
@@ -85,7 +87,9 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
     solarReturnTheme,
     ascSRInNatalHouse,
     aspectLineHoverTimer,
-    setAspectLineHoverTimer
+    setAspectLineHoverTimer,
+    planetCircleHoverTimer,
+    setPlanetCircleHoverTimer
   } = props;
 
   // =============================================================================
@@ -565,10 +569,14 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
               clearTimeout(tooltipTimer);
               setTooltipTimer(null);
             }
-            // ⭐ También cancelar aspectLineHoverTimer si existe
+            // ⭐ También cancelar aspectLineHoverTimer y planetCircleHoverTimer si existen
             if (aspectLineHoverTimer && setAspectLineHoverTimer) {
               clearTimeout(aspectLineHoverTimer);
               setAspectLineHoverTimer(null);
+            }
+            if (planetCircleHoverTimer && setPlanetCircleHoverTimer) {
+              clearTimeout(planetCircleHoverTimer);
+              setPlanetCircleHoverTimer(null);
             }
           }}
         >
@@ -580,10 +588,14 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           console.log('🎯 MOUSE ENTERED TOOLTIP - PLANET');
           e.stopPropagation();
           handleTooltipMouseEnter();
-          // ⭐ Cancelar aspectLineHoverTimer si existe
+          // ⭐ Cancelar todos los timers de ChartDisplay
           if (aspectLineHoverTimer && setAspectLineHoverTimer) {
             clearTimeout(aspectLineHoverTimer);
             setAspectLineHoverTimer(null);
+          }
+          if (planetCircleHoverTimer && setPlanetCircleHoverTimer) {
+            clearTimeout(planetCircleHoverTimer);
+            setPlanetCircleHoverTimer(null);
           }
         }}
         onMouseLeave={(e) => {
@@ -1518,6 +1530,10 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
               clearTimeout(aspectLineHoverTimer);
               setAspectLineHoverTimer(null);
             }
+            if (planetCircleHoverTimer && setPlanetCircleHoverTimer) {
+              clearTimeout(planetCircleHoverTimer);
+              setPlanetCircleHoverTimer(null);
+            }
           }}
         >
           <div
@@ -1535,6 +1551,10 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
             console.log('🚫 Cancelando aspectLineHoverTimer de ChartDisplay');
             clearTimeout(aspectLineHoverTimer);
             setAspectLineHoverTimer(null);
+          }
+          if (planetCircleHoverTimer && setPlanetCircleHoverTimer) {
+            clearTimeout(planetCircleHoverTimer);
+            setPlanetCircleHoverTimer(null);
           }
         }}
         onMouseLeave={(e) => {
