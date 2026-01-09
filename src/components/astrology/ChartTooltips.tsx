@@ -266,7 +266,19 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
   // ⭐ Hook para establecer la posición inicial del tooltip cuando aparece
   useEffect(() => {
     const aspectKey = clickedAspect || hoveredAspect;
-    const planetKey = clickedPlanet || hoveredPlanet;
+    const planetName = clickedPlanet || hoveredPlanet;
+
+    // Para planetas, necesitamos construir el interpretationKey completo
+    let planetKey = '';
+    if (planetName && planetName !== 'Ascendente' && planetName !== 'Medio Cielo') {
+      const planet = planets.find(p => p.name === planetName);
+      if (planet) {
+        planetKey = `${planet.name}-${planet.sign}-${planet.house}`;
+      }
+    } else if (planetName) {
+      // Para Ascendente o Medio Cielo
+      planetKey = planetName;
+    }
 
     // Si cambia el tooltip (nueva key), establecer nueva posición inicial
     const newKey = aspectKey || planetKey || `house-${hoveredHouse}` || '';
@@ -285,7 +297,7 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
       setTooltipPosition2({ x: initialX, y: initialY });
     }
-  }, [hoveredAspect, clickedAspect, hoveredPlanet, clickedPlanet, hoveredHouse, tooltipPosition.x, tooltipPosition.y, currentTooltipKey]);
+  }, [hoveredAspect, clickedAspect, hoveredPlanet, clickedPlanet, hoveredHouse, tooltipPosition.x, tooltipPosition.y, currentTooltipKey, planets]);
 
   // =============================================================================
   // TOOLTIP HOVER DELAY (CONFIGURABLE PER TYPE)
