@@ -840,8 +840,7 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
             transform: 'translateX(-50%)',
             width: `${width}px`,
             height: `${height}px`,
-            zIndex: 1000,
-            pointerEvents: 'none'
+            zIndex: 1000
           }}
         >
           <Draggable
@@ -856,8 +855,7 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
               style={{
                 borderColor: aspectStyles[hoveredAspectData.type]?.color || '#FFD700',
                 minWidth: '160px',
-                backdropFilter: 'blur(8px)',
-                pointerEvents: 'auto'
+                backdropFilter: 'blur(8px)'
               }}
               onMouseEnter={cancelAspectHideTimeout}
               onMouseLeave={handleAspectMouseLeave}
