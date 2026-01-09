@@ -104,10 +104,15 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
   // ✅ Ref para Draggable (React 18+ compatibility)
   const draggableRef = useRef<HTMLDivElement>(null);
+  const planetDraggableRef = useRef<HTMLDivElement>(null);
   const [tooltipLocked, setTooltipLocked] = useState(false); // ⭐ NUEVO: Controla si tooltip permanece abierto con drawer
 
   // ⭐ NUEVO: Estado global de generación para el modal
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // ⭐ Estado para controlar la posición del tooltip draggable
+  const [tooltipPosition2, setTooltipPosition2] = useState({ x: 0, y: 0 });
+  const [currentTooltipKey, setCurrentTooltipKey] = useState<string>('');
   // =============================================================================
 
   // ✅ Hook para detectar clic fuera - SIMPLIFICADO Y CONSISTENTE
@@ -257,6 +262,30 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
     fetchInterpretations();
   }, [userId, chartType, solarReturnYear]);
+
+  // ⭐ Hook para establecer la posición inicial del tooltip cuando aparece
+  useEffect(() => {
+    const aspectKey = clickedAspect || hoveredAspect;
+    const planetKey = clickedPlanet || hoveredPlanet;
+
+    // Si cambia el tooltip (nueva key), establecer nueva posición inicial
+    const newKey = aspectKey || planetKey || `house-${hoveredHouse}` || '';
+
+    if (newKey && newKey !== currentTooltipKey) {
+      setCurrentTooltipKey(newKey);
+
+      // Calcular posición inicial
+      const initialX = typeof window !== 'undefined' && window.innerWidth < 768
+        ? window.innerWidth / 2 - 200
+        : tooltipPosition.x - 80;
+
+      const initialY = typeof window !== 'undefined' && window.innerWidth < 768
+        ? window.innerHeight / 2 - 100
+        : tooltipPosition.y - 40;
+
+      setTooltipPosition2({ x: initialX, y: initialY });
+    }
+  }, [hoveredAspect, clickedAspect, hoveredPlanet, clickedPlanet, hoveredHouse, tooltipPosition.x, tooltipPosition.y, currentTooltipKey]);
 
   // =============================================================================
   // TOOLTIP HOVER DELAY (CONFIGURABLE PER TYPE)
@@ -527,16 +556,31 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
     return (
       <div
-        className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-6 shadow-2xl w-[90vw] md:w-auto max-w-sm md:max-w-md overflow-y-auto pointer-events-auto z-50"
-        data-tooltip-type="planet"
+        className="fixed pointer-events-none z-50"
         style={{
-          left: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.x + 25,
-          top: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.y - 50,
-          transform: typeof window !== 'undefined' && window.innerWidth < 768
-            ? 'translate(-50%, -50%)'
-            : (tooltipPosition.x > window.innerWidth - 400 ? 'translateX(-100%)' : 'none')
+          left: 0,
+          top: 0,
+          width: '100vw',
+          height: '100vh'
         }}
-        onMouseEnter={(e) => {
+      >
+        <Draggable
+          key={interpretationKey}
+          nodeRef={planetDraggableRef}
+          defaultPosition={tooltipPosition2}
+          onStart={() => {
+            console.log('🚫 DRAGGABLE onStart - cancelando timeout');
+            if (tooltipTimer) {
+              clearTimeout(tooltipTimer);
+              setTooltipTimer(null);
+            }
+          }}
+        >
+          <div
+            ref={planetDraggableRef}
+            className="bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-6 shadow-2xl w-[90vw] md:w-auto max-w-sm md:max-w-md overflow-y-auto pointer-events-auto cursor-move"
+            data-tooltip-type="planet"
+            onMouseEnter={(e) => {
           console.log('🎯 MOUSE ENTERED TOOLTIP - PLANET');
           e.stopPropagation();
           handleTooltipMouseEnter();
@@ -968,6 +1012,13 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
             💡 Haz hover más tiempo para ver la interpretación
           </div>
         )}
+
+        {/* Tooltip stays visible hint */}
+        <div className="mt-2 text-center text-xs text-gray-400">
+          🖱️ Arrastra para mover • Click para pinnear
+        </div>
+          </div>
+        </Draggable>
       </div>
     );
   }
@@ -1447,15 +1498,9 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
         }}
       >
         <Draggable
+          key={aspectKeyFull}
           nodeRef={draggableRef}
-          defaultPosition={{
-            x: typeof window !== 'undefined' && window.innerWidth < 768
-              ? window.innerWidth / 2 - 200
-              : tooltipPosition.x - 80,
-            y: typeof window !== 'undefined' && window.innerWidth < 768
-              ? window.innerHeight / 2 - 100
-              : tooltipPosition.y - 40
-          }}
+          defaultPosition={tooltipPosition2}
           onStart={() => {
             console.log('🚫 DRAGGABLE onStart - cancelando timeout');
             handleAspectMouseEnter();
