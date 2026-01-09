@@ -8,6 +8,7 @@
 // =============================================================================
 
 import React, { useState, useEffect } from 'react';
+import Draggable from 'react-draggable';
 import { X } from 'lucide-react';
 import { Planet, Aspect } from '@/types/astrology/chartDisplay';
 import { planetMeanings, signMeanings, houseMeanings, aspectMeanings, PLANET_SYMBOLS, SIGN_SYMBOLS, PLANET_COLORS } from '@/constants/astrology';
@@ -1434,18 +1435,34 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
     return (
       <div
-        className="aspect-tooltip fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-6 shadow-2xl w-[90vw] md:w-auto max-w-lg md:max-w-xl overflow-y-auto pointer-events-auto z-50"
-        data-aspect-tooltip="true"
-        data-tooltip-type="aspect"
+        className="fixed pointer-events-none z-50"
         style={{
-          left: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.x,
-          top: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.y,
-          transform: typeof window !== 'undefined' && window.innerWidth < 768
-            ? 'translate(-50%, -50%)'
-            : (tooltipPosition.x > window.innerWidth - 450 ? 'translateX(-100%)' : 'none')
+          left: 0,
+          top: 0,
+          width: '100vw',
+          height: '100vh'
         }}
-        onMouseEnter={(e) => {
-          console.log('🎯 MOUSE ENTERED TOOLTIP - ASPECT');
+      >
+        <Draggable
+          defaultPosition={{
+            x: typeof window !== 'undefined' && window.innerWidth < 768
+              ? window.innerWidth / 2 - 200
+              : tooltipPosition.x - 80,
+            y: typeof window !== 'undefined' && window.innerWidth < 768
+              ? window.innerHeight / 2 - 100
+              : tooltipPosition.y - 40
+          }}
+          onStart={() => {
+            console.log('🚫 DRAGGABLE onStart - cancelando timeout');
+            handleAspectMouseEnter();
+          }}
+        >
+          <div
+            className="aspect-tooltip bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-6 shadow-2xl w-[90vw] md:w-auto max-w-lg md:max-w-xl overflow-y-auto pointer-events-auto cursor-move"
+            data-aspect-tooltip="true"
+            data-tooltip-type="aspect"
+            onMouseEnter={(e) => {
+              console.log('🎯 MOUSE ENTERED TOOLTIP - ASPECT');
           e.stopPropagation();
           handleAspectMouseEnter();
           setAspectTooltipLocked(true);
@@ -1659,8 +1676,10 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
         {/* Tooltip stays visible hint */}
         <div className="mt-2 text-center text-xs text-gray-400">
-          💡 Tooltip permanece 2 segundos después de salir
+          🖱️ Arrastra para mover • Click para pinnear
         </div>
+          </div>
+        </Draggable>
       </div>
     );
   }
