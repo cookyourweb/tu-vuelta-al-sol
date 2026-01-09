@@ -66,8 +66,10 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
 
   // Manejar hover de aspectos con delay para dar tiempo a mover mouse al tooltip
   const handleAspectMouseEnter = (aspectId: string) => {
+    console.log('🎯 handleAspectMouseEnter:', aspectId);
     // Cancelar cualquier timeout pendiente
     if (aspectHoverTimeoutRef.current) {
+      console.log('  ✅ Cancelando timeout pendiente');
       clearTimeout(aspectHoverTimeoutRef.current);
       aspectHoverTimeoutRef.current = null;
     }
@@ -75,13 +77,21 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
   };
 
   const handleAspectMouseLeave = () => {
+    console.log('👋 handleAspectMouseLeave - iniciando delay de 2000ms');
     // Agregar delay de 2000ms antes de ocultar - tiempo amplio para llegar al tooltip
     aspectHoverTimeoutRef.current = setTimeout(() => {
+      console.log('⏰ TIMEOUT EJECUTADO después de 2000ms - ocultando tooltip');
+      console.log('  hoveredAspect:', hoveredAspect);
+      console.log('  pinnedAspect:', pinnedAspect);
       // No ocultar si está pinneado
       if (hoveredAspect !== pinnedAspect) {
+        console.log('  ❌ Ocultando tooltip');
         setHoveredAspect(null);
+      } else {
+        console.log('  📌 Tooltip está pinneado - NO ocultar');
       }
     }, 2000);
+    console.log('  ✅ Timeout creado con ID:', aspectHoverTimeoutRef.current);
   };
 
   const handleAspectClick = (aspectId: string) => {
@@ -96,10 +106,14 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
   };
 
   const cancelAspectHideTimeout = () => {
+    console.log('🚫 cancelAspectHideTimeout llamado');
     // Cancelar timeout si el mouse entra al tooltip
     if (aspectHoverTimeoutRef.current) {
+      console.log('  ✅ Timeout cancelado exitosamente');
       clearTimeout(aspectHoverTimeoutRef.current);
       aspectHoverTimeoutRef.current = null;
+    } else {
+      console.log('  ⚠️ No había timeout para cancelar');
     }
   };
 
@@ -541,9 +555,18 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
               filter: isHovered ? `drop-shadow(0 0 6px ${style.color})` : `drop-shadow(0 0 2px ${style.color})`,
               transition: 'all 0.3s ease'
             }}
-            onMouseEnter={() => handleAspectMouseEnter(aspectId)}
-            onMouseLeave={() => handleAspectMouseLeave()}
-            onClick={() => handleAspectClick(aspectId)}
+            onMouseEnter={() => {
+              console.log('🔴 LÍNEA onMouseEnter:', aspectId);
+              handleAspectMouseEnter(aspectId);
+            }}
+            onMouseLeave={() => {
+              console.log('🔴 LÍNEA onMouseLeave:', aspectId);
+              handleAspectMouseLeave();
+            }}
+            onClick={() => {
+              console.log('🔴 LÍNEA onClick:', aspectId);
+              handleAspectClick(aspectId);
+            }}
           />
           
         </g>
@@ -857,9 +880,18 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
                 minWidth: '160px',
                 backdropFilter: 'blur(8px)'
               }}
-              onMouseEnter={cancelAspectHideTimeout}
-              onMouseLeave={handleAspectMouseLeave}
-              onClick={() => handleAspectClick(hoveredAspect)}
+              onMouseEnter={() => {
+                console.log('🖱️ TOOLTIP onMouseEnter');
+                cancelAspectHideTimeout();
+              }}
+              onMouseLeave={() => {
+                console.log('🖱️ TOOLTIP onMouseLeave');
+                handleAspectMouseLeave();
+              }}
+              onClick={() => {
+                console.log('🖱️ TOOLTIP onClick');
+                handleAspectClick(hoveredAspect);
+              }}
             >
               <div className="flex items-start justify-between mb-2">
                 <div className="text-white font-bold text-sm">

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test React Draggable</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f0f0f0;
+    }
+    .container {
+      position: relative;
+      width: 600px;
+      height: 400px;
+      background: white;
+      border: 2px solid #333;
+      margin: 20px auto;
+    }
+    .draggable-box {
+      position: absolute;
+      background: #4CAF50;
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      cursor: move;
+      user-select: none;
+    }
+    .test-line {
+      position: absolute;
+      width: 200px;
+      height: 4px;
+      background: red;
+      top: 200px;
+      left: 200px;
+      cursor: pointer;
+    }
+    .tooltip {
+      position: absolute;
+      background: rgba(0,0,0,0.9);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      pointer-events: auto;
+      cursor: move;
+    }
+    .pointer-events-none {
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Test React Draggable - Tu Vuelta al Sol</h1>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useRef } = React;
+
+    function TestDraggable() {
+      const [hoveredLine, setHoveredLine] = useState(false);
+      const [tooltipVisible, setTooltipVisible] = useState(false);
+      const timeoutRef = useRef(null);
+
+      const handleLineEnter = () => {
+        console.log('LINE ENTER');
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        setHoveredLine(true);
+        setTooltipVisible(true);
+      };
+
+      const handleLineLeave = () => {
+        console.log('LINE LEAVE - starting 2000ms timeout');
+        timeoutRef.current = setTimeout(() => {
+          console.log('TIMEOUT EXECUTED - hiding tooltip');
+          setTooltipVisible(false);
+          setHoveredLine(false);
+        }, 2000);
+      };
+
+      const cancelTimeout = () => {
+        console.log('CANCEL TIMEOUT');
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+          timeoutRef.current = null;
+        }
+      };
+
+      return (
+        <div>
+          <p>Instrucciones:</p>
+          <ol>
+            <li>Haz hover sobre la línea roja</li>
+            <li>Aparecerá el tooltip negro</li>
+            <li>Mueve el mouse al tooltip antes de 2 segundos</li>
+            <li>El tooltip debe permanecer visible</li>
+            <li>Intenta arrastrarlo</li>
+          </ol>
+
+          <div className="container">
+            <div
+              className="test-line"
+              style={{ backgroundColor: hoveredLine ? 'orange' : 'red' }}
+              onMouseEnter={handleLineEnter}
+              onMouseLeave={handleLineLeave}
+            >
+            </div>
+
+            {tooltipVisible && (
+              <div
+                className="pointer-events-none"
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  width: '100%',
+                  height: '100%',
+                  zIndex: 1000
+                }}
+              >
+                <div
+                  className="tooltip"
+                  style={{
+                    left: 300,
+                    top: 180
+                  }}
+                  onMouseEnter={cancelTimeout}
+                  onMouseLeave={handleLineLeave}
+                >
+                  <div style={{ fontWeight: 'bold' }}>TOOLTIP TEST</div>
+                  <div style={{ fontSize: '12px' }}>
+                    Tooltip visible: {tooltipVisible ? 'YES' : 'NO'}
+                  </div>
+                  <div style={{ fontSize: '10px', marginTop: '5px' }}>
+                    Hover me to cancel timeout
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div style={{ marginTop: '20px', padding: '10px', background: '#eee' }}>
+            <strong>Estado:</strong><br/>
+            hoveredLine: {hoveredLine ? 'true' : 'false'}<br/>
+            tooltipVisible: {tooltipVisible ? 'true' : 'false'}<br/>
+            timeout: {timeoutRef.current ? 'ACTIVE' : 'null'}
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<TestDraggable />, document.getElementById('root'));
+  </script>
+</body>
+</html>
