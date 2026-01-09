@@ -113,6 +113,7 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
   // ⭐ Estado para controlar la posición del tooltip draggable
   const [tooltipPosition2, setTooltipPosition2] = useState({ x: 0, y: 0 });
   const [currentTooltipKey, setCurrentTooltipKey] = useState<string>('');
+  const lastTooltipPositionRef = useRef({ x: 0, y: 0 }); // Para guardar la última posición del mouse
   // =============================================================================
 
   // ✅ Hook para detectar clic fuera - SIMPLIFICADO Y CONSISTENTE
@@ -263,7 +264,12 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
     fetchInterpretations();
   }, [userId, chartType, solarReturnYear]);
 
-  // ⭐ Hook para establecer la posición inicial del tooltip cuando aparece
+  // ⭐ Actualizar ref con la posición actual del tooltip (para capturarla cuando aparezca un nuevo tooltip)
+  useEffect(() => {
+    lastTooltipPositionRef.current = tooltipPosition;
+  }, [tooltipPosition]);
+
+  // ⭐ Hook para establecer la posición inicial del tooltip cuando aparece (SIN depender de tooltipPosition)
   useEffect(() => {
     const aspectKey = clickedAspect || hoveredAspect;
     const planetName = clickedPlanet || hoveredPlanet;
@@ -284,20 +290,23 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
     const newKey = aspectKey || planetKey || `house-${hoveredHouse}` || '';
 
     if (newKey && newKey !== currentTooltipKey) {
+      console.log('🎯 NUEVO TOOLTIP detectado:', newKey);
+      console.log('   Posición del mouse:', lastTooltipPositionRef.current);
       setCurrentTooltipKey(newKey);
 
-      // Calcular posición inicial
+      // Calcular posición inicial usando la última posición del mouse guardada en el ref
       const initialX = typeof window !== 'undefined' && window.innerWidth < 768
         ? window.innerWidth / 2 - 200
-        : tooltipPosition.x - 80;
+        : lastTooltipPositionRef.current.x - 80;
 
       const initialY = typeof window !== 'undefined' && window.innerWidth < 768
         ? window.innerHeight / 2 - 100
-        : tooltipPosition.y - 40;
+        : lastTooltipPositionRef.current.y - 40;
 
+      console.log('   Posición inicial calculada:', { x: initialX, y: initialY });
       setTooltipPosition2({ x: initialX, y: initialY });
     }
-  }, [hoveredAspect, clickedAspect, hoveredPlanet, clickedPlanet, hoveredHouse, tooltipPosition.x, tooltipPosition.y, currentTooltipKey, planets]);
+  }, [hoveredAspect, clickedAspect, hoveredPlanet, clickedPlanet, hoveredHouse, currentTooltipKey, planets]);
 
   // =============================================================================
   // TOOLTIP HOVER DELAY (CONFIGURABLE PER TYPE)
