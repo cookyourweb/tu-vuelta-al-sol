@@ -401,7 +401,7 @@ TONO: Directo, personal, sin explicar astrología. Como si fueras su coach perso
     - Empoderador, concreto, accionable
     - NO vago ni genérico"
   },
->>>>>>>>> Temporary merge branch 2
+
 
   "analisis_tecnico": {
     "evento_en_casa_natal": ${data.event.house},
@@ -605,22 +605,21 @@ function extractBloqueos(natalInterpretation: any): Array<{
   return bloqueos.slice(0, 5); // Máximo 5 bloqueos
 }
 
+interface ActivatedPlanet {
+  planeta: string;
+  signo: string;
+  casa: number;
+  grado: number;
+  tipoActivacion: string;
+  razonActivacion: string;
+}
+
 // ✅ Identificar planetas natales que el evento activa
 function identificarPlanetasActivados(
   event: EventData,
   natalChart: any
-): Array<{
-  planeta: string;
-  signo: string;
-  casa: number;
-  razonActivacion: string;
-}> {
-  const activados: Array<{
-    planeta: string;
-    signo: string;
-    casa: number;
-    razonActivacion: string;
-  }> = [];
+): ActivatedPlanet[] {
+  const activados: ActivatedPlanet[] = [];
 
   if (!natalChart.planets) return activados;
 
@@ -632,6 +631,8 @@ function identificarPlanetasActivados(
           planeta: p.name,
           signo: p.sign,
           casa: p.house,
+          grado: p.degree || 0,
+          tipoActivacion: 'conjunción_casa',
           razonActivacion: `${event.type === 'luna_nueva' ? 'Luna Nueva' : 'Luna Llena'} ocurre en la misma casa que tu ${p.name} natal`
         });
       }
@@ -650,6 +651,8 @@ function identificarPlanetasActivados(
         planeta: planetaNatal.name,
         signo: planetaNatal.sign,
         casa: planetaNatal.house,
+        grado: planetaNatal.degree || 0,
+        tipoActivacion: 'transito_directo',
         razonActivacion: `${event.transitingPlanet} ${event.aspectType || 'transita'} tu ${planetaNatal.name} natal`
       });
     }
