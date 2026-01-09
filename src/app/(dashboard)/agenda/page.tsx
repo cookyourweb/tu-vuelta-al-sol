@@ -1759,7 +1759,7 @@ const AgendaPersonalizada = () => {
 
         {/* 📅 TAB: CALENDARIO */}
         {activeTab === 'calendario' && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
             {/* CALENDARIO PRINCIPAL - 2/3 en desktop */}
           <div className="lg:col-span-2">
@@ -2455,7 +2455,9 @@ const AgendaPersonalizada = () => {
               </div>
             </div>
           </div>
-        </div>
+          </div>
+          </div>
+        )}
 
         {/* TOOLTIP ÉPICO */}
         {hoveredEvent && hoveredEvent?.aiInterpretation && (
@@ -2681,6 +2683,7 @@ const AgendaPersonalizada = () => {
                       Cerrar ✨
                     </button>
                   </div>
+                </div>
                 </div>
               </Draggable>
             </div>
