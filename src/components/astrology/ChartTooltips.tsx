@@ -119,6 +119,10 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
       console.log('🔍 handleClickOutside EJECUTADO');
       console.log('  - target:', target?.className);
       console.log('  - target tagName:', target?.tagName);
+      console.log('  - target.dataset:', target?.dataset);
+      console.log('  - has data-aspect-tooltip?', target?.hasAttribute?.('data-aspect-tooltip'));
+      console.log('  - closest([data-aspect-tooltip]):', target?.closest?.('[data-aspect-tooltip="true"]'));
+      console.log('  - closest result:', isTooltip);
       console.log('  - isTooltip:', !!isTooltip);
       console.log('  - isDrawer:', !!isDrawer);
       console.log('  - isChart:', !!isChart);
