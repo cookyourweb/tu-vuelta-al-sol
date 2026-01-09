@@ -63,6 +63,7 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
   const [hoveredAspect, setHoveredAspect] = useState<string | null>(null);
   const [pinnedAspect, setPinnedAspect] = useState<string | null>(null);
   const aspectHoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
 
   // Manejar hover de aspectos con delay para dar tiempo a mover mouse al tooltip
   const handleAspectMouseEnter = (aspectId: string) => {
@@ -867,6 +868,7 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
           }}
         >
           <Draggable
+            nodeRef={tooltipRef}
             defaultPosition={{
               x: tooltipPosition.x - 80,
               y: tooltipPosition.y - 40
@@ -874,6 +876,7 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
             onStart={cancelAspectHideTimeout}
           >
             <div
+              ref={tooltipRef}
               className="aspect-tooltip absolute bg-black/90 rounded-lg p-4 shadow-2xl border-2 pointer-events-auto cursor-move"
               style={{
                 borderColor: aspectStyles[hoveredAspectData.type]?.color || '#FFD700',

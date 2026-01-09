@@ -7,7 +7,7 @@
 // ✅ pointer-events-auto on ALL tooltips with buttons
 // =============================================================================
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Draggable from 'react-draggable';
 import { X } from 'lucide-react';
 import { Planet, Aspect } from '@/types/astrology/chartDisplay';
@@ -101,6 +101,9 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
   const [planetTooltipTimer, setPlanetTooltipTimer] = useState<NodeJS.Timeout | null>(null);
   const [aspectTooltipTimer, setAspectTooltipTimer] = useState<NodeJS.Timeout | null>(null);
   const [clickedTooltipTimer, setClickedTooltipTimer] = useState<NodeJS.Timeout | null>(null);
+
+  // ✅ Ref para Draggable (React 18+ compatibility)
+  const draggableRef = useRef<HTMLDivElement>(null);
   const [tooltipLocked, setTooltipLocked] = useState(false); // ⭐ NUEVO: Controla si tooltip permanece abierto con drawer
 
   // ⭐ NUEVO: Estado global de generación para el modal
@@ -1444,6 +1447,7 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
         }}
       >
         <Draggable
+          nodeRef={draggableRef}
           defaultPosition={{
             x: typeof window !== 'undefined' && window.innerWidth < 768
               ? window.innerWidth / 2 - 200
@@ -1458,6 +1462,7 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           }}
         >
           <div
+            ref={draggableRef}
             className="aspect-tooltip bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-6 shadow-2xl w-[90vw] md:w-auto max-w-lg md:max-w-xl overflow-y-auto pointer-events-auto cursor-move"
             data-aspect-tooltip="true"
             data-tooltip-type="aspect"
