@@ -112,17 +112,55 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
       const target = event.target as HTMLElement;
 
       // Verificar si el clic fue en tooltip, drawer o chart
-      const isTooltip = target && typeof target.closest === 'function' ? target.closest('[class*="tooltip"], [class*="chart-tooltip"], .aspect-tooltip, [data-aspect-tooltip="true"], [data-tooltip-type]') : null;
-      const isDrawer = target && typeof target.closest === 'function' ? target.closest('.interpretation-drawer') : null;
-      const isChart = target && typeof target.closest === 'function' ? target.closest('.chart-container, [data-chart-container="true"]') : null;
+      // Handle SVG elements that might not have closest method
+      let isTooltip = null;
+      let isDrawer = null;
+      let isChart = null;
+
+      if (target && typeof target.closest === 'function') {
+        isTooltip = target.closest('[class*="tooltip"], [class*="chart-tooltip"], .aspect-tooltip, [data-aspect-tooltip="true"], [data-tooltip-type]');
+        isDrawer = target.closest('.interpretation-drawer');
+        isChart = target.closest('.chart-container, [data-chart-container="true"]');
+      } else if (target) {
+        // For SVG elements, check parent elements manually
+        let element: Element | null = target;
+        while (element && !isTooltip) {
+          if (element.hasAttribute && (
+            element.hasAttribute('data-aspect-tooltip') ||
+            element.hasAttribute('data-tooltip-type') ||
+            element.classList?.contains('aspect-tooltip') ||
+            element.classList?.contains('chart-tooltip') ||
+            element.className?.includes?.('tooltip')
+          )) {
+            isTooltip = element;
+          }
+          element = element.parentElement;
+        }
+
+        element = target;
+        while (element && !isDrawer) {
+          if (element.classList?.contains('interpretation-drawer')) {
+            isDrawer = element;
+          }
+          element = element.parentElement;
+        }
+
+        element = target;
+        while (element && !isChart) {
+          if (element.hasAttribute && (
+            element.hasAttribute('data-chart-container') ||
+            element.classList?.contains('chart-container')
+          )) {
+            isChart = element;
+          }
+          element = element.parentElement;
+        }
+      }
 
       console.log('🔍 handleClickOutside EJECUTADO');
       console.log('  - target:', target?.className);
       console.log('  - target tagName:', target?.tagName);
       console.log('  - target.dataset:', target?.dataset);
-      console.log('  - has data-aspect-tooltip?', target?.hasAttribute?.('data-aspect-tooltip'));
-      console.log('  - closest([data-aspect-tooltip]):', target?.closest?.('[data-aspect-tooltip="true"]'));
-      console.log('  - closest result:', isTooltip);
       console.log('  - isTooltip:', !!isTooltip);
       console.log('  - isDrawer:', !!isDrawer);
       console.log('  - isChart:', !!isChart);
@@ -486,6 +524,7 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
     return (
       <div
         className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-6 shadow-2xl w-[90vw] md:w-auto max-w-sm md:max-w-md overflow-y-auto pointer-events-auto z-50"
+        data-tooltip-type="planet"
         style={{
           left: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.x + 25,
           top: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.y - 50,
@@ -498,21 +537,21 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           e.stopPropagation();
           handleTooltipMouseEnter();
         }}
-          onMouseLeave={(e) => {
-            console.log('🎯 MOUSE LEFT TOOLTIP - PLANET');
+        onMouseLeave={(e) => {
+          console.log('🎯 MOUSE LEFT TOOLTIP - PLANET');
 
-            // ⭐ NUEVO: Si está locked O generando, NO cerrar
-            if (tooltipLocked || isGenerating) {
-              console.log('🔒 Tooltip locked o generando - no se cierra');
-              return;
+          // ⭐ NUEVO: Si está locked O generando, NO cerrar
+          if (tooltipLocked || isGenerating) {
+            console.log('🔒 Tooltip locked o generando - no se cierra');
+            return;
+          }
+
+          handleMouseLeaveTooltip(() => {
+            if (!drawerOpen) {
+              setHoveredPlanet(null);
             }
-
-            handleMouseLeaveTooltip(() => {
-              if (!drawerOpen) {
-                setHoveredPlanet(null);
-              }
-            }, 1000); // 1 second for planets
-          }}
+          }, 1000); // 1 second for planets
+        }}
         onClick={(e) => {
           console.log('🎯 TOOLTIP CLICKED (parent) - PLANET');
           e.stopPropagation();

@@ -1591,7 +1591,7 @@ const ChartDisplay = ({
         </div>
 
         {/* 🎨 CARTA NATAL PRINCIPAL */}
-        <div className="bg-gradient-to-br from-black/50 to-purple-900/30 backdrop-blur-sm border border-white/20 rounded-3xl p-4 md:p-8 relative overflow-hidden">
+        <div className="bg-gradient-to-br from-black/50 to-purple-900/30 backdrop-blur-sm border border-white/20 rounded-3xl p-4 md:p-8 relative overflow-hidden" data-chart-container="true">
           <div className="absolute top-2 right-2 md:top-4 md:right-4 w-2 h-2 md:w-3 md:h-3 bg-yellow-400 rounded-full animate-pulse"></div>
           <div className="absolute bottom-2 left-2 md:bottom-4 md:left-4 w-1.5 h-1.5 md:w-2 md:h-2 bg-purple-400 rounded-full animate-bounce"></div>
 
