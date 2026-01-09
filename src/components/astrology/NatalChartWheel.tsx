@@ -874,7 +874,7 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
             onStart={cancelAspectHideTimeout}
           >
             <div
-              className="absolute bg-black/90 rounded-lg p-4 shadow-2xl border-2 pointer-events-auto cursor-move"
+              className="aspect-tooltip absolute bg-black/90 rounded-lg p-4 shadow-2xl border-2 pointer-events-auto cursor-move"
               style={{
                 borderColor: aspectStyles[hoveredAspectData.type]?.color || '#FFD700',
                 minWidth: '160px',
