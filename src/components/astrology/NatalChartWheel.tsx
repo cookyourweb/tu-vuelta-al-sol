@@ -833,7 +833,7 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
       {/* Tooltip HTML Draggable para aspectos */}
       {hoveredAspect && tooltipPosition && hoveredAspectData && (
         <div
-          className="absolute"
+          className="absolute pointer-events-none"
           style={{
             left: '50%',
             top: '0',
@@ -851,7 +851,7 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
             onStart={cancelAspectHideTimeout}
           >
             <div
-              className="absolute bg-black/90 rounded-lg p-4 shadow-2xl border-2 cursor-move"
+              className="absolute bg-black/90 rounded-lg p-4 shadow-2xl border-2 pointer-events-auto cursor-move"
               style={{
                 borderColor: aspectStyles[hoveredAspectData.type]?.color || '#FFD700',
                 minWidth: '160px',
