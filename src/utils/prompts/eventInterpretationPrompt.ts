@@ -168,29 +168,7 @@ ${transitosActuales}
 
 ---
 
-<<<<<<<<< Temporary merge branch 1
 ## 📋 ESTRUCTURA JSON REQUERIDA - FORMATO AGENDA FÍSICA
-=========
-## 📋 ESTRUCTURA JSON REQUERIDA - METODOLOGÍA PROFESIONAL DE 3 NIVELES
-
-**ORDEN SAGRADO (NO NEGOCIABLE):**
-1. **NIVEL 1**: Análisis Objetivo (SIN interpretar, SIN dar consejos)
-2. **NIVEL 2**: Qué activa en tu carta (estructura natal específica)
-3. **NIVEL 3**: Cómo se vive en ti (psicológico + acción)
-
-**JERARQUÍA PROFESIONAL:**
-Planeta en tránsito > Casa > Signo > Natal
-
-**LAS 6 PREGUNTAS QUE DEBES RESPONDER:**
-1. ¿Qué planeta se mueve? (o qué evento ocurre)
-2. ¿En qué signo?
-3. ¿En qué casa natal?
-4. ¿Hace aspecto real o solo resuena?
-5. ¿Qué riesgo psicológico trae?
-6. ¿Qué decisión consciente lo transforma?
-
----
->>>>>>>>> Temporary merge branch 2
 
 Responde ÚNICAMENTE con JSON válido en español (sin markdown, sin backticks, sin comentarios).
 
@@ -199,7 +177,6 @@ NO expliques astrología. Traduce la energía en acción concreta.
 Escribe como si fuera su agenda personal, directamente aplicable a su vida.
 
 {
-<<<<<<<<< Temporary merge branch 1
   "titulo_evento": "String: Solo el nombre del evento. Ejemplo: 'Luna Llena en Capricornio', '${descripcionEvento.tipo}'",
 
   "clima_del_dia": [
@@ -296,112 +273,6 @@ TONO: Directo, personal, sin explicar astrología. Como si fueras su coach perso
   "nota_apoyo": "String de 1-2 frases. Ejemplo: 'Nada obligatorio. Solo herramientas que acompañan la decisión.'",
 
   "cierre_dia": "String de 2-3 frases EMPODERADORAS que cierran el día. Ejemplo: 'Esta Luna Llena no viene a quitarte nada. Viene a devolverte espacio, foco y autoridad personal.'",
-=========
-  "titulo_evento": "String de 50-80 caracteres: [Tipo de Evento] en [Signo] - [Frase memorable], ${data.userName}. Ejemplo: 'Ingreso de Mercurio en Sagitario - La Voz de Tu Verdad, ${data.userName}'",
-
-  "nivel_1_analisis_objetivo": {
-    "datos_objetivos": {
-      "evento": "String: Tipo EXACTO de evento. Distingue: 'Ingreso de Mercurio en Sagitario' vs 'Tránsito de Mercurio' vs 'Aspecto Mercurio-Sol'. SÉ ESPECÍFICO.",
-      "fecha": "${data.event.date}",
-      "signo_principal": "${data.event.sign || 'N/A'}",
-      "tipo_energia": "String 20-30 palabras: Describe el tipo de energía ASTROLÓGICA pura (ej: 'Comunicación expansiva, búsqueda de verdad, expresión auténtica')"
-    },
-
-    "que_se_mueve": "String 40-60 palabras: Explica QUÉ está pasando astronómicamente. ¿Qué planeta se mueve? ¿En qué signo? ¿Es directo o retrógrado? ¿Es un ingreso, un aspecto, una fase lunar? SIN decir qué significa para el usuario. SOLO describe el fenómeno.",
-
-    "donde_cae": "String 40-60 palabras: Indica en qué Casa ${data.event.house} (${significadoCasa}) de la carta natal de ${data.userName} cae este evento. SOLO describe la ubicación, NO des consejos. Ejemplo: 'Este evento cae en tu Casa ${data.event.house} (${significadoCasa}), el área de vida asociada con [tema de la casa].'",
-
-    "como_es_la_energia": "String 40-60 palabras: Describe el TIPO de energía desde ${data.event.sign || 'el signo involucrado'}. ¿Es expansiva, restrictiva, transformadora, comunicativa? SOLO características del signo, NO aplicación personal."
-  },
-
-  "nivel_2_que_activa_en_tu_carta": {
-    "casa_activada": {
-      "numero": ${data.event.house},
-      "significado": "${significadoCasa}",
-      "descripcion": "String 60-80 palabras: Explica qué ÁREA DE VIDA específica de ${data.userName} se activa. ¿Qué temas entran en foco? ¿Qué diálogo interno puede aparecer? TODAVÍA no des consejos, solo describe qué parte de su vida se ilumina."
-    },
-
-    "planetas_natales_implicados": [
-      ${planetasActivados.length > 0 ? `
-      ${planetasActivados.map(p => `{
-        "planeta": "${p.planeta}",
-        "signo": "${p.signo}",
-        "casa": ${p.casa},
-        "grado": ${p.grado.toFixed(1)},
-        "tipo_activacion": "${p.tipoActivacion}",
-        "justificacion": "${p.razonActivacion}"
-      }`).join(',\n      ')}
-      ` : `
-      {
-        "planeta": "Ninguno",
-        "signo": "N/A",
-        "casa": ${data.event.house},
-        "grado": 0,
-        "tipo_activacion": "ninguna",
-        "justificacion": "Este evento NO activa planetas natales directamente. Solo activa el tema de la Casa ${data.event.house} (${significadoCasa}). NO sobre-impliques conexiones planetarias."
-      }
-      `}
-    ],
-
-    "resonancia_natal": "String 100-120 palabras: Explica cómo este evento RESUENA con la estructura natal específica de ${data.userName}.
-
-    ⚠️ REGLAS CRÍTICAS:
-    - Si HAY planetas activados (arriba), explica POR QUÉ y CÓMO (usa las justificaciones)
-    - Si NO hay planetas activados, ACLÁRALO: 'Este evento activa el tema de la casa pero NO hace aspectos exactos con planetas natales'
-    - Menciona: Sol en ${sol?.sign} Casa ${sol?.house}, Luna en ${luna?.sign} Casa ${luna?.house}
-    - Si mencionas Nodo Sur u otros puntos, JUSTIFICA POR QUÉ (regencia, tema, conexión clara)
-    - NO inventes conexiones
-    - Formato: 'Tu ${sol?.sign} en Casa ${sol?.house} [característica específica]. Esto hace que este evento [conexión concreta].'
-    "
-  },
-
-  "nivel_3_como_se_vive_en_ti": {
-    "manifestaciones_concretas": "String 120-150 palabras: Describe CÓMO se manifiesta este evento en la vida diaria de ${data.userName}.
-
-    - OBLIGATORIO empezar con: 'Durante esos días es muy probable que:'
-    - Lista 3-5 manifestaciones CONCRETAS (sentimientos, situaciones, conversaciones)
-    - Conecta cada una con su configuración natal
-    - Usa su nombre ${data.userName} al menos 1 vez
-    - Menciona casas con significado: 'Casa ${data.event.house} (${significadoCasa})'
-    - SÉ ESPECÍFICO, no vago",
-
-    "riesgo_si_vives_inconscientemente": "String 80-100 palabras: RIESGOS específicos si ${data.userName} no trabaja este evento conscientemente.
-
-    ⚠️ REGLA CRÍTICA - NODO SUR:
-    - Si mencionas Nodo Sur, DEBES justificar POR QUÉ se activa:
-      ✅ 'Porque Mercurio rige Géminis (tu Nodo Sur)'
-      ✅ 'Porque el tema de dispersión mental conecta con tu Nodo Sur en Géminis'
-      ❌ NO: 'Esto conecta con tu Nodo Sur' (sin explicar por qué)
-
-    - Formato: Lista 4-6 riesgos concretos
-    - Conecta con patrones natales del usuario
-    - NO uses lenguaje vago
-    - Sé directo y honesto",
-
-    "uso_consciente": "String 120-150 palabras: Consejo APLICADO y CONCRETO para ${data.userName}.
-
-    - Empieza con acción clara: 'No tomes...', 'Observa...', 'Elige...', 'Pregúntate...'
-    - Da 3-4 consejos específicos ejecutables
-    - Usa su configuración natal para personalizar
-    - Menciona casas, planetas, aspectos REALES
-    - Pregunta clave personalizada
-    - NO genérico",
-
-    "accion_practica": "String 80-120 palabras: UNA acción práctica EJECUTABLE que ${data.userName} puede hacer.
-
-    - Pasos numerados (1, 2, 3) muy claros
-    - Conecta cada paso con posiciones de su carta
-    - Da timing específico si aplica
-    - DEBE ser accionable, no abstracta",
-
-    "mantra_personal": "String 40-60 palabras: Frase-mantra personalizada para ${data.userName}.
-
-    - OBLIGATORIO en PRIMERA PERSONA ('Esta Luna me muestra...', 'Yo elijo...', 'Mi ${sol?.sign} sostiene...')
-    - Menciona posiciones planetarias ESPECÍFICAS
-    - Empoderador, concreto, accionable
-    - NO vago ni genérico"
-  },
-
 
   "analisis_tecnico": {
     "evento_en_casa_natal": ${data.event.house},
