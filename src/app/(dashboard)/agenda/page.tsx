@@ -10,6 +10,10 @@ import type { UserProfile, AstrologicalEvent, EventType } from '@/types/astrolog
 
 import EventsLoadingModal from '@/components/astrology/EventsLoadingModal';
 import EventInterpretationButton from '@/components/agenda/EventInterpretationButton';
+import PlanetaryCards from '@/components/agenda/PlanetaryCards';
+import { AgendaLibro } from '@/components/agenda/AgendaLibro';
+import { StyleProvider } from '@/context/StyleContext';
+import { mapAstrologicalEventToEventData } from '@/utils/eventMapping';
 
 interface AstronomicalDay {
   date: Date;
@@ -32,6 +36,8 @@ const AgendaPersonalizada = () => {
   const [hoveredEvent, setHoveredEvent] = useState<AstrologicalEvent | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showPersonalityModal, setShowPersonalityModal] = useState(false);
+  // Estado para mostrar Agenda Libro
+  const [showAgendaLibro, setShowAgendaLibro] = useState(false);
   // Estados para carga de agenda completa (birthday to next birthday)
   const [loadingYearEvents, setLoadingYearEvents] = useState(false);
   const [yearRange, setYearRange] = useState<{start: Date, end: Date} | null>(null);
@@ -161,7 +167,8 @@ const AgendaPersonalizada = () => {
           birthDate: userProfile.birthDate,
           birthTime: userProfile.birthTime,
           birthPlace: userProfile.birthPlace,
-          currentYear: startDate.getFullYear()
+          currentYear: startDate.getFullYear(),
+          userId: user?.uid // ✅ Enviar userId para cálculo de casas
         })
       });
 
@@ -957,27 +964,34 @@ const AgendaPersonalizada = () => {
 
 
   // ✅ HELPER: Mapear tipo de evento a formato de EventInterpretationButton
+  // Ahora usa la función de mapeo completo de utils
   const mapEventTypeToInterpretation = (event: AstrologicalEvent): {
     type: 'luna_nueva' | 'luna_llena' | 'transito' | 'aspecto';
     house: number;
   } => {
-    let type: 'luna_nueva' | 'luna_llena' | 'transito' | 'aspecto';
-    let house = 1; // Default casa 1 (TODO: calcular casa real basado en carta natal)
+    const eventData = mapAstrologicalEventToEventData(event, {
+      defaultHouse: 1 // Fallback si no hay casa calculada
+    });
 
-    // Mapear tipo de evento
-    if (event.type === 'lunar_phase') {
-      // Determinar si es Luna Nueva o Llena basado en el título
-      type = event.title.toLowerCase().includes('nueva') ? 'luna_nueva' : 'luna_llena';
-    } else if (event.type === 'retrograde' || event.type === 'planetary_transit') {
-      type = 'transito';
-    } else if (event.type === 'eclipse' || event.type === 'aspect') {
-      type = 'aspecto';
-    } else {
-      type = 'aspecto'; // Default
-    }
-
-    return { type, house };
+    return {
+      type: eventData.type,
+      house: eventData.house
+    };
   };
+
+  // Si está en modo Agenda Libro, mostrar solo eso
+  if (showAgendaLibro && userProfile && yearRange) {
+    return (
+      <StyleProvider>
+        <AgendaLibro
+          onClose={() => setShowAgendaLibro(false)}
+          userName={userProfile.name || 'Usuario'}
+          startDate={yearRange.start}
+          endDate={yearRange.end}
+        />
+      </StyleProvider>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 relative overflow-hidden">
@@ -1104,6 +1118,11 @@ const AgendaPersonalizada = () => {
             </div>
           </div>
         )}
+
+        {/* PLANETARY CARDS - Contexto anual */}
+        <div className="mb-8">
+          <PlanetaryCards />
+        </div>
 
         {/* LAYOUT DESKTOP/MOBILE */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -1436,14 +1455,12 @@ const AgendaPersonalizada = () => {
                     Explorar más ✨
                   </button>
                   <button
-                    onClick={() => window.print()}
-                    className="bg-gradient-to-r from-green-500/80 to-emerald-500/80 hover:from-green-400/90 hover:to-emerald-400/90 transition-all duration-200 shadow-lg hover:shadow-green-500/25 border border-white/10 p-3 rounded-full group"
-                    title="Imprimir agenda como libro A5"
+                    onClick={() => setShowAgendaLibro(true)}
+                    className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 transition-all duration-200 shadow-lg hover:shadow-yellow-500/25 border border-white/10 p-3 rounded-full group"
+                    title="Ver tu agenda en formato libro"
                   >
-                    <svg className="h-5 w-5 text-white group-hover:scale-110 transition-transform inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                    </svg>
-                    Imprimir Agenda
+                    <span className="text-xl mr-2">📖</span>
+                    <span className="text-white font-bold">Ver Agenda Libro</span>
                   </button>
                 </div>
               </div>
@@ -1534,6 +1551,7 @@ const AgendaPersonalizada = () => {
                         {modalEvent.planet && modalEvent.sign && (
                           <p className="text-purple-300 text-xs mt-1">
                             {modalEvent.planet} en {modalEvent.sign}
+                            {modalEvent.house && ` • Casa ${modalEvent.house}`}
                           </p>
                         )}
                       </div>
@@ -1637,11 +1655,24 @@ const AgendaPersonalizada = () => {
                           <div className="mb-4">
                             <h3 className="text-lg font-semibold text-purple-300 mb-2 flex items-center">
                               <span className="mr-2">✨</span>
-                              ¿Quieres una interpretación ULTRA PERSONALIZADA?
+                              Interpretación ULTRA Personalizada
                             </h3>
                             <p className="text-purple-200 text-sm mb-4">
-                              Genera una interpretación única basada en TU carta natal + Solar Return que analiza cómo este evento te afecta específicamente, incluyendo tus fortalezas a usar, bloqueos a transformar, mantras personalizados y ejercicios concretos.
+                              Genera una interpretación única cruzando <strong>TU carta natal + Solar Return + Este evento</strong> que analiza:
                             </p>
+                            <ul className="text-purple-200 text-sm space-y-1 mb-4 ml-4">
+                              <li>✓ Cómo este evento te afecta específicamente</li>
+                              <li>✓ Qué fortalezas de tu carta usar</li>
+                              <li>✓ Qué bloqueos transformar</li>
+                              <li>✓ Ejercicios concretos para este momento</li>
+                              <li>✓ Mantra personalizado con tus posiciones planetarias</li>
+                              <li>✓ Timing evolutivo preciso</li>
+                            </ul>
+                            {modalEvent.house && (
+                              <div className="bg-purple-700/30 rounded-lg p-3 text-sm text-purple-100 mb-4">
+                                <strong>📍 Casa Activada:</strong> Casa {modalEvent.house} de tu carta natal
+                              </div>
+                            )}
                           </div>
 
                           <EventInterpretationButton

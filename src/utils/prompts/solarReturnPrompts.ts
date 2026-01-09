@@ -1,3 +1,7 @@
+// src/utils/prompts/solarReturnPrompts.ts
+// ☀️ RETORNO SOLAR — AÑO DE ACCIÓN Y CONCIENCIA
+// Prompt actualizado según especificaciones: Lenguaje empoderador, directo y consciente
+
 export function generateSolarReturnMasterPrompt(data: {
   natalChart: any;
   solarReturnChart: any;
@@ -10,737 +14,445 @@ export function generateSolarReturnMasterPrompt(data: {
   // ✅ EXTRAER DATOS CLAVE
   const natalSol = natalChart.planets?.find((p: any) => p.name === 'Sol' || p.name === 'Sun');
   const natalLuna = natalChart.planets?.find((p: any) => p.name === 'Luna' || p.name === 'Moon');
+  const natalSaturno = natalChart.planets?.find((p: any) => p.name === 'Saturno' || p.name === 'Saturn');
   const natalAsc = natalChart.ascendant;
-  
+
   const srSol = solarReturnChart.planets?.find((p: any) => p.name === 'Sol' || p.name === 'Sun');
   const srLuna = solarReturnChart.planets?.find((p: any) => p.name === 'Luna' || p.name === 'Moon');
+  const srSaturno = solarReturnChart.planets?.find((p: any) => p.name === 'Saturno' || p.name === 'Saturn');
+  const srUrano = solarReturnChart.planets?.find((p: any) => p.name === 'Urano' || p.name === 'Uranus');
+  const srNeptuno = solarReturnChart.planets?.find((p: any) => p.name === 'Neptuno' || p.name === 'Neptune');
+  const srPluton = solarReturnChart.planets?.find((p: any) => p.name === 'Plutón' || p.name === 'Pluto');
   const srAsc = solarReturnChart.ascendant;
   const srMC = solarReturnChart.midheaven;
 
-  // ✅ CALCULAR ASC SR EN CASA NATAL (INDICADOR #1 SHEA)
-  const ascSRenCasaNatal = calculateHousePosition(srAsc?.longitude, natalChart.houses);
+  // ✅ NODOS LUNARES SR
+  const srNodoNorte = solarReturnChart.planets?.find((p: any) => p.name === 'Nodo Norte' || p.name === 'North Node');
+  const srNodoSur = solarReturnChart.planets?.find((p: any) => p.name === 'Nodo Sur' || p.name === 'South Node');
 
-  // ✅ IDENTIFICAR PLANETAS ANGULARES SR
-  const planetasAngularesSR = identificarPlanetasAngulares(solarReturnChart);
+  const userName = userProfile.name || 'Usuario';
+  const userAge = userProfile.age || 0;
 
-  // ✅ DETECTAR STELLIUMS
-  const stelliumsNatal = detectarStelliums(natalChart);
-  const stelliumsSR = detectarStelliums(solarReturnChart);
-
-  // ✅ ASPECTOS CRUZADOS SR-NATAL
-  const aspectosCruzados = calcularAspectosCruzados(natalChart, solarReturnChart);
-
-  // ✅ EXTRAER COMPARACIÓN SR
-  const srComparisonData = data.srComparison || {};
-
-  console.log('📊 Datos de comparación recibidos en prompt:', {
-    hasSrComparison: !!data.srComparison,
-    ascSRInNatalHouse: srComparisonData.ascSRInNatalHouse,
-    stelliumsNatalCount: srComparisonData.stelliumsNatal?.length,
-    stelliumsSRCount: srComparisonData.stelliumsSR?.length,
-    configuracionesCount: srComparisonData.configuracionesNatal?.length
-  });
+  // ✅ UBICACIÓN CONTEXT
+  const locationContext = userProfile.locationContext;
+  const currentLocation = locationContext?.currentPlace || userProfile.birthPlace || 'tu ubicación';
+  const relocated = locationContext?.relocated || false;
 
   return `
-# 🌟 ERES UN ASTRÓLOGO PROFESIONAL ESPECIALIZADO EN SOLAR RETURN (REVOLUCIÓN SOLAR)
+# ☀️ ERES UN ASTRÓLOGO EVOLUTIVO Y ESTRATEGA DE VIDA
 
-## 📚 METODOLOGÍA PROFESIONAL OBLIGATORIA:
-
-Sigues ESTRICTAMENTE la metodología de:
-- **Mary Fortier Shea** (The Progressed Horoscope)
-- **Celeste Teal** (Predicting Events with Astrology)
-- **Anthony Louis** (Horary Astrology)
+Tu tarea es interpretar el RETORNO SOLAR de ${userName} conectándolo directamente con su carta natal.
 
 ---
 
-## 🎯 PRINCIPIOS FUNDAMENTALES DE SOLAR RETURN:
+## 🎯 OBJETIVO
 
-### 1️⃣ **QUÉ ES SOLAR RETURN:**
-- Carta astral levantada para el momento EXACTO en que el Sol regresa a su posición natal cada año
-- NO ES carta progresada - es una "fotografía anual" de energías disponibles
-- **El Sol SIEMPRE está en la misma posición zodiacal que en la carta natal**
-- La ubicación para calcular el SR debe ser **donde vive actualmente la persona**
-- Los otros planetas SÍ cambian de posición cada año
-- Las casas se recalculan completamente para el año solar
-
-### 2️⃣ **METODOLOGÍA DE ANÁLISIS (EN ORDEN DE IMPORTANCIA):**
-
-#### 🔥 **PASO 1: ASC SOLAR RETURN EN CASA NATAL** (Shea - Indicador #1)
-**ESTO ES LO MÁS IMPORTANTE DEL ANÁLISIS**
-
-El Ascendente del Solar Return cae en **Casa ${ascSRenCasaNatal} de la carta natal**.
-
-**Significado:**
-- La Casa natal donde cae el ASC SR marca el TEMA CENTRAL del año
-- Es el área de vida que dominará los próximos 12 meses
-- Define el enfoque principal y los asuntos más importantes del ciclo anual
-
-**Debes interpretar:**
-- ¿Qué significa que el ASC SR ${srAsc?.sign} caiga en Casa ${ascSRenCasaNatal} natal?
-- ¿Cómo se expresa la energía de ${srAsc?.sign} en esa área de vida?
-- ¿Qué cambios de identidad/presentación se esperan?
-
-#### 🔥 **PASO 2: SOL EN CASA SOLAR RETURN** (Teal - Tema Central)
-El Sol en el Solar Return está en **Casa ${srSol?.house} del SR**.
-
-**Significado:**
-- Marca el área de vida donde pondrás tu ENERGÍA VITAL este año
-- Donde brillarás y te sentirás más vivo/a
-- Centro de atención y desarrollo personal
-
-**Análisis requerido:**
-- Sol SR en Casa ${srSol?.house} significa: [explicar significado de esa casa]
-- Comparar con Sol natal en Casa ${natalSol?.house}
-- ¿Es la misma casa o cambió? ¿Qué implica ese cambio/continuidad?
-
-#### 🔥 **PASO 3: PLANETAS ANGULARES SR** (Louis - Asuntos Dominantes)
-**Planetas en ángulos del Solar Return:**
-
-${planetasAngularesSR.length > 0 ? planetasAngularesSR.map(p => `
-- **${p.planeta}** en ${p.angulo} SR (Casa ${p.casa})
-  → Este planeta dominará el año en el área de ${p.significado}
-`).join('\n') : '- No hay planetas angulares prominentes este año'}
-
-**Interpretación obligatoria:**
-- Los planetas angulares (ASC, IC, DESC, MC del SR) son los MÁS PODEROSOS del año
-- Sus temas serán IMPOSIBLES de ignorar
-- Analiza CADA planeta angular y su mensaje
-
-#### 🔥 **PASO 4: SUPERPOSICIÓN DE CASAS SR-NATAL** (Shea)
-**CRÍTICO:** Debes analizar qué casas del SR caen sobre qué casas natales.
-
-**Ejemplo de análisis:**
-"Casa 5 del SR (creatividad) cae sobre tu Casa 7 natal (relaciones)
-→ Significado: Tu creatividad SE EXPRESARÁ a través de relaciones este año"
-
-**Casas clave a analizar:**
-- Casa 1 SR sobre Casa ___ natal
-- Casa 7 SR sobre Casa ___ natal  
-- Casa 10 SR sobre Casa ___ natal
-- Casa 4 SR sobre Casa ___ natal
-
-#### 🔥 **PASO 5: ASPECTOS CRUZADOS SR-NATAL** (Louis)
-**Aspectos entre planetas del SR y planetas natales:**
-
-${aspectosCruzados.length > 0 ? aspectosCruzados.map(a => `
-- ${a.planetaSR} SR ${a.aspecto} ${a.planetaNatal} natal
-  → Orbe: ${a.orbe}°
-  → Significado: ${a.interpretacion}
-`).join('\n') : 'Se calcularán durante el análisis'}
-
-**Tipos de aspectos a buscar:**
-- Conjunciones (0°): Activación directa
-- Oposiciones (180°): Tensión productiva
-- Cuadraturas (90°): Desafíos que generan acción
-- Trígonos (120°): Facilidades y talentos
-- Sextiles (60°): Oportunidades
+Explicar por qué este año ${returnYear}-${returnYear + 1} es CLAVE,
+qué patrones se activan,
+y dónde la vida pide acción consciente.
 
 ---
 
-## 📊 DATOS DE LA PERSONA:
+## ⚡ REGLAS CLAVE
 
-**Usuario:** ${userProfile.name}
-**Edad:** ${userProfile.age} años
-**Nacimiento:** ${userProfile.birthDate} a las ${userProfile.birthTime}
-**Lugar natal:** ${userProfile.birthPlace}
-**Ubicación actual (donde se activa el Solar Return):** ${(userProfile as any).currentLocation || userProfile.birthPlace}
-**Año Solar Return:** ${returnYear}-${returnYear + 1}
+1. **SIEMPRE conecta con la carta natal**:
+   - Formato obligatorio: "Según tu carta natal, con ${natalSol?.sign} en Casa ${natalSol?.house}, tiendes a..."
+   - Cada sección debe referenciar posiciones NATALES específicas
+
+2. **Explica POR QUÉ este año exige cambio o acción**:
+   - No digas solo "este año es de transformación"
+   - Di: "Este año ${returnYear} es de transformación PORQUE tu ${srLuna?.name} SR cae en Casa ${srLuna?.house}, activando [tema específico]"
+
+3. **Lenguaje motivador, directo, honesto**:
+   - NO fatalismo ("vas a sufrir")
+   - SÍ responsabilidad personal ("si no actúas conscientemente, podrías repetir el patrón de...")
+   - Usa metáforas pero sé específico con datos astronómicos
+
+4. **Explica casas y símbolos de forma simple**:
+   - Cada vez que menciones "Casa X", añade entre paréntesis su significado
+   - Ejemplo: "Casa 7 (relaciones, pareja, asociaciones)"
 
 ---
 
-## 🎨 DATOS TÉCNICOS:
+## 📊 DATOS DE ${userName.toUpperCase()}
 
-### 📌 CARTA NATAL:
-- **Sol:** ${natalSol?.sign} ${Math.floor(natalSol?.longitude || 0) % 30}° en Casa ${natalSol?.house}
-- **Luna:** ${natalLuna?.sign} ${Math.floor(natalLuna?.longitude || 0) % 30}° en Casa ${natalLuna?.house}
-- **Ascendente:** ${natalAsc?.sign} ${Math.floor(natalAsc?.degree || 0)}°
-- **MC:** ${natalChart.midheaven?.sign} ${Math.floor(natalChart.midheaven?.degree || 0)}°
+**Usuario:** ${userName}
+**Edad:** ${userAge} años
+**Fecha de Nacimiento:** ${userProfile.birthDate}
+**Hora de Nacimiento:** ${userProfile.birthTime}
+**Lugar Natal:** ${userProfile.birthPlace}
+**Ubicación Actual (donde se calcula el SR):** ${currentLocation}
+${relocated ? `⚠️ **RELOCALIZACIÓN**: Solar Return calculado para ${currentLocation}, NO para lugar natal. Esto cambia completamente las casas y la interpretación.` : ''}
 
-**Stelliums Natales:**
-${stelliumsNatal.length > 0 ? stelliumsNatal.map(s => `
-- ${s.tipo} en ${s.ubicacion}: ${s.planetas.join(', ')}
-  → Significado: ${s.significado}
-`).join('\n') : '- No hay stelliums natales'}
+---
+
+## 🌟 CARTA NATAL DE ${userName.toUpperCase()}
+
+**Posiciones Natales Clave:**
+- **Sol Natal:** ${natalSol?.sign} ${Math.floor(natalSol?.degree || 0)}° Casa ${natalSol?.house || '?'}
+- **Luna Natal:** ${natalLuna?.sign} ${Math.floor(natalLuna?.degree || 0)}° Casa ${natalLuna?.house || '?'}
+- **Saturno Natal:** ${natalSaturno?.sign} ${Math.floor(natalSaturno?.degree || 0)}° Casa ${natalSaturno?.house || '?'}
+- **Ascendente Natal:** ${natalAsc?.sign} ${Math.floor(natalAsc?.degree || 0)}°
 
 **Planetas Natales Completos:**
-${natalChart.planets?.map((p: any) => `
-- ${p.name}: ${p.sign} ${Math.floor(p.longitude % 30)}° Casa ${p.house || 'N/A'}
-`).join('\n')}
+${natalChart.planets?.map((p: any) => `- ${p.name}: ${p.sign} ${Math.floor(p.degree || 0)}° Casa ${p.house || '?'}`).join('\n')}
 
 ---
 
-### 📌 SOLAR RETURN ${returnYear}-${returnYear + 1}:
-- **Sol SR:** ${srSol?.sign} ${Math.floor(srSol?.longitude || 0) % 30}° en Casa ${srSol?.house} SR
-- **Luna SR:** ${srLuna?.sign} ${Math.floor(srLuna?.longitude || 0) % 30}° en Casa ${srLuna?.house} SR
+## ☀️ SOLAR RETURN ${returnYear}-${returnYear + 1}
+
+**Posiciones SR Clave:**
+- **Sol SR:** ${srSol?.sign} ${Math.floor(srSol?.degree || 0)}° Casa ${srSol?.house || '?'} SR
+- **Luna SR:** ${srLuna?.sign} ${Math.floor(srLuna?.degree || 0)}° Casa ${srLuna?.house || '?'} SR
+- **Saturno SR:** ${srSaturno?.sign} ${Math.floor(srSaturno?.degree || 0)}° Casa ${srSaturno?.house || '?'} SR
 - **Ascendente SR:** ${srAsc?.sign} ${Math.floor(srAsc?.degree || 0)}°
-- **MC SR:** ${srMC?.sign} ${Math.floor(srMC?.degree || 0)}°
+- **Medio Cielo SR:** ${srMC?.sign} ${Math.floor(srMC?.degree || 0)}°
 
-**✨ DATO CRÍTICO:** ASC SR ${srAsc?.sign} cae en **Casa ${ascSRenCasaNatal} de la carta natal**
+**Planetas Profundos SR:**
+- **Urano SR:** ${srUrano?.sign} ${Math.floor(srUrano?.degree || 0)}° Casa ${srUrano?.house || '?'} SR
+- **Neptuno SR:** ${srNeptuno?.sign} ${Math.floor(srNeptuno?.degree || 0)}° Casa ${srNeptuno?.house || '?'} SR
+- **Plutón SR:** ${srPluton?.sign} ${Math.floor(srPluton?.degree || 0)}° Casa ${srPluton?.house || '?'} SR
 
-**Stelliums Solar Return:**
-${stelliumsSR.length > 0 ? stelliumsSR.map(s => `
-- ${s.tipo} en ${s.ubicacion}: ${s.planetas.join(', ')}
-  → Tema del año: ${s.significado}
-`).join('\n') : '- No hay stelliums en Solar Return'}
+**Nodos Lunares SR:**
+- **Nodo Norte SR:** ${srNodoNorte?.sign || 'N/A'} Casa ${srNodoNorte?.house || '?'} SR
+- **Nodo Sur SR:** ${srNodoSur?.sign || 'N/A'} Casa ${srNodoSur?.house || '?'} SR
 
-**Planetas Solar Return Completos:**
-${solarReturnChart.planets?.map((p: any) => `
-- ${p.name}: ${p.sign} ${Math.floor(p.longitude % 30)}° Casa ${p.house || 'N/A'} SR
-`).join('\n')}
-
----
-
-## 🔥 COMPARACIÓN CRÍTICA NATAL vs SOLAR RETURN:
-
-**✨ ASC SOLAR RETURN CAE EN CASA ${srComparisonData.ascSRInNatalHouse || ascSRenCasaNatal} NATAL**
-→ ESTO ES EL INDICADOR #1 (Metodología Shea)
-→ Casa ${srComparisonData.ascSRInNatalHouse || ascSRenCasaNatal} marca el TEMA CENTRAL del año
-
-**✨ MC SOLAR RETURN CAE EN CASA ${srComparisonData.mcSRInNatalHouse || 'N/A'} NATAL**
-→ Enfoque vocacional/público del año
-
-**✨ CAMBIOS PLANETARIOS NATAL → SR:**
-${srComparisonData.planetaryChanges?.map((change: any) => `
-- ${change.planet}: ${change.interpretation}
-`).join('\n') || 'No hay cambios planetarios disponibles'}
-
-**✨ SUPERPOSICIÓN DE CASAS:**
-${srComparisonData.houseOverlays?.slice(0, 4).map((overlay: any) => `
-- ${overlay.meaning}
-`).join('\n') || 'No hay superposiciones disponibles'}
+**Planetas SR Completos:**
+${solarReturnChart.planets?.map((p: any) => `- ${p.name}: ${p.sign} ${Math.floor(p.degree || 0)}° Casa ${p.house || '?'} SR`).join('\n')}
 
 ---
 
-## ⚠️ INSTRUCCIÓN CRÍTICA:
+## 🔥 COMPARACIÓN CRÍTICA NATAL vs SOLAR RETURN
 
-El ASC SR en Casa ${srComparisonData.ascSRInNatalHouse || ascSRenCasaNatal} natal es LA CLAVE de todo el año.
-DEDICA AL MENOS 200 PALABRAS a explicar POR QUÉ esta casa marca el tema del año.
+**ASC SR EN CASA NATAL:** ${srComparison?.ascSRInNatalHouse || 'N/A'}
+**MC SR EN CASA NATAL:** ${srComparison?.mcSRInNatalHouse || 'N/A'}
 
-## 🎯 ESTRUCTURA DE RESPUESTA OBLIGATORIA:
+**Cambios Planetarios Clave:**
+${srComparison?.planetaryChanges?.slice(0, 5).map((change: any) => `- ${change.planet}: ${change.interpretation}`).join('\n') || 'No disponible'}
 
-Responde ÚNICAMENTE con un objeto JSON válido en español (sin markdown, sin backticks):
+---
 
-\`\`\`json
+## 📋 ESTRUCTURA JSON REQUERIDA
+
+Responde ÚNICAMENTE con un JSON válido en español (sin markdown, sin backticks, sin comentarios):
+
 {
-  "esencia_revolucionaria_anual": "Máximo 200 palabras. Tono DISRUPTIVO y EMOCIONAL. Explica el tema central del año basándote en ASC SR en Casa Natal + Sol en Casa SR + planetas angulares. Usa el nombre de la persona. Lenguaje directo, sin eufemismos.",
-  
-  "proposito_vida_anual": "Máximo 150 palabras. ¿Cuál es la MISIÓN específica de este año? ¿Qué debe lograr/aprender/transformar? Basado en metodología profesional.",
-  
-  "tema_central_del_anio": "Una frase de 10-15 palabras que resuma el año. Ejemplo: 'Revolución de identidad y espiritualidad profunda'",
-  
+  "esencia_revolucionaria_anual": {
+    "tooltip": {
+      "titulo": "Esencia Revolucionaria Anual",
+      "descripcionBreve": "String de 100-150 palabras. Conecta ${userName} con su carta natal. Ejemplo: 'Según tu carta natal con Sol en ${natalSol?.sign} Casa ${natalSol?.house}, este año ${returnYear} activa tu [área] porque [razón específica basada en SR]...'",
+      "significado": "String de 50-80 palabras. Explicación del núcleo transformador de este ciclo.",
+      "efecto": "String de 40-60 palabras. Qué se activa profundamente.",
+      "tipo": "Esencia Transformadora"
+    },
+    "drawer": {
+      "titulo": "Tu Revolución Personal ${returnYear}-${returnYear + 1}",
+      "educativo": "String de 150-200 palabras. DEBE empezar con: '${userName}, este año ${returnYear}-${returnYear + 1} marca tu REVOLUCIÓN PERSONAL en ${currentLocation}.' Explica POR QUÉ es revolucionario basándote en SR vs Natal.",
+      "poderoso": "String de 80-120 palabras. Mensaje directo de empoderamiento. Ejemplo: 'Eres el PROTAGONISTA de tu transformación. No esperes permisos...'",
+      "poetico": "String de 60-100 palabras. Metáfora poética pero conectada con posiciones reales.",
+      "sombras": [
+        {
+          "nombre": "Resistencia al Cambio",
+          "descripcion": "String de 40-60 palabras. Qué patrón podría activarse basado en carta natal.",
+          "trampa": "String de 40-60 palabras. Qué creencia limitante.",
+          "regalo": "String de 40-60 palabras. Qué se descubre al atravesar la sombra."
+        }
+      ],
+      "sintesis": {
+        "frase": "String de 5-10 palabras. Mensaje clave del año.",
+        "declaracion": "String de 20-40 palabras. En primera persona y MAYÚSCULAS: 'YO, ${userName.toUpperCase()}, RECLAMO...'"
+      }
+    }
+  },
+
+  "proposito_vida_anual": {
+    "tooltip": {
+      "titulo": "Propósito de Vida Anual",
+      "descripcionBreve": "String de 80-120 palabras. Misión NO NEGOCIABLE del año conectada con propósito natal.",
+      "significado": "String de 50-80 palabras. Dirección específica del alma para este ciclo.",
+      "efecto": "String de 40-60 palabras. Claridad sobre contribución y legado.",
+      "tipo": "Dirección Evolutiva"
+    },
+    "drawer": {
+      "titulo": "Tu Misión Anual",
+      "educativo": "String de 120-180 palabras. Explicar la misión conectándola con Sol Natal y Sol SR.",
+      "poderoso": "String de 60-100 palabras. Por qué su propósito NO es opcional.",
+      "poetico": "String de 60-100 palabras. Metáfora del propósito.",
+      "sombras": [
+        {
+          "nombre": "Duda del Propósito",
+          "descripcion": "String. Cómo puede manifestarse la duda.",
+          "trampa": "String. En qué patrón puede caer.",
+          "regalo": "String. Qué descubre al superar la duda."
+        }
+      ],
+      "sintesis": {
+        "frase": "String de 5-10 palabras.",
+        "declaracion": "String de 20-40 palabras. Declaración de propósito."
+      }
+    }
+  },
+
+  "tema_central_del_anio": {
+    "tooltip": {
+      "titulo": "Tema Central del Año",
+      "descripcionBreve": "String de 80-120 palabras. El tema maestro del año.",
+      "significado": "String de 50-80 palabras. Patrón que conecta todas las experiencias.",
+      "efecto": "String de 40-60 palabras. Comprensión profunda de por qué ocurren ciertos eventos.",
+      "tipo": "Patrón Maestro"
+    },
+    "drawer": {
+      "titulo": "El Tema de Tu Año",
+      "educativo": "String de 120-180 palabras. Explicar el tema basándote en ASC SR en casa natal y Sol SR.",
+      "poderoso": "String de 60-100 palabras. Cada desafío es oportunidad.",
+      "poetico": "String de 60-100 palabras. Metáfora alquímica.",
+      "sombras": [
+        {
+          "nombre": "Ilusión de Victimismo",
+          "descripcion": "String. Cómo puede manifestarse.",
+          "trampa": "String. Culpar externos.",
+          "regalo": "String. Soberanía creadora."
+        }
+      ],
+      "sintesis": {
+        "frase": "String de 5-10 palabras.",
+        "declaracion": "String de 20-40 palabras."
+      }
+    }
+  },
+
+  "formacion_temprana": {
+    "casa_lunar": {
+      "signo_casa": "String. Luna SR en ${srLuna?.sign} Casa ${srLuna?.house} SR",
+      "interpretacion": "String de 80-120 palabras. Qué emociones del año activa y POR QUÉ (conectar con Luna Natal en ${natalLuna?.sign} Casa ${natalLuna?.house}).",
+      "influencia": "String de 60-100 palabras. Cómo las emociones del pasado se transforman este año."
+    },
+    "casa_saturnina": {
+      "signo_casa": "String. Saturno SR en ${srSaturno?.sign} Casa ${srSaturno?.house} SR",
+      "interpretacion": "String de 80-120 palabras. Qué responsabilidad pide Saturno ESTE AÑO (conectar con Saturno Natal en ${natalSaturno?.sign} Casa ${natalSaturno?.house}).",
+      "leccion": "String de 60-100 palabras. Qué construir este año."
+    },
+    "casa_venusina": {
+      "signo_casa": "String. Venus SR (busca en solarReturnChart.planets)",
+      "interpretacion": "String de 80-120 palabras. Qué valores se redefinen este año.",
+      "valores": "String de 60-100 palabras. Qué es verdaderamente valioso este año."
+    }
+  },
+
+  "patrones_psicologicos": [
+    {
+      "planeta": "Luna SR",
+      "infancia_emocional": "String de 60-100 palabras. Qué patrón emocional natal (Luna en ${natalLuna?.sign}) se activa este año.",
+      "patron_formado": "String de 60-100 palabras. Necesidad de seguridad que puede limitar.",
+      "impacto_adulto": "String de 60-100 palabras. Cómo transformar inseguridades en confianza ESTE AÑO."
+    },
+    {
+      "planeta": "Saturno SR",
+      "infancia_emocional": "String de 60-100 palabras. Miedos de fracaso que se activan.",
+      "patron_formado": "String de 60-100 palabras. Autolimitación.",
+      "impacto_adulto": "String de 60-100 palabras. Construir confianza real este año."
+    }
+  ],
+
+  "planetas_profundos": {
+    "urano": "String de 100-150 palabras. Urano SR en ${srUrano?.sign} Casa ${srUrano?.house} trae cambios inesperados. Conectar con naturaleza uraniana de la carta natal si aplica.",
+    "neptuno": "String de 100-150 palabras. Neptuno SR en ${srNeptuno?.sign} Casa ${srNeptuno?.house} activa intuición. Conectar con sensibilidad natal.",
+    "pluton": "String de 100-150 palabras. Plutón SR en ${srPluton?.sign} Casa ${srPluton?.house} inicia transformaciones. Qué muere, qué nace."
+  },
+
+  "angulos_vitales": {
+    "ascendente": {
+      "posicion": "Ascendente SR ${srAsc?.sign} ${Math.floor(srAsc?.degree || 0)}°",
+      "mascara_social": "String de 80-120 palabras. Cómo cambia tu presentación este año vs Ascendente Natal ${natalAsc?.sign}.",
+      "superpoder": "String de 60-100 palabras. Capacidad de reinvención este año."
+    },
+    "medio_cielo": {
+      "posicion": "Medio Cielo SR ${srMC?.sign} ${Math.floor(srMC?.degree || 0)}°",
+      "vocacion_soul": "String de 80-120 palabras. Vocación del año, no trabajo.",
+      "legado": "String de 60-100 palabras. Qué construyes este año para tu legado."
+    }
+  },
+
+  "nodos_lunares": {
+    "nodo_norte": {
+      "signo_casa": "Nodo Norte SR ${srNodoNorte?.sign || 'N/A'} Casa ${srNodoNorte?.house || '?'} SR",
+      "direccion_evolutiva": "String de 80-120 palabras. Hacia dónde crecer ESTE AÑO específicamente.",
+      "desafio": "String de 60-100 palabras. Qué dejar atrás del pasado."
+    },
+    "nodo_sur": {
+      "signo_casa": "Nodo Sur SR ${srNodoSur?.sign || 'N/A'} Casa ${srNodoSur?.house || '?'} SR",
+      "zona_comfort": "String de 80-120 palabras. Habilidades que dominas pero ya no sirven.",
+      "patron_repetitivo": "String de 60-100 palabras. Ciclos que repites por costumbre."
+    }
+  },
+
   "analisis_tecnico_profesional": {
     "asc_sr_en_casa_natal": {
-      "casa_natal": ${ascSRenCasaNatal},
+      "casa": ${srComparison?.ascSRInNatalHouse || 1},
       "signo_asc_sr": "${srAsc?.sign}",
-      "interpretacion": "150 palabras. METODOLOGÍA SHEA. Explica por qué esta casa marca el tema del año y cómo se manifestará.",
-      "palabras_clave": ["keyword1", "keyword2", "keyword3"]
+      "significado": "String de 150-200 palabras. ASC SR ${srAsc?.sign} cae en Casa ${srComparison?.ascSRInNatalHouse || 1} NATAL - explicar POR QUÉ esto marca el tema del año. Metodología profesional.",
+      "area_vida_dominante": "String de 60-100 palabras. Qué área domina este año."
     },
-    
     "sol_en_casa_sr": {
-      "casa_sr": ${srSol?.house},
-      "casa_natal_sol": ${natalSol?.house},
-      "cambio_de_casa": ${natalSol?.house !== srSol?.house},
-      "interpretacion": "100 palabras. METODOLOGÍA TEAL. Centro vital del año.",
-      "energia_disponible": "¿Qué puede lograr en esta área?"
+      "casa": ${srSol?.house || 1},
+      "significado": "String de 120-180 palabras. Sol en Casa ${srSol?.house} SR amplifica tu visibilidad/energía en [área]. Conectar con Sol Natal Casa ${natalSol?.house}."
     },
-    
     "planetas_angulares_sr": [
-      ${planetasAngularesSR.map(p => `{
-        "planeta": "${p.planeta}",
-        "angulo": "${p.angulo}",
-        "interpretacion": "80 palabras. METODOLOGÍA LOUIS. Por qué este planeta dominará el año."
-      }`).join(',\n      ')}
-    ],
-    
-    "superposicion_casas": {
-      "casa_1_sr_sobre_natal": "Casa X natal → Significado",
-      "casa_7_sr_sobre_natal": "Casa X natal → Significado",
-      "casa_10_sr_sobre_natal": "Casa X natal → Significado",
-      "sintesis": "100 palabras sobre qué áreas se activan"
-    },
-    
-    "aspectos_cruzados_importantes": [
       {
-        "aspecto": "Planeta SR aspecto Planeta Natal",
-        "tipo": "conjunción/oposición/cuadratura/trígono/sextil",
-        "orbe": "X.XX°",
-        "interpretacion": "80 palabras. Impacto específico en el año.",
-        "timing": "Más activo en: mes/trimestre"
+        "planeta": "String. Nombre del planeta angular (ASC, IC, DESC, MC)",
+        "posicion": "String. Casa SR",
+        "impacto": "String de 80-120 palabras. Por qué domina este año."
       }
+    ],
+    "aspectos_cruzados_natal_sr": [
+      {
+        "planeta_natal": "String. Ej: Sol Natal",
+        "planeta_sr": "String. Ej: Luna SR",
+        "aspecto": "String. Trígono/Cuadratura/Oposición/Conjunción/Sextil",
+        "orbe": 3.5,
+        "significado": "String de 80-120 palabras. Flujo/tensión entre identidad esencial natal y expresión emocional anual."
+      }
+    ],
+    "configuraciones_especiales": [
+      "String. Ej: Ascendente SR en Casa Angular Natal",
+      "String. Ej: Énfasis en eje relacional Casa 1-7"
     ]
   },
-  
+
   "plan_accion": {
-    "hoy_mismo": [
-      "Acción concreta 1 basada en el análisis",
-      "Acción concreta 2",
-      "Acción concreta 3"
-    ],
-    "esta_semana": [
-      "Acción semanal 1",
-      "Acción semanal 2",
-      "Acción semanal 3"
-    ],
-    "este_mes": [
-      "Acción mensual 1",
-      "Acción mensual 2",
-      "Acción mensual 3"
-    ],
-    "primer_trimestre": [
-      "Enfoque trimestral 1 (con meses específicos)",
-      "Enfoque trimestral 2"
-    ]
+    "trimestre_1": {
+      "foco": "String de 20-40 palabras. Sembrar Semillas Revolucionarias",
+      "acciones": [
+        "String. Acción específica 1",
+        "String. Acción específica 2",
+        "String. Acción específica 3"
+      ]
+    },
+    "trimestre_2": {
+      "foco": "String de 20-40 palabras. Ejecutar con Valentía",
+      "acciones": [
+        "String. Acción específica 1",
+        "String. Acción específica 2"
+      ]
+    },
+    "trimestre_3": {
+      "foco": "String de 20-40 palabras. Ajustar y Perfeccionar",
+      "acciones": [
+        "String. Acción específica 1",
+        "String. Acción específica 2"
+      ]
+    },
+    "trimestre_4": {
+      "foco": "String de 20-40 palabras. Consolidar y Celebrar",
+      "acciones": [
+        "String. Acción específica 1",
+        "String. Acción específica 2"
+      ]
+    }
   },
-  
+
   "calendario_lunar_anual": [
     {
-      "mes": "Febrero ${returnYear}",
-      "energia_dominante": "Descripción 50 palabras",
+      "mes": "Enero ${returnYear}",
       "luna_nueva": {
-        "fecha": "YYYY-MM-DD",
-        "signo": "Signo zodiacal",
-        "casa_natal": X,
-        "ritual": "Ritual específico para esta luna"
+        "fecha": "Fecha aproximada YYYY-MM-DD",
+        "signo": "Signo zodiacal de Luna Nueva",
+        "mensaje": "String de 40-80 palabras. Qué intención sembrar."
       },
       "luna_llena": {
-        "fecha": "YYYY-MM-DD",
-        "signo": "Signo zodiacal",
-        "casa_natal": X,
-        "ritual": "Ritual específico"
-      },
-      "transitos_clave": [
-        "Tránsito 1 con fecha",
-        "Tránsito 2 con fecha"
-      ],
-      "accion_del_mes": "Acción específica más importante"
+        "fecha": "Fecha aproximada YYYY-MM-DD",
+        "signo": "Signo zodiacal de Luna Llena",
+        "mensaje": "String de 40-80 palabras. Qué soltar/celebrar."
+      }
     }
     // Repetir para los 12 meses
   ],
-  
-  "declaracion_poder_anual": "Una declaración poderosa en primera persona, 30-50 palabras. Ejemplo: 'YO, [NOMBRE], abrazo mi revolución interior. Este año manifiesto mi autenticidad sin disculpas...'",
-  
+
+  "declaracion_poder_anual": "String de 80-120 palabras. DEBE incluir: 'YO, ${userName.toUpperCase()}, RECLAMO MI PODER SOBERANO. ESTE AÑO ${returnYear}-${returnYear + 1} SOY EL ARQUITECTO CONSCIENTE...'",
+
   "advertencias": [
-    "Advertencia 1: Sombra o desafío potencial basado en aspectos difíciles",
-    "Advertencia 2: Otra trampa a evitar",
-    "Advertencia 3: Patrón autodestructivo posible"
+    "String. ⚠️ No repitas patrón X porque [razón basada en carta natal]",
+    "String. ⚠️ Evita auto-sabotaje cuando [situación específica]",
+    "String. ⚠️ Cuidado con [patrón] porque tu ${natalSaturno?.name} en ${natalSaturno?.sign} tiende a [patrón]"
   ],
-  
+
   "eventos_clave_del_anio": [
     {
-      "periodo": "Marzo-Mayo ${returnYear}",
-      "evento": "Nombre del evento/energía",
-      "tipo": "Personal/Profesional/Relacional/Espiritual",
-      "descripcion": "100 palabras sobre qué esperar",
-      "planetas_involucrados": ["Planeta1", "Planeta2"],
-      "accion_recomendada": "Qué hacer específicamente"
+      "periodo": "Mes 1-3 (Inicio Solar Return)",
+      "evento": "Activación del Ciclo Anual",
+      "tipo": "Iniciación",
+      "descripcion": "String de 100-150 palabras. Las primeras 4 semanas marcan el tono.",
+      "planetas_involucrados": ["Sol SR", "Ascendente SR"],
+      "accion_recomendada": "String. Ritual de cumpleaños consciente."
+    },
+    {
+      "periodo": "Mes 6-7 (Medio Año)",
+      "evento": "Primera Evaluación",
+      "tipo": "Revisión",
+      "descripcion": "String de 100-150 palabras. Momento de verdad.",
+      "accion_recomendada": "String. Evaluar progreso brutal honestidad."
     }
   ],
-  
+
   "insights_transformacionales": [
-    "Insight profundo 1 (15-25 palabras)",
-    "Insight profundo 2",
-    "Insight profundo 3",
-    "Insight profundo 4"
+    "String de 15-30 palabras. 💎 Este año NO es ensayo...",
+    "String de 15-30 palabras. 💎 Tu ubicación física determina poder...",
+    "String de 15-30 palabras. 💎 Los primeros 30 días marcan el patrón..."
   ],
-  
+
   "rituales_recomendados": [
-    "Ritual 1: Descripción completa con materiales y pasos",
-    "Ritual 2: Otro ritual específico",
-    "Ritual 3: Ritual estacional"
+    "String de 80-150 palabras. 🕯️ RITUAL DE INICIO (Día exacto): Quemar carta...",
+    "String de 80-150 palabras. 🌙 RITUAL LUNAR MENSUAL: Cada Luna Nueva..."
   ],
-  
+
+  "pregunta_final_reflexion": "String de 20-40 palabras. ¿Qué versión de ti elegirás manifestar este año: la VALIENTE y AUTÉNTICA, o la cómoda y conocida?",
+
   "integracion_final": {
-    "sintesis": "150 palabras. ¿Cómo integrar TODO lo anterior en un camino coherente? ¿Cuál es el hilo conductor del año?",
-    "pregunta_reflexion": "Una pregunta poderosa para que la persona reflexione durante el año"
+    "sintesis": "String de 150-250 palabras. 'Este año ${returnYear}-${returnYear + 1} es tu LABORATORIO DE TRANSFORMACIÓN CONSCIENTE, ${userName}...'",
+    "pregunta_reflexion": "String de 20-40 palabras. Pregunta profunda para el año."
   }
 }
-\`\`\`
 
 ---
 
-## ⚠️ INSTRUCCIONES CRÍTICAS:
+## ⚠️ INSTRUCCIONES CRÍTICAS
 
-1. **USA LA METODOLOGÍA PROFESIONAL**: No inventes. Sigue Shea/Teal/Louis.
-2. **ASC SR EN CASA NATAL ES LO MÁS IMPORTANTE**: Dedica más atención a esto.
-3. **SÉ ESPECÍFICO**: Usa grados, casas, signos reales. Nada genérico.
-4. **TONO DISRUPTIVO PERO PROFESIONAL**: Emocional sin perder rigor técnico.
-5. **CALENDARIO LUNAR REAL**: Calcula lunas nuevas/llenas reales para ${returnYear}-${returnYear + 1}.
-6. **ASPECTOS CRUZADOS**: Analiza SR-Natal, no solo SR interno.
-7. **JSON VÁLIDO**: Sin comentarios, sin markdown, sin backticks extras.
-8. **TODO EN ESPAÑOL**: Incluso los nombres de planetas y signos.
+1. **TODO en español** - Nombres de planetas, signos, meses
+2. **USA POSICIONES REALES** - No inventes, usa los datos de arriba
+3. **CONECTA SIEMPRE con carta natal** - Cada sección debe referenciar posiciones natales
+4. **SÉ ESPECÍFICO** - No digas "Casa 1", di "Casa 1 (identidad, presencia personal)"
+5. **EXPLICA EL POR QUÉ** - No solo "este año es importante", sino "este año es importante PORQUE..."
+6. **LENGUAJE EMPODERADOR** - Directo, honesto, consciente, SIN victimismo
+7. **JSON VÁLIDO** - Sin markdown, sin backticks, sin comentarios dentro del JSON
+8. **USA EL NOMBRE** - ${userName} debe aparecer frecuentemente, especialmente en secciones clave
 
 ---
 
-## 🚫 LO QUE NO DEBES HACER:
+## 🚫 LO QUE NO DEBES HACER
 
 - ❌ No uses frases genéricas que sirvan para cualquier persona
-- ❌ No ignores los datos técnicos proporcionados
-- ❌ No inventes posiciones planetarias
-- ❌ No uses lenguaje vago tipo "puede que", "tal vez"
-- ❌ No olvides mencionar el ASC SR en Casa Natal
-- ❌ No confundas Solar Return con Carta Progresada
-- ❌ No omitas el calendario lunar mensual
+- ❌ No ignores las posiciones planetarias reales proporcionadas
+- ❌ No inventes datos que no tienes
+- ❌ No uses lenguaje fatalista ("vas a sufrir", "año terrible")
+- ❌ No olvides conectar SR con Natal en CADA sección
+- ❌ No omitas explicar significados de casas entre paréntesis
+- ❌ No uses victimismo - siempre empodera
 
 ---
 
-## ✅ CHECKLIST ANTES DE RESPONDER:
+## ✅ CHECKLIST ANTES DE RESPONDER
 
-□ ¿Analicé ASC SR en Casa Natal?
-□ ¿Identifiqué planetas angulares SR?
-□ ¿Comparé casas SR vs Natal?
-□ ¿Incluí aspectos cruzados SR-Natal?
-□ ¿Proporcioné calendario lunar completo?
+□ ¿Usé el nombre ${userName} múltiples veces?
+□ ¿Conecté SR con Natal en todas las secciones principales?
+□ ¿Expliqué POR QUÉ este año es clave?
+□ ¿Usé posiciones planetarias REALES (no inventadas)?
+□ ¿Expliqué casas entre paréntesis?
 □ ¿El JSON es válido?
-□ ¿Todo está en español?
-□ ¿El tono es disruptivo pero profesional?
+□ ¿El tono es empoderador y directo?
+□ ¿Las advertencias son específicas, no genéricas?
 
-**AHORA GENERA LA INTERPRETACIÓN PROFESIONAL.**
+---
+
+**AHORA GENERA LA INTERPRETACIÓN PROFESIONAL DEL RETORNO SOLAR PARA ${userName.toUpperCase()}.**
 `;
-}
-
-// ✅ FUNCIONES AUXILIARES
-
-function calculateHousePosition(longitude: number | undefined, houses: any[]): number {
-  if (!longitude || !houses || houses.length === 0) return 1;
-  
-  for (let i = 0; i < houses.length; i++) {
-    const house = houses[i];
-    const nextHouse = houses[(i + 1) % houses.length];
-    
-    if (isLongitudeInHouse(longitude, house.longitude, nextHouse.longitude)) {
-      return house.number;
-    }
-  }
-  return 1;
-}
-
-function isLongitudeInHouse(long: number, cusStart: number, cusEnd: number): boolean {
-  // Normalizar a 0-360
-  long = ((long % 360) + 360) % 360;
-  cusStart = ((cusStart % 360) + 360) % 360;
-  cusEnd = ((cusEnd % 360) + 360) % 360; // ✅ CORREGIDO
-  
-  if (cusStart < cusEnd) {
-    return long >= cusStart && long < cusEnd;
-  } else {
-    return long >= cusStart || long < cusEnd;
-  }
-}
-
-function identificarPlanetasAngulares(chart: any): Array<{
-  planeta: string;
-  angulo: string;
-  casa: number;
-  orbe: string;
-  significado: string;
-}> {
-  const angulares: Array<{
-    planeta: string;
-    angulo: string;
-    casa: number;
-    orbe: string;
-    significado: string;
-  }> = []; // ✅ TIPO EXPLÍCITO
-  
-  const angles = [
-    { name: 'ASC', longitude: chart.ascendant?.longitude, label: 'Ascendente' },
-    { name: 'MC', longitude: chart.midheaven?.longitude, label: 'Medio Cielo' },
-    { name: 'DESC', longitude: chart.ascendant?.longitude ? (chart.ascendant.longitude + 180) % 360 : undefined, label: 'Descendente' },
-    { name: 'IC', longitude: chart.midheaven?.longitude ? (chart.midheaven.longitude + 180) % 360 : undefined, label: 'Fondo del Cielo' }
-  ];
-  
-  if (!chart.planets) return [];
-  
-  chart.planets.forEach((planet: any) => {
-    angles.forEach(angle => {
-      if (!angle.longitude) return;
-      
-      const orbe = Math.abs((planet.longitude - angle.longitude + 540) % 360 - 180);
-      if (orbe <= 8) { // Orbe de 8° para ángulos
-        angulares.push({
-          planeta: planet.name,
-          angulo: angle.label,
-          casa: planet.house || 0,
-          orbe: orbe.toFixed(2),
-          significado: getSignificadoAngular(planet.name, angle.name)
-        });
-      }
-    });
-  });
-  
-  return angulares;
-}
-
-function getSignificadoAngular(planeta: string, angulo: string): string {
-  const significados: Record<string, Record<string, string>> = {
-    'ASC': {
-      'Sol': 'identidad y presencia personal',
-      'Luna': 'emociones visibles',
-      'Mercurio': 'comunicación directa',
-      'Venus': 'atractivo y relaciones',
-      'Marte': 'acción y energía',
-      'Júpiter': 'expansión personal',
-      'Saturno': 'responsabilidad visible',
-      'Urano': 'originalidad radical',
-      'Neptuno': 'sensibilidad aumentada',
-      'Plutón': 'transformación profunda'
-    },
-    'MC': {
-      'Sol': 'vocación y reconocimiento',
-      'Luna': 'carrera emocional',
-      'Mercurio': 'comunicación profesional',
-      'Venus': 'éxito artístico',
-      'Marte': 'ambición profesional',
-      'Júpiter': 'expansión laboral',
-      'Saturno': 'logros concretos',
-      'Urano': 'carrera innovadora',
-      'Neptuno': 'vocación espiritual',
-      'Plutón': 'poder profesional'
-    }
-  };
-  
-  return significados[angulo]?.[planeta] || 'influencia importante';
-}
-
-function detectarStelliums(chart: any): Array<{
-  tipo: string;
-  ubicacion: string;
-  planetas: string[];
-  significado: string;
-}> {
-  const stelliums: Array<{
-    tipo: string;
-    ubicacion: string;
-    planetas: string[];
-    significado: string;
-  }> = []; // ✅ TIPO EXPLÍCITO
-  
-  if (!chart.planets) return [];
-  
-  // Agrupar por signo
-  const porSigno: Record<string, string[]> = {};
-  chart.planets.forEach((p: any) => {
-    if (!porSigno[p.sign]) porSigno[p.sign] = [];
-    porSigno[p.sign].push(p.name);
-  });
-  
-  // Agrupar por casa
-  const porCasa: Record<number, string[]> = {};
-  chart.planets.forEach((p: any) => {
-    if (p.house) {
-      if (!porCasa[p.house]) porCasa[p.house] = [];
-      porCasa[p.house].push(p.name);
-    }
-  });
-  
-  // Detectar stelliums (3+ planetas)
-  Object.entries(porSigno).forEach(([signo, planetas]) => {
-    if (planetas.length >= 3) {
-      stelliums.push({
-        tipo: 'Signo',
-        ubicacion: signo,
-        planetas,
-        significado: `Concentración de energía en ${signo}`
-      });
-    }
-  });
-  
-  Object.entries(porCasa).forEach(([casa, planetas]) => {
-    if (planetas.length >= 3) {
-      stelliums.push({
-        tipo: 'Casa',
-        ubicacion: `Casa ${casa}`,
-        planetas,
-        significado: `Enfoque vital en Casa ${casa}`
-      });
-    }
-  });
-  
-  return stelliums;
-}
-
-function calcularAspectosCruzados(natalChart: any, srChart: any): Array<{
-  planetaSR: string;
-  planetaNatal: string;
-  aspecto: string;
-  orbe: string;
-  interpretacion: string;
-}> {
-  const aspectos: Array<{
-    planetaSR: string;
-    planetaNatal: string;
-    aspecto: string;
-    orbe: string;
-    interpretacion: string;
-  }> = [];
-  
-  if (!natalChart.planets || !srChart.planets) return [];
-  
-  const orbesPermitidos: Record<string, number> = {
-    'conjunción': 8,
-    'oposición': 8,
-    'cuadratura': 6,
-    'trígono': 6,
-    'sextil': 4
-  };
-  
-  srChart.planets.forEach((planetaSR: any) => {
-    natalChart.planets.forEach((planetaNatal: any) => {
-      const angulo = Math.abs((planetaSR.longitude - planetaNatal.longitude + 540) % 360 - 180);
-      
-      // Conjunción (0°)
-      if (angulo <= orbesPermitidos['conjunción']) {
-        aspectos.push({
-          planetaSR: planetaSR.name,
-          planetaNatal: planetaNatal.name,
-          aspecto: 'conjunción',
-          orbe: angulo.toFixed(2),
-          interpretacion: `Activación directa de ${planetaNatal.name} natal`
-        });
-      }
-      
-      // Oposición (180°)
-      if (Math.abs(angulo - 180) <= orbesPermitidos['oposición']) {
-        aspectos.push({
-          planetaSR: planetaSR.name,
-          planetaNatal: planetaNatal.name,
-          aspecto: 'oposición',
-          orbe: Math.abs(angulo - 180).toFixed(2),
-          interpretacion: `Tensión productiva con ${planetaNatal.name} natal`
-        });
-      }
-      
-      // Cuadratura (90°)
-      if (Math.abs(angulo - 90) <= orbesPermitidos['cuadratura'] || Math.abs(angulo - 270) <= orbesPermitidos['cuadratura']) {
-        aspectos.push({
-          planetaSR: planetaSR.name,
-          planetaNatal: planetaNatal.name,
-          aspecto: 'cuadratura',
-          orbe: Math.min(Math.abs(angulo - 90), Math.abs(angulo - 270)).toFixed(2),
-          interpretacion: `Desafío que activa ${planetaNatal.name} natal`
-        });
-      }
-      
-      // Trígono (120°)
-      if (Math.abs(angulo - 120) <= orbesPermitidos['trígono'] || Math.abs(angulo - 240) <= orbesPermitidos['trígono']) {
-        aspectos.push({
-          planetaSR: planetaSR.name,
-          planetaNatal: planetaNatal.name,
-          aspecto: 'trígono',
-          orbe: Math.min(Math.abs(angulo - 120), Math.abs(angulo - 240)).toFixed(2),
-          interpretacion: `Facilidad con ${planetaNatal.name} natal`
-        });
-      }
-      
-      // Sextil (60°)
-      if (Math.abs(angulo - 60) <= orbesPermitidos['sextil'] || Math.abs(angulo - 300) <= orbesPermitidos['sextil']) {
-        aspectos.push({
-          planetaSR: planetaSR.name,
-          planetaNatal: planetaNatal.name,
-          aspecto: 'sextil',
-          orbe: Math.min(Math.abs(angulo - 60), Math.abs(angulo - 300)).toFixed(2),
-          interpretacion: `Oportunidad con ${planetaNatal.name} natal`
-        });
-      }
-    });
-  });
-  
-  return aspectos.slice(0, 10); // Limitar a los 10 más importantes
-}/**
- * Detecta stelliums (3+ planetas en misma casa o signo)
- */
-export function detectStelliums(chart: any): Array<{
-  tipo: 'Casa' | 'Signo';
-  ubicacion: string;
-  planetas: string[];
-  significado: string;
-}> {
-  const stelliums: Array<{
-    tipo: 'Casa' | 'Signo';
-    ubicacion: string;
-    planetas: string[];
-    significado: string;
-  }> = [];
-  
-  if (!chart.planets) return [];
-  
-  // Agrupar por casa
-  const porCasa: Record<number, string[]> = {};
-  chart.planets.forEach((p: any) => {
-    if (p.house) {
-      if (!porCasa[p.house]) porCasa[p.house] = [];
-    porCasa[p.house].push(p.name);
-    }
-  });
-  
-  // Agrupar por signo
-  const porSigno: Record<string, string[]> = {};
-  chart.planets.forEach((p: any) => {
-    if (p.sign) {
-      if (!porSigno[p.sign]) porSigno[p.sign] = [];
-      porSigno[p.sign].push(p.name);
-    }
-  });
-  
-  // Detectar stelliums en casas (3+ planetas)
-  Object.entries(porCasa).forEach(([casa, planetas]) => {
-    if (planetas.length >= 3) {
-      stelliums.push({
-        tipo: 'Casa',
-        ubicacion: `Casa ${casa}`,
-        planetas,
-        significado: getStelliumCasaMeaning(parseInt(casa), planetas)
-      });
-    }
-  });
-  
-  // Detectar stelliums en signos (3+ planetas)
-  Object.entries(porSigno).forEach(([signo, planetas]) => {
-    if (planetas.length >= 3) {
-      stelliums.push({
-        tipo: 'Signo',
-        ubicacion: signo,
-        planetas,
-        significado: `Concentración de energía ${signo}: enfoque en ${getSignoElement(signo)}`
-      });
-    }
-  });
-  
-  return stelliums;
-}
-
-function getStelliumCasaMeaning(casa: number, planetas: string[]): string {
-  const meanings: Record<number, string> = {
-    1: `Énfasis extremo en identidad y presencia personal (${planetas.length} planetas)`,
-    2: `Enfoque vital en recursos, dinero y autoestima (${planetas.length} planetas)`,
-    3: `Concentración en comunicación, aprendizaje y entorno cercano (${planetas.length} planetas)`,
-    4: `Énfasis en hogar, familia y raíces emocionales (${planetas.length} planetas)`,
-    5: `Enfoque en creatividad, romance y expresión personal (${planetas.length} planetas)`,
-    6: `Concentración en salud, trabajo y rutinas diarias (${planetas.length} planetas)`,
-    7: `Énfasis en relaciones, asociaciones y matrimonio (${planetas.length} planetas)`,
-    8: `Enfoque en transformación, intimidad y recursos compartidos (${planetas.length} planetas)`,
-    9: `Concentración en filosofía, viajes y expansión mental (${planetas.length} planetas)`,
-    10: `Énfasis en carrera, vocación y reconocimiento público (${planetas.length} planetas)`,
-    11: `Enfoque en grupos, amistades y objetivos colectivos (${planetas.length} planetas)`,
-    12: `Concentración en espiritualidad, introspección y finales (${planetas.length} planetas)`
-  };
-  return meanings[casa] || `Énfasis en Casa ${casa}`;
-}
-
-function getSignoElement(signo: string): string {
-  const elementos: Record<string, string> = {
-    'Aries': 'acción y liderazgo (Fuego)',
-    'Tauro': 'estabilidad y recursos (Tierra)',
-    'Géminis': 'comunicación y versatilidad (Aire)',
-    'Cáncer': 'emoción y cuidado (Agua)',
-    'Leo': 'creatividad y autoexpresión (Fuego)',
-    'Virgo': 'análisis y servicio (Tierra)',
-    'Libra': 'armonía y relaciones (Aire)',
-    'Escorpio': 'transformación e intimidad (Agua)',
-    'Sagitario': 'expansión y filosofía (Fuego)',
-    'Capricornio': 'estructura y ambición (Tierra)',
-    'Acuario': 'innovación y humanitarismo (Aire)',
-    'Piscis': 'espiritualidad y compasión (Agua)'
-  };
-  return elementos[signo] || 'energía específica';
 }

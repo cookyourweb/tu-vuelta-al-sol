@@ -150,11 +150,12 @@ export async function POST(request: NextRequest) {
 
     // 5. Buscar datos del usuario
     const user = await User.findOne({ userId }).lean().exec() as any;
-    const userName = user?.fullName || user?.name || 'Usuario';
+    const userName = user?.fullName || user?.name || birthData?.fullName || 'Usuario';
     const userAge = user?.age || calculateAge(user?.birthDate || birthData?.birthDate);
     const userBirthPlace = user?.birthPlace || birthData?.birthPlace || 'Desconocido';
 
     console.log(`👤 User: ${userName}, ${userAge} años`);
+    console.log(`📍 Birth data name: ${birthData?.fullName}`);
 
     // 6. Generar prompt
     const prompt = generateEventInterpretationPrompt({

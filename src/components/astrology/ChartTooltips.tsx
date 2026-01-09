@@ -7,7 +7,8 @@
 // ✅ pointer-events-auto on ALL tooltips with buttons
 // =============================================================================
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import Draggable from 'react-draggable';
 import { X } from 'lucide-react';
 import { Planet, Aspect } from '@/types/astrology/chartDisplay';
 import { planetMeanings, signMeanings, houseMeanings, aspectMeanings, PLANET_SYMBOLS, SIGN_SYMBOLS, PLANET_COLORS } from '@/constants/astrology';
@@ -48,6 +49,10 @@ interface ChartTooltipsProps {
   natalInterpretations?: any;
   cardHoverTimer?: NodeJS.Timeout | null;
   setCardHoverTimer?: (timer: NodeJS.Timeout | null) => void;
+  aspectLineHoverTimer?: NodeJS.Timeout | null;
+  setAspectLineHoverTimer?: (timer: NodeJS.Timeout | null) => void;
+  planetCircleHoverTimer?: NodeJS.Timeout | null;
+  setPlanetCircleHoverTimer?: (timer: NodeJS.Timeout | null) => void;
 }
 
 const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
@@ -80,7 +85,11 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
     modalityDistribution,
     solarReturnYear,
     solarReturnTheme,
-    ascSRInNatalHouse
+    ascSRInNatalHouse,
+    aspectLineHoverTimer,
+    setAspectLineHoverTimer,
+    planetCircleHoverTimer,
+    setPlanetCircleHoverTimer
   } = props;
 
   // =============================================================================
@@ -100,10 +109,17 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
   const [planetTooltipTimer, setPlanetTooltipTimer] = useState<NodeJS.Timeout | null>(null);
   const [aspectTooltipTimer, setAspectTooltipTimer] = useState<NodeJS.Timeout | null>(null);
   const [clickedTooltipTimer, setClickedTooltipTimer] = useState<NodeJS.Timeout | null>(null);
+
+  // ✅ Ref para Draggable (React 18+ compatibility)
+  const draggableRef = useRef<HTMLDivElement>(null);
+  const planetDraggableRef = useRef<HTMLDivElement>(null);
   const [tooltipLocked, setTooltipLocked] = useState(false); // ⭐ NUEVO: Controla si tooltip permanece abierto con drawer
 
   // ⭐ NUEVO: Estado global de generación para el modal
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // ⭐ Ref para guardar la última posición del mouse
+  const lastTooltipPositionRef = useRef({ x: 0, y: 0 });
   // =============================================================================
 
   // ✅ Hook para detectar clic fuera - SIMPLIFICADO Y CONSISTENTE
@@ -112,9 +128,67 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
       const target = event.target as HTMLElement;
 
       // Verificar si el clic fue en tooltip, drawer o chart
-      const isTooltip = target && typeof target.closest === 'function' ? target.closest('[class*="tooltip"], [class*="chart-tooltip"]') : null;
-      const isDrawer = target && typeof target.closest === 'function' ? target.closest('.interpretation-drawer') : null;
-      const isChart = target && typeof target.closest === 'function' ? target.closest('.chart-container') : null;
+      // Handle SVG elements that might not have closest method
+      let isTooltip = null;
+      let isDrawer = null;
+      let isChart = null;
+
+      if (target && typeof target.closest === 'function') {
+        isTooltip = target.closest('[class*="tooltip"], [class*="chart-tooltip"], .aspect-tooltip, [data-aspect-tooltip="true"], [data-tooltip-type]');
+        isDrawer = target.closest('.interpretation-drawer');
+        isChart = target.closest('.chart-container, [data-chart-container="true"]');
+      } else if (target) {
+        // For SVG elements, check parent elements manually
+        let element: Element | null = target;
+        while (element && !isTooltip) {
+          if (element.hasAttribute && (
+            element.hasAttribute('data-aspect-tooltip') ||
+            element.hasAttribute('data-tooltip-type') ||
+            element.classList?.contains('aspect-tooltip') ||
+            element.classList?.contains('chart-tooltip') ||
+            element.className?.includes?.('tooltip')
+          )) {
+            isTooltip = element;
+          }
+          element = element.parentElement;
+        }
+
+        element = target;
+        while (element && !isDrawer) {
+          if (element.classList?.contains('interpretation-drawer')) {
+            isDrawer = element;
+          }
+          element = element.parentElement;
+        }
+
+        element = target;
+        while (element && !isChart) {
+          if (element.hasAttribute && (
+            element.hasAttribute('data-chart-container') ||
+            element.classList?.contains('chart-container')
+          )) {
+            isChart = element;
+          }
+          element = element.parentElement;
+        }
+      }
+
+      console.log('🔍 handleClickOutside EJECUTADO');
+      console.log('  - target:', target?.className);
+      console.log('  - target tagName:', target?.tagName);
+      console.log('  - target.dataset:', target?.dataset);
+      console.log('  - isTooltip:', !!isTooltip);
+      console.log('  - isDrawer:', !!isDrawer);
+      console.log('  - isChart:', !!isChart);
+      console.log('  - tooltipLocked:', tooltipLocked);
+      console.log('  - isGenerating:', isGenerating);
+
+      // ⭐ CRÍTICO FIX: SIEMPRE respetar si el click fue dentro del tooltip
+      // Esto previene la race condition donde handleClickOutside se ejecuta ANTES que onMouseDown del tooltip
+      if (isTooltip) {
+        console.log('✅ Click DENTRO del tooltip - NO CERRAR');
+        return;
+      }
 
       // ⭐ CRÍTICO: NO cerrar si está generando
       if (isGenerating) {
@@ -124,8 +198,8 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
       // ⭐ Si el tooltip está "locked" (porque se abrió el drawer), solo cerrar si se hace click fuera del tooltip Y fuera del drawer
       if (tooltipLocked) {
-        if (!isTooltip && !isDrawer) {
-          console.log('🔓 Desbloqueando tooltip y cerrando');
+        if (!isDrawer) {
+          console.log('🔓 Desbloqueando tooltip y cerrando (locked pero click fuera)');
           setHoveredPlanet(null);
           setHoveredAspect(null);
           setHoveredHouse(null);
@@ -138,7 +212,7 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
       }
 
       // Comportamiento normal: cerrar si se hace click fuera de tooltip, drawer y chart
-      if (!isTooltip && !isDrawer && !isChart) {
+      if (!isDrawer && !isChart) {
         console.log('🎯 Click fuera - cerrando todos los tooltips');
         setHoveredPlanet(null);
         setHoveredAspect(null);
@@ -195,6 +269,11 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
     fetchInterpretations();
   }, [userId, chartType, solarReturnYear]);
+
+  // ⭐ Actualizar ref con la posición actual del tooltip
+  useEffect(() => {
+    lastTooltipPositionRef.current = tooltipPosition;
+  }, [tooltipPosition]);
 
   // =============================================================================
   // TOOLTIP HOVER DELAY (CONFIGURABLE PER TYPE)
@@ -465,34 +544,75 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
     return (
       <div
-        className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-6 shadow-2xl w-[90vw] md:w-auto max-w-sm md:max-w-md overflow-y-auto pointer-events-auto z-50"
+        className="fixed pointer-events-none z-50"
         style={{
-          left: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.x + 25,
-          top: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.y - 50,
-          transform: typeof window !== 'undefined' && window.innerWidth < 768
-            ? 'translate(-50%, -50%)'
-            : (tooltipPosition.x > window.innerWidth - 400 ? 'translateX(-100%)' : 'none')
+          left: 0,
+          top: 0,
+          width: '100vw',
+          height: '100vh'
         }}
-        onMouseEnter={(e) => {
+      >
+        <Draggable
+          key={interpretationKey}
+          nodeRef={planetDraggableRef}
+          defaultPosition={{
+            x: typeof window !== 'undefined' && window.innerWidth < 768
+              ? window.innerWidth / 2 - 200
+              : lastTooltipPositionRef.current.x - 80,
+            y: typeof window !== 'undefined' && window.innerWidth < 768
+              ? window.innerHeight / 2 - 100
+              : lastTooltipPositionRef.current.y - 40
+          }}
+          onStart={() => {
+            console.log('🚫 DRAGGABLE onStart - cancelando timeout');
+            if (tooltipTimer) {
+              clearTimeout(tooltipTimer);
+              setTooltipTimer(null);
+            }
+            // ⭐ También cancelar aspectLineHoverTimer y planetCircleHoverTimer si existen
+            if (aspectLineHoverTimer && setAspectLineHoverTimer) {
+              clearTimeout(aspectLineHoverTimer);
+              setAspectLineHoverTimer(null);
+            }
+            if (planetCircleHoverTimer && setPlanetCircleHoverTimer) {
+              clearTimeout(planetCircleHoverTimer);
+              setPlanetCircleHoverTimer(null);
+            }
+          }}
+        >
+          <div
+            ref={planetDraggableRef}
+            className="bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-6 shadow-2xl w-[90vw] md:w-auto max-w-sm md:max-w-md overflow-y-auto pointer-events-auto cursor-move"
+            data-tooltip-type="planet"
+            onMouseEnter={(e) => {
           console.log('🎯 MOUSE ENTERED TOOLTIP - PLANET');
           e.stopPropagation();
           handleTooltipMouseEnter();
+          // ⭐ Cancelar todos los timers de ChartDisplay
+          if (aspectLineHoverTimer && setAspectLineHoverTimer) {
+            clearTimeout(aspectLineHoverTimer);
+            setAspectLineHoverTimer(null);
+          }
+          if (planetCircleHoverTimer && setPlanetCircleHoverTimer) {
+            clearTimeout(planetCircleHoverTimer);
+            setPlanetCircleHoverTimer(null);
+          }
         }}
-          onMouseLeave={(e) => {
-            console.log('🎯 MOUSE LEFT TOOLTIP - PLANET');
+        onMouseLeave={(e) => {
+          console.log('🎯 MOUSE LEFT TOOLTIP - PLANET');
 
-            // ⭐ NUEVO: Si está locked O generando, NO cerrar
-            if (tooltipLocked || isGenerating) {
-              console.log('🔒 Tooltip locked o generando - no se cierra');
-              return;
+          // ⭐ NUEVO: Si está locked O generando, NO cerrar
+          if (tooltipLocked || isGenerating) {
+            console.log('🔒 Tooltip locked o generando - no se cierra');
+            return;
+          }
+
+          handleMouseLeaveTooltip(() => {
+            if (!drawerOpen) {
+              setHoveredPlanet(null);
             }
-
-            handleMouseLeaveTooltip(() => {
-              if (!drawerOpen) {
-                setHoveredPlanet(null);
-              }
-            }, 1000); // 1 second for planets
-          }}
+          }, 1000); // 1 second for planets
+        }}
         onClick={(e) => {
           console.log('🎯 TOOLTIP CLICKED (parent) - PLANET');
           e.stopPropagation();
@@ -905,6 +1025,13 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
             💡 Haz hover más tiempo para ver la interpretación
           </div>
         )}
+
+        {/* Tooltip stays visible hint */}
+        <div className="mt-2 text-center text-xs text-gray-400">
+          🖱️ Arrastra para mover • Click para pinnear
+        </div>
+          </div>
+        </Draggable>
       </div>
     );
   }
@@ -1375,19 +1502,60 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
     return (
       <div
-        className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-6 shadow-2xl w-[90vw] md:w-auto max-w-lg md:max-w-xl overflow-y-auto pointer-events-auto z-50"
+        className="fixed pointer-events-none z-50"
         style={{
-          left: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.x,
-          top: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.y,
-          transform: typeof window !== 'undefined' && window.innerWidth < 768
-            ? 'translate(-50%, -50%)'
-            : (tooltipPosition.x > window.innerWidth - 450 ? 'translateX(-100%)' : 'none')
+          left: 0,
+          top: 0,
+          width: '100vw',
+          height: '100vh'
         }}
-        onMouseEnter={(e) => {
-          console.log('🎯 MOUSE ENTERED TOOLTIP - ASPECT');
+      >
+        <Draggable
+          key={aspectKeyFull}
+          nodeRef={draggableRef}
+          defaultPosition={{
+            x: typeof window !== 'undefined' && window.innerWidth < 768
+              ? window.innerWidth / 2 - 200
+              : lastTooltipPositionRef.current.x - 80,
+            y: typeof window !== 'undefined' && window.innerWidth < 768
+              ? window.innerHeight / 2 - 100
+              : lastTooltipPositionRef.current.y - 40
+          }}
+          onStart={() => {
+            console.log('🚫 DRAGGABLE onStart - cancelando timeout');
+            handleAspectMouseEnter();
+            // ⭐ CRÍTICO: Cancelar el timer de ChartDisplay que cierra el tooltip
+            if (aspectLineHoverTimer && setAspectLineHoverTimer) {
+              console.log('🚫 Cancelando aspectLineHoverTimer de ChartDisplay (onStart)');
+              clearTimeout(aspectLineHoverTimer);
+              setAspectLineHoverTimer(null);
+            }
+            if (planetCircleHoverTimer && setPlanetCircleHoverTimer) {
+              clearTimeout(planetCircleHoverTimer);
+              setPlanetCircleHoverTimer(null);
+            }
+          }}
+        >
+          <div
+            ref={draggableRef}
+            className="aspect-tooltip bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-6 shadow-2xl w-[90vw] md:w-auto max-w-lg md:max-w-xl overflow-y-auto pointer-events-auto cursor-move"
+            data-aspect-tooltip="true"
+            data-tooltip-type="aspect"
+            onMouseEnter={(e) => {
+              console.log('🎯 MOUSE ENTERED TOOLTIP - ASPECT');
           e.stopPropagation();
           handleAspectMouseEnter();
           setAspectTooltipLocked(true);
+          // ⭐ CRÍTICO: Cancelar el timer de ChartDisplay que cierra el tooltip
+          if (aspectLineHoverTimer && setAspectLineHoverTimer) {
+            console.log('🚫 Cancelando aspectLineHoverTimer de ChartDisplay');
+            clearTimeout(aspectLineHoverTimer);
+            setAspectLineHoverTimer(null);
+          }
+          if (planetCircleHoverTimer && setPlanetCircleHoverTimer) {
+            clearTimeout(planetCircleHoverTimer);
+            setPlanetCircleHoverTimer(null);
+          }
         }}
         onMouseLeave={(e) => {
           console.log('🎯 MOUSE LEFT TOOLTIP - ASPECT');
@@ -1598,8 +1766,10 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
         {/* Tooltip stays visible hint */}
         <div className="mt-2 text-center text-xs text-gray-400">
-          💡 Tooltip permanece 2 segundos después de salir
+          🖱️ Arrastra para mover • Click para pinnear
         </div>
+          </div>
+        </Draggable>
       </div>
     );
   }

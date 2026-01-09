@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
+import Draggable from 'react-draggable';
 
 interface Planet {
   name: string;
@@ -60,12 +61,16 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
 }) => {
   const [hoveredPlanet, setHoveredPlanet] = useState<string | null>(null);
   const [hoveredAspect, setHoveredAspect] = useState<string | null>(null);
+  const [pinnedAspect, setPinnedAspect] = useState<string | null>(null);
   const aspectHoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
 
   // Manejar hover de aspectos con delay para dar tiempo a mover mouse al tooltip
   const handleAspectMouseEnter = (aspectId: string) => {
+    console.log('🎯 handleAspectMouseEnter:', aspectId);
     // Cancelar cualquier timeout pendiente
     if (aspectHoverTimeoutRef.current) {
+      console.log('  ✅ Cancelando timeout pendiente');
       clearTimeout(aspectHoverTimeoutRef.current);
       aspectHoverTimeoutRef.current = null;
     }
@@ -73,17 +78,43 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
   };
 
   const handleAspectMouseLeave = () => {
-    // Agregar delay de 800ms antes de ocultar - tiempo suficiente para mover mouse al tooltip
+    console.log('👋 handleAspectMouseLeave - iniciando delay de 2000ms');
+    // Agregar delay de 2000ms antes de ocultar - tiempo amplio para llegar al tooltip
     aspectHoverTimeoutRef.current = setTimeout(() => {
+      console.log('⏰ TIMEOUT EJECUTADO después de 2000ms - ocultando tooltip');
+      console.log('  hoveredAspect:', hoveredAspect);
+      console.log('  pinnedAspect:', pinnedAspect);
+      // No ocultar si está pinneado
+      if (hoveredAspect !== pinnedAspect) {
+        console.log('  ❌ Ocultando tooltip');
+        setHoveredAspect(null);
+      } else {
+        console.log('  📌 Tooltip está pinneado - NO ocultar');
+      }
+    }, 2000);
+    console.log('  ✅ Timeout creado con ID:', aspectHoverTimeoutRef.current);
+  };
+
+  const handleAspectClick = (aspectId: string) => {
+    // Toggle pin/unpin
+    if (pinnedAspect === aspectId) {
+      setPinnedAspect(null);
       setHoveredAspect(null);
-    }, 800);
+    } else {
+      setPinnedAspect(aspectId);
+      setHoveredAspect(aspectId);
+    }
   };
 
   const cancelAspectHideTimeout = () => {
+    console.log('🚫 cancelAspectHideTimeout llamado');
     // Cancelar timeout si el mouse entra al tooltip
     if (aspectHoverTimeoutRef.current) {
+      console.log('  ✅ Timeout cancelado exitosamente');
       clearTimeout(aspectHoverTimeoutRef.current);
       aspectHoverTimeoutRef.current = null;
+    } else {
+      console.log('  ⚠️ No había timeout para cancelar');
     }
   };
 
@@ -525,57 +556,20 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
               filter: isHovered ? `drop-shadow(0 0 6px ${style.color})` : `drop-shadow(0 0 2px ${style.color})`,
               transition: 'all 0.3s ease'
             }}
-            onMouseEnter={() => handleAspectMouseEnter(aspectId)}
-            onMouseLeave={() => handleAspectMouseLeave()}
+            onMouseEnter={() => {
+              console.log('🔴 LÍNEA onMouseEnter:', aspectId);
+              handleAspectMouseEnter(aspectId);
+            }}
+            onMouseLeave={() => {
+              console.log('🔴 LÍNEA onMouseLeave:', aspectId);
+              handleAspectMouseLeave();
+            }}
+            onClick={() => {
+              console.log('🔴 LÍNEA onClick:', aspectId);
+              handleAspectClick(aspectId);
+            }}
           />
           
-          {/* Tooltip para aspecto */}
-          {isHovered && (
-            <g>
-              <rect
-                x={(pos1.x + pos2.x) / 2 - 60}
-                y={(pos1.y + pos2.y) / 2 - 30}
-                width="120"
-                height="60"
-                fill="rgba(0,0,0,0.9)"
-                rx="5"
-                ry="5"
-                stroke={style.color}
-                strokeWidth="1"
-              />
-              <text
-                x={(pos1.x + pos2.x) / 2}
-                y={(pos1.y + pos2.y) / 2 - 15}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fontSize="12"
-                fill="white"
-                fontWeight="bold"
-              >
-                {aspect.type.toUpperCase()}
-              </text>
-              <text
-                x={(pos1.x + pos2.x) / 2}
-                y={(pos1.y + pos2.y) / 2}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fontSize="10"
-                fill={style.color}
-              >
-                {aspect.planet1} ↔ {aspect.planet2}
-              </text>
-              <text
-                x={(pos1.x + pos2.x) / 2}
-                y={(pos1.y + pos2.y) / 2 + 15}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fontSize="9"
-                fill="#FFD700"
-              >
-                Orbe: {aspect.orb.toFixed(1)}°
-              </text>
-            </g>
-          )}
         </g>
       );
     });
@@ -675,8 +669,36 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
     );
   };
 
+  // Calcular posición de tooltip hovereado para renderizar en HTML
+  const getTooltipPosition = () => {
+    if (!hoveredAspect) return null;
+
+    const aspectParts = hoveredAspect.split('-');
+    const planet1Name = aspectParts[0];
+    const planet2Name = aspectParts[1];
+
+    const planet1 = planets.find(p => p.name === planet1Name);
+    const planet2 = planets.find(p => p.name === planet2Name);
+
+    if (!planet1 || !planet2) return null;
+
+    const pos1 = getPositionFromLongitude(planet1.longitude, planetRadius);
+    const pos2 = getPositionFromLongitude(planet2.longitude, planetRadius);
+
+    return {
+      x: (pos1.x + pos2.x) / 2,
+      y: (pos1.y + pos2.y) / 2
+    };
+  };
+
+  const tooltipPosition = getTooltipPosition();
+  const hoveredAspectData = hoveredAspect ? aspects.find(a => {
+    const aspectId = `${a.planet1}-${a.planet2}-${a.type}`;
+    return aspectId === hoveredAspect;
+  }) : null;
+
   return (
-    <div className="flex flex-col items-center space-y-6">
+    <div className="flex flex-col items-center space-y-6 relative">
       {/* Debug info mejorado - Solo en desarrollo */}
       {process.env.NODE_ENV === 'development' && (
         <div className="p-3 bg-blue-50 rounded-lg text-xs max-w-4xl border border-blue-200">
@@ -831,7 +853,74 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
           strokeWidth="2"
         />
       </svg>
-     
+
+      {/* Tooltip HTML Draggable para aspectos */}
+      {hoveredAspect && tooltipPosition && hoveredAspectData && (
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            left: '50%',
+            top: '0',
+            transform: 'translateX(-50%)',
+            width: `${width}px`,
+            height: `${height}px`,
+            zIndex: 1000
+          }}
+        >
+          <Draggable
+            nodeRef={tooltipRef}
+            defaultPosition={{
+              x: tooltipPosition.x - 80,
+              y: tooltipPosition.y - 40
+            }}
+            onStart={cancelAspectHideTimeout}
+          >
+            <div
+              ref={tooltipRef}
+              className="aspect-tooltip absolute bg-black/90 rounded-lg p-4 shadow-2xl border-2 pointer-events-auto cursor-move"
+              style={{
+                borderColor: aspectStyles[hoveredAspectData.type]?.color || '#FFD700',
+                minWidth: '160px',
+                backdropFilter: 'blur(8px)'
+              }}
+              onMouseEnter={() => {
+                console.log('🖱️ TOOLTIP onMouseEnter');
+                cancelAspectHideTimeout();
+              }}
+              onMouseLeave={() => {
+                console.log('🖱️ TOOLTIP onMouseLeave');
+                handleAspectMouseLeave();
+              }}
+              onClick={() => {
+                console.log('🖱️ TOOLTIP onClick');
+                handleAspectClick(hoveredAspect);
+              }}
+            >
+              <div className="flex items-start justify-between mb-2">
+                <div className="text-white font-bold text-sm">
+                  {hoveredAspectData.type.toUpperCase()}
+                </div>
+                {pinnedAspect === hoveredAspect && (
+                  <div className="text-yellow-400 text-lg">📌</div>
+                )}
+              </div>
+              <div
+                className="text-xs mb-1"
+                style={{ color: aspectStyles[hoveredAspectData.type]?.color || '#FFD700' }}
+              >
+                {hoveredAspectData.planet1} ↔ {hoveredAspectData.planet2}
+              </div>
+              <div className="text-yellow-400 text-xs">
+                Orbe: {hoveredAspectData.orb.toFixed(1)}°
+              </div>
+              <div className="text-gray-400 text-xs mt-2 italic">
+                Arrastra para mover • Click para pinnear
+              </div>
+            </div>
+          </Draggable>
+        </div>
+      )}
+
       {/* Panel de información mejorado */}
       <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-purple-200/50 max-w-4xl">
         <h3 className="font-bold mb-4 text-gray-800 text-center">📊 Información de la Carta Natal</h3>
@@ -990,10 +1079,11 @@ const NatalChartWheel: React.FC<NatalChartWheelProps> = ({
         {/* Estado de la carta */}
         <div className="mt-4 pt-4 border-t border-gray-200">
           <div className="flex justify-center items-center space-x-4 text-sm">
-            <button 
+            <button
               onClick={() => {
                 setHoveredPlanet(null);
                 setHoveredAspect(null);
+                setPinnedAspect(null);
               }}
               className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
             >

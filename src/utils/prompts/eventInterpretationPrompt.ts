@@ -168,93 +168,111 @@ ${transitosActuales}
 
 ---
 
-## 📋 ESTRUCTURA JSON REQUERIDA
+## 📋 ESTRUCTURA JSON REQUERIDA - FORMATO AGENDA FÍSICA
 
-Responde ÚNICAMENTE con JSON válido en español (sin markdown, sin backticks, sin comentarios):
+Responde ÚNICAMENTE con JSON válido en español (sin markdown, sin backticks, sin comentarios).
+
+**IMPORTANTE:** Este es el contenido que leerá el usuario en su agenda física.
+NO expliques astrología. Traduce la energía en acción concreta.
+Escribe como si fuera su agenda personal, directamente aplicable a su vida.
 
 {
-  "titulo_evento": "String de 50-80 caracteres: Título memorable que incluya el nombre del usuario. Ejemplo: 'Luna Nueva en Tauro - Tu Portal de Materialización, ${data.userName}'",
+  "titulo_evento": "String: Solo el nombre del evento. Ejemplo: 'Luna Llena en Capricornio', '${descripcionEvento.tipo}'",
 
-  "para_ti_especificamente": "String de 100-150 palabras:
+  "clima_del_dia": [
+    "String: Keyword 1 del clima energético",
+    "String: Keyword 2 del clima energético",
+    "String: Keyword 3 del clima energético"
+  ],
 
-    - EMPIEZA OBLIGATORIAMENTE con: 'Para TI, ${data.userName}, con tu [configuración natal específica]:'
-    - Menciona su Sol, Luna o Ascendente y en qué casa están
-    - Explica qué casa natal activa este evento (${data.event.house}) y QUÉ SIGNIFICA ESA CASA
-    - Conecta la energía del evento con su configuración natal específica
-    - Usa MAYÚSCULAS para énfasis en 2-3 palabras clave
-    - Usa la palabra 'PERO' para contrastar aspectos de su carta
+  "energias_activas": [
+    "String: Símbolo + Nombre del planeta 1 activo este año. Ejemplo: '♂ Marte'",
+    "String: Símbolo + Nombre del planeta 2 activo este año. Ejemplo: '♀ Venus'",
+    "String: Símbolo + Nombre del planeta 3 activo este año. Ejemplo: '♄ Saturno'"
+  ],
 
-    Ejemplo:
-    'Para TI, ${data.userName}, con tu Sol en ${sol?.sign} Casa ${sol?.house} (${sol?.house ? getHouseMeaning(sol.house) : 'identidad'}) y tu Luna en ${luna?.sign} Casa ${luna?.house} (${luna?.house ? getHouseMeaning(luna.house) : 'emociones'}): Este ${descripcionEvento.tipo} activa tu Casa ${data.event.house} natal (${significadoCasa}). Tu naturaleza ${sol?.sign} te hace [característica], PERO tu ${luna?.sign} te da el poder de [superpoder]. Este evento te dice: [mensaje específico].'",
+  "mensaje_sintesis": "String de 2-3 frases POTENTES que resumen la esencia del día. Directo, sin florituras. Ejemplo: 'Cerrar con responsabilidad lo que ya ha cumplido su función. Hoy no se trata de sentir más, sino de asumir una decisión clara.'",
 
-  "tu_fortaleza_a_usar": {
-    "fortaleza": "String: UNA fortaleza ESPECÍFICA de su carta natal (extraída de la lista arriba) que sea RELEVANTE para este evento. Usa posición planetaria exacta. Ejemplo: 'Tu ${fortalezas[0]?.nombre || 'Mercurio en Casa 1 (identidad, presencia)'} - ${fortalezas[0]?.posicion || 'Tu Voz como Poder'}'",
+  "como_te_afecta": "String de 200-300 palabras:
 
-    "como_usarla": "String de 100-120 palabras: Instrucciones MUY ESPECÍFICAS de cómo ACTIVAR esa fortaleza durante este evento.
+ESTRUCTURA OBLIGATORIA:
 
-    - Menciona la posición planetaria exacta CON significado de casa entre paréntesis
-    - Da ACCIÓN CONCRETA (no vaga)
-    - Conecta con el tipo de evento (${data.event.type})
-    - Conecta con la casa activada (Casa ${data.event.house} - ${significadoCasa})
-    - Menciona otro planeta de su carta que apoye esta fortaleza
+Párrafo 1 (quién eres):
+'Tú eres [descripción basada en ${sol?.sign}, ${luna?.sign}, ${ascendente?.sign}].'
 
-    Ejemplo:
-    'Tu ${fortalezas[0]?.posicion || 'Mercurio en Casa 1 (identidad, presencia)'} te da [superpoder específico]. Durante este ${descripcionEvento.tipo} en tu Casa ${data.event.house} (${significadoCasa}), ACTIVA esto haciendo [acción concreta 1]: [detalles]. Con tu [otro planeta de su carta], [cómo ese planeta apoya la acción]. Tu ${sol?.sign} te da [característica] - úsala para [resultado específico].'"
+Párrafo 2 (qué piden los planetas activos este año):
+'Este año [Planeta 1] te está pidiendo [acción/transformación].
+[Planeta 2] [qué te pide].
+[Planeta 3] [qué te pide].'
+
+Párrafo 3 (qué activa este evento):
+'Este ${descripcionEvento.tipo} activa un punto clave:
+👉 [Pregunta poderosa específica para ${data.userName}]'
+
+Párrafo 4 (qué se ve con claridad):
+'Hoy se ve con claridad:
+- [Aspecto 1]
+- [Aspecto 2]
+- [Aspecto 3]'
+
+TONO: Directo, personal, sin explicar astrología. Como si fueras su coach personal.",
+
+  "interpretacion_practica": [
+    {
+      "planeta": "String: Nombre del planeta activo (ej: 'Marte')",
+      "que_pide": "String de 1-2 frases: Qué te pide este planeta en este momento. Ejemplo: 'Tu cuerpo y tu energía ya saben qué no quieren empujar más'"
+    },
+    {
+      "planeta": "String: Nombre del planeta activo 2",
+      "que_pide": "String de 1-2 frases"
+    },
+    {
+      "planeta": "String: Nombre del planeta activo 3",
+      "que_pide": "String de 1-2 frases"
+    }
+  ],
+
+  "sintesis_practica": "String de 1-2 frases que resume la interpretación práctica. Ejemplo: 'Esta Luna no exige acción inmediata, exige claridad interna.'",
+
+  "accion_concreta": {
+    "titulo": "String: Título del ejercicio. Ejemplo: 'Ejercicio de cierre consciente'",
+    "pasos": [
+      "String: Paso 1 con instrucciones CLARAS y CONCRETAS",
+      "String: Paso 2 con instrucciones CLARAS y CONCRETAS"
+    ]
   },
 
-  "tu_bloqueo_a_trabajar": {
-    "bloqueo": "String: UN bloqueo ESPECÍFICO de su carta natal (extraído de la lista arriba) que este evento puede ayudar a TRANSFORMAR. Usa posición planetaria exacta CON significado de casa. Ejemplo: 'Tu Saturno en Casa 2 (dinero, valores, autoestima) - \"No merezco ganar dinero fácilmente\"'",
+  "sombra_a_evitar": [
+    "String: Sombra 1",
+    "String: Sombra 2",
+    "String: Sombra 3"
+  ],
 
-    "reframe": "String de 100-120 palabras: Reencuadre DISRUPTIVO y EMPODERADOR del bloqueo.
+  "explicacion_sombra": "String de 1 frase que reencuadra positivamente. Ejemplo: 'Soltar hoy es ordenar tu energía, no rendirte.'",
 
-    - Empieza con 'NO.' para negar la creencia limitante
-    - Explica el ORIGEN del bloqueo (infancia/familia)
-    - Reencuadra como MAESTRÍA o ENTRENAMIENTO, no limitación
-    - Menciona tránsitos actuales del Solar Return que apoyan la transformación
-    - Conecta con el evento actual como 'permiso cósmico' para cambiar
+  "frase_ancla": "String de 8-12 palabras. Frase POTENTE y memorizable. Ejemplo: 'Puedo ser responsable sin cargar con todo.'",
 
-    Ejemplo:
-    'NO. Tu [bloqueo] no es limitación, es [reframe positivo]. Ese mensaje de [creencia limitante] viene de [origen], pero ahora TÚ eres quien redefine [área de vida]. Con [tránsito actual del SR] activando tu Casa [X], el universo te está PIDIENDO que [acción transformadora]. Este ${descripcionEvento.tipo} es tu permiso cósmico para [resultado deseado] sin culpa.'"
-  },
+  "apoyo_energetico": [
+    {
+      "tipo": "String: tipo de apoyo (🕯️ Vela / 🪨 Piedra / 🧘 Ejercicio)",
+      "elemento": "String: qué elemento específico. Ejemplo: 'Vela marrón o negra'",
+      "proposito": "String: para qué sirve. Ejemplo: 'estructura y cierre consciente'"
+    },
+    {
+      "tipo": "String",
+      "elemento": "String",
+      "proposito": "String"
+    },
+    {
+      "tipo": "String",
+      "elemento": "String",
+      "proposito": "String"
+    }
+  ],
 
-  "mantra_personalizado": "String de 20-40 palabras: Mantra que INTEGRE posiciones planetarias ESPECÍFICAS de su carta con el evento.
+  "nota_apoyo": "String de 1-2 frases. Ejemplo: 'Nada obligatorio. Solo herramientas que acompañan la decisión.'",
 
-  - DEBE mencionar al menos 2 posiciones planetarias reales (ej: 'palabra escorpiana', 'dispersión geminiana')
-  - Debe ser en PRIMERA PERSONA
-  - Debe incluir MAYÚSCULAS en 1-2 palabras clave
-  - Debe ser accionable y empoderador
-
-  Ejemplo:
-  'Mi ${luna?.sign ? luna.sign.toLowerCase() : 'lunar'} [característica] tiene valor [área de Casa ${data.event.house}]. Mi ${sol?.sign ? sol.sign.toLowerCase() : 'solar'} [característica] se [acción] cuando mi [otro planeta] lo decide. ACTÚO con [cualidad].'",
-
-  "ejercicio_para_ti": "String de 120-150 palabras: Ejercicio CONCRETO y ESPECÍFICO basado en su carta + el evento.
-
-  - Empieza con acción específica: 'Esta semana, escribe/crea/conecta...'
-  - Da estructura numerada (1, 2, 3) de pasos concretos
-  - Cada paso debe mencionar UNA posición planetaria de su carta
-  - Conecta cada paso con el evento actual
-  - Termina con instrucción de timing: 'con este ${descripcionEvento.tipo}, [acción final]'
-
-  Ejemplo:
-  'Esta semana, escribe 3 [acciones específicas] (${fortalezas[0]?.posicion || 'tu fortaleza principal'}): 1) ¿Qué [pregunta] tienes que otros necesitan? (${luna?.sign} en Casa ${luna?.house}) 2) ¿Cómo puedes [acción 2]? (${sol?.sign} en Casa ${sol?.house}) 3) ¿Qué [acción 3] puedes crear? (${bloqueos[0]?.posicion || 'tu desafío'}). Luego, con este ${descripcionEvento.tipo} en ${data.event.sign || 'la casa'} ${data.event.house}, [acción final concreta]: [detalles]. Tu ${luna?.sign} sabe que [verdad sobre su carta].'",,
-
-  "consejo_especifico": "String de 120-150 palabras: Consejo basado en TRÁNSITOS ACTUALES del Solar Return + posiciones natales + el evento.
-
-  - Menciona AL MENOS 2 tránsitos actuales del Solar Return
-  - Conecta esos tránsitos con planetas natales específicos
-  - Explica cómo el evento actual es el TIMING perfecto dado esos tránsitos
-  - Da acción concreta aprovechando la confluencia de tránsitos
-  - Usa palabras como 'timing perfecto', 'confluencia', 'simultáneamente'
-
-  Ejemplo:
-  'Con [Tránsito 1 del SR] activando tu Casa [X] (${getHouseMeaning(data.event.house)}) y [Tránsito 2 del SR] en Casa [Y], ${descripcionEvento.tipo} es el TIMING PERFECTO para [acción específica]. Tu configuración ${sol?.sign}-${luna?.sign} en Casas ${sol?.house}-${luna?.house} = [interpretación única]. Este ${descripcionEvento.tipo} en tu Casa ${data.event.house} activa [área de vida]. [Tránsito 1] te [efecto], [Tránsito 2] te [efecto], ${descripcionEvento.tipo} te [efecto]. USA estos tres tránsitos SIMULTÁNEAMENTE: [acción 1], [acción 2], [acción 3].'"
-  },
-
-  "timing_evolutivo": {
-    "que_sembrar": "String de 60-80 palabras: Qué sembrar ESPECÍFICAMENTE basado en su configuración natal + el evento. No genérico. Menciona planetas.",
-    "cuando_actuar": "String de 40-60 palabras: Cuándo actuar (fases lunares + posiciones en su carta específica). Ej: 'Durante los próximos 14 días (de ${descripcionEvento.tipo} a Luna Llena), [acción]. Tu ${luna?.sign} necesita [necesidad específica].'",
-    "resultado_esperado": "String de 60-80 palabras: Qué resultado esperar en X meses basado en su configuración + el evento. Menciona fecha futura y planetas que lo sostendrán."
-  },
+  "cierre_dia": "String de 2-3 frases EMPODERADORAS que cierran el día. Ejemplo: 'Esta Luna Llena no viene a quitarte nada. Viene a devolverte espacio, foco y autoridad personal.'",
 
   "analisis_tecnico": {
     "evento_en_casa_natal": ${data.event.house},
@@ -458,22 +476,21 @@ function extractBloqueos(natalInterpretation: any): Array<{
   return bloqueos.slice(0, 5); // Máximo 5 bloqueos
 }
 
+interface ActivatedPlanet {
+  planeta: string;
+  signo: string;
+  casa: number;
+  grado: number;
+  tipoActivacion: string;
+  razonActivacion: string;
+}
+
 // ✅ Identificar planetas natales que el evento activa
 function identificarPlanetasActivados(
   event: EventData,
   natalChart: any
-): Array<{
-  planeta: string;
-  signo: string;
-  casa: number;
-  razonActivacion: string;
-}> {
-  const activados: Array<{
-    planeta: string;
-    signo: string;
-    casa: number;
-    razonActivacion: string;
-  }> = [];
+): ActivatedPlanet[] {
+  const activados: ActivatedPlanet[] = [];
 
   if (!natalChart.planets) return activados;
 
@@ -485,6 +502,8 @@ function identificarPlanetasActivados(
           planeta: p.name,
           signo: p.sign,
           casa: p.house,
+          grado: p.degree || 0,
+          tipoActivacion: 'conjunción_casa',
           razonActivacion: `${event.type === 'luna_nueva' ? 'Luna Nueva' : 'Luna Llena'} ocurre en la misma casa que tu ${p.name} natal`
         });
       }
@@ -503,6 +522,8 @@ function identificarPlanetasActivados(
         planeta: planetaNatal.name,
         signo: planetaNatal.sign,
         casa: planetaNatal.house,
+        grado: planetaNatal.degree || 0,
+        tipoActivacion: 'transito_directo',
         razonActivacion: `${event.transitingPlanet} ${event.aspectType || 'transita'} tu ${planetaNatal.name} natal`
       });
     }

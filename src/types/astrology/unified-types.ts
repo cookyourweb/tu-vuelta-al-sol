@@ -84,6 +84,15 @@ export interface PersonalizedInterpretation {
     temaVida: string;
     desafioEvolutivo: string;
   };
+  // ✅ CAPA 2: Interpretación aplicada con estructura detallada
+  capa_2_aplicado?: {
+    cruce_con_tu_estructura_natal?: string;
+    como_se_vive_en_ti?: string;
+    riesgo_si_vives_inconscientemente?: string;
+    uso_consciente_consejo_aplicado?: string;
+    accion_practica_sugerida?: string;
+    sintesis_final?: string;
+  };
 }
 
 export interface DisruptiveInterpretation {

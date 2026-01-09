@@ -90,6 +90,8 @@ const ChartDisplay = ({
 
   // ✅ Hover delay timers (reduced to 150ms for better responsiveness on small elements)
   const [cardHoverTimer, setCardHoverTimer] = useState<NodeJS.Timeout | null>(null);
+  const [aspectLineHoverTimer, setAspectLineHoverTimer] = useState<NodeJS.Timeout | null>(null);
+  const [planetCircleHoverTimer, setPlanetCircleHoverTimer] = useState<NodeJS.Timeout | null>(null);
   // ✅ Track mouse down state for aspect lines to prevent tooltip hiding on click
   const [aspectMouseDown, setAspectMouseDown] = useState(false);
 
@@ -99,9 +101,18 @@ const ChartDisplay = ({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
+  // ✅ Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      if (cardHoverTimer) clearTimeout(cardHoverTimer);
+      if (aspectLineHoverTimer) clearTimeout(aspectLineHoverTimer);
+      if (planetCircleHoverTimer) clearTimeout(planetCircleHoverTimer);
+    };
+  }, [cardHoverTimer, aspectLineHoverTimer, planetCircleHoverTimer]);
+
   // ✅ FUNCIONES UTILITARIAS
   const handleMouseMove = (event: React.MouseEvent) => {
-    setTooltipPosition({ 
+    setTooltipPosition({
       x: event?.clientX ?? 0,
       y: event?.clientY ?? 0
     });
@@ -377,6 +388,7 @@ const ChartDisplay = ({
             onMouseEnter={(e) => {
               // ✅ DELAY: Clear any existing timer and set new one
               if (cardHoverTimer) clearTimeout(cardHoverTimer);
+              if (aspectLineHoverTimer) clearTimeout(aspectLineHoverTimer);
               const timer = setTimeout(() => {
                 setHoveredAspect(aspectKey);
                 handleMouseMove(e);
@@ -385,13 +397,17 @@ const ChartDisplay = ({
             }}
             onMouseMove={handleMouseMove}
             onMouseLeave={() => {
-              // ✅ IMMEDIATE: Clear timer and hide tooltip immediately on mouse leave (unless mouse is down)
+              // ✅ DELAY 2000ms: Give user time to move mouse to tooltip
               if (!aspectMouseDown) {
                 if (cardHoverTimer) {
                   clearTimeout(cardHoverTimer);
                   setCardHoverTimer(null);
                 }
-                setHoveredAspect(null);
+                // ⭐ IMPORTANTE: Delay de 2000ms para dar tiempo a llegar al tooltip
+                const timer = setTimeout(() => {
+                  setHoveredAspect(null);
+                }, 2000); // 2 seconds to move mouse to tooltip
+                setAspectLineHoverTimer(timer);
               }
             }}
             onMouseDown={() => {
@@ -434,6 +450,7 @@ const ChartDisplay = ({
             onMouseEnter={(e) => {
               // ✅ DELAY: Clear any existing timer and set new one
               if (cardHoverTimer) clearTimeout(cardHoverTimer);
+              if (planetCircleHoverTimer) clearTimeout(planetCircleHoverTimer);
               const timer = setTimeout(() => {
                 setHoveredPlanet(planet.name);
                 handleMouseMove(e);
@@ -442,12 +459,16 @@ const ChartDisplay = ({
             }}
             onMouseMove={handleMouseMove}
             onMouseLeave={() => {
-              // ✅ IMMEDIATE: Clear timer and hide tooltip immediately on mouse leave
+              // ✅ DELAY 2000ms: Give user time to move mouse to tooltip
               if (cardHoverTimer) {
                 clearTimeout(cardHoverTimer);
                 setCardHoverTimer(null);
               }
-              setHoveredPlanet(null);
+              // ⭐ IMPORTANTE: Delay de 2000ms para dar tiempo a llegar al tooltip
+              const timer = setTimeout(() => {
+                setHoveredPlanet(null);
+              }, 2000); // 2 seconds to move mouse to tooltip
+              setPlanetCircleHoverTimer(timer);
             }}
             onMouseDown={() => {
               setHoveredPlanet(planet.name);
@@ -1591,12 +1612,13 @@ const ChartDisplay = ({
         </div>
 
         {/* 🎨 CARTA NATAL PRINCIPAL */}
-        <div className="bg-gradient-to-br from-black/50 to-purple-900/30 backdrop-blur-sm border border-white/20 rounded-3xl p-4 md:p-8 relative overflow-hidden">
+        <div className="bg-gradient-to-br from-black/50 to-purple-900/30 backdrop-blur-sm border border-white/20 rounded-3xl p-4 md:p-8 relative overflow-hidden" data-chart-container="true">
           <div className="absolute top-2 right-2 md:top-4 md:right-4 w-2 h-2 md:w-3 md:h-3 bg-yellow-400 rounded-full animate-pulse"></div>
           <div className="absolute bottom-2 left-2 md:bottom-4 md:left-4 w-1.5 h-1.5 md:w-2 md:h-2 bg-purple-400 rounded-full animate-bounce"></div>
 
           <div
             className="flex justify-center cursor-move"
+            data-chart-container="true"
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMovePan}
             onMouseUp={handleMouseUp}
@@ -1738,11 +1760,18 @@ const ChartDisplay = ({
                   key={index}
                   className="bg-black/30 rounded-xl p-4 backdrop-blur-sm border border-white/10 cursor-pointer hover:border-white/20 transition-all duration-200 group relative pointer-events-auto"
                   onMouseEnter={(e) => {
+                    if (aspectLineHoverTimer) clearTimeout(aspectLineHoverTimer);
                     setHoveredAspect(`${aspect.planet1}-${aspect.planet2}-${aspect.type}`);
                     handleMouseMove(e);
                   }}
                   onMouseMove={handleMouseMove}
-                  onMouseLeave={() => setHoveredAspect(null)}
+                  onMouseLeave={() => {
+                    // ⭐ DELAY 2000ms: Give user time to move mouse to tooltip
+                    const timer = setTimeout(() => {
+                      setHoveredAspect(null);
+                    }, 2000); // 2 seconds to move mouse to tooltip
+                    setAspectLineHoverTimer(timer);
+                  }}
                   onClick={(e) => {
                     console.log(`🎯 Clicked aspect card: ${aspect.planet1} - ${aspect.planet2} (${aspect.type})`);
                     setClickedAspect(`${aspect.planet1}-${aspect.planet2}-${aspect.type}`);
@@ -1898,11 +1927,18 @@ const ChartDisplay = ({
                 key={index}
                 className="bg-black/30 rounded-xl p-4 backdrop-blur-sm border border-white/10 cursor-pointer hover:border-white/20 transition-all duration-200 pointer-events-auto"
                 onMouseEnter={(e) => {
+                  if (planetCircleHoverTimer) clearTimeout(planetCircleHoverTimer);
                   setHoveredPlanet(planet.name);
                   handleMouseMove(e);
                 }}
                 onMouseMove={handleMouseMove}
-                onMouseLeave={() => setHoveredPlanet(null)}
+                onMouseLeave={() => {
+                  // ⭐ DELAY 2000ms: Give user time to move mouse to tooltip
+                  const timer = setTimeout(() => {
+                    setHoveredPlanet(null);
+                  }, 2000); // 2 seconds to move mouse to tooltip
+                  setPlanetCircleHoverTimer(timer);
+                }}
                 onClick={(e) => {
                   console.log(`🌟 Clicked planet card: ${planet.name}`);
                   setClickedPlanet(planet.name);
@@ -2161,6 +2197,12 @@ const ChartDisplay = ({
         // ✅ FIX: Pass card timer props for tooltip to cancel close timer
         cardHoverTimer={cardHoverTimer}
         setCardHoverTimer={setCardHoverTimer}
+        // ⭐ NEW: Pass aspect line timer to allow tooltip to cancel it
+        aspectLineHoverTimer={aspectLineHoverTimer}
+        setAspectLineHoverTimer={setAspectLineHoverTimer}
+        // ⭐ NEW: Pass planet circle timer to allow tooltip to cancel it
+        planetCircleHoverTimer={planetCircleHoverTimer}
+        setPlanetCircleHoverTimer={setPlanetCircleHoverTimer}
       />
 
 
