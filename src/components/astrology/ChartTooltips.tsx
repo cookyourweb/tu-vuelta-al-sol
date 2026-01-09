@@ -112,7 +112,7 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
       const target = event.target as HTMLElement;
 
       // Verificar si el clic fue en tooltip, drawer o chart
-      const isTooltip = target && typeof target.closest === 'function' ? target.closest('[class*="tooltip"], [class*="chart-tooltip"]') : null;
+      const isTooltip = target && typeof target.closest === 'function' ? target.closest('[class*="tooltip"], [class*="chart-tooltip"], .aspect-tooltip') : null;
       const isDrawer = target && typeof target.closest === 'function' ? target.closest('.interpretation-drawer') : null;
       const isChart = target && typeof target.closest === 'function' ? target.closest('.chart-container') : null;
 
@@ -1390,7 +1390,7 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
     return (
       <div
-        className="fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-6 shadow-2xl w-[90vw] md:w-auto max-w-lg md:max-w-xl overflow-y-auto pointer-events-auto z-50"
+        className="aspect-tooltip fixed bg-gradient-to-r from-purple-500/95 to-pink-500/95 backdrop-blur-sm border border-white/30 rounded-xl p-6 shadow-2xl w-[90vw] md:w-auto max-w-lg md:max-w-xl overflow-y-auto pointer-events-auto z-50"
         style={{
           left: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.x,
           top: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : tooltipPosition.y,
