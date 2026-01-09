@@ -110,10 +110,8 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
   // ⭐ NUEVO: Estado global de generación para el modal
   const [isGenerating, setIsGenerating] = useState(false);
 
-  // ⭐ Estado para controlar la posición del tooltip draggable
-  const [tooltipPosition2, setTooltipPosition2] = useState({ x: 0, y: 0 });
-  const [currentTooltipKey, setCurrentTooltipKey] = useState<string>('');
-  const lastTooltipPositionRef = useRef({ x: 0, y: 0 }); // Para guardar la última posición del mouse
+  // ⭐ Ref para guardar la última posición del mouse
+  const lastTooltipPositionRef = useRef({ x: 0, y: 0 });
   // =============================================================================
 
   // ✅ Hook para detectar clic fuera - SIMPLIFICADO Y CONSISTENTE
@@ -264,49 +262,10 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
     fetchInterpretations();
   }, [userId, chartType, solarReturnYear]);
 
-  // ⭐ Actualizar ref con la posición actual del tooltip (para capturarla cuando aparezca un nuevo tooltip)
+  // ⭐ Actualizar ref con la posición actual del tooltip
   useEffect(() => {
     lastTooltipPositionRef.current = tooltipPosition;
   }, [tooltipPosition]);
-
-  // ⭐ Hook para establecer la posición inicial del tooltip cuando aparece (SIN depender de tooltipPosition)
-  useEffect(() => {
-    const aspectKey = clickedAspect || hoveredAspect;
-    const planetName = clickedPlanet || hoveredPlanet;
-
-    // Para planetas, necesitamos construir el interpretationKey completo
-    let planetKey = '';
-    if (planetName && planetName !== 'Ascendente' && planetName !== 'Medio Cielo') {
-      const planet = planets.find(p => p.name === planetName);
-      if (planet) {
-        planetKey = `${planet.name}-${planet.sign}-${planet.house}`;
-      }
-    } else if (planetName) {
-      // Para Ascendente o Medio Cielo
-      planetKey = planetName;
-    }
-
-    // Si cambia el tooltip (nueva key), establecer nueva posición inicial
-    const newKey = aspectKey || planetKey || `house-${hoveredHouse}` || '';
-
-    if (newKey && newKey !== currentTooltipKey) {
-      console.log('🎯 NUEVO TOOLTIP detectado:', newKey);
-      console.log('   Posición del mouse:', lastTooltipPositionRef.current);
-      setCurrentTooltipKey(newKey);
-
-      // Calcular posición inicial usando la última posición del mouse guardada en el ref
-      const initialX = typeof window !== 'undefined' && window.innerWidth < 768
-        ? window.innerWidth / 2 - 200
-        : lastTooltipPositionRef.current.x - 80;
-
-      const initialY = typeof window !== 'undefined' && window.innerWidth < 768
-        ? window.innerHeight / 2 - 100
-        : lastTooltipPositionRef.current.y - 40;
-
-      console.log('   Posición inicial calculada:', { x: initialX, y: initialY });
-      setTooltipPosition2({ x: initialX, y: initialY });
-    }
-  }, [hoveredAspect, clickedAspect, hoveredPlanet, clickedPlanet, hoveredHouse, currentTooltipKey, planets]);
 
   // =============================================================================
   // TOOLTIP HOVER DELAY (CONFIGURABLE PER TYPE)
@@ -588,7 +547,14 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
         <Draggable
           key={interpretationKey}
           nodeRef={planetDraggableRef}
-          defaultPosition={tooltipPosition2}
+          defaultPosition={{
+            x: typeof window !== 'undefined' && window.innerWidth < 768
+              ? window.innerWidth / 2 - 200
+              : lastTooltipPositionRef.current.x - 80,
+            y: typeof window !== 'undefined' && window.innerWidth < 768
+              ? window.innerHeight / 2 - 100
+              : lastTooltipPositionRef.current.y - 40
+          }}
           onStart={() => {
             console.log('🚫 DRAGGABLE onStart - cancelando timeout');
             if (tooltipTimer) {
@@ -1521,7 +1487,14 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
         <Draggable
           key={aspectKeyFull}
           nodeRef={draggableRef}
-          defaultPosition={tooltipPosition2}
+          defaultPosition={{
+            x: typeof window !== 'undefined' && window.innerWidth < 768
+              ? window.innerWidth / 2 - 200
+              : lastTooltipPositionRef.current.x - 80,
+            y: typeof window !== 'undefined' && window.innerWidth < 768
+              ? window.innerHeight / 2 - 100
+              : lastTooltipPositionRef.current.y - 40
+          }}
           onStart={() => {
             console.log('🚫 DRAGGABLE onStart - cancelando timeout');
             handleAspectMouseEnter();
