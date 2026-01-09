@@ -9,9 +9,6 @@ import User from '@/models/User';
 import { generateEventInterpretationPrompt, EventData } from '@/utils/prompts/eventInterpretationPrompt';
 import OpenAI from 'openai';
 
-// ⏰ VERCEL PRO: Timeout de 60 segundos para llamadas a OpenAI
-export const maxDuration = 60;
-
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
@@ -153,33 +150,12 @@ export async function POST(request: NextRequest) {
 
     // 5. Buscar datos del usuario
     const user = await User.findOne({ userId }).lean().exec() as any;
-<<<<<<< HEAD
     const userName = user?.fullName || user?.name || birthData?.fullName || 'Usuario';
     const userAge = user?.age || calculateAge(user?.birthDate || birthData?.birthDate);
     const userBirthPlace = user?.birthPlace || birthData?.birthPlace || 'Desconocido';
 
     console.log(`👤 User: ${userName}, ${userAge} años`);
     console.log(`📍 Birth data name: ${birthData?.fullName}`);
-=======
-
-    // Buscar nombre en múltiples lugares: User model, birthData, o extraer del email
-    let userName = user?.fullName || user?.name || user?.displayName;
-    if (!userName && birthData?.name) {
-      userName = birthData.name;
-    }
-    if (!userName && user?.email) {
-      // Extraer nombre del email (antes del @)
-      userName = user.email.split('@')[0].replace(/[._-]/g, ' ');
-    }
-    if (!userName) {
-      userName = 'Usuario';
-    }
-
-    const userAge = user?.age || calculateAge(user?.birthDate || birthData?.birthDate);
-    const userBirthPlace = user?.birthPlace || birthData?.birthPlace || birthData?.city || 'Desconocido';
-
-    console.log(`👤 User: ${userName}, ${userAge} años, ${userBirthPlace}`);
->>>>>>> 28cd4a6c3407c470260079b1f2090b77cc6d1a5b
 
     // 6. Generar prompt
     const prompt = generateEventInterpretationPrompt({
