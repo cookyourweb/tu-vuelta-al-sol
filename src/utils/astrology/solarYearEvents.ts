@@ -75,6 +75,9 @@ function eclipticLongitudeToZodiac(longitude: number): { sign: string; degree: n
   const signIndex = Math.floor(normalizedLon / 30);
   const degree = normalizedLon % 30;
 
+  // 🔍 DEBUG: Log para verificar que usamos TROPICAL
+  console.log(`🔍 [TROPICAL] Longitud eclíptica: ${normalizedLon.toFixed(2)}° → ${ZODIAC_SIGNS[signIndex]} ${degree.toFixed(1)}°`);
+
   return {
     sign: ZODIAC_SIGNS[signIndex],
     degree: degree
@@ -111,7 +114,7 @@ export function calculateLunarPhases(startDate: Date, endDate: Date): LunarPhase
             date: newMoonDate,
             sign: zodiacInfo.sign,
             degree: zodiacInfo.degree,
-            description: `🌑 Luna Nueva en ${zodiacInfo.sign} ${zodiacInfo.degree.toFixed(1)}°`
+            description: `Luna Nueva en ${zodiacInfo.sign} ${zodiacInfo.degree.toFixed(1)}°`
           });
         }
 
@@ -131,7 +134,7 @@ export function calculateLunarPhases(startDate: Date, endDate: Date): LunarPhase
               date: fullMoonDate,
               sign: zodiacInfoFull.sign,
               degree: zodiacInfoFull.degree,
-              description: `🌕 Luna Llena en ${zodiacInfoFull.sign} ${zodiacInfoFull.degree.toFixed(1)}°`
+              description: `Luna Llena en ${zodiacInfoFull.sign} ${zodiacInfoFull.degree.toFixed(1)}°`
             });
           }
         }
@@ -247,7 +250,7 @@ export function calculateRetrogrades(startDate: Date, endDate: Date): Retrograde
                 endDate: retrogradeEnd,
                 startSign: retrogradeStartSign,
                 endSign: retrogradeEndSign,
-                description: `☿️ ${planetName} Retrógrado en ${retrogradeStartSign}`
+                description: `${planetName} Retrógrado en ${retrogradeStartSign}`
               });
             }
 
@@ -274,7 +277,7 @@ export function calculateRetrogrades(startDate: Date, endDate: Date): Retrograde
             endDate: retrogradeEnd,
             startSign: retrogradeStartSign,
             endSign: retrogradeEndSign,
-            description: `☿️ ${planetName} Retrógrado en ${retrogradeStartSign}`
+            description: `${planetName} Retrógrado en ${retrogradeStartSign}`
           });
         }
       }
@@ -316,7 +319,7 @@ export function calculateEclipses(startDate: Date, endDate: Date): Eclipse[] {
               sign: zodiacInfo.sign,
               degree: zodiacInfo.degree,
               magnitude: solarEclipse.obscuration || 0.5,
-              description: `☀️🌑 Eclipse Solar en ${zodiacInfo.sign} ${zodiacInfo.degree.toFixed(1)}°`
+              description: `Eclipse Solar en ${zodiacInfo.sign} ${zodiacInfo.degree.toFixed(1)}°`
             });
           }
 
@@ -352,7 +355,7 @@ export function calculateEclipses(startDate: Date, endDate: Date): Eclipse[] {
               sign: zodiacInfo.sign,
               degree: zodiacInfo.degree,
               magnitude: lunarEclipse.obscuration || 0.5,
-              description: `🌑🌕 Eclipse Lunar en ${zodiacInfo.sign} ${zodiacInfo.degree.toFixed(1)}°`
+              description: `Eclipse Lunar en ${zodiacInfo.sign} ${zodiacInfo.degree.toFixed(1)}°`
             });
           }
 
@@ -423,7 +426,7 @@ function calculateSunIngresses(startDate: Date, endDate: Date): PlanetaryIngress
             date: marEquinoxDate,
             fromSign: 'Piscis',
             toSign: 'Aries',
-            description: '♈ Sol ingresa en Aries'
+            description: 'Sol ingresa en Aries'
           });
         }
 
@@ -435,7 +438,7 @@ function calculateSunIngresses(startDate: Date, endDate: Date): PlanetaryIngress
             date: junSolsticeDate,
             fromSign: 'Géminis',
             toSign: 'Cáncer',
-            description: '♋ Sol ingresa en Cáncer'
+            description: 'Sol ingresa en Cáncer'
           });
         }
 
@@ -447,7 +450,7 @@ function calculateSunIngresses(startDate: Date, endDate: Date): PlanetaryIngress
             date: sepEquinoxDate,
             fromSign: 'Virgo',
             toSign: 'Libra',
-            description: '♎ Sol ingresa en Libra'
+            description: 'Sol ingresa en Libra'
           });
         }
 
@@ -459,7 +462,7 @@ function calculateSunIngresses(startDate: Date, endDate: Date): PlanetaryIngress
             date: decSolsticeDate,
             fromSign: 'Sagitario',
             toSign: 'Capricornio',
-            description: '♑ Sol ingresa en Capricornio'
+            description: 'Sol ingresa en Capricornio'
           });
         }
       } catch (error) {
@@ -509,6 +512,20 @@ function getKnownPlanetaryIngresses(startDate: Date, endDate: Date): PlanetaryIn
           searchStart.setDate(searchStart.getDate() - planetInfo.sampleDays);
           let searchEnd = new Date(currentDate);
 
+          // Get longitudes before and after to detect retrograde
+          const posBeforeIngress = Astronomy.Ecliptic(Astronomy.GeoVector(planetInfo.body, searchStart, false));
+          const posAfterIngress = Astronomy.Ecliptic(Astronomy.GeoVector(planetInfo.body, searchEnd, false));
+
+          let lonBefore = ((posBeforeIngress.elon % 360) + 360) % 360;
+          let lonAfter = ((posAfterIngress.elon % 360) + 360) % 360;
+
+          // Handle 360° wrap-around (e.g., 359° → 1°)
+          let lonDiff = lonAfter - lonBefore;
+          if (lonDiff > 180) lonDiff -= 360;
+          if (lonDiff < -180) lonDiff += 360;
+
+          const isRetrograde = lonDiff < 0; // Longitude decreasing = retrograde
+
           for (let i = 0; i < 10; i++) { // 10 iterations = ~1 hour precision
             const midDate = new Date((searchStart.getTime() + searchEnd.getTime()) / 2);
             const midPos = Astronomy.Ecliptic(Astronomy.GeoVector(planetInfo.body, midDate, false));
@@ -529,7 +546,7 @@ function getKnownPlanetaryIngresses(startDate: Date, endDate: Date): PlanetaryIn
               date: refinedDate,
               fromSign: lastSign,
               toSign: currentSign,
-              description: `♈ ${planetInfo.name} ingresa en ${currentSign}`
+              description: `${planetInfo.name} ingresa en ${currentSign}`
             });
           }
         }
@@ -567,7 +584,7 @@ export function calculateSeasonalEvents(startDate: Date, endDate: Date): Seasona
           events.push({
             type: 'spring_equinox',
             date: marEquinoxDate,
-            description: '🌸 Equinoccio de Primavera (Sol ingresa en Aries)'
+            description: 'Equinoccio de Primavera (Sol ingresa en Aries)'
           });
         }
 
@@ -577,7 +594,7 @@ export function calculateSeasonalEvents(startDate: Date, endDate: Date): Seasona
           events.push({
             type: 'summer_solstice',
             date: junSolsticeDate,
-            description: '☀️ Solsticio de Verano (Sol ingresa en Cáncer)'
+            description: 'Solsticio de Verano (Sol ingresa en Cancer)'
           });
         }
 
@@ -587,7 +604,7 @@ export function calculateSeasonalEvents(startDate: Date, endDate: Date): Seasona
           events.push({
             type: 'autumn_equinox',
             date: sepEquinoxDate,
-            description: '🍂 Equinoccio de Otoño (Sol ingresa en Libra)'
+            description: 'Equinoccio de Otono (Sol ingresa en Libra)'
           });
         }
 
@@ -597,7 +614,7 @@ export function calculateSeasonalEvents(startDate: Date, endDate: Date): Seasona
           events.push({
             type: 'winter_solstice',
             date: decSolsticeDate,
-            description: '❄️ Solsticio de Invierno (Sol ingresa en Capricornio)'
+            description: 'Solsticio de Invierno (Sol ingresa en Capricornio)'
           });
         }
       } catch (error) {
@@ -637,9 +654,9 @@ export async function calculateSolarYearEvents(birthDate: Date): Promise<SolarYe
 
     console.log('✅ Solar Year Events calculated:');
     console.log(`  🌙 ${lunarPhases.length} lunar phases`);
-    console.log(`  ☿️ ${retrogrades.length} retrogrades`);
+    console.log(`  ${retrogrades.length} retrogrades`);
     console.log(`  🌑 ${eclipses.length} eclipses`);
-    console.log(`  ♈ ${planetaryIngresses.length} planetary ingresses`);
+    console.log(`  ${planetaryIngresses.length} planetary ingresses`);
     console.log(`  🌸 ${seasonalEvents.length} seasonal events`);
 
     return {

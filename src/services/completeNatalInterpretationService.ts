@@ -6,11 +6,13 @@
 
 import OpenAI from 'openai';
 import {
-  generateCompleteNatalChartPrompt,
-  calculateElementDistribution,
-  calculateModalityDistribution,
+  generateNatalChartLayer1Prompt,
   type ChartData,
   type UserProfile,
+} from '@/utils/prompts/natalChartLayer1Prompt';
+import {
+  calculateElementDistribution,
+  calculateModalityDistribution,
 } from '@/utils/prompts/completeNatalChartPrompt';
 
 // =============================================================================
@@ -265,7 +267,7 @@ export async function generateCompleteNatalInterpretation(
   console.log('🎯 [COMPLETE NATAL] Starting generation for:', userProfile.name);
 
   const openai = getOpenAIClient();
-  const prompt = generateCompleteNatalChartPrompt(chartData, userProfile);
+  const prompt = generateNatalChartLayer1Prompt(chartData, userProfile);
 
   console.log('🎯 [COMPLETE NATAL] Prompt length:', prompt.length, 'characters');
 

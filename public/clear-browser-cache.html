@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧹 Limpiar Caché del Navegador - Tu Vuelta al Sol</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            margin-top: 0;
+            font-size: 2.5em;
+        }
+        .warning {
+            background: rgba(255, 152, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #ff9800;
+            margin: 20px 0;
+        }
+        .info {
+            background: rgba(33, 150, 243, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #2196f3;
+            margin: 20px 0;
+        }
+        .success {
+            background: rgba(76, 175, 80, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #4caf50;
+            margin: 20px 0;
+            display: none;
+        }
+        button {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 10px 5px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .stats {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+        code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Limpieza de Caché</h1>
+        <p>Esta herramienta limpia todos los datos cacheados en tu navegador para forzar la recarga con parámetros <strong>TROPICALES</strong> correctos.</p>
+
+        <div class="warning">
+            <strong>⚠️ ADVERTENCIA:</strong> Esto eliminará:
+            <ul>
+                <li>localStorage (datos guardados localmente)</li>
+                <li>sessionStorage (datos de la sesión)</li>
+                <li>Cookies del sitio</li>
+                <li>Caché del navegador</li>
+            </ul>
+            <p><strong>Tendrás que volver a iniciar sesión.</strong></p>
+        </div>
+
+        <div class="info">
+            <strong>📊 Estado actual del caché:</strong>
+            <div id="stats" class="stats">Cargando...</div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <button onclick="clearAllCache()">🗑️ Limpiar TODO el Caché</button>
+            <button onclick="clearStorageOnly()">📦 Solo localStorage/sessionStorage</button>
+            <button onclick="location.reload()">🔄 Recargar Página</button>
+        </div>
+
+        <div id="success" class="success">
+            <strong>✅ Caché limpiado exitosamente!</strong>
+            <p>Los eventos se recalcularán con parámetros <code>ayanamsa=0</code> (TROPICAL) en la próxima carga.</p>
+            <p>Recarga la página para aplicar los cambios.</p>
+        </div>
+
+        <div class="info">
+            <strong>🔍 Qué hace esto:</strong>
+            <ul>
+                <li>Elimina eventos calculados con parámetros VÉDICOS incorrectos</li>
+                <li>Fuerza recalculo con <code>ayanamsa=0</code> (TROPICAL occidental)</li>
+                <li>Garantiza fechas correctas para Luna Nueva/Llena</li>
+                <li>Alinea signos con zodiaco tropical (equinoccio vernal)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Mostrar estadísticas del caché
+        function showStats() {
+            const stats = document.getElementById('stats');
+            let info = [];
+
+            // localStorage
+            const localStorageSize = Object.keys(localStorage).length;
+            info.push(`📦 localStorage: ${localStorageSize} items`);
+
+            // sessionStorage
+            const sessionStorageSize = Object.keys(sessionStorage).length;
+            info.push(`📝 sessionStorage: ${sessionStorageSize} items`);
+
+            // Cookies
+            const cookiesSize = document.cookie.split(';').filter(c => c.trim()).length;
+            info.push(`🍪 Cookies: ${cookiesSize} cookies`);
+
+            stats.innerHTML = info.join('<br>');
+        }
+
+        // Limpiar localStorage y sessionStorage
+        function clearStorageOnly() {
+            if (confirm('¿Seguro que quieres limpiar localStorage y sessionStorage? Tendrás que volver a iniciar sesión.')) {
+                const localCount = localStorage.length;
+                const sessionCount = sessionStorage.length;
+
+                localStorage.clear();
+                sessionStorage.clear();
+
+                console.log(`🧹 Limpiado: ${localCount} items de localStorage, ${sessionCount} items de sessionStorage`);
+
+                document.getElementById('success').style.display = 'block';
+                showStats();
+            }
+        }
+
+        // Limpiar TODO el caché
+        function clearAllCache() {
+            if (confirm('¿Seguro que quieres limpiar TODO el caché? Esto incluye cookies y datos de sesión. Tendrás que volver a iniciar sesión.')) {
+                // localStorage
+                const localCount = localStorage.length;
+                localStorage.clear();
+
+                // sessionStorage
+                const sessionCount = sessionStorage.length;
+                sessionStorage.clear();
+
+                // Cookies
+                const cookies = document.cookie.split(';');
+                const cookieCount = cookies.length;
+                for (let cookie of cookies) {
+                    const eqPos = cookie.indexOf('=');
+                    const name = eqPos > -1 ? cookie.substring(0, eqPos).trim() : cookie.trim();
+                    document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+                }
+
+                console.log(`🧹 Limpiado completo:
+                  - ${localCount} items de localStorage
+                  - ${sessionCount} items de sessionStorage
+                  - ${cookieCount} cookies`);
+
+                document.getElementById('success').style.display = 'block';
+                showStats();
+
+                // Recargar después de 2 segundos
+                setTimeout(() => {
+                    alert('✅ Caché limpiado. Recargando página...');
+                    location.reload();
+                }, 2000);
+            }
+        }
+
+        // Mostrar stats al cargar
+        showStats();
+
+        // Log para debug
+        console.log('🧪 Tu Vuelta al Sol - Limpiador de Caché');
+        console.log('📊 Estado actual:', {
+            localStorage: Object.keys(localStorage),
+            sessionStorage: Object.keys(sessionStorage),
+            cookies: document.cookie
+        });
+    </script>
+</body>
+</html>
