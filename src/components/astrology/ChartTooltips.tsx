@@ -49,6 +49,8 @@ interface ChartTooltipsProps {
   natalInterpretations?: any;
   cardHoverTimer?: NodeJS.Timeout | null;
   setCardHoverTimer?: (timer: NodeJS.Timeout | null) => void;
+  aspectLineHoverTimer?: NodeJS.Timeout | null;
+  setAspectLineHoverTimer?: (timer: NodeJS.Timeout | null) => void;
 }
 
 const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
@@ -81,7 +83,9 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
     modalityDistribution,
     solarReturnYear,
     solarReturnTheme,
-    ascSRInNatalHouse
+    ascSRInNatalHouse,
+    aspectLineHoverTimer,
+    setAspectLineHoverTimer
   } = props;
 
   // =============================================================================
@@ -561,6 +565,11 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
               clearTimeout(tooltipTimer);
               setTooltipTimer(null);
             }
+            // ⭐ También cancelar aspectLineHoverTimer si existe
+            if (aspectLineHoverTimer && setAspectLineHoverTimer) {
+              clearTimeout(aspectLineHoverTimer);
+              setAspectLineHoverTimer(null);
+            }
           }}
         >
           <div
@@ -571,6 +580,11 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           console.log('🎯 MOUSE ENTERED TOOLTIP - PLANET');
           e.stopPropagation();
           handleTooltipMouseEnter();
+          // ⭐ Cancelar aspectLineHoverTimer si existe
+          if (aspectLineHoverTimer && setAspectLineHoverTimer) {
+            clearTimeout(aspectLineHoverTimer);
+            setAspectLineHoverTimer(null);
+          }
         }}
         onMouseLeave={(e) => {
           console.log('🎯 MOUSE LEFT TOOLTIP - PLANET');
@@ -1498,6 +1512,12 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           onStart={() => {
             console.log('🚫 DRAGGABLE onStart - cancelando timeout');
             handleAspectMouseEnter();
+            // ⭐ CRÍTICO: Cancelar el timer de ChartDisplay que cierra el tooltip
+            if (aspectLineHoverTimer && setAspectLineHoverTimer) {
+              console.log('🚫 Cancelando aspectLineHoverTimer de ChartDisplay (onStart)');
+              clearTimeout(aspectLineHoverTimer);
+              setAspectLineHoverTimer(null);
+            }
           }}
         >
           <div
@@ -1510,6 +1530,12 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           e.stopPropagation();
           handleAspectMouseEnter();
           setAspectTooltipLocked(true);
+          // ⭐ CRÍTICO: Cancelar el timer de ChartDisplay que cierra el tooltip
+          if (aspectLineHoverTimer && setAspectLineHoverTimer) {
+            console.log('🚫 Cancelando aspectLineHoverTimer de ChartDisplay');
+            clearTimeout(aspectLineHoverTimer);
+            setAspectLineHoverTimer(null);
+          }
         }}
         onMouseLeave={(e) => {
           console.log('🎯 MOUSE LEFT TOOLTIP - ASPECT');

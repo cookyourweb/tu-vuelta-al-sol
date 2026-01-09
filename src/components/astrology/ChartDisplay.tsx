@@ -2183,6 +2183,9 @@ const ChartDisplay = ({
         // ✅ FIX: Pass card timer props for tooltip to cancel close timer
         cardHoverTimer={cardHoverTimer}
         setCardHoverTimer={setCardHoverTimer}
+        // ⭐ NEW: Pass aspect line timer to allow tooltip to cancel it
+        aspectLineHoverTimer={aspectLineHoverTimer}
+        setAspectLineHoverTimer={setAspectLineHoverTimer}
       />
 
 
