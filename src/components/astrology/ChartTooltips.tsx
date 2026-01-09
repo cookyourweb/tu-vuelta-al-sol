@@ -114,7 +114,7 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
       // Verificar si el clic fue en tooltip, drawer o chart
       const isTooltip = target && typeof target.closest === 'function' ? target.closest('[class*="tooltip"], [class*="chart-tooltip"], .aspect-tooltip, [data-aspect-tooltip="true"], [data-tooltip-type]') : null;
       const isDrawer = target && typeof target.closest === 'function' ? target.closest('.interpretation-drawer') : null;
-      const isChart = target && typeof target.closest === 'function' ? target.closest('.chart-container') : null;
+      const isChart = target && typeof target.closest === 'function' ? target.closest('.chart-container, [data-chart-container="true"]') : null;
 
       console.log('🔍 handleClickOutside EJECUTADO');
       console.log('  - target:', target?.className);

@@ -1597,6 +1597,7 @@ const ChartDisplay = ({
 
           <div
             className="flex justify-center cursor-move"
+            data-chart-container="true"
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMovePan}
             onMouseUp={handleMouseUp}
