@@ -118,9 +118,35 @@ async function getCachedInterpretation(
 
     if (cached && cached.interpretation) {
       console.log(`✅ [CACHE HIT] Event ${eventId} for user ${userId}`);
+
+      // Check if it's the new format (V2)
+      const interp = cached.interpretation as any;
+      if (interp.title && interp.que_se_activa) {
+        // New format - return as is
+        return {
+          ...interp,
+          eventId,
+          cached: true,
+          generatedAt: cached.createdAt
+        } as UltraPersonalizedEventInterpretation;
+      }
+
+      // Old format - transform to new format
       return {
-        ...cached.interpretation,
         eventId,
+        title: interp.titulo_evento || 'Evento Astrológico',
+        date: cached.eventDate?.toISOString() || new Date().toISOString(),
+        que_se_activa: interp.para_ti_especificamente || '',
+        como_se_siente: [interp.tu_fortaleza_a_usar?.como_usarla || 'Energía renovada'],
+        consejo: [
+          interp.consejo_especifico || '',
+          interp.ejercicio_para_ti || ''
+        ].filter(Boolean),
+        ritual_breve: interp.timing_evolutivo?.cuando_actuar || 'Conecta con tu intuición',
+        advertencias: interp.tu_bloqueo_a_trabajar?.bloqueo ? [interp.tu_bloqueo_a_trabajar.bloqueo] : [],
+        oportunidades: interp.tu_fortaleza_a_usar?.fortaleza ? [interp.tu_fortaleza_a_usar.fortaleza] : [],
+        mantra: interp.mantra_personalizado || 'Estoy en mi camino',
+        pregunta_clave: interp.tu_bloqueo_a_trabajar?.reframe,
         cached: true,
         generatedAt: cached.createdAt
       };
