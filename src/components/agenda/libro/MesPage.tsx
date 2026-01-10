@@ -311,9 +311,9 @@ export default function MesPage({
                           <p className="font-body text-sm text-gray-600 mb-2">
                             {format(new Date(eclipse.date), "d 'de' MMMM", { locale: es })}
                           </p>
-                          {eclipse.descripcion && (
+                          {eclipse.description && (
                             <p className="font-body text-base text-gray-700 leading-relaxed">
-                              {eclipse.descripcion}
+                              {eclipse.description}
                             </p>
                           )}
                         </div>
@@ -328,7 +328,7 @@ export default function MesPage({
                           date: eventDate,
                           sign: eclipse.signo,
                           house: eclipse.casa,
-                          description: eclipse.descripcion
+                          description: eclipse.description
                         }}
                         interpretation={eventInterp}
                         userName={userName}
@@ -358,9 +358,9 @@ export default function MesPage({
                           <p className="font-body text-sm text-gray-600 mb-2">
                             {format(new Date(luna.date), "d 'de' MMMM", { locale: es })}
                           </p>
-                          {luna.descripcion && (
+                          {luna.description && (
                             <p className="font-body text-sm text-gray-700">
-                              {luna.descripcion}
+                              {luna.description}
                             </p>
                           )}
                         </div>
@@ -375,7 +375,7 @@ export default function MesPage({
                           date: eventDate,
                           sign: luna.signo,
                           house: luna.casa,
-                          description: luna.descripcion
+                          description: luna.description
                         }}
                         interpretation={eventInterp}
                         userName={userName}
@@ -405,9 +405,9 @@ export default function MesPage({
                           <p className="font-body text-sm text-gray-600 mb-2">
                             {format(new Date(luna.date), "d 'de' MMMM", { locale: es })}
                           </p>
-                          {luna.descripcion && (
+                          {luna.description && (
                             <p className="font-body text-sm text-gray-700">
-                              {luna.descripcion}
+                              {luna.description}
                             </p>
                           )}
                         </div>
@@ -422,7 +422,7 @@ export default function MesPage({
                           date: eventDate,
                           sign: luna.signo,
                           house: luna.casa,
-                          description: luna.descripcion
+                          description: luna.description
                         }}
                         interpretation={eventInterp}
                         userName={userName}
