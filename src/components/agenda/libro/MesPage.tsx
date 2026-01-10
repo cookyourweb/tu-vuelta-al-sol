@@ -327,7 +327,7 @@ export default function MesPage({
                           type: eclipse.type || 'eclipse',
                           date: eventDate,
                           sign: eclipse.signo,
-                          house: eclipse.casa,
+                          house: eclipse.house,
                           description: eclipse.description
                         }}
                         interpretation={eventInterp}
@@ -374,7 +374,7 @@ export default function MesPage({
                           type: 'luna_nueva',
                           date: eventDate,
                           sign: luna.signo,
-                          house: luna.casa,
+                          house: luna.house,
                           description: luna.description
                         }}
                         interpretation={eventInterp}
@@ -421,7 +421,7 @@ export default function MesPage({
                           type: 'luna_llena',
                           date: eventDate,
                           sign: luna.signo,
-                          house: luna.casa,
+                          house: luna.house,
                           description: luna.description
                         }}
                         interpretation={eventInterp}
