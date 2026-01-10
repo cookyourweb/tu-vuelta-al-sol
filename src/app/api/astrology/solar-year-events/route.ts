@@ -193,7 +193,7 @@ export async function POST(request: NextRequest) {
       seasonalEvents: events.seasonalEvents.map(s => ({
         ...s,
         date: s.date instanceof Date ? s.date.toISOString() : s.date,
-        house: natalChart && s.sign ? calculateHouseForEvent(s.sign, s.degree || 0, natalChart) : undefined
+        house: natalChart && (s as any).sign ? calculateHouseForEvent((s as any).sign, (s as any).degree || 0, natalChart) : undefined
       }))
     };
 
