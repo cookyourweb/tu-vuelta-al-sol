@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
         await connectDB();
         const natalDoc = await NatalChart.findOne({ userId }).lean();
         if (natalDoc) {
-          natalChart = natalDoc.natalChart || natalDoc;
+          natalChart = (natalDoc as any).natalChart || natalDoc;
           console.log('✅ Natal chart loaded for house calculations');
         } else {
           console.warn('⚠️ No natal chart found for user:', userId);
