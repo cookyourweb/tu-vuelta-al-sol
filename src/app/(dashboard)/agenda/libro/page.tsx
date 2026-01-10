@@ -15,6 +15,16 @@ import CalendarioAnual from '@/components/agenda/libro/CalendarioAnual';
 import MesPage from '@/components/agenda/libro/MesPage';
 import CierreCiclo from '@/components/agenda/libro/CierreCiclo';
 
+interface MonthEvent {
+  date: string | Date;
+  type: string;
+  sign?: string;
+  signo?: string;
+  description?: string;
+  house?: number;
+  interpretation?: any;
+}
+
 interface MonthData {
   nombre: string;
   nombreCorto: string;
@@ -292,18 +302,18 @@ export default function LibroAgendaPage() {
               const monthDate = addMonths(startDate, index);
 
               // Combinar todos los eventos del mes para MesPage
-              const allMonthEvents = [
-                ...monthData.lunas_nuevas.map(e => ({ ...e, date: e.fecha, type: 'luna-nueva' })),
-                ...monthData.lunas_llenas.map(e => ({ ...e, date: e.fecha, type: 'luna-llena' })),
-                ...monthData.eclipses.map(e => ({ ...e, date: e.fecha, type: e.tipo })),
-                ...monthData.ingresos_destacados.map(e => ({ ...e, date: e.fecha, type: 'ingreso' }))
+              const allMonthEvents: MonthEvent[] = [
+                ...monthData.lunas_nuevas.map(e => ({ date: e.fecha, type: 'luna-nueva', sign: e.signo, description: e.descripcion, house: e.casa })),
+                ...monthData.lunas_llenas.map(e => ({ date: e.fecha, type: 'luna-llena', sign: e.signo, description: e.descripcion, house: e.casa })),
+                ...monthData.eclipses.map(e => ({ date: e.fecha, type: e.tipo, sign: e.signo, description: e.descripcion, house: e.casa })),
+                ...monthData.ingresos_destacados.map(e => ({ date: e.fecha, type: 'ingreso', sign: e.signo, description: e.descripcion, house: 1 })) // ingresos no tienen casa
               ];
 
               return (
                 <MesPage
                   key={index}
                   monthDate={monthDate}
-                  monthData={monthData}
+                
                   interpretation={monthInterp}
                   allEvents={allMonthEvents}
                   userName={bookContent.userName}
