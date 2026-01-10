@@ -3,21 +3,10 @@
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addDays, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import EventInterpretationPrint from './EventInterpretationPrint';
+import type { MonthEvent, MonthInterpretation, MonthData } from '@/types/astrology';
 
-interface MonthEvent {
-  date: string | Date;
-  type: string;
-  sign?: string;
-  signo?: string;
-  description?: string;
-  house?: number;
-  interpretation?: any; // Interpretación personalizada del evento
-}
-
-interface MonthInterpretation {
-  mes: string;
-  portada_mes?: string;
-  interpretacion_mensual?: string;
+// MonthInterpretation extendido con campos específicos de esta vista
+interface ExtendedMonthInterpretation extends MonthInterpretation {
   ritual_del_mes?: string;
   mantra_mensual?: string;
 }

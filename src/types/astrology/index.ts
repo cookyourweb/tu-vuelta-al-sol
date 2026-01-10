@@ -85,3 +85,33 @@ export const EVENT_TYPES = [
   'jupiter_expansion', 'saturn_discipline', 'uranus_innovation',
   'neptune_intuition', 'pluto_transformation'
 ] as const;
+
+// =============================================================================
+// TIPOS DE EVENTOS ASTROLÓGICOS (Agenda)
+// =============================================================================
+
+export type {
+  LunarPhase,
+  Retrograde,
+  Eclipse,
+  PlanetaryIngress,
+  SeasonalEvent,
+  SolarYearEvents,
+  MonthEvent,
+  MonthData,
+  MonthInterpretation,
+  EventCategory,
+  CategorizedEvent,
+  EventId,
+  EventInterpretationInput,
+  EventInterpretation,
+} from './events';
+
+export {
+  generateEventId,
+  isLunarPhase,
+  isEclipse,
+  isRetrograde,
+  isPlanetaryIngress,
+  isSeasonalEvent,
+} from './events';
