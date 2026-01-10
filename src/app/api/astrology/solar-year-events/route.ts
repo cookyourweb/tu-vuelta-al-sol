@@ -188,7 +188,7 @@ export async function POST(request: NextRequest) {
         date: i.date instanceof Date ? i.date.toISOString() : i.date,
         newSign: i.toSign,
         previousSign: i.fromSign,
-        house: natalChart ? calculateHouseForEvent(i.toSign, i.toDegree || 0, natalChart) : undefined
+        house: natalChart ? calculateHouseForEvent(i.toSign, (i as any).toDegree || 0, natalChart) : undefined
       })),
       seasonalEvents: events.seasonalEvents.map(s => ({
         ...s,
