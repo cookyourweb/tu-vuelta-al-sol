@@ -324,7 +324,7 @@ export default function MesPage({
                     {eventInterp && (
                       <EventInterpretationPrint
                         event={{
-                          type: eclipse.tipo || 'eclipse',
+                          type: eclipse.type || 'eclipse',
                           date: eventDate,
                           sign: eclipse.signo,
                           house: eclipse.casa,
