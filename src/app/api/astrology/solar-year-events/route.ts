@@ -175,7 +175,7 @@ export async function POST(request: NextRequest) {
         startDate: r.startDate instanceof Date ? r.startDate.toISOString() : r.startDate,
         endDate: r.endDate instanceof Date ? r.endDate.toISOString() : r.endDate,
         sign: r.startSign,
-        house: natalChart ? calculateHouseForEvent(r.startSign, r.startDegree || 0, natalChart) : undefined
+        house: natalChart ? calculateHouseForEvent(r.startSign, (r as any).startDegree || 0, natalChart) : undefined
       })),
       eclipses: events.eclipses.map(e => ({
         ...e,
