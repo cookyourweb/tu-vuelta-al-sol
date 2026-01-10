@@ -44,6 +44,7 @@ const AgendaPersonalizada = () => {
   const [loadedMonths, setLoadedMonths] = useState<Set<string>>(new Set());
   const [loadingMonthlyEvents, setLoadingMonthlyEvents] = useState(false);
   const [loadingMonthName, setLoadingMonthName] = useState<string>('');
+  const [isPreviousYear, setIsPreviousYear] = useState(false); // Detectar si vemos año anterior
 
   // Perfil de usuario REAL (no datos de prueba)
   const [userProfile, setUserProfile] = React.useState<UserProfile | null>(null);
@@ -132,7 +133,7 @@ const AgendaPersonalizada = () => {
   }, []);
 
   // 📅 CARGA COMPLETA: Fetch Year Events (birthday to next birthday)
-  const fetchYearEvents = async (): Promise<AstrologicalEvent[]> => {
+  const fetchYearEvents = async (forceNextYear: boolean = false): Promise<AstrologicalEvent[]> => {
     if (!userProfile || !userProfile.birthDate) {
       console.log('⚠️ [YEAR-EVENTS] Cannot fetch - missing userProfile or birthDate');
       return [];
@@ -140,18 +141,41 @@ const AgendaPersonalizada = () => {
 
     try {
       console.log('📅 [YEAR-EVENTS] Fetching complete year events from birthday to next birthday...');
+      if (forceNextYear) console.log('🔄 [YEAR-EVENTS] FORCING next year cycle...');
 
       // Calcular el rango del año astrológico (cumpleaños actual al próximo)
       const birthDate = new Date(userProfile.birthDate);
-      const currentYear = new Date().getFullYear();
-
-      // Fecha de cumpleaños de este año
-      const currentBirthday = new Date(currentYear, birthDate.getMonth(), birthDate.getDate());
-
-      // Si ya pasó el cumpleaños este año, usar el del próximo año
       const now = new Date();
-      const startDate = currentBirthday < now ? new Date(currentYear + 1, birthDate.getMonth(), birthDate.getDate()) : currentBirthday;
-      const endDate = new Date(startDate.getFullYear() + 1, birthDate.getMonth(), birthDate.getDate());
+      const currentYear = now.getFullYear();
+
+      // Fecha de cumpleaños de este año y del año pasado
+      const currentYearBirthday = new Date(currentYear, birthDate.getMonth(), birthDate.getDate());
+      const lastYearBirthday = new Date(currentYear - 1, birthDate.getMonth(), birthDate.getDate());
+
+      // Determinar el rango del año astrológico ACTUAL
+      // (desde el último cumpleaños que ya pasó hasta el próximo)
+      let startDate: Date;
+      let endDate: Date;
+
+      if (forceNextYear) {
+        // 🔄 FORZAR año siguiente: próximo cumpleaños → cumpleaños del año después
+        const nextYearBirthday = new Date(currentYear + 1, birthDate.getMonth(), birthDate.getDate());
+        startDate = nextYearBirthday;
+        endDate = new Date(currentYear + 2, birthDate.getMonth(), birthDate.getDate());
+      } else if (currentYearBirthday <= now) {
+        // Si ya pasó el cumpleaños este año, el rango es: cumpleaños este año → cumpleaños próximo año
+        startDate = currentYearBirthday;
+        endDate = new Date(currentYear + 1, birthDate.getMonth(), birthDate.getDate());
+      } else {
+        // Si aún no ha pasado el cumpleaños este año, el rango es: cumpleaños año pasado → cumpleaños este año
+        startDate = lastYearBirthday;
+        endDate = currentYearBirthday;
+      }
+
+      // 🔍 DETECTAR si estamos viendo el año ANTERIOR del retorno solar
+      // (si el final del rango ya pasó, estamos viendo el año anterior)
+      const isViewingPreviousYear = endDate < now && !forceNextYear;
+      setIsPreviousYear(isViewingPreviousYear);
 
       setYearRange({ start: startDate, end: endDate });
 
@@ -743,6 +767,36 @@ const AgendaPersonalizada = () => {
     ];
   };
 
+  // 📅 FUNCIÓN: Cargar eventos del año completo
+  const loadYearEvents = async (forceNextYear: boolean = false) => {
+    if (!userProfile) {
+      console.log('⚠️ [AGENDA] No userProfile available yet');
+      return;
+    }
+
+    setLoading(true);
+    setLoadingYearEvents(true);
+    console.log('📅 [AGENDA] Loading complete year events (birthday to birthday)...');
+
+    try {
+      const yearEvents = await fetchYearEvents(forceNextYear);
+      console.log(`✅ [AGENDA] Loaded ${yearEvents.length} events for the complete year`);
+
+      setEvents(yearEvents);
+    } catch (error) {
+      console.error('❌ [AGENDA] Error loading year events:', error);
+      console.error('❌ [AGENDA] Error details:', error instanceof Error ? error.message : String(error));
+      // Fallback to example events
+      const exampleEvents = generateExampleEvents();
+      console.log(`⚠️ [AGENDA] Using ${exampleEvents.length} fallback example events`);
+      setEvents(exampleEvents);
+      setError('No se pudieron cargar los eventos. Mostrando eventos de ejemplo.');
+    } finally {
+      setLoading(false);
+      setLoadingYearEvents(false);
+    }
+  };
+
   // Cargar eventos del año completo al iniciar
   useEffect(() => {
     if (!userProfile) {
@@ -755,30 +809,6 @@ const AgendaPersonalizada = () => {
       hasBirthDate: !!userProfile.birthDate,
       birthDate: userProfile.birthDate
     });
-
-    const loadYearEvents = async () => {
-      setLoading(true);
-      setLoadingYearEvents(true);
-      console.log('📅 [AGENDA] Loading complete year events (birthday to birthday)...');
-
-      try {
-        const yearEvents = await fetchYearEvents();
-        console.log(`✅ [AGENDA] Loaded ${yearEvents.length} events for the complete year`);
-
-        setEvents(yearEvents);
-      } catch (error) {
-        console.error('❌ [AGENDA] Error loading year events:', error);
-        console.error('❌ [AGENDA] Error details:', error instanceof Error ? error.message : String(error));
-        // Fallback to example events
-        const exampleEvents = generateExampleEvents();
-        console.log(`⚠️ [AGENDA] Using ${exampleEvents.length} fallback example events`);
-        setEvents(exampleEvents);
-        setError('No se pudieron cargar los eventos. Mostrando eventos de ejemplo.');
-      } finally {
-        setLoading(false);
-        setLoadingYearEvents(false);
-      }
-    };
 
     loadYearEvents();
   }, [userProfile]);
@@ -1082,6 +1112,52 @@ const AgendaPersonalizada = () => {
             </div>
           </div>
         </div>
+
+        {/* ⚠️ BANNER: AÑO ANTERIOR - Mostrar cuando estamos viendo el año pasado del retorno solar */}
+        {isPreviousYear && yearRange && (
+          <div className="mb-8 bg-gradient-to-r from-orange-900/70 to-red-900/70 border-2 border-orange-500/60 rounded-2xl p-6 backdrop-blur-sm shadow-2xl">
+            <div className="flex items-start gap-4">
+              <div className="text-4xl">📅</div>
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold text-orange-200 mb-2 flex items-center gap-2">
+                  <span>⏰</span>
+                  Estás Viendo tu Año Solar Anterior
+                </h3>
+                <p className="text-orange-100 mb-4 leading-relaxed">
+                  Este es tu ciclo solar del <strong className="text-white">{yearRange.start.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</strong> al <strong className="text-white">{yearRange.end.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</strong>.
+                  <br />
+                  <span className="text-yellow-200">El {yearRange.end.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })} fue el <strong>último día de tu Retorno Solar anterior</strong>.</span>
+                </p>
+                <button
+                  onClick={() => {
+                    // Recargar eventos del año SIGUIENTE (forzar nuevo ciclo)
+                    if (userProfile) {
+                      // Limpiar eventos anteriores
+                      setEvents([]);
+                      setLoadedMonths(new Set());
+                      // Cargar año siguiente con forceNextYear=true
+                      loadYearEvents(true);
+                    }
+                  }}
+                  disabled={loadingYearEvents}
+                  className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-yellow-500/50 flex items-center gap-2"
+                >
+                  {loadingYearEvents ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      <span>Generando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-xl">🔄</span>
+                      <span>Generar Nuevo Ciclo Solar {new Date().getFullYear()}</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ERROR BANNER - Si hay errores cargando eventos */}
         {error && (
