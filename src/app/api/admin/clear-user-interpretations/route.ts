@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
     console.log(`📊 Interpretaciones del usuario ${userId}:`, interpretations.length);
 
     // Mostrar información resumida de cada interpretación
-    const summary = interpretations.map(i => ({
+    const summary = interpretations.map((i: any) => ({
       _id: i._id,
       chartType: i.chartType,
       year: i.year,
