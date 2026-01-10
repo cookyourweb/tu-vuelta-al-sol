@@ -294,7 +294,7 @@ export default function MesPage({
 <div className="space-y-8">
               {/* Eclipses */}
               {monthData.eclipses.map((eclipse, idx) => {
-                const eventDate = format(new Date(eclipse.fecha), 'yyyy-MM-dd');
+                const eventDate = format(new Date(eclipse.date), 'yyyy-MM-dd');
                 const eventId = `eclipse-${eventDate}`;
                 const eventInterp = eventInterpretations[eventId];
 
@@ -309,7 +309,7 @@ export default function MesPage({
                             Eclipse en {eclipse.signo || 'signo'}
                           </h4>
                           <p className="font-body text-sm text-gray-600 mb-2">
-                            {format(new Date(eclipse.fecha), "d 'de' MMMM", { locale: es })}
+                            {format(new Date(eclipse.date), "d 'de' MMMM", { locale: es })}
                           </p>
                           {eclipse.descripcion && (
                             <p className="font-body text-base text-gray-700 leading-relaxed">
@@ -340,7 +340,7 @@ export default function MesPage({
 
               {/* Lunas Nuevas */}
               {monthData.lunas_nuevas.map((luna, idx) => {
-                const eventDate = format(new Date(luna.fecha), 'yyyy-MM-dd');
+                const eventDate = format(new Date(luna.date), 'yyyy-MM-dd');
                 // Generar eventId igual que en el modelo: luna_nueva_YYYY-MM-DD_signo
                 const eventId = `luna_nueva_${eventDate}_${luna.signo?.toLowerCase()}`;
                 const eventInterp = eventInterpretations[eventId];
@@ -356,7 +356,7 @@ export default function MesPage({
                             Luna Nueva en {luna.signo || 'signo'}
                           </h4>
                           <p className="font-body text-sm text-gray-600 mb-2">
-                            {format(new Date(luna.fecha), "d 'de' MMMM", { locale: es })}
+                            {format(new Date(luna.date), "d 'de' MMMM", { locale: es })}
                           </p>
                           {luna.descripcion && (
                             <p className="font-body text-sm text-gray-700">
@@ -387,7 +387,7 @@ export default function MesPage({
 
               {/* Lunas Llenas */}
               {monthData.lunas_llenas.map((luna, idx) => {
-                const eventDate = format(new Date(luna.fecha), 'yyyy-MM-dd');
+                const eventDate = format(new Date(luna.date), 'yyyy-MM-dd');
                 // Generar eventId igual que en el modelo: luna_llena_YYYY-MM-DD_signo
                 const eventId = `luna_llena_${eventDate}_${luna.signo?.toLowerCase()}`;
                 const eventInterp = eventInterpretations[eventId];
@@ -403,7 +403,7 @@ export default function MesPage({
                             Luna Llena en {luna.signo || 'signo'}
                           </h4>
                           <p className="font-body text-sm text-gray-600 mb-2">
-                            {format(new Date(luna.fecha), "d 'de' MMMM", { locale: es })}
+                            {format(new Date(luna.date), "d 'de' MMMM", { locale: es })}
                           </p>
                           {luna.descripcion && (
                             <p className="font-body text-sm text-gray-700">
