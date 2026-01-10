@@ -5,12 +5,6 @@ import { es } from 'date-fns/locale';
 import EventInterpretationPrint from './EventInterpretationPrint';
 import type { MonthEvent, MonthInterpretation, MonthData } from '@/types/astrology';
 
-// MonthInterpretation extendido con campos específicos de esta vista
-interface ExtendedMonthInterpretation extends MonthInterpretation {
-  ritual_del_mes?: string;
-  mantra_mensual?: string;
-}
-
 interface MesPageProps {
   monthDate: Date;
   monthData?: {

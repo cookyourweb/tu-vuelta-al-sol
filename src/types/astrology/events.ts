@@ -124,6 +124,8 @@ export interface MonthInterpretation {
   mes: string;
   portada_mes?: string;
   interpretacion_mensual?: string;
+  mantra_mensual?: string;
+  ritual_del_mes?: string;
   eventos_destacados?: string[];
 }
 
