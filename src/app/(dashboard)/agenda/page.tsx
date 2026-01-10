@@ -1095,20 +1095,58 @@ const AgendaPersonalizada = () => {
               </>
             )}
 
-            {/* Estadísticas de progreso */}
-            <div className="flex justify-center items-center space-x-6 text-sm">
-              <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-                <span className="text-green-300">🌙</span>
-                <span className="text-green-300 ml-2">Fases Lunares</span>
+            {/* Estadísticas de progreso + Control de Año Solar */}
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
+              {/* Badges de tipos de eventos */}
+              <div className="flex justify-center items-center space-x-4">
+                <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+                  <span className="text-green-300">🌙</span>
+                  <span className="text-green-300 ml-2">Fases Lunares</span>
+                </div>
+                <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+                  <span className="text-blue-300">⭐</span>
+                  <span className="text-blue-300 ml-2">Tránsitos</span>
+                </div>
+                <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+                  <span className="text-pink-300">✨</span>
+                  <span className="text-pink-300 ml-2">Eventos Épicos</span>
+                </div>
               </div>
-              <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-                <span className="text-blue-300">⭐</span>
-                <span className="text-blue-300 ml-2">Tránsitos</span>
-              </div>
-              <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-                <span className="text-pink-300">✨</span>
-                <span className="text-pink-300 ml-2">Eventos Épicos</span>
-              </div>
+
+              {/* Control de Año Solar */}
+              {yearRange && (
+                <div className="flex items-center gap-3 bg-gradient-to-r from-purple-600/30 to-pink-600/30 backdrop-blur-sm border border-purple-400/30 rounded-full px-5 py-2.5">
+                  <div className="text-white text-sm font-medium">
+                    <span className="text-yellow-400">🌞</span> Ciclo Solar: {yearRange.start.getFullYear()}-{yearRange.end.getFullYear()}
+                  </div>
+
+                  {isPreviousYear && (
+                    <button
+                      onClick={() => {
+                        if (userProfile) {
+                          setEvents([]);
+                          setLoadedMonths(new Set());
+                          loadYearEvents(true);
+                        }
+                      }}
+                      disabled={loadingYearEvents}
+                      className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold py-1.5 px-4 rounded-full transition-all duration-300 shadow-lg hover:shadow-yellow-500/50 flex items-center gap-1.5"
+                    >
+                      {loadingYearEvents ? (
+                        <>
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                          <span>Cargando...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>🔄</span>
+                          <span>Generar Nuevo Ciclo {new Date().getFullYear()}</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
