@@ -286,20 +286,4 @@ export interface EventInterpretation {
 // =============================================================================
 // EXPORTS
 // =============================================================================
-
-export type {
-  LunarPhase,
-  Retrograde,
-  Eclipse,
-  PlanetaryIngress,
-  SeasonalEvent,
-  SolarYearEvents,
-  MonthEvent,
-  MonthData,
-  MonthInterpretation,
-  EventCategory,
-  CategorizedEvent,
-  EventId,
-  EventInterpretationInput,
-  EventInterpretation,
-};
+// All types are already exported at their definition point above

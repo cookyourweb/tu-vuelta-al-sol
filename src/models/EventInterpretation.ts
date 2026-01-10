@@ -46,6 +46,8 @@ export interface IEventInterpretation extends Document {
   method: string;
   cached: boolean;
   lastModified?: Date;
+  createdAt?: Date; // Added by Mongoose timestamps
+  updatedAt?: Date; // Added by Mongoose timestamps
 
   // ✅ Instance methods
   isExpired(): boolean;
