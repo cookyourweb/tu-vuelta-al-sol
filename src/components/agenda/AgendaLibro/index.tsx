@@ -69,32 +69,7 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
         />
         <PaginaIntencion />
 
-        {/* 2. TU AÑO, TU VIAJE */}
-        <CartaBienvenida name={userName} />
-        <TemaCentralAnio />
-        <LoQueVieneAMover />
-        <LoQuePideSoltar />
-        <PaginaIntencionAnual />
-
-        {/* 3. SOUL CHART */}
-        <EsenciaNatal />
-        <NodoNorte />
-        <NodoSur />
-        <PlanetasDominantes />
-        <PatronesEmocionales />
-
-        {/* 4. RETORNO SOLAR */}
-        <QueEsRetornoSolar />
-        <AscendenteAnio />
-        <SolRetorno />
-        <LunaRetorno />
-        <EjesDelAnio />
-        <EjesDelAnio2 />
-        <IntegracionEjes />
-        <RitualCumpleanos />
-        <MantraAnual />
-
-        {/* Índice Completo del Libro */}
+        {/* 3. ÍNDICE - Tercera página del libro */}
         <div className="print-page bg-white p-10">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 mb-6 text-center">
@@ -194,6 +169,31 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
             </div>
           </div>
         </div>
+
+        {/* 2. TU AÑO, TU VIAJE */}
+        <CartaBienvenida name={userName} />
+        <TemaCentralAnio />
+        <LoQueVieneAMover />
+        <LoQuePideSoltar />
+        <PaginaIntencionAnual />
+
+        {/* 3. SOUL CHART */}
+        <EsenciaNatal />
+        <NodoNorte />
+        <NodoSur />
+        <PlanetasDominantes />
+        <PatronesEmocionales />
+
+        {/* 4. RETORNO SOLAR */}
+        <QueEsRetornoSolar />
+        <AscendenteAnio />
+        <SolRetorno />
+        <LunaRetorno />
+        <EjesDelAnio />
+        <EjesDelAnio2 />
+        <IntegracionEjes />
+        <RitualCumpleanos />
+        <MantraAnual />
 
       </div>
     </div>
