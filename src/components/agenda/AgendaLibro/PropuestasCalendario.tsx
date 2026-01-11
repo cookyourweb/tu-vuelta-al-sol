@@ -100,37 +100,37 @@ export const PropuestaCalendario1: React.FC = () => {
     { dia: 18, tipo: 'lunaNueva', nombre: 'Luna Nueva ●' },
     { dia: 26, tipo: 'ingreso', nombre: 'Neptuno → Aries' },
   ];
-  
+
   const { weeks, monthDate } = generarSemanasCalendario(1, 2026);
   const getEventoDelDia = (dia: number) => eventos.find(e => e.dia === dia);
 
   return (
-    <div className={`print-page bg-white p-8 flex flex-col ${config.pattern}`}>
+    <div className={`print-page bg-white p-6 flex flex-col ${config.pattern}`}>
       {/* Header minimalista */}
-      <div className="mb-6">
-        <h1 className={`text-4xl font-display ${config.titleGradient} tracking-tight`}>
-          ENERO 2026
+      <div className="mb-3">
+        <h1 className={`text-2xl font-display ${config.titleGradient} tracking-tight`}>
+          ENERO 2026 · PROPUESTA 1: MINIMALISTA
         </h1>
-        <p className={`text-sm ${config.iconSecondary} mt-1`}>
-          Ordenar tu energía antes de exigir resultados
+        <p className={`text-[10px] ${config.iconSecondary} mt-0.5`}>
+          Líneas limpias, eventos con barra de color lateral
         </p>
       </div>
 
       {/* Calendario Grid - Sin bordes exteriores */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex flex-col">
         {/* Días de la semana */}
-        <div className="grid grid-cols-7 border-b-2 border-gray-200 pb-2 mb-2">
+        <div className="grid grid-cols-7 border-b border-gray-300 pb-1 mb-1">
           {diasSemana.map((dia, idx) => (
             <div key={idx} className="text-center">
-              <span className={`text-xs font-bold ${config.iconSecondary} uppercase`}>
+              <span className={`text-[9px] font-bold ${config.iconSecondary} uppercase`}>
                 {dia}
               </span>
             </div>
           ))}
         </div>
 
-        {/* Semanas */}
-        <div className="flex-1 grid grid-rows-6">
+        {/* Semanas - 6 filas fijas */}
+        <div className="grid grid-rows-6 gap-0">
           {weeks.map((week, weekIdx) => (
             <div key={weekIdx} className="grid grid-cols-7 border-b border-gray-100 last:border-b-0">
               {week.map((day, dayIdx) => {
@@ -138,26 +138,26 @@ export const PropuestaCalendario1: React.FC = () => {
                 const dayNum = day.getDate();
                 const evento = isCurrentMonth ? getEventoDelDia(dayNum) : null;
                 const colors = evento ? getEventoColor(evento.tipo) : null;
-                
+
                 return (
                   <div
                     key={dayIdx}
                     className={`
-                      min-h-[70px] p-2 border-r border-gray-100 last:border-r-0
+                      h-[26mm] p-1 border-r border-gray-100 last:border-r-0
                       ${isCurrentMonth ? '' : 'opacity-30'}
                       ${evento ? colors?.bg : ''}
                     `}
                   >
-                    <div className="flex items-start gap-1">
+                    <div className="flex items-start gap-0.5 h-full">
                       {evento && (
-                        <div className={`w-1 h-8 ${colors?.accent} flex-shrink-0`} />
+                        <div className={`w-0.5 h-6 ${colors?.accent} flex-shrink-0`} />
                       )}
-                      <div className="flex-1">
-                        <span className={`text-lg font-bold ${evento ? colors?.text : 'text-gray-800'}`}>
+                      <div className="flex-1 min-w-0">
+                        <span className={`text-sm font-bold ${evento ? colors?.text : 'text-gray-800'} block`}>
                           {dayNum}
                         </span>
                         {evento && (
-                          <div className={`text-[10px] font-medium ${colors?.text} leading-tight mt-0.5`}>
+                          <div className={`text-[8px] font-medium ${colors?.text} leading-tight mt-0.5 truncate`}>
                             {evento.nombre}
                           </div>
                         )}
@@ -172,16 +172,14 @@ export const PropuestaCalendario1: React.FC = () => {
       </div>
 
       {/* Activaciones - Footer compacto */}
-      <div className="mt-4 pt-4 border-t border-gray-200">
-        <div className="flex items-center gap-2 mb-2">
-          <Flame className={`w-4 h-4 ${config.iconAccent}`} />
-          <span className={`text-xs font-bold uppercase ${config.iconAccent}`}>Lo que se activa</span>
+      <div className="mt-2 pt-2 border-t border-gray-200">
+        <div className="flex items-center gap-1 mb-1">
+          <Flame className={`w-3 h-3 ${config.iconAccent}`} />
+          <span className={`text-[9px] font-bold uppercase ${config.iconAccent}`}>Lo que se activa</span>
         </div>
-        <div className="grid grid-cols-4 gap-4 text-xs text-gray-600">
+        <div className="grid grid-cols-2 gap-2 text-[8px] text-gray-600">
           <div><strong className={config.iconPrimary}>Eje 4-10:</strong> Hogar vs Dirección</div>
           <div><strong className={config.iconPrimary}>Saturno-Urano:</strong> Cambios estables</div>
-          <div><strong className={config.iconPrimary}>Stellium Cap:</strong> Enfoque metas</div>
-          <div><strong className={config.iconPrimary}>Acuario 19:</strong> Nuevas perspectivas</div>
         </div>
       </div>
     </div>
@@ -198,44 +196,39 @@ export const PropuestaCalendario1: React.FC = () => {
 export const PropuestaCalendario2: React.FC = () => {
   const { config } = useStyle();
   const eventos: EventoMensual[] = [
-    { dia: 2, tipo: 'especial', nombre: 'Quirón Directo en Aries' },
-    { dia: 3, tipo: 'lunaLlena', nombre: 'Luna Llena en Cáncer' },
-    { dia: 18, tipo: 'lunaNueva', nombre: 'Luna Nueva en Capricornio' },
-    { dia: 26, tipo: 'ingreso', nombre: 'Neptuno entra en Aries' },
+    { dia: 2, tipo: 'especial', nombre: 'Quirón Directo' },
+    { dia: 3, tipo: 'lunaLlena', nombre: 'Luna Llena' },
+    { dia: 18, tipo: 'lunaNueva', nombre: 'Luna Nueva' },
+    { dia: 26, tipo: 'ingreso', nombre: 'Neptuno → Aries' },
   ];
-  
+
   const { weeks, monthDate } = generarSemanasCalendario(1, 2026);
   const getEventoDelDia = (dia: number) => eventos.find(e => e.dia === dia);
 
   return (
     <div className={`print-page bg-white p-6 flex flex-col ${config.pattern}`}>
       {/* Header editorial */}
-      <div className="flex items-baseline gap-4 mb-4 border-b-4 border-gray-900 pb-2">
-        <span className={`text-6xl font-display font-bold ${config.titleGradient}`}>01</span>
-        <div>
-          <h1 className="text-2xl font-display tracking-widest text-gray-900">ENERO</h1>
-          <p className="text-xs text-gray-500 uppercase tracking-wider">Dos Mil Veintiséis</p>
-        </div>
-        <div className="ml-auto text-right">
-          <p className={`text-sm italic ${config.iconSecondary}`}>
-            "Ordenar tu energía antes de exigir resultados"
-          </p>
+      <div className="flex items-baseline gap-2 mb-2 border-b-2 border-gray-900 pb-1">
+        <span className={`text-3xl font-display font-bold ${config.titleGradient}`}>01</span>
+        <div className="flex-1">
+          <h1 className="text-lg font-display tracking-widest text-gray-900">ENERO</h1>
+          <p className="text-[9px] text-gray-500 uppercase tracking-wider">Propuesta 2: Editorial</p>
         </div>
       </div>
 
       {/* Calendario Grid */}
-      <div className="flex-1">
+      <div>
         {/* Días de la semana */}
-        <div className="grid grid-cols-7 mb-1">
+        <div className="grid grid-cols-7 mb-0.5">
           {diasSemanaFull.map((dia, idx) => (
-            <div key={idx} className={`text-center py-1 ${idx >= 5 ? 'text-gray-400' : 'text-gray-700'}`}>
-              <span className="text-[10px] font-bold uppercase tracking-widest">{dia}</span>
+            <div key={idx} className={`text-center py-0.5 ${idx >= 5 ? 'text-gray-400' : 'text-gray-700'}`}>
+              <span className="text-[9px] font-bold uppercase tracking-widest">{dia}</span>
             </div>
           ))}
         </div>
 
         {/* Semanas */}
-        <div className="flex-1">
+        <div className="grid grid-rows-6 gap-0">
           {weeks.map((week, weekIdx) => (
             <div key={weekIdx} className="grid grid-cols-7">
               {week.map((day, dayIdx) => {
@@ -244,12 +237,12 @@ export const PropuestaCalendario2: React.FC = () => {
                 const evento = isCurrentMonth ? getEventoDelDia(dayNum) : null;
                 const colors = evento ? getEventoColor(evento.tipo) : null;
                 const isWeekend = dayIdx >= 5;
-                
+
                 return (
                   <div
                     key={dayIdx}
                     className={`
-                      h-[80px] p-1.5 relative
+                      h-[24mm] p-1 relative
                       ${isCurrentMonth ? '' : 'opacity-20'}
                     `}
                   >
@@ -260,18 +253,18 @@ export const PropuestaCalendario2: React.FC = () => {
                     
                     <div className="relative z-10">
                       <span className={`
-                        text-2xl font-light
+                        text-lg font-light
                         ${evento ? colors?.text : isWeekend ? 'text-gray-300' : 'text-gray-700'}
                       `}>
                         {dayNum}
                       </span>
-                      
+
                       {evento && (
                         <div className="mt-0.5">
-                          <div className={`flex items-center gap-1 ${colors?.text}`}>
-                            <IconoEvento tipo={evento.tipo} className="w-3 h-3" />
-                            <span className="text-[9px] font-bold leading-tight">
-                              {evento.nombre.split(' ').slice(0, 3).join(' ')}
+                          <div className={`flex items-center gap-0.5 ${colors?.text}`}>
+                            <IconoEvento tipo={evento.tipo} className="w-2.5 h-2.5" />
+                            <span className="text-[7px] font-bold leading-tight truncate">
+                              {evento.nombre.split(' ').slice(0, 2).join(' ')}
                             </span>
                           </div>
                         </div>
@@ -286,16 +279,16 @@ export const PropuestaCalendario2: React.FC = () => {
       </div>
 
       {/* Eventos detallados en footer */}
-      <div className="mt-3 grid grid-cols-4 gap-3">
+      <div className="mt-1.5 grid grid-cols-2 gap-1.5">
         {eventos.map((evento, idx) => {
           const colors = getEventoColor(evento.tipo);
           return (
-            <div key={idx} className={`p-2 ${colors.bg}`}>
-              <div className="flex items-center gap-1.5">
-                <span className={`text-lg font-bold ${colors.text}`}>{evento.dia}</span>
-                <IconoEvento tipo={evento.tipo} className={`w-4 h-4 ${colors.text}`} />
+            <div key={idx} className={`p-1 ${colors.bg}`}>
+              <div className="flex items-center gap-1">
+                <span className={`text-sm font-bold ${colors.text}`}>{evento.dia}</span>
+                <IconoEvento tipo={evento.tipo} className={`w-3 h-3 ${colors.text}`} />
               </div>
-              <p className={`text-[10px] font-medium ${colors.text} leading-tight`}>
+              <p className={`text-[8px] font-medium ${colors.text} leading-tight`}>
                 {evento.nombre}
               </p>
             </div>
@@ -326,33 +319,34 @@ export const PropuestaCalendario3: React.FC = () => {
   const getEventoDelDia = (dia: number) => eventos.find(e => e.dia === dia);
 
   return (
-    <div className={`print-page bg-white p-4 flex flex-col ${config.pattern}`}>
+    <div className={`print-page bg-white p-6 flex flex-col ${config.pattern}`}>
       {/* Header ultra-compacto */}
-      <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-300">
-        <h1 className={`text-3xl font-display font-bold ${config.titleGradient}`}>
-          ENERO 2026
-        </h1>
-        <div className="flex items-center gap-3 text-[10px]">
-          <span className="flex items-center gap-1"><span className="w-2 h-2 bg-amber-400"></span> Luna Llena</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 bg-indigo-400"></span> Luna Nueva</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 bg-teal-400"></span> Ingreso</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 bg-fuchsia-400"></span> Especial</span>
+      <div className="flex items-center justify-between mb-2 pb-1 border-b border-gray-300">
+        <div>
+          <h1 className={`text-xl font-display font-bold ${config.titleGradient}`}>
+            ENERO 2026
+          </h1>
+          <p className="text-[8px] text-gray-500">Propuesta 3: Funcional - Máximo espacio</p>
+        </div>
+        <div className="flex items-center gap-1.5 text-[8px]">
+          <span className="flex items-center gap-0.5"><span className="w-1.5 h-1.5 bg-amber-400"></span> Luna Llena</span>
+          <span className="flex items-center gap-0.5"><span className="w-1.5 h-1.5 bg-indigo-400"></span> Luna Nueva</span>
         </div>
       </div>
 
       {/* Calendario - Máximo espacio */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex flex-col">
         {/* Header días */}
         <div className="grid grid-cols-7">
           {diasSemana.map((dia, idx) => (
-            <div key={idx} className={`text-center py-1 text-[10px] font-bold text-gray-400 uppercase`}>
+            <div key={idx} className={`text-center py-0.5 text-[9px] font-bold text-gray-400 uppercase`}>
               {dia}
             </div>
           ))}
         </div>
 
         {/* Grid de días - Expandido */}
-        <div className="flex-1 grid grid-rows-6">
+        <div className="grid grid-rows-6 gap-0">
           {weeks.map((week, weekIdx) => (
             <div key={weekIdx} className="grid grid-cols-7 border-t border-gray-200 first:border-t-0">
               {week.map((day, dayIdx) => {
@@ -360,33 +354,33 @@ export const PropuestaCalendario3: React.FC = () => {
                 const dayNum = day.getDate();
                 const evento = isCurrentMonth ? getEventoDelDia(dayNum) : null;
                 const colors = evento ? getEventoColor(evento.tipo) : null;
-                
+
                 return (
                   <div
                     key={dayIdx}
                     className={`
-                      min-h-[85px] p-1 border-l border-gray-200 first:border-l-0
+                      h-[27mm] p-1 border-l border-gray-200 first:border-l-0
                       ${isCurrentMonth ? '' : 'bg-gray-50 opacity-40'}
                     `}
                   >
                     <div className="flex flex-col h-full">
                       {/* Número + evento en la misma línea */}
                       <div className="flex items-start justify-between">
-                        <span className={`text-base font-bold ${evento ? colors?.text : 'text-gray-800'}`}>
+                        <span className={`text-sm font-bold ${evento ? colors?.text : 'text-gray-800'}`}>
                           {dayNum}
                         </span>
                         {evento && (
-                          <div className={`w-2 h-2 ${colors?.accent}`} />
+                          <div className={`w-1.5 h-1.5 ${colors?.accent}`} />
                         )}
                       </div>
-                      
+
                       {/* Evento inline */}
                       {evento && (
-                        <div className={`text-[9px] font-bold ${colors?.text} mt-0.5 leading-tight`}>
+                        <div className={`text-[7px] font-bold ${colors?.text} mt-0.5 leading-tight truncate`}>
                           {evento.nombre}
                         </div>
                       )}
-                      
+
                       {/* Espacio para escribir */}
                       <div className="flex-1 mt-1">
                         <div className="h-full border-b border-dotted border-gray-200" />
@@ -401,9 +395,9 @@ export const PropuestaCalendario3: React.FC = () => {
       </div>
 
       {/* Footer minimal */}
-      <div className={`mt-2 pt-2 border-t border-gray-300 text-center`}>
-        <p className={`text-xs italic ${config.iconSecondary}`}>
-          ¿Desde dónde estoy arrancando: desde la exigencia o desde la coherencia?
+      <div className={`mt-1 pt-1 border-t border-gray-300 text-center`}>
+        <p className={`text-[9px] italic ${config.iconSecondary}`}>
+          Espacio amplio para escribir tus notas y tareas diarias
         </p>
       </div>
     </div>
@@ -440,50 +434,54 @@ export const PropuestaSemana1: React.FC = () => {
   );
 
   return (
-    <div className={`print-page bg-white p-6 flex flex-col h-full ${config.pattern}`}>
+    <div className={`print-page bg-white p-6 flex flex-col ${config.pattern}`}>
       {/* Header compacto */}
-      <div className="flex items-baseline justify-between mb-4 pb-2 border-b-2 border-gray-400">
-        <div className="flex items-baseline gap-3">
-          <span className={`text-xs font-bold uppercase tracking-widest ${config.iconSecondary}`}>FEBRERO 2026</span>
-          <h1 className={`text-xl font-display ${config.titleGradient}`}>Semana 2: 9-15 febrero</h1>
+      <div className="flex items-baseline justify-between mb-2 pb-1 border-b border-gray-400">
+        <div className="flex items-baseline gap-2">
+          <span className={`text-[9px] font-bold uppercase tracking-widest ${config.iconSecondary}`}>FEBRERO 2026</span>
+          <h1 className={`text-base font-display ${config.titleGradient}`}>Semana 2: 9-15 feb · Propuesta 1</h1>
         </div>
-        <p className={`text-xs italic ${config.iconSecondary}`}>Renacimiento Solar</p>
       </div>
 
-      {/* Grid de días - ocupa toda la página */}
-      <div className="flex-1 flex flex-col">
+      {/* Grid de días - 7 filas fijas */}
+      <div className="grid grid-rows-7 gap-0">
         {dias.map((dia, idx) => {
           const dayNum = dia.fecha.getDate();
           const dayName = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'][dia.fecha.getDay() === 0 ? 6 : dia.fecha.getDay() - 1];
           const colors = dia.evento ? getEventoColor(dia.evento.tipo) : null;
-          
+
           return (
             <div
               key={idx}
-              className={`flex-1 flex items-start border-b border-gray-200 last:border-b-0 min-h-[60px] ${colors ? colors.bg : ''}`}
+              className={`h-[25mm] flex items-start border-b border-gray-200 last:border-b-0 ${colors ? colors.bg : ''}`}
             >
               {/* Indicador lateral de color */}
-              {colors && <div className={`w-1 self-stretch ${colors.accent}`} />}
-              
+              {colors && <div className={`w-0.5 self-stretch ${colors.accent}`} />}
+
               {/* Fecha - alineada arriba */}
-              <div className={`w-14 pt-1.5 flex flex-col items-center ${colors ? '' : ''}`}>
-                <span className={`text-2xl font-bold leading-none ${colors ? colors.text : 'text-gray-800'}`}>{dayNum}</span>
-                <span className={`text-[9px] uppercase mt-0.5 ${colors ? colors.text : 'text-gray-400'}`}>{dayName}</span>
+              <div className={`w-10 pt-1 flex flex-col items-center ${colors ? '' : ''}`}>
+                <span className={`text-base font-bold leading-none ${colors ? colors.text : 'text-gray-800'}`}>{dayNum}</span>
+                <span className={`text-[7px] uppercase mt-0.5 ${colors ? colors.text : 'text-gray-400'}`}>{dayName}</span>
               </div>
-              
+
               {/* Contenido - alineado arriba con líneas */}
-              <div className="flex-1 pt-1.5 pr-2 flex flex-col h-full">
+              <div className="flex-1 pt-1 pr-1 flex flex-col h-full">
                 {dia.evento ? (
                   <>
-                    <div className="flex items-center gap-2 mb-1">
-                      <IconoEvento tipo={dia.evento.tipo} className={`w-4 h-4 ${colors?.text}`} />
-                      <span className={`text-sm font-bold ${colors?.text}`}>{dia.evento.titulo}</span>
-                      {dia.evento.tipo === 'cumpleanos' && <span className="text-sm">🌟</span>}
+                    <div className="flex items-center gap-1 mb-0.5">
+                      <IconoEvento tipo={dia.evento.tipo} className={`w-3 h-3 ${colors?.text}`} />
+                      <span className={`text-[10px] font-bold ${colors?.text}`}>{dia.evento.titulo}</span>
+                      {dia.evento.tipo === 'cumpleanos' && <span className="text-[10px]">🌟</span>}
                     </div>
-                    <LineasEscritura count={2} />
+                    <div className="flex-1">
+                      <div className="h-4 border-b border-gray-200" />
+                    </div>
                   </>
                 ) : (
-                  <LineasEscritura count={3} />
+                  <div className="flex-1 flex flex-col gap-1">
+                    <div className="h-4 border-b border-gray-200" />
+                    <div className="h-4 border-b border-gray-200" />
+                  </div>
                 )}
               </div>
             </div>
@@ -492,10 +490,10 @@ export const PropuestaSemana1: React.FC = () => {
       </div>
 
       {/* Footer con espacio para notas - más compacto */}
-      <div className="mt-3 pt-2 border-t border-gray-400">
-        <div className="flex items-center gap-2 mb-2">
-          <PenLine className={`w-3 h-3 ${config.iconSecondary}`} />
-          <span className={`text-[10px] font-bold uppercase tracking-wider ${config.iconSecondary}`}>Notas de la semana</span>
+      <div className="mt-1 pt-1 border-t border-gray-400">
+        <div className="flex items-center gap-1 mb-0.5">
+          <PenLine className={`w-2.5 h-2.5 ${config.iconSecondary}`} />
+          <span className={`text-[8px] font-bold uppercase tracking-wider ${config.iconSecondary}`}>Notas de la semana</span>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
