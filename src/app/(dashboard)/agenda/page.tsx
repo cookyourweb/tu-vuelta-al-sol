@@ -45,6 +45,8 @@ const AgendaPersonalizada = () => {
   const [loadingMonthlyEvents, setLoadingMonthlyEvents] = useState(false);
   const [loadingMonthName, setLoadingMonthName] = useState<string>('');
   const [isPreviousYear, setIsPreviousYear] = useState(false); // Detectar si vemos año anterior
+  const [isLastDayOfCycle, setIsLastDayOfCycle] = useState(false); // Último día del ciclo (cumpleaños)
+  const [isDayAfterBirthday, setIsDayAfterBirthday] = useState(false); // Primer día después del cumpleaños
 
   // Perfil de usuario REAL (no datos de prueba)
   const [userProfile, setUserProfile] = React.useState<UserProfile | null>(null);
@@ -176,6 +178,21 @@ const AgendaPersonalizada = () => {
       // (si el final del rango ya pasó, estamos viendo el año anterior)
       const isViewingPreviousYear = endDate < now && !forceNextYear;
       setIsPreviousYear(isViewingPreviousYear);
+
+      // 🎂 DETECTAR si HOY es el último día del ciclo (día del cumpleaños)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const endDateOnly = new Date(endDate);
+      endDateOnly.setHours(0, 0, 0, 0);
+      const isLastDay = today.getTime() === endDateOnly.getTime();
+      setIsLastDayOfCycle(isLastDay);
+
+      // 🎉 DETECTAR si HOY es el día DESPUÉS del cumpleaños
+      const dayAfter = new Date(endDate);
+      dayAfter.setDate(dayAfter.getDate() + 1);
+      dayAfter.setHours(0, 0, 0, 0);
+      const isDayAfter = today.getTime() === dayAfter.getTime();
+      setIsDayAfterBirthday(isDayAfter);
 
       setYearRange({ start: startDate, end: endDate });
 
@@ -1149,6 +1166,46 @@ const AgendaPersonalizada = () => {
             </div>
           </div>
         </div>
+
+        {/* 🎂 BANNER: ÚLTIMO DÍA DEL CICLO - Mostrar en el día del cumpleaños */}
+        {isLastDayOfCycle && yearRange && (
+          <div className="mb-8 bg-gradient-to-r from-purple-900/70 to-pink-900/70 border-2 border-pink-500/60 rounded-2xl p-6 backdrop-blur-sm shadow-2xl animate-pulse">
+            <div className="flex items-start gap-4">
+              <div className="text-4xl">🎂</div>
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold text-pink-200 mb-2 flex items-center gap-2">
+                  <span>✨</span>
+                  ¡Hoy es el Último Día de tu Retorno Solar!
+                </h3>
+                <p className="text-pink-100 leading-relaxed">
+                  Hoy culmina tu ciclo solar {yearRange.start.getFullYear()}-{yearRange.end.getFullYear()}.
+                  <br />
+                  <span className="text-yellow-200">Mañana comienza un <strong>nuevo año astrológico</strong> lleno de posibilidades. ¡Feliz cumpleaños! 🎉</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 🎉 BANNER: PRIMER DÍA DESPUÉS DEL CUMPLEAÑOS - Mostrar el día después del cumpleaños */}
+        {isDayAfterBirthday && yearRange && (
+          <div className="mb-8 bg-gradient-to-r from-yellow-900/70 to-orange-900/70 border-2 border-yellow-500/60 rounded-2xl p-6 backdrop-blur-sm shadow-2xl">
+            <div className="flex items-start gap-4">
+              <div className="text-4xl">🌟</div>
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold text-yellow-200 mb-2 flex items-center gap-2">
+                  <span>🎁</span>
+                  ¡Comienza tu Nuevo Año Solar!
+                </h3>
+                <p className="text-yellow-100 mb-4 leading-relaxed">
+                  Ayer fue tu cumpleaños y comenzó un nuevo ciclo solar.
+                  <br />
+                  <span className="text-white">Tu <strong>Agenda Astrológica {yearRange.end.getFullYear()}-{yearRange.end.getFullYear() + 1}</strong> está lista para este nuevo año lleno de oportunidades.</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ⚠️ BANNER: AÑO ANTERIOR - Mostrar cuando estamos viendo el año pasado del retorno solar */}
         {isPreviousYear && yearRange && (
