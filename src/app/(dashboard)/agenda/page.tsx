@@ -813,11 +813,12 @@ const AgendaPersonalizada = () => {
     loadYearEvents();
   }, [userProfile]);
 
-  // 🎂 Inicializar currentMonth al mes del cumpleaños cuando se calcula yearRange
+  // 📅 Inicializar currentMonth al MES ACTUAL (no al mes de cumpleaños)
   useEffect(() => {
     if (yearRange && yearRange.start) {
-      console.log('🎂 [AGENDA] Setting currentMonth to birthday month:', yearRange.start);
-      setCurrentMonth(yearRange.start);
+      const today = new Date();
+      console.log('📅 [AGENDA] Setting currentMonth to CURRENT month:', today);
+      setCurrentMonth(today);
     }
   }, [yearRange]);
 
@@ -1120,31 +1121,29 @@ const AgendaPersonalizada = () => {
                     <span className="text-yellow-400">🌞</span> Ciclo Solar: {yearRange.start.getFullYear()}-{yearRange.end.getFullYear()}
                   </div>
 
-                  {isPreviousYear && (
-                    <button
-                      onClick={() => {
-                        if (userProfile) {
-                          setEvents([]);
-                          setLoadedMonths(new Set());
-                          loadYearEvents(true);
-                        }
-                      }}
-                      disabled={loadingYearEvents}
-                      className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold py-1.5 px-4 rounded-full transition-all duration-300 shadow-lg hover:shadow-yellow-500/50 flex items-center gap-1.5"
-                    >
-                      {loadingYearEvents ? (
-                        <>
-                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
-                          <span>Cargando...</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>🔄</span>
-                          <span>Generar Nuevo Ciclo {new Date().getFullYear()}</span>
-                        </>
-                      )}
-                    </button>
-                  )}
+                  <button
+                    onClick={() => {
+                      if (userProfile) {
+                        setEvents([]);
+                        setLoadedMonths(new Set());
+                        loadYearEvents(true);
+                      }
+                    }}
+                    disabled={loadingYearEvents}
+                    className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold py-1.5 px-4 rounded-full transition-all duration-300 shadow-lg hover:shadow-yellow-500/50 flex items-center gap-1.5"
+                  >
+                    {loadingYearEvents ? (
+                      <>
+                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                        <span>Cargando...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>🔄</span>
+                        <span>Generar Nuevo Ciclo {new Date().getFullYear()}</span>
+                      </>
+                    )}
+                  </button>
                 </div>
               )}
             </div>
