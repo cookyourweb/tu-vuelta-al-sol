@@ -970,7 +970,8 @@ const AgendaPersonalizada = () => {
               '🌟 Celebra: tu existencia es un regalo para el universo'
             ],
             color: 'green',
-            mantra: 'Hoy nace un nuevo yo. Abrazo este ciclo con consciencia y gratitud.'
+            mantra: 'Hoy nace un nuevo yo. Abrazo este ciclo con consciencia y gratitud.',
+            showNewCycleButton: true
           }
         : {
             title: '🎂 ÚLTIMO DÍA DE TU RETORNO SOLAR',
@@ -1875,6 +1876,38 @@ const AgendaPersonalizada = () => {
                           "{(modalEvent as any).metadata.mantra}"
                         </p>
                       </div>
+
+                      {/* Botón generar nuevo ciclo (solo en primer día) */}
+                      {(modalEvent as any).metadata?.showNewCycleButton && (
+                        <div className="mt-6 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 border-2 border-yellow-400/40 rounded-2xl p-6 text-center">
+                          <h3 className="text-lg font-bold text-yellow-300 mb-3">
+                            🌅 ¿Listo para tu Nuevo Año Astrológico?
+                          </h3>
+                          <p className="text-white/90 text-sm mb-4 leading-relaxed">
+                            Genera los eventos del próximo ciclo solar ({yearRange.end.getFullYear()}-{yearRange.end.getFullYear() + 1}) para empezar a planificar tu nuevo año.
+                          </p>
+                          <button
+                            onClick={() => {
+                              loadYearEvents(true);
+                              closeEventModal();
+                            }}
+                            disabled={loadingYearEvents}
+                            className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-white font-bold py-3 px-6 rounded-full transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {loadingYearEvents ? (
+                              <span className="flex items-center gap-2">
+                                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                </svg>
+                                Generando...
+                              </span>
+                            ) : (
+                              '🔄 Generar Nuevo Ciclo Solar'
+                            )}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
 

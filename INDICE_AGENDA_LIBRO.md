@@ -1,479 +1,449 @@
-# 📖 ÍNDICE DE CONTENIDO - AGENDA ASTROLÓGICA PERSONALIZADA
+# 📖 ÍNDICE DEL LIBRO "TU VUELTA AL SOL" - Estructura Real del Código
 
+**Basado en**: `PrintableAgenda.tsx` (commit 33d1fc4)
 **Fecha**: 2026-01-11
-**Proyecto**: Tu Vuelta al Sol - Agenda Física
-**Versión**: 1.0.0
+**Fuente**: Código real del proyecto `libroagendapropuesta`
 
 ---
 
-## 📚 ESTRUCTURA COMPLETA DEL LIBRO
+## 📚 ESTRUCTURA COMPLETA
 
-Esta es la estructura del libro "Tu Vuelta al Sol - Agenda Astrológica Personalizada" que abarca de cumpleaños a cumpleaños (tu año solar completo).
+Esta es la estructura EXACTA del libro según el código `PrintableAgenda.tsx`.
 
 ---
 
-## 🌟 PARTE I: PORTAL DE ENTRADA
+## 🌟 PARTE I: PORTAL DE ENTRADA (2 páginas)
 
 ### 1. Portada Personalizada
-- **Contenido**: Nombre del usuario, fechas del ciclo solar
-- **Diseño**: Logo, gradientes cósmicos, información del año
-- **Propósito**: Presentación personalizada del libro
+**Componente**: `<PortadaPersonalizada name={name} startDate={startDate} endDate={endDate} />`
+- Nombre personalizado del usuario
+- Fechas del ciclo solar (cumpleaños a cumpleaños)
+- Diseño visual con logo y gradientes
 
 ### 2. Página de Intención
-- **Contenido**: Espacio para escribir la intención del año
-- **Diseño**: Página en blanco con guía suave
-- **Propósito**: Establecer el propósito del ciclo solar
+**Componente**: `<PaginaIntencion />`
+- Espacio en blanco para escribir tu intención del año
+- Prompt guía para reflexión
 
 ---
 
-## 🎯 PARTE II: TU AÑO, TU VIAJE
+## 🎯 PARTE II: TU AÑO, TU VIAJE (5 páginas)
 
 ### 3. Carta de Bienvenida
-- **Contenido**: Mensaje personalizado dirigido al usuario
-- **Propósito**: Introducción al año astrológico
+**Componente**: `<CartaBienvenida name={name} />`
+- Mensaje personalizado de bienvenida
+- Introducción al año astrológico
 
 ### 4. Tema Central del Año
-- **Contenido**: Tema principal basado en el Retorno Solar
-- **Propósito**: Comprender el foco del año
+**Componente**: `<TemaCentralAnio />`
+- Tema principal basado en el Retorno Solar
+- Qué energía domina este año
 
 ### 5. Lo Que Viene a Mover
-- **Contenido**: Áreas de cambio y transformación
-- **Propósito**: Preparar para los movimientos importantes
+**Componente**: `<LoQueVieneAMover />`
+- Áreas de transformación
+- Cambios que el año trae
 
 ### 6. Lo Que Pide Soltar
-- **Contenido**: Patrones, creencias o situaciones a liberar
-- **Propósito**: Soltar lo que ya no sirve
+**Componente**: `<LoQuePideSoltar />`
+- Patrones a liberar
+- Lo que hay que dejar ir
 
 ### 7. Página de Intención Anual
-- **Contenido**: Espacio para escribir intenciones específicas
-- **Propósito**: Concretar objetivos del año
+**Componente**: `<PaginaIntencionAnual />`
+- Espacio para intenciones específicas del año
 
 ---
 
-## 🌙 PARTE III: SOUL CHART (Carta Natal)
+## 🌙 PARTE III: SOUL CHART - Carta Natal (5 páginas)
 
 ### 8. Esencia Natal
-- **Contenido**: Sol, Luna y Ascendente natal
-- **Propósito**: Recordar tu identidad astrológica permanente
+**Componente**: `<EsenciaNatal />`
+- Sol, Luna y Ascendente natal
+- Tu identidad astrológica permanente
 
 ### 9. Nodo Norte
-- **Contenido**: Propósito de vida y dirección evolutiva
-- **Propósito**: Comprender hacia dónde vas
+**Componente**: `<NodoNorte />`
+- Propósito de vida
+- Dirección evolutiva
 
 ### 10. Nodo Sur
-- **Contenido**: Talentos innatos y patrones del pasado
-- **Propósito**: Reconocer lo que traes contigo
+**Componente**: `<NodoSur />`
+- Talentos innatos
+- Patrones del pasado
 
 ### 11. Planetas Dominantes
-- **Contenido**: Planetas más fuertes en tu carta
-- **Propósito**: Identificar tus superpoderes astrológicos
+**Componente**: `<PlanetasDominantes />`
+- Planetas más fuertes en tu carta
+- Tus superpoderes astrológicos
 
 ### 12. Patrones Emocionales
-- **Contenido**: Luna y aspectos emocionales
-- **Propósito**: Entender tu mundo interior
+**Componente**: `<PatronesEmocionales />`
+- Luna y aspectos emocionales
+- Tu mundo interior
 
 ---
 
-## ☀️ PARTE IV: RETORNO SOLAR (Año Actual)
+## ☀️ PARTE IV: RETORNO SOLAR - Año Actual (9 páginas)
 
 ### 13. ¿Qué es un Retorno Solar?
-- **Contenido**: Explicación del concepto
-- **Propósito**: Educación astrológica
+**Componente**: `<QueEsRetornoSolar />`
+- Explicación educativa del concepto
 
 ### 14. Ascendente del Año
-- **Contenido**: Ascendente del Retorno Solar
-- **Propósito**: Comprender la energía con la que te presentas este año
+**Componente**: `<AscendenteAnio />`
+- Ascendente del Retorno Solar
+- Cómo te presentas este año
 
 ### 15. Sol en el Retorno
-- **Contenido**: Casa y aspectos del Sol SR
-- **Propósito**: Foco principal del año
+**Componente**: `<SolRetorno />`
+- Casa y aspectos del Sol SR
+- Foco principal del año
 
 ### 16. Luna en el Retorno
-- **Contenido**: Casa y aspectos de la Luna SR
-- **Propósito**: Necesidades emocionales del año
+**Componente**: `<LunaRetorno />`
+- Casa y aspectos de la Luna SR
+- Necesidades emocionales del año
 
 ### 17. Ejes del Año (Parte 1)
-- **Contenido**: Eje Ascendente-Descendente
-- **Propósito**: Yo vs. Otro este año
+**Componente**: `<EjesDelAnio />`
+- Eje Ascendente-Descendente
+- Yo vs. Otro este año
 
 ### 18. Ejes del Año (Parte 2)
-- **Contenido**: Eje MC-IC
-- **Propósito**: Vocación vs. Hogar este año
+**Componente**: `<EjesDelAnio2 />`
+- Eje MC-IC
+- Vocación vs. Hogar este año
 
 ### 19. Integración de Ejes
-- **Contenido**: Cómo trabajar ambos ejes
-- **Propósito**: Síntesis de polaridades
+**Componente**: `<IntegracionEjes />`
+- Cómo trabajar ambos ejes
+- Síntesis de polaridades
 
 ### 20. Ritual de Cumpleaños
-- **Contenido**: Ritual personalizado para el día de tu cumpleaños
-- **Propósito**: Celebrar conscientemente el nuevo ciclo
+**Componente**: `<RitualCumpleanos />`
+- Ritual personalizado para tu cumpleaños
+- Cómo celebrar conscientemente
 
 ### 21. Mantra Anual
-- **Contenido**: Mantra personalizado para el año
-- **Propósito**: Frase que sintetiza tu año
+**Componente**: `<MantraAnual />`
+- Mantra personalizado para el año
+- Frase que sintetiza tu año
 
 ---
 
-## 📅 PARTE V: CALENDARIO ANUAL
+## 📅 PARTE V: CALENDARIO ANUAL (3 páginas)
 
 ### 22. Línea de Tiempo Emocional
-- **Contenido**: Gráfico visual del año completo
-- **Propósito**: Ver el año de un vistazo
+**Componente**: `<LineaTiempoEmocional startDate={startDate} endDate={endDate} />`
+- Gráfico visual del año completo
+- Vista panorámica del ciclo
 
 ### 23. Meses Clave y Puntos de Giro
-- **Contenido**: Meses más importantes del año
-- **Propósito**: Identificar momentos críticos
+**Componente**: `<MesesClaveYPuntosGiro />`
+- Meses más importantes
+- Momentos críticos del año
 
 ### 24. Grandes Aprendizajes
-- **Contenido**: Lecciones principales del año
-- **Propósito**: Preparar para el crecimiento
+**Componente**: `<GrandesAprendizajes />`
+- Lecciones principales del año
+- Qué vendrá a enseñarte
 
 ---
 
-## 📆 PARTE VI: LOS 12 MESES (Enero - Diciembre)
+## 📆 PARTE VI: EJEMPLO COMPLETO - ENERO 2026 (11 páginas)
 
-**NOTA**: El primer mes comienza en tu cumpleaños, no en enero. Por ejemplo, si tu cumpleaños es en julio, tu "Mes 1" será julio.
+**NOTA**: Este es un mes de EJEMPLO hardcodeado. En la implementación final, todos los meses seguirán esta estructura.
 
-### Estructura de Cada Mes (x12):
+### 25-26. Apertura de Enero (2 páginas)
+**Componentes**:
+- `<AperturaEneroIzquierda />` - Página izquierda con título del mes
+- `<AperturaEneroDerecha />` - Página derecha con eventos del mes
 
-#### A. Apertura del Mes (2 páginas)
-- **Página Izquierda**:
-  - Número y nombre del mes
-  - Frase inspiradora
-  - Evento principal del mes
-- **Página Derecha**:
-  - Lista de eventos del mes
-  - Lunas (Nueva y Llena)
-  - Tránsitos importantes
-  - Eclipses (si aplica)
+### 27. Calendario Visual de Enero
+**Componente**: `<CalendarioVisualEnero />`
+- Calendario mensual tradicional
+- Eventos marcados por día
 
-#### B. Calendario Visual del Mes
-- **Contenido**:
-  - Calendario mensual tradicional
-  - Marcadores de eventos en cada día
-  - Lunas marcadas visualmente
-  - Primer/último día del ciclo destacados (si aplica)
+### 28. Interpretación Luna Nueva Enero
+**Componente**: `<InterpretacionLunaNuevaEnero />`
+- Luna Nueva del 6 de enero (ejemplo)
+- Qué sembrar en esta luna
 
-#### C. Interpretación Luna Nueva
-- **Contenido**:
-  - Fecha y hora
-  - Signo zodiacal
-  - Casa natal activada
-  - Qué sembrar en esta luna
-  - Ritual personalizado
+### 29. Interpretación Luna Llena Enero
+**Componente**: `<InterpretacionLunaLlenaEnero />`
+- Luna Llena del 20 de enero (ejemplo)
+- Qué liberar en esta luna
 
-#### D. Interpretación Luna Llena
-- **Contenido**:
-  - Fecha y hora
-  - Signo zodiacal
-  - Casa natal activada
-  - Qué liberar en esta luna
-  - Ritual personalizado
+### 30. Ejercicios de Enero
+**Componente**: `<EjerciciosEnero />`
+- 3-5 ejercicios prácticos del mes
+- Journaling prompts
 
-#### E. Ejercicios del Mes
-- **Contenido**:
-  - 3-5 ejercicios prácticos
-  - Basados en los eventos del mes
-  - Journaling prompts
-  - Prácticas de meditación
+### 31. Mantra de Enero
+**Componente**: `<MantraEnero />`
+- Frase poderosa para el mes
 
-#### F. Mantra del Mes
-- **Contenido**:
-  - Frase poderosa para el mes
-  - Basada en las energías presentes
-  - Para repetir diariamente
+### 32-35. Semanas de Enero (4 páginas)
+**Componentes**:
+- `<Semana1Enero />` - Semana 1 (días 1-7)
+- `<Semana2Enero />` - Semana 2 (días 8-14)
+- `<Semana3Enero />` - Semana 3 (días 15-21)
+- `<Semana4Enero />` - Semana 4 (días 22-28/31)
 
-#### G. Las 4 Semanas del Mes
-
-**Estructura de Cada Semana** (repetida 4 veces):
-
-1. **Semana 1** (Días 1-7)
-   - Página de apertura
-   - 7 páginas de días individuales
-   - Cada día incluye:
-     - Fecha completa
-     - Eventos del día
-     - Espacio para notas
-     - Fase lunar
-     - Frase inspiradora
-
-2. **Semana 2** (Días 8-14)
-   - [Misma estructura]
-
-3. **Semana 3** (Días 15-21)
-   - [Misma estructura]
-
-4. **Semana 4** (Días 22-28/30/31)
-   - [Misma estructura]
-   - Incluye días extra si el mes tiene 29, 30 o 31 días
-
-#### H. Eventos Astrológicos Intercalados
-- **Luna Nueva** (cada 2 meses)
-- **Luna Llena** (cada 2 meses)
-- **Eclipses** (cuando ocurran en el año)
-  - Eclipse Solar
-  - Eclipse Lunar
-- **Mercurio Retrógrado** (3 veces al año aprox.)
-
-#### I. Integración Mensual
-- **Contenido**:
-  - Espacio para reflexionar sobre el mes
-  - Preguntas guía:
-    - ¿Qué aprendí este mes?
-    - ¿Qué logré?
-    - ¿Qué desafíos enfrenté?
-    - ¿Cómo me transformé?
-  - Gratitudes del mes
-
-#### J. Cierre del Mes
-- **Contenido**:
-  - Resumen visual
-  - Preparación para el mes siguiente
-  - Afirmación de cierre
+### 36. Cierre de Enero
+**Componente**: `<CierreEnero />`
+- Reflexión del mes
+- Preparación para febrero
 
 ---
 
-## 🎨 PARTE VII: TERAPIAS CREATIVAS
+## 📆 PARTE VII: RESTO DE MESES (Meses 2-12)
+
+**LOOP**: `months.slice(1).map((monthDate, monthIndex) => { ... })`
+
+Para cada uno de los 11 meses restantes (Febrero - Diciembre), se generan:
+
+### A. Portada del Mes
+**Componente**: `<PortadaMes monthDate={monthDate} monthNumber={actualMonthNumber} />`
+
+### B. Calendario Mensual Completo
+**Componente**: `<CalendarioMensualCompleto monthDate={monthDate} monthNumber={actualMonthNumber} birthday={birthday} />`
+
+### C. Días del Mes
+**Componente**: `<DiasDelMes monthDate={monthDate} monthNumber={actualMonthNumber} birthday={birthday} />`
+
+### D. Interpretación Mensual
+**Componente**: `<InterpretacionMensual monthDate={monthDate} monthNumber={actualMonthNumber} />`
+
+### E. Ritual y Mantra del Mes
+**Componente**: `<RitualYMantraMes monthDate={monthDate} monthNumber={actualMonthNumber} />`
+
+### F. Intención del Mes
+**Componente**: `<IntencionMes monthDate={monthDate} monthNumber={actualMonthNumber} />`
+
+### G. Semanas del Mes (4 páginas por mes)
+**LOOP**: `weeksInMonth.map((week, weekIdx) => { ... })`
+
+**Componente**: `<SemanaConsciente weekStart={week.weekStart} weekNumber={(actualMonthNumber * 4) + weekIdx + 1} />`
+
+Cada semana muestra:
+- 7 días individuales
+- Eventos de cada día
+- Espacio para notas
+
+### H. Eventos Lunares Intercalados
+Distribuidos cada 3 meses:
+- **Mes 2, 5, 8, 11**: `<PaginaLunaNueva />`
+- **Mes 3, 6, 9, 12**: `<PaginaLunaLlena />`
+- **Mes 4 solamente**: `<PaginaEclipse />`
+
+### I. Integración Mensual
+**Componente**: `<IntegracionMensual monthDate={monthDate} />`
+- Espacio para reflexión del mes
+- Preguntas guía
+
+**Total meses 2-12**: 11 meses × (6 componentes base + 4 semanas + eventos lunares + integración) = ~110 páginas aproximadamente
+
+---
+
+## 🎨 PARTE VIII: TERAPIAS CREATIVAS (4 páginas)
 
 ### 131. Escritura Terapéutica
-- **Contenido**: Ejercicios de journaling profundo
-- **Propósito**: Procesar emociones a través de la escritura
+**Componente**: `<EscrituraTerapeutica />`
+- Ejercicios de journaling profundo
 
 ### 132. Visualización
-- **Contenido**: Meditaciones guiadas visuales
-- **Propósito**: Conectar con tu futuro deseado
+**Componente**: `<Visualizacion />`
+- Meditaciones guiadas visuales
 
 ### 133. Ritual Simbólico
-- **Contenido**: Rituales para momentos clave
-- **Propósito**: Anclar intenciones con acciones físicas
+**Componente**: `<RitualSimbolico />`
+- Rituales para momentos clave
 
 ### 134. Trabajo Emocional
-- **Contenido**: Ejercicios de inteligencia emocional
-- **Propósito**: Sanar y transformar patrones
+**Componente**: `<TrabajoEmocional />`
+- Ejercicios de inteligencia emocional
 
 ---
 
-## 🌅 PARTE VIII: CIERRE DE CICLO
+## 🌅 PARTE IX: CIERRE DE CICLO (5 páginas)
 
 ### 135. Quién Era / Quién Soy
-- **Contenido**: Comparación antes/después del año
-- **Propósito**: Reconocer tu transformación
+**Componente**: `<QuienEraQuienSoy />`
+- Comparación antes/después del año
 
 ### 136. Preparación para la Próxima Vuelta
-- **Contenido**: Intenciones para el próximo ciclo
-- **Propósito**: Cerrar con consciencia, abrir con esperanza
+**Componente**: `<PreparacionProximaVuelta />`
+- Intenciones para el próximo ciclo
 
 ### 137. Carta de Cierre
-- **Contenido**: Carta del usuario a sí mismo
-- **Propósito**: Sellar el aprendizaje del año
+**Componente**: `<CartaCierre name={name} />`
+- Carta del usuario a sí mismo
 
 ### 138. Página Final en Blanco
-- **Contenido**: Espacio libre
-- **Propósito**: Lo que el usuario necesite
+**Componente**: `<PaginaFinalBlanca />`
+- Espacio libre
 
 ### 139. Contraportada
-- **Contenido**: Información final, créditos
-- **Propósito**: Cierre visual del libro
+**Componente**: `<Contraportada />`
+- Información final, créditos
 
 ---
 
-## 📏 ESPECIFICACIONES TÉCNICAS
+## 📊 RESUMEN ESTADÍSTICO
 
-### Formato de Impresión
-- **Tamaño**: A5 (148mm x 210mm)
-- **Orientación**: Vertical
-- **Márgenes**: Sin márgenes (sangrado completo)
-- **Páginas totales estimadas**: ~350-400 páginas (según eventos del año)
+### Páginas Totales Estimadas: ~350-400
 
-### Estilos Visuales (4 opciones)
-
-#### 1. Elegante
-- **Colores**: Dorado, negro, blanco
-- **Fuentes**: Serif clásicas
-- **Estilo**: Sofisticado, minimalista
-
-#### 2. Creativo
-- **Colores**: Púrpura, rosa, amarillo
-- **Fuentes**: Mix serif/sans-serif
-- **Estilo**: Vibrante, artístico
-
-#### 3. Minimalista
-- **Colores**: Grises, negro, blanco
-- **Fuentes**: Sans-serif limpias
-- **Estilo**: Simple, zen
-
-#### 4. Bohemio
-- **Colores**: Tierra, ocre, terracota
-- **Fuentes**: Script decorativas
-- **Estilo**: Orgánico, natural
+**Desglose**:
+- Portal de Entrada: 2 páginas
+- Tu Año Tu Viaje: 5 páginas
+- Soul Chart: 5 páginas
+- Retorno Solar: 9 páginas
+- Calendario Anual: 3 páginas
+- Ejemplo Enero: 11 páginas
+- Resto de meses (11): ~110 páginas
+- Terapias Creativas: 4 páginas
+- Cierre de Ciclo: 5 páginas
+- **Eventos lunares intercalados**: ~15 páginas adicionales
+- **Semanas detalladas**: ~200 páginas (4 semanas × 12 meses × ~4 páginas/semana)
 
 ---
 
-## 🎯 DÍAS ESPECIALES DESTACADOS
+## 🔧 IMPLEMENTACIÓN TÉCNICA
 
-### Primer Día del Ciclo (Tu Cumpleaños - Inicio)
-**Marcador Visual**: Badge verde "🌱 Inicio"
+### Sistema de Generación de Meses
 
-**Al hacer clic, se muestra**:
-- **Título**: "PRIMER DÍA DE TU RETORNO SOLAR"
-- **Descripción**: Explicación del inicio del ciclo
-- **Pautas**:
-  - ✨ Establecer intenciones para el año
-  - 🎯 Definir manifestaciones
-  - 🔮 Realizar ritual de cumpleaños consciente
-  - 📝 Revisar Carta de Retorno Solar
-  - 🌟 Celebrar tu existencia
-- **Mantra**: "Hoy nace un nuevo yo. Abrazo este ciclo con consciencia y gratitud."
+```typescript
+// Generate months from birthday to next birthday
+const generateMonths = () => {
+  const months: Date[] = [];
+  let currentMonth = startOfMonth(startDate);
+  while (isBefore(currentMonth, endDate)) {
+    months.push(currentMonth);
+    currentMonth = addMonths(currentMonth, 1);
+  }
+  return months.slice(0, 12);
+};
+```
 
-### Último Día del Ciclo (Día antes de tu cumpleaños - Final)
-**Marcador Visual**: Badge rosa "🎂 Final"
+### Sistema de Generación de Semanas
 
-**Al hacer clic, se muestra**:
-- **Título**: "ÚLTIMO DÍA DE TU RETORNO SOLAR"
-- **Descripción**: Explicación del cierre del ciclo
-- **Pautas**:
-  - 🙏 Agradecer todo lo vivido
-  - 💭 Reflexionar sobre aprendizajes
-  - 🔥 Realizar ritual de cierre simbólico
-  - 📔 Leer diario del año
-  - 🌙 Prepararse para el nuevo ciclo
-- **Mantra**: "Cierro este ciclo con amor. Honro mi camino y me preparo para renacer."
+```typescript
+// Generate weeks for each month
+const generateWeeksForMonth = (monthDate: Date) => {
+  const weeks: { weekStart: Date; weekNumber: number }[] = [];
+  const monthStart = startOfMonth(monthDate);
+  const monthEnd = addMonths(monthStart, 1);
+  let currentWeek = startOfWeek(monthStart, { weekStartsOn: 1 });
+  let weekNum = 1;
 
----
-
-## 📊 CONTENIDO PERSONALIZADO vs GENÉRICO
-
-### ✅ Contenido Personalizado (Basado en tus datos reales)
-
-1. **Carta Natal**:
-   - Posiciones planetarias exactas
-   - Aspectos específicos
-   - Casas activadas
-
-2. **Retorno Solar**:
-   - Carta del año actual
-   - Comparación natal vs. SR
-   - Planetas individuales del año
-
-3. **Eventos del Año**:
-   - Lunas Nuevas y Llenas en TUS casas
-   - Tránsitos activando TUS planetas natales
-   - Eclipses en TUS ejes
-
-4. **Interpretaciones IA**:
-   - Textos generados con tu carta natal
-   - Consejos específicos para ti
-   - Mantras personalizados
-
-### 🟡 Contenido Semi-Personalizado
-
-1. **Eventos Universales**:
-   - Fechas de Lunas (iguales para todos)
-   - Fechas de retrogradaciones
-   - Fechas de ingresos planetarios
-
-2. **Estructura del Libro**:
-   - Organización de secciones
-   - Ejercicios terapéuticos generales
-
-### 🔴 Contenido Genérico (Educativo)
-
-1. **Explicaciones Astrológicas**:
-   - ¿Qué es un Retorno Solar?
-   - Significados de casas
-   - Conceptos básicos
-
-2. **Terapias Creativas**:
-   - Ejercicios de journaling
-   - Visualizaciones guiadas
-   - Rituales generales
+  while (isBefore(currentWeek, monthEnd)) {
+    weeks.push({ weekStart: currentWeek, weekNumber: weekNum });
+    currentWeek = addWeeks(currentWeek, 1);
+    weekNum++;
+  }
+  return weeks.slice(0, 4);
+};
+```
 
 ---
 
-## 🎁 EXTRAS Y FUNCIONALIDADES
+## 🎨 ESTILOS VISUALES
 
-### Funcionalidades de la Agenda Digital
-- **Cambio de estilo**: 4 temas visuales intercambiables
-- **Impresión**: Generación de PDF listo para imprenta
-- **Navegación**: Saltos directos a meses/semanas
-- **Búsqueda**: Encontrar eventos específicos
-- **Exportación**: Guardar como PDF personalizado
+El libro tiene **4 estilos intercambiables** (StyleContext):
 
-### Funcionalidades de la Agenda en App
-- **Notificaciones**: Avisos de eventos importantes
-- **Sincronización**: Acceso desde múltiples dispositivos
-- **Actualización**: Nuevos eventos se agregan automáticamente
-- **Interpretaciones**: Generación de textos personalizados con IA
-- **Calendario interactivo**: Click en días para ver detalles
-- **Navegación por meses**: Botones para avanzar/retroceder
+1. **Elegante**: Dorado, negro, serif clásicas
+2. **Creativo**: Púrpura, rosa, amarillo, mix de fuentes
+3. **Minimalista**: Grises, negro, sans-serif limpias
+4. **Bohemio**: Tierra, ocre, terracota, script decorativas
 
 ---
 
-## 📝 NOTAS DE USO
+## 📏 ESPECIFICACIONES DE IMPRESIÓN
 
-### Para Imprimir el Libro Físico
+```css
+@media print {
+  @page {
+    size: A5;
+    margin: 0;
+  }
 
-1. **Preparación**:
-   - Abrir agenda en navegador
-   - Seleccionar estilo visual preferido
-   - Click en "Imprimir Libro"
-
-2. **Configuración de Impresión**:
-   - Tamaño: A5
-   - Orientación: Vertical
-   - Márgenes: Ninguno
-   - Calidad: Alta (600 dpi o más)
-
-3. **Opciones de Encuadernación**:
-   - Espiral metálico (recomendado)
-   - Anillas
-   - Encuadernación térmica
-   - Cosido japonés
-
-### Para Usar la Agenda Digital
-
-1. **Acceso**: `https://www.tuvueltaalsol.es/agenda`
-2. **Login**: Con tu cuenta de Firebase
-3. **Navegación**:
-   - Calendario interactivo
-   - Botones mes anterior/siguiente
-   - Click en días para ver eventos
-   - Click en eventos para interpretación
-4. **Exportación**: Botón "Descargar PDF" en sidebar
+  .print-page {
+    page-break-after: always;
+    width: 148mm;
+    height: 210mm;
+  }
+}
+```
 
 ---
 
-## 🔄 ACTUALIZACIONES Y MANTENIMIENTO
+## 🔄 IMPORTACIONES DEL CÓDIGO
 
-### Contenido que se Actualiza Automáticamente
+```typescript
+// Portal de Entrada
+import { PortadaPersonalizada, PaginaIntencion } from "./agenda/PortalEntrada";
 
-- **Eventos astrológicos**: Calculados dinámicamente
-- **Interpretaciones IA**: Generadas según tu carta actual
-- **Fases lunares**: Actualizadas en tiempo real
+// Tu Año Tu Viaje
+import { CartaBienvenida, TemaCentralAnio, LoQueVieneAMover, LoQuePideSoltar, PaginaIntencionAnual } from "./agenda/TuAnioTuViaje";
 
-### Contenido Estático
+// Soul Chart
+import { EsenciaNatal, NodoNorte, NodoSur, PlanetasDominantes, PatronesEmocionales } from "./agenda/SoulChart";
 
-- **Carta Natal**: Permanece igual toda la vida
-- **Retorno Solar**: Se actualiza cada año en tu cumpleaños
-- **Estructura del libro**: Fija (139 secciones)
+// Retorno Solar
+import { QueEsRetornoSolar, AscendenteAnio, SolRetorno, LunaRetorno, EjesDelAnio, EjesDelAnio2, IntegracionEjes, RitualCumpleanos, MantraAnual } from "./agenda/RetornoSolar";
+
+// Calendario Anual
+import { LineaTiempoEmocional, MesesClaveYPuntosGiro, GrandesAprendizajes } from "./agenda/CalendarioAnual";
+
+// Mes Pages
+import { PortadaMes, CalendarioMensualCompleto, DiasDelMes, InterpretacionMensual, RitualYMantraMes, IntencionMes } from "./agenda/MesPage";
+
+// Ejemplo completo Enero 2026
+import {
+  AperturaEneroIzquierda,
+  AperturaEneroDerecha,
+  CalendarioVisualEnero,
+  InterpretacionLunaNuevaEnero,
+  InterpretacionLunaLlenaEnero,
+  EjerciciosEnero,
+  MantraEnero,
+  Semana1Enero,
+  Semana2Enero,
+  Semana3Enero,
+  Semana4Enero,
+  CierreEnero
+} from "./agenda/EjemploEnero2026";
+
+// Semanas
+import { SemanaConsciente } from "./agenda/SemanaConsciente";
+
+// Eventos Astrológicos
+import { PaginaLunaNueva, PaginaLunaLlena, PaginaEclipse } from "./agenda/EventosAstrologicos";
+
+// Terapias Creativas
+import { EscrituraTerapeutica, Visualizacion, RitualSimbolico, TrabajoEmocional } from "./agenda/TerapiasCreativas";
+
+// Integración
+import { IntegracionMensual } from "./agenda/IntegracionMensual";
+
+// Cierre
+import { QuienEraQuienSoy, PreparacionProximaVuelta, CartaCierre, PaginaFinalBlanca, Contraportada } from "./agenda/CierreCiclo";
+```
 
 ---
 
-## 📞 SOPORTE Y AYUDA
+## 📝 NOTAS IMPORTANTES
 
-**Para preguntas sobre**:
-- Cómo imprimir tu agenda → Ver sección "Notas de Uso"
-- Qué significa cada sección → Buscar en este índice
-- Cómo usar la agenda digital → Ver "Funcionalidades de la Agenda en App"
-- Personalización adicional → Contactar soporte en la web
-
----
-
-**Documento creado**: 2026-01-11
-**Basado en**: PrintableAgenda.tsx v1.0
-**Mantenido por**: Claude Code Sessions
-**Proyecto**: Tu Vuelta al Sol (www.tuvueltaalsol.es)
+1. **Primer mes**: Siempre empieza en tu cumpleaños, no en enero
+2. **Ejemplo hardcodeado**: Enero 2026 es solo ejemplo, la implementación final debe generar dinámicamente todos los meses
+3. **Semanas**: 4 semanas por mes (simplificado, algunos meses tienen 5)
+4. **Eventos lunares**: Distribuidos estratégicamente cada 2-3 meses
+5. **Personalización**: Nombre, fechas y datos del usuario se inyectan dinámicamente
 
 ---
 
-**✨ Este índice sirve como mapa completo de tu Agenda Astrológica Personalizada ✨**
+**Este es el índice REAL basado en el código fuente actual.**
+**Última actualización**: 2026-01-11
+**Fuente**: `libroagendapropuesta/src/components/PrintableAgenda.tsx`
