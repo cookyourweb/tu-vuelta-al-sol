@@ -1355,6 +1355,10 @@ const AgendaPersonalizada = () => {
                       const isToday = isSameDay(day.date, new Date());
                       const isSelected = selectedDate && isSameDay(day.date, selectedDate);
 
+                      // 🎂 Detectar primer y último día del ciclo solar
+                      const isFirstDayOfCycle = yearRange && isSameDay(day.date, yearRange.start);
+                      const isLastDayOfCycle = yearRange && isSameDay(day.date, yearRange.end);
+
                       return (
                         <div
                           key={index}
@@ -1362,7 +1366,11 @@ const AgendaPersonalizada = () => {
                           className={`
                             relative min-h-[80px] lg:min-h-[100px] p-2 cursor-pointer transition-all duration-300 border-r border-b border-purple-400/20 last:border-r-0 group
                             ${day.isCurrentMonth
-                              ? isToday
+                              ? isFirstDayOfCycle
+                                ? 'bg-gradient-to-br from-green-600/30 to-emerald-600/30 border-2 border-green-400/60 shadow-lg shadow-green-500/30'
+                                : isLastDayOfCycle
+                                ? 'bg-gradient-to-br from-pink-600/30 to-rose-600/30 border-2 border-pink-400/60 shadow-lg shadow-pink-500/30'
+                                : isToday
                                 ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-2 border-yellow-400/50 shadow-lg shadow-yellow-500/20'
                                 : isSelected
                                 ? 'bg-gradient-to-br from-purple-500/30 to-pink-500/30 border-2 border-purple-400/60'
@@ -1371,10 +1379,22 @@ const AgendaPersonalizada = () => {
                             }
                           `}
                         >
+                          {/* Badge para primer/último día */}
+                          {isFirstDayOfCycle && (
+                            <div className="absolute -top-1 -left-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full shadow-lg z-10">
+                              🌱 Inicio
+                            </div>
+                          )}
+                          {isLastDayOfCycle && (
+                            <div className="absolute -top-1 -left-1 bg-gradient-to-r from-pink-500 to-rose-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full shadow-lg z-10">
+                              🎂 Final
+                            </div>
+                          )}
+
                           {/* Número del día */}
                           <div className={`
                             text-sm font-bold mb-1
-                            ${isToday ? 'text-yellow-300' : day.isCurrentMonth ? 'text-white' : 'text-gray-500'}
+                            ${isFirstDayOfCycle ? 'text-green-300' : isLastDayOfCycle ? 'text-pink-300' : isToday ? 'text-yellow-300' : day.isCurrentMonth ? 'text-white' : 'text-gray-500'}
                           `}>
                             {day.date.getDate()}
                           </div>
