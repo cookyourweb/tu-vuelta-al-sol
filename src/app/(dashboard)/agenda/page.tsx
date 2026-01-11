@@ -950,6 +950,58 @@ const AgendaPersonalizada = () => {
   const handleDayClick = (day: AstronomicalDay) => {
     setSelectedDate(day.date);
     setSelectedDayEvents(day.events);
+
+    // 🎂 Detectar si es el primer o último día del ciclo solar
+    const isFirstDay = yearRange && isSameDay(day.date, yearRange.start);
+    const isLastDay = yearRange && isSameDay(day.date, yearRange.end);
+
+    // Mostrar mensaje especial para días clave del ciclo
+    if (isFirstDay || isLastDay) {
+      const specialMessage = isFirstDay
+        ? {
+            title: '🌱 PRIMER DÍA DE TU RETORNO SOLAR',
+            subtitle: `Inicio de tu ciclo ${yearRange.start.getFullYear()}-${yearRange.end.getFullYear()}`,
+            description: `Hoy es tu cumpleaños y comienza un nuevo año astrológico para ti. Este es el día en que el Sol regresa a la posición exacta que tenía cuando naciste.`,
+            guidance: [
+              '✨ Este es el momento perfecto para establecer tus intenciones para el año',
+              '🎯 Define qué quieres manifestar en este nuevo ciclo solar',
+              '🔮 Realiza un ritual de cumpleaños consciente: enciende una vela, escribe tus deseos',
+              '📝 Revisa tu Carta de Retorno Solar para entender las energías del año',
+              '🌟 Celebra: tu existencia es un regalo para el universo'
+            ],
+            color: 'green',
+            mantra: 'Hoy nace un nuevo yo. Abrazo este ciclo con consciencia y gratitud.'
+          }
+        : {
+            title: '🎂 ÚLTIMO DÍA DE TU RETORNO SOLAR',
+            subtitle: `Culminación de tu ciclo ${yearRange.start.getFullYear()}-${yearRange.end.getFullYear()}`,
+            description: `Hoy cierra tu año astrológico. Mañana será tu cumpleaños y comenzará un nuevo ciclo solar.`,
+            guidance: [
+              '🙏 Agradece todo lo vivido en este ciclo: aprendizajes, personas, experiencias',
+              '💭 Reflexiona: ¿Qué llegó a mi vida? ¿Qué se transformó? ¿Qué solté?',
+              '🔥 Realiza un ritual de cierre: escribe lo que dejas ir y quémalo simbólicamente',
+              '📔 Lee tu diario del año para ver tu evolución',
+              '🌙 Prepárate para tu nuevo retorno solar con apertura y claridad'
+            ],
+            color: 'pink',
+            mantra: 'Cierro este ciclo con amor. Honro mi camino y me preparo para renacer.'
+          };
+
+      // Agregar evento especial al array de eventos del día
+      const specialEvent = {
+        id: `special-${day.date.getTime()}`,
+        date: day.date.toISOString(),
+        type: 'special_day' as const,
+        title: specialMessage.title,
+        description: specialMessage.description,
+        priority: 'high' as const,
+        metadata: specialMessage
+      };
+
+      // Abrir modal con el evento especial
+      setModalEvent(specialEvent as any);
+      setShowEventModal(true);
+    }
   };
 
   // Modal handlers (reemplaza tooltip)
@@ -1768,14 +1820,74 @@ const AgendaPersonalizada = () => {
 
                 {/* Contenido del modal con scroll */}
                 <div className="p-6 max-h-[60vh] overflow-y-auto">
-                  {/* Descripción */}
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
-                      <span className="text-purple-300 mr-2">📝</span>
-                      Descripción del Evento
-                    </h3>
-                    <p className="text-gray-200 leading-relaxed">{modalEvent.description}</p>
-                  </div>
+                  {/* 🎂 SECCIÓN ESPECIAL: Primer/Último Día del Ciclo Solar */}
+                  {(modalEvent as any).metadata?.guidance && (
+                    <div className={`mb-6 bg-gradient-to-br ${
+                      (modalEvent as any).metadata.color === 'green'
+                        ? 'from-green-600/20 to-emerald-600/20 border-green-400/40'
+                        : 'from-pink-600/20 to-rose-600/20 border-pink-400/40'
+                    } border-2 rounded-3xl p-6`}>
+                      {/* Subtítulo */}
+                      <div className="text-center mb-4">
+                        <p className="text-lg font-semibold text-white/90">
+                          {(modalEvent as any).metadata.subtitle}
+                        </p>
+                      </div>
+
+                      {/* Descripción */}
+                      <div className="mb-6">
+                        <p className="text-white/90 leading-relaxed text-center">
+                          {(modalEvent as any).metadata.description}
+                        </p>
+                      </div>
+
+                      {/* Pautas / Guía */}
+                      <div className="bg-black/20 rounded-2xl p-5 mb-5">
+                        <h3 className={`text-lg font-bold mb-4 flex items-center ${
+                          (modalEvent as any).metadata.color === 'green' ? 'text-green-300' : 'text-pink-300'
+                        }`}>
+                          <span className="mr-2">🌟</span>
+                          PAUTAS PARA ESTE DÍA SAGRADO
+                        </h3>
+                        <div className="space-y-3">
+                          {(modalEvent as any).metadata.guidance.map((guide: string, index: number) => (
+                            <div key={index} className="flex items-start gap-3">
+                              <div className={`min-w-[8px] h-[8px] rounded-full mt-2 ${
+                                (modalEvent as any).metadata.color === 'green' ? 'bg-green-400' : 'bg-pink-400'
+                              }`} />
+                              <p className="text-white/90 leading-relaxed">{guide}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Mantra especial */}
+                      <div className={`bg-gradient-to-r ${
+                        (modalEvent as any).metadata.color === 'green'
+                          ? 'from-green-500/20 to-emerald-500/20 border-green-400/30'
+                          : 'from-pink-500/20 to-rose-500/20 border-pink-400/30'
+                      } border-2 rounded-2xl p-5 text-center`}>
+                        <h3 className="text-md font-semibold text-white/80 mb-2 flex items-center justify-center">
+                          <span className="mr-2">🙏</span>
+                          MANTRA PARA HOY
+                        </h3>
+                        <p className="text-white text-lg font-medium italic leading-relaxed">
+                          "{(modalEvent as any).metadata.mantra}"
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Descripción (solo si NO es un día especial) */}
+                  {!(modalEvent as any).metadata?.guidance && (
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
+                        <span className="text-purple-300 mr-2">📝</span>
+                        Descripción del Evento
+                      </h3>
+                      <p className="text-gray-200 leading-relaxed">{modalEvent.description}</p>
+                    </div>
+                  )}
 
                   {/* Interpretación personalizada */}
                   {modalEvent.aiInterpretation && (
