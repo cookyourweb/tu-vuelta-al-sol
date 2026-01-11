@@ -531,43 +531,43 @@ export const PropuestaSemana2: React.FC = () => {
   ];
 
   return (
-    <div className={`print-page bg-white p-5 flex flex-col ${config.pattern}`}>
+    <div className={`print-page bg-white p-6 flex flex-col ${config.pattern}`}>
       {/* Header */}
-      <div className="text-center mb-3 pb-2 border-b-2 border-gray-800">
-        <div className={`text-xs font-bold uppercase tracking-[0.3em] ${config.iconSecondary}`}>FEBRERO</div>
-        <h1 className={`text-3xl font-display ${config.titleGradient}`}>Semana 2</h1>
-        <p className="text-sm text-gray-500">9 - 15 febrero 2026</p>
+      <div className="text-center mb-2 pb-1 border-b border-gray-800">
+        <div className={`text-[9px] font-bold uppercase tracking-[0.3em] ${config.iconSecondary}`}>FEBRERO</div>
+        <h1 className={`text-lg font-display ${config.titleGradient}`}>Semana 2 · Propuesta 2</h1>
+        <p className="text-[9px] text-gray-500">9 - 15 febrero 2026</p>
       </div>
 
       {/* 2 columnas */}
-      <div className="flex-1 grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-5 gap-2">
         {/* Columna izquierda - 3/5 */}
-        <div className="col-span-3 flex flex-col">
+        <div className="col-span-3 grid grid-rows-7 gap-0">
           {dias.map((dia, idx) => {
             const dayNum = dia.fecha.getDate();
             const dayName = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'][dia.fecha.getDay() === 0 ? 6 : dia.fecha.getDay() - 1];
             const colors = dia.evento ? getEventoColor(dia.evento.tipo) : null;
-            
+
             return (
               <div
                 key={idx}
-                className={`flex-1 flex border-b border-gray-100 last:border-b-0 ${colors ? colors.bg : ''}`}
+                className={`h-[24mm] flex border-b border-gray-100 last:border-b-0 ${colors ? colors.bg : ''}`}
               >
                 {/* Barra de color */}
-                {colors && <div className={`w-1.5 ${colors.accent}`} />}
-                
+                {colors && <div className={`w-1 ${colors.accent}`} />}
+
                 {/* Fecha y día */}
-                <div className="w-20 py-2 px-2 flex items-center gap-2">
-                  <span className={`text-xl font-bold ${colors ? colors.text : 'text-gray-800'}`}>{dayNum}</span>
-                  <span className={`text-[9px] uppercase ${colors ? colors.text : 'text-gray-400'}`}>{dayName.slice(0,3)}</span>
+                <div className="w-16 py-1 px-1 flex items-center gap-1">
+                  <span className={`text-base font-bold ${colors ? colors.text : 'text-gray-800'}`}>{dayNum}</span>
+                  <span className={`text-[7px] uppercase ${colors ? colors.text : 'text-gray-400'}`}>{dayName.slice(0,3)}</span>
                 </div>
-                
+
                 {/* Evento o línea para escribir */}
-                <div className="flex-1 py-2 pr-2 flex items-center">
+                <div className="flex-1 py-1 pr-1 flex items-center">
                   {dia.evento ? (
-                    <div className="flex items-center gap-2">
-                      <IconoEvento tipo={dia.evento.tipo} className={`w-4 h-4 ${colors?.text}`} />
-                      <span className={`text-sm font-bold ${colors?.text}`}>{dia.evento.titulo}</span>
+                    <div className="flex items-center gap-1">
+                      <IconoEvento tipo={dia.evento.tipo} className={`w-3 h-3 ${colors?.text}`} />
+                      <span className={`text-[9px] font-bold ${colors?.text}`}>{dia.evento.titulo}</span>
                     </div>
                   ) : (
                     <div className="w-full border-b border-dotted border-gray-300" />
@@ -579,24 +579,22 @@ export const PropuestaSemana2: React.FC = () => {
         </div>
 
         {/* Columna derecha - 2/5 */}
-        <div className="col-span-2 flex flex-col gap-3">
+        <div className="col-span-2 flex flex-col gap-2">
           {/* Propósito */}
-          <div className={`${config.highlightPrimary} p-3`}>
-            <h3 className={`text-[10px] font-bold uppercase ${config.iconPrimary} mb-1`}>Propósito de la semana</h3>
-            <p className="text-xs text-gray-700 italic">Renacimiento Solar. Tu nuevo ciclo personal comienza.</p>
+          <div className={`${config.highlightPrimary} p-2`}>
+            <h3 className={`text-[8px] font-bold uppercase ${config.iconPrimary} mb-0.5`}>Propósito de la semana</h3>
+            <p className="text-[9px] text-gray-700 italic leading-tight">Renacimiento Solar. Tu nuevo ciclo personal comienza.</p>
           </div>
-          
+
           {/* Eventos */}
-          <div className={`${config.highlightSecondary} p-3`}>
-            <h3 className={`text-[10px] font-bold uppercase ${config.iconSecondary} mb-2`}>Eventos activos</h3>
-            <div className="space-y-2 text-xs">
-              <div className={`p-2 ${getEventoColor('cumpleanos').bg}`}>
-                <span className={`font-bold ${getEventoColor('cumpleanos').text}`}>10 Feb · Retorno Solar</span>
-                <p className="text-gray-600 mt-0.5">Tu nuevo año personal comienza</p>
+          <div className={`${config.highlightSecondary} p-2`}>
+            <h3 className={`text-[8px] font-bold uppercase ${config.iconSecondary} mb-1`}>Eventos activos</h3>
+            <div className="space-y-1 text-[9px]">
+              <div className={`p-1 ${getEventoColor('cumpleanos').bg}`}>
+                <span className={`font-bold ${getEventoColor('cumpleanos').text}`}>10 Feb · Retorno</span>
               </div>
-              <div className={`p-2 ${getEventoColor('lunaLlena').bg}`}>
-                <span className={`font-bold ${getEventoColor('lunaLlena').text}`}>12 Feb · Luna Llena en Leo</span>
-                <p className="text-gray-600 mt-0.5">Culminación creativa y expresión</p>
+              <div className={`p-1 ${getEventoColor('lunaLlena').bg}`}>
+                <span className={`font-bold ${getEventoColor('lunaLlena').text}`}>12 Feb · Luna Llena</span>
               </div>
             </div>
           </div>
@@ -640,44 +638,44 @@ export const PropuestaSemana3: React.FC = () => {
   return (
     <div className={`print-page bg-white p-6 flex flex-col ${config.pattern}`}>
       {/* Header en línea */}
-      <div className="flex items-baseline gap-3 mb-4">
-        <h1 className={`text-4xl font-display font-bold ${config.titleGradient}`}>S2</h1>
+      <div className="flex items-baseline gap-2 mb-2">
+        <h1 className={`text-2xl font-display font-bold ${config.titleGradient}`}>S2</h1>
         <div className="flex-1">
-          <span className="text-lg text-gray-800">9 - 15 febrero 2026</span>
-          <span className={`ml-3 text-sm ${config.iconSecondary}`}>· Renacimiento Solar</span>
+          <span className="text-sm text-gray-800">9 - 15 febrero 2026</span>
+          <span className={`ml-2 text-[9px] ${config.iconSecondary}`}>· Propuesta 3</span>
         </div>
       </div>
 
-      {/* Grid de días - Ocupa toda la página */}
-      <div className="flex-1 flex flex-col">
+      {/* Grid de días - 7 filas fijas */}
+      <div className="grid grid-rows-7 gap-0">
         {dias.map((dia, idx) => {
           const dayNum = dia.fecha.getDate();
           const dayName = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'][dia.fecha.getDay() === 0 ? 6 : dia.fecha.getDay() - 1];
           const colors = dia.evento ? getEventoColor(dia.evento.tipo) : null;
-          
+
           return (
             <div
               key={idx}
-              className="flex-1 flex items-stretch"
+              className="h-[24mm] flex items-stretch"
             >
               {/* Fecha compacta */}
-              <div className="w-14 flex items-center justify-center gap-1 text-gray-400">
-                <span className="text-xl font-bold text-gray-700">{dayNum}</span>
-                <span className="text-[9px] uppercase">{dayName}</span>
+              <div className="w-12 flex items-center justify-center gap-0.5 text-gray-400">
+                <span className="text-base font-bold text-gray-700">{dayNum}</span>
+                <span className={`text-[7px] uppercase`}>{dayName}</span>
               </div>
-              
+
               {/* Contenido del día */}
-              <div className={`flex-1 border-l-2 ${colors ? colors.accent.replace('bg-', 'border-') : 'border-gray-100'} pl-3 py-2 flex flex-col justify-center`}>
+              <div className={`flex-1 border-l-2 ${colors ? colors.accent.replace('bg-', 'border-') : 'border-gray-100'} pl-2 py-1 flex flex-col justify-center`}>
                 {dia.evento ? (
-                  <div className={`inline-flex items-center gap-2 ${colors?.bg} px-2 py-1 self-start`}>
-                    <span className={`text-sm font-bold ${colors?.text}`}>{dia.evento.titulo}</span>
+                  <div className={`inline-flex items-center gap-1 ${colors?.bg} px-1 py-0.5 self-start`}>
+                    <span className={`text-[9px] font-bold ${colors?.text}`}>{dia.evento.titulo}</span>
                   </div>
                 ) : null}
-                
+
                 {/* Líneas para escribir */}
-                <div className="mt-1 space-y-2 flex-1">
-                  <div className="border-b border-dotted border-gray-200" />
-                  <div className="border-b border-dotted border-gray-200" />
+                <div className="mt-0.5 space-y-1 flex-1">
+                  <div className="h-3 border-b border-dotted border-gray-200" />
+                  <div className="h-3 border-b border-dotted border-gray-200" />
                 </div>
               </div>
             </div>
@@ -686,15 +684,15 @@ export const PropuestaSemana3: React.FC = () => {
       </div>
 
       {/* Ejercicios de la semana - Compacto */}
-      <div className="mt-3 pt-3 border-t border-gray-200">
-        <div className="flex gap-4">
+      <div className="mt-1.5 pt-1.5 border-t border-gray-200">
+        <div className="flex gap-2">
           <div className="flex-1">
-            <h3 className={`text-[10px] font-bold uppercase ${config.iconAccent} mb-1`}>Ejercicio de la semana</h3>
-            <p className="text-xs text-gray-600">Escribe lo que sueltas del ciclo anterior y lo que invitas al nuevo.</p>
+            <h3 className={`text-[8px] font-bold uppercase ${config.iconAccent} mb-0.5`}>Ejercicio de la semana</h3>
+            <p className="text-[9px] text-gray-600 leading-tight">Escribe lo que sueltas del ciclo anterior.</p>
           </div>
           <div className="w-1/3">
-            <h3 className={`text-[10px] font-bold uppercase ${config.iconSecondary} mb-1`}>Mantra</h3>
-            <p className={`text-xs italic ${config.iconPrimary}`}>"Este año viene a reordenarme"</p>
+            <h3 className={`text-[8px] font-bold uppercase ${config.iconSecondary} mb-0.5`}>Mantra</h3>
+            <p className={`text-[9px] italic ${config.iconPrimary}`}>"Este año viene a reordenarme"</p>
           </div>
         </div>
       </div>
