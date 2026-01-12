@@ -110,7 +110,7 @@ export const IndiceNavegable: React.FC = () => {
   ];
 
   return (
-    <div className={`print-page bg-white flex flex-col ${config.pattern}`} style={{ padding: '12mm' }}>
+    <div className={`print-page bg-white p-6 flex flex-col ${config.pattern}`}>
       {/* Header */}
       <div className="text-center mb-4">
         <h1 className={`text-2xl font-display ${config.titleGradient} mb-1`}>
