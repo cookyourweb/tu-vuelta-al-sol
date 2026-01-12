@@ -147,7 +147,7 @@ export const EneroEstilo1: React.FC = () => {
   const getEventoDelDia = (dia: number) => eventosEnero2026.find(e => e.dia === dia);
 
   return (
-    <div className={`print-page bg-white p-6 flex flex-col ${config.pattern}`}>
+    <div className={`print-page bg-white flex flex-col ${config.pattern}`} style={{ padding: '12mm' }}>
       {/* Header compacto */}
       <div className="text-center mb-3">
         <div className="flex items-center justify-center gap-3 mb-1">
@@ -321,7 +321,7 @@ export const EneroEstilo2: React.FC = () => {
   ];
 
   return (
-    <div className={`print-page bg-white p-6 flex flex-col ${config.pattern}`}>
+    <div className={`print-page bg-white flex flex-col ${config.pattern}`} style={{ padding: '12mm' }}>
       {/* Header */}
       <div className="mb-3 pb-2 border-b border-gray-800">
         <div className="flex items-baseline justify-between">
@@ -438,7 +438,7 @@ export const EneroEstilo3: React.FC = () => {
   const getEventoDelDia = (dia: number) => eventosEnero2026.find(e => e.dia === dia);
 
   return (
-    <div className={`print-page bg-white p-6 flex flex-col ${config.pattern}`}>
+    <div className={`print-page bg-white flex flex-col ${config.pattern}`} style={{ padding: '12mm' }}>
       {/* Header */}
       <div className="mb-3">
         <h1 className={`text-2xl font-display ${config.titleGradient} mb-0.5`}>
