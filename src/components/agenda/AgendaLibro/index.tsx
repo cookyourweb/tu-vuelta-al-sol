@@ -15,6 +15,9 @@ import { QueEsRetornoSolar, AscendenteAnio, SolRetorno, LunaRetorno, EjesDelAnio
 import { IndiceNavegable } from './Indice';
 import { CalendarioYMapaMes, LunasYEjercicios, SemanaConInterpretacion, CierreMes, PrimerDiaCiclo } from './MesCompleto';
 import { CalendarioMensualEscritura } from './CalendarioMensualEscritura';
+import { CalendarioMensualCompactoMaximo } from './CalendarioMensualCompactoMaximo';
+import { CalendarioMensualTabla } from './CalendarioMensualTabla';
+import '@/styles/print-libro.css';
 
 interface AgendaLibroProps {
   onClose: () => void;
@@ -28,11 +31,14 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
   const { config } = useStyle();
 
   const handlePrint = () => {
-    window.print();
+    // Forzar el layout antes de imprimir
+    window.setTimeout(() => {
+      window.print();
+    }, 100);
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="libro-container min-h-screen bg-gray-100">
       {/* Header de controles - NO se imprime */}
       <div className={`no-print sticky top-0 z-50 backdrop-blur border-b ${config.headerBg} ${config.headerText} p-4`}>
         <div className="container mx-auto flex items-center justify-between">
@@ -98,11 +104,40 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
         <RitualCumpleanos />
         <MantraAnual />
 
-        {/* 5. CALENDARIO MENSUAL CON ESPACIO PARA ESCRIBIR - Enero 2026 */}
+        {/* 5. PROPUESTA 1: CALENDARIO CON MÁXIMO ESPACIO PARA ESCRIBIR */}
         <CalendarioMensualEscritura
           monthDate={new Date(2026, 0, 1)}
           mesNumero={1}
           nombreZodiaco="Capricornio → Acuario"
+          simboloZodiaco="♑"
+          temaDelMes="Inicios conscientes"
+          eventos={[
+            { dia: 6, tipo: 'ingreso', titulo: 'Venus → Piscis', signo: 'Piscis' },
+            { dia: 13, tipo: 'lunaLlena', titulo: 'Luna Llena en Cáncer', signo: 'Cáncer' },
+            { dia: 20, tipo: 'ingreso', titulo: 'Sol → Acuario', signo: 'Acuario' },
+            { dia: 29, tipo: 'lunaNueva', titulo: 'Luna Nueva en Acuario', signo: 'Acuario' }
+          ]}
+        />
+
+        {/* 6. PROPUESTA 2: CALENDARIO COMPACTO MÁXIMO (4 líneas por día) */}
+        <CalendarioMensualCompactoMaximo
+          monthDate={new Date(2026, 0, 1)}
+          mesNumero={1}
+          nombreZodiaco="Capricornio → Acuario"
+          simboloZodiaco="♑"
+          eventos={[
+            { dia: 6, tipo: 'ingreso', titulo: 'Venus → Piscis', signo: 'Piscis' },
+            { dia: 13, tipo: 'lunaLlena', titulo: 'Luna Llena en Cáncer', signo: 'Cáncer' },
+            { dia: 20, tipo: 'ingreso', titulo: 'Sol → Acuario', signo: 'Acuario' },
+            { dia: 29, tipo: 'lunaNueva', titulo: 'Luna Nueva en Acuario', signo: 'Acuario' }
+          ]}
+        />
+
+        {/* 7. PROPUESTA 3: CALENDARIO TABLA (formato profesional) */}
+        <CalendarioMensualTabla
+          monthDate={new Date(2026, 0, 1)}
+          mesNumero={1}
+          nombreZodiaco="Capicornio → Acuario"
           simboloZodiaco="♑"
           temaDelMes="Inicios conscientes"
           eventos={[
