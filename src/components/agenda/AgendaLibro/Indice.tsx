@@ -110,74 +110,54 @@ export const IndiceNavegable: React.FC = () => {
   ];
 
   return (
-    <div className={`print-page bg-white p-6 flex flex-col ${config.pattern}`}>
-      {/* Header */}
-      <div className="text-center mb-4">
-        <h1 className={`text-2xl font-display ${config.titleGradient} mb-1`}>
-          Índice
-        </h1>
-        <div className={`w-16 h-px mx-auto ${config.iconAccent} opacity-50`} />
-        <p className={`mt-1 text-[10px] italic ${config.iconSecondary}`}>
-          Tu mapa para navegar el año
-        </p>
+    <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
+      <div className="text-center mb-8">
+        <span className={`${config.iconSecondary} opacity-60 text-sm tracking-[0.3em] uppercase ${config.fontBody}`}>Navegación</span>
+        <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient} mt-2`}>Índice</h2>
       </div>
 
-      {/* Secciones - ajustado a A5 */}
-      <div className="flex-1 overflow-hidden">
-        <div className="space-y-0">
-          {secciones.map((seccion, idx) => (
-            <div key={idx}>
-              {/* Sección principal */}
-              <div className="flex items-center gap-2 py-1 border-b border-gray-100">
-                <span className={`${config.iconPrimary}`}>
-                  {seccion.icono}
-                </span>
-                <span className={`flex-1 font-display text-xs font-medium text-gray-800`}>
-                  {seccion.titulo}
-                </span>
-                <span className="text-gray-300 text-[10px]">{'·'.repeat(10)}</span>
-                <span className={`w-6 text-right text-xs font-bold ${config.iconPrimary}`}>
-                  {seccion.pagina}
-                </span>
-              </div>
-
-              {/* Subsecciones */}
-              {seccion.subsecciones && (
-                <div className="ml-5 border-l border-gray-100">
-                  {seccion.subsecciones.map((sub, subIdx) => (
-                    <div
-                      key={subIdx}
-                      className="flex items-center gap-2 py-0.5 pl-2"
-                    >
-                      <span className="flex-1 text-[10px] text-gray-600">
-                        {sub.titulo}
-                      </span>
-                      <span className="text-gray-200 text-[9px]">{'·'.repeat(7)}</span>
-                      <span className="w-5 text-right text-[10px] text-gray-500">
-                        {sub.pagina}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
+      <div className={`space-y-4 text-gray-700 leading-relaxed max-w-2xl mx-auto ${config.fontBody}`}>
+        {secciones.map((seccion, idx) => (
+          <div key={idx}>
+            {/* Sección principal */}
+            <div className="flex items-center gap-3 py-2 border-b border-gray-200">
+              <span className={`${config.iconPrimary}`}>
+                {seccion.icono}
+              </span>
+              <span className="flex-1 font-medium text-gray-800">
+                {seccion.titulo}
+              </span>
+              <span className="text-gray-300">{'·'.repeat(15)}</span>
+              <span className={`font-bold ${config.iconPrimary}`}>
+                {seccion.pagina}
+              </span>
             </div>
-          ))}
-        </div>
+
+            {/* Subsecciones */}
+            {seccion.subsecciones && (
+              <div className="ml-8 space-y-1 mt-2">
+                {seccion.subsecciones.map((sub, subIdx) => (
+                  <div
+                    key={subIdx}
+                    className="flex items-center gap-2"
+                  >
+                    <span className="flex-1 text-sm text-gray-600">
+                      {sub.titulo}
+                    </span>
+                    <span className="text-gray-200">{'·'.repeat(12)}</span>
+                    <span className="text-sm text-gray-500">
+                      {sub.pagina}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
       </div>
 
-      {/* Footer */}
-      <div className="mt-3 pt-2 border-t border-gray-200 text-center">
-        <p className={`text-[9px] ${config.iconSecondary}`}>
-          Este libro se lee según lo necesites, no de forma lineal.
-          <br />
-          <span className="italic">Salta, vuelve, subraya, escribe. Es tuyo.</span>
-        </p>
-      </div>
-
-      {/* Footer libro */}
-      <div className="absolute bottom-4 left-0 right-0 flex justify-between items-center px-8 text-[10px]">
-        <span className={`${config.iconSecondary} opacity-50`}>Tu Vuelta al Sol</span>
-        <span className={`${config.iconSecondary} opacity-50`}>☉</span>
+      <div className={`mt-auto text-center ${config.iconSecondary} opacity-60 italic ${config.fontBody}`}>
+        Tu mapa para navegar el año ✧
       </div>
     </div>
   );
