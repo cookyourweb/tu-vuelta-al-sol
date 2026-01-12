@@ -12,7 +12,8 @@ import { PortadaPersonalizada, PaginaIntencion } from './PortalEntrada';
 import { CartaBienvenida, TemaCentralAnio, LoQueVieneAMover, LoQuePideSoltar, PaginaIntencionAnual } from './TuAnioTuViaje';
 import { EsenciaNatal, NodoNorte, NodoSur, PlanetasDominantes, PatronesEmocionales } from './SoulChart';
 import { QueEsRetornoSolar, AscendenteAnio, SolRetorno, LunaRetorno, EjesDelAnio, EjesDelAnio2, IntegracionEjes, RitualCumpleanos, MantraAnual } from './RetornoSolar';
-import { CalendarioMensualPropuesta1, SemanaPropuesta2Columnas, PaginaCumpleanos } from './CalendariosPropuestas';
+import { IndiceNavegable } from './Indice';
+import { EneroEstilo1, EneroEstilo2, EneroEstilo3 } from './CalendariosEnero';
 
 interface AgendaLibroProps {
   onClose: () => void;
@@ -69,6 +70,7 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
           endDate={endDate}
         />
         <PaginaIntencion />
+        <IndiceNavegable />
 
         {/* 2. TU AÑO, TU VIAJE */}
         <CartaBienvenida name={userName} />
@@ -95,30 +97,10 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
         <RitualCumpleanos />
         <MantraAnual />
 
-        {/* 5. PROPUESTAS DE CALENDARIO - Para decidir estilo */}
-        <div className="print-page bg-white p-10 flex flex-col justify-center items-center">
-          <h2 className={`text-2xl font-display ${config.titleGradient} mb-4 text-center`}>
-            📅 Propuestas de Calendario
-          </h2>
-          <p className="text-sm text-gray-600 text-center max-w-lg mb-6">
-            A continuación verás ejemplos de cómo se estructuran los calendarios mensuales,
-            las semanas y páginas especiales. Todos sin bordes decorativos, diseñados para escribir.
-          </p>
-          <div className="space-y-2 text-xs text-gray-500">
-            <p>• <strong>Propuesta 1:</strong> Calendario mensual minimalista</p>
-            <p>• <strong>Propuesta 2:</strong> Semana con 2 columnas</p>
-            <p>• <strong>Propuesta 3:</strong> Página especial de cumpleaños</p>
-          </div>
-        </div>
-
-        {/* Página especial de cumpleaños */}
-        <PaginaCumpleanos nombre={userName} />
-
-        {/* Calendario mensual */}
-        <CalendarioMensualPropuesta1 />
-
-        {/* Semana con 2 columnas */}
-        <SemanaPropuesta2Columnas />
+        {/* 5. CALENDARIOS - Enero 2026 en 3 estilos */}
+        <EneroEstilo1 />
+        <EneroEstilo2 />
+        <EneroEstilo3 />
 
       </div>
     </div>
