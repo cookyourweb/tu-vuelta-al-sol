@@ -110,50 +110,50 @@ export const IndiceNavegable: React.FC = () => {
   ];
 
   return (
-    <div className={`print-page bg-white p-8 flex flex-col ${config.pattern}`}>
+    <div className={`print-page bg-white p-6 flex flex-col ${config.pattern}`}>
       {/* Header */}
-      <div className="text-center mb-6">
-        <h1 className={`text-3xl font-display ${config.titleGradient} mb-2`}>
+      <div className="text-center mb-4">
+        <h1 className={`text-2xl font-display ${config.titleGradient} mb-1`}>
           Índice
         </h1>
         <div className={`w-16 h-px mx-auto ${config.iconAccent} opacity-50`} />
-        <p className={`mt-2 text-xs italic ${config.iconSecondary}`}>
+        <p className={`mt-1 text-[10px] italic ${config.iconSecondary}`}>
           Tu mapa para navegar el año
         </p>
       </div>
 
       {/* Secciones - ajustado a A5 */}
       <div className="flex-1 overflow-hidden">
-        <div className="space-y-px">
+        <div className="space-y-0">
           {secciones.map((seccion, idx) => (
             <div key={idx}>
               {/* Sección principal */}
-              <div className="flex items-center gap-2 py-1.5 border-b border-gray-100">
+              <div className="flex items-center gap-2 py-1 border-b border-gray-100">
                 <span className={`${config.iconPrimary}`}>
                   {seccion.icono}
                 </span>
-                <span className={`flex-1 font-display text-sm font-medium text-gray-800`}>
+                <span className={`flex-1 font-display text-xs font-medium text-gray-800`}>
                   {seccion.titulo}
                 </span>
-                <span className="text-gray-300 text-xs">{'·'.repeat(12)}</span>
-                <span className={`w-6 text-right text-sm font-bold ${config.iconPrimary}`}>
+                <span className="text-gray-300 text-[10px]">{'·'.repeat(10)}</span>
+                <span className={`w-6 text-right text-xs font-bold ${config.iconPrimary}`}>
                   {seccion.pagina}
                 </span>
               </div>
 
               {/* Subsecciones */}
               {seccion.subsecciones && (
-                <div className="ml-6 border-l border-gray-100">
+                <div className="ml-5 border-l border-gray-100">
                   {seccion.subsecciones.map((sub, subIdx) => (
                     <div
                       key={subIdx}
-                      className="flex items-center gap-2 py-1 pl-3"
+                      className="flex items-center gap-2 py-0.5 pl-2"
                     >
-                      <span className="flex-1 text-xs text-gray-600">
+                      <span className="flex-1 text-[10px] text-gray-600">
                         {sub.titulo}
                       </span>
-                      <span className="text-gray-200 text-xs">{'·'.repeat(8)}</span>
-                      <span className="w-6 text-right text-xs text-gray-500">
+                      <span className="text-gray-200 text-[9px]">{'·'.repeat(7)}</span>
+                      <span className="w-5 text-right text-[10px] text-gray-500">
                         {sub.pagina}
                       </span>
                     </div>
@@ -166,8 +166,8 @@ export const IndiceNavegable: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <div className="mt-4 pt-3 border-t border-gray-200 text-center">
-        <p className={`text-[10px] ${config.iconSecondary}`}>
+      <div className="mt-3 pt-2 border-t border-gray-200 text-center">
+        <p className={`text-[9px] ${config.iconSecondary}`}>
           Este libro se lee según lo necesites, no de forma lineal.
           <br />
           <span className="italic">Salta, vuelve, subraya, escribe. Es tuyo.</span>

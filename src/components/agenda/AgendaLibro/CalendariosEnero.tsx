@@ -1,167 +1,275 @@
 'use client';
 
 import React from 'react';
-import { format, startOfMonth, addDays, isSameMonth } from 'date-fns';
+import { format, startOfMonth, endOfMonth, startOfWeek, addDays, isSameMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useStyle } from '@/context/StyleContext';
+import {
+  Moon, Sun, Star, Sparkles, Circle, PenLine,
+  Flame, Target, Heart, Compass, ArrowRight,
+  Calendar
+} from 'lucide-react';
 
-// Tipos
+// ============ TIPOS ============
 interface EventoMensual {
   dia: number;
-  tipo: 'lunaLlena' | 'lunaNueva' | 'retrogrado' | 'ingreso' | 'especial';
-  titulo: string;
-  interpretacion: string;
+  tipo: 'lunaLlena' | 'lunaNueva' | 'eclipse' | 'retrogrado' | 'ingreso' | 'especial';
+  nombre: string;
+  signo?: string;
+  descripcionCorta: string;
 }
 
-// Eventos de Enero 2026
-const eventosEnero: EventoMensual[] = [
-  {
-    dia: 1,
-    tipo: 'especial',
-    titulo: 'Año Nuevo',
-    interpretacion: 'Inicio del año calendario. Momento para intenciones colectivas y renovación.'
-  },
+interface EventoDia {
+  titulo: string;
+  tipo: 'lunaLlena' | 'lunaNueva' | 'eclipse' | 'retrogrado' | 'ingreso' | 'especial';
+  descripcion?: string;
+}
+
+// ============ EVENTOS DE ENERO 2026 ============
+const eventosEnero2026: EventoMensual[] = [
   {
     dia: 6,
     tipo: 'ingreso',
-    titulo: 'Venus en Piscis',
-    interpretacion: 'El amor se vuelve más compasivo. Conexiones espirituales y artísticas florecen.'
+    nombre: 'Venus → Piscis',
+    signo: 'Piscis',
+    descripcionCorta: 'El amor se vuelve compasivo. Conexiones espirituales.'
   },
   {
     dia: 13,
     tipo: 'lunaLlena',
-    titulo: 'Luna Llena en Cáncer',
-    interpretacion: 'Culminación emocional. Lo que sembraste en familia y hogar llega a su punto máximo. Observa qué necesitas soltar para sentirte en casa contigo mismo.'
+    nombre: 'Luna Llena',
+    signo: 'Cáncer',
+    descripcionCorta: 'Culminación emocional. Hogar, raíces, límites familiares.'
   },
   {
     dia: 20,
     tipo: 'ingreso',
-    titulo: 'Sol en Acuario',
-    interpretacion: 'Comienza la temporada de innovación y comunidad. Es momento de pensar en colectivo y en el futuro.'
+    nombre: 'Sol → Acuario',
+    signo: 'Acuario',
+    descripcionCorta: 'Temporada de innovación y comunidad.'
   },
   {
     dia: 29,
     tipo: 'lunaNueva',
-    titulo: 'Luna Nueva en Acuario',
-    interpretacion: 'Siembra intenciones sobre libertad, innovación y propósito colectivo. ¿Qué quieres crear con tu tribu?'
+    nombre: 'Luna Nueva',
+    signo: 'Acuario',
+    descripcionCorta: 'Siembra intenciones sobre libertad e innovación.'
   },
 ];
 
-// Generar días del mes
-const generarDiasMes = (mes: number, anio: number) => {
-  const inicio = startOfMonth(new Date(anio, mes - 1));
-  const dias: Date[] = [];
-
-  let diaActual = new Date(inicio);
-  const diaSemana = diaActual.getDay();
-  const ajuste = diaSemana === 0 ? -6 : 1 - diaSemana;
-  diaActual = addDays(diaActual, ajuste);
-
-  for (let i = 0; i < 42; i++) {
-    dias.push(new Date(diaActual));
-    diaActual = addDays(diaActual, 1);
+// ============ FUNCIONES AUXILIARES ============
+const IconoEvento = ({ tipo, className = "w-4 h-4" }: { tipo: EventoMensual['tipo'] | EventoDia['tipo']; className?: string }) => {
+  switch (tipo) {
+    case 'lunaLlena':
+      return <Circle className={className} fill="currentColor" />;
+    case 'lunaNueva':
+      return <Moon className={className} />;
+    case 'eclipse':
+      return <Sparkles className={className} />;
+    case 'retrogrado':
+      return <span className={`${className} font-bold`}>℞</span>;
+    case 'ingreso':
+      return <ArrowRight className={className} />;
+    case 'especial':
+      return <Star className={className} fill="currentColor" />;
+    default:
+      return <Circle className={className} />;
   }
-
-  return dias;
 };
 
+const getEventoColors = (tipo: EventoMensual['tipo'] | EventoDia['tipo']) => {
+  switch (tipo) {
+    case 'lunaLlena':
+      return {
+        bg: 'bg-amber-100',
+        border: 'border-amber-300',
+        text: 'text-amber-800',
+        icon: 'text-amber-600'
+      };
+    case 'lunaNueva':
+      return {
+        bg: 'bg-indigo-100',
+        border: 'border-indigo-300',
+        text: 'text-indigo-800',
+        icon: 'text-indigo-600'
+      };
+    case 'ingreso':
+      return {
+        bg: 'bg-teal-100',
+        border: 'border-teal-300',
+        text: 'text-teal-800',
+        icon: 'text-teal-600'
+      };
+    default:
+      return {
+        bg: 'bg-gray-100',
+        border: 'border-gray-300',
+        text: 'text-gray-800',
+        icon: 'text-gray-600'
+      };
+  }
+};
+
+const generarSemanasCalendario = (mes: number, anio: number) => {
+  const monthDate = new Date(anio, mes - 1, 1);
+  const monthStart = startOfMonth(monthDate);
+  const monthEnd = endOfMonth(monthDate);
+  const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+
+  const weeks: Date[][] = [];
+  let currentDay = calendarStart;
+
+  while (currentDay <= monthEnd || weeks.length < 5) {
+    const week: Date[] = [];
+    for (let i = 0; i < 7; i++) {
+      week.push(currentDay);
+      currentDay = addDays(currentDay, 1);
+    }
+    weeks.push(week);
+    if (weeks.length >= 6) break;
+  }
+
+  return { weeks, monthDate };
+};
+
+const diasSemana = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'];
+const diasSemanaCortos = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+
 // ============================================================
-// ESTILO 1: GRID MENSUAL COMPACTO CON EVENTOS ABAJO
-// Funcional, máximo espacio para escribir
+// ESTILO 1: CALENDARIO MENSUAL COMPACTO
+// Grid mensual completo con eventos abajo
 // ============================================================
 
 export const EneroEstilo1: React.FC = () => {
   const { config } = useStyle();
-  const dias = generarDiasMes(1, 2026);
-  const mesReferencia = new Date(2026, 0, 1);
+  const { weeks, monthDate } = generarSemanasCalendario(1, 2026);
 
-  const getEventoDelDia = (fecha: Date) => {
-    const dia = fecha.getDate();
-    return eventosEnero.find(e => e.dia === dia && isSameMonth(fecha, mesReferencia));
-  };
+  const getEventoDelDia = (dia: number) => eventosEnero2026.find(e => e.dia === dia);
 
   return (
-    <div className="print-page bg-white p-6 flex flex-col">
-      {/* Header simple */}
-      <div className="mb-2">
-        <h1 className={`text-2xl font-display ${config.titleGradient} mb-0.5`}>
-          ENERO 2026
-        </h1>
-        <p className="text-[10px] text-gray-500 italic">
-          Mes de inicios y renovación · Capricornio ♑ → Acuario ♒
+    <div className={`print-page bg-white p-6 flex flex-col ${config.pattern}`}>
+      {/* Header compacto */}
+      <div className="text-center mb-3">
+        <div className="flex items-center justify-center gap-3 mb-1">
+          <Star className={`w-4 h-4 ${config.iconSecondary}`} fill="currentColor" />
+          <h1 className={`text-2xl font-display ${config.titleGradient}`}>
+            ENERO 2026
+          </h1>
+          <Star className={`w-4 h-4 ${config.iconSecondary}`} fill="currentColor" />
+        </div>
+        <p className={`text-[10px] ${config.iconSecondary} italic`}>
+          Mes de inicios y renovación · ♑ → ♒
         </p>
       </div>
 
-      {/* Calendario - Grid sin bordes decorativos */}
-      <div className="mb-2">
+      {/* Calendario Grid - Compacto */}
+      <div className="mb-3 rounded-lg overflow-hidden border border-gray-200">
         {/* Días de la semana */}
-        <div className="grid grid-cols-7 border-b border-gray-400 pb-0.5 mb-0.5">
-          {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((dia, idx) => (
-            <div key={idx} className="text-center">
-              <span className="text-[9px] font-bold text-gray-600 uppercase">
-                {dia}
-              </span>
+        <div className={`grid grid-cols-7 ${config.headerBg}`}>
+          {diasSemanaCortos.map((dia, idx) => (
+            <div
+              key={idx}
+              className={`text-center py-1 text-[10px] font-bold ${config.headerText} border-r border-white/20 last:border-r-0`}
+            >
+              {dia}
             </div>
           ))}
         </div>
 
-        {/* Grid de días - 6 filas */}
-        <div className="grid grid-rows-6 gap-0">
-          {Array.from({ length: 6 }).map((_, semanaIdx) => (
-            <div key={semanaIdx} className="grid grid-cols-7 border-b border-gray-200 last:border-b-0">
-              {dias.slice(semanaIdx * 7, (semanaIdx + 1) * 7).map((fecha, diaIdx) => {
-                const esDelMes = isSameMonth(fecha, mesReferencia);
-                const evento = getEventoDelDia(fecha);
-                const dia = fecha.getDate();
+        {/* Semanas */}
+        {weeks.map((week, weekIdx) => (
+          <div key={weekIdx} className="grid grid-cols-7 border-t border-gray-200" style={{ height: '36px' }}>
+            {week.map((day, dayIdx) => {
+              const isCurrentMonth = isSameMonth(day, monthDate);
+              const dayNum = day.getDate();
+              const evento = isCurrentMonth ? getEventoDelDia(dayNum) : null;
+              const colors = evento ? getEventoColors(evento.tipo) : null;
+              const isWeekend = dayIdx >= 5;
 
-                return (
-                  <div
-                    key={diaIdx}
-                    className={`
-                      h-[22mm] p-0.5 border-r border-gray-200 last:border-r-0
-                      ${esDelMes ? '' : 'bg-gray-50'}
-                    `}
-                  >
-                    <div className="flex flex-col h-full">
-                      <div className="flex items-start justify-between mb-0.5">
-                        <span className={`text-xs font-bold ${esDelMes ? 'text-gray-800' : 'text-gray-400'}`}>
-                          {dia}
-                        </span>
-                        {evento && <span className={`text-[7px] ${config.iconPrimary}`}>●</span>}
-                      </div>
-
-                      {/* Espacio para escribir - líneas sutiles */}
-                      <div className="flex-1 flex flex-col justify-between">
-                        <div className="h-2 border-b border-dotted border-gray-200" />
-                        <div className="h-2 border-b border-dotted border-gray-200" />
-                        <div className="h-2" />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ))}
-        </div>
+              return (
+                <div
+                  key={dayIdx}
+                  className={`
+                    p-1 border-r border-gray-100 last:border-r-0 relative flex items-start
+                    ${isCurrentMonth ? 'bg-white' : 'bg-gray-50'}
+                    ${isWeekend && isCurrentMonth && !evento ? 'bg-gray-50/50' : ''}
+                    ${evento ? `${colors?.bg}` : ''}
+                  `}
+                >
+                  {isCurrentMonth && (
+                    <>
+                      <span className={`
+                        text-xs font-bold
+                        ${evento ? colors?.text : isWeekend ? 'text-gray-400' : 'text-gray-700'}
+                      `}>
+                        {dayNum}
+                      </span>
+                      {evento && (
+                        <div className={`absolute bottom-0.5 right-0.5 ${colors?.icon}`}>
+                          <IconoEvento tipo={evento.tipo} className="w-2 h-2" />
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ))}
       </div>
 
-      {/* Eventos del mes - Sección compacta */}
-      <div className="border-t-2 border-gray-800 pt-1.5">
-        <h3 className="text-[9px] font-bold text-gray-700 uppercase mb-1">
-          Eventos clave de enero
-        </h3>
-        <div className="space-y-1">
-          {eventosEnero.map((evento, idx) => (
-            <div key={idx} className="border-l-2 border-gray-400 pl-1.5">
-              <div className="flex items-baseline gap-1 mb-0.5">
-                <span className="text-xs font-bold text-gray-800">{evento.dia}</span>
-                <span className="text-[8px] font-bold text-gray-700">{evento.titulo}</span>
+      {/* Eventos del mes - Grid compacto 2 columnas */}
+      <div className="grid grid-cols-2 gap-2 mb-2">
+        {eventosEnero2026.map((evento, idx) => {
+          const colors = getEventoColors(evento.tipo);
+          return (
+            <div
+              key={idx}
+              className={`p-2 rounded ${colors.bg} border ${colors.border}`}
+            >
+              <div className="flex items-start gap-1">
+                <div className={`${colors.icon} mt-0.5`}>
+                  <IconoEvento tipo={evento.tipo} className="w-3 h-3" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1">
+                    <span className={`text-[10px] font-bold ${colors.text}`}>
+                      {evento.dia} ENE
+                    </span>
+                  </div>
+                  <p className={`text-[11px] font-bold ${colors.text} leading-tight`}>{evento.nombre}</p>
+                  <p className={`text-[9px] ${colors.text} opacity-90 leading-tight`}>
+                    {evento.descripcionCorta}
+                  </p>
+                </div>
               </div>
-              <p className="text-[7px] text-gray-600 leading-tight">
-                {evento.interpretacion}
-              </p>
             </div>
-          ))}
+          );
+        })}
+      </div>
+
+      {/* Lo que se activa este mes */}
+      <div className={`${config.highlightSecondary} rounded-lg p-3`}>
+        <div className="flex items-center gap-2 mb-2">
+          <Flame className={`w-4 h-4 ${config.iconAccent}`} />
+          <h3 className={`text-[10px] font-bold uppercase tracking-wide ${config.iconAccent}`}>
+            Lo que se activa este mes
+          </h3>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="flex items-start gap-1">
+            <Circle className={`w-1.5 h-1.5 ${config.iconSecondary} mt-1 flex-shrink-0`} fill="currentColor" />
+            <p className="text-[10px] text-gray-700"><span className="font-bold">Inicio consciente:</span> Sin repetir automatismos</p>
+          </div>
+          <div className="flex items-start gap-1">
+            <Circle className={`w-1.5 h-1.5 ${config.iconSecondary} mt-1 flex-shrink-0`} fill="currentColor" />
+            <p className="text-[10px] text-gray-700"><span className="font-bold">Coherencia:</span> Entre lo externo e interno</p>
+          </div>
+        </div>
+        <div className={`mt-2 pt-2 border-t border-current/10`}>
+          <p className={`text-center italic ${config.iconSecondary} text-[9px]`}>
+            "¿Desde dónde estoy arrancando: desde la exigencia o desde la coherencia?"
+          </p>
         </div>
       </div>
     </div>
@@ -169,104 +277,124 @@ export const EneroEstilo1: React.FC = () => {
 };
 
 // ============================================================
-// ESTILO 2: VISTA SEMANAL CON 2 COLUMNAS
-// Días a la izquierda, eventos y espacio para reflexiones a la derecha
+// ESTILO 2: SEMANA DETALLADA CON 2 COLUMNAS
+// Días izquierda, eventos y notas derecha
 // ============================================================
 
 export const EneroEstilo2: React.FC = () => {
   const { config } = useStyle();
 
-  // Semana representativa: 12-18 enero (incluye Luna Llena)
+  // Semana 12-18 enero (incluye Luna Llena)
   const semana = [
-    { fecha: new Date(2026, 0, 12), eventos: [] },
+    { fecha: new Date(2026, 0, 12), dia: 'LUN', evento: null },
     {
       fecha: new Date(2026, 0, 13),
-      eventos: [eventosEnero.find(e => e.dia === 13)!]
+      dia: 'MAR',
+      evento: {
+        titulo: 'Luna Llena en Cáncer',
+        tipo: 'lunaLlena' as const,
+        descripcion: 'Culminación emocional. Observa qué necesitas soltar.'
+      }
     },
-    { fecha: new Date(2026, 0, 14), eventos: [] },
-    { fecha: new Date(2026, 0, 15), eventos: [] },
-    { fecha: new Date(2026, 0, 16), eventos: [] },
-    { fecha: new Date(2026, 0, 17), eventos: [] },
-    { fecha: new Date(2026, 0, 18), eventos: [] },
+    { fecha: new Date(2026, 0, 14), dia: 'MIÉ', evento: null },
+    { fecha: new Date(2026, 0, 15), dia: 'JUE', evento: null },
+    { fecha: new Date(2026, 0, 16), dia: 'VIE', evento: null },
+    { fecha: new Date(2026, 0, 17), dia: 'SÁB', evento: null },
+    { fecha: new Date(2026, 0, 18), dia: 'DOM', evento: null },
   ];
 
   return (
-    <div className="print-page bg-white p-6 flex flex-col">
+    <div className={`print-page bg-white p-6 flex flex-col ${config.pattern}`}>
       {/* Header */}
-      <div className="mb-2 pb-1.5 border-b border-gray-800">
+      <div className="mb-3 pb-2 border-b border-gray-800">
         <div className="flex items-baseline justify-between">
           <div>
-            <span className="text-[8px] text-gray-500 uppercase tracking-wider">Enero 2026</span>
+            <span className="text-[9px] text-gray-500 uppercase tracking-wider">Enero 2026</span>
             <h1 className={`text-lg font-display ${config.titleGradient}`}>
               Semana 2 · 12-18 enero
             </h1>
           </div>
-          <span className="text-[8px] italic text-gray-600">Semana de culminación emocional</span>
+          <span className="text-[8px] italic text-gray-600">Semana de culminación</span>
         </div>
       </div>
 
       {/* Layout 2 columnas */}
-      <div className="flex-1 flex gap-2">
-        {/* COLUMNA IZQUIERDA: Días (35%) */}
-        <div className="w-[35%] flex flex-col">
+      <div className="flex-1 flex gap-3">
+        {/* COLUMNA IZQUIERDA: Días (40%) */}
+        <div className="w-[40%] flex flex-col">
           {semana.map((dia, idx) => {
-            const nombreDia = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'][idx];
             const numDia = dia.fecha.getDate();
-            const tieneEvento = dia.eventos.length > 0;
+            const tieneEvento = dia.evento !== null;
+            const colors = tieneEvento && dia.evento ? getEventoColors(dia.evento.tipo) : null;
 
             return (
               <div
                 key={idx}
                 className={`
-                  flex-1 flex items-center border-b border-gray-200 last:border-b-0 pl-0.5
-                  ${tieneEvento ? `border-l-2 ${config.cardBorder}` : ''}
+                  flex-1 flex items-center border-b border-gray-200 last:border-b-0 px-1
+                  ${tieneEvento && colors ? `border-l-2 ${colors.border}` : ''}
                 `}
               >
-                <div className="flex items-center gap-1.5 flex-1">
+                <div className="flex items-center gap-2 flex-1">
                   <div className="text-center">
-                    <div className={`text-lg font-bold ${tieneEvento ? 'text-gray-800' : 'text-gray-600'}`}>
+                    <div className={`text-base font-bold ${tieneEvento ? 'text-gray-800' : 'text-gray-600'}`}>
                       {numDia}
                     </div>
-                    <div className="text-[7px] uppercase text-gray-500">{nombreDia}</div>
+                    <div className="text-[8px] uppercase text-gray-500">{dia.dia}</div>
                   </div>
-                  <div className="flex-1 border-b border-dotted border-gray-300" />
+                  {tieneEvento && colors && (
+                    <div className={`flex-1 ${colors.bg} rounded px-1 py-0.5`}>
+                      <div className="flex items-center gap-1">
+                        <IconoEvento tipo={dia.evento!.tipo} className={`w-2 h-2 ${colors.icon}`} />
+                        <span className={`text-[8px] font-bold ${colors.text}`}>
+                          {dia.evento!.titulo}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  {!tieneEvento && (
+                    <div className="flex-1 border-b border-dotted border-gray-300" />
+                  )}
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* COLUMNA DERECHA: Eventos y reflexiones (65%) */}
-        <div className="w-[65%] border-l border-gray-300 pl-2">
-          <h3 className="text-[8px] font-bold uppercase text-gray-700 mb-1.5">
+        {/* COLUMNA DERECHA: Eventos y reflexiones (60%) */}
+        <div className="w-[60%] border-l border-gray-300 pl-3 flex flex-col">
+          <h3 className="text-[9px] font-bold uppercase text-gray-700 mb-2">
             Eventos de la semana
           </h3>
 
-          <div className="space-y-2 mb-3">
-            {semana.filter(d => d.eventos.length > 0).map((dia, idx) => (
-              <div key={idx} className="border-l-2 border-gray-800 pl-1.5">
-                <div className="mb-0.5">
-                  <span className="text-sm font-bold text-gray-800">
-                    {dia.fecha.getDate()}
-                  </span>
-                  <span className="text-[9px] font-bold text-gray-700 ml-1.5">
-                    {dia.eventos[0].titulo}
-                  </span>
+          <div className="space-y-2 mb-2">
+            {semana.filter(d => d.evento).map((dia, idx) => {
+              const colors = getEventoColors(dia.evento!.tipo);
+              return (
+                <div key={idx} className={`border-l-2 ${colors.border} pl-2`}>
+                  <div className="mb-0.5">
+                    <span className="text-xs font-bold text-gray-800">
+                      {dia.fecha.getDate()}
+                    </span>
+                    <span className={`text-[9px] font-bold ${colors.text} ml-1`}>
+                      {dia.evento!.titulo}
+                    </span>
+                  </div>
+                  <p className="text-[8px] text-gray-600 leading-snug">
+                    {dia.evento!.descripcion}
+                  </p>
                 </div>
-                <p className="text-[8px] text-gray-600 leading-snug">
-                  {dia.eventos[0].interpretacion}
-                </p>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Espacio para notas personales */}
-          <div className="mt-3 pt-2 border-t border-gray-300">
-            <h4 className="text-[7px] font-bold uppercase text-gray-600 mb-1">
+          <div className="flex-1 pt-2 border-t border-gray-300">
+            <h4 className="text-[8px] font-bold uppercase text-gray-600 mb-1">
               Tus notas y reflexiones
             </h4>
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-              <div key={i} className="h-3 border-b border-dotted border-gray-300" />
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
+              <div key={i} className="h-2.5 border-b border-dotted border-gray-300" />
             ))}
           </div>
         </div>
@@ -276,136 +404,109 @@ export const EneroEstilo2: React.FC = () => {
 };
 
 // ============================================================
-// ESTILO 3: HÍBRIDO - OVERVIEW MENSUAL + SEMANAS DETALLADAS
-// Vista mensual compacta arriba, luego 2 semanas detalladas
+// ESTILO 3: MINI CALENDARIO + EVENTOS DESTACADOS
+// Vista general compacta + detalles de eventos principales
 // ============================================================
 
 export const EneroEstilo3: React.FC = () => {
   const { config } = useStyle();
-  const dias = generarDiasMes(1, 2026);
-  const mesReferencia = new Date(2026, 0, 1);
+  const { weeks, monthDate } = generarSemanasCalendario(1, 2026);
 
-  const getEventoDelDia = (fecha: Date) => {
-    const dia = fecha.getDate();
-    return eventosEnero.find(e => e.dia === dia && isSameMonth(fecha, mesReferencia));
-  };
-
-  // Semanas destacadas
-  const semanas = [
-    {
-      titulo: 'Semana 1: 1-7 enero',
-      dias: [1, 2, 3, 4, 5, 6, 7],
-      evento: eventosEnero.find(e => e.dia === 6)
-    },
-    {
-      titulo: 'Semana 2: 12-18 enero',
-      dias: [12, 13, 14, 15, 16, 17, 18],
-      evento: eventosEnero.find(e => e.dia === 13)
-    },
-  ];
+  const getEventoDelDia = (dia: number) => eventosEnero2026.find(e => e.dia === dia);
 
   return (
-    <div className="print-page bg-white p-6 flex flex-col">
+    <div className={`print-page bg-white p-6 flex flex-col ${config.pattern}`}>
       {/* Header */}
-      <div className="mb-2">
+      <div className="mb-3">
         <h1 className={`text-2xl font-display ${config.titleGradient} mb-0.5`}>
           ENERO 2026
         </h1>
         <p className="text-[9px] text-gray-500 italic">
-          Vista general + semanas destacadas
+          Vista general + eventos clave
         </p>
       </div>
 
       {/* Mini calendario mensual - muy compacto */}
-      <div className="mb-2 pb-2 border-b border-gray-300">
-        <div className="grid grid-cols-7 gap-px bg-gray-200 p-0.5">
-          {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((dia, idx) => (
+      <div className="mb-3 pb-3 border-b border-gray-300">
+        <div className="grid grid-cols-7 gap-px bg-gray-200 p-0.5 rounded">
+          {diasSemanaCortos.map((dia, idx) => (
             <div key={idx} className="text-center bg-white py-0.5">
-              <span className="text-[7px] font-bold text-gray-500">{dia}</span>
+              <span className="text-[8px] font-bold text-gray-500">{dia}</span>
             </div>
           ))}
-          {dias.slice(0, 35).map((fecha, idx) => {
-            const esDelMes = isSameMonth(fecha, mesReferencia);
-            const evento = getEventoDelDia(fecha);
-            const dia = fecha.getDate();
+          {weeks.slice(0, 35).map((week, weekIdx) =>
+            week.map((day, dayIdx) => {
+              const isCurrentMonth = isSameMonth(day, monthDate);
+              const evento = isCurrentMonth ? getEventoDelDia(day.getDate()) : null;
+              const dayNum = day.getDate();
 
-            return (
-              <div
-                key={idx}
-                className={`
-                  text-center py-1 bg-white
-                  ${esDelMes ? '' : 'opacity-40'}
-                `}
-              >
-                <span className={`text-[9px] ${evento ? 'font-bold' : 'font-normal'} ${esDelMes ? 'text-gray-800' : 'text-gray-400'}`}>
-                  {dia}
-                </span>
-                {evento && <div className={`w-1 h-1 rounded-full mx-auto mt-0.5 ${config.iconPrimary}`} style={{backgroundColor: 'currentColor'}} />}
-              </div>
-            );
-          })}
+              return (
+                <div
+                  key={`${weekIdx}-${dayIdx}`}
+                  className={`
+                    text-center py-1 bg-white
+                    ${isCurrentMonth ? '' : 'opacity-40'}
+                  `}
+                >
+                  <span className={`text-[9px] ${evento ? 'font-bold' : 'font-normal'} ${isCurrentMonth ? 'text-gray-800' : 'text-gray-400'}`}>
+                    {dayNum}
+                  </span>
+                  {evento && <div className={`w-1 h-1 rounded-full mx-auto mt-0.5 ${getEventoColors(evento.tipo).icon}`} style={{backgroundColor: 'currentColor'}} />}
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
 
-      {/* Semanas destacadas */}
-      <div className="space-y-2">
-        {semanas.map((semana, idx) => (
-          <div key={idx} className="border border-gray-300 p-1.5">
-            <h3 className="text-[9px] font-bold text-gray-700 mb-1">
-              {semana.titulo}
-            </h3>
-
-            {/* Días de la semana en línea */}
-            <div className="flex gap-1 mb-1">
-              {semana.dias.map(dia => (
-                <div
-                  key={dia}
-                  className={`flex-1 text-center py-1 border border-gray-200 ${
-                    semana.evento && semana.evento.dia === dia
-                      ? 'border-gray-800 bg-gray-50'
-                      : ''
-                  }`}
-                >
-                  <span className="text-[9px] font-bold text-gray-700">{dia}</span>
+      {/* Eventos destacados */}
+      <div className="space-y-2 mb-3">
+        {eventosEnero2026.filter(e => e.tipo === 'lunaLlena' || e.tipo === 'lunaNueva').map((evento, idx) => {
+          const colors = getEventoColors(evento.tipo);
+          return (
+            <div key={idx} className={`${colors.bg} border ${colors.border} rounded-lg p-3`}>
+              <div className="flex items-start gap-2 mb-1">
+                <div className={`w-8 h-8 rounded-full ${colors.bg} border-2 ${colors.border} flex items-center justify-center flex-shrink-0`}>
+                  <IconoEvento tipo={evento.tipo} className={`w-4 h-4 ${colors.icon}`} />
                 </div>
-              ))}
-            </div>
-
-            {/* Evento destacado */}
-            {semana.evento && (
-              <div className="border-l-2 border-gray-800 pl-1.5 mb-1">
-                <span className="text-[8px] font-bold text-gray-700">
-                  {semana.evento.titulo}
-                </span>
-                <p className="text-[7px] text-gray-600 leading-tight mt-0.5">
-                  {semana.evento.interpretacion}
-                </p>
+                <div>
+                  <h3 className={`${colors.text} font-bold text-sm`}>{evento.nombre}</h3>
+                  <span className={`text-[9px] ${colors.text} opacity-70`}>
+                    {evento.dia} de enero en {evento.signo}
+                  </span>
+                </div>
               </div>
-            )}
-
-            {/* Espacio para notas */}
-            <div className="space-y-0.5">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-2 border-b border-dotted border-gray-300" />
-              ))}
+              <p className={`text-[10px] ${colors.text} opacity-90 pl-10 leading-tight`}>
+                {evento.descripcionCorta}
+              </p>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {/* Eventos restantes */}
-      <div className="mt-2 pt-1.5 border-t border-gray-400">
-        <h3 className="text-[8px] font-bold text-gray-700 uppercase mb-1">
+      {/* Otros eventos */}
+      <div className="pt-2 border-t border-gray-400">
+        <h3 className="text-[9px] font-bold text-gray-700 uppercase mb-2">
           Otros eventos del mes
         </h3>
-        <div className="grid grid-cols-2 gap-1">
-          {eventosEnero.filter(e => ![6, 13].includes(e.dia)).map((evento, idx) => (
-            <div key={idx} className="text-[7px]">
+        <div className="grid grid-cols-2 gap-1.5">
+          {eventosEnero2026.filter(e => e.tipo !== 'lunaLlena' && e.tipo !== 'lunaNueva').map((evento, idx) => (
+            <div key={idx} className="text-[9px] flex items-center gap-1">
               <span className="font-bold text-gray-800">{evento.dia}</span>
-              <span className="text-gray-600 ml-1">{evento.titulo}</span>
+              <span className="text-gray-600">{evento.nombre}</span>
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Espacio para notas */}
+      <div className="mt-3 flex-1 border-t border-gray-300 pt-2">
+        <h4 className="text-[8px] font-bold uppercase text-gray-600 mb-1">
+          Notas del mes
+        </h4>
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-2.5 border-b border-dotted border-gray-300" />
+        ))}
       </div>
     </div>
   );
