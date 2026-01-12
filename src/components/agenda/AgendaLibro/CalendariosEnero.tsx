@@ -178,7 +178,7 @@ export const EneroEstilo1: React.FC = () => {
 
         {/* Semanas */}
         {weeks.map((week, weekIdx) => (
-          <div key={weekIdx} className="grid grid-cols-7 border-t border-gray-200" style={{ height: '36px' }}>
+          <div key={weekIdx} className="grid grid-cols-7 border-t border-gray-200" style={{ height: '32px' }}>
             {week.map((day, dayIdx) => {
               const isCurrentMonth = isSameMonth(day, monthDate);
               const dayNum = day.getDate();
@@ -271,6 +271,12 @@ export const EneroEstilo1: React.FC = () => {
             "¿Desde dónde estoy arrancando: desde la exigencia o desde la coherencia?"
           </p>
         </div>
+      </div>
+
+      {/* Footer libro */}
+      <div className="absolute bottom-4 left-0 right-0 flex justify-between items-center px-8 text-[10px]">
+        <span className={`${config.iconSecondary} opacity-50`}>Tu Vuelta al Sol</span>
+        <span className={`${config.iconSecondary} opacity-50`}>☉</span>
       </div>
     </div>
   );
@@ -393,11 +399,17 @@ export const EneroEstilo2: React.FC = () => {
             <h4 className="text-[8px] font-bold uppercase text-gray-600 mb-1">
               Tus notas y reflexiones
             </h4>
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
+            {[1, 2, 3, 4, 5, 6, 7].map((i) => (
               <div key={i} className="h-2.5 border-b border-dotted border-gray-300" />
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Footer libro */}
+      <div className="absolute bottom-4 left-0 right-0 flex justify-between items-center px-8 text-[10px]">
+        <span className={`${config.iconSecondary} opacity-50`}>Tu Vuelta al Sol</span>
+        <span className={`${config.iconSecondary} opacity-50`}>☉</span>
       </div>
     </div>
   );
@@ -507,6 +519,12 @@ export const EneroEstilo3: React.FC = () => {
         {[1, 2, 3, 4].map((i) => (
           <div key={i} className="h-2.5 border-b border-dotted border-gray-300" />
         ))}
+      </div>
+
+      {/* Footer libro */}
+      <div className="absolute bottom-4 left-0 right-0 flex justify-between items-center px-8 text-[10px]">
+        <span className={`${config.iconSecondary} opacity-50`}>Tu Vuelta al Sol</span>
+        <span className={`${config.iconSecondary} opacity-50`}>☉</span>
       </div>
     </div>
   );

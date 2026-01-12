@@ -173,6 +173,12 @@ export const IndiceNavegable: React.FC = () => {
           <span className="italic">Salta, vuelve, subraya, escribe. Es tuyo.</span>
         </p>
       </div>
+
+      {/* Footer libro */}
+      <div className="absolute bottom-4 left-0 right-0 flex justify-between items-center px-8 text-[10px]">
+        <span className={`${config.iconSecondary} opacity-50`}>Tu Vuelta al Sol</span>
+        <span className={`${config.iconSecondary} opacity-50`}>☉</span>
+      </div>
     </div>
   );
 };
