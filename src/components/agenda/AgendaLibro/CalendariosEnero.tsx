@@ -163,13 +163,13 @@ export const EneroEstilo1: React.FC = () => {
       </div>
 
       {/* Calendario Grid - Compacto */}
-      <div className="mb-3 rounded-lg overflow-hidden border border-gray-200">
+      <div className="mb-4 rounded-xl overflow-hidden border-2 border-gray-200">
         {/* Días de la semana */}
         <div className={`grid grid-cols-7 ${config.headerBg}`}>
           {diasSemanaCortos.map((dia, idx) => (
             <div
               key={idx}
-              className={`text-center py-1 text-[10px] font-bold ${config.headerText} border-r border-white/20 last:border-r-0`}
+              className={`text-center py-2 text-xs font-bold ${config.headerText} border-r border-white/20 last:border-r-0`}
             >
               {dia}
             </div>
@@ -178,7 +178,7 @@ export const EneroEstilo1: React.FC = () => {
 
         {/* Semanas */}
         {weeks.map((week, weekIdx) => (
-          <div key={weekIdx} className="grid grid-cols-7 border-t border-gray-200" style={{ height: '32px' }}>
+          <div key={weekIdx} className="grid grid-cols-7 border-t border-gray-200">
             {week.map((day, dayIdx) => {
               const isCurrentMonth = isSameMonth(day, monthDate);
               const dayNum = day.getDate();
@@ -190,26 +190,31 @@ export const EneroEstilo1: React.FC = () => {
                 <div
                   key={dayIdx}
                   className={`
-                    p-1 border-r border-gray-100 last:border-r-0 relative flex items-start
+                    min-h-[52px] p-1 border-r border-gray-100 last:border-r-0 relative
                     ${isCurrentMonth ? 'bg-white' : 'bg-gray-50'}
                     ${isWeekend && isCurrentMonth && !evento ? 'bg-gray-50/50' : ''}
-                    ${evento ? `${colors?.bg}` : ''}
+                    ${evento ? `${colors?.bg} ${colors?.border} border-2` : ''}
                   `}
                 >
                   {isCurrentMonth && (
-                    <>
+                    <div className="h-full flex flex-col">
                       <span className={`
-                        text-xs font-bold
+                        text-sm font-bold
                         ${evento ? colors?.text : isWeekend ? 'text-gray-400' : 'text-gray-700'}
                       `}>
                         {dayNum}
                       </span>
                       {evento && (
-                        <div className={`absolute bottom-0.5 right-0.5 ${colors?.icon}`}>
-                          <IconoEvento tipo={evento.tipo} className="w-2 h-2" />
+                        <div className="flex-1 flex flex-col items-center justify-center">
+                          <div className={`${colors?.icon}`}>
+                            <IconoEvento tipo={evento.tipo} className="w-4 h-4" />
+                          </div>
+                          <span className={`text-[9px] font-bold ${colors?.text} text-center leading-tight mt-0.5`}>
+                            {evento.nombre.split(' ').slice(0, 2).join(' ')}
+                          </span>
                         </div>
                       )}
-                    </>
+                    </div>
                   )}
                 </div>
               );
@@ -219,26 +224,26 @@ export const EneroEstilo1: React.FC = () => {
       </div>
 
       {/* Eventos del mes - Grid compacto 2 columnas */}
-      <div className="grid grid-cols-2 gap-2 mb-2">
+      <div className="grid grid-cols-2 gap-2 mb-4">
         {eventosEnero2026.map((evento, idx) => {
           const colors = getEventoColors(evento.tipo);
           return (
             <div
               key={idx}
-              className={`p-2 rounded ${colors.bg} border ${colors.border}`}
+              className={`p-3 rounded-lg ${colors.bg} border ${colors.border}`}
             >
-              <div className="flex items-start gap-1">
+              <div className="flex items-start gap-2">
                 <div className={`${colors.icon} mt-0.5`}>
-                  <IconoEvento tipo={evento.tipo} className="w-3 h-3" />
+                  <IconoEvento tipo={evento.tipo} className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1">
-                    <span className={`text-[10px] font-bold ${colors.text}`}>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className={`text-xs font-bold ${colors.text}`}>
                       {evento.dia} ENE
                     </span>
                   </div>
-                  <p className={`text-[11px] font-bold ${colors.text} leading-tight`}>{evento.nombre}</p>
-                  <p className={`text-[9px] ${colors.text} opacity-90 leading-tight`}>
+                  <p className={`text-sm font-bold ${colors.text}`}>{evento.nombre}</p>
+                  <p className={`text-xs ${colors.text} opacity-90 mt-1 leading-tight`}>
                     {evento.descripcionCorta}
                   </p>
                 </div>
@@ -249,25 +254,31 @@ export const EneroEstilo1: React.FC = () => {
       </div>
 
       {/* Lo que se activa este mes */}
-      <div className={`${config.highlightSecondary} rounded-lg p-3`}>
-        <div className="flex items-center gap-2 mb-2">
-          <Flame className={`w-4 h-4 ${config.iconAccent}`} />
-          <h3 className={`text-[10px] font-bold uppercase tracking-wide ${config.iconAccent}`}>
+      <div className={`${config.highlightSecondary} rounded-xl p-4`}>
+        <div className="flex items-center gap-2 mb-3">
+          <Flame className={`w-5 h-5 ${config.iconAccent}`} />
+          <h3 className={`text-sm font-bold uppercase tracking-wide ${config.iconAccent}`}>
             Lo que se activa este mes
           </h3>
         </div>
-        <div className="grid grid-cols-2 gap-2">
-          <div className="flex items-start gap-1">
-            <Circle className={`w-1.5 h-1.5 ${config.iconSecondary} mt-1 flex-shrink-0`} fill="currentColor" />
-            <p className="text-[10px] text-gray-700"><span className="font-bold">Inicio consciente:</span> Sin repetir automatismos</p>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="flex items-start gap-2">
+            <Circle className={`w-2 h-2 ${config.iconSecondary} mt-1.5 flex-shrink-0`} fill="currentColor" />
+            <div>
+              <p className={`text-sm font-bold ${config.iconPrimary}`}>Inicio consciente</p>
+              <p className="text-xs text-gray-600">Sin repetir automatismos</p>
+            </div>
           </div>
-          <div className="flex items-start gap-1">
-            <Circle className={`w-1.5 h-1.5 ${config.iconSecondary} mt-1 flex-shrink-0`} fill="currentColor" />
-            <p className="text-[10px] text-gray-700"><span className="font-bold">Coherencia:</span> Entre lo externo e interno</p>
+          <div className="flex items-start gap-2">
+            <Circle className={`w-2 h-2 ${config.iconSecondary} mt-1.5 flex-shrink-0`} fill="currentColor" />
+            <div>
+              <p className={`text-sm font-bold ${config.iconPrimary}`}>Coherencia</p>
+              <p className="text-xs text-gray-600">Entre lo externo e interno</p>
+            </div>
           </div>
         </div>
-        <div className={`mt-2 pt-2 border-t border-current/10`}>
-          <p className={`text-center italic ${config.iconSecondary} text-[9px]`}>
+        <div className={`mt-4 pt-3 border-t border-current/10`}>
+          <p className={`text-center italic ${config.iconSecondary} text-sm`}>
             "¿Desde dónde estoy arrancando: desde la exigencia o desde la coherencia?"
           </p>
         </div>
