@@ -104,3 +104,20 @@ body {
     page-break-inside: avoid;
   }
 }
+
+/* ========================================
+   ESTILOS DE PANTALLA PARA PREVIEW DEL LIBRO
+   ======================================== */
+
+/* Vista previa en pantalla - las páginas se ven como en el libro */
+@media screen {
+  .print-page {
+    width: 148mm;
+    min-height: 210mm;
+    margin: 0 auto 2rem;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+}
