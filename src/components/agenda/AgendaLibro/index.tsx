@@ -14,10 +14,7 @@ import { EsenciaNatal, NodoNorte, NodoSur, PlanetasDominantes, PatronesEmocional
 import { QueEsRetornoSolar, AscendenteAnio, SolRetorno, LunaRetorno, EjesDelAnio, EjesDelAnio2, IntegracionEjes, RitualCumpleanos, MantraAnual } from './RetornoSolar';
 import { IndiceNavegable } from './Indice';
 import { CalendarioYMapaMes, LunasYEjercicios, SemanaConInterpretacion, CierreMes, PrimerDiaCiclo } from './MesCompleto';
-import { CalendarioMensualEscritura } from './CalendarioMensualEscritura';
-import { CalendarioMensualCompactoMaximo } from './CalendarioMensualCompactoMaximo';
 import { CalendarioMensualTabla } from './CalendarioMensualTabla';
-import { CalendarioCompletoModerno } from './CalendarioCompletoModerno';
 import '@/styles/print-libro.css';
 
 interface AgendaLibroProps {
@@ -105,55 +102,11 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
         <RitualCumpleanos />
         <MantraAnual />
 
-        {/* 5. PROPUESTA 1: CALENDARIO CON MÁXIMO ESPACIO PARA ESCRIBIR */}
-        <CalendarioMensualEscritura
-          monthDate={new Date(2026, 0, 1)}
-          mesNumero={1}
-          nombreZodiaco="Capricornio → Acuario"
-          simboloZodiaco="♑"
-          temaDelMes="Inicios conscientes"
-          eventos={[
-            { dia: 6, tipo: 'ingreso', titulo: 'Venus → Piscis', signo: 'Piscis' },
-            { dia: 13, tipo: 'lunaLlena', titulo: 'Luna Llena en Cáncer', signo: 'Cáncer' },
-            { dia: 20, tipo: 'ingreso', titulo: 'Sol → Acuario', signo: 'Acuario' },
-            { dia: 29, tipo: 'lunaNueva', titulo: 'Luna Nueva en Acuario', signo: 'Acuario' }
-          ]}
-        />
-
-        {/* 6. PROPUESTA 2: CALENDARIO COMPACTO MÁXIMO (4 líneas por día) */}
-        <CalendarioMensualCompactoMaximo
-          monthDate={new Date(2026, 0, 1)}
-          mesNumero={1}
-          nombreZodiaco="Capricornio → Acuario"
-          simboloZodiaco="♑"
-          eventos={[
-            { dia: 6, tipo: 'ingreso', titulo: 'Venus → Piscis', signo: 'Piscis' },
-            { dia: 13, tipo: 'lunaLlena', titulo: 'Luna Llena en Cáncer', signo: 'Cáncer' },
-            { dia: 20, tipo: 'ingreso', titulo: 'Sol → Acuario', signo: 'Acuario' },
-            { dia: 29, tipo: 'lunaNueva', titulo: 'Luna Nueva en Acuario', signo: 'Acuario' }
-          ]}
-        />
-
-        {/* 7. PROPUESTA 3: CALENDARIO TABLA (formato profesional) */}
+        {/* 5. CALENDARIO MENSUAL (formato tabla profesional) */}
         <CalendarioMensualTabla
           monthDate={new Date(2026, 0, 1)}
           mesNumero={1}
           nombreZodiaco="Capicornio → Acuario"
-          simboloZodiaco="♑"
-          temaDelMes="Inicios conscientes"
-          eventos={[
-            { dia: 6, tipo: 'ingreso', titulo: 'Venus → Piscis', signo: 'Piscis' },
-            { dia: 13, tipo: 'lunaLlena', titulo: 'Luna Llena en Cáncer', signo: 'Cáncer' },
-            { dia: 20, tipo: 'ingreso', titulo: 'Sol → Acuario', signo: 'Acuario' },
-            { dia: 29, tipo: 'lunaNueva', titulo: 'Luna Nueva en Acuario', signo: 'Acuario' }
-          ]}
-        />
-
-        {/* 8. PROPUESTA 4: CALENDARIO COMPLETO MODERNO (con eventos + interpretaciones) */}
-        <CalendarioCompletoModerno
-          monthDate={new Date(2026, 0, 1)}
-          mesNumero={1}
-          nombreZodiaco="Capricornio → Acuario"
           simboloZodiaco="♑"
           temaDelMes="Inicios conscientes"
           eventos={[

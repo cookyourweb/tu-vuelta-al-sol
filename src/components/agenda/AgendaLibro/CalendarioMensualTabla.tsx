@@ -16,6 +16,7 @@ interface EventoMes {
   tipo: 'lunaNueva' | 'lunaLlena' | 'eclipse' | 'retrogrado' | 'ingreso' | 'especial' | 'cumpleanos';
   titulo: string;
   signo?: string;
+  interpretacion?: string;
 }
 
 interface CalendarioTablaProps {
@@ -63,6 +64,19 @@ const IconoEvento = ({ tipo, className = "w-3 h-3" }: { tipo: string; className?
   }
 };
 
+const getEventoColor = (tipo: string) => {
+  switch (tipo) {
+    case 'lunaLlena': return { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', icon: 'text-amber-500' };
+    case 'lunaNueva': return { bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-700', icon: 'text-indigo-500' };
+    case 'eclipse': return { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700', icon: 'text-purple-500' };
+    case 'cumpleanos': return { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-700', icon: 'text-orange-500' };
+    case 'retrogrado': return { bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-700', icon: 'text-rose-500' };
+    case 'ingreso': return { bg: 'bg-teal-50', border: 'border-teal-200', text: 'text-teal-700', icon: 'text-teal-500' };
+    case 'especial': return { bg: 'bg-fuchsia-50', border: 'border-fuchsia-200', text: 'text-fuchsia-700', icon: 'text-fuchsia-500' };
+    default: return { bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-700', icon: 'text-gray-500' };
+  }
+};
+
 const FooterLibro = ({ pagina }: { pagina?: number }) => {
   const { config } = useStyle();
   return (
@@ -86,8 +100,13 @@ export const CalendarioMensualTabla: React.FC<CalendarioTablaProps> = ({
   const { config } = useStyle();
   const weeks = generateCalendarWeeks(monthDate);
 
+  // Filtrar eventos que tienen interpretación
+  const eventosConInterpretacion = eventos.filter(e => e.interpretacion);
+
   return (
-    <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
+    <>
+      {/* PÁGINA 1: Calendario Tabla */}
+      <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
       {/* Header */}
       <div className="text-center mb-4 pb-3 border-b-2 border-gray-300">
         <div className="flex items-center justify-center gap-2 mb-1">
@@ -190,8 +209,76 @@ export const CalendarioMensualTabla: React.FC<CalendarioTablaProps> = ({
         })}
       </div>
 
-      <FooterLibro pagina={mesNumero * 10} />
-    </div>
+        <FooterLibro pagina={mesNumero * 10} />
+      </div>
+
+      {/* PÁGINA 2: Eventos del Mes (si hay eventos con interpretación) */}
+      {eventosConInterpretacion.length > 0 && (
+        <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
+          {/* Header de eventos */}
+          <div className="text-center mb-6 pb-4 border-b-2 border-gray-300">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Sparkles className={`w-6 h-6 ${config.iconPrimary}`} />
+              <h2 className={`text-xl font-display ${config.titleGradient}`}>
+                Eventos de {format(monthDate, 'MMMM', { locale: es })}
+              </h2>
+            </div>
+            <p className={`text-xs italic ${config.iconSecondary}`}>
+              {nombreZodiaco}
+            </p>
+          </div>
+
+          {/* Lista de eventos con interpretaciones */}
+          <div className="flex-1 space-y-4">
+            {eventosConInterpretacion.map((evento, idx) => {
+              const colors = getEventoColor(evento.tipo);
+              return (
+                <div
+                  key={idx}
+                  className={`${colors.bg} ${colors.border} border-2 rounded-lg p-4`}
+                >
+                  {/* Título del evento */}
+                  <div className="flex items-center gap-2 mb-2">
+                    <IconoEvento tipo={evento.tipo} className={`w-4 h-4 ${colors.icon}`} />
+                    <span className={`text-sm font-bold ${colors.text}`}>
+                      Día {evento.dia}: {evento.titulo}
+                    </span>
+                    {evento.signo && (
+                      <span className={`text-xs ${colors.text} opacity-70`}>
+                        en {evento.signo}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Interpretación */}
+                  {evento.interpretacion && (
+                    <div>
+                      <p className={`text-xs ${colors.text} leading-relaxed mb-3`}>
+                        {evento.interpretacion}
+                      </p>
+
+                      {/* Espacio para notas personales */}
+                      <div className="mt-3 pt-3 border-t border-gray-300">
+                        <p className="text-[10px] text-gray-500 mb-2">Mis notas:</p>
+                        {Array.from({ length: 3 }).map((_, i) => (
+                          <div
+                            key={i}
+                            className="border-b border-gray-300"
+                            style={{ height: '16px', marginBottom: '6px' }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <FooterLibro pagina={mesNumero * 10 + 1} />
+        </div>
+      )}
+    </>
   );
 };
 
