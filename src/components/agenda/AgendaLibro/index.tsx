@@ -14,6 +14,7 @@ import { EsenciaNatal, NodoNorte, NodoSur, PlanetasDominantes, PatronesEmocional
 import { QueEsRetornoSolar, AscendenteAnio, SolRetorno, LunaRetorno, EjesDelAnio, EjesDelAnio2, IntegracionEjes, RitualCumpleanos, MantraAnual } from './RetornoSolar';
 import { IndiceNavegable } from './Indice';
 import { CalendarioYMapaMes, LunasYEjercicios, SemanaConInterpretacion, CierreMes, PrimerDiaCiclo } from './MesCompleto';
+import { CalendarioMensualEscritura } from './CalendarioMensualEscritura';
 
 interface AgendaLibroProps {
   onClose: () => void;
@@ -97,15 +98,13 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
         <RitualCumpleanos />
         <MantraAnual />
 
-        {/* 5. CALENDARIOS - Enero 2026 */}
-        <CalendarioYMapaMes
+        {/* 5. CALENDARIO MENSUAL CON ESPACIO PARA ESCRIBIR - Enero 2026 */}
+        <CalendarioMensualEscritura
           monthDate={new Date(2026, 0, 1)}
           mesNumero={1}
           nombreZodiaco="Capricornio → Acuario"
           simboloZodiaco="♑"
           temaDelMes="Inicios conscientes"
-          energiaDelMes="Enero es el mes de los inicios, pero este año no desde la exigencia sino desde la coherencia interna. Es tiempo de parar, revisar y decidir con calma."
-          preguntaGuia="¿Desde dónde estoy arrancando: desde la exigencia o desde la coherencia?"
           eventos={[
             { dia: 6, tipo: 'ingreso', titulo: 'Venus → Piscis', signo: 'Piscis' },
             { dia: 13, tipo: 'lunaLlena', titulo: 'Luna Llena en Cáncer', signo: 'Cáncer' },
