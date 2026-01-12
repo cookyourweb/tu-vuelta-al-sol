@@ -17,6 +17,7 @@ import { CalendarioYMapaMes, LunasYEjercicios, SemanaConInterpretacion, CierreMe
 import { CalendarioMensualEscritura } from './CalendarioMensualEscritura';
 import { CalendarioMensualCompactoMaximo } from './CalendarioMensualCompactoMaximo';
 import { CalendarioMensualTabla } from './CalendarioMensualTabla';
+import { CalendarioCompletoModerno } from './CalendarioCompletoModerno';
 import '@/styles/print-libro.css';
 
 interface AgendaLibroProps {
@@ -147,6 +148,46 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
             { dia: 29, tipo: 'lunaNueva', titulo: 'Luna Nueva en Acuario', signo: 'Acuario' }
           ]}
         />
+
+        {/* 8. PROPUESTA 4: CALENDARIO COMPLETO MODERNO (con eventos + interpretaciones) */}
+        <CalendarioCompletoModerno
+          monthDate={new Date(2026, 0, 1)}
+          mesNumero={1}
+          nombreZodiaco="Capricornio → Acuario"
+          simboloZodiaco="♑"
+          temaDelMes="Inicios conscientes"
+          eventos={[
+            {
+              dia: 6,
+              tipo: 'ingreso',
+              titulo: 'Venus → Piscis',
+              signo: 'Piscis',
+              interpretacion: 'Venus ingresa en Piscis trayendo una energía más empática y compasiva al amor y las relaciones. Es tiempo de conectar desde el corazón.'
+            },
+            {
+              dia: 13,
+              tipo: 'lunaLlena',
+              titulo: 'Luna Llena en Cáncer',
+              signo: 'Cáncer',
+              interpretacion: 'Culminación emocional. Momento para soltar lo que ya no te pertenece en el ámbito familiar y emocional. Cierra ciclos con amor.'
+            },
+            {
+              dia: 20,
+              tipo: 'ingreso',
+              titulo: 'Sol → Acuario',
+              signo: 'Acuario',
+              interpretacion: 'El Sol ingresa en Acuario iniciando una temporada de innovación, comunidad y pensamiento original. Tiempo de romper moldes.'
+            },
+            {
+              dia: 29,
+              tipo: 'lunaNueva',
+              titulo: 'Luna Nueva en Acuario',
+              signo: 'Acuario',
+              interpretacion: 'Siembra intenciones sobre libertad, amistad y tu visión única del mundo. Es momento de conectar con tu tribu y tu propósito social.'
+            }
+          ]}
+        />
+
         <LunasYEjercicios
           monthDate={new Date(2026, 0, 1)}
           eventos={[
