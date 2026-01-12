@@ -13,7 +13,7 @@ import { CartaBienvenida, TemaCentralAnio, LoQueVieneAMover, LoQuePideSoltar, Pa
 import { EsenciaNatal, NodoNorte, NodoSur, PlanetasDominantes, PatronesEmocionales } from './SoulChart';
 import { QueEsRetornoSolar, AscendenteAnio, SolRetorno, LunaRetorno, EjesDelAnio, EjesDelAnio2, IntegracionEjes, RitualCumpleanos, MantraAnual } from './RetornoSolar';
 import { IndiceNavegable } from './Indice';
-import { EneroEstilo1, EneroEstilo2, EneroEstilo3 } from './CalendariosEnero';
+import { CalendarioYMapaMes, LunasYEjercicios, SemanaConInterpretacion, CierreMes, PrimerDiaCiclo } from './MesCompleto';
 
 interface AgendaLibroProps {
   onClose: () => void;
@@ -97,10 +97,56 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
         <RitualCumpleanos />
         <MantraAnual />
 
-        {/* 5. CALENDARIOS - Enero 2026 en 3 estilos */}
-        <EneroEstilo1 />
-        <EneroEstilo2 />
-        <EneroEstilo3 />
+        {/* 5. CALENDARIOS - Enero 2026 */}
+        <CalendarioYMapaMes
+          monthDate={new Date(2026, 0, 1)}
+          mesNumero={1}
+          nombreZodiaco="Capricornio → Acuario"
+          simboloZodiaco="♑"
+          temaDelMes="Inicios conscientes"
+          energiaDelMes="Enero es el mes de los inicios, pero este año no desde la exigencia sino desde la coherencia interna. Es tiempo de parar, revisar y decidir con calma."
+          preguntaGuia="¿Desde dónde estoy arrancando: desde la exigencia o desde la coherencia?"
+          eventos={[
+            { dia: 6, tipo: 'ingreso', titulo: 'Venus → Piscis', signo: 'Piscis' },
+            { dia: 13, tipo: 'lunaLlena', titulo: 'Luna Llena en Cáncer', signo: 'Cáncer' },
+            { dia: 20, tipo: 'ingreso', titulo: 'Sol → Acuario', signo: 'Acuario' },
+            { dia: 29, tipo: 'lunaNueva', titulo: 'Luna Nueva en Acuario', signo: 'Acuario' }
+          ]}
+        />
+        <LunasYEjercicios
+          monthDate={new Date(2026, 0, 1)}
+          eventos={[
+            {
+              dia: 13,
+              tipo: 'lunaLlena',
+              titulo: 'Luna Llena en Cáncer',
+              interpretacion: 'Culminación emocional. Momento para soltar lo que ya no te pertenece en el ámbito familiar y emocional.'
+            },
+            {
+              dia: 29,
+              tipo: 'lunaNueva',
+              titulo: 'Luna Nueva en Acuario',
+              interpretacion: 'Siembra intenciones sobre libertad, comunidad e innovación. Tiempo de conectar con tu visión única.'
+            }
+          ]}
+          ejercicioCentral={{
+            titulo: 'Revisar automatismos',
+            descripcion: 'Durante este mes, identifica una acción que haces por inercia y pregúntate: ¿esto me sigue sirviendo?'
+          }}
+          mantra="Arranco desde mi verdad, no desde la prisa"
+        />
+        <SemanaConInterpretacion
+          weekStart={new Date(2026, 0, 5)}
+          weekNumber={1}
+          mesNombre="Enero 2026"
+          tematica="Pausa y revisión"
+          eventos={[
+            { dia: 6, tipo: 'ingreso', titulo: 'Venus → Piscis', signo: 'Piscis' }
+          ]}
+          interpretacionSemanal="Esta primera semana del año es para bajar el ritmo y revisar qué quieres cultivar realmente. No hay prisa."
+          ejercicioSemana="Escribe 3 cosas que NO quieres repetir este año."
+        />
+        <CierreMes monthDate={new Date(2026, 0, 1)} />
 
       </div>
     </div>

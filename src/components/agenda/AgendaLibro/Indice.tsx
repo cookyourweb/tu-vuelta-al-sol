@@ -1,11 +1,10 @@
-'use client';
-
 import React from 'react';
 import { useStyle } from '@/context/StyleContext';
 import {
   BookOpen, Sun, Moon, Star, Calendar,
   PenLine, Heart, Sparkles
 } from 'lucide-react';
+import { FooterLibro } from './MesCompleto';
 
 interface SeccionIndice {
   titulo: string;
@@ -69,7 +68,7 @@ export const IndiceNavegable: React.FC = () => {
       icono: <Calendar className="w-4 h-4" />,
       subsecciones: [
         { titulo: 'Línea de Tiempo Emocional', pagina: 19 },
-        { titulo: 'Meses Clave', pagina: 20 },
+        { titulo: 'Meses Clave y Puntos de Giro', pagina: 20 },
         { titulo: 'Grandes Aprendizajes', pagina: 21 },
       ]
     },
@@ -78,87 +77,131 @@ export const IndiceNavegable: React.FC = () => {
       pagina: 22,
       icono: <Moon className="w-4 h-4" />,
       subsecciones: [
-        { titulo: 'Calendario Mensual', pagina: 22 },
-        { titulo: 'Semanas 1-4', pagina: 23 },
+        { titulo: 'Calendario + Mapa del Mes', pagina: 22 },
+        { titulo: 'Lunas + Ejercicios + Mantra', pagina: 23 },
+        { titulo: 'Semanas con Interpretación', pagina: 24 },
+        { titulo: 'Cierre del Mes', pagina: 28 },
       ]
     },
     {
-      titulo: 'Febrero - Diciembre 2026',
-      pagina: 27,
+      titulo: 'Febrero 2026 · Retorno Solar',
+      pagina: 29,
+      icono: <Sun className="w-4 h-4" />,
+      subsecciones: [
+        { titulo: 'Primer Día del Ciclo', pagina: 29 },
+        { titulo: 'Calendario + Mapa', pagina: 30 },
+        { titulo: 'Semana del Cumpleaños', pagina: 32 },
+      ]
+    },
+    {
+      titulo: 'Marzo - Diciembre 2026',
+      pagina: 35,
       icono: <Calendar className="w-4 h-4" />,
     },
     {
+      titulo: 'Enero 2027',
+      pagina: 110,
+      icono: <Moon className="w-4 h-4" />,
+    },
+    {
       titulo: 'Terapias Creativas',
-      pagina: 132,
+      pagina: 120,
       icono: <PenLine className="w-4 h-4" />,
       subsecciones: [
-        { titulo: 'Escritura Terapéutica', pagina: 132 },
-        { titulo: 'Visualización', pagina: 133 },
-        { titulo: 'Ritual Simbólico', pagina: 134 },
+        { titulo: 'Escritura Terapéutica', pagina: 120 },
+        { titulo: 'Visualización', pagina: 121 },
+        { titulo: 'Ritual Simbólico', pagina: 122 },
+        { titulo: 'Trabajo Emocional', pagina: 123 },
       ]
     },
     {
       titulo: 'Cierre de Ciclo',
-      pagina: 136,
+      pagina: 124,
       icono: <Heart className="w-4 h-4" />,
       subsecciones: [
-        { titulo: 'Quién Era, Quién Soy', pagina: 136 },
-        { titulo: 'Preparación Próxima Vuelta', pagina: 137 },
-        { titulo: 'Carta de Cierre', pagina: 138 },
+        { titulo: 'Último Día del Ciclo', pagina: 124 },
+        { titulo: 'Quién Era, Quién Soy', pagina: 125 },
+        { titulo: 'Carta de Cierre', pagina: 126 },
       ]
     },
   ];
 
   return (
-    <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
+    <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm 20mm' }}>
+      {/* Header elegante */}
       <div className="text-center mb-8">
-        <span className={`${config.iconSecondary} opacity-60 text-sm tracking-[0.3em] uppercase ${config.fontBody}`}>Navegación</span>
-        <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient} mt-2`}>Índice</h2>
+        <h1 className={`text-3xl font-display ${config.titleGradient} mb-2`}>
+          Índice
+        </h1>
+        <div className={`${config.divider} w-24 mx-auto`} />
+        <p className={`mt-4 text-sm italic ${config.iconSecondary}`}>
+          Tu mapa para navegar el año
+        </p>
       </div>
 
-      <div className={`space-y-4 text-gray-700 leading-relaxed max-w-2xl mx-auto ${config.fontBody}`}>
-        {secciones.map((seccion, idx) => (
-          <div key={idx}>
-            {/* Sección principal */}
-            <div className="flex items-center gap-3 py-2 border-b border-gray-200">
-              <span className={`${config.iconPrimary}`}>
-                {seccion.icono}
-              </span>
-              <span className="flex-1 font-medium text-gray-800">
-                {seccion.titulo}
-              </span>
-              <span className="text-gray-300">{'·'.repeat(15)}</span>
-              <span className={`font-bold ${config.iconPrimary}`}>
-                {seccion.pagina}
-              </span>
-            </div>
-
-            {/* Subsecciones */}
-            {seccion.subsecciones && (
-              <div className="ml-8 space-y-1 mt-2">
-                {seccion.subsecciones.map((sub, subIdx) => (
-                  <div
-                    key={subIdx}
-                    className="flex items-center gap-2"
-                  >
-                    <span className="flex-1 text-sm text-gray-600">
-                      {sub.titulo}
-                    </span>
-                    <span className="text-gray-200">{'·'.repeat(12)}</span>
-                    <span className="text-sm text-gray-500">
-                      {sub.pagina}
-                    </span>
-                  </div>
-                ))}
+      {/* Grid de secciones */}
+      <div className="flex-1">
+        <div className="space-y-1">
+          {secciones.map((seccion, idx) => (
+            <div key={idx}>
+              {/* Sección principal */}
+              <div className={`flex items-center gap-3 py-2 border-b ${config.highlightPrimary.includes('border') ? 'border-gray-100' : 'border-gray-100'}`}>
+                <span className={`${config.iconPrimary}`}>
+                  {seccion.icono}
+                </span>
+                <span className={`flex-1 font-display text-sm font-medium text-gray-800`}>
+                  {seccion.titulo}
+                </span>
+                <span className="flex-shrink-0">
+                  <span className="text-gray-300 tracking-[0.2em] text-xs">
+                    {'·'.repeat(15)}
+                  </span>
+                </span>
+                <span className={`w-8 text-right font-bold text-sm ${config.iconPrimary}`}>
+                  {seccion.pagina}
+                </span>
               </div>
-            )}
-          </div>
-        ))}
+
+              {/* Subsecciones */}
+              {seccion.subsecciones && (
+                <div className={`ml-8 border-l-2 ${config.cardBorder.replace('border-l-4', '')}`}>
+                  {seccion.subsecciones.map((sub, subIdx) => (
+                    <div
+                      key={subIdx}
+                      className="flex items-center gap-3 py-1 pl-4"
+                    >
+                      <span className="flex-1 text-xs text-gray-600">
+                        {sub.titulo}
+                      </span>
+                      <span className="flex-shrink-0">
+                        <span className="text-gray-200 tracking-[0.15em] text-xs">
+                          {'·'.repeat(10)}
+                        </span>
+                      </span>
+                      <span className="w-8 text-right text-xs text-gray-500">
+                        {sub.pagina}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className={`mt-auto text-center ${config.iconSecondary} opacity-60 italic ${config.fontBody}`}>
-        Tu mapa para navegar el año ✧
+      {/* Footer */}
+      <div className="mt-6 pt-4 border-t border-gray-200 text-center">
+        <p className={`text-xs ${config.iconSecondary}`}>
+          Este libro se lee según lo necesites, no de forma lineal.
+          <br />
+          <span className="italic">Salta, vuelve, subraya, escribe. Es tuyo.</span>
+        </p>
       </div>
+
+      <FooterLibro />
     </div>
   );
 };
+
+export default IndiceNavegable;
