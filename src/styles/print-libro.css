@@ -195,8 +195,12 @@
     min-height: 297mm;
     margin: 20px auto;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    background: white;
     position: relative;
+  }
+
+  /* Fondo blanco solo para páginas interiores (no portada/contraportada) */
+  .print-page:not(.print-no-bg) {
+    background: white;
   }
 
   /* Contenedor del libro */
