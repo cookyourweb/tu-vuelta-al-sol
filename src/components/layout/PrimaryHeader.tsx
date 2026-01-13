@@ -199,7 +199,7 @@ export default function PrimaryHeader({ className = '' }: PrimaryHeaderProps) {
   }, [isDropdownOpen]);
 
   return (
-    <header className={`bg-gradient-to-r from-purple-900 to-indigo-900 backdrop-blur-sm border-b border-purple-700/50 sticky top-0 z-50 shadow-lg ${className}`}>
+    <header className={`no-print bg-gradient-to-r from-purple-900 to-indigo-900 backdrop-blur-sm border-b border-purple-700/50 sticky top-0 z-50 shadow-lg ${className}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           
