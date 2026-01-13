@@ -171,6 +171,18 @@
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+
+  /* PORTADA Y CONTRAPORTADA: Sin fondo al imprimir (para papel de color) */
+  .print-no-bg {
+    background: white !important;
+    background-image: none !important;
+    background-color: white !important;
+  }
+
+  /* Mantener el patrón muy sutil en portada/contraportada */
+  .print-no-bg [class*="pattern"] {
+    opacity: 0.05 !important;
+  }
 }
 
 /* ============================================

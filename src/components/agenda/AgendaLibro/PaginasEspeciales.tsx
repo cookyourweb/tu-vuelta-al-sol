@@ -320,7 +320,7 @@ export const Contraportada = () => {
   const { config } = useStyle();
 
   return (
-    <div className={`print-page flex flex-col items-center justify-center text-center relative overflow-hidden ${config.headerBg}`} style={{ padding: '15mm' }}>
+    <div className={`print-page print-no-bg flex flex-col items-center justify-center text-center relative overflow-hidden ${config.headerBg}`} style={{ padding: '15mm' }}>
       {/* Decoración de fondo */}
       <div className={`absolute inset-0 ${config.pattern} opacity-30`} />
 

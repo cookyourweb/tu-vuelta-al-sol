@@ -74,7 +74,7 @@ body {
   .print-page {
     page-break-after: always;
     width: 148mm;
-    height: 210mm;
+    height: 297mm;
     position: relative;
     overflow: hidden;
     background: white;
@@ -113,7 +113,7 @@ body {
 @media screen {
   .print-page {
     width: 148mm;
-    min-height: 210mm;
+    min-height: 297mm;
     margin: 0 auto 2rem;
     box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
     border-radius: 4px;
