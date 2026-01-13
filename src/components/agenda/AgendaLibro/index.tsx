@@ -15,8 +15,10 @@ import { LineaTiempoEmocional, MesesClavePuntosGiro, GrandesAprendizajes } from 
 import { EsenciaNatal, NodoNorte, NodoSur, PlanetasDominantes, PatronesEmocionales } from './SoulChart';
 import { QueEsRetornoSolar, AscendenteAnio, SolRetorno, LunaRetorno, EjesDelAnio, EjesDelAnio2, IntegracionEjes, RitualCumpleanos, MantraAnual } from './RetornoSolar';
 import { IndiceNavegable } from './Indice';
-import { CalendarioYMapaMes, LunasYEjercicios, SemanaConInterpretacion, CierreMes, PrimerDiaCiclo } from './MesCompleto';
+import { CalendarioYMapaMes, LunasYEjercicios, SemanaConInterpretacion, CierreMes, PrimerDiaCiclo as PrimerDiaCicloMes } from './MesCompleto';
 import { CalendarioMensualTabla } from './CalendarioMensualTabla';
+import { EscrituraTerapeutica, Visualizacion, RitualSimbolico, TrabajoEmocional } from './TerapiaCreativa';
+import { PrimerDiaCiclo, UltimoDiaCiclo, QuienEraQuienSoy, PreparacionProximaVuelta, CartaCierre, PaginaFinalBlanca, Contraportada } from './PaginasEspeciales';
 import '@/styles/print-libro.css';
 
 interface AgendaLibroProps {
@@ -389,6 +391,25 @@ Pregunta para reflexionar:
             <CierreMes monthDate={new Date(2026, 1, 1)} />
           </div>
         </div>
+
+        {/* TERAPIA ASTROLÓGICA CREATIVA */}
+        <div id="terapia-creativa">
+          <EscrituraTerapeutica />
+          <Visualizacion />
+          <RitualSimbolico />
+          <TrabajoEmocional />
+        </div>
+
+        {/* CIERRE DEL CICLO */}
+        <div id="cierre-ciclo">
+          <QuienEraQuienSoy />
+          <PreparacionProximaVuelta />
+          <CartaCierre name={userName} />
+          <PaginaFinalBlanca />
+        </div>
+
+        {/* CONTRAPORTADA */}
+        <Contraportada />
 
       </div>
     </div>

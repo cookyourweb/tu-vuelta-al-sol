@@ -105,6 +105,30 @@ export const IndiceNavegable: React.FC = () => {
         { titulo: 'Febrero 2026 (Cumpleaños)', pagina: 21, id: 'mes-febrero' },
       ]
     },
+    {
+      titulo: 'Terapia Astrológica Creativa',
+      pagina: 140,
+      id: 'terapia-creativa',
+      icono: <Heart className="w-4 h-4" />,
+      subsecciones: [
+        { titulo: 'Escritura Terapéutica', pagina: 140, id: 'escritura-terapeutica' },
+        { titulo: 'Visualización Guiada', pagina: 141, id: 'visualizacion' },
+        { titulo: 'Ritual Simbólico', pagina: 142, id: 'ritual-simbolico' },
+        { titulo: 'Trabajo Emocional', pagina: 143, id: 'trabajo-emocional' },
+      ]
+    },
+    {
+      titulo: 'Cierre del Ciclo',
+      pagina: 145,
+      id: 'cierre-ciclo',
+      icono: <Sparkles className="w-4 h-4" />,
+      subsecciones: [
+        { titulo: 'El Viaje Completado', pagina: 145, id: 'quien-era-quien-soy' },
+        { titulo: 'Preparación Próxima Vuelta', pagina: 146, id: 'preparacion-proxima' },
+        { titulo: 'Carta de Cierre', pagina: 147, id: 'carta-cierre' },
+        { titulo: 'Página Final', pagina: 148, id: 'pagina-final' },
+      ]
+    },
   ];
 
   return (
