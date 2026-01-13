@@ -3,6 +3,7 @@ import { format, startOfMonth, endOfMonth, startOfWeek, addDays, isSameMonth, is
 import { es } from 'date-fns/locale';
 import { useStyle } from '@/context/StyleContext';
 import { Moon, Sun, Circle, Sparkles, Star } from 'lucide-react';
+import { FooterLibro } from './MesCompleto';
 
 // ============ CALENDARIO TABLA LIMPIA ============
 // - Formato de agenda profesional
@@ -75,17 +76,6 @@ const getEventoColor = (tipo: string) => {
     case 'especial': return { bg: 'bg-fuchsia-50', border: 'border-fuchsia-200', text: 'text-fuchsia-700', icon: 'text-fuchsia-500' };
     default: return { bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-700', icon: 'text-gray-500' };
   }
-};
-
-const FooterLibro = ({ pagina }: { pagina?: number }) => {
-  const { config } = useStyle();
-  return (
-    <div className="absolute bottom-4 left-0 right-0 flex justify-between items-center px-8 text-[10px]">
-      <span className={`${config.iconSecondary} opacity-50`}>Tu Vuelta al Sol</span>
-      {pagina && <span className={`${config.iconSecondary} opacity-50`}>{pagina}</span>}
-      <span className={`${config.iconSecondary} opacity-50`}>☉</span>
-    </div>
-  );
 };
 
 export const CalendarioMensualTabla: React.FC<CalendarioTablaProps> = ({

@@ -1,6 +1,7 @@
 'use client';
 
 import { useStyle } from "@/context/StyleContext";
+import { FooterLibro } from './MesCompleto';
 
 export const EsenciaNatal = () => {
   const { config } = useStyle();
@@ -68,6 +69,8 @@ export const EsenciaNatal = () => {
           </div>
         </div>
       </div>
+
+      <FooterLibro pagina={7} />
     </div>
   );
 };
@@ -108,6 +111,8 @@ export const NodoNorte = () => {
           </div>
         </div>
       </div>
+
+      <FooterLibro pagina={8} />
     </div>
   );
 };
@@ -147,6 +152,8 @@ export const NodoSur = () => {
           </div>
         </div>
       </div>
+
+      <FooterLibro pagina={9} />
     </div>
   );
 };
@@ -199,6 +206,8 @@ export const PlanetasDominantes = () => {
           </div>
         </div>
       </div>
+
+      <FooterLibro pagina={10} />
     </div>
   );
 };
@@ -252,6 +261,8 @@ export const PatronesEmocionales = () => {
           </div>
         </div>
       </div>
+
+      <FooterLibro pagina={11} />
     </div>
   );
 };

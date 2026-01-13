@@ -1,6 +1,7 @@
 'use client';
 
 import { useStyle } from "@/context/StyleContext";
+import { FooterLibro } from './MesCompleto';
 
 interface PortalEntradaProps {
   name: string;
@@ -132,6 +133,8 @@ export const PaginaIntencion = () => {
       <div className={`mt-auto text-center ${config.iconSecondary} opacity-40 text-sm`}>
         ✧
       </div>
+
+      <FooterLibro pagina={2} />
     </div>
   );
 };
