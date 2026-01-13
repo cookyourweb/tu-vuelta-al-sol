@@ -180,13 +180,34 @@ export const CalendarioMensualTabla: React.FC<CalendarioTablaProps> = ({
                         </div>
                       </div>
 
-                      {/* Evento si existe */}
+                      {/* Evento si existe - Con nombre */}
                       {(evento || isBirthday) && (
-                        <div className="flex items-center justify-center gap-0.5 mb-1">
-                          <IconoEvento
-                            tipo={isBirthday ? 'cumpleanos' : evento!.tipo}
-                            className={`${isBirthday ? config.iconAccent : config.iconSecondary}`}
-                          />
+                        <div className="mb-1">
+                          <div className="flex items-center justify-center gap-1 mb-0.5">
+                            <IconoEvento
+                              tipo={isBirthday ? 'cumpleanos' : evento!.tipo}
+                              className={`${isBirthday ? config.iconAccent : config.iconSecondary} w-3 h-3`}
+                            />
+                          </div>
+                          {evento && (
+                            <div className="text-center px-0.5">
+                              <p className={`text-[7px] leading-tight font-medium ${config.iconPrimary}`}>
+                                {evento.titulo}
+                              </p>
+                              {evento.signo && (
+                                <p className={`text-[6px] ${config.iconSecondary} italic`}>
+                                  {evento.signo}
+                                </p>
+                              )}
+                            </div>
+                          )}
+                          {isBirthday && !evento && (
+                            <div className="text-center px-0.5">
+                              <p className={`text-[7px] leading-tight font-medium ${config.iconAccent}`}>
+                                ¡Tu día!
+                              </p>
+                            </div>
+                          )}
                         </div>
                       )}
 

@@ -10,118 +10,79 @@ interface SeccionIndice {
   titulo: string;
   pagina: number;
   icono: React.ReactNode;
-  subsecciones?: { titulo: string; pagina: number }[];
+  id: string; // ID para navegación
+  subsecciones?: { titulo: string; pagina: number; id: string }[];
 }
 
 export const IndiceNavegable: React.FC = () => {
   const { config } = useStyle();
 
+  const handleNavigation = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   const secciones: SeccionIndice[] = [
     {
       titulo: 'Portal de Entrada',
       pagina: 1,
+      id: 'portal-entrada',
       icono: <Sparkles className="w-4 h-4" />,
       subsecciones: [
-        { titulo: 'Portada Personalizada', pagina: 1 },
-        { titulo: 'Intención del Año', pagina: 2 },
+        { titulo: 'Portada Personalizada', pagina: 1, id: 'portada' },
+        { titulo: 'Intención del Año', pagina: 2, id: 'intencion-anio' },
       ]
     },
     {
       titulo: 'Tu Año, Tu Viaje',
       pagina: 3,
+      id: 'tu-anio-tu-viaje',
       icono: <BookOpen className="w-4 h-4" />,
       subsecciones: [
-        { titulo: 'Carta de Bienvenida', pagina: 3 },
-        { titulo: 'Tema Central del Año', pagina: 4 },
-        { titulo: 'Lo Que Viene a Mover', pagina: 5 },
-        { titulo: 'Lo Que Pide Soltar', pagina: 6 },
+        { titulo: 'Carta de Bienvenida', pagina: 3, id: 'carta-bienvenida' },
+        { titulo: 'Tema Central del Año', pagina: 4, id: 'tema-central' },
+        { titulo: 'Lo Que Viene a Mover', pagina: 5, id: 'viene-mover' },
+        { titulo: 'Lo Que Pide Soltar', pagina: 6, id: 'pide-soltar' },
       ]
     },
     {
       titulo: 'Soul Chart',
       pagina: 7,
+      id: 'soul-chart',
       icono: <Star className="w-4 h-4" />,
       subsecciones: [
-        { titulo: 'Esencia Natal', pagina: 7 },
-        { titulo: 'Nodo Norte', pagina: 8 },
-        { titulo: 'Nodo Sur', pagina: 9 },
-        { titulo: 'Planetas Dominantes', pagina: 10 },
-        { titulo: 'Patrones Emocionales', pagina: 11 },
+        { titulo: 'Esencia Natal', pagina: 7, id: 'esencia-natal' },
+        { titulo: 'Nodo Norte', pagina: 8, id: 'nodo-norte' },
+        { titulo: 'Nodo Sur', pagina: 9, id: 'nodo-sur' },
+        { titulo: 'Planetas Dominantes', pagina: 10, id: 'planetas-dominantes' },
+        { titulo: 'Patrones Emocionales', pagina: 11, id: 'patrones-emocionales' },
       ]
     },
     {
       titulo: 'Retorno Solar',
       pagina: 12,
+      id: 'retorno-solar',
       icono: <Sun className="w-4 h-4" />,
       subsecciones: [
-        { titulo: '¿Qué es el Retorno Solar?', pagina: 12 },
-        { titulo: 'Ascendente del Año', pagina: 13 },
-        { titulo: 'Sol en Retorno', pagina: 14 },
-        { titulo: 'Luna en Retorno', pagina: 15 },
-        { titulo: 'Ejes del Año', pagina: 16 },
-        { titulo: 'Ritual de Cumpleaños', pagina: 18 },
+        { titulo: '¿Qué es el Retorno Solar?', pagina: 12, id: 'que-es-retorno' },
+        { titulo: 'Ascendente del Año', pagina: 13, id: 'ascendente-anio' },
+        { titulo: 'Sol en Retorno', pagina: 14, id: 'sol-retorno' },
+        { titulo: 'Luna en Retorno', pagina: 15, id: 'luna-retorno' },
+        { titulo: 'Ejes del Año', pagina: 16, id: 'ejes-anio' },
+        { titulo: 'Ritual de Cumpleaños', pagina: 18, id: 'ritual-cumpleanos' },
       ]
     },
     {
-      titulo: 'Calendario Anual',
+      titulo: 'Calendario Mensual',
       pagina: 19,
+      id: 'calendario-mensual',
       icono: <Calendar className="w-4 h-4" />,
       subsecciones: [
-        { titulo: 'Línea de Tiempo Emocional', pagina: 19 },
-        { titulo: 'Meses Clave y Puntos de Giro', pagina: 20 },
-        { titulo: 'Grandes Aprendizajes', pagina: 21 },
-      ]
-    },
-    {
-      titulo: 'Enero 2026',
-      pagina: 22,
-      icono: <Moon className="w-4 h-4" />,
-      subsecciones: [
-        { titulo: 'Calendario + Mapa del Mes', pagina: 22 },
-        { titulo: 'Lunas + Ejercicios + Mantra', pagina: 23 },
-        { titulo: 'Semanas con Interpretación', pagina: 24 },
-        { titulo: 'Cierre del Mes', pagina: 28 },
-      ]
-    },
-    {
-      titulo: 'Febrero 2026 · Retorno Solar',
-      pagina: 29,
-      icono: <Sun className="w-4 h-4" />,
-      subsecciones: [
-        { titulo: 'Primer Día del Ciclo', pagina: 29 },
-        { titulo: 'Calendario + Mapa', pagina: 30 },
-        { titulo: 'Semana del Cumpleaños', pagina: 32 },
-      ]
-    },
-    {
-      titulo: 'Marzo - Diciembre 2026',
-      pagina: 35,
-      icono: <Calendar className="w-4 h-4" />,
-    },
-    {
-      titulo: 'Enero 2027',
-      pagina: 110,
-      icono: <Moon className="w-4 h-4" />,
-    },
-    {
-      titulo: 'Terapias Creativas',
-      pagina: 120,
-      icono: <PenLine className="w-4 h-4" />,
-      subsecciones: [
-        { titulo: 'Escritura Terapéutica', pagina: 120 },
-        { titulo: 'Visualización', pagina: 121 },
-        { titulo: 'Ritual Simbólico', pagina: 122 },
-        { titulo: 'Trabajo Emocional', pagina: 123 },
-      ]
-    },
-    {
-      titulo: 'Cierre de Ciclo',
-      pagina: 124,
-      icono: <Heart className="w-4 h-4" />,
-      subsecciones: [
-        { titulo: 'Último Día del Ciclo', pagina: 124 },
-        { titulo: 'Quién Era, Quién Soy', pagina: 125 },
-        { titulo: 'Carta de Cierre', pagina: 126 },
+        { titulo: 'Enero 2026', pagina: 19, id: 'mes-enero' },
+        { titulo: 'Febrero 2026', pagina: 21, id: 'mes-febrero' },
+        { titulo: 'Marzo 2026', pagina: 23, id: 'mes-marzo' },
       ]
     },
   ];
@@ -144,12 +105,15 @@ export const IndiceNavegable: React.FC = () => {
         <div className="space-y-1">
           {secciones.map((seccion, idx) => (
             <div key={idx}>
-              {/* Sección principal */}
-              <div className={`flex items-center gap-3 py-2 border-b ${config.highlightPrimary.includes('border') ? 'border-gray-100' : 'border-gray-100'}`}>
+              {/* Sección principal - clickeable */}
+              <button
+                onClick={() => handleNavigation(seccion.id)}
+                className={`w-full flex items-center gap-3 py-2 border-b ${config.highlightPrimary.includes('border') ? 'border-gray-100' : 'border-gray-100'} hover:bg-gray-50 transition-colors cursor-pointer no-print-hover`}
+              >
                 <span className={`${config.iconPrimary}`}>
                   {seccion.icono}
                 </span>
-                <span className={`flex-1 font-display text-sm font-medium text-gray-800`}>
+                <span className={`flex-1 font-display text-sm font-medium text-gray-800 text-left`}>
                   {seccion.titulo}
                 </span>
                 <span className="flex-shrink-0">
@@ -160,17 +124,18 @@ export const IndiceNavegable: React.FC = () => {
                 <span className={`w-8 text-right font-bold text-sm ${config.iconPrimary}`}>
                   {seccion.pagina}
                 </span>
-              </div>
+              </button>
 
-              {/* Subsecciones */}
+              {/* Subsecciones - clickeables */}
               {seccion.subsecciones && (
                 <div className={`ml-8 border-l-2 ${config.cardBorder.replace('border-l-4', '')}`}>
                   {seccion.subsecciones.map((sub, subIdx) => (
-                    <div
+                    <button
                       key={subIdx}
-                      className="flex items-center gap-3 py-1 pl-4"
+                      onClick={() => handleNavigation(sub.id)}
+                      className="w-full flex items-center gap-3 py-1 pl-4 hover:bg-gray-50 transition-colors cursor-pointer no-print-hover"
                     >
-                      <span className="flex-1 text-xs text-gray-600">
+                      <span className="flex-1 text-xs text-gray-600 text-left">
                         {sub.titulo}
                       </span>
                       <span className="flex-shrink-0">
@@ -181,7 +146,7 @@ export const IndiceNavegable: React.FC = () => {
                       <span className="w-8 text-right text-xs text-gray-500">
                         {sub.pagina}
                       </span>
-                    </div>
+                    </button>
                   ))}
                 </div>
               )}
