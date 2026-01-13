@@ -10,6 +10,8 @@ import { Printer, X } from 'lucide-react';
 // Secciones del libro
 import { PortadaPersonalizada, PaginaIntencion } from './PortalEntrada';
 import { CartaBienvenida, TemaCentralAnio, LoQueVieneAMover, LoQuePideSoltar, PaginaIntencionAnual } from './TuAnioTuViaje';
+import { TuAnioOverview, TuAnioCiclos, PaginaCumpleanos } from './TuAnio';
+import { LineaTiempoEmocional, MesesClavePuntosGiro, GrandesAprendizajes } from './CiclosAnuales';
 import { EsenciaNatal, NodoNorte, NodoSur, PlanetasDominantes, PatronesEmocionales } from './SoulChart';
 import { QueEsRetornoSolar, AscendenteAnio, SolRetorno, LunaRetorno, EjesDelAnio, EjesDelAnio2, IntegracionEjes, RitualCumpleanos, MantraAnual } from './RetornoSolar';
 import { IndiceNavegable } from './Indice';
@@ -83,7 +85,31 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
         </div>
         <IndiceNavegable />
 
-        {/* 2. TU AÑO, TU VIAJE */}
+        {/* 2. TU AÑO 2026-2027 - OVERVIEW */}
+        <div id="tu-anio-overview">
+          <TuAnioOverview
+            startDate={startDate}
+            endDate={endDate}
+            userName={userName}
+          />
+          <TuAnioCiclos
+            startDate={startDate}
+            endDate={endDate}
+            userName={userName}
+          />
+        </div>
+
+        {/* 3. CICLOS ANUALES */}
+        <div id="ciclos-anuales">
+          <LineaTiempoEmocional
+            startDate={startDate}
+            endDate={endDate}
+          />
+          <MesesClavePuntosGiro />
+          <GrandesAprendizajes />
+        </div>
+
+        {/* 4. TU AÑO, TU VIAJE */}
         <div id="tu-anio-tu-viaje">
           <div id="carta-bienvenida">
             <CartaBienvenida name={userName} />
@@ -311,6 +337,56 @@ Fecha clave: Marca en tu agenda la Luna Llena en Acuario de [fecha] para hacer b
           ejercicioSemana="Escribe 3 cosas que NO quieres repetir este año."
         />
             <CierreMes monthDate={new Date(2026, 0, 1)} />
+          </div>
+
+          {/* FEBRERO 2026 - MES DE CUMPLEAÑOS (EJEMPLO) */}
+          <div id="mes-febrero">
+            {/* PÁGINA ESPECIAL DE CUMPLEAÑOS */}
+            <PaginaCumpleanos
+              birthDate={new Date(2026, 1, 10)} // 10 de febrero
+              userName={userName}
+            />
+
+            <CalendarioMensualTabla
+              monthDate={new Date(2026, 1, 1)}
+              mesNumero={2}
+              nombreZodiaco="Acuario → Piscis"
+              simboloZodiaco="♒"
+              temaDelMes="Renacimiento solar"
+              birthday={new Date(2026, 1, 10)} // Marca el día 10 como cumpleaños
+              eventos={[
+                {
+                  dia: 10,
+                  tipo: 'cumpleanos',
+                  titulo: '¡Tu Cumpleaños! 🎂',
+                  interpretacion: `🎂 TU RETORNO SOLAR
+
+Hoy el Sol regresa exactamente al grado donde estaba cuando naciste. Este es tu nuevo año personal.
+
+Qué significa:
+Este momento marca el inicio de un nuevo ciclo de 12 meses donde tu identidad, propósito y dirección vital se reconfiguran. La energía de este día marca el tono de todo tu año solar.
+
+Ritual sugerido:
+• Dedica tiempo a estar contigo misma
+• Enciende una vela dorada al amanecer
+• Escribe 3 intenciones para tu nuevo año solar
+• Revisa las páginas de "Tu Año 2026-2027" en este libro
+• Celebra tu existencia y tu evolución
+
+Pregunta para reflexionar:
+¿Quién quiero ser en este nuevo ciclo que comienza hoy?`
+                },
+                {
+                  dia: 12,
+                  tipo: 'lunaNueva',
+                  titulo: 'Luna Nueva en Acuario',
+                  signo: 'Acuario',
+                  interpretacion: 'Luna Nueva cerca de tu cumpleaños: momento perfecto para sembrar intenciones para tu nuevo año solar. Conecta con tu visión única y auténtica.'
+                }
+              ]}
+            />
+
+            <CierreMes monthDate={new Date(2026, 1, 1)} />
           </div>
         </div>
 

@@ -72,8 +72,15 @@ export const FooterLibro: React.FC<{ pagina?: number }> = ({ pagina }) => {
   const { config } = useStyle();
   return (
     <div className="absolute bottom-4 left-0 right-0 flex justify-between items-center px-8 text-[10px]">
-      <span className={`${config.iconSecondary} opacity-50`}>Tu Vuelta al Sol</span>
-      {pagina && <span className={`${config.iconSecondary} opacity-50`}>{pagina}</span>}
+      <a
+        href="https://wunjocreations.es"
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`${config.iconSecondary} opacity-50 hover:opacity-100 transition-opacity no-print-hover`}
+      >
+        Tu Vuelta al Sol by Wunjo Creations
+      </a>
+      {pagina && <span className={`${config.iconSecondary} opacity-50 font-medium`}>{pagina}</span>}
       <span className={`${config.iconSecondary} opacity-50`}>☉</span>
     </div>
   );

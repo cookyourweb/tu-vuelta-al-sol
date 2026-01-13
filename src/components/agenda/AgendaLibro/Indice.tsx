@@ -75,14 +75,34 @@ export const IndiceNavegable: React.FC = () => {
       ]
     },
     {
+      titulo: 'Tu Año 2026-2027',
+      pagina: 13,
+      id: 'tu-anio-overview',
+      icono: <Star className="w-4 h-4" />,
+      subsecciones: [
+        { titulo: 'Overview del Año', pagina: 13, id: 'tu-anio-overview' },
+        { titulo: 'Ciclos del Año', pagina: 14, id: 'ciclos-del-anio' },
+      ]
+    },
+    {
+      titulo: 'Ciclos Anuales',
+      pagina: 15,
+      id: 'ciclos-anuales',
+      icono: <Calendar className="w-4 h-4" />,
+      subsecciones: [
+        { titulo: 'Línea de Tiempo Emocional', pagina: 15, id: 'linea-tiempo' },
+        { titulo: 'Meses Clave y Puntos de Giro', pagina: 16, id: 'meses-clave' },
+        { titulo: 'Grandes Aprendizajes', pagina: 17, id: 'grandes-aprendizajes' },
+      ]
+    },
+    {
       titulo: 'Calendario Mensual',
       pagina: 19,
       id: 'calendario-mensual',
-      icono: <Calendar className="w-4 h-4" />,
+      icono: <Moon className="w-4 h-4" />,
       subsecciones: [
         { titulo: 'Enero 2026', pagina: 19, id: 'mes-enero' },
-        { titulo: 'Febrero 2026', pagina: 21, id: 'mes-febrero' },
-        { titulo: 'Marzo 2026', pagina: 23, id: 'mes-marzo' },
+        { titulo: 'Febrero 2026 (Cumpleaños)', pagina: 21, id: 'mes-febrero' },
       ]
     },
   ];
