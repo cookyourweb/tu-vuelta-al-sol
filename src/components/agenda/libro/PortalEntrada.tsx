@@ -31,49 +31,58 @@ export default function PortalEntrada({
   return (
     <>
       {/* PORTADA PERSONALIZADA */}
-      <div className="print-page bg-white flex flex-col items-center justify-center p-12 text-center">
-        {/* Logo o símbolo del sol */}
-        <div className="mb-8">
-          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-cosmic-gold to-cosmic-amber flex items-center justify-center">
-            <span className="text-4xl text-white">☉</span>
+      <div className="print-page print-no-bg bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-900 flex flex-col items-center justify-center text-center relative overflow-hidden" style={{ padding: '15mm' }}>
+        {/* Patrón de fondo */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(251, 191, 36, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(251, 191, 36, 0.15) 0%, transparent 50%)',
+          }} />
+        </div>
+
+        <div className="relative z-10 space-y-8">
+          {/* Logo o símbolo del sol */}
+          <div className="mb-6">
+            <div className="w-28 h-28 rounded-full bg-gradient-to-br from-cosmic-gold to-cosmic-amber flex items-center justify-center shadow-2xl">
+              <span className="text-5xl text-white">☉</span>
+            </div>
           </div>
-        </div>
 
-        {/* Título principal */}
-        <h1 className="font-display text-5xl text-cosmic-gold mb-4">
-          Tu Vuelta al Sol
-        </h1>
+          {/* Título principal */}
+          <h1 className="font-display text-6xl text-white mb-4">
+            Tu Vuelta al Sol
+          </h1>
 
-        {/* Subtítulo personalizado */}
-        <h2 className="font-display text-3xl text-gray-800 mb-8">
-          {portada?.subtitulo || `${startYear} - ${endYear}`}
-        </h2>
+          {/* Subtítulo personalizado */}
+          <h2 className="font-display text-3xl text-cosmic-gold mb-8">
+            {portada?.subtitulo || `${startYear} - ${endYear}`}
+          </h2>
 
-        {/* Nombre del usuario */}
-        <div className="mb-12">
-          <p className="font-body text-xl text-gray-600 mb-2">Un viaje astrológico para</p>
-          <p className="font-display text-4xl text-cosmic-gold">{userName}</p>
-        </div>
+          {/* Nombre del usuario */}
+          <div className="mb-10">
+            <p className="font-body text-xl text-white/80 mb-3">Un viaje astrológico para</p>
+            <p className="font-display text-5xl text-cosmic-gold">{userName}</p>
+          </div>
 
-        {/* Dedicatoria */}
-        {portada?.dedicatoria && (
-          <div className="max-w-2xl">
-            <p className="font-body text-lg text-gray-700 italic leading-relaxed">
-              {portada.dedicatoria}
+          {/* Dedicatoria */}
+          {portada?.dedicatoria && (
+            <div className="max-w-2xl bg-white/10 backdrop-blur-sm border border-cosmic-gold/30 rounded-lg p-6">
+              <p className="font-body text-lg text-white/90 italic leading-relaxed">
+                {portada.dedicatoria}
+              </p>
+            </div>
+          )}
+
+          {/* Fechas del ciclo */}
+          <div className="mt-10 pt-6 border-t border-cosmic-gold/30">
+            <p className="font-body text-sm text-white/70">
+              {format(startDate, "d 'de' MMMM 'de' yyyy", { locale: es })} — {format(endDate, "d 'de' MMMM 'de' yyyy", { locale: es })}
             </p>
           </div>
-        )}
-
-        {/* Fechas del ciclo */}
-        <div className="mt-12 pt-8 border-t border-cosmic-gold/20">
-          <p className="font-body text-sm text-gray-600">
-            {format(startDate, "d 'de' MMMM 'de' yyyy", { locale: es })} — {format(endDate, "d 'de' MMMM 'de' yyyy", { locale: es })}
-          </p>
         </div>
       </div>
 
       {/* PÁGINA DE INTENCIÓN */}
-      <div className="print-page bg-white p-12">
+      <div className="print-page bg-white" style={{ padding: '15mm' }}>
         <div className="max-w-3xl mx-auto">
           {/* Título de sección */}
           <div className="text-center mb-12">
