@@ -8,7 +8,7 @@ export const EscrituraTerapeutica = () => {
   const { config } = useStyle();
 
   return (
-    <div className={`print-page bg-white p-12 flex flex-col relative ${config.pattern}`}>
+    <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
       {/* Header decorativo */}
       <div className="text-center mb-10">
         <div className="flex items-center justify-center space-x-3 mb-4">
@@ -88,7 +88,7 @@ export const Visualizacion = () => {
   const { config } = useStyle();
 
   return (
-    <div className={`print-page bg-white p-12 flex flex-col relative ${config.pattern}`}>
+    <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
       {/* Header decorativo */}
       <div className="text-center mb-10">
         <div className="flex items-center justify-center space-x-3 mb-4">
@@ -154,7 +154,7 @@ export const RitualSimbolico = () => {
   const { config } = useStyle();
 
   return (
-    <div className={`print-page bg-white p-12 flex flex-col relative ${config.pattern}`}>
+    <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
       {/* Header decorativo */}
       <div className="text-center mb-10">
         <div className="flex items-center justify-center space-x-3 mb-4">
@@ -248,7 +248,7 @@ export const TrabajoEmocional = () => {
   const { config } = useStyle();
 
   return (
-    <div className={`print-page bg-white p-12 flex flex-col relative ${config.pattern}`}>
+    <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
       {/* Header decorativo */}
       <div className="text-center mb-10">
         <div className="flex items-center justify-center space-x-3 mb-4">

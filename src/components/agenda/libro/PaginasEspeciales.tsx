@@ -22,7 +22,7 @@ export const PrimerDiaCiclo: React.FC<{
   const { config } = useStyle();
 
   return (
-    <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '20mm' }}>
+    <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
       <div className="flex-1 flex flex-col items-center justify-center text-center">
         {/* Sol decorativo */}
         <div className="mb-6">
@@ -92,7 +92,7 @@ export const UltimoDiaCiclo: React.FC<{
   const { config } = useStyle();
 
   return (
-    <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '20mm' }}>
+    <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
       <div className="flex-1 flex flex-col items-center justify-center text-center">
         {/* Luna decorativa */}
         <div className="mb-6">
@@ -161,7 +161,7 @@ export const CierreMes: React.FC<{
   const { config } = useStyle();
 
   return (
-    <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '20mm' }}>
+    <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
       {/* Header decorativo */}
       <div className="text-center mb-8 pb-6 border-b border-cosmic-gold/20">
         <div className="flex items-center justify-center space-x-2 mb-3">
