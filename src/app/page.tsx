@@ -14,7 +14,9 @@ import {
   Quote,
   CheckCircle,
   Zap,
-  Clock
+  Clock,
+  Stars,
+  Book
 } from 'lucide-react';
 
 export default function Home() {
@@ -47,11 +49,12 @@ export default function Home() {
                 <Star className="w-16 h-16 text-yellow-400" />
               </div>
             </div>
-            
-            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black mb-8 leading-tight">
+
+            <h1 className="font-extralight text-pink-300 text-lg">Agenda astrológica personalizada por cumpleaños</h1>
+            <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black mb-8 leading-tight">
               ¿Y si las estrellas ya
               <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent"> saben tu futuro</span>?
-            </h1>
+            </h2>
 
             <p className="text-xl sm:text-2xl lg:text-3xl max-w-4xl mx-auto mb-12 leading-relaxed text-gray-300">
               Las estrellas saben cómo eres,<br />
@@ -77,7 +80,7 @@ export default function Home() {
                 className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-black py-6 px-12 rounded-2xl text-xl hover:from-yellow-300 hover:to-orange-400 transition-all duration-300 transform hover:scale-105 shadow-2xl flex items-center"
               >
                 <Sparkles className="w-6 h-6 mr-3" />
-                Descubrir mi destino
+                Crear mi agenda personalizada
                 <ArrowRight className="w-6 h-6 ml-3" />
               </Link>
               
@@ -100,87 +103,35 @@ export default function Home() {
             <div className="flex justify-center items-center mb-8">
               <div className="bg-gradient-to-r from-purple-400/20 to-pink-500/20 border border-purple-400/30 rounded-full p-6 backdrop-blur-sm relative">
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-purple-400 rounded-full animate-pulse"></div>
-                <Moon className="w-10 h-10 text-purple-400" />
+                <Sun className="w-10 h-10 text-purple-400" />
               </div>
             </div>
             
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-black mb-8">
-              Lo que ya venía 
-              <span className="bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent"> escrito sobre ti</span>
+              ¿Qué es
+              <span className="bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent"> Tu Vuelta Al Sol</span>
             </h2>
-            
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-              Al nacer, el cosmos escribió tu historia. Tu carta natal revela quién eres, 
-              y tu carta progresada te muestra qué te espera este año.
+             <p className="text-xl lg:text-2xl text-gray-300 mb-12 leading-relaxed max-w-3xl mx-auto">
+             Tu Vuelta al Sol es una agenda <strong>astrológica totalmente personalizada</strong> que te acompaña durante tu año solar:
             </p>
+          
+            <div className="bg-gradient-to-r from-pink-400/10 to-red-500/10 border border-pink-400/30 rounded-2xl p-6 backdrop-blur-sm max-w-2xl mx-auto mb-12">
+              
+              <p className="text-gray-400">
+           
+No es un horóscopo genérico ni una agenda estándar.</p><p className="text-gray-400">
+
+Es una guía creada a partir de 
+  <strong className="text-white"> tu información natal real,</strong> pensada para ayudarte a comprenderte mejor y tomar decisiones alineadas contigo.
+                
+              </p> </div><div className="mt-8 flex items-center justify-center text-gray-400">
+              <CheckCircle className="w-5 h-5 mr-2 text-green-400" />
+              <span>Es astrología profunda, pero aplicada a la vida real.</span>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {[
-              {
-                title: "Tu Carta Natal: El ADN Cósmico",
-                description: "Lo que ya venía escrito cuando naciste: tu personalidad, talentos, miedos, el tipo de amor que necesitas y cómo vas a conseguir dinero. Todo estaba ahí desde el segundo cero.",
-                icon: Star,
-                gradient: "from-yellow-400/20 to-orange-500/20",
-                border: "border-yellow-400/30",
-                iconColor: "text-yellow-400"
-              },
-              {
-                title: "Tu Agenda Cósmica Digital",
-                description: "Desde tu último cumpleaños hasta el próximo, tu calendario personalizado te guía con tu carta progresada, eventos astrológicos del año, consejos según tu personalidad y rituales de poder.",
-                icon: Calendar,
-                gradient: "from-blue-400/20 to-cyan-500/20",
-                border: "border-blue-400/30",
-                iconColor: "text-blue-400"
-              },
-              {
-                title: "Tu Vuelta al Sol - Guía Transformacional",
-                description: "Descubre el poder transformador de tu nueva vuelta al sol. Una guía astrológica anual personalizada que te acompañará en tu evolución, sanación emocional y manifestación de tus sueños más profundos.",
-                icon: Sparkles,
-                gradient: "from-purple-400/20 to-pink-500/20",
-                border: "border-purple-400/30",
-                iconColor: "text-purple-400"
-              },
-              {
-                title: "Sanación Emocional Profunda",
-                description: "Libera patrones kármicos ancestrales y sana heridas del alma que han bloqueado tu crecimiento. Tu carta natal revela exactamente qué necesitas sanar y cuándo hacerlo.",
-                icon: Heart,
-                gradient: "from-pink-400/20 to-red-500/20",
-                border: "border-pink-400/30",
-                iconColor: "text-pink-400"
-              },
-              {
-                title: "Tu Propósito de Vida Revelado",
-                description: "Conecta con tu misión evolutiva y destino único en esta encarnación. No más dudas sobre tu camino: tu carta natal te muestra exactamente para qué viniste a este mundo.",
-                icon: Briefcase,
-                gradient: "from-green-400/20 to-emerald-500/20",
-                border: "border-green-400/30",
-                iconColor: "text-green-400"
-              },
-              {
-                title: "Abundancia Consciente",
-                description: "Manifiesta prosperidad alineada con tu alma y propósito superior. Descubre los momentos cósmicos perfectos para atraer riqueza material y espiritual a tu vida.",
-                icon: Zap,
-                gradient: "from-red-400/20 to-pink-500/20",
-                border: "border-red-400/30",
-                iconColor: "text-red-400"
-              }
-            ].map((feature, index) => {
-              const IconComponent = feature.icon;
-              return (
-                <div key={index} className={`bg-gradient-to-br ${feature.gradient} backdrop-blur-sm border ${feature.border} rounded-3xl p-8 hover:scale-105 transition-all duration-300 relative group`}>
-                  <div className="absolute top-4 right-4 w-3 h-3 bg-white/30 rounded-full animate-pulse"></div>
-                  
-                  <div className={`bg-gradient-to-r ${feature.gradient} border ${feature.border} rounded-full p-4 backdrop-blur-sm mb-6 w-fit`}>
-                    <IconComponent className={`w-8 h-8 ${feature.iconColor}`} />
-                  </div>
-                  
-                  <h3 className="text-2xl font-bold text-white mb-4">{feature.title}</h3>
-                  <p className="text-gray-300 leading-relaxed">{feature.description}</p>
-                </div>
-              );
-            })}
-          </div>
+      
+            
         </div>
       </section>
 
@@ -209,27 +160,27 @@ export default function Home() {
           <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
             {[
               {
-                title: "Descifra tu código",
-                description: "Ingresa tu fecha, hora y lugar de nacimiento. En segundos, desbloquearemos los secretos que el universo escribió sobre ti.",
-                icon: Users,
+                title: "Carta natal",
+                description: "Analizamos tu carta natal para comprender cómo eres:tu personalidad, talentos, fortalezas y los bloqueos que tienden a repetirse en tu vida.",
+                icon: Stars,
                 number: "1",
                 gradient: "from-blue-400/20 to-cyan-500/20",
                 border: "border-blue-400/30",
                 iconColor: "text-blue-400"
               },
               {
-                title: "Revelaciones instantáneas",
-                description: "Tu carta natal se genera automáticamente, revelando patrones de amor, dinero, carrera y destino que nunca imaginaste.",
-                icon: Moon,
+                title: "Retorno solar",
+                description: "Estudiamos tu retorno solar para ver qué áreas se activan en tu nuevo año:relaciones, trabajo, emociones, propósito, cambios importantes y oportunidades.",
+                icon: Sun,
                 number: "2",
                 gradient: "from-purple-400/20 to-pink-500/20",
                 border: "border-purple-400/30",
                 iconColor: "text-purple-400"
               },
               {
-                title: "Tu hoja de ruta",
-                description: "Recibe fechas exactas, estrategias personalizadas y tu agenda del destino impresa para llevar contigo toda la sabiduría cósmica.",
-                icon: Sun,
+                title: "Agenda personalizada",
+                description: "Integramos los eventos astrológicos del año en una agenda práctica, con fechas clave y consejos personalizados según lo que se activa en tu carta.",
+                icon: Book,
                 number: "3",
                 gradient: "from-yellow-400/20 to-orange-500/20",
                 border: "border-yellow-400/30",
@@ -437,24 +388,34 @@ export default function Home() {
             </h2>
             
             <p className="text-xl lg:text-2xl text-gray-300 mb-12 leading-relaxed max-w-3xl mx-auto">
-              En 2 minutos sabrás más sobre tu futuro que en años de terapia. 
-              Las respuestas están en las estrellas, nosotros solo las traducimos.
+             En solo unos minutos vas a entender <strong>tu momento vital actual </strong>
+ con una claridad que a muchas personas les lleva <strong>años de introspección, terapia o búsqueda personal</strong>.
             </p>
-            
+          
+              <div className="bg-gradient-to-r from-pink-400/10 to-red-500/10 border border-pink-400/30 rounded-2xl p-6 backdrop-blur-sm max-w-2xl mx-auto mb-12">
+              
+              <p className="text-gray-400">
+              Las respuestas no vienen de fuera.</p> <p className="text-gray-400">
+Están en las estrellas.</p> <p className="text-gray-400">
+Nosotros solo las traducimos y las convertimos
+en una   <strong className="text-white">agenda real para tu día a día.</strong>
+                
+              </p> </div>
+           
             <div className="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-8">
               <Link 
                 href="/register" 
                 className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-black py-6 px-12 rounded-2xl text-xl hover:from-yellow-300 hover:to-orange-400 transition-all duration-300 transform hover:scale-105 shadow-2xl flex items-center"
               >
                 <Zap className="w-6 h-6 mr-3" />
-                Revelar mi destino AHORA
+               Revelar mi Vuelta al Sol ahora
                 <ArrowRight className="w-6 h-6 ml-3" />
               </Link>
             </div>
             
             <div className="mt-8 flex items-center justify-center text-gray-400">
               <CheckCircle className="w-5 h-5 mr-2 text-green-400" />
-              <span>Resultados inmediatos • Sin trucos • Información que cambia vidas</span>
+              <span>Claridad profunda • Sin adivinación • Astrología aplicada a tu vida real</span>
             </div>
           </div>
         </div>
