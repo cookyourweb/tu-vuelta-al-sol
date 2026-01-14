@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
 
     console.log('📊 Found natal chart');
 
-    // ✅ 2. Buscar Solar Return actual
+    // ✅ 2. Buscar Solar Return actual (OPCIONAL - si existe, mejor contexto)
     const currentYear = new Date().getFullYear();
     const solarReturn = await Interpretation.findOne({
       userId,
@@ -99,14 +99,11 @@ export async function POST(request: NextRequest) {
     .lean()
     .exec() as any;
 
-    if (!solarReturn) {
-      return NextResponse.json({
-        success: false,
-        error: 'No Solar Return found. User must generate Solar Return first.'
-      }, { status: 404 });
+    if (solarReturn) {
+      console.log('🌅 Found Solar Return - generating enhanced planetary cards');
+    } else {
+      console.log('⚠️ No Solar Return found - generating basic planetary cards based on natal + transits');
     }
-
-    console.log('🌅 Found Solar Return');
 
     // ✅ 3. Buscar interpretación natal (opcional, para contexto)
     const natalInterpretation = await Interpretation.findOne({
@@ -132,7 +129,9 @@ export async function POST(request: NextRequest) {
     // ✅ 5. Determinar qué planetas generar
     const planetsToGenerate = planets && planets.length > 0
       ? planets
-      : determineActivePlanets(solarReturn.interpretation || solarReturn);
+      : solarReturn
+        ? determineActivePlanets(solarReturn.interpretation || solarReturn)
+        : ['Sol', 'Luna', 'Mercurio', 'Venus', 'Marte']; // Planetas básicos si no hay SR
 
     console.log('🌟 Planets to generate:', planetsToGenerate);
 
@@ -150,7 +149,7 @@ export async function POST(request: NextRequest) {
         birthDate, // Para calcular fechas del año solar
         planetName,
         natalChart: natalChart.natalChart || natalChart,
-        solarReturn: solarReturn.interpretation || solarReturn,
+        solarReturn: solarReturn ? (solarReturn.interpretation || solarReturn) : null,
         natalInterpretation: natalInterpretation?.interpretation
       };
 

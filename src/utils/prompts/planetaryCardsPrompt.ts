@@ -18,7 +18,7 @@ export interface PlanetaryCardPromptData {
 
   // Cartas completas
   natalChart: any;
-  solarReturn: any;
+  solarReturn: any | null; // Puede ser null si no existe SR
 
   // Interpretación natal (para contexto)
   natalInterpretation?: any;
@@ -40,14 +40,27 @@ export function generatePlanetaryCardPrompt(data: PlanetaryCardPromptData): stri
     p.name === planetName || p.name.toLowerCase() === planetName.toLowerCase()
   );
 
+  const natalSign = natalPlanet?.sign || 'Desconocido';
+  const natalHouse = natalPlanet?.house || 1;
+  const natalDegree = natalPlanet?.degree ? Math.floor(natalPlanet.degree) : 0;
+
+  // Si no hay Solar Return, generar prompt simplificado
+  if (!solarReturn) {
+    return generateBasicPlanetaryCardPrompt({
+      userName,
+      userAge,
+      planetName,
+      natalSign,
+      natalHouse,
+      natalDegree,
+      birthDate
+    });
+  }
+
   // Extraer planeta del Solar Return
   const srPlanet = solarReturn?.planets?.find((p: any) =>
     p.name === planetName || p.name.toLowerCase() === planetName.toLowerCase()
   );
-
-  const natalSign = natalPlanet?.sign || 'Desconocido';
-  const natalHouse = natalPlanet?.house || 1;
-  const natalDegree = natalPlanet?.degree ? Math.floor(natalPlanet.degree) : 0;
 
   const srSign = srPlanet?.sign || 'Desconocido';
   const srHouse = srPlanet?.house || 1;
@@ -389,6 +402,194 @@ Responde ÚNICAMENTE con JSON válido en español (sin markdown, sin backticks, 
 ---
 
 **AHORA GENERA LA FICHA PLANETARIA ANUAL DE ${planetName.toUpperCase()} PARA ${userName.toUpperCase()}.**
+`;
+}
+
+// =============================================================================
+// SIMPLIFIED PROMPT (when no Solar Return exists)
+// =============================================================================
+
+/**
+ * Genera prompt básico cuando no existe Solar Return
+ * Enfocado en natal + temas planetarios generales del año
+ */
+function generateBasicPlanetaryCardPrompt(data: {
+  userName: string;
+  userAge: number;
+  planetName: string;
+  natalSign: string;
+  natalHouse: number;
+  natalDegree: number;
+  birthDate: string;
+}): string {
+  const { userName, userAge, planetName, natalSign, natalHouse, natalDegree, birthDate } = data;
+
+  const natalHouseMeaning = getHouseMeaning(natalHouse);
+  const planetSymbol = getPlanetSymbol(planetName);
+
+  // Calcular año actual
+  const currentYear = new Date().getFullYear();
+
+  return `
+# 🌟 ERES UN ASTRÓLOGO EVOLUTIVO ESPECIALIZADO EN TEMAS PLANETARIOS
+
+## 📚 TU MISIÓN:
+Crear una FICHA PLANETARIA BÁSICA para ${userName} sobre ${planetName}.
+
+**IMPORTANTE:**
+- Esta ficha se genera SIN Retorno Solar específico
+- Se enfoca en la naturaleza natal de ${planetName} + temas generales del año
+- Incluye una nota invitando a generar el Retorno Solar para interpretaciones más profundas
+
+---
+
+## 📊 DATOS DEL USUARIO: ${userName.toUpperCase()}
+
+**Nombre:** ${userName}
+**Edad:** ${userAge} años
+**Año actual:** ${currentYear}
+
+---
+
+## 🧬 ${planetSymbol} ${planetName.toUpperCase()} NATAL
+
+**Posición Natal:**
+${planetName} en ${natalSign} ${natalDegree}° Casa ${natalHouse}
+
+**Significado de Casa ${natalHouse}:**
+${natalHouseMeaning}
+
+---
+
+## 📋 ESTRUCTURA JSON REQUERIDA
+
+Responde ÚNICAMENTE con JSON válido en español (sin markdown, sin backticks, sin comentarios).
+
+{
+  "planeta": "${planetName}",
+  "simbolo": "${planetSymbol}",
+
+  "quien_eres_natal": {
+    "titulo": "🧬 QUIÉN ERES (NATAL – permanente)",
+    "posicion_completa": "${planetName} en ${natalSign} Casa ${natalHouse}",
+    "caracteristicas": [
+      "Característica 1 de cómo expresas ${planetName} naturalmente",
+      "Característica 2 específica a ${natalSign}",
+      "Característica 3 relacionada con Casa ${natalHouse} (${natalHouseMeaning})"
+    ],
+    "superpoder_natal": "Tu fuerza está en... (describe el superpoder de este ${planetName})",
+    "diferenciador_clave": "Al estar en Casa ${natalHouse}, esto se manifiesta en..."
+  },
+
+  "que_se_activa_este_anio": {
+    "titulo": "🌍 TEMAS GENERALES DE ${planetName.toUpperCase()} EN ${currentYear}",
+    "periodo": "Año ${currentYear}",
+    "posicion_completa": "Tránsitos generales de ${planetName} durante ${currentYear}",
+    "duracion_texto": "Todo el año",
+    "introduccion": "Este año ${planetName} te invita a trabajar en [tema general]. Para interpretaciones específicas basadas en tu Retorno Solar, genera tu carta anual.",
+    "este_anio": [
+      "Tema general 1 de ${planetName} en ${currentYear}",
+      "Tema general 2 de ${planetName} en ${currentYear}",
+      "Tema general 3 de ${planetName} en ${currentYear}"
+    ],
+    "integracion_signo_casa": "Desde tu natal en ${natalSign} Casa ${natalHouse}, estos temas se manifiestan en...",
+    "contraste_con_natal": "⚠️ Genera tu Retorno Solar para ver cómo estos temas se activan específicamente en tu año personal. Esta ficha muestra tendencias generales basadas en tu natal."
+  },
+
+  "cruce_real": {
+    "titulo": "🔄 TU BASE NATAL + EL AÑO",
+    "natal_especifico": "Natal (${natalSign} Casa ${natalHouse}): Tu forma natural de expresar ${planetName} es...",
+    "sr_especifico": "⚠️ GENERA TU RETORNO SOLAR para ver cómo se canaliza específicamente tu energía este año. Sin él, solo podemos trabajar con temas generales.",
+    "contraste_directo": "Esta sección estará disponible cuando generes tu Retorno Solar",
+    "aprendizaje_del_anio": "Tema general del año basado en tu natal: [descripción]",
+    "frase_potente_cierre": "Tu ${planetName} en ${natalSign} te recuerda que..."
+  },
+
+  "reglas_del_anio": {
+    "titulo": "🎯 GUÍAS DE ${planetName.toUpperCase()} (basadas en tu natal)",
+    "reglas": [
+      "Guía 1 basada en ${natalSign}",
+      "Guía 2 basada en Casa ${natalHouse}",
+      "Guía 3 general de ${planetName}"
+    ],
+    "entrenamiento_anual": "El trabajo consciente con ${planetName} este año es..."
+  },
+
+  "como_se_activa_segun_momento": {
+    "titulo": "⏱️ CÓMO SE ACTIVA ${planetName.toUpperCase()} EN EVENTOS ASTRONÓMICOS",
+    "introduccion": "Estos son patrones generales. Tu Retorno Solar te mostrará cómo se activan específicamente en ti.",
+    "en_lunas_nuevas": "En general, ${planetName} en Lunas Nuevas invita a... Desde tu ${natalSign}, esto significa...",
+    "en_lunas_llenas": "En general, ${planetName} en Lunas Llenas pide... Desde tu Casa ${natalHouse}, esto se manifiesta en...",
+    "durante_retrogradaciones": "Cuando ${planetName} retrograda (si aplica), se revisa... Tu natal en ${natalSign} experimenta esto como...",
+    "durante_eclipses": "Los eclipses activan ${planetName} en temas de... Tu Casa ${natalHouse} lo vive en el área de ${natalHouseMeaning}."
+  },
+
+  "sombras_a_vigilar": {
+    "titulo": "⚠️ SOMBRAS A VIGILAR (basadas en tu natal)",
+    "sombras": [
+      "Sombra 1 de ${natalSign}",
+      "Sombra 2 de Casa ${natalHouse}",
+      "Sombra 3 general de ${planetName}"
+    ],
+    "equilibrio": "El equilibrio está en honrar tu ${planetName} en ${natalSign} sin caer en..."
+  },
+
+  "ritmo_de_trabajo": {
+    "titulo": "✨ RITMO DE TRABAJO CON ${planetName.toUpperCase()}",
+    "frecuencia": "Mensualmente",
+    "ejercicio_mensual": "Ejercicio mensual para trabajar ${planetName} desde tu natal en ${natalSign} Casa ${natalHouse}",
+    "preguntas_mensuales": [
+      "¿Cómo estoy expresando mi ${planetName} en ${natalSign}?",
+      "¿Qué área de ${natalHouseMeaning} necesita mi atención?",
+      "¿Estoy honrando mi naturaleza ${natalSign} en esta área?"
+    ],
+    "claves_practicas_diarias": [
+      "Práctica 1 relacionada con ${natalSign}",
+      "Práctica 2 relacionada con Casa ${natalHouse}",
+      "Práctica 3 general de ${planetName}"
+    ],
+    "ritmos_semanales": "Ritmo sugerido basado en ${planetName} en ${natalSign}..."
+  },
+
+  "apoyo_fisico": {
+    "titulo": "🔮 APOYO FÍSICO",
+    "nota": "⚠️ Estas son sugerencias generales. Tu Retorno Solar puede especificar herramientas más personalizadas.",
+    "items": [
+      {
+        "tipo": "🕯️ Vela",
+        "elemento": "Color asociado a ${planetName}",
+        "proposito": "Para conectar con la energía de ${planetName}"
+      },
+      {
+        "tipo": "🪨 Piedra",
+        "elemento": "Piedra asociada a ${natalSign}",
+        "proposito": "Para anclar la energía de ${natalSign}"
+      },
+      {
+        "tipo": "🧘 Práctica",
+        "elemento": "Meditación/movimiento para ${planetName}",
+        "proposito": "Para integrar ${planetName} conscientemente"
+      }
+    ]
+  },
+
+  "frase_ancla_del_anio": "Mi ${planetName} en ${natalSign} es mi guía este año."
+}
+
+---
+
+## ⚠️ INSTRUCCIONES CRÍTICAS
+
+1. **SOLO INFORMACIÓN NATAL + TEMAS GENERALES** - No inventes posiciones de Solar Return
+2. **INCLUYE NOTA DE SR** - Recuerda al usuario que generar su Retorno Solar dará interpretaciones más específicas
+3. **LENGUAJE DIRECTO** - Sin tecnicismos, aplicable
+4. **DESCRIBE EXPERIENCIA** - No teoría astrológica
+5. **PERSONALIZA A ${userName}** - Usa su nombre varias veces
+6. **JSON VÁLIDO** - Sin comentarios, sin markdown
+
+---
+
+**AHORA GENERA LA FICHA BÁSICA DE ${planetName.toUpperCase()} PARA ${userName.toUpperCase()}.**
 `;
 }
 
