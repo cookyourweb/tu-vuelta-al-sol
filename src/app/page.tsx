@@ -53,14 +53,23 @@ export default function Home() {
               <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent"> saben tu futuro</span>?
             </h1>
 
-            <p className="text-2xl sm:text-3xl max-w-4xl mx-auto mb-8 leading-relaxed text-gray-200 font-semibold">
-              No como destino fijo, sino como ciclos que puedes comprender y usar a tu favor.
+            <p className="text-xl sm:text-2xl lg:text-3xl max-w-4xl mx-auto mb-12 leading-relaxed text-gray-300">
+              Las estrellas saben cómo eres,<br />
+              qué se te da bien y cómo reaccionas ante la vida.<br />
+              Cada año los ciclos cambian,<br />
+              y tu cumpleaños marca el inicio de uno nuevo.
             </p>
 
-            <p className="text-xl sm:text-2xl max-w-4xl mx-auto mb-12 leading-relaxed text-gray-300">
-              Agenda astrológica personalizada basada en tu carta natal y tu retorno solar,<br />
-              creada para acompañarte desde tu cumpleaños hasta el siguiente.
-            </p>
+            <div className="bg-gradient-to-r from-pink-400/10 to-red-500/10 border border-pink-400/30 rounded-2xl p-6 backdrop-blur-sm max-w-2xl mx-auto mb-12">
+              <div className="flex items-center justify-center mb-3">
+                <Heart className="w-6 h-6 text-pink-400 mr-3" />
+                <span className="font-bold text-pink-300 text-lg">Agenda astrológica personalizada</span>
+              </div>
+              <p className="text-gray-400">
+                con consejos y guía práctica<br />
+                para vivir tu año de una manera única: <strong className="text-white">la tuya</strong>.
+              </p>
+            </div>
 
             <div className="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-8">
               <Link
@@ -248,7 +257,97 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
+      {/* What's Included Section */}
+      <section className="relative z-10 py-24 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-black mb-8">
+              ¿Qué incluye tu
+              <span className="bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent"> agenda astrológica personalizada</span>?
+            </h2>
+
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed mb-4">
+              Cada agenda se crea desde cero a partir de tus datos natales.<br />
+              <strong className="text-white">No hay dos iguales.</strong>
+            </p>
+
+            <p className="text-lg text-gray-400 max-w-3xl mx-auto leading-relaxed">
+              Tu Vuelta al Sol es una combinación de interpretación profunda y guía práctica,<br />
+              diseñada para acompañarte durante todo tu año solar.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 mb-12">
+            {[
+              {
+                title: "🔮 Interpretación de tu carta natal",
+                description: "Una lectura clara y profunda de tu carta natal para entender cómo eres, cuáles son tus talentos naturales y qué patrones influyen en tu vida.",
+                gradient: "from-yellow-400/20 to-orange-500/20",
+                border: "border-yellow-400/30"
+              },
+              {
+                title: "🌞 Análisis de tu retorno solar",
+                description: "Un estudio detallado del año que comienzas en tu cumpleaños: qué áreas se activan, qué retos aparecen y dónde están las oportunidades de crecimiento.",
+                gradient: "from-orange-400/20 to-red-500/20",
+                border: "border-orange-400/30"
+              },
+              {
+                title: "📅 Agenda organizada por tu año solar",
+                description: "Una agenda diseñada desde tu cumpleaños hasta el siguiente, donde integramos los tránsitos y eventos astrológicos más relevantes aplicados a tu carta.",
+                gradient: "from-blue-400/20 to-cyan-500/20",
+                border: "border-blue-400/30"
+              },
+              {
+                title: "🧭 Consejos personalizados",
+                description: "Orientación práctica adaptada a tus fortalezas y bloqueos, para ayudarte a tomar decisiones más alineadas contigo en cada etapa del año.",
+                gradient: "from-green-400/20 to-emerald-500/20",
+                border: "border-green-400/30"
+              },
+              {
+                title: "🎁 Formato ideal para ti o para regalar",
+                description: "Una experiencia única y significativa, perfecta tanto para uso personal como para sorprender a alguien especial con un regalo diferente y consciente.",
+                gradient: "from-pink-400/20 to-red-500/20",
+                border: "border-pink-400/30"
+              }
+            ].map((item, index) => (
+              <div key={index} className={`bg-gradient-to-br ${item.gradient} backdrop-blur-sm border ${item.border} rounded-3xl p-8 hover:scale-105 transition-all duration-300 relative`}>
+                <div className="absolute top-4 right-4 w-3 h-3 bg-white/30 rounded-full animate-pulse"></div>
+                <h3 className="text-2xl font-bold text-white mb-4">{item.title}</h3>
+                <p className="text-gray-300 leading-relaxed">{item.description}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Bloque diferencial */}
+          <div className="bg-gradient-to-r from-purple-400/10 to-pink-500/10 border border-purple-400/30 rounded-2xl p-8 backdrop-blur-sm max-w-4xl mx-auto mb-8 text-center">
+            <p className="text-xl text-white leading-relaxed mb-2">
+              Tu agenda no te dice qué "deberías" hacer.
+            </p>
+            <p className="text-lg text-gray-300 leading-relaxed">
+              Te ayuda a comprender qué se mueve en tu vida y cómo aprovecharlo según quién eres.
+            </p>
+            <p className="text-base text-gray-400 italic mt-4">
+              Es una guía, no una imposición.
+            </p>
+          </div>
+
+          {/* CTA suave */}
+          <div className="text-center">
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-xl text-lg hover:from-purple-400 hover:to-pink-400 transition-all duration-300 transform hover:scale-105 shadow-lg"
+            >
+              <Calendar className="w-5 h-5" />
+              Quiero mi agenda personalizada
+            </Link>
+          </div>
+
+        </div>
+      </section>
+
+      {/* Testimonials Section - COMENTADO PARA EL FUTURO */}
+      {/*
       <section className="relative z-10 py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           
@@ -315,6 +414,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      */}
 
       {/* CTA Section */}
       <section className="relative z-10 py-32 px-4 sm:px-6 lg:px-8">
