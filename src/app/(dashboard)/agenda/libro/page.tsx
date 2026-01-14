@@ -14,6 +14,8 @@ import RetornoSolar from '@/components/agenda/libro/RetornoSolar';
 import CalendarioAnual from '@/components/agenda/libro/CalendarioAnual';
 import MesPage from '@/components/agenda/libro/MesPage';
 import CierreCiclo from '@/components/agenda/libro/CierreCiclo';
+import { EscrituraTerapeutica, Visualizacion, RitualSimbolico, TrabajoEmocional } from '@/components/agenda/libro/TerapiaCreativa';
+import { PrimerDiaCiclo, UltimoDiaCiclo, QuienEraQuienSoy, PreparacionProximaVuelta, CartaCierre, PaginaFinalBlanca, Contraportada } from '@/components/agenda/libro/PaginasEspeciales';
 
 interface MonthEvent {
   date: string | Date;
@@ -262,6 +264,12 @@ export default function LibroAgendaPage() {
           apertura={bookContent.apertura_del_viaje}
         />
 
+        {/* PRIMER DÍA DEL CICLO */}
+        <PrimerDiaCiclo
+          fecha={startDate}
+          nombre={bookContent.userName}
+        />
+
         {/* TU AÑO TU VIAJE */}
         <TuAnioTuViaje
           userName={bookContent.userName}
@@ -324,6 +332,12 @@ export default function LibroAgendaPage() {
           </>
         )}
 
+        {/* TERAPIA ASTROLÓGICA CREATIVA */}
+        <EscrituraTerapeutica />
+        <Visualizacion />
+        <RitualSimbolico />
+        <TrabajoEmocional />
+
         {/* CIERRE DEL CICLO */}
         <CierreCiclo
           userName={bookContent.userName}
@@ -332,6 +346,21 @@ export default function LibroAgendaPage() {
           cierreDelCiclo={bookContent.cierre_del_ciclo}
           fraseFinal={bookContent.frase_final}
         />
+
+        {/* PÁGINAS FINALES DE REFLEXIÓN */}
+        <QuienEraQuienSoy />
+        <PreparacionProximaVuelta />
+        <CartaCierre name={bookContent.userName} />
+        <PaginaFinalBlanca />
+
+        {/* ÚLTIMO DÍA DEL CICLO */}
+        <UltimoDiaCiclo
+          fecha={endDate}
+          nombre={bookContent.userName}
+        />
+
+        {/* CONTRAPORTADA */}
+        <Contraportada />
       </div>
 
       {/* Print styles are configured in globals.css */}
