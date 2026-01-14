@@ -12,6 +12,7 @@ import connectDB from '@/lib/db';
 import NatalChart from '@/models/NatalChart';
 import Interpretation from '@/models/Interpretation';
 import User from '@/models/User';
+import Chart from '@/models/Chart';
 import OpenAI from 'openai';
 import {
   generatePlanetaryCardPrompt,
@@ -90,6 +91,8 @@ export async function POST(request: NextRequest) {
 
     // ✅ 2. Buscar Solar Return actual (OPCIONAL - si existe, mejor contexto)
     const currentYear = new Date().getFullYear();
+
+    // Buscar interpretación del Solar Return
     const solarReturn = await Interpretation.findOne({
       userId,
       chartType: 'solar-return',
@@ -99,8 +102,14 @@ export async function POST(request: NextRequest) {
     .lean()
     .exec() as any;
 
-    if (solarReturn) {
-      console.log('🌅 Found Solar Return - generating enhanced planetary cards');
+    // Buscar la CARTA del Solar Return (con posiciones planetarias)
+    const chartDoc = await Chart.findOne({ userId }).lean().exec() as any;
+    const solarReturnChart = chartDoc?.solarReturnChart;
+
+    if (solarReturn && solarReturnChart) {
+      console.log('🌅 Found Solar Return interpretation + chart - generating enhanced planetary cards');
+    } else if (solarReturn && !solarReturnChart) {
+      console.log('⚠️ Found Solar Return interpretation but no chart data - using interpretation only');
     } else {
       console.log('⚠️ No Solar Return found - generating basic planetary cards based on natal + transits');
     }
@@ -129,11 +138,12 @@ export async function POST(request: NextRequest) {
     // ✅ 5. Determinar qué planetas generar
     const planetsToGenerate = planets && planets.length > 0
       ? planets
-      : solarReturn
+      : (solarReturn && solarReturnChart)
         ? determineActivePlanets(solarReturn.interpretation || solarReturn)
         : ['Sol', 'Luna', 'Mercurio', 'Venus', 'Marte']; // Planetas básicos si no hay SR
 
     console.log('🌟 Planets to generate:', planetsToGenerate);
+    console.log('📊 Solar Return Chart available:', !!solarReturnChart);
 
     // ✅ 6. Generar fichas para cada planeta
     const planetaryCards: any[] = [];
@@ -149,7 +159,7 @@ export async function POST(request: NextRequest) {
         birthDate, // Para calcular fechas del año solar
         planetName,
         natalChart: natalChart.natalChart || natalChart,
-        solarReturn: solarReturn ? (solarReturn.interpretation || solarReturn) : null,
+        solarReturn: solarReturnChart || null, // Usar la CARTA, no la interpretación
         natalInterpretation: natalInterpretation?.interpretation
       };
 
