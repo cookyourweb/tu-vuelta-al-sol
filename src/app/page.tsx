@@ -53,33 +53,22 @@ export default function Home() {
               <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent"> saben tu futuro</span>?
             </h1>
 
-            <p className="text-2xl sm:text-3xl max-w-3xl mx-auto mb-8 leading-relaxed text-gray-200 font-medium">
-              No para decidirlo por ti.<br />
-              Sino para ayudarte a vivirlo mejor.
+            <p className="text-2xl sm:text-3xl max-w-4xl mx-auto mb-8 leading-relaxed text-gray-200 font-semibold">
+              No como destino fijo, sino como ciclos que puedes comprender y usar a tu favor.
             </p>
 
-            <div className="bg-gradient-to-r from-purple-400/10 to-pink-500/10 border border-purple-400/30 rounded-2xl p-8 backdrop-blur-sm max-w-3xl mx-auto mb-12">
-              <p className="text-lg sm:text-xl text-gray-300 leading-relaxed mb-6">
-                Una <strong className="text-white">agenda astrológica personalizada</strong><br />
-                que combina tu carta natal y tu retorno solar<br />
-                para acompañarte desde tu cumpleaños hasta el siguiente.
-              </p>
-
-              <p className="text-base sm:text-lg text-gray-400 leading-relaxed">
-                Te muestra qué se activa en tu año,<br />
-                cómo te afecta emocional y energéticamente,<br />
-                y te da consejos, mantras y prácticas<br />
-                para atravesar cada momento con <strong className="text-white">más conciencia, motivación y poder personal</strong>.
-              </p>
-            </div>
+            <p className="text-xl sm:text-2xl max-w-4xl mx-auto mb-12 leading-relaxed text-gray-300">
+              Agenda astrológica personalizada basada en tu carta natal y tu retorno solar,<br />
+              creada para acompañarte desde tu cumpleaños hasta el siguiente.
+            </p>
 
             <div className="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-8">
               <Link
                 href="/register"
                 className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-black py-6 px-12 rounded-2xl text-xl hover:from-yellow-300 hover:to-orange-400 transition-all duration-300 transform hover:scale-105 shadow-2xl flex items-center"
               >
-                <Calendar className="w-6 h-6 mr-3" />
-                Crear mi agenda
+                <Sparkles className="w-6 h-6 mr-3" />
+                Descubrir mi destino
                 <ArrowRight className="w-6 h-6 ml-3" />
               </Link>
               
