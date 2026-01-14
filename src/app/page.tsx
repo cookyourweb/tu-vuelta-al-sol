@@ -52,30 +52,34 @@ export default function Home() {
               ¿Y si las estrellas ya
               <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent"> saben tu futuro</span>?
             </h1>
-            
-            <p className="text-xl sm:text-2xl lg:text-3xl max-w-4xl mx-auto mb-12 leading-relaxed text-gray-300">
-              Tu carta natal revela cuándo encontrarás el amor, el trabajo perfecto, y los momentos de poder que cambiarán tu vida.
-              <span className="text-white font-semibold"> No es casualidad. Es cósmico.</span>
+
+            <p className="text-2xl sm:text-3xl max-w-3xl mx-auto mb-8 leading-relaxed text-gray-200 font-medium">
+              No para decidirlo por ti.<br />
+              Sino para ayudarte a vivirlo mejor.
             </p>
-            
-            <div className="bg-gradient-to-r from-pink-400/10 to-red-500/10 border border-pink-400/30 rounded-2xl p-6 backdrop-blur-sm max-w-2xl mx-auto mb-12">
-              <div className="flex items-center justify-center mb-3">
-                <Heart className="w-6 h-6 text-pink-400 mr-3" />
-                <span className="font-bold text-pink-300 text-lg">¡Tu Vida Está Escrita en las Estrellas!</span>
-              </div>
-              <p className="text-gray-400">
-                Descubre cuándo llegará tu gran amor, tu ascenso laboral, o tu momento de abundancia.
-                <strong className="text-white"> El universo tiene un plan para ti.</strong>
+
+            <div className="bg-gradient-to-r from-purple-400/10 to-pink-500/10 border border-purple-400/30 rounded-2xl p-8 backdrop-blur-sm max-w-3xl mx-auto mb-12">
+              <p className="text-lg sm:text-xl text-gray-300 leading-relaxed mb-6">
+                Una <strong className="text-white">agenda astrológica personalizada</strong><br />
+                que combina tu carta natal y tu retorno solar<br />
+                para acompañarte desde tu cumpleaños hasta el siguiente.
+              </p>
+
+              <p className="text-base sm:text-lg text-gray-400 leading-relaxed">
+                Te muestra qué se activa en tu año,<br />
+                cómo te afecta emocional y energéticamente,<br />
+                y te da consejos, mantras y prácticas<br />
+                para atravesar cada momento con <strong className="text-white">más conciencia, motivación y poder personal</strong>.
               </p>
             </div>
-            
+
             <div className="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-8">
-              <Link 
-                href="/register" 
+              <Link
+                href="/register"
                 className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-black py-6 px-12 rounded-2xl text-xl hover:from-yellow-300 hover:to-orange-400 transition-all duration-300 transform hover:scale-105 shadow-2xl flex items-center"
               >
-                <Sparkles className="w-6 h-6 mr-3" />
-                Descubrir mi destino
+                <Calendar className="w-6 h-6 mr-3" />
+                Crear mi agenda
                 <ArrowRight className="w-6 h-6 ml-3" />
               </Link>
               
