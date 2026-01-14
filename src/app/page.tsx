@@ -54,18 +54,18 @@ export default function Home() {
             </h1>
             
             <p className="text-xl sm:text-2xl lg:text-3xl max-w-4xl mx-auto mb-12 leading-relaxed text-gray-300">
-              Tu carta natal revela cuándo encontrarás el amor, el trabajo perfecto, y los momentos de poder que cambiarán tu vida.
-              <span className="text-white font-semibold"> No es casualidad. Es cósmico.</span>
+              Saben cómo eres, qué se te da bien y cómo reaccionas ante la vida. Cada año los ciclos cambian,
+              y tu cumpleaños marca el inicio de uno nuevo.
             </p>
             
             <div className="bg-gradient-to-r from-pink-400/10 to-red-500/10 border border-pink-400/30 rounded-2xl p-6 backdrop-blur-sm max-w-2xl mx-auto mb-12">
               <div className="flex items-center justify-center mb-3">
                 <Heart className="w-6 h-6 text-pink-400 mr-3" />
-                <span className="font-bold text-pink-300 text-lg">¡Tu Vida Está Escrita en las Estrellas!</span>
+                <span className="font-bold text-pink-300 text-lg">Agenda astrológica personalizada</span>
               </div>
               <p className="text-gray-400">
-                Descubre cuándo llegará tu gran amor, tu ascenso laboral, o tu momento de abundancia.
-                <strong className="text-white"> El universo tiene un plan para ti.</strong>
+                con consejos y guía práctica  para vivir tu año de una manera única:
+                <strong className="text-white"> la tuya.</strong>
               </p>
             </div>
             
