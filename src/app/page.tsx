@@ -367,6 +367,140 @@ Es una guía creada a partir de
       </section>
       */}
 
+      {/* Gift Section */}
+      <section className="relative z-10 py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-pink-900/20 to-purple-900/20 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto">
+
+          <div className="text-center mb-16">
+            <div className="flex justify-center items-center mb-8">
+              <div className="bg-gradient-to-r from-pink-400/20 to-red-500/20 border border-pink-400/30 rounded-full p-6 backdrop-blur-sm relative">
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-pink-400 rounded-full animate-pulse"></div>
+                <Heart className="w-10 h-10 text-pink-400" />
+              </div>
+            </div>
+
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-black mb-8">
+              Un regalo
+              <span className="bg-gradient-to-r from-pink-400 to-red-500 bg-clip-text text-transparent"> único, personal y con sentido</span>
+            </h2>
+
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed mb-4">
+              Encontrar un regalo especial no siempre es fácil.<br />
+              La mayoría de regalos se usan un tiempo… y se olvidan.
+            </p>
+
+            <p className="text-lg text-white max-w-3xl mx-auto leading-relaxed font-semibold">
+              Tu Vuelta al Sol es diferente:<br />
+              es una experiencia personal que acompaña durante todo un año.
+            </p>
+          </div>
+
+          {/* ¿Por qué es tan especial? */}
+          <div className="mb-16">
+            <h3 className="text-3xl font-bold text-white text-center mb-12">
+              ✨ ¿Por qué es un regalo tan especial?
+            </h3>
+
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 max-w-5xl mx-auto">
+              {[
+                {
+                  emoji: "🌟",
+                  title: "Porque es totalmente personalizado",
+                  description: "Se crea a partir de la carta natal y el retorno solar de la persona. No hay dos agendas iguales.",
+                  gradient: "from-yellow-400/20 to-orange-500/20",
+                  border: "border-yellow-400/30"
+                },
+                {
+                  emoji: "🎂",
+                  title: "Porque empieza en su cumpleaños",
+                  description: "La agenda comienza el día de su cumpleaños y la acompaña hasta el siguiente, haciendo que el regalo tenga un significado real y profundo.",
+                  gradient: "from-purple-400/20 to-pink-500/20",
+                  border: "border-purple-400/30"
+                },
+                {
+                  emoji: "💫",
+                  title: "Porque combina emoción y utilidad",
+                  description: "No es solo bonito o simbólico: ofrece guía, reflexión y apoyo práctico durante todo el año.",
+                  gradient: "from-blue-400/20 to-cyan-500/20",
+                  border: "border-blue-400/30"
+                },
+                {
+                  emoji: "💝",
+                  title: "Porque demuestra intención",
+                  description: "Es un regalo pensado, consciente y lleno de significado. Ideal para decir: \"me importas\".",
+                  gradient: "from-pink-400/20 to-red-500/20",
+                  border: "border-pink-400/30"
+                }
+              ].map((item, index) => (
+                <div key={index} className={`bg-gradient-to-br ${item.gradient} backdrop-blur-sm border ${item.border} rounded-3xl p-8 hover:scale-105 transition-all duration-300 relative`}>
+                  <div className="absolute top-4 right-4 w-3 h-3 bg-white/30 rounded-full animate-pulse"></div>
+                  <div className="text-5xl mb-4">{item.emoji}</div>
+                  <h4 className="text-xl font-bold text-white mb-3">{item.title}</h4>
+                  <p className="text-gray-300 leading-relaxed">{item.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ¿Para quién? */}
+          <div className="mb-16">
+            <h3 className="text-3xl font-bold text-white text-center mb-8">
+              🎯 ¿Para quién es perfecto este regalo?
+            </h3>
+
+            <div className="bg-gradient-to-r from-purple-400/10 to-pink-500/10 border border-purple-400/30 rounded-2xl p-8 backdrop-blur-sm max-w-3xl mx-auto">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
+                {['Cumpleaños', 'Pareja', 'Familia', 'Amistades', 'Momentos de cambio', 'Nuevos comienzos'].map((ocasion, index) => (
+                  <div key={index} className="bg-white/5 rounded-lg p-4 border border-white/10">
+                    <p className="text-white font-medium">• {ocasion}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="text-gray-300 text-center mt-6 italic">
+                O simplemente, para regalar(te) algo diferente.
+              </p>
+            </div>
+          </div>
+
+          {/* Bloque emocional */}
+          <div className="bg-gradient-to-r from-pink-400/10 to-red-500/10 border border-pink-400/30 rounded-2xl p-10 backdrop-blur-sm max-w-4xl mx-auto mb-12 text-center">
+            <p className="text-2xl sm:text-3xl text-white leading-relaxed font-semibold mb-4">
+              Hay regalos que se abren una vez.
+            </p>
+            <p className="text-xl sm:text-2xl text-gray-200 leading-relaxed">
+              Este se descubre poco a poco,<br />
+              <strong className="text-white">a lo largo de todo un año</strong>.
+            </p>
+          </div>
+
+          {/* CTAs para regalo */}
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-6">
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-pink-500 to-red-500 text-white font-black rounded-xl text-lg hover:from-pink-400 hover:to-red-400 transition-all duration-300 transform hover:scale-105 shadow-lg"
+            >
+              <Heart className="w-5 h-5" />
+              Quiero regalar una Vuelta al Sol
+            </Link>
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-xl text-lg hover:from-purple-400 hover:to-pink-400 transition-all duration-300 transform hover:scale-105 shadow-lg"
+            >
+              <Sparkles className="w-5 h-5" />
+              Crear mi agenda
+            </Link>
+          </div>
+
+          {/* Nota extra */}
+          <div className="mt-8 text-center">
+            <p className="text-gray-400 text-sm">
+              💌 Puedes indicar que es un regalo y añadir un mensaje personalizado.
+            </p>
+          </div>
+
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="relative z-10 py-32 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto text-center">
