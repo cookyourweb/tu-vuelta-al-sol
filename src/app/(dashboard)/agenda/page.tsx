@@ -60,6 +60,7 @@ const AgendaPersonalizada = () => {
     srSign?: string;
     srHouse?: number;
     duration: string;
+    isSlowPlanet: boolean;
   }> | null>(null);
 
   React.useEffect(() => {
@@ -103,15 +104,12 @@ const AgendaPersonalizada = () => {
     fetchUserProfile();
   }, [user]);
 
-  // Cargar planetas activos del año
+  // Cargar planetas activos del año con fechas específicas
   React.useEffect(() => {
     const fetchActivePlanets = async () => {
       if (!user?.uid || !userProfile) return;
 
       try {
-        // Obtener planetas principales del Solar Return (si existe)
-        const mainPlanets = ['Marte', 'Venus', 'Mercurio', 'Luna', 'Sol'];
-
         const birthDate = new Date(userProfile.birthDate);
         const now = new Date();
         const currentYear = now.getFullYear();
@@ -121,16 +119,58 @@ const AgendaPersonalizada = () => {
 
         const startYear = now >= thisYearBirthday ? currentYear : currentYear - 1;
         const endYear = startYear + 1;
-        const duration = `${getMonthName(birthMonth)} ${startYear} – ${getMonthName(birthMonth)} ${endYear}`;
 
-        // Por ahora, mostrar planetas principales con duración del año solar
-        setActivePlanets(mainPlanets.map(planet => ({
-          name: planet,
-          symbol: getPlanetSymbol(planet),
-          natalSign: 'Tu natal',
-          natalHouse: 1,
-          duration
-        })));
+        const yearStart = new Date(startYear, birthMonth, birthDay);
+        const yearEnd = new Date(endYear, birthMonth, birthDay);
+
+        // Definir duraciones específicas para cada planeta
+        // Planetas lentos: duran todo el año
+        // Planetas rápidos: cambios más frecuentes (simplificado por ahora)
+
+        const planets = [
+          {
+            name: 'Júpiter',
+            symbol: getPlanetSymbol('Júpiter'),
+            natalSign: 'Tu natal',
+            natalHouse: 1,
+            duration: `${formatDate(yearStart)} – ${formatDate(yearEnd)}`,
+            isSlowPlanet: true
+          },
+          {
+            name: 'Saturno',
+            symbol: getPlanetSymbol('Saturno'),
+            natalSign: 'Tu natal',
+            natalHouse: 1,
+            duration: `${formatDate(yearStart)} – ${formatDate(yearEnd)}`,
+            isSlowPlanet: true
+          },
+          {
+            name: 'Marte',
+            symbol: getPlanetSymbol('Marte'),
+            natalSign: 'Tu natal',
+            natalHouse: 1,
+            duration: `${formatDate(yearStart)} – ${formatDate(yearEnd)}`,
+            isSlowPlanet: false
+          },
+          {
+            name: 'Venus',
+            symbol: getPlanetSymbol('Venus'),
+            natalSign: 'Tu natal',
+            natalHouse: 1,
+            duration: `${formatDate(yearStart)} – ${formatDate(yearEnd)}`,
+            isSlowPlanet: false
+          },
+          {
+            name: 'Mercurio',
+            symbol: getPlanetSymbol('Mercurio'),
+            natalSign: 'Tu natal',
+            natalHouse: 1,
+            duration: `${formatDate(yearStart)} – ${formatDate(yearEnd)}`,
+            isSlowPlanet: false
+          }
+        ];
+
+        setActivePlanets(planets);
       } catch (error) {
         console.error('Error loading active planets:', error);
       }
@@ -138,6 +178,10 @@ const AgendaPersonalizada = () => {
 
     fetchActivePlanets();
   }, [user, userProfile]);
+
+  const formatDate = (date: Date): string => {
+    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+  };
 
   const getPlanetSymbol = (planet: string): string => {
     const symbols: Record<string, string> = {
@@ -1408,11 +1452,6 @@ const AgendaPersonalizada = () => {
           </div>
         )}
 
-        {/* PLANETARY CARDS - Contexto anual */}
-        <div className="mb-8">
-          <PlanetaryCards />
-        </div>
-
         {/* LAYOUT DESKTOP/MOBILE */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
@@ -1671,12 +1710,21 @@ const AgendaPersonalizada = () => {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <span className="text-2xl">{planet.symbol}</span>
-                            <span className="text-white font-semibold text-sm">{planet.name}</span>
+                            <div>
+                              <span className="text-white font-semibold text-sm block">{planet.name}</span>
+                              <span className={`text-[10px] px-2 py-0.5 rounded-full ${
+                                planet.isSlowPlanet
+                                  ? 'bg-blue-500/20 text-blue-300'
+                                  : 'bg-orange-500/20 text-orange-300'
+                              }`}>
+                                {planet.isSlowPlanet ? 'Todo el año' : 'Ciclo rápido'}
+                              </span>
+                            </div>
                           </div>
-                          <span className="text-purple-300 text-xs">Activo</span>
                         </div>
-                        <div className="mt-2 text-gray-400 text-xs">
-                          📅 {planet.duration}
+                        <div className="mt-2 text-gray-400 text-[10px]">
+                          📅 Desde: <span className="text-gray-300">{planet.duration.split(' – ')[0]}</span><br/>
+                          📅 Hasta: <span className="text-gray-300">{planet.duration.split(' – ')[1]}</span>
                         </div>
                       </div>
                     ))}
@@ -1689,6 +1737,11 @@ const AgendaPersonalizada = () => {
                   </div>
                 </div>
               )}
+
+              {/* PLANETARY CARDS - Fichas planetarias generadas */}
+              <div className="mb-6">
+                <PlanetaryCards />
+              </div>
 
               {/* Header del sidebar */}
               <div className="bg-gradient-to-r from-pink-600/30 to-purple-600/30 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-pink-400/30">
