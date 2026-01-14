@@ -51,6 +51,17 @@ const AgendaPersonalizada = () => {
   // Perfil de usuario REAL (no datos de prueba)
   const [userProfile, setUserProfile] = React.useState<UserProfile | null>(null);
 
+  // Planetas activos del año
+  const [activePlanets, setActivePlanets] = React.useState<Array<{
+    name: string;
+    symbol: string;
+    natalSign: string;
+    natalHouse: number;
+    srSign?: string;
+    srHouse?: number;
+    duration: string;
+  }> | null>(null);
+
   React.useEffect(() => {
     const fetchUserProfile = async () => {
       if (!user?.uid) return;
@@ -91,6 +102,61 @@ const AgendaPersonalizada = () => {
 
     fetchUserProfile();
   }, [user]);
+
+  // Cargar planetas activos del año
+  React.useEffect(() => {
+    const fetchActivePlanets = async () => {
+      if (!user?.uid || !userProfile) return;
+
+      try {
+        // Obtener planetas principales del Solar Return (si existe)
+        const mainPlanets = ['Marte', 'Venus', 'Mercurio', 'Luna', 'Sol'];
+
+        const birthDate = new Date(userProfile.birthDate);
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const birthMonth = birthDate.getMonth();
+        const birthDay = birthDate.getDate();
+        const thisYearBirthday = new Date(currentYear, birthMonth, birthDay);
+
+        const startYear = now >= thisYearBirthday ? currentYear : currentYear - 1;
+        const endYear = startYear + 1;
+        const duration = `${getMonthName(birthMonth)} ${startYear} – ${getMonthName(birthMonth)} ${endYear}`;
+
+        // Por ahora, mostrar planetas principales con duración del año solar
+        setActivePlanets(mainPlanets.map(planet => ({
+          name: planet,
+          symbol: getPlanetSymbol(planet),
+          natalSign: 'Tu natal',
+          natalHouse: 1,
+          duration
+        })));
+      } catch (error) {
+        console.error('Error loading active planets:', error);
+      }
+    };
+
+    fetchActivePlanets();
+  }, [user, userProfile]);
+
+  const getPlanetSymbol = (planet: string): string => {
+    const symbols: Record<string, string> = {
+      'Sol': '☉',
+      'Luna': '☽',
+      'Mercurio': '☿',
+      'Venus': '♀',
+      'Marte': '♂',
+      'Júpiter': '♃',
+      'Saturno': '♄',
+    };
+    return symbols[planet] || '●';
+  };
+
+  const getMonthName = (month: number): string => {
+    const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+                    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    return months[month];
+  };
 
   // 🔧 NUEVO: Cargar datos de carta progresada si vienen desde esa página
   React.useEffect(() => {
@@ -1584,46 +1650,42 @@ const AgendaPersonalizada = () => {
             <div className="sticky top-8">
 
               {/* Info del usuario - MOVIDO ARRIBA */}
-              {userProfile && (
-                <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-3xl p-6 mb-6 relative overflow-hidden">
-                  <div className="absolute top-4 right-4 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                  <div className="absolute bottom-4 left-4 w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+              {activePlanets && activePlanets.length > 0 && (
+                <div className="bg-gradient-to-br from-purple-900/40 to-indigo-900/40 backdrop-blur-sm border border-purple-400/30 rounded-3xl p-6 mb-6 relative overflow-hidden">
+                  <div className="absolute top-4 right-4 w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></div>
+                  <div className="absolute bottom-4 left-4 w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
 
                   <div className="flex items-center mb-4">
-                    <div className="bg-gradient-to-r from-green-400/20 to-blue-500/20 border border-green-400/30 rounded-full p-3 backdrop-blur-sm mr-4">
-                      <span className="text-2xl">👤</span>
+                    <div className="bg-gradient-to-r from-yellow-400/20 to-purple-500/20 border border-yellow-400/30 rounded-full p-3 backdrop-blur-sm mr-4">
+                      <span className="text-2xl">🌟</span>
                     </div>
                     <div>
-                      <h4 className="text-lg font-bold text-white">{userProfile.name || 'Usuario'}</h4>
-                      <p className="text-gray-300 text-sm">{userProfile.currentAge || 0} años</p>
+                      <h4 className="text-lg font-bold text-white">Planetas Activos del Año</h4>
+                      <p className="text-gray-300 text-xs">{activePlanets.length} planetas guiando tu ciclo</p>
                     </div>
                   </div>
 
-                  <div className="space-y-3">
-                    <div className="bg-black/30 rounded-xl p-3 border border-white/10">
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-400 text-xs">Lugar</span>
-                        <span className="text-white text-sm">📍 {userProfile.place || 'Sin ubicación'}</span>
+                  <div className="space-y-2">
+                    {activePlanets.map((planet, idx) => (
+                      <div key={idx} className="bg-black/30 rounded-xl p-3 border border-white/10 hover:border-yellow-400/30 transition-all">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl">{planet.symbol}</span>
+                            <span className="text-white font-semibold text-sm">{planet.name}</span>
+                          </div>
+                          <span className="text-purple-300 text-xs">Activo</span>
+                        </div>
+                        <div className="mt-2 text-gray-400 text-xs">
+                          📅 {planet.duration}
+                        </div>
                       </div>
-                    </div>
+                    ))}
+                  </div>
 
-                    <div className="bg-black/30 rounded-xl p-3 border border-white/10">
-                      <div className="text-gray-400 text-xs mb-2">Signos Astrológicos</div>
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-yellow-300 text-xs">☉ Sol</span>
-                          <span className="text-white text-sm">{userProfile.astrological?.signs?.sun || 'N/A'}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-blue-300 text-xs">☽ Luna</span>
-                          <span className="text-white text-sm">{userProfile.astrological?.signs?.moon || 'N/A'}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-purple-300 text-xs">↗ Ascendente</span>
-                          <span className="text-white text-sm">{userProfile.astrological?.signs?.ascendant || 'N/A'}</span>
-                        </div>
-                      </div>
-                    </div>
+                  <div className="mt-4 pt-4 border-t border-white/10">
+                    <p className="text-xs text-gray-400 text-center">
+                      Estos planetas modulan todos los eventos de tu agenda
+                    </p>
                   </div>
                 </div>
               )}
