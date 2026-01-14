@@ -1884,7 +1884,7 @@ const AgendaPersonalizada = () => {
                             🌅 ¿Listo para tu Nuevo Año Astrológico?
                           </h3>
                           <p className="text-white/90 text-sm mb-4 leading-relaxed">
-                            Genera los eventos del próximo ciclo solar ({yearRange.end.getFullYear()}-{yearRange.end.getFullYear() + 1}) para empezar a planificar tu nuevo año.
+                            Genera los eventos del próximo ciclo solar ({yearRange?.end ? yearRange.end.getFullYear() + 1 : new Date().getFullYear() + 1}-{yearRange?.end ? yearRange.end.getFullYear() + 2 : new Date().getFullYear() + 2}) para empezar a planificar tu nuevo año.
                           </p>
                           <button
                             onClick={() => {
