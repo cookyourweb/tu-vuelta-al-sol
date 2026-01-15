@@ -1065,6 +1065,24 @@ const AgendaPersonalizada = () => {
     const isFirstDay = yearRange && isSameDay(day.date, yearRange.start);
     const isLastDay = yearRange && isSameDay(day.date, yearRange.end);
 
+    // Si hay eventos normales, abrir modal con lista de eventos
+    if (day.events.length > 0 && !isFirstDay && !isLastDay) {
+      // Crear evento modal con lista de eventos del día
+      const dayEventsModal = {
+        id: `day-${day.date.getTime()}`,
+        date: day.date.toISOString(),
+        type: 'daily_summary' as const,
+        title: `Eventos del día`,
+        description: `${day.events.length} eventos cósmicos`,
+        priority: 'medium' as const,
+        events: day.events
+      };
+
+      setModalEvent(dayEventsModal as any);
+      setShowEventModal(true);
+      return;
+    }
+
     // Mostrar mensaje especial para días clave del ciclo
     if (isFirstDay || isLastDay) {
       const specialMessage = isFirstDay
@@ -1896,6 +1914,56 @@ const AgendaPersonalizada = () => {
 
                 {/* Contenido del modal con scroll */}
                 <div className="p-6 max-h-[60vh] overflow-y-auto">
+                  {/* 📅 RESUMEN DIARIO: Lista de eventos del día */}
+                  {modalEvent.type === 'daily_summary' && (modalEvent as any).events && (
+                    <div>
+                      <p className="text-purple-200 text-sm mb-6 text-center">
+                        Click en cualquier evento para ver su interpretación completa
+                      </p>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {((modalEvent as any).events as AstrologicalEvent[]).map((event) => (
+                          <button
+                            key={event.id}
+                            onClick={() => {
+                              // Cerrar modal actual y abrir con el evento específico
+                              setModalEvent(event);
+                            }}
+                            className={`
+                              bg-gradient-to-r ${getEventColor(event.type, event.priority)}/20 backdrop-blur-sm
+                              rounded-xl p-4 border border-white/20 hover:shadow-lg transition-all duration-200
+                              cursor-pointer hover:scale-105 text-left
+                            `}
+                          >
+                            <div className="flex items-start gap-3 mb-3">
+                              <span className="text-3xl">{getEventIcon(event.type, event.priority)}</span>
+                              <div className="flex-1">
+                                <h4 className="font-bold text-white text-sm">{event.title}</h4>
+                                {event.planet && event.sign && (
+                                  <p className="text-purple-200 text-xs mt-1">{event.planet} en {event.sign}</p>
+                                )}
+                              </div>
+                              {event.priority === 'high' && (
+                                <span className="bg-red-500/80 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                  CRÍTICO
+                                </span>
+                              )}
+                            </div>
+
+                            <p className="text-gray-300 text-xs line-clamp-2">{event.description}</p>
+
+                            <div className="mt-3 text-purple-400 text-xs flex items-center gap-1">
+                              <span>Ver detalles</span>
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* 🎂 SECCIÓN ESPECIAL: Primer/Último Día del Ciclo Solar */}
                   {(modalEvent as any).metadata?.guidance && (
                     <div className={`mb-6 bg-gradient-to-br ${
