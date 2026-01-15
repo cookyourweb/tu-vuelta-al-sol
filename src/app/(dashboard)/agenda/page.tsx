@@ -10,7 +10,7 @@ import type { UserProfile, AstrologicalEvent, EventType } from '@/types/astrolog
 
 import EventsLoadingModal from '@/components/astrology/EventsLoadingModal';
 import EventInterpretationButton from '@/components/agenda/EventInterpretationButton';
-import PlanetaryCards from '@/components/agenda/PlanetaryCards';
+import PlanetarySection from '@/components/agenda/PlanetarySection';
 import { AgendaLibro } from '@/components/agenda/AgendaLibro';
 import { StyleProvider } from '@/context/StyleContext';
 import { mapAstrologicalEventToEventData } from '@/utils/eventMapping';
@@ -1688,60 +1688,8 @@ const AgendaPersonalizada = () => {
           <div className="lg:col-span-1">
             <div className="sticky top-8">
 
-              {/* Info del usuario - MOVIDO ARRIBA */}
-              {activePlanets && activePlanets.length > 0 && (
-                <div className="bg-gradient-to-br from-purple-900/40 to-indigo-900/40 backdrop-blur-sm border border-purple-400/30 rounded-3xl p-6 mb-6 relative overflow-hidden">
-                  <div className="absolute top-4 right-4 w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></div>
-                  <div className="absolute bottom-4 left-4 w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
-
-                  <div className="flex items-center mb-4">
-                    <div className="bg-gradient-to-r from-yellow-400/20 to-purple-500/20 border border-yellow-400/30 rounded-full p-3 backdrop-blur-sm mr-4">
-                      <span className="text-2xl">🌟</span>
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-bold text-white">Planetas Activos del Año</h4>
-                      <p className="text-gray-300 text-xs">{activePlanets.length} planetas guiando tu ciclo</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    {activePlanets.map((planet, idx) => (
-                      <div key={idx} className="bg-black/30 rounded-xl p-3 border border-white/10 hover:border-yellow-400/30 transition-all">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="text-2xl">{planet.symbol}</span>
-                            <div>
-                              <span className="text-white font-semibold text-sm block">{planet.name}</span>
-                              <span className={`text-[10px] px-2 py-0.5 rounded-full ${
-                                planet.isSlowPlanet
-                                  ? 'bg-blue-500/20 text-blue-300'
-                                  : 'bg-orange-500/20 text-orange-300'
-                              }`}>
-                                {planet.isSlowPlanet ? 'Todo el año' : 'Ciclo rápido'}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="mt-2 text-gray-400 text-[10px]">
-                          📅 Desde: <span className="text-gray-300">{planet.duration.split(' – ')[0]}</span><br/>
-                          📅 Hasta: <span className="text-gray-300">{planet.duration.split(' – ')[1]}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-4 pt-4 border-t border-white/10">
-                    <p className="text-xs text-gray-400 text-center">
-                      Estos planetas modulan todos los eventos de tu agenda
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* PLANETARY CARDS - Fichas planetarias generadas */}
-              <div className="mb-6">
-                <PlanetaryCards />
-              </div>
+              {/* SECCIÓN UNIFICADA DE PLANETAS */}
+              <PlanetarySection activePlanets={activePlanets} />
 
               {/* Header del sidebar */}
               <div className="bg-gradient-to-r from-pink-600/30 to-purple-600/30 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-pink-400/30">
