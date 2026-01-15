@@ -1294,35 +1294,47 @@ const AgendaPersonalizada = () => {
                 </div>
               </div>
 
-              {/* Control de Año Solar */}
+              {/* Control de Año Solar + Agenda Libro */}
               {yearRange && (
-                <div className="flex items-center gap-3 bg-gradient-to-r from-purple-600/30 to-pink-600/30 backdrop-blur-sm border border-purple-400/30 rounded-full px-5 py-2.5">
-                  <div className="text-white text-sm font-medium">
-                    <span className="text-yellow-400">🌞</span> Ciclo Solar: {yearRange.start.getFullYear()}-{yearRange.end.getFullYear()}
+                <div className="flex items-center gap-3 flex-wrap">
+                  <div className="flex items-center gap-3 bg-gradient-to-r from-purple-600/30 to-pink-600/30 backdrop-blur-sm border border-purple-400/30 rounded-full px-5 py-2.5">
+                    <div className="text-white text-sm font-medium">
+                      <span className="text-yellow-400">🌞</span> Ciclo Solar: {yearRange.start.getFullYear()}-{yearRange.end.getFullYear()}
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        if (userProfile) {
+                          setEvents([]);
+                          setLoadedMonths(new Set());
+                          loadYearEvents(true);
+                        }
+                      }}
+                      disabled={loadingYearEvents}
+                      className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold py-1.5 px-4 rounded-full transition-all duration-300 shadow-lg hover:shadow-yellow-500/50 flex items-center gap-1.5"
+                    >
+                      {loadingYearEvents ? (
+                        <>
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                          <span>Cargando...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>🔄</span>
+                          <span>Generar Nuevo Ciclo {new Date().getFullYear()}</span>
+                        </>
+                      )}
+                    </button>
                   </div>
 
+                  {/* Botón Ver Agenda Libro */}
                   <button
-                    onClick={() => {
-                      if (userProfile) {
-                        setEvents([]);
-                        setLoadedMonths(new Set());
-                        loadYearEvents(true);
-                      }
-                    }}
-                    disabled={loadingYearEvents}
-                    className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold py-1.5 px-4 rounded-full transition-all duration-300 shadow-lg hover:shadow-yellow-500/50 flex items-center gap-1.5"
+                    onClick={() => setShowAgendaLibro(true)}
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg hover:shadow-purple-500/25 border border-white/10 px-5 py-2.5 rounded-full group"
+                    title="Ver tu agenda en formato libro"
                   >
-                    {loadingYearEvents ? (
-                      <>
-                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
-                        <span>Cargando...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>🔄</span>
-                        <span>Generar Nuevo Ciclo {new Date().getFullYear()}</span>
-                      </>
-                    )}
+                    <span className="text-lg mr-2">📖</span>
+                    <span className="text-white font-bold text-sm">Ver Agenda Libro</span>
                   </button>
                 </div>
               )}
