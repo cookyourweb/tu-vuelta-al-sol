@@ -44,9 +44,24 @@ const AgendaPersonalizada = () => {
   const [loadedMonths, setLoadedMonths] = useState<Set<string>>(new Set());
   const [loadingMonthlyEvents, setLoadingMonthlyEvents] = useState(false);
   const [loadingMonthName, setLoadingMonthName] = useState<string>('');
+  const [isPreviousYear, setIsPreviousYear] = useState(false); // Detectar si vemos año anterior
+  const [isLastDayOfCycle, setIsLastDayOfCycle] = useState(false); // Último día del ciclo (cumpleaños)
+  const [isDayAfterBirthday, setIsDayAfterBirthday] = useState(false); // Primer día después del cumpleaños
 
   // Perfil de usuario REAL (no datos de prueba)
   const [userProfile, setUserProfile] = React.useState<UserProfile | null>(null);
+
+  // Planetas activos del año
+  const [activePlanets, setActivePlanets] = React.useState<Array<{
+    name: string;
+    symbol: string;
+    natalSign: string;
+    natalHouse: number;
+    srSign?: string;
+    srHouse?: number;
+    duration: string;
+    isSlowPlanet: boolean;
+  }> | null>(null);
 
   React.useEffect(() => {
     const fetchUserProfile = async () => {
@@ -88,6 +103,104 @@ const AgendaPersonalizada = () => {
 
     fetchUserProfile();
   }, [user]);
+
+  // Cargar planetas activos del año con fechas específicas
+  React.useEffect(() => {
+    const fetchActivePlanets = async () => {
+      if (!user?.uid || !userProfile) return;
+
+      try {
+        const birthDate = new Date(userProfile.birthDate);
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const birthMonth = birthDate.getMonth();
+        const birthDay = birthDate.getDate();
+        const thisYearBirthday = new Date(currentYear, birthMonth, birthDay);
+
+        const startYear = now >= thisYearBirthday ? currentYear : currentYear - 1;
+        const endYear = startYear + 1;
+
+        const yearStart = new Date(startYear, birthMonth, birthDay);
+        const yearEnd = new Date(endYear, birthMonth, birthDay);
+
+        // Definir duraciones específicas para cada planeta
+        // Planetas lentos: duran todo el año
+        // Planetas rápidos: cambios más frecuentes (simplificado por ahora)
+
+        const planets = [
+          {
+            name: 'Júpiter',
+            symbol: getPlanetSymbol('Júpiter'),
+            natalSign: 'Tu natal',
+            natalHouse: 1,
+            duration: `${formatDate(yearStart)} – ${formatDate(yearEnd)}`,
+            isSlowPlanet: true
+          },
+          {
+            name: 'Saturno',
+            symbol: getPlanetSymbol('Saturno'),
+            natalSign: 'Tu natal',
+            natalHouse: 1,
+            duration: `${formatDate(yearStart)} – ${formatDate(yearEnd)}`,
+            isSlowPlanet: true
+          },
+          {
+            name: 'Marte',
+            symbol: getPlanetSymbol('Marte'),
+            natalSign: 'Tu natal',
+            natalHouse: 1,
+            duration: `${formatDate(yearStart)} – ${formatDate(yearEnd)}`,
+            isSlowPlanet: false
+          },
+          {
+            name: 'Venus',
+            symbol: getPlanetSymbol('Venus'),
+            natalSign: 'Tu natal',
+            natalHouse: 1,
+            duration: `${formatDate(yearStart)} – ${formatDate(yearEnd)}`,
+            isSlowPlanet: false
+          },
+          {
+            name: 'Mercurio',
+            symbol: getPlanetSymbol('Mercurio'),
+            natalSign: 'Tu natal',
+            natalHouse: 1,
+            duration: `${formatDate(yearStart)} – ${formatDate(yearEnd)}`,
+            isSlowPlanet: false
+          }
+        ];
+
+        setActivePlanets(planets);
+      } catch (error) {
+        console.error('Error loading active planets:', error);
+      }
+    };
+
+    fetchActivePlanets();
+  }, [user, userProfile]);
+
+  const formatDate = (date: Date): string => {
+    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+  };
+
+  const getPlanetSymbol = (planet: string): string => {
+    const symbols: Record<string, string> = {
+      'Sol': '☉',
+      'Luna': '☽',
+      'Mercurio': '☿',
+      'Venus': '♀',
+      'Marte': '♂',
+      'Júpiter': '♃',
+      'Saturno': '♄',
+    };
+    return symbols[planet] || '●';
+  };
+
+  const getMonthName = (month: number): string => {
+    const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+                    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    return months[month];
+  };
 
   // 🔧 NUEVO: Cargar datos de carta progresada si vienen desde esa página
   React.useEffect(() => {
@@ -132,7 +245,7 @@ const AgendaPersonalizada = () => {
   }, []);
 
   // 📅 CARGA COMPLETA: Fetch Year Events (birthday to next birthday)
-  const fetchYearEvents = async (): Promise<AstrologicalEvent[]> => {
+  const fetchYearEvents = async (forceNextYear: boolean = false): Promise<AstrologicalEvent[]> => {
     if (!userProfile || !userProfile.birthDate) {
       console.log('⚠️ [YEAR-EVENTS] Cannot fetch - missing userProfile or birthDate');
       return [];
@@ -140,18 +253,56 @@ const AgendaPersonalizada = () => {
 
     try {
       console.log('📅 [YEAR-EVENTS] Fetching complete year events from birthday to next birthday...');
+      if (forceNextYear) console.log('🔄 [YEAR-EVENTS] FORCING next year cycle...');
 
       // Calcular el rango del año astrológico (cumpleaños actual al próximo)
       const birthDate = new Date(userProfile.birthDate);
-      const currentYear = new Date().getFullYear();
-
-      // Fecha de cumpleaños de este año
-      const currentBirthday = new Date(currentYear, birthDate.getMonth(), birthDate.getDate());
-
-      // Si ya pasó el cumpleaños este año, usar el del próximo año
       const now = new Date();
-      const startDate = currentBirthday < now ? new Date(currentYear + 1, birthDate.getMonth(), birthDate.getDate()) : currentBirthday;
-      const endDate = new Date(startDate.getFullYear() + 1, birthDate.getMonth(), birthDate.getDate());
+      const currentYear = now.getFullYear();
+
+      // Fecha de cumpleaños de este año y del año pasado
+      const currentYearBirthday = new Date(currentYear, birthDate.getMonth(), birthDate.getDate());
+      const lastYearBirthday = new Date(currentYear - 1, birthDate.getMonth(), birthDate.getDate());
+
+      // Determinar el rango del año astrológico ACTUAL
+      // (desde el último cumpleaños que ya pasó hasta el próximo)
+      let startDate: Date;
+      let endDate: Date;
+
+      if (forceNextYear) {
+        // 🔄 FORZAR año siguiente: próximo cumpleaños → cumpleaños del año después
+        const nextYearBirthday = new Date(currentYear + 1, birthDate.getMonth(), birthDate.getDate());
+        startDate = nextYearBirthday;
+        endDate = new Date(currentYear + 2, birthDate.getMonth(), birthDate.getDate());
+      } else if (currentYearBirthday <= now) {
+        // Si ya pasó el cumpleaños este año, el rango es: cumpleaños este año → cumpleaños próximo año
+        startDate = currentYearBirthday;
+        endDate = new Date(currentYear + 1, birthDate.getMonth(), birthDate.getDate());
+      } else {
+        // Si aún no ha pasado el cumpleaños este año, el rango es: cumpleaños año pasado → cumpleaños este año
+        startDate = lastYearBirthday;
+        endDate = currentYearBirthday;
+      }
+
+      // 🔍 DETECTAR si estamos viendo el año ANTERIOR del retorno solar
+      // (si el final del rango ya pasó, estamos viendo el año anterior)
+      const isViewingPreviousYear = endDate < now && !forceNextYear;
+      setIsPreviousYear(isViewingPreviousYear);
+
+      // 🎂 DETECTAR si HOY es el último día del ciclo (día del cumpleaños)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const endDateOnly = new Date(endDate);
+      endDateOnly.setHours(0, 0, 0, 0);
+      const isLastDay = today.getTime() === endDateOnly.getTime();
+      setIsLastDayOfCycle(isLastDay);
+
+      // 🎉 DETECTAR si HOY es el día DESPUÉS del cumpleaños
+      const dayAfter = new Date(endDate);
+      dayAfter.setDate(dayAfter.getDate() + 1);
+      dayAfter.setHours(0, 0, 0, 0);
+      const isDayAfter = today.getTime() === dayAfter.getTime();
+      setIsDayAfterBirthday(isDayAfter);
 
       setYearRange({ start: startDate, end: endDate });
 
@@ -743,6 +894,36 @@ const AgendaPersonalizada = () => {
     ];
   };
 
+  // 📅 FUNCIÓN: Cargar eventos del año completo
+  const loadYearEvents = async (forceNextYear: boolean = false) => {
+    if (!userProfile) {
+      console.log('⚠️ [AGENDA] No userProfile available yet');
+      return;
+    }
+
+    setLoading(true);
+    setLoadingYearEvents(true);
+    console.log('📅 [AGENDA] Loading complete year events (birthday to birthday)...');
+
+    try {
+      const yearEvents = await fetchYearEvents(forceNextYear);
+      console.log(`✅ [AGENDA] Loaded ${yearEvents.length} events for the complete year`);
+
+      setEvents(yearEvents);
+    } catch (error) {
+      console.error('❌ [AGENDA] Error loading year events:', error);
+      console.error('❌ [AGENDA] Error details:', error instanceof Error ? error.message : String(error));
+      // Fallback to example events
+      const exampleEvents = generateExampleEvents();
+      console.log(`⚠️ [AGENDA] Using ${exampleEvents.length} fallback example events`);
+      setEvents(exampleEvents);
+      setError('No se pudieron cargar los eventos. Mostrando eventos de ejemplo.');
+    } finally {
+      setLoading(false);
+      setLoadingYearEvents(false);
+    }
+  };
+
   // Cargar eventos del año completo al iniciar
   useEffect(() => {
     if (!userProfile) {
@@ -756,38 +937,15 @@ const AgendaPersonalizada = () => {
       birthDate: userProfile.birthDate
     });
 
-    const loadYearEvents = async () => {
-      setLoading(true);
-      setLoadingYearEvents(true);
-      console.log('📅 [AGENDA] Loading complete year events (birthday to birthday)...');
-
-      try {
-        const yearEvents = await fetchYearEvents();
-        console.log(`✅ [AGENDA] Loaded ${yearEvents.length} events for the complete year`);
-
-        setEvents(yearEvents);
-      } catch (error) {
-        console.error('❌ [AGENDA] Error loading year events:', error);
-        console.error('❌ [AGENDA] Error details:', error instanceof Error ? error.message : String(error));
-        // Fallback to example events
-        const exampleEvents = generateExampleEvents();
-        console.log(`⚠️ [AGENDA] Using ${exampleEvents.length} fallback example events`);
-        setEvents(exampleEvents);
-        setError('No se pudieron cargar los eventos. Mostrando eventos de ejemplo.');
-      } finally {
-        setLoading(false);
-        setLoadingYearEvents(false);
-      }
-    };
-
     loadYearEvents();
   }, [userProfile]);
 
-  // 🎂 Inicializar currentMonth al mes del cumpleaños cuando se calcula yearRange
+  // 📅 Inicializar currentMonth al MES ACTUAL (no al mes de cumpleaños)
   useEffect(() => {
     if (yearRange && yearRange.start) {
-      console.log('🎂 [AGENDA] Setting currentMonth to birthday month:', yearRange.start);
-      setCurrentMonth(yearRange.start);
+      const today = new Date();
+      console.log('📅 [AGENDA] Setting currentMonth to CURRENT month:', today);
+      setCurrentMonth(today);
     }
   }, [yearRange]);
 
@@ -902,6 +1060,59 @@ const AgendaPersonalizada = () => {
   const handleDayClick = (day: AstronomicalDay) => {
     setSelectedDate(day.date);
     setSelectedDayEvents(day.events);
+
+    // 🎂 Detectar si es el primer o último día del ciclo solar
+    const isFirstDay = yearRange && isSameDay(day.date, yearRange.start);
+    const isLastDay = yearRange && isSameDay(day.date, yearRange.end);
+
+    // Mostrar mensaje especial para días clave del ciclo
+    if (isFirstDay || isLastDay) {
+      const specialMessage = isFirstDay
+        ? {
+            title: '🌱 PRIMER DÍA DE TU RETORNO SOLAR',
+            subtitle: `Inicio de tu ciclo ${yearRange.start.getFullYear()}-${yearRange.end.getFullYear()}`,
+            description: `Hoy es tu cumpleaños y comienza un nuevo año astrológico para ti. Este es el día en que el Sol regresa a la posición exacta que tenía cuando naciste.`,
+            guidance: [
+              '✨ Este es el momento perfecto para establecer tus intenciones para el año',
+              '🎯 Define qué quieres manifestar en este nuevo ciclo solar',
+              '🔮 Realiza un ritual de cumpleaños consciente: enciende una vela, escribe tus deseos',
+              '📝 Revisa tu Carta de Retorno Solar para entender las energías del año',
+              '🌟 Celebra: tu existencia es un regalo para el universo'
+            ],
+            color: 'green',
+            mantra: 'Hoy nace un nuevo yo. Abrazo este ciclo con consciencia y gratitud.',
+            showNewCycleButton: true
+          }
+        : {
+            title: '🎂 ÚLTIMO DÍA DE TU RETORNO SOLAR',
+            subtitle: `Culminación de tu ciclo ${yearRange.start.getFullYear()}-${yearRange.end.getFullYear()}`,
+            description: `Hoy cierra tu año astrológico. Mañana será tu cumpleaños y comenzará un nuevo ciclo solar.`,
+            guidance: [
+              '🙏 Agradece todo lo vivido en este ciclo: aprendizajes, personas, experiencias',
+              '💭 Reflexiona: ¿Qué llegó a mi vida? ¿Qué se transformó? ¿Qué solté?',
+              '🔥 Realiza un ritual de cierre: escribe lo que dejas ir y quémalo simbólicamente',
+              '📔 Lee tu diario del año para ver tu evolución',
+              '🌙 Prepárate para tu nuevo retorno solar con apertura y claridad'
+            ],
+            color: 'pink',
+            mantra: 'Cierro este ciclo con amor. Honro mi camino y me preparo para renacer.'
+          };
+
+      // Agregar evento especial al array de eventos del día
+      const specialEvent = {
+        id: `special-${day.date.getTime()}`,
+        date: day.date.toISOString(),
+        type: 'special_day' as const,
+        title: specialMessage.title,
+        description: specialMessage.description,
+        priority: 'high' as const,
+        metadata: specialMessage
+      };
+
+      // Abrir modal con el evento especial
+      setModalEvent(specialEvent as any);
+      setShowEventModal(true);
+    }
   };
 
   // Modal handlers (reemplaza tooltip)
@@ -1065,23 +1276,145 @@ const AgendaPersonalizada = () => {
               </>
             )}
 
-            {/* Estadísticas de progreso */}
-            <div className="flex justify-center items-center space-x-6 text-sm">
-              <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-                <span className="text-green-300">🌙</span>
-                <span className="text-green-300 ml-2">Fases Lunares</span>
+            {/* Estadísticas de progreso + Control de Año Solar */}
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
+              {/* Badges de tipos de eventos */}
+              <div className="flex justify-center items-center space-x-4">
+                <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+                  <span className="text-green-300">🌙</span>
+                  <span className="text-green-300 ml-2">Fases Lunares</span>
+                </div>
+                <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+                  <span className="text-blue-300">⭐</span>
+                  <span className="text-blue-300 ml-2">Tránsitos</span>
+                </div>
+                <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+                  <span className="text-pink-300">✨</span>
+                  <span className="text-pink-300 ml-2">Eventos Épicos</span>
+                </div>
               </div>
-              <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-                <span className="text-blue-300">⭐</span>
-                <span className="text-blue-300 ml-2">Tránsitos</span>
-              </div>
-              <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
-                <span className="text-pink-300">✨</span>
-                <span className="text-pink-300 ml-2">Eventos Épicos</span>
-              </div>
+
+              {/* Control de Año Solar */}
+              {yearRange && (
+                <div className="flex items-center gap-3 bg-gradient-to-r from-purple-600/30 to-pink-600/30 backdrop-blur-sm border border-purple-400/30 rounded-full px-5 py-2.5">
+                  <div className="text-white text-sm font-medium">
+                    <span className="text-yellow-400">🌞</span> Ciclo Solar: {yearRange.start.getFullYear()}-{yearRange.end.getFullYear()}
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      if (userProfile) {
+                        setEvents([]);
+                        setLoadedMonths(new Set());
+                        loadYearEvents(true);
+                      }
+                    }}
+                    disabled={loadingYearEvents}
+                    className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold py-1.5 px-4 rounded-full transition-all duration-300 shadow-lg hover:shadow-yellow-500/50 flex items-center gap-1.5"
+                  >
+                    {loadingYearEvents ? (
+                      <>
+                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                        <span>Cargando...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>🔄</span>
+                        <span>Generar Nuevo Ciclo {new Date().getFullYear()}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
+
+        {/* 🎂 BANNER: ÚLTIMO DÍA DEL CICLO - Mostrar en el día del cumpleaños */}
+        {isLastDayOfCycle && yearRange && (
+          <div className="mb-8 bg-gradient-to-r from-purple-900/70 to-pink-900/70 border-2 border-pink-500/60 rounded-2xl p-6 backdrop-blur-sm shadow-2xl animate-pulse">
+            <div className="flex items-start gap-4">
+              <div className="text-4xl">🎂</div>
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold text-pink-200 mb-2 flex items-center gap-2">
+                  <span>✨</span>
+                  ¡Hoy es el Último Día de tu Retorno Solar!
+                </h3>
+                <p className="text-pink-100 leading-relaxed">
+                  Hoy culmina tu ciclo solar {yearRange.start.getFullYear()}-{yearRange.end.getFullYear()}.
+                  <br />
+                  <span className="text-yellow-200">Mañana comienza un <strong>nuevo año astrológico</strong> lleno de posibilidades. ¡Feliz cumpleaños! 🎉</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 🎉 BANNER: PRIMER DÍA DESPUÉS DEL CUMPLEAÑOS - Mostrar el día después del cumpleaños */}
+        {isDayAfterBirthday && yearRange && (
+          <div className="mb-8 bg-gradient-to-r from-yellow-900/70 to-orange-900/70 border-2 border-yellow-500/60 rounded-2xl p-6 backdrop-blur-sm shadow-2xl">
+            <div className="flex items-start gap-4">
+              <div className="text-4xl">🌟</div>
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold text-yellow-200 mb-2 flex items-center gap-2">
+                  <span>🎁</span>
+                  ¡Comienza tu Nuevo Año Solar!
+                </h3>
+                <p className="text-yellow-100 mb-4 leading-relaxed">
+                  Ayer fue tu cumpleaños y comenzó un nuevo ciclo solar.
+                  <br />
+                  <span className="text-white">Tu <strong>Agenda Astrológica {yearRange.end.getFullYear()}-{yearRange.end.getFullYear() + 1}</strong> está lista para este nuevo año lleno de oportunidades.</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ⚠️ BANNER: AÑO ANTERIOR - Mostrar cuando estamos viendo el año pasado del retorno solar */}
+        {isPreviousYear && yearRange && (
+          <div className="mb-8 bg-gradient-to-r from-orange-900/70 to-red-900/70 border-2 border-orange-500/60 rounded-2xl p-6 backdrop-blur-sm shadow-2xl">
+            <div className="flex items-start gap-4">
+              <div className="text-4xl">📅</div>
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold text-orange-200 mb-2 flex items-center gap-2">
+                  <span>⏰</span>
+                  Estás Viendo tu Año Solar Anterior
+                </h3>
+                <p className="text-orange-100 mb-4 leading-relaxed">
+                  Este es tu ciclo solar del <strong className="text-white">{yearRange.start.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</strong> al <strong className="text-white">{yearRange.end.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</strong>.
+                  <br />
+                  <span className="text-yellow-200">El {yearRange.end.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })} fue el <strong>último día de tu Retorno Solar anterior</strong>.</span>
+                </p>
+                <button
+                  onClick={() => {
+                    // Recargar eventos del año SIGUIENTE (forzar nuevo ciclo)
+                    if (userProfile) {
+                      // Limpiar eventos anteriores
+                      setEvents([]);
+                      setLoadedMonths(new Set());
+                      // Cargar año siguiente con forceNextYear=true
+                      loadYearEvents(true);
+                    }
+                  }}
+                  disabled={loadingYearEvents}
+                  className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-yellow-500/50 flex items-center gap-2"
+                >
+                  {loadingYearEvents ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      <span>Generando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-xl">🔄</span>
+                      <span>Generar Nuevo Ciclo Solar {new Date().getFullYear()}</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ERROR BANNER - Si hay errores cargando eventos */}
         {error && (
@@ -1118,11 +1451,6 @@ const AgendaPersonalizada = () => {
             </div>
           </div>
         )}
-
-        {/* PLANETARY CARDS - Contexto anual */}
-        <div className="mb-8">
-          <PlanetaryCards />
-        </div>
 
         {/* LAYOUT DESKTOP/MOBILE */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -1185,6 +1513,10 @@ const AgendaPersonalizada = () => {
                       const isToday = isSameDay(day.date, new Date());
                       const isSelected = selectedDate && isSameDay(day.date, selectedDate);
 
+                      // 🎂 Detectar primer y último día del ciclo solar
+                      const isFirstDayOfCycle = yearRange && isSameDay(day.date, yearRange.start);
+                      const isLastDayOfCycle = yearRange && isSameDay(day.date, yearRange.end);
+
                       return (
                         <div
                           key={index}
@@ -1192,7 +1524,11 @@ const AgendaPersonalizada = () => {
                           className={`
                             relative min-h-[80px] lg:min-h-[100px] p-2 cursor-pointer transition-all duration-300 border-r border-b border-purple-400/20 last:border-r-0 group
                             ${day.isCurrentMonth
-                              ? isToday
+                              ? isFirstDayOfCycle
+                                ? 'bg-gradient-to-br from-green-600/30 to-emerald-600/30 border-2 border-green-400/60 shadow-lg shadow-green-500/30'
+                                : isLastDayOfCycle
+                                ? 'bg-gradient-to-br from-pink-600/30 to-rose-600/30 border-2 border-pink-400/60 shadow-lg shadow-pink-500/30'
+                                : isToday
                                 ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-2 border-yellow-400/50 shadow-lg shadow-yellow-500/20'
                                 : isSelected
                                 ? 'bg-gradient-to-br from-purple-500/30 to-pink-500/30 border-2 border-purple-400/60'
@@ -1201,10 +1537,22 @@ const AgendaPersonalizada = () => {
                             }
                           `}
                         >
+                          {/* Badge para primer/último día */}
+                          {isFirstDayOfCycle && (
+                            <div className="absolute -top-1 -left-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full shadow-lg z-10">
+                              🌱 Inicio
+                            </div>
+                          )}
+                          {isLastDayOfCycle && (
+                            <div className="absolute -top-1 -left-1 bg-gradient-to-r from-pink-500 to-rose-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full shadow-lg z-10">
+                              🎂 Final
+                            </div>
+                          )}
+
                           {/* Número del día */}
                           <div className={`
                             text-sm font-bold mb-1
-                            ${isToday ? 'text-yellow-300' : day.isCurrentMonth ? 'text-white' : 'text-gray-500'}
+                            ${isFirstDayOfCycle ? 'text-green-300' : isLastDayOfCycle ? 'text-pink-300' : isToday ? 'text-yellow-300' : day.isCurrentMonth ? 'text-white' : 'text-gray-500'}
                           `}>
                             {day.date.getDate()}
                           </div>
@@ -1341,49 +1689,59 @@ const AgendaPersonalizada = () => {
             <div className="sticky top-8">
 
               {/* Info del usuario - MOVIDO ARRIBA */}
-              {userProfile && (
-                <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 rounded-3xl p-6 mb-6 relative overflow-hidden">
-                  <div className="absolute top-4 right-4 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                  <div className="absolute bottom-4 left-4 w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+              {activePlanets && activePlanets.length > 0 && (
+                <div className="bg-gradient-to-br from-purple-900/40 to-indigo-900/40 backdrop-blur-sm border border-purple-400/30 rounded-3xl p-6 mb-6 relative overflow-hidden">
+                  <div className="absolute top-4 right-4 w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></div>
+                  <div className="absolute bottom-4 left-4 w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
 
                   <div className="flex items-center mb-4">
-                    <div className="bg-gradient-to-r from-green-400/20 to-blue-500/20 border border-green-400/30 rounded-full p-3 backdrop-blur-sm mr-4">
-                      <span className="text-2xl">👤</span>
+                    <div className="bg-gradient-to-r from-yellow-400/20 to-purple-500/20 border border-yellow-400/30 rounded-full p-3 backdrop-blur-sm mr-4">
+                      <span className="text-2xl">🌟</span>
                     </div>
                     <div>
-                      <h4 className="text-lg font-bold text-white">{userProfile.name || 'Usuario'}</h4>
-                      <p className="text-gray-300 text-sm">{userProfile.currentAge || 0} años</p>
+                      <h4 className="text-lg font-bold text-white">Planetas Activos del Año</h4>
+                      <p className="text-gray-300 text-xs">{activePlanets.length} planetas guiando tu ciclo</p>
                     </div>
                   </div>
 
-                  <div className="space-y-3">
-                    <div className="bg-black/30 rounded-xl p-3 border border-white/10">
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-400 text-xs">Lugar</span>
-                        <span className="text-white text-sm">📍 {userProfile.place || 'Sin ubicación'}</span>
+                  <div className="space-y-2">
+                    {activePlanets.map((planet, idx) => (
+                      <div key={idx} className="bg-black/30 rounded-xl p-3 border border-white/10 hover:border-yellow-400/30 transition-all">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl">{planet.symbol}</span>
+                            <div>
+                              <span className="text-white font-semibold text-sm block">{planet.name}</span>
+                              <span className={`text-[10px] px-2 py-0.5 rounded-full ${
+                                planet.isSlowPlanet
+                                  ? 'bg-blue-500/20 text-blue-300'
+                                  : 'bg-orange-500/20 text-orange-300'
+                              }`}>
+                                {planet.isSlowPlanet ? 'Todo el año' : 'Ciclo rápido'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="mt-2 text-gray-400 text-[10px]">
+                          📅 Desde: <span className="text-gray-300">{planet.duration.split(' – ')[0]}</span><br/>
+                          📅 Hasta: <span className="text-gray-300">{planet.duration.split(' – ')[1]}</span>
+                        </div>
                       </div>
-                    </div>
+                    ))}
+                  </div>
 
-                    <div className="bg-black/30 rounded-xl p-3 border border-white/10">
-                      <div className="text-gray-400 text-xs mb-2">Signos Astrológicos</div>
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-yellow-300 text-xs">☉ Sol</span>
-                          <span className="text-white text-sm">{userProfile.astrological?.signs?.sun || 'N/A'}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-blue-300 text-xs">☽ Luna</span>
-                          <span className="text-white text-sm">{userProfile.astrological?.signs?.moon || 'N/A'}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-purple-300 text-xs">↗ Ascendente</span>
-                          <span className="text-white text-sm">{userProfile.astrological?.signs?.ascendant || 'N/A'}</span>
-                        </div>
-                      </div>
-                    </div>
+                  <div className="mt-4 pt-4 border-t border-white/10">
+                    <p className="text-xs text-gray-400 text-center">
+                      Estos planetas modulan todos los eventos de tu agenda
+                    </p>
                   </div>
                 </div>
               )}
+
+              {/* PLANETARY CARDS - Fichas planetarias generadas */}
+              <div className="mb-6">
+                <PlanetaryCards />
+              </div>
 
               {/* Header del sidebar */}
               <div className="bg-gradient-to-r from-pink-600/30 to-purple-600/30 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-pink-400/30">
@@ -1578,14 +1936,106 @@ const AgendaPersonalizada = () => {
 
                 {/* Contenido del modal con scroll */}
                 <div className="p-6 max-h-[60vh] overflow-y-auto">
-                  {/* Descripción */}
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
-                      <span className="text-purple-300 mr-2">📝</span>
-                      Descripción del Evento
-                    </h3>
-                    <p className="text-gray-200 leading-relaxed">{modalEvent.description}</p>
-                  </div>
+                  {/* 🎂 SECCIÓN ESPECIAL: Primer/Último Día del Ciclo Solar */}
+                  {(modalEvent as any).metadata?.guidance && (
+                    <div className={`mb-6 bg-gradient-to-br ${
+                      (modalEvent as any).metadata.color === 'green'
+                        ? 'from-green-600/20 to-emerald-600/20 border-green-400/40'
+                        : 'from-pink-600/20 to-rose-600/20 border-pink-400/40'
+                    } border-2 rounded-3xl p-6`}>
+                      {/* Subtítulo */}
+                      <div className="text-center mb-4">
+                        <p className="text-lg font-semibold text-white/90">
+                          {(modalEvent as any).metadata.subtitle}
+                        </p>
+                      </div>
+
+                      {/* Descripción */}
+                      <div className="mb-6">
+                        <p className="text-white/90 leading-relaxed text-center">
+                          {(modalEvent as any).metadata.description}
+                        </p>
+                      </div>
+
+                      {/* Pautas / Guía */}
+                      <div className="bg-black/20 rounded-2xl p-5 mb-5">
+                        <h3 className={`text-lg font-bold mb-4 flex items-center ${
+                          (modalEvent as any).metadata.color === 'green' ? 'text-green-300' : 'text-pink-300'
+                        }`}>
+                          <span className="mr-2">🌟</span>
+                          PAUTAS PARA ESTE DÍA SAGRADO
+                        </h3>
+                        <div className="space-y-3">
+                          {(modalEvent as any).metadata.guidance.map((guide: string, index: number) => (
+                            <div key={index} className="flex items-start gap-3">
+                              <div className={`min-w-[8px] h-[8px] rounded-full mt-2 ${
+                                (modalEvent as any).metadata.color === 'green' ? 'bg-green-400' : 'bg-pink-400'
+                              }`} />
+                              <p className="text-white/90 leading-relaxed">{guide}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Mantra especial */}
+                      <div className={`bg-gradient-to-r ${
+                        (modalEvent as any).metadata.color === 'green'
+                          ? 'from-green-500/20 to-emerald-500/20 border-green-400/30'
+                          : 'from-pink-500/20 to-rose-500/20 border-pink-400/30'
+                      } border-2 rounded-2xl p-5 text-center`}>
+                        <h3 className="text-md font-semibold text-white/80 mb-2 flex items-center justify-center">
+                          <span className="mr-2">🙏</span>
+                          MANTRA PARA HOY
+                        </h3>
+                        <p className="text-white text-lg font-medium italic leading-relaxed">
+                          "{(modalEvent as any).metadata.mantra}"
+                        </p>
+                      </div>
+
+                      {/* Botón generar nuevo ciclo (solo en primer día) */}
+                      {(modalEvent as any).metadata?.showNewCycleButton && (
+                        <div className="mt-6 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 border-2 border-yellow-400/40 rounded-2xl p-6 text-center">
+                          <h3 className="text-lg font-bold text-yellow-300 mb-3">
+                            🌅 ¿Listo para tu Nuevo Año Astrológico?
+                          </h3>
+                          <p className="text-white/90 text-sm mb-4 leading-relaxed">
+                            Genera los eventos del próximo ciclo solar ({yearRange?.end ? yearRange.end.getFullYear() + 1 : new Date().getFullYear() + 1}-{yearRange?.end ? yearRange.end.getFullYear() + 2 : new Date().getFullYear() + 2}) para empezar a planificar tu nuevo año.
+                          </p>
+                          <button
+                            onClick={() => {
+                              loadYearEvents(true);
+                              closeEventModal();
+                            }}
+                            disabled={loadingYearEvents}
+                            className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-white font-bold py-3 px-6 rounded-full transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {loadingYearEvents ? (
+                              <span className="flex items-center gap-2">
+                                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                </svg>
+                                Generando...
+                              </span>
+                            ) : (
+                              '🔄 Generar Nuevo Ciclo Solar'
+                            )}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Descripción (solo si NO es un día especial) */}
+                  {!(modalEvent as any).metadata?.guidance && (
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
+                        <span className="text-purple-300 mr-2">📝</span>
+                        Descripción del Evento
+                      </h3>
+                      <p className="text-gray-200 leading-relaxed">{modalEvent.description}</p>
+                    </div>
+                  )}
 
                   {/* Interpretación personalizada */}
                   {modalEvent.aiInterpretation && (

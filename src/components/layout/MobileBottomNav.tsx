@@ -135,7 +135,7 @@ export default function MobileBottomNav() {
   };
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-purple-900/95 backdrop-blur-lg border-t border-purple-700/50 shadow-2xl">
+    <nav className="no-print md:hidden fixed bottom-0 left-0 right-0 z-50 bg-purple-900/95 backdrop-blur-lg border-t border-purple-700/50 shadow-2xl">
       <div className="flex items-center justify-around h-16 px-2">
         {navItems.map((item) => {
           const IconComponent = item.icon;

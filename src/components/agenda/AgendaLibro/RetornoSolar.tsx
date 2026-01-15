@@ -1,6 +1,7 @@
 'use client';
 
 import { useStyle } from "@/context/StyleContext";
+import { FooterLibro } from './MesCompleto';
 
 export const QueEsRetornoSolar = () => {
   const { config } = useStyle();
@@ -54,6 +55,8 @@ export const QueEsRetornoSolar = () => {
           "Tu cumpleaños no es solo una celebración. Es un portal."
         </p>
       </div>
+
+      <FooterLibro pagina={12} />
     </div>
   );
 };
@@ -91,6 +94,8 @@ export const AscendenteAnio = () => {
           </div>
         </div>
       </div>
+
+      <FooterLibro pagina={13} />
     </div>
   );
 };
@@ -129,6 +134,8 @@ export const SolRetorno = () => {
           </div>
         </div>
       </div>
+
+      <FooterLibro pagina={14} />
     </div>
   );
 };
@@ -166,6 +173,8 @@ export const LunaRetorno = () => {
           </div>
         </div>
       </div>
+
+      <FooterLibro pagina={15} />
     </div>
   );
 };
@@ -251,6 +260,8 @@ export const EjesDelAnio = () => {
           </div>
         </div>
       </div>
+
+      <FooterLibro pagina={16} />
     </div>
   );
 };
@@ -326,6 +337,8 @@ export const EjesDelAnio2 = () => {
           </div>
         </div>
       </div>
+
+      <FooterLibro pagina={17} />
     </div>
   );
 };
@@ -380,6 +393,8 @@ export const IntegracionEjes = () => {
           </p>
         </div>
       </div>
+
+      <FooterLibro />
     </div>
   );
 };
@@ -426,6 +441,8 @@ export const RitualCumpleanos = () => {
           <p className={`${config.iconSecondary} italic text-sm`}>Si resuena contigo, pruébalo.</p>
         </div>
       </div>
+
+      <FooterLibro pagina={18} />
     </div>
   );
 };

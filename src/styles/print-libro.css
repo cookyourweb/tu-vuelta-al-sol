@@ -1,0 +1,212 @@
+/* ============================================
+   ESTILOS DE IMPRESIÓN PARA LIBRO A5
+   ============================================ */
+
+@media print {
+  /* Configuración global de página A5 */
+  @page {
+    size: A5 portrait;
+    margin: 0;
+  }
+
+  /* Ocultar elementos que no se deben imprimir */
+  .no-print {
+    display: none !important;
+  }
+
+  /* Quitar estilos hover en impresión */
+  .no-print-hover:hover {
+    background: transparent !important;
+    cursor: default !important;
+  }
+
+  button {
+    cursor: default !important;
+  }
+
+  /* Configuración del body */
+  body {
+    margin: 0;
+    padding: 0;
+    background: white;
+  }
+
+  /* Cada página debe ocupar exactamente una hoja A5 */
+  .print-page {
+    width: 148mm !important; /* A5 ancho */
+    height: 297mm !important; /* A5 alto */
+    page-break-after: always;
+    page-break-inside: avoid;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    position: relative;
+    background: white;
+  }
+
+  /* La última página no debe tener page-break */
+  .print-page:last-child {
+    page-break-after: auto;
+  }
+
+  /* Asegurar que los contenedores internos respeten el espacio */
+  .print-page > * {
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  /* Forzar colores de fondo en impresión */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Optimizar tipografía para impresión */
+  body,
+  .print-page {
+    font-smoothing: antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Ajustar tamaños de fuente para legibilidad en A5 */
+  .print-page h1 {
+    font-size: 18pt;
+  }
+
+  .print-page h2 {
+    font-size: 14pt;
+  }
+
+  .print-page h3 {
+    font-size: 12pt;
+  }
+
+  .print-page p,
+  .print-page span {
+    font-size: 10pt;
+    line-height: 1.4;
+  }
+
+  /* Asegurar que los bordes se impriman */
+  .print-page [class*="border"] {
+    border-color: rgba(0, 0, 0, 0.2) !important;
+  }
+
+  /* Optimizar gradientes para impresión */
+  [class*="gradient"] {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Footer del libro */
+  .print-page footer,
+  .print-page [class*="footer"] {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+
+  /* Calendarios: asegurar que el grid se mantenga */
+  .print-page .grid {
+    display: grid !important;
+  }
+
+  /* Líneas de escritura: asegurar visibilidad */
+  .print-page [class*="border-b"] {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* Iconos: mantener tamaño */
+  .print-page svg {
+    width: auto !important;
+    height: auto !important;
+  }
+
+  /* Evitar que las imágenes se corten */
+  img {
+    page-break-inside: avoid;
+    max-width: 100%;
+  }
+
+  /* Headers de calendario */
+  .print-page [class*="calendar-header"] {
+    page-break-inside: avoid;
+  }
+
+  /* Evitar viudas y huérfanas */
+  p,
+  li {
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Títulos no deben quedar solos al final de página */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Tablas: evitar cortes */
+  table {
+    page-break-inside: avoid;
+  }
+
+  /* Contenedores flex: mantener estructura */
+  .flex,
+  .flex-col {
+    display: flex !important;
+  }
+
+  /* Asegurar que los patrones de fondo se impriman */
+  [class*="pattern"],
+  [class*="bg-"] {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* PORTADA Y CONTRAPORTADA: Sin fondo al imprimir (para papel de color) */
+  .print-no-bg {
+    background: white !important;
+    background-image: none !important;
+    background-color: white !important;
+  }
+
+  /* Mantener el patrón muy sutil en portada/contraportada */
+  .print-no-bg [class*="pattern"] {
+    opacity: 0.05 !important;
+  }
+}
+
+/* ============================================
+   ESTILOS PARA VISTA DE PANTALLA
+   ============================================ */
+@media screen {
+  /* Simular páginas A5 en pantalla */
+  .print-page {
+    width: 210mm; /* A5 en pantalla - ajustado para mejor visualización */
+    min-height: 297mm;
+    margin: 20px auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+  }
+
+  /* Fondo blanco solo para páginas interiores (no portada/contraportada) */
+  .print-page:not(.print-no-bg) {
+    background: white;
+  }
+
+  /* Contenedor del libro */
+  .libro-container {
+    background: #f5f5f5;
+    min-height: 100vh;
+    padding: 20px 0;
+  }
+}

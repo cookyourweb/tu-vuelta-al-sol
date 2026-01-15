@@ -1,6 +1,7 @@
 'use client';
 
 import { useStyle } from "@/context/StyleContext";
+import { FooterLibro } from './MesCompleto';
 
 interface TuAnioTuViajeProps {
   name: string;
@@ -58,6 +59,8 @@ export const CartaBienvenida = ({ name }: TuAnioTuViajeProps) => {
       <div className={`mt-auto text-right ${config.iconSecondary} opacity-60 italic ${config.fontBody}`}>
         Con amor cósmico ✧
       </div>
+
+      <FooterLibro pagina={3} />
     </div>
   );
 };
@@ -96,6 +99,8 @@ export const TemaCentralAnio = () => {
           <span className={`${config.iconSecondary} opacity-40 text-2xl`}>☉</span>
         </div>
       </div>
+
+      <FooterLibro pagina={4} />
     </div>
   );
 };
@@ -138,6 +143,8 @@ export const LoQueVieneAMover = () => {
           </ul>
         </div>
       </div>
+
+      <FooterLibro pagina={5} />
     </div>
   );
 };
@@ -179,6 +186,8 @@ export const LoQuePideSoltar = () => {
           </p>
         </div>
       </div>
+
+      <FooterLibro pagina={6} />
     </div>
   );
 };
@@ -213,6 +222,8 @@ export const PaginaIntencionAnual = () => {
       <div className={`text-center ${config.iconSecondary} opacity-40 text-xs mt-4 ${config.fontBody}`}>
         Página de escritura libre
       </div>
+
+      <FooterLibro />
     </div>
   );
 };

@@ -127,7 +127,7 @@ async function getCachedInterpretation(
           ...interp,
           eventId,
           cached: true,
-          generatedAt: cached.createdAt
+          generatedAt: cached.createdAt || cached.generatedAt || new Date()
         } as UltraPersonalizedEventInterpretation;
       }
 
@@ -148,7 +148,7 @@ async function getCachedInterpretation(
         mantra: interp.mantra_personalizado || 'Estoy en mi camino',
         pregunta_clave: interp.tu_bloqueo_a_trabajar?.reframe,
         cached: true,
-        generatedAt: cached.createdAt
+        generatedAt: cached.createdAt || cached.generatedAt || new Date()
       };
     }
 
