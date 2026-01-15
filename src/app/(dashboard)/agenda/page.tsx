@@ -36,6 +36,8 @@ const AgendaPersonalizada = () => {
   const [hoveredEvent, setHoveredEvent] = useState<AstrologicalEvent | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showPersonalityModal, setShowPersonalityModal] = useState(false);
+  // Estado para mostrar modal de día seleccionado
+  const [showDayModal, setShowDayModal] = useState(false);
   // Estado para mostrar Agenda Libro
   const [showAgendaLibro, setShowAgendaLibro] = useState(false);
   // Estados para carga de agenda completa (birthday to next birthday)
@@ -1112,6 +1114,9 @@ const AgendaPersonalizada = () => {
       // Abrir modal con el evento especial
       setModalEvent(specialEvent as any);
       setShowEventModal(true);
+    } else if (day.events.length > 0) {
+      // Para días normales con eventos, abrir modal de día
+      setShowDayModal(true);
     }
   };
 
@@ -1294,35 +1299,48 @@ const AgendaPersonalizada = () => {
                 </div>
               </div>
 
-              {/* Control de Año Solar */}
+              {/* Control de Año Solar + Ver Agenda Libro */}
               {yearRange && (
-                <div className="flex items-center gap-3 bg-gradient-to-r from-purple-600/30 to-pink-600/30 backdrop-blur-sm border border-purple-400/30 rounded-full px-5 py-2.5">
-                  <div className="text-white text-sm font-medium">
-                    <span className="text-yellow-400">🌞</span> Ciclo Solar: {yearRange.start.getFullYear()}-{yearRange.end.getFullYear()}
+                <div className="flex items-center gap-3 flex-wrap">
+                  {/* Ciclo Solar */}
+                  <div className="flex items-center gap-3 bg-gradient-to-r from-purple-600/30 to-pink-600/30 backdrop-blur-sm border border-purple-400/30 rounded-full px-5 py-2.5">
+                    <div className="text-white text-sm font-medium">
+                      <span className="text-yellow-400">🌞</span> Ciclo Solar: {yearRange.start.getFullYear()}-{yearRange.end.getFullYear()}
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        if (userProfile) {
+                          setEvents([]);
+                          setLoadedMonths(new Set());
+                          loadYearEvents(true);
+                        }
+                      }}
+                      disabled={loadingYearEvents}
+                      className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold py-1.5 px-4 rounded-full transition-all duration-300 shadow-lg hover:shadow-yellow-500/50 flex items-center gap-1.5"
+                    >
+                      {loadingYearEvents ? (
+                        <>
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                          <span>Cargando...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>🔄</span>
+                          <span>Generar Nuevo Ciclo {new Date().getFullYear()}</span>
+                        </>
+                      )}
+                    </button>
                   </div>
 
+                  {/* Ver Agenda Libro */}
                   <button
-                    onClick={() => {
-                      if (userProfile) {
-                        setEvents([]);
-                        setLoadedMonths(new Set());
-                        loadYearEvents(true);
-                      }
-                    }}
-                    disabled={loadingYearEvents}
-                    className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold py-1.5 px-4 rounded-full transition-all duration-300 shadow-lg hover:shadow-yellow-500/50 flex items-center gap-1.5"
+                    onClick={() => setShowAgendaLibro(true)}
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg hover:shadow-purple-500/25 border border-white/10 px-5 py-2.5 rounded-full flex items-center gap-2"
+                    title="Ver tu agenda en formato libro"
                   >
-                    {loadingYearEvents ? (
-                      <>
-                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
-                        <span>Cargando...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>🔄</span>
-                        <span>Generar Nuevo Ciclo {new Date().getFullYear()}</span>
-                      </>
-                    )}
+                    <span className="text-lg">📖</span>
+                    <span className="text-white font-bold text-sm">Ver Agenda Libro</span>
                   </button>
                 </div>
               )}
@@ -1599,6 +1617,61 @@ const AgendaPersonalizada = () => {
               </div>
             </div>
 
+            {/* EVENTOS DEL DÍA SELECCIONADO - Debajo del calendario */}
+            {selectedDate && selectedDayEvents.length > 0 && (
+              <div className="mt-8">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-pink-600/30 to-purple-600/30 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-pink-400/30">
+                  <h3 className="text-2xl font-bold text-white mb-2 flex items-center">
+                    <span className="mr-3">📅</span>
+                    {selectedDate.getDate()} de {format(selectedDate, 'MMMM', { locale: es })}
+                  </h3>
+                  <p className="text-pink-200 text-sm">
+                    {selectedDayEvents.length} evento{selectedDayEvents.length > 1 ? 's' : ''} cósmico{selectedDayEvents.length > 1 ? 's' : ''}
+                  </p>
+                </div>
+
+                {/* Grid de eventos en 2 columnas */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {selectedDayEvents.map((event) => (
+                    <div
+                      key={event.id}
+                      className={`
+                        bg-gradient-to-r ${getEventColor(event.type, event.priority)}/20 backdrop-blur-sm
+                        rounded-2xl p-4 border border-white/20 hover:shadow-lg transition-all duration-200
+                        cursor-pointer hover:scale-105
+                      `}
+                      onMouseEnter={(e) => handleEventHover(event, e)}
+                      onMouseLeave={handleEventLeave}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">{getEventIcon(event.type, event.priority)}</span>
+                          <div>
+                            <h4 className="font-bold text-white text-sm lg:text-base">{event.title}</h4>
+                            {event.planet && event.sign && (
+                              <p className="text-purple-200 text-xs">{event.planet} en {event.sign}</p>
+                            )}
+                          </div>
+                        </div>
+                        {event.priority === 'high' && (
+                          <span className="bg-red-500/80 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
+                            CRÍTICO
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-gray-200 text-sm mb-3">{event.description}</p>
+
+                      <div className="text-purple-300 text-xs italic">
+                        Hover para ver interpretación completa ✨
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* CONTENIDO DE IMPRESIÓN OCULTO - Solo visible al imprimir */}
             <div className="print-only hidden">
               {/* Página 1: Vista anual completa */}
@@ -1684,70 +1757,12 @@ const AgendaPersonalizada = () => {
             </div>
           </div>
 
-          {/* SIDEBAR EVENTOS - 1/3 en desktop */}
+          {/* SIDEBAR - 1/3 en desktop */}
           <div className="lg:col-span-1">
             <div className="sticky top-8">
 
               {/* SECCIÓN UNIFICADA DE PLANETAS */}
               <PlanetarySection activePlanets={activePlanets} />
-
-              {/* Header del sidebar */}
-              <div className="bg-gradient-to-r from-pink-600/30 to-purple-600/30 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-pink-400/30">
-                <h3 className="text-xl font-bold text-white mb-2 flex items-center">
-                  <span className="mr-3">📅</span>
-                  {selectedDate
-                    ? `${selectedDate.getDate()} de ${format(selectedDate, 'MMMM', { locale: es })}`
-                    : 'Selecciona un día'
-                  }
-                </h3>
-                <p className="text-pink-200 text-sm">
-                  {selectedDayEvents.length === 0
-                    ? 'Haz click en un día para ver sus eventos'
-                    : `${selectedDayEvents.length} evento${selectedDayEvents.length > 1 ? 's' : ''} cósmico${selectedDayEvents.length > 1 ? 's' : ''}`
-                  }
-                </p>
-              </div>
-
-              {/* Lista de eventos */}
-              {selectedDayEvents.length > 0 && (
-                <div className="space-y-4 max-h-[600px] overflow-y-auto">
-                  {selectedDayEvents.map((event) => (
-                    <div
-                      key={event.id}
-                      className={`
-                        bg-gradient-to-r ${getEventColor(event.type, event.priority)}/20 backdrop-blur-sm
-                        rounded-2xl p-4 border border-white/20 hover:shadow-lg transition-all duration-200
-                        cursor-pointer hover:scale-105
-                      `}
-                      onMouseEnter={(e) => handleEventHover(event, e)}
-                      onMouseLeave={handleEventLeave}
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl">{getEventIcon(event.type, event.priority)}</span>
-                          <div>
-                            <h4 className="font-bold text-white text-sm lg:text-base">{event.title}</h4>
-                            {event.planet && event.sign && (
-                              <p className="text-purple-200 text-xs">{event.planet} en {event.sign}</p>
-                            )}
-                          </div>
-                        </div>
-                        {event.priority === 'high' && (
-                          <span className="bg-red-500/80 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
-                            CRÍTICO
-                          </span>
-                        )}
-                      </div>
-
-                      <p className="text-gray-200 text-sm mb-3 line-clamp-2">{event.description}</p>
-
-                      <div className="text-purple-300 text-xs italic">
-                        Hover para ver interpretación completa ✨
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
 
               {/* CTA inspirado en Dididaze */}
               <div className="mt-6 bg-gradient-to-r from-purple-600/40 to-pink-600/40 backdrop-blur-sm rounded-2xl p-6 border border-purple-400/30 text-center">
@@ -1756,19 +1771,9 @@ const AgendaPersonalizada = () => {
                 <p className="text-purple-200 text-sm mb-4">
                   Descubre interpretaciones aún más profundas de tu carta natal
                 </p>
-                <div className="flex flex-col gap-3">
-                  <button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-full font-semibold hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg hover:shadow-xl">
-                    Explorar más ✨
-                  </button>
-                  <button
-                    onClick={() => setShowAgendaLibro(true)}
-                    className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 transition-all duration-200 shadow-lg hover:shadow-yellow-500/25 border border-white/10 p-3 rounded-full group"
-                    title="Ver tu agenda en formato libro"
-                  >
-                    <span className="text-xl mr-2">📖</span>
-                    <span className="text-white font-bold">Ver Agenda Libro</span>
-                  </button>
-                </div>
+                <button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-full font-semibold hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg hover:shadow-xl">
+                  Explorar más ✨
+                </button>
               </div>
             </div>
           </div>
@@ -2099,6 +2104,106 @@ const AgendaPersonalizada = () => {
                     <button
                       onClick={closeEventModal}
                       className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-full font-semibold hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg"
+                    >
+                      Cerrar ✨
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* MODAL DE DÍA SELECCIONADO */}
+        {showDayModal && selectedDate && selectedDayEvents.length > 0 && (
+          <>
+            {/* Overlay */}
+            <div
+              className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40"
+              onClick={() => setShowDayModal(false)}
+            />
+
+            {/* Modal fullscreen */}
+            <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+              <div className="bg-gradient-to-br from-purple-900/95 to-pink-900/95 backdrop-blur-sm border border-purple-400/40 rounded-3xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden">
+                {/* Header del modal */}
+                <div className="bg-gradient-to-r from-purple-600/80 to-pink-600/80 p-6 border-b border-white/20">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <span className="text-4xl">📅</span>
+                      <div>
+                        <h2 className="text-3xl font-bold text-white">
+                          {selectedDate.getDate()} de {format(selectedDate, 'MMMM', { locale: es })}
+                        </h2>
+                        <p className="text-purple-200 text-sm">
+                          {selectedDayEvents.length} evento{selectedDayEvents.length > 1 ? 's' : ''} cósmico{selectedDayEvents.length > 1 ? 's' : ''}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Botón cerrar */}
+                    <button
+                      onClick={() => setShowDayModal(false)}
+                      className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors duration-200"
+                    >
+                      <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Contenido del modal con grid de 2 columnas */}
+                <div className="p-6 max-h-[70vh] overflow-y-auto">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {selectedDayEvents.map((event) => (
+                      <div
+                        key={event.id}
+                        className={`
+                          bg-gradient-to-r ${getEventColor(event.type, event.priority)}/20 backdrop-blur-sm
+                          rounded-2xl p-5 border border-white/20 hover:shadow-lg transition-all duration-200
+                          hover:scale-105 cursor-pointer
+                        `}
+                        onClick={() => {
+                          setShowDayModal(false);
+                          setModalEvent(event);
+                          setShowEventModal(true);
+                        }}
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <span className="text-3xl">{getEventIcon(event.type, event.priority)}</span>
+                            <div>
+                              <h4 className="font-bold text-white text-base">{event.title}</h4>
+                              {event.planet && event.sign && (
+                                <p className="text-purple-200 text-xs">{event.planet} en {event.sign}</p>
+                              )}
+                            </div>
+                          </div>
+                          {event.priority === 'high' && (
+                            <span className="bg-red-500/80 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
+                              CRÍTICO
+                            </span>
+                          )}
+                        </div>
+
+                        <p className="text-gray-200 text-sm mb-4 line-clamp-3">{event.description}</p>
+
+                        <div className="flex items-center justify-between text-purple-300 text-xs">
+                          <span>Click para ver detalles completos</span>
+                          <span>→</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Footer del modal */}
+                <div className="bg-gradient-to-r from-purple-600/80 to-pink-600/80 p-6 border-t border-white/20">
+                  <div className="flex items-center justify-center">
+                    <button
+                      onClick={() => setShowDayModal(false)}
+                      className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-3 rounded-full font-semibold hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg"
                     >
                       Cerrar ✨
                     </button>
