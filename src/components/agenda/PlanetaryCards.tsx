@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Sparkles, Loader2, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Sparkles, Loader2, AlertCircle, ArrowRight, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 interface PlanetaryCard {
@@ -83,7 +83,7 @@ export default function PlanetaryCards() {
   const [cards, setCards] = useState<PlanetaryCard[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [selectedCard, setSelectedCard] = useState<PlanetaryCard | null>(null);
   const [showCards, setShowCards] = useState(false);
 
   const handleGenerateCards = async () => {
@@ -125,27 +125,33 @@ export default function PlanetaryCards() {
     }
   };
 
-  const toggleCard = (planeta: string) => {
-    setExpandedCard(expandedCard === planeta ? null : planeta);
-  };
-
   if (!showCards) {
     return (
       <div className="bg-gradient-to-br from-purple-900/40 to-indigo-900/40 rounded-2xl p-6 border border-purple-400/30">
         <div className="flex items-center gap-3 mb-4">
           <span className="text-3xl">🌟</span>
           <div>
-            <h2 className="text-2xl font-bold text-white">Planetas Activos del Año</h2>
+            <h2 className="text-2xl font-bold text-white">Planetas Dominantes del Año Solar</h2>
             <p className="text-purple-200 text-sm">
-              Manuales de uso para cada planeta clave de tu año solar
+              Los planetas de tu Solar Return que marcan el tono de todo el año
             </p>
           </div>
         </div>
 
-        <p className="text-purple-100 mb-6 leading-relaxed">
-          Estas fichas te explican cómo los planetas activos este año modulan <strong>TODOS</strong> los eventos
-          de tu agenda (Lunas, retrogradaciones, eclipses). Son tu contexto anual.
-        </p>
+        <div className="mb-6 space-y-3">
+          <p className="text-purple-100 leading-relaxed">
+            Estas fichas te explican cómo los <strong>planetas dominantes de tu año solar</strong> modulan <strong>TODOS</strong> los eventos
+            de tu agenda (Lunas, retrogradaciones, eclipses). Son tu contexto anual.
+          </p>
+
+          <div className="bg-purple-900/40 border border-purple-400/20 rounded-lg p-4">
+            <p className="text-purple-100 text-sm leading-relaxed">
+              <strong className="text-purple-200">💡 Diferencia clave:</strong> Los <em>tránsitos</em> son el movimiento diario de los planetas en el cielo.
+              Los <em>Planetas Dominantes del Año Solar</em> son las posiciones de tu carta de Retorno Solar que se mantienen activas
+              <strong> todo el año</strong> (desde tu cumpleaños hasta el siguiente).
+            </p>
+          </div>
+        </div>
 
         <button
           onClick={handleGenerateCards}
@@ -160,12 +166,12 @@ export default function PlanetaryCards() {
           {loading ? (
             <>
               <Loader2 className="w-5 h-5 animate-spin" />
-              Generando fichas planetarias...
+              Generando Planetas Dominantes...
             </>
           ) : (
             <>
               <Sparkles className="w-5 h-5" />
-              Generar Fichas Planetarias
+              Generar Planetas Dominantes del Año
             </>
           )}
         </button>
@@ -196,9 +202,9 @@ export default function PlanetaryCards() {
         <div className="flex items-center gap-3">
           <span className="text-3xl">🌟</span>
           <div>
-            <h2 className="text-2xl font-bold text-white">Planetas Activos del Año</h2>
+            <h2 className="text-2xl font-bold text-white">Planetas Dominantes del Año Solar</h2>
             <p className="text-purple-200 text-sm">
-              {cards.length} {cards.length === 1 ? 'planeta' : 'planetas'} clave de tu año solar
+              {cards.length} {cards.length === 1 ? 'planeta dominante' : 'planetas dominantes'} de tu Retorno Solar
             </p>
           </div>
         </div>
@@ -207,46 +213,80 @@ export default function PlanetaryCards() {
       {/* FICHAS DE PLANETAS */}
       <div className="space-y-3">
         {cards.map((card) => (
-          <div
+          <button
             key={card.planeta}
-            className="bg-gradient-to-br from-slate-800/50 to-purple-900/30 rounded-xl border border-purple-400/30 overflow-hidden"
+            onClick={() => setSelectedCard(card)}
+            className="w-full bg-gradient-to-br from-slate-800/50 to-purple-900/30 rounded-xl border border-purple-400/30
+                       p-5 flex items-center justify-between hover:bg-white/5 hover:border-purple-300/50
+                       transition-all duration-200 cursor-pointer group"
           >
-            {/* HEADER DE LA FICHA */}
-            <button
-              onClick={() => toggleCard(card.planeta)}
-              className="w-full p-5 flex items-center justify-between hover:bg-white/5 transition-colors"
-            >
-              <div className="flex items-center gap-4">
-                <span className="text-4xl">{card.simbolo}</span>
-                <div className="text-left">
-                  <h3 className="text-xl font-bold text-white">{card.planeta.toUpperCase()} DEL AÑO</h3>
-                  <p className="text-purple-200 text-sm">
-                    {card.quien_eres_natal.posicion_completa} → {card.que_se_activa_este_anio.posicion_completa}
-                  </p>
-                  <p className="text-yellow-300 text-xs mt-1">
-                    📅 {card.que_se_activa_este_anio.periodo}
-                  </p>
+            <div className="flex items-center gap-4">
+              <span className="text-4xl">{card.simbolo}</span>
+              <div className="text-left">
+                <h3 className="text-xl font-bold text-white">{card.planeta.toUpperCase()} DEL AÑO</h3>
+                <p className="text-purple-200 text-sm">
+                  {card.quien_eres_natal.posicion_completa} → {card.que_se_activa_este_anio.posicion_completa}
+                </p>
+                <p className="text-yellow-300 text-xs mt-1">
+                  📅 {card.que_se_activa_este_anio.periodo}
+                </p>
+                <p className="text-blue-300 text-xs mt-1 italic">
+                  {card.que_se_activa_este_anio.duracion_texto}
+                </p>
+              </div>
+            </div>
+            <ArrowRight className="w-6 h-6 text-purple-300 group-hover:translate-x-1 transition-transform" />
+          </button>
+        ))}
+      </div>
+
+      {/* MODAL FULLSCREEN */}
+      {selectedCard && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm overflow-y-auto">
+          <div className="min-h-screen px-4 py-8">
+            <div className="max-w-4xl mx-auto bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 rounded-2xl shadow-2xl border border-purple-500/20 mb-8">
+
+              {/* MODAL HEADER */}
+              <div className="bg-gradient-to-r from-purple-900/90 to-pink-900/90 px-6 py-6 rounded-t-2xl border-b border-purple-400/30 sticky top-0 z-10">
+                <div className="flex justify-between items-start gap-4">
+                  <div className="flex-1 flex items-center gap-4">
+                    <span className="text-5xl">{selectedCard.simbolo}</span>
+                    <div>
+                      <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+                        {selectedCard.planeta.toUpperCase()} DEL AÑO
+                      </h1>
+                      <p className="text-purple-200 text-sm mb-1">
+                        {selectedCard.quien_eres_natal.posicion_completa} → {selectedCard.que_se_activa_este_anio.posicion_completa}
+                      </p>
+                      <p className="text-yellow-300 text-sm">
+                        📅 {selectedCard.que_se_activa_este_anio.periodo}
+                      </p>
+                      <p className="text-blue-300 text-sm mt-1 italic">
+                        {selectedCard.que_se_activa_este_anio.duracion_texto}
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setSelectedCard(null)}
+                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                  >
+                    <X className="w-6 h-6 text-purple-200" />
+                  </button>
                 </div>
               </div>
-              {expandedCard === card.planeta ? (
-                <ChevronUp className="w-6 h-6 text-purple-300" />
-              ) : (
-                <ChevronDown className="w-6 h-6 text-purple-300" />
-              )}
-            </button>
 
-            {/* CONTENIDO EXPANDIDO */}
-            {expandedCard === card.planeta && (
-              <div className="p-6 pt-0 space-y-6 border-t border-purple-400/20">
+              {/* MODAL CONTENT */}
+              <div className="p-6 md:p-8 space-y-6">
 
                 {/* 🧬 QUIÉN ERES (NATAL) */}
                 <div>
                   <h4 className="text-lg font-semibold text-purple-100 mb-3 flex items-center gap-2">
                     <span>🧬</span> QUIÉN ERES (NATAL)
                   </h4>
-                  <p className="text-purple-300 font-semibold mb-2">{card.quien_eres_natal.posicion_completa}</p>
+                  <p className="text-purple-300 font-semibold mb-2">{selectedCard.quien_eres_natal.posicion_completa}</p>
                   <ul className="space-y-1 text-gray-200 mb-3">
-                    {card.quien_eres_natal.caracteristicas.map((c, i) => (
+                    {selectedCard.quien_eres_natal.caracteristicas.map((c, i) => (
                       <li key={i} className="flex items-start gap-2">
                         <span className="text-purple-400 mt-1">→</span>
                         <span>{c}</span>
@@ -254,11 +294,11 @@ export default function PlanetaryCards() {
                     ))}
                   </ul>
                   <p className="text-white italic bg-purple-900/30 rounded-lg p-3 mb-3">
-                    {card.quien_eres_natal.superpoder_natal}
+                    {selectedCard.quien_eres_natal.superpoder_natal}
                   </p>
-                  {card.quien_eres_natal.diferenciador_clave && (
+                  {selectedCard.quien_eres_natal.diferenciador_clave && (
                     <p className="text-purple-200 text-sm leading-relaxed bg-purple-800/20 rounded-lg p-3 border-l-4 border-purple-400">
-                      💡 {card.quien_eres_natal.diferenciador_clave}
+                      💡 {selectedCard.quien_eres_natal.diferenciador_clave}
                     </p>
                   )}
                 </div>
@@ -268,29 +308,29 @@ export default function PlanetaryCards() {
                   <h4 className="text-lg font-semibold text-blue-100 mb-3 flex items-center gap-2">
                     <span>🌍</span> QUÉ SE ACTIVA ESTE AÑO
                   </h4>
-                  <p className="text-yellow-300 font-semibold mb-2 text-sm">({card.que_se_activa_este_anio.periodo})</p>
-                  <p className="text-blue-300 font-semibold mb-2">{card.que_se_activa_este_anio.posicion_completa}</p>
-                  <p className="text-blue-200 text-sm mb-3 italic">{card.que_se_activa_este_anio.duracion_texto}</p>
-                  <p className="text-white mb-3 leading-relaxed">{card.que_se_activa_este_anio.introduccion}</p>
+                  <p className="text-yellow-300 font-semibold mb-2 text-sm">({selectedCard.que_se_activa_este_anio.periodo})</p>
+                  <p className="text-blue-300 font-semibold mb-2">{selectedCard.que_se_activa_este_anio.posicion_completa}</p>
+                  <p className="text-blue-200 text-sm mb-3 italic">{selectedCard.que_se_activa_este_anio.duracion_texto}</p>
+                  <p className="text-white mb-3 leading-relaxed">{selectedCard.que_se_activa_este_anio.introduccion}</p>
                   <p className="text-gray-300 text-sm mb-2 font-semibold">Este año:</p>
                   <ul className="space-y-1 text-gray-200">
-                    {card.que_se_activa_este_anio.este_anio.map((p, i) => (
+                    {selectedCard.que_se_activa_este_anio.este_anio.map((p, i) => (
                       <li key={i} className="flex items-start gap-2">
                         <span className="text-blue-400 mt-1">→</span>
                         <span>{p}</span>
                       </li>
                     ))}
                   </ul>
-                  {card.que_se_activa_este_anio.integracion_signo_casa && (
+                  {selectedCard.que_se_activa_este_anio.integracion_signo_casa && (
                     <p className="text-blue-200 text-sm leading-relaxed bg-blue-900/20 rounded-lg p-3 border-l-4 border-blue-400 mt-3">
-                      🔗 {card.que_se_activa_este_anio.integracion_signo_casa}
+                      🔗 {selectedCard.que_se_activa_este_anio.integracion_signo_casa}
                     </p>
                   )}
-                  {card.que_se_activa_este_anio.contraste_con_natal && (
+                  {selectedCard.que_se_activa_este_anio.contraste_con_natal && (
                     <div className="mt-4 bg-gradient-to-r from-orange-900/30 to-amber-900/30 rounded-lg p-4 border-l-4 border-amber-500">
                       <p className="text-amber-200 font-semibold mb-2">⚡ El contraste clave del año:</p>
                       <p className="text-gray-200 text-sm leading-relaxed italic">
-                        {card.que_se_activa_este_anio.contraste_con_natal}
+                        {selectedCard.que_se_activa_este_anio.contraste_con_natal}
                       </p>
                     </div>
                   )}
@@ -303,40 +343,40 @@ export default function PlanetaryCards() {
                   </h4>
                   <div className="space-y-3 text-gray-200">
                     {/* Formato nuevo (mejorado) */}
-                    {card.cruce_real.natal_especifico && (
+                    {selectedCard.cruce_real.natal_especifico && (
                       <p className="bg-purple-900/20 rounded-lg p-3">
-                        <strong className="text-purple-200">Natal:</strong> {card.cruce_real.natal_especifico}
+                        <strong className="text-purple-200">Natal:</strong> {selectedCard.cruce_real.natal_especifico}
                       </p>
                     )}
-                    {card.cruce_real.sr_especifico && (
+                    {selectedCard.cruce_real.sr_especifico && (
                       <p className="bg-blue-900/20 rounded-lg p-3">
-                        <strong className="text-blue-200">Solar Return:</strong> {card.cruce_real.sr_especifico}
+                        <strong className="text-blue-200">Solar Return:</strong> {selectedCard.cruce_real.sr_especifico}
                       </p>
                     )}
-                    {card.cruce_real.contraste_directo && (
+                    {selectedCard.cruce_real.contraste_directo && (
                       <p className="bg-orange-900/30 rounded-lg p-3 border-l-4 border-orange-400">
-                        <strong className="text-orange-200">⚡ Contraste:</strong> {card.cruce_real.contraste_directo}
+                        <strong className="text-orange-200">⚡ Contraste:</strong> {selectedCard.cruce_real.contraste_directo}
                       </p>
                     )}
-                    {card.cruce_real.aprendizaje_del_anio && (
+                    {selectedCard.cruce_real.aprendizaje_del_anio && (
                       <p className="bg-yellow-900/20 rounded-lg p-3">
-                        <strong className="text-yellow-200">🎯 Aprendizaje del año:</strong> {card.cruce_real.aprendizaje_del_anio}
+                        <strong className="text-yellow-200">🎯 Aprendizaje del año:</strong> {selectedCard.cruce_real.aprendizaje_del_anio}
                       </p>
                     )}
-                    {card.cruce_real.frase_potente_cierre && (
+                    {selectedCard.cruce_real.frase_potente_cierre && (
                       <p className="bg-emerald-900/30 rounded-lg p-4 border-2 border-emerald-500/30 text-center">
-                        <strong className="text-emerald-200 text-lg italic">"{card.cruce_real.frase_potente_cierre}"</strong>
+                        <strong className="text-emerald-200 text-lg italic">"{selectedCard.cruce_real.frase_potente_cierre}"</strong>
                       </p>
                     )}
 
                     {/* Formato antiguo (compatibilidad hacia atrás) */}
-                    {!card.cruce_real.natal_especifico && card.cruce_real.tu_naturaleza && (
+                    {!selectedCard.cruce_real.natal_especifico && selectedCard.cruce_real.tu_naturaleza && (
                       <>
-                        <p><strong className="text-orange-200">Tu naturaleza:</strong> {card.cruce_real.tu_naturaleza}</p>
-                        <p><strong className="text-orange-200">Este año pide:</strong> {card.cruce_real.este_anio_pide}</p>
-                        <p><strong className="text-red-200">El conflicto:</strong> {card.cruce_real.el_conflicto}</p>
+                        <p><strong className="text-orange-200">Tu naturaleza:</strong> {selectedCard.cruce_real.tu_naturaleza}</p>
+                        <p><strong className="text-orange-200">Este año pide:</strong> {selectedCard.cruce_real.este_anio_pide}</p>
+                        <p><strong className="text-red-200">El conflicto:</strong> {selectedCard.cruce_real.el_conflicto}</p>
                         <p className="bg-emerald-900/30 rounded-lg p-3">
-                          <strong className="text-emerald-200">La clave:</strong> {card.cruce_real.la_clave}
+                          <strong className="text-emerald-200">La clave:</strong> {selectedCard.cruce_real.la_clave}
                         </p>
                       </>
                     )}
@@ -346,10 +386,10 @@ export default function PlanetaryCards() {
                 {/* 🎯 REGLAS DEL AÑO */}
                 <div className="border-t border-purple-400/20 pt-6">
                   <h4 className="text-lg font-semibold text-yellow-100 mb-3 flex items-center gap-2">
-                    <span>🎯</span> REGLAS DE {card.planeta.toUpperCase()} PARA TODO EL AÑO
+                    <span>🎯</span> REGLAS DE {selectedCard.planeta.toUpperCase()} PARA TODO EL AÑO
                   </h4>
                   <ul className="space-y-2 text-gray-200 mb-4">
-                    {card.reglas_del_anio.reglas.map((regla, i) => (
+                    {selectedCard.reglas_del_anio.reglas.map((regla, i) => (
                       <li key={i} className="flex items-start gap-2">
                         <span className="text-yellow-400 mt-1">→</span>
                         <span className="leading-relaxed">{regla}</span>
@@ -357,34 +397,34 @@ export default function PlanetaryCards() {
                     ))}
                   </ul>
                   <p className="text-yellow-200 italic bg-yellow-900/20 rounded-lg p-3">
-                    👉 {card.reglas_del_anio.entrenamiento_anual}
+                    👉 {selectedCard.reglas_del_anio.entrenamiento_anual}
                   </p>
                 </div>
 
                 {/* ⏱️ CÓMO SE ACTIVA SEGÚN EL MOMENTO */}
                 <div className="border-t border-purple-400/20 pt-6 bg-gradient-to-r from-cyan-900/20 to-blue-900/20 rounded-lg p-4">
                   <h4 className="text-lg font-semibold text-cyan-100 mb-2 flex items-center gap-2">
-                    <span>⏱️</span> CÓMO SE ACTIVA {card.planeta.toUpperCase()} SEGÚN EL MOMENTO
+                    <span>⏱️</span> CÓMO SE ACTIVA {selectedCard.planeta.toUpperCase()} SEGÚN EL MOMENTO
                   </h4>
-                  {card.como_se_activa_segun_momento.introduccion && (
-                    <p className="text-cyan-200 text-sm mb-4 italic">{card.como_se_activa_segun_momento.introduccion}</p>
+                  {selectedCard.como_se_activa_segun_momento.introduccion && (
+                    <p className="text-cyan-200 text-sm mb-4 italic">{selectedCard.como_se_activa_segun_momento.introduccion}</p>
                   )}
                   <div className="space-y-3 text-gray-200">
                     <div>
                       <p className="font-semibold text-cyan-200 mb-1">🌑 En cada Luna Nueva</p>
-                      <p className="pl-4">{card.como_se_activa_segun_momento.en_lunas_nuevas}</p>
+                      <p className="pl-4">{selectedCard.como_se_activa_segun_momento.en_lunas_nuevas}</p>
                     </div>
                     <div>
                       <p className="font-semibold text-cyan-200 mb-1">🌕 En cada Luna Llena</p>
-                      <p className="pl-4">{card.como_se_activa_segun_momento.en_lunas_llenas}</p>
+                      <p className="pl-4">{selectedCard.como_se_activa_segun_momento.en_lunas_llenas}</p>
                     </div>
                     <div>
                       <p className="font-semibold text-cyan-200 mb-1">↩️ Durante retrogradaciones</p>
-                      <p className="pl-4">{card.como_se_activa_segun_momento.durante_retrogradaciones}</p>
+                      <p className="pl-4">{selectedCard.como_se_activa_segun_momento.durante_retrogradaciones}</p>
                     </div>
                     <div>
                       <p className="font-semibold text-cyan-200 mb-1">🌘 Durante eclipses</p>
-                      <p className="pl-4">{card.como_se_activa_segun_momento.durante_eclipses}</p>
+                      <p className="pl-4">{selectedCard.como_se_activa_segun_momento.durante_eclipses}</p>
                     </div>
                   </div>
                 </div>
@@ -395,7 +435,7 @@ export default function PlanetaryCards() {
                     <span>⚠️</span> SOMBRAS A VIGILAR ESTE AÑO
                   </h4>
                   <ul className="space-y-2 text-gray-200 mb-4">
-                    {card.sombras_a_vigilar.sombras.map((sombra, i) => (
+                    {selectedCard.sombras_a_vigilar.sombras.map((sombra, i) => (
                       <li key={i} className="flex items-start gap-2">
                         <span className="text-red-400 mt-1">{i + 1}.</span>
                         <span>{sombra}</span>
@@ -403,24 +443,24 @@ export default function PlanetaryCards() {
                     ))}
                   </ul>
                   <p className="text-emerald-200 italic bg-emerald-900/20 rounded-lg p-3">
-                    👉 {card.sombras_a_vigilar.equilibrio}
+                    👉 {selectedCard.sombras_a_vigilar.equilibrio}
                   </p>
                 </div>
 
                 {/* ✨ RITMO DE TRABAJO */}
                 <div className="border-t border-purple-400/20 pt-6 bg-gradient-to-r from-green-900/20 to-emerald-900/20 rounded-lg p-4">
                   <h4 className="text-lg font-semibold text-green-100 mb-2 flex items-center gap-2">
-                    <span>✨</span> RITMO DE TRABAJO CON {card.planeta.toUpperCase()} (agenda)
+                    <span>✨</span> RITMO DE TRABAJO CON {selectedCard.planeta.toUpperCase()} (agenda)
                   </h4>
-                  <p className="text-green-200 text-sm mb-3">Frecuencia: {card.ritmo_de_trabajo.frecuencia}</p>
-                  <p className="text-gray-200 mb-4">{card.ritmo_de_trabajo.ejercicio_mensual}</p>
+                  <p className="text-green-200 text-sm mb-3">Frecuencia: {selectedCard.ritmo_de_trabajo.frecuencia}</p>
+                  <p className="text-gray-200 mb-4">{selectedCard.ritmo_de_trabajo.ejercicio_mensual}</p>
 
                   {/* Claves prácticas diarias */}
-                  {card.ritmo_de_trabajo.claves_practicas_diarias && card.ritmo_de_trabajo.claves_practicas_diarias.length > 0 && (
+                  {selectedCard.ritmo_de_trabajo.claves_practicas_diarias && selectedCard.ritmo_de_trabajo.claves_practicas_diarias.length > 0 && (
                     <div className="mb-4 bg-green-800/20 rounded-lg p-3">
                       <p className="font-semibold text-green-200 mb-2">🔑 Claves prácticas diarias:</p>
                       <ul className="space-y-2 text-gray-200">
-                        {card.ritmo_de_trabajo.claves_practicas_diarias.map((clave, i) => (
+                        {selectedCard.ritmo_de_trabajo.claves_practicas_diarias.map((clave, i) => (
                           <li key={i} className="flex items-start gap-2">
                             <span className="text-green-400 mt-1">✓</span>
                             <span className="leading-relaxed">{clave}</span>
@@ -431,10 +471,10 @@ export default function PlanetaryCards() {
                   )}
 
                   {/* Ritmos semanales */}
-                  {card.ritmo_de_trabajo.ritmos_semanales && (
+                  {selectedCard.ritmo_de_trabajo.ritmos_semanales && (
                     <div className="mb-4 bg-emerald-800/20 rounded-lg p-3 border-l-4 border-emerald-400">
                       <p className="font-semibold text-emerald-200 mb-2">📅 Ritmos semanales:</p>
-                      <p className="text-gray-200 text-sm leading-relaxed">{card.ritmo_de_trabajo.ritmos_semanales}</p>
+                      <p className="text-gray-200 text-sm leading-relaxed">{selectedCard.ritmo_de_trabajo.ritmos_semanales}</p>
                     </div>
                   )}
 
@@ -442,7 +482,7 @@ export default function PlanetaryCards() {
                   <div className="space-y-2">
                     <p className="font-semibold text-green-200">❓ Preguntas mensuales:</p>
                     <ol className="space-y-2 text-gray-200 list-decimal list-inside pl-2">
-                      {card.ritmo_de_trabajo.preguntas_mensuales.map((pregunta, i) => (
+                      {selectedCard.ritmo_de_trabajo.preguntas_mensuales.map((pregunta, i) => (
                         <li key={i} className="leading-relaxed">{pregunta}</li>
                       ))}
                     </ol>
@@ -454,11 +494,11 @@ export default function PlanetaryCards() {
                   <h4 className="text-lg font-semibold text-violet-100 mb-2 flex items-center gap-2">
                     <span>🔮</span> APOYO FÍSICO (conexión tienda futura)
                   </h4>
-                  {card.apoyo_fisico.nota && (
-                    <p className="text-violet-200 text-sm mb-3 italic">{card.apoyo_fisico.nota}</p>
+                  {selectedCard.apoyo_fisico.nota && (
+                    <p className="text-violet-200 text-sm mb-3 italic">{selectedCard.apoyo_fisico.nota}</p>
                   )}
                   <div className="space-y-3">
-                    {card.apoyo_fisico.items.map((apoyo, i) => (
+                    {selectedCard.apoyo_fisico.items.map((apoyo, i) => (
                       <div key={i} className="flex items-start gap-3 text-white">
                         <span className="text-xl">{apoyo.tipo.split(' ')[0]}</span>
                         <div>
@@ -476,15 +516,31 @@ export default function PlanetaryCards() {
                     <span>🌟</span> FRASE ANCLA DEL AÑO
                   </h4>
                   <p className="text-white text-xl font-bold italic">
-                    "{card.frase_ancla_del_anio}"
+                    "{selectedCard.frase_ancla_del_anio}"
                   </p>
                 </div>
 
               </div>
-            )}
+
+              {/* MODAL FOOTER */}
+              <div className="px-6 py-4 border-t border-purple-400/30 bg-slate-900/50 rounded-b-2xl">
+                <div className="flex justify-between items-center">
+                  <p className="text-slate-400 text-sm">
+                    🌟 Planeta Dominante de tu año solar
+                  </p>
+                  <button
+                    onClick={() => setSelectedCard(null)}
+                    className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors"
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              </div>
+
+            </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
