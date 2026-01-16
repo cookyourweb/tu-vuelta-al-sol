@@ -1277,10 +1277,10 @@ const AgendaPersonalizada = () => {
                 {showPersonalityModal && (
                   <>
                     <div
-                      className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50"
+                      className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100]"
                       onClick={() => setShowPersonalityModal(false)}
                     />
-                    <div className="fixed inset-0 flex items-center justify-center z-50 p-6">
+                    <div className="fixed inset-0 flex items-center justify-center z-[101] p-6">
                       <div className="bg-gradient-to-br from-purple-900/95 to-pink-900/95 backdrop-blur-sm border border-purple-400/40 rounded-3xl shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-y-auto p-6 text-white">
                         <h3 className="text-2xl font-bold mb-4">Perfil de Personalidad</h3>
                         <p className="whitespace-pre-line leading-relaxed">
@@ -1601,13 +1601,13 @@ const AgendaPersonalizada = () => {
                                     handleEventClick(event);
                                   }}
                                   className={`
-                                    flex items-center gap-1 p-1 rounded cursor-pointer transition-all duration-200 group-hover:scale-105
+                                    flex items-start gap-1 p-1.5 rounded cursor-pointer transition-all duration-200 group-hover:scale-105
                                     bg-gradient-to-r ${getEventColor(event.type, event.priority)} bg-opacity-80 backdrop-blur-sm
                                     hover:shadow-lg hover:shadow-purple-500/30
                                   `}
                                 >
-                                  <span className="text-xs">{getEventIcon(event.type, event.priority)}</span>
-                                  <span className="text-white text-xs font-medium truncate flex-1">
+                                  <span className="text-xs shrink-0">{getEventIcon(event.type, event.priority)}</span>
+                                  <span className="text-white text-[10px] leading-tight font-medium line-clamp-2 flex-1">
                                     {event.title}
                                   </span>
                                   {event.priority === 'high' && (
@@ -1852,12 +1852,12 @@ const AgendaPersonalizada = () => {
           <>
             {/* Overlay */}
             <div
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
               onClick={closeEventModal}
             />
 
             {/* Modal centrado */}
-            <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+            <div className="fixed inset-0 flex items-center justify-center z-[101] p-4">
               <div className="bg-gradient-to-br from-purple-900/95 to-pink-900/95 backdrop-blur-sm border border-purple-400/40 rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
                 {/* Header del modal */}
                 <div className="bg-gradient-to-r from-purple-600/80 to-pink-600/80 p-6 border-b border-white/20">
@@ -2116,46 +2116,46 @@ const AgendaPersonalizada = () => {
                           </div>
                         </div>
                       )}
+                    </div>
+                  )}
 
-                      {/* 🌟 INTERPRETACIÓN PERSONALIZADA PROFUNDA (NUEVO) */}
-                      {user?.uid && modalEvent && (
-                        <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-2 border-purple-400/30 rounded-2xl p-6">
-                          <div className="mb-4">
-                            <h3 className="text-lg font-semibold text-purple-300 mb-2 flex items-center">
-                              <span className="mr-2">✨</span>
-                              Interpretación ULTRA Personalizada
-                            </h3>
-                            <p className="text-purple-200 text-sm mb-4">
-                              Genera una interpretación única cruzando <strong>TU carta natal + Solar Return + Este evento</strong> que analiza:
-                            </p>
-                            <ul className="text-purple-200 text-sm space-y-1 mb-4 ml-4">
-                              <li>✓ Cómo este evento te afecta específicamente</li>
-                              <li>✓ Qué fortalezas de tu carta usar</li>
-                              <li>✓ Qué bloqueos transformar</li>
-                              <li>✓ Ejercicios concretos para este momento</li>
-                              <li>✓ Mantra personalizado con tus posiciones planetarias</li>
-                              <li>✓ Timing evolutivo preciso</li>
-                            </ul>
-                            {modalEvent.house && (
-                              <div className="bg-purple-700/30 rounded-lg p-3 text-sm text-purple-100 mb-4">
-                                <strong>📍 Casa Activada:</strong> Casa {modalEvent.house} de tu carta natal
-                              </div>
-                            )}
+                  {/* 🌟 INTERPRETACIÓN PERSONALIZADA PROFUNDA - Siempre visible */}
+                  {user?.uid && modalEvent && !(modalEvent as any).metadata?.guidance && (
+                    <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-2 border-purple-400/30 rounded-2xl p-6 mt-6">
+                      <div className="mb-4">
+                        <h3 className="text-lg font-semibold text-purple-300 mb-2 flex items-center">
+                          <span className="mr-2">✨</span>
+                          Interpretación ULTRA Personalizada
+                        </h3>
+                        <p className="text-purple-200 text-sm mb-4">
+                          Genera una interpretación única cruzando <strong>TU carta natal + Solar Return + Este evento</strong> que analiza:
+                        </p>
+                        <ul className="text-purple-200 text-sm space-y-1 mb-4 ml-4">
+                          <li>✓ Cómo este evento te afecta específicamente</li>
+                          <li>✓ Qué fortalezas de tu carta usar</li>
+                          <li>✓ Qué bloqueos transformar</li>
+                          <li>✓ Ejercicios concretos para este momento</li>
+                          <li>✓ Mantra personalizado con tus posiciones planetarias</li>
+                          <li>✓ Timing evolutivo preciso</li>
+                        </ul>
+                        {modalEvent.house && (
+                          <div className="bg-purple-700/30 rounded-lg p-3 text-sm text-purple-100 mb-4">
+                            <strong>📍 Casa Activada:</strong> Casa {modalEvent.house} de tu carta natal
                           </div>
+                        )}
+                      </div>
 
-                          <EventInterpretationButton
-                            userId={user.uid}
-                            event={{
-                              type: mapEventTypeToInterpretation(modalEvent).type,
-                              date: modalEvent.date,
-                              sign: modalEvent.sign || 'Desconocido',
-                              house: mapEventTypeToInterpretation(modalEvent).house,
-                              planetsInvolved: modalEvent.planet ? [modalEvent.planet] : []
-                            }}
-                            className="w-full"
-                          />
-                        </div>
-                      )}
+                      <EventInterpretationButton
+                        userId={user.uid}
+                        event={{
+                          type: mapEventTypeToInterpretation(modalEvent).type,
+                          date: modalEvent.date,
+                          sign: modalEvent.sign || 'Desconocido',
+                          house: mapEventTypeToInterpretation(modalEvent).house,
+                          planetsInvolved: modalEvent.planet ? [modalEvent.planet] : []
+                        }}
+                        className="w-full"
+                      />
                     </div>
                   )}
                 </div>
@@ -2184,12 +2184,12 @@ const AgendaPersonalizada = () => {
           <>
             {/* Overlay */}
             <div
-              className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40"
+              className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100]"
               onClick={() => setShowDayModal(false)}
             />
 
             {/* Modal fullscreen */}
-            <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+            <div className="fixed inset-0 flex items-center justify-center z-[101] p-4">
               <div className="bg-gradient-to-br from-purple-900/95 to-pink-900/95 backdrop-blur-sm border border-purple-400/40 rounded-3xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden">
                 {/* Header del modal */}
                 <div className="bg-gradient-to-r from-purple-600/80 to-pink-600/80 p-6 border-b border-white/20">
