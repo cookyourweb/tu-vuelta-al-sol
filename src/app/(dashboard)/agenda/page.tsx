@@ -1321,10 +1321,10 @@ const AgendaPersonalizada = () => {
                 {showPersonalityModal && (
                   <>
                     <div
-                      className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100]"
+                      className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[200]"
                       onClick={() => setShowPersonalityModal(false)}
                     />
-                    <div className="fixed inset-0 flex items-center justify-center z-[101] p-6">
+                    <div className="fixed inset-0 flex items-center justify-center z-[201] p-6">
                       <div className="bg-gradient-to-br from-purple-900/95 to-pink-900/95 backdrop-blur-sm border border-purple-400/40 rounded-3xl shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-y-auto p-6 text-white">
                         <h3 className="text-2xl font-bold mb-4">Perfil de Personalidad</h3>
                         <p className="whitespace-pre-line leading-relaxed">
@@ -1612,7 +1612,7 @@ const AgendaPersonalizada = () => {
                                 : 'bg-gradient-to-br from-purple-800/10 to-indigo-800/10 hover:from-purple-600/20 hover:to-indigo-600/20'
                               : 'bg-gradient-to-br from-gray-800/20 to-slate-800/20 text-gray-500'
                             }
-                            ${isSelected && !isSameDay(day.date, new Date()) ? 'ring-4 ring-purple-400/80 ring-offset-2 ring-offset-purple-900/50' : ''}
+                            ${isSelected && !isFirstDayOfCycle && !isLastDayOfCycle ? 'ring-4 ring-purple-400/80 ring-offset-2 ring-offset-purple-900/50' : ''}
                           `}
                         >
                           {/* Badge para primer/último día */}
@@ -1852,7 +1852,7 @@ const AgendaPersonalizada = () => {
         {/* TOOLTIP ÉPICO */}
         {hoveredEvent && hoveredEvent.aiInterpretation && (
           <div
-            className="fixed bg-gradient-to-r from-purple-900/95 to-pink-900/95 backdrop-blur-sm border border-purple-400/40 rounded-2xl p-6 shadow-2xl max-w-sm pointer-events-none z-[102]"
+            className="fixed bg-gradient-to-r from-purple-900/95 to-pink-900/95 backdrop-blur-sm border border-purple-400/40 rounded-2xl p-6 shadow-2xl max-w-sm pointer-events-none z-[202]"
             style={{
               left: Math.min(tooltipPosition.x - 200, window.innerWidth - 400),
               top: tooltipPosition.y - 20,
@@ -1907,12 +1907,12 @@ const AgendaPersonalizada = () => {
           <>
             {/* Overlay */}
             <div
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200]"
               onClick={closeEventModal}
             />
 
             {/* Modal centrado */}
-            <div className="fixed inset-0 flex items-center justify-center z-[101] p-4">
+            <div className="fixed inset-0 flex items-center justify-center z-[201] p-4">
               <div className="bg-gradient-to-br from-purple-900/95 to-pink-900/95 backdrop-blur-sm border border-purple-400/40 rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
                 {/* Header del modal */}
                 <div className="bg-gradient-to-r from-purple-600/80 to-pink-600/80 p-6 border-b border-white/20">
@@ -2075,8 +2075,22 @@ const AgendaPersonalizada = () => {
                             Genera los eventos del próximo ciclo solar ({yearRange?.end ? yearRange.end.getFullYear() + 1 : new Date().getFullYear() + 1}-{yearRange?.end ? yearRange.end.getFullYear() + 2 : new Date().getFullYear() + 2}) para empezar a planificar tu nuevo año.
                           </p>
                           <button
-                            onClick={() => {
-                              loadYearEvents(true);
+                            onClick={async () => {
+                              // Generar nuevo ciclo
+                              await loadYearEvents(true);
+
+                              // Navegar al inicio del nuevo ciclo (próximo cumpleaños)
+                              if (userProfile?.birthDate) {
+                                const birthDate = new Date(userProfile.birthDate);
+                                const currentYear = new Date().getFullYear();
+                                const nextBirthday = new Date(currentYear + 1, birthDate.getMonth(), birthDate.getDate());
+
+                                setSelectedDate(nextBirthday);
+                                setCurrentMonth(nextBirthday);
+
+                                console.log('[NEW-CYCLE] Navegando al inicio del nuevo ciclo:', nextBirthday.toDateString());
+                              }
+
                               closeEventModal();
                             }}
                             disabled={loadingYearEvents}
@@ -2239,12 +2253,12 @@ const AgendaPersonalizada = () => {
           <>
             {/* Overlay */}
             <div
-              className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100]"
+              className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[200]"
               onClick={() => setShowDayModal(false)}
             />
 
             {/* Modal fullscreen */}
-            <div className="fixed inset-0 flex items-center justify-center z-[101] p-4">
+            <div className="fixed inset-0 flex items-center justify-center z-[201] p-4">
               <div className="bg-gradient-to-br from-purple-900/95 to-pink-900/95 backdrop-blur-sm border border-purple-400/40 rounded-3xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden">
                 {/* Header del modal */}
                 <div className="bg-gradient-to-r from-purple-600/80 to-pink-600/80 p-6 border-b border-white/20">

@@ -178,7 +178,7 @@ export default function PlanetarySection({ activePlanets }: PlanetarySectionProp
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <span className="text-3xl">{planet.symbol}</span>
+                          <span className="text-3xl filter brightness-150 saturate-150">{planet.symbol}</span>
                           <div className="text-left">
                             <span className="text-white font-semibold text-base block">{planet.name}</span>
                             <span className={`text-xs px-2 py-0.5 rounded-full inline-block mt-1 ${
@@ -223,7 +223,7 @@ export default function PlanetarySection({ activePlanets }: PlanetarySectionProp
 
       {/* MODAL FULLSCREEN PARA PLANETA SELECCIONADO */}
       {showTooltip && selectedPlanet && (
-        <div className="fixed inset-0 z-[150] bg-black/90 backdrop-blur-sm overflow-y-auto">
+        <div className="fixed inset-0 z-[250] bg-black/90 backdrop-blur-sm overflow-y-auto">
           <div className="min-h-screen px-4 py-8">
             <div className="max-w-3xl mx-auto bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 rounded-2xl shadow-2xl border border-purple-500/20">
 
