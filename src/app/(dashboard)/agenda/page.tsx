@@ -7,6 +7,7 @@ import { es } from 'date-fns/locale';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { Calendar } from 'lucide-react';
 import type { UserProfile, AstrologicalEvent, EventType } from '@/types/astrology/unified-types';
 
 import EventsLoadingModal from '@/components/astrology/EventsLoadingModal';
@@ -1510,7 +1511,7 @@ const AgendaPersonalizada = () => {
             <div className="bg-gradient-to-r from-purple-600/30 to-indigo-600/30 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-purple-400/30">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl lg:text-3xl font-bold text-white capitalize flex items-center">
-                  <span className="mr-3">🗓️</span>
+                  <Calendar className="mr-3 h-7 w-7 lg:h-8 lg:w-8" />
                   Agenda Cósmica
                 </h2>
 
@@ -1653,8 +1654,10 @@ const AgendaPersonalizada = () => {
                 {/* Header */}
                 <div className="bg-gradient-to-r from-pink-600/30 to-purple-600/30 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-pink-400/30">
                   <h3 className="text-2xl font-bold text-white mb-2 flex items-center">
-                    <span className="mr-3">📅</span>
-                    {isSameDay(selectedDate, new Date()) ? 'Hoy' : `${selectedDate.getDate()} de ${format(selectedDate, 'MMMM', { locale: es })}`}
+                    <Calendar className="mr-3 h-6 w-6" />
+                    {isSameDay(selectedDate, new Date())
+                      ? `Hoy, ${selectedDate.getDate()} de ${format(selectedDate, 'MMMM', { locale: es })}`
+                      : `${selectedDate.getDate()} de ${format(selectedDate, 'MMMM', { locale: es })}`}
                   </h3>
                   <p className="text-pink-200 text-sm">
                     {selectedDayEvents.length === 0

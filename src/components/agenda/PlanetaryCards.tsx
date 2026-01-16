@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sparkles, Loader2, AlertCircle, ArrowRight, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -103,6 +103,36 @@ export default function PlanetaryCards({
   const setCards = externalSetCards || setInternalCards;
   const showCards = externalShowCards !== undefined ? externalShowCards : internalShowCards;
   const setShowCards = externalSetShowCards || setInternalShowCards;
+
+  // 🎯 Cargar fichas cacheadas al montar el componente
+  useEffect(() => {
+    const loadCachedCards = async () => {
+      if (!user || cards.length > 0) return; // Ya tenemos cards o no hay usuario
+
+      try {
+        const token = await user.getIdToken();
+        const response = await fetch('/api/astrology/planetary-cards', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          }
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.cards && data.cards.length > 0) {
+          console.log('[PLANETARY-CARDS] Loaded cached cards:', data.cards.length);
+          setCards(data.cards);
+          setShowCards(true);
+        }
+      } catch (err) {
+        console.log('[PLANETARY-CARDS] No cached cards available:', err);
+        // No mostrar error, simplemente no hay fichas cacheadas
+      }
+    };
+
+    loadCachedCards();
+  }, [user]); // Solo ejecutar cuando cambie el usuario
 
   const handleGenerateCards = async () => {
     if (!user) {
