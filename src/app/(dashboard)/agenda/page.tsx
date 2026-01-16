@@ -52,6 +52,21 @@ const AgendaPersonalizada = () => {
   const [isLastDayOfCycle, setIsLastDayOfCycle] = useState(false); // Último día del ciclo (cumpleaños)
   const [isDayAfterBirthday, setIsDayAfterBirthday] = useState(false); // Primer día después del cumpleaños
 
+  // 🆕 Estados para sistema de ciclos múltiples
+  const [availableCycles, setAvailableCycles] = useState<Array<{
+    yearLabel: string;
+    start: string;
+    end: string;
+    eventCount: number;
+    isCurrent: boolean;
+    isFuture: boolean;
+  }>>([]);
+  const [currentCycleLabel, setCurrentCycleLabel] = useState<string>('');
+  const [selectedCycleLabel, setSelectedCycleLabel] = useState<string>('');
+  const [canGenerateNext, setCanGenerateNext] = useState<boolean>(false);
+  const [loadingCycles, setLoadingCycles] = useState<boolean>(false);
+  const [generatingCycle, setGeneratingCycle] = useState<boolean>(false);
+
   // Perfil de usuario REAL (no datos de prueba)
   const [userProfile, setUserProfile] = React.useState<UserProfile | null>(null);
 
@@ -247,6 +262,118 @@ const AgendaPersonalizada = () => {
       }
     }
   }, []);
+
+  // 🌞 NUEVO: Fetch ciclos disponibles del usuario
+  const fetchAvailableCycles = async () => {
+    if (!user?.uid) return;
+
+    setLoadingCycles(true);
+    try {
+      const response = await fetch(`/api/astrology/solar-cycles?userId=${user.uid}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setAvailableCycles(data.data.cycles);
+        setCurrentCycleLabel(data.data.currentCycleLabel);
+        setCanGenerateNext(data.data.canGenerateNext);
+
+        // Si no hay ciclo seleccionado, usar el predeterminado
+        if (!selectedCycleLabel) {
+          setSelectedCycleLabel(data.data.defaultCycle);
+        }
+
+        console.log('✅ [CYCLES] Ciclos disponibles:', data.data.cycles);
+      }
+    } catch (error) {
+      console.error('❌ [CYCLES] Error fetching cycles:', error);
+    } finally {
+      setLoadingCycles(false);
+    }
+  };
+
+  // 🌞 NUEVO: Generar nuevo ciclo
+  const generateNewCycle = async () => {
+    if (!user?.uid || generatingCycle) return;
+
+    setGeneratingCycle(true);
+    setLoadingYearEvents(true);
+
+    try {
+      console.log('🔄 [CYCLES] Generando nuevo ciclo...');
+
+      const response = await fetch('/api/astrology/solar-cycles/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.uid })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        console.log('✅ [CYCLES] Ciclo generado:', data.data.cycle.yearLabel);
+
+        // Recargar ciclos disponibles
+        await fetchAvailableCycles();
+
+        // Cambiar al nuevo ciclo
+        setSelectedCycleLabel(data.data.cycle.yearLabel);
+
+        // Cargar eventos del nuevo ciclo
+        await loadCycleEvents(data.data.cycle.yearLabel);
+      } else {
+        console.error('❌ [CYCLES] Error generando ciclo:', data.error);
+        setError(data.error);
+      }
+    } catch (error) {
+      console.error('❌ [CYCLES] Error generando ciclo:', error);
+      setError('Error al generar el nuevo ciclo');
+    } finally {
+      setGeneratingCycle(false);
+      setLoadingYearEvents(false);
+    }
+  };
+
+  // 🌞 NUEVO: Cambiar entre ciclos
+  const switchToCycle = async (yearLabel: string) => {
+    if (selectedCycleLabel === yearLabel) return;
+
+    console.log('🔄 [CYCLES] Cambiando a ciclo:', yearLabel);
+    setSelectedCycleLabel(yearLabel);
+
+    // Cargar eventos de ese ciclo
+    await loadCycleEvents(yearLabel);
+  };
+
+  // 🌞 NUEVO: Cargar eventos de un ciclo específico desde BD
+  const loadCycleEvents = async (yearLabel: string) => {
+    if (!user?.uid) return;
+
+    setLoadingYearEvents(true);
+    try {
+      // Buscar el ciclo en los disponibles
+      const cycle = availableCycles.find(c => c.yearLabel === yearLabel);
+
+      if (!cycle) {
+        console.warn('⚠️ [CYCLES] Ciclo no encontrado en disponibles:', yearLabel);
+        // Si no existe, intentar generar (llamando a fetchYearEvents normal)
+        await loadYearEvents();
+        return;
+      }
+
+      // Cargar eventos desde la API (que ahora debería consultar BD)
+      const [startYear] = yearLabel.split('-').map(Number);
+      const forceNextYear = startYear > new Date().getFullYear();
+
+      const cycleEvents = await fetchYearEvents(forceNextYear);
+      setEvents(cycleEvents);
+
+      console.log(`✅ [CYCLES] Eventos del ciclo ${yearLabel} cargados:`, cycleEvents.length);
+    } catch (error) {
+      console.error('❌ [CYCLES] Error loading cycle events:', error);
+    } finally {
+      setLoadingYearEvents(false);
+    }
+  };
 
   // 📅 CARGA COMPLETA: Fetch Year Events (birthday to next birthday)
   const fetchYearEvents = async (forceNextYear: boolean = false): Promise<AstrologicalEvent[]> => {
@@ -944,6 +1071,13 @@ const AgendaPersonalizada = () => {
     loadYearEvents();
   }, [userProfile]);
 
+  // 🌞 NUEVO: Cargar ciclos disponibles al iniciar
+  useEffect(() => {
+    if (!user?.uid) return;
+
+    fetchAvailableCycles();
+  }, [user?.uid]);
+
   // 📅 Inicializar currentMonth al MES ACTUAL (no al mes de cumpleaños)
   useEffect(() => {
     if (yearRange && yearRange.start) {
@@ -1361,48 +1495,63 @@ const AgendaPersonalizada = () => {
                 </div>
               </div>
 
-              {/* Control de Año Solar + Ver Agenda Libro */}
-              {yearRange && (
+              {/* 🌞 Control de Ciclos Solares */}
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                {/* Grupo de ciclos */}
                 <div className="flex items-center gap-3 bg-gradient-to-r from-purple-600/30 to-pink-600/30 backdrop-blur-sm border border-purple-400/30 rounded-full px-5 py-2.5">
+                  {/* Label del ciclo actual */}
                   <div className="text-white text-sm font-medium">
-                    <span className="text-yellow-400">🌞</span> Ciclo Solar: {yearRange.start.getFullYear()}-{yearRange.end.getFullYear()}
+                    <span className="text-yellow-400">☀️</span> Ciclo Solar: {selectedCycleLabel || (yearRange ? `${yearRange.start.getFullYear()}-${yearRange.end.getFullYear()}` : '...')}
                   </div>
 
+                  {/* Botones para cambiar entre ciclos (si hay más de 1) */}
+                  {availableCycles.length > 1 && availableCycles.map(cycle => (
                     <button
-                      onClick={() => {
-                        if (userProfile) {
-                          setEvents([]);
-                          setLoadedMonths(new Set());
-                          loadYearEvents(true);
-                        }
-                      }}
+                      key={cycle.yearLabel}
+                      onClick={() => switchToCycle(cycle.yearLabel)}
                       disabled={loadingYearEvents}
+                      className={`text-white text-xs font-bold py-1.5 px-4 rounded-full transition-all duration-300 shadow-lg flex items-center gap-1.5 ${
+                        selectedCycleLabel === cycle.yearLabel
+                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 cursor-default'
+                          : 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-400 hover:to-cyan-400'
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
+                    >
+                      Ver Ciclo {cycle.yearLabel}
+                    </button>
+                  ))}
+
+                  {/* Botón generar nuevo ciclo (solo si se puede) */}
+                  {canGenerateNext && (
+                    <button
+                      onClick={generateNewCycle}
+                      disabled={generatingCycle || loadingYearEvents}
                       className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold py-1.5 px-4 rounded-full transition-all duration-300 shadow-lg hover:shadow-yellow-500/50 flex items-center gap-1.5"
                     >
-                      {loadingYearEvents ? (
+                      {generatingCycle ? (
                         <>
                           <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
-                          <span>Cargando...</span>
+                          <span>Generando...</span>
                         </>
                       ) : (
                         <>
                           <span>🔄</span>
-                          <span>Generar Nuevo Ciclo {new Date().getFullYear()}</span>
+                          <span>Generar Nuevo Ciclo {currentCycleLabel ? parseInt(currentCycleLabel.split('-')[1]) : new Date().getFullYear()}-{currentCycleLabel ? parseInt(currentCycleLabel.split('-')[1]) + 1 : new Date().getFullYear() + 1}</span>
                         </>
                       )}
                     </button>
-
-                  {/* Ver Agenda Libro */}
-                  <button
-                    onClick={() => setShowAgendaLibro(true)}
-                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg hover:shadow-purple-500/25 border border-white/10 px-5 py-2.5 rounded-full flex items-center gap-2"
-                    title="Ver tu agenda en formato libro"
-                  >
-                    <span className="text-lg">📖</span>
-                    <span className="text-white font-bold text-sm">Ver Agenda Libro</span>
-                  </button>
+                  )}
                 </div>
-              )}
+
+                {/* Ver Agenda Libro - Separado del grupo */}
+                <button
+                  onClick={() => setShowAgendaLibro(true)}
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg hover:shadow-purple-500/25 border border-white/10 px-5 py-2.5 rounded-full flex items-center gap-2"
+                  title="Ver tu agenda en formato libro"
+                >
+                  <span className="text-lg">📖</span>
+                  <span className="text-white font-bold text-sm">Ver Agenda Libro</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1457,37 +1606,13 @@ const AgendaPersonalizada = () => {
                   <span>⏰</span>
                   Estás Viendo tu Año Solar Anterior
                 </h3>
-                <p className="text-orange-100 mb-4 leading-relaxed">
+                <p className="text-orange-100 leading-relaxed">
                   Este es tu ciclo solar del <strong className="text-white">{yearRange.start.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</strong> al <strong className="text-white">{yearRange.end.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</strong>.
                   <br />
                   <span className="text-yellow-200">El {yearRange.end.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })} fue el <strong>último día de tu Retorno Solar anterior</strong>.</span>
+                  <br />
+                  <span className="text-orange-200 text-sm mt-2 inline-block">💡 Usa los botones superiores para cambiar entre ciclos disponibles.</span>
                 </p>
-                <button
-                  onClick={() => {
-                    // Recargar eventos del año SIGUIENTE (forzar nuevo ciclo)
-                    if (userProfile) {
-                      // Limpiar eventos anteriores
-                      setEvents([]);
-                      setLoadedMonths(new Set());
-                      // Cargar año siguiente con forceNextYear=true
-                      loadYearEvents(true);
-                    }
-                  }}
-                  disabled={loadingYearEvents}
-                  className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-yellow-500/50 flex items-center gap-2"
-                >
-                  {loadingYearEvents ? (
-                    <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                      <span>Generando...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-xl">🔄</span>
-                      <span>Generar Nuevo Ciclo Solar {new Date().getFullYear()}</span>
-                    </>
-                  )}
-                </button>
               </div>
             </div>
           </div>
@@ -2076,8 +2201,8 @@ const AgendaPersonalizada = () => {
                           </p>
                           <button
                             onClick={async () => {
-                              // Generar nuevo ciclo
-                              await loadYearEvents(true);
+                              // Generar nuevo ciclo usando la nueva función
+                              await generateNewCycle();
 
                               // Navegar al inicio del nuevo ciclo (próximo cumpleaños)
                               if (userProfile?.birthDate) {
@@ -2093,10 +2218,10 @@ const AgendaPersonalizada = () => {
 
                               closeEventModal();
                             }}
-                            disabled={loadingYearEvents}
+                            disabled={generatingCycle || loadingYearEvents}
                             className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-white font-bold py-3 px-6 rounded-full transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            {loadingYearEvents ? (
+                            {generatingCycle || loadingYearEvents ? (
                               <span className="flex items-center gap-2">
                                 <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
                                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
