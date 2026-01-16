@@ -396,23 +396,28 @@ const AgendaPersonalizada = () => {
       const lastYearBirthday = new Date(currentYear - 1, birthDate.getMonth(), birthDate.getDate());
 
       // Determinar el rango del año astrológico ACTUAL
-      // (desde el último cumpleaños que ya pasó hasta el próximo)
+      // (desde el cumpleaños hasta el DÍA ANTES del próximo cumpleaños)
       let startDate: Date;
       let endDate: Date;
 
       if (forceNextYear) {
-        // 🔄 FORZAR año siguiente: próximo cumpleaños → cumpleaños del año después
+        // 🔄 FORZAR año siguiente: próximo cumpleaños → día antes del cumpleaños del año después
         const nextYearBirthday = new Date(currentYear + 1, birthDate.getMonth(), birthDate.getDate());
         startDate = nextYearBirthday;
-        endDate = new Date(currentYear + 2, birthDate.getMonth(), birthDate.getDate());
+        const nextNextYearBirthday = new Date(currentYear + 2, birthDate.getMonth(), birthDate.getDate());
+        endDate = new Date(nextNextYearBirthday);
+        endDate.setDate(endDate.getDate() - 1); // Día ANTES del cumpleaños
       } else if (currentYearBirthday <= now) {
-        // Si ya pasó el cumpleaños este año, el rango es: cumpleaños este año → cumpleaños próximo año
+        // Si ya pasó el cumpleaños este año, el rango es: cumpleaños este año → día antes del cumpleaños próximo año
         startDate = currentYearBirthday;
-        endDate = new Date(currentYear + 1, birthDate.getMonth(), birthDate.getDate());
+        const nextYearBirthday = new Date(currentYear + 1, birthDate.getMonth(), birthDate.getDate());
+        endDate = new Date(nextYearBirthday);
+        endDate.setDate(endDate.getDate() - 1); // Día ANTES del cumpleaños
       } else {
-        // Si aún no ha pasado el cumpleaños este año, el rango es: cumpleaños año pasado → cumpleaños este año
+        // Si aún no ha pasado el cumpleaños este año, el rango es: cumpleaños año pasado → día antes del cumpleaños este año
         startDate = lastYearBirthday;
-        endDate = currentYearBirthday;
+        endDate = new Date(currentYearBirthday);
+        endDate.setDate(endDate.getDate() - 1); // Día ANTES del cumpleaños
       }
 
       // 🔍 DETECTAR si estamos viendo el año ANTERIOR del retorno solar
@@ -420,7 +425,7 @@ const AgendaPersonalizada = () => {
       const isViewingPreviousYear = endDate < now && !forceNextYear;
       setIsPreviousYear(isViewingPreviousYear);
 
-      // 🎂 DETECTAR si HOY es el último día del ciclo (día del cumpleaños)
+      // 🎂 DETECTAR si HOY es el último día del ciclo (día ANTES del cumpleaños)
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const endDateOnly = new Date(endDate);
@@ -428,12 +433,11 @@ const AgendaPersonalizada = () => {
       const isLastDay = today.getTime() === endDateOnly.getTime();
       setIsLastDayOfCycle(isLastDay);
 
-      // 🎉 DETECTAR si HOY es el día DESPUÉS del cumpleaños
-      const dayAfter = new Date(endDate);
-      dayAfter.setDate(dayAfter.getDate() + 1);
-      dayAfter.setHours(0, 0, 0, 0);
-      const isDayAfter = today.getTime() === dayAfter.getTime();
-      setIsDayAfterBirthday(isDayAfter);
+      // 🎉 DETECTAR si HOY es el día del cumpleaños (primer día del NUEVO ciclo)
+      const birthdayThisYear = new Date(currentYear, birthDate.getMonth(), birthDate.getDate());
+      birthdayThisYear.setHours(0, 0, 0, 0);
+      const isBirthday = today.getTime() === birthdayThisYear.getTime();
+      setIsDayAfterBirthday(isBirthday); // Reutilizamos este estado para el cumpleaños
 
       setYearRange({ start: startDate, end: endDate });
 
@@ -1238,38 +1242,20 @@ const AgendaPersonalizada = () => {
 
 
   const handleDayClick = (day: AstronomicalDay) => {
-    // Actualizar fecha seleccionada - el useEffect actualizará selectedDayEvents automáticamente
+    // Simplemente actualizar fecha seleccionada - el useEffect actualizará selectedDayEvents automáticamente
+    // Los eventos se mostrarán debajo del calendario
     setSelectedDate(day.date);
 
-    // 🎂 Detectar si es el primer o último día del ciclo solar
+    // 🎂 Si es primer o último día del ciclo, agregar evento especial a los selectedDayEvents
     const isFirstDay = yearRange && isSameDay(day.date, yearRange.start);
     const isLastDay = yearRange && isSameDay(day.date, yearRange.end);
 
-    // Si hay eventos normales, abrir modal con lista de eventos
-    if (day.events.length > 0 && !isFirstDay && !isLastDay) {
-      // Crear evento modal con lista de eventos del día
-      const dayEventsModal = {
-        id: `day-${day.date.getTime()}`,
-        date: day.date.toISOString(),
-        type: 'daily_summary' as const,
-        title: `Eventos del día`,
-        description: `${day.events.length} eventos cósmicos`,
-        priority: 'medium' as const,
-        events: day.events
-      };
-
-      setModalEvent(dayEventsModal as any);
-      setShowEventModal(true);
-      return;
-    }
-
-    // Mostrar mensaje especial para días clave del ciclo
     if (isFirstDay || isLastDay) {
       const specialMessage = isFirstDay
         ? {
-            title: '🌱 PRIMER DÍA DE TU RETORNO SOLAR',
-            subtitle: `Inicio de tu ciclo ${yearRange.start.getFullYear()}-${yearRange.end.getFullYear()}`,
-            description: `Hoy es tu cumpleaños y comienza un nuevo año astrológico para ti. Este es el día en que el Sol regresa a la posición exacta que tenía cuando naciste.`,
+            title: '🎂 ¡FELIZ CUMPLEAÑOS! PRIMER DÍA DE TU NUEVO RETORNO SOLAR',
+            subtitle: `Inicio de tu ciclo ${yearRange.start.getFullYear()}-${yearRange.end.getFullYear() + 1}`,
+            description: `¡Hoy es tu cumpleaños y comienza un nuevo año astrológico para ti! Este es el día en que el Sol regresa a la posición exacta que tenía cuando naciste.`,
             guidance: [
               '✨ Este es el momento perfecto para establecer tus intenciones para el año',
               '🎯 Define qué quieres manifestar en este nuevo ciclo solar',
@@ -1282,7 +1268,7 @@ const AgendaPersonalizada = () => {
             showNewCycleButton: true
           }
         : {
-            title: '🎂 ÚLTIMO DÍA DE TU RETORNO SOLAR',
+            title: '🌅 ÚLTIMO DÍA DE TU RETORNO SOLAR',
             subtitle: `Culminación de tu ciclo ${yearRange.start.getFullYear()}-${yearRange.end.getFullYear()}`,
             description: `Hoy cierra tu año astrológico. Mañana será tu cumpleaños y comenzará un nuevo ciclo solar.`,
             guidance: [
@@ -1296,24 +1282,10 @@ const AgendaPersonalizada = () => {
             mantra: 'Cierro este ciclo con amor. Honro mi camino y me preparo para renacer.'
           };
 
-      // Agregar evento especial al array de eventos del día
-      const specialEvent = {
-        id: `special-${day.date.getTime()}`,
-        date: day.date.toISOString(),
-        type: 'special_day' as const,
-        title: specialMessage.title,
-        description: specialMessage.description,
-        priority: 'high' as const,
-        metadata: specialMessage
-      };
-
-      // Abrir modal con el evento especial
-      setModalEvent(specialEvent as any);
-      setShowEventModal(true);
-    } else if (day.events.length > 0) {
-      // Para días normales con eventos, abrir modal de día
-      setShowDayModal(true);
+      // Los eventos especiales se agregan automáticamente al hacer el handleDayClick en el calendario
+      // y se mostrarán debajo del calendario
     }
+    // Los eventos del día se actualizarán automáticamente vía useEffect
   };
 
   // Modal handlers (reemplaza tooltip)
@@ -1432,6 +1404,41 @@ const AgendaPersonalizada = () => {
             Bienvenido a tu
             <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent"> agenda cósmica</span>
           </h1>
+
+          {/* 🎯 CALENDARIO PERSONALIZADO */}
+          {userProfile && userProfile.birthDate && (
+            <div className="max-w-4xl mx-auto mb-8">
+              <div className="bg-gradient-to-r from-purple-600/40 to-pink-600/40 backdrop-blur-md border-2 border-purple-400/50 rounded-2xl p-6 shadow-2xl">
+                <div className="flex items-center justify-center gap-3 mb-4">
+                  <span className="text-3xl">⭐</span>
+                  <h2 className="text-2xl font-bold text-yellow-300">Calendario Personalizado</h2>
+                  <span className="text-3xl">⭐</span>
+                </div>
+                <div className="text-center space-y-2">
+                  <p className="text-white text-lg font-semibold">
+                    🌟 <span className="text-yellow-200">{userProfile.name || 'Usuario'}</span>
+                  </p>
+                  <p className="text-purple-200">
+                    📅 Nacida el <span className="font-bold text-white">{new Date(userProfile.birthDate).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                  </p>
+                  <p className="text-purple-200">
+                    📍 {userProfile.birthPlace ? `${userProfile.birthPlace.split(',')[0]}` : 'Madrid'}
+                    {userProfile.currentPlace && userProfile.currentPlace !== userProfile.birthPlace && (
+                      <span className="ml-2">• Vive en <span className="font-bold text-white">{userProfile.currentPlace.split(',')[0]}</span></span>
+                    )}
+                    {(!userProfile.currentPlace || userProfile.currentPlace === userProfile.birthPlace) && (
+                      <span className="ml-2">• Vive en <span className="font-bold text-white">{userProfile.birthPlace ? userProfile.birthPlace.split(',')[0] : 'Madrid'}</span></span>
+                    )}
+                  </p>
+                  <div className="pt-2 border-t border-purple-300/30 mt-3">
+                    <p className="text-sm text-purple-100 italic">
+                      ✨ Tu agenda está calculada específicamente con tu carta natal y retorno solar
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="max-w-3xl mx-auto">
             <p className="text-xl text-gray-300 mb-6 leading-relaxed">
@@ -1576,21 +1583,40 @@ const AgendaPersonalizada = () => {
           </div>
         )}
 
-        {/* 🎉 BANNER: PRIMER DÍA DESPUÉS DEL CUMPLEAÑOS - Mostrar el día después del cumpleaños */}
+        {/* 🎂 BANNER: CUMPLEAÑOS - Mostrar el día del cumpleaños */}
         {isDayAfterBirthday && yearRange && (
-          <div className="mb-8 bg-gradient-to-r from-yellow-900/70 to-orange-900/70 border-2 border-yellow-500/60 rounded-2xl p-6 backdrop-blur-sm shadow-2xl">
+          <div className="mb-8 bg-gradient-to-r from-green-900/70 to-emerald-900/70 border-2 border-green-500/60 rounded-2xl p-6 backdrop-blur-sm shadow-2xl">
             <div className="flex items-start gap-4">
-              <div className="text-4xl">🌟</div>
+              <div className="text-4xl">🎂</div>
               <div className="flex-1">
-                <h3 className="text-2xl font-bold text-yellow-200 mb-2 flex items-center gap-2">
-                  <span>🎁</span>
-                  ¡Comienza tu Nuevo Año Solar!
+                <h3 className="text-2xl font-bold text-green-200 mb-2 flex items-center gap-2">
+                  <span>🎉</span>
+                  ¡Feliz Cumpleaños! Hoy Comienza tu Nueva Vuelta al Sol
                 </h3>
-                <p className="text-yellow-100 mb-4 leading-relaxed">
-                  Ayer fue tu cumpleaños y comenzó un nuevo ciclo solar.
+                <p className="text-green-100 mb-4 leading-relaxed">
+                  ¡Hoy es tu cumpleaños y comienza un nuevo ciclo solar!
                   <br />
-                  <span className="text-white">Tu <strong>Agenda Astrológica {yearRange.end.getFullYear()}-{yearRange.end.getFullYear() + 1}</strong> está lista para este nuevo año lleno de oportunidades.</span>
+                  <span className="text-white">Genera tu <strong>Agenda Astrológica {yearRange.end.getFullYear() + 1}-{yearRange.end.getFullYear() + 2}</strong> para planificar este nuevo año lleno de oportunidades.</span>
                 </p>
+                {canGenerateNext && (
+                  <button
+                    onClick={generateNewCycle}
+                    disabled={generatingCycle || loadingYearEvents}
+                    className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-yellow-500/50 flex items-center gap-2"
+                  >
+                    {generatingCycle || loadingYearEvents ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                        <span>Generando...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-xl">🔄</span>
+                        <span>Generar Nuevo Ciclo {yearRange.end.getFullYear() + 1}-{yearRange.end.getFullYear() + 2}</span>
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
           </div>
