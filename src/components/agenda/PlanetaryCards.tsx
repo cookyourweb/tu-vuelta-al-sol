@@ -166,7 +166,6 @@ export default function PlanetaryCards({
         setError(data.error || 'Error generando fichas planetarias');
       }
     } catch (err) {
-      console.error('Error:', err);
       setError('Error de conexión. Intenta de nuevo.');
     } finally {
       setLoading(false);
@@ -585,6 +584,54 @@ export default function PlanetaryCards({
                 </div>
               </div>
 
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE LOADING */}
+      {loading && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="bg-gradient-to-br from-purple-900 to-indigo-900 border-2 border-purple-400/50 rounded-3xl p-10 max-w-md mx-4 shadow-2xl">
+            <div className="text-center">
+              {/* Spinner animado */}
+              <div className="mb-6 flex justify-center">
+                <Loader2 className="w-16 h-16 text-purple-300 animate-spin" />
+              </div>
+
+              {/* Título */}
+              <h3 className="text-2xl font-bold text-white mb-4">
+                Generando Planetas Dominantes
+              </h3>
+
+              {/* Descripción de lo que está pasando */}
+              <div className="space-y-3 text-purple-200 text-sm leading-relaxed">
+                <p className="flex items-start gap-2">
+                  <span className="text-purple-400 mt-1">✓</span>
+                  <span>Analizando tu carta de Retorno Solar...</span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <span className="text-purple-400 mt-1">✓</span>
+                  <span>Identificando planetas dominantes del año...</span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <span className="text-purple-400 mt-1">✓</span>
+                  <span>Cruzando con tu carta natal...</span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <Loader2 className="w-4 h-4 text-purple-300 animate-spin mt-1" />
+                  <span className="text-white font-semibold">Generando interpretaciones personalizadas con IA...</span>
+                </p>
+              </div>
+
+              {/* Mensaje de espera */}
+              <div className="mt-6 bg-purple-800/30 border border-purple-400/30 rounded-lg p-4">
+                <p className="text-purple-100 text-xs">
+                  Este proceso puede tardar entre 30-60 segundos.
+                  <br />
+                  Estamos creando contenido único para ti.
+                </p>
+              </div>
             </div>
           </div>
         </div>
