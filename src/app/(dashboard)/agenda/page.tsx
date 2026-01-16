@@ -967,6 +967,34 @@ const AgendaPersonalizada = () => {
     }
   }, [selectedDate, events]);
 
+  // 🎂 AUTO-GENERAR nuevo ciclo solar el día después del cumpleaños
+  useEffect(() => {
+    if (isDayAfterBirthday && yearRange && userProfile) {
+      const hasGeneratedNewCycle = localStorage.getItem(`newCycle_${userProfile.userId}_${yearRange.end.getFullYear()}`);
+
+      if (!hasGeneratedNewCycle) {
+        console.log('[BIRTHDAY] Dia después del cumpleaños detectado - Generando nuevo ciclo automáticamente...');
+
+        // Generar nuevo ciclo
+        loadYearEvents(true);
+
+        // Marcar como generado para no volver a generar
+        localStorage.setItem(`newCycle_${userProfile.userId}_${yearRange.end.getFullYear()}`, 'generated');
+
+        // Navegar al día del cumpleaños (que es el inicio del nuevo ciclo yearRange.start)
+        // pero como estamos en el día DESPUÉS, restamos 1 día para ir al cumpleaños
+        const today = new Date();
+        const birthday = new Date(today);
+        birthday.setDate(birthday.getDate() - 1); // Ayer = día del cumpleaños
+
+        setSelectedDate(birthday);
+        setCurrentMonth(birthday);
+
+        console.log('[BIRTHDAY] Nuevo ciclo generado y navegado al día del cumpleaños:', birthday.toDateString());
+      }
+    }
+  }, [isDayAfterBirthday, yearRange, userProfile]);
+
   // Funciones auxiliares
   const getRandomEventTitle = () => {
     const titles = [
