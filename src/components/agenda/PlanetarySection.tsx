@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Sparkles } from 'lucide-react';
+import { X, Sparkles, Loader2 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 import PlanetaryCards, { PlanetaryCard } from './PlanetaryCards';
+import { PlanetIndividualSRInterpretation } from '@/types/astrology/interpretation';
 
 interface ActivePlanet {
   name: string;
@@ -20,12 +22,70 @@ interface PlanetarySectionProps {
 }
 
 export default function PlanetarySection({ activePlanets }: PlanetarySectionProps) {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'activos' | 'dominantes'>('activos');
   const [selectedPlanet, setSelectedPlanet] = useState<ActivePlanet | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [loadingInterpretation, setLoadingInterpretation] = useState(false);
+  const [interpretation, setInterpretation] = useState<PlanetIndividualSRInterpretation | null>(null);
+  const [interpretationError, setInterpretationError] = useState<string | null>(null);
   // Estado para persistir planetas dominantes entre cambios de pestaña
   const [dominantCards, setDominantCards] = useState<PlanetaryCard[]>([]);
   const [showDominantCards, setShowDominantCards] = useState(false);
+
+  const generatePlanetInterpretation = async (planet: ActivePlanet) => {
+    if (!user) {
+      setInterpretationError('Debes estar autenticado');
+      return;
+    }
+
+    setLoadingInterpretation(true);
+    setInterpretationError(null);
+    setInterpretation(null);
+
+    try {
+      const token = await user.getIdToken();
+      const currentYear = new Date().getFullYear();
+      const planetNameLower = planet.name.toLowerCase();
+
+      const response = await fetch('/api/astrology/interpret-planet-sr', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          userId: user.uid,
+          planetName: planetNameLower,
+          returnYear: currentYear,
+          natalSign: planet.natalSign,
+          natalHouse: planet.natalHouse,
+          srSign: planet.srSign || planet.natalSign,
+          srHouse: planet.srHouse || planet.natalHouse,
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setInterpretation(data.interpretation);
+      } else {
+        setInterpretationError(data.error || 'Error generando interpretación');
+      }
+    } catch (err) {
+      setInterpretationError('Error de conexión. Intenta de nuevo.');
+    } finally {
+      setLoadingInterpretation(false);
+    }
+  };
+
+  const handleClosePlanetModal = () => {
+    setShowTooltip(false);
+    setInterpretation(null);
+    setInterpretationError(null);
+    setLoadingInterpretation(false);
+    setSelectedPlanet(null);
+  };
 
   const getPlanetExplanation = (planetName: string): { description: string; keywords: string[] } => {
     const explanations: Record<string, { description: string; keywords: string[] }> = {
@@ -184,7 +244,7 @@ export default function PlanetarySection({ activePlanets }: PlanetarySectionProp
                     </div>
                   </div>
                   <button
-                    onClick={() => setShowTooltip(false)}
+                    onClick={handleClosePlanetModal}
                     className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                   >
                     <X className="w-6 h-6 text-purple-200" />
@@ -234,19 +294,97 @@ export default function PlanetarySection({ activePlanets }: PlanetarySectionProp
                   </div>
                 </div>
 
-                {/* Botón interpretar */}
-                <button
-                  onClick={() => {
-                    // TODO: Implementar generación de interpretación personalizada del planeta
-                    alert(`Próximamente: Interpretación personalizada de ${selectedPlanet.name}\n\nEsta funcionalidad generará un análisis profundo de cómo ${selectedPlanet.name} en tu Retorno Solar modula todos los eventos de tu agenda.`);
-                  }}
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700
-                             text-white font-bold py-4 px-6 rounded-xl transition-all duration-200
-                             shadow-lg hover:shadow-purple-500/50 flex items-center justify-center gap-3"
-                >
-                  <Sparkles className="w-5 h-5" />
-                  <span>Generar Interpretación Personalizada</span>
-                </button>
+                {/* Interpretación generada */}
+                {interpretation && (
+                  <div className="space-y-4">
+                    {/* Sección: Quién eres */}
+                    <div className="bg-gradient-to-br from-indigo-900/40 to-blue-900/40 rounded-xl p-5 border border-indigo-400/20">
+                      <h3 className="text-lg font-semibold text-indigo-100 mb-2">
+                        {interpretation.drawer.quien_eres.titulo}
+                      </h3>
+                      <p className="text-sm text-indigo-200 mb-2">{interpretation.drawer.quien_eres.posicion_natal}</p>
+                      <p className="text-gray-200 leading-relaxed">{interpretation.drawer.quien_eres.descripcion}</p>
+                    </div>
+
+                    {/* Sección: Qué se activa */}
+                    <div className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 rounded-xl p-5 border border-purple-400/20">
+                      <h3 className="text-lg font-semibold text-purple-100 mb-2">
+                        {interpretation.drawer.que_se_activa.titulo}
+                      </h3>
+                      <p className="text-sm text-purple-200 mb-2">{interpretation.drawer.que_se_activa.posicion_sr}</p>
+                      <p className="text-gray-200 leading-relaxed">{interpretation.drawer.que_se_activa.descripcion}</p>
+                    </div>
+
+                    {/* Sección: Cruce clave */}
+                    <div className="bg-gradient-to-br from-yellow-900/40 to-orange-900/40 rounded-xl p-5 border border-yellow-400/20">
+                      <h3 className="text-lg font-semibold text-yellow-100 mb-2">
+                        {interpretation.drawer.cruce_clave.titulo}
+                      </h3>
+                      <p className="text-gray-200 leading-relaxed">{interpretation.drawer.cruce_clave.descripcion}</p>
+                    </div>
+
+                    {/* Sección: Cómo usar */}
+                    <div className="bg-gradient-to-br from-green-900/40 to-emerald-900/40 rounded-xl p-5 border border-green-400/20">
+                      <h3 className="text-lg font-semibold text-green-100 mb-3">
+                        {interpretation.drawer.como_usar.titulo}
+                      </h3>
+                      <ul className="space-y-2">
+                        {interpretation.drawer.como_usar.acciones.map((accion, idx) => (
+                          <li key={idx} className="text-gray-200 flex items-start gap-2">
+                            <span className="text-green-400 mt-1">•</span>
+                            <span>{accion}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Botón para regenerar */}
+                    <button
+                      onClick={() => generatePlanetInterpretation(selectedPlanet)}
+                      disabled={loadingInterpretation}
+                      className="w-full bg-gradient-to-r from-purple-600/50 to-pink-600/50 hover:from-purple-700/50 hover:to-pink-700/50
+                                 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200
+                                 border border-purple-400/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Regenerar Interpretación
+                    </button>
+                  </div>
+                )}
+
+                {/* Botón para generar por primera vez */}
+                {!interpretation && !loadingInterpretation && (
+                  <button
+                    onClick={() => generatePlanetInterpretation(selectedPlanet)}
+                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700
+                               text-white font-bold py-4 px-6 rounded-xl transition-all duration-200
+                               shadow-lg hover:shadow-purple-500/50 flex items-center justify-center gap-3"
+                  >
+                    <Sparkles className="w-5 h-5" />
+                    <span>Generar Interpretación Personalizada</span>
+                  </button>
+                )}
+
+                {/* Loading state */}
+                {loadingInterpretation && (
+                  <div className="bg-purple-900/30 rounded-xl p-6 border border-purple-400/20 text-center">
+                    <Loader2 className="w-8 h-8 text-purple-300 animate-spin mx-auto mb-3" />
+                    <p className="text-purple-200">Generando interpretación personalizada con IA...</p>
+                    <p className="text-purple-300 text-sm mt-2">Esto puede tardar 10-20 segundos</p>
+                  </div>
+                )}
+
+                {/* Error state */}
+                {interpretationError && (
+                  <div className="bg-red-900/30 rounded-xl p-4 border border-red-400/20">
+                    <p className="text-red-200 text-sm">{interpretationError}</p>
+                    <button
+                      onClick={() => generatePlanetInterpretation(selectedPlanet)}
+                      className="mt-3 text-sm text-red-300 hover:text-red-100 underline"
+                    >
+                      Intentar de nuevo
+                    </button>
+                  </div>
+                )}
 
                 {/* Nota educativa */}
                 <div className="bg-gradient-to-r from-yellow-900/20 to-amber-900/20 rounded-xl p-4 border border-yellow-400/20">
@@ -264,7 +402,7 @@ export default function PlanetarySection({ activePlanets }: PlanetarySectionProp
                     🌟 Planeta activo de tu año solar
                   </p>
                   <button
-                    onClick={() => setShowTooltip(false)}
+                    onClick={handleClosePlanetModal}
                     className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition-colors"
                   >
                     Cerrar
