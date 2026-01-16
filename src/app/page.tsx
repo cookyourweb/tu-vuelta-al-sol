@@ -1,14 +1,14 @@
 // src/app/page.tsx
 import Link from 'next/link';
-import { 
-  Star, 
-  Sparkles, 
-  Moon, 
-  Sun, 
-  Users, 
-  Calendar, 
-  Heart, 
-  Briefcase, 
+import {
+  Star,
+  Sparkles,
+  Moon,
+  Sun,
+  Users,
+  Calendar,
+  Heart,
+  Briefcase,
   Sprout,
   ArrowRight,
   Quote,
@@ -16,7 +16,9 @@ import {
   Zap,
   Clock,
   Stars,
-  Book
+  Book,
+  Cake,
+  Gift
 } from 'lucide-react';
 
 export default function Home() {
@@ -96,37 +98,39 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="relative z-10 py-24 px-4 sm:px-6 lg:px-8">
+      <section className="relative z-10 pt-24 pb-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          
-          <div className="text-center mb-20">
-            <div className="flex justify-center items-center mb-8">
-              <div className="bg-gradient-to-r from-purple-400/20 to-pink-500/20 border border-purple-400/30 rounded-full p-6 backdrop-blur-sm relative">
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-purple-400 rounded-full animate-pulse"></div>
-                <Sun className="w-10 h-10 text-purple-400" />
-              </div>
-            </div>
-            
-            <h2 className="text-4xl sm:text-5xl md:text-6xl font-black mb-8">
-              ¿Qué es
-              <span className="bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent"> Tu Vuelta Al Sol</span>
-            </h2>
-             <p className="text-xl lg:text-2xl text-gray-300 mb-12 leading-relaxed max-w-3xl mx-auto">
-             Tu Vuelta al Sol es una agenda <strong>astrológica totalmente personalizada</strong> que te acompaña durante tu año solar:
-            </p>
-          
-            <div className="bg-gradient-to-r from-pink-400/10 to-red-500/10 border border-pink-400/30 rounded-2xl p-6 backdrop-blur-sm max-w-2xl mx-auto mb-12">
-              
-              <p className="text-gray-400">
-           
-No es un horóscopo genérico ni una agenda estándar.</p><p className="text-gray-400">
 
-Es una guía creada a partir de 
-  <strong className="text-white"> tu información natal real,</strong> pensada para ayudarte a comprenderte mejor y tomar decisiones alineadas contigo.
-                
-              </p> </div><div className="mt-8 flex items-center justify-center text-gray-400">
-              <CheckCircle className="w-5 h-5 mr-2 text-green-400" />
-              <span>Es astrología profunda, pero aplicada a la vida real.</span>
+          <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 backdrop-blur-sm border border-purple-400/30 rounded-3xl p-8 md:p-12">
+            <div className="text-center mb-12">
+              <div className="flex justify-center items-center mb-8">
+                <div className="bg-gradient-to-r from-purple-400/20 to-pink-500/20 border border-purple-400/30 rounded-full p-6 backdrop-blur-sm relative">
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-purple-400 rounded-full animate-pulse"></div>
+                  <Sun className="w-10 h-10 text-purple-400" />
+                </div>
+              </div>
+
+              <h2 className="text-4xl sm:text-5xl md:text-6xl font-black mb-8">
+                ¿Qué es
+                <span className="bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent"> Tu Vuelta Al Sol</span>
+              </h2>
+               <p className="text-xl lg:text-2xl text-gray-300 mb-12 leading-relaxed max-w-3xl mx-auto">
+               Tu Vuelta al Sol es una agenda <strong>astrológica totalmente personalizada</strong> que te acompaña durante tu año solar:
+              </p>
+
+              <div className="bg-gradient-to-r from-pink-400/10 to-red-500/10 border border-pink-400/30 rounded-2xl p-6 backdrop-blur-sm max-w-2xl mx-auto mb-12">
+
+                <p className="text-gray-400">
+
+  No es un horóscopo genérico ni una agenda estándar.</p><p className="text-gray-400">
+
+  Es una guía creada a partir de
+    <strong className="text-white"> tu información natal real,</strong> pensada para ayudarte a comprenderte mejor y tomar decisiones alineadas contigo.
+
+                </p> </div><div className="mt-8 flex items-center justify-center text-gray-400">
+                <CheckCircle className="w-5 h-5 mr-2 text-green-400" />
+                <span>Es astrología profunda, pero aplicada a la vida real.</span>
+              </div>
             </div>
           </div>
 
@@ -136,7 +140,7 @@ Es una guía creada a partir de
       </section>
 
       {/* How It Works Section */}
-      <section className="relative z-10 py-24 px-4 sm:px-6 lg:px-8">
+      <section className="relative z-10 pt-8 pb-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           
           <div className="text-center mb-20">
@@ -404,41 +408,50 @@ Es una guía creada a partir de
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 max-w-5xl mx-auto">
               {[
                 {
-                  emoji: "🌟",
+                  Icon: Sparkles,
+                  iconColor: "text-yellow-400",
                   title: "Porque es totalmente personalizado",
                   description: "Se crea a partir de la carta natal y el retorno solar de la persona. No hay dos agendas iguales.",
                   gradient: "from-yellow-400/20 to-orange-500/20",
                   border: "border-yellow-400/30"
                 },
                 {
-                  emoji: "🎂",
+                  Icon: Cake,
+                  iconColor: "text-purple-400",
                   title: "Porque empieza en su cumpleaños",
                   description: "La agenda comienza el día de su cumpleaños y la acompaña hasta el siguiente, haciendo que el regalo tenga un significado real y profundo.",
                   gradient: "from-purple-400/20 to-pink-500/20",
                   border: "border-purple-400/30"
                 },
                 {
-                  emoji: "💫",
+                  Icon: Zap,
+                  iconColor: "text-blue-400",
                   title: "Porque combina emoción y utilidad",
                   description: "No es solo bonito o simbólico: ofrece guía, reflexión y apoyo práctico durante todo el año.",
                   gradient: "from-blue-400/20 to-cyan-500/20",
                   border: "border-blue-400/30"
                 },
                 {
-                  emoji: "💝",
+                  Icon: Gift,
+                  iconColor: "text-pink-400",
                   title: "Porque demuestra intención",
                   description: "Es un regalo pensado, consciente y lleno de significado. Ideal para decir: \"me importas\".",
                   gradient: "from-pink-400/20 to-red-500/20",
                   border: "border-pink-400/30"
                 }
-              ].map((item, index) => (
-                <div key={index} className={`bg-gradient-to-br ${item.gradient} backdrop-blur-sm border ${item.border} rounded-3xl p-8 hover:scale-105 transition-all duration-300 relative`}>
-                  <div className="absolute top-4 right-4 w-3 h-3 bg-white/30 rounded-full animate-pulse"></div>
-                  <div className="text-5xl mb-4">{item.emoji}</div>
-                  <h4 className="text-xl font-bold text-white mb-3">{item.title}</h4>
-                  <p className="text-gray-300 leading-relaxed">{item.description}</p>
-                </div>
-              ))}
+              ].map((item, index) => {
+                const IconComponent = item.Icon;
+                return (
+                  <div key={index} className={`bg-gradient-to-br ${item.gradient} backdrop-blur-sm border ${item.border} rounded-3xl p-8 hover:scale-105 transition-all duration-300 relative`}>
+                    <div className="absolute top-4 right-4 w-3 h-3 bg-white/30 rounded-full animate-pulse"></div>
+                    <div className="mb-4">
+                      <IconComponent className={`w-12 h-12 ${item.iconColor}`} />
+                    </div>
+                    <h4 className="text-xl font-bold text-white mb-3">{item.title}</h4>
+                    <p className="text-gray-300 leading-relaxed">{item.description}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
 

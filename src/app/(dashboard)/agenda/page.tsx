@@ -1584,6 +1584,7 @@ const AgendaPersonalizada = () => {
                                 : 'bg-gradient-to-br from-purple-800/10 to-indigo-800/10 hover:from-purple-600/20 hover:to-indigo-600/20'
                               : 'bg-gradient-to-br from-gray-800/20 to-slate-800/20 text-gray-500'
                             }
+                            ${isSelected && !isSameDay(day.date, new Date()) ? 'ring-4 ring-purple-400/80 ring-offset-2 ring-offset-purple-900/50' : ''}
                           `}
                         >
                           {/* Badge para primer/último día */}
