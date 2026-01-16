@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Sparkles, Loader2, AlertCircle, ArrowRight, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
-interface PlanetaryCard {
+export interface PlanetaryCard {
   planeta: string;
   simbolo: string;
   quien_eres_natal: {
@@ -78,13 +78,31 @@ interface PlanetaryCard {
   cached?: boolean;
 }
 
-export default function PlanetaryCards() {
+interface PlanetaryCardsProps {
+  cards?: PlanetaryCard[];
+  setCards?: (cards: PlanetaryCard[]) => void;
+  showCards?: boolean;
+  setShowCards?: (show: boolean) => void;
+}
+
+export default function PlanetaryCards({
+  cards: externalCards,
+  setCards: externalSetCards,
+  showCards: externalShowCards,
+  setShowCards: externalSetShowCards
+}: PlanetaryCardsProps) {
   const { user } = useAuth();
-  const [cards, setCards] = useState<PlanetaryCard[]>([]);
+  // Use external state if provided, otherwise use internal state
+  const [internalCards, setInternalCards] = useState<PlanetaryCard[]>([]);
+  const [internalShowCards, setInternalShowCards] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedCard, setSelectedCard] = useState<PlanetaryCard | null>(null);
-  const [showCards, setShowCards] = useState(false);
+
+  const cards = externalCards !== undefined ? externalCards : internalCards;
+  const setCards = externalSetCards || setInternalCards;
+  const showCards = externalShowCards !== undefined ? externalShowCards : internalShowCards;
+  const setShowCards = externalSetShowCards || setInternalShowCards;
 
   const handleGenerateCards = async () => {
     if (!user) {

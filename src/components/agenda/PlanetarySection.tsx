@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { X, Sparkles } from 'lucide-react';
-import PlanetaryCards from './PlanetaryCards';
+import PlanetaryCards, { PlanetaryCard } from './PlanetaryCards';
 
 interface ActivePlanet {
   name: string;
@@ -23,6 +23,9 @@ export default function PlanetarySection({ activePlanets }: PlanetarySectionProp
   const [activeTab, setActiveTab] = useState<'activos' | 'dominantes'>('activos');
   const [selectedPlanet, setSelectedPlanet] = useState<ActivePlanet | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
+  // Estado para persistir planetas dominantes entre cambios de pestaña
+  const [dominantCards, setDominantCards] = useState<PlanetaryCard[]>([]);
+  const [showDominantCards, setShowDominantCards] = useState(false);
 
   const getPlanetExplanation = (planetName: string): { description: string; keywords: string[] } => {
     const explanations: Record<string, { description: string; keywords: string[] }> = {
@@ -88,7 +91,7 @@ export default function PlanetarySection({ activePlanets }: PlanetarySectionProp
             }`}
           >
             <span className="flex items-center justify-center gap-2">
-              ✨ Fichas Dominantes
+              ✨ Planetas Dominantes
             </span>
           </button>
         </div>
@@ -148,14 +151,19 @@ export default function PlanetarySection({ activePlanets }: PlanetarySectionProp
 
         {activeTab === 'dominantes' && (
           <div>
-            <PlanetaryCards />
+            <PlanetaryCards
+              cards={dominantCards}
+              setCards={setDominantCards}
+              showCards={showDominantCards}
+              setShowCards={setShowDominantCards}
+            />
           </div>
         )}
       </div>
 
       {/* MODAL FULLSCREEN PARA PLANETA SELECCIONADO */}
       {showTooltip && selectedPlanet && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm overflow-y-auto">
+        <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm overflow-y-auto">
           <div className="min-h-screen px-4 py-8">
             <div className="max-w-3xl mx-auto bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 rounded-2xl shadow-2xl border border-purple-500/20">
 
