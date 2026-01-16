@@ -20,15 +20,29 @@
 
 ## Remaining Tasks
 
-### 4. Full Project Analysis
-- **Task**: Perform comprehensive analysis of all files for potential issues
-- **Status**: 🔄 IN PROGRESS
+### 4. Reemplazar iconos de eventos con Lucide React
+- **Tarea**: Refactorizar getEventIcon() para retornar componentes JSX en lugar de emojis
+- **Archivos**: src/app/(dashboard)/agenda/page.tsx
+- **Emojis a reemplazar**: 🪐 🌙 ⏪ 🔥 y otros emojis de planetas/signos
+- **Requerimientos**:
+  - Crear iconos personalizados para cada planeta (Mercurio, Venus, Marte, etc.)
+  - Crear iconos para signos zodiacales (Aries, Tauro, etc.)
+  - Actualizar getEventIcon() para retornar JSX en lugar de string
+- **Status**: ⏳ PENDING (Para revisar en el futuro)
 
-### 5. Test Build Process
+### 5. Limpiar emojis de console.log
+- **Tarea**: Quitar todos los emojis de los console.log del proyecto
+- **Status**: 🔄 EN PROGRESO
+
+### 6. Full Project Analysis
+- **Task**: Perform comprehensive analysis of all files for potential issues
+- **Status**: ⏳ PENDING
+
+### 7. Test Build Process
 - **Task**: Run build command to ensure all errors are resolved
 - **Status**: ⏳ PENDING
 
-### 6. Verify Tooltip Consistency
+### 8. Verify Tooltip Consistency
 - **Task**: Test that tooltips and drawers now show consistent house information
 - **Status**: ⏳ PENDING
 
