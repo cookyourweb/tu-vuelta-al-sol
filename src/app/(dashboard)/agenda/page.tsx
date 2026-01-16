@@ -555,7 +555,7 @@ const AgendaPersonalizada = () => {
           transformedEvents.push({
             id: `ingress-${ingress.planet}-${ingress.date}`,
             date: ingress.date,
-            title: `🪐 ${ingress.planet} entra en ${ingress.newSign}`,
+            title: `${ingress.planet} entra en ${ingress.newSign}`,
             description: `Cambio de energía planetaria`,
             type: 'planetary_transit',
             priority: ingress.planet === 'Sol' ? 'medium' : 'low',
@@ -800,7 +800,7 @@ const AgendaPersonalizada = () => {
         transformedEvents.push({
           id: `ingress-${ingress.planet}-${ingress.date}`,
           date: ingress.date,
-          title: `🪐 ${ingress.planet} entra en ${ingress.newSign}`,
+          title: `${ingress.planet} entra en ${ingress.newSign}`,
           description: `Cambio de energía planetaria`,
           type: 'planetary_transit',
           priority: ingress.planet === 'Sol' ? 'medium' : 'low',

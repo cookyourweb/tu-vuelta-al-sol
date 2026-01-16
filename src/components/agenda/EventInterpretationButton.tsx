@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sparkles, X, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -29,8 +29,48 @@ export default function EventInterpretationButton({
   const { user } = useAuth();
   const [interpretation, setInterpretation] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingInitial, setLoadingInitial] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [hasExistingInterpretation, setHasExistingInterpretation] = useState(false);
+
+  // ✅ NUEVO: Cargar interpretación automáticamente al montar
+  useEffect(() => {
+    const loadExistingInterpretation = async () => {
+      if (!user) {
+        setLoadingInitial(false);
+        return;
+      }
+
+      try {
+        const token = await user.getIdToken();
+        const response = await fetch('/api/interpretations/event', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            event,
+            regenerate: false
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.interpretation) {
+          setInterpretation(data.interpretation);
+          setHasExistingInterpretation(true);
+        }
+      } catch (err) {
+        console.error('Error cargando interpretación existente:', err);
+      } finally {
+        setLoadingInitial(false);
+      }
+    };
+
+    loadExistingInterpretation();
+  }, [user, event]);
 
   const handleGenerateInterpretation = async (regenerate = false) => {
     setLoading(true);
@@ -70,6 +110,7 @@ export default function EventInterpretationButton({
 
       if (data.success) {
         setInterpretation(data.interpretation);
+        setHasExistingInterpretation(true);
         setShowModal(true);
       } else {
         setError(data.error || 'Error generando interpretación');
@@ -90,8 +131,8 @@ export default function EventInterpretationButton({
     <>
       {/* BOTÓN */}
       <button
-        onClick={() => handleGenerateInterpretation(false)}
-        disabled={loading}
+        onClick={() => hasExistingInterpretation ? setShowModal(true) : handleGenerateInterpretation(false)}
+        disabled={loading || loadingInitial}
         className={`
           inline-flex items-center gap-2 px-4 py-2 rounded-lg
           bg-gradient-to-r from-purple-600 to-pink-600
@@ -102,15 +143,25 @@ export default function EventInterpretationButton({
           ${className}
         `}
       >
-        {loading ? (
+        {loadingInitial ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Verificando...
+          </>
+        ) : loading ? (
           <>
             <Loader2 className="w-4 h-4 animate-spin" />
             Generando...
           </>
+        ) : hasExistingInterpretation ? (
+          <>
+            <Sparkles className="w-4 h-4" />
+            Ver Interpretación
+          </>
         ) : (
           <>
             <Sparkles className="w-4 h-4" />
-            Ver Interpretación Personalizada
+            Generar Interpretación Personalizada
           </>
         )}
       </button>
