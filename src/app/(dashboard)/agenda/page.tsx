@@ -6,6 +6,7 @@ import { format, addMonths, subMonths, isSameMonth, isSameDay, startOfMonth, end
 import { es } from 'date-fns/locale';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import type { UserProfile, AstrologicalEvent, EventType } from '@/types/astrology/unified-types';
 
 import EventsLoadingModal from '@/components/astrology/EventsLoadingModal';
@@ -1786,9 +1787,12 @@ const AgendaPersonalizada = () => {
                 <p className="text-purple-200 text-sm mb-4">
                   Descubre interpretaciones aún más profundas de tu carta natal
                 </p>
-                <button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-full font-semibold hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg hover:shadow-xl">
+                <Link
+                  href="/natal-chart"
+                  className="block w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-full font-semibold hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
                   Explorar más ✨
-                </button>
+                </Link>
               </div>
             </div>
           </div>
