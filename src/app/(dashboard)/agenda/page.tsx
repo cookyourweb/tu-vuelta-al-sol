@@ -26,7 +26,7 @@ interface AstronomicalDay {
 const AgendaPersonalizada = () => {
   const { user } = useAuth();
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date()); // Inicializar con fecha actual
   const [selectedDayEvents, setSelectedDayEvents] = useState<AstrologicalEvent[]>([]);
   const [events, setEvents] = useState<AstrologicalEvent[]>([]);
   const [loading, setLoading] = useState(false);
@@ -952,6 +952,20 @@ const AgendaPersonalizada = () => {
     }
   }, [yearRange]);
 
+  // 🎯 Actualizar eventos del día seleccionado cuando cambien los events o selectedDate
+  useEffect(() => {
+    if (selectedDate && events.length > 0) {
+      const dayEvents = events.filter(event => {
+        const eventDate = new Date(event.date);
+        return isSameDay(eventDate, selectedDate);
+      });
+      setSelectedDayEvents(dayEvents);
+      console.log(`📅 [AGENDA] Updated selectedDayEvents for ${selectedDate.toDateString()}: ${dayEvents.length} events`);
+    } else if (selectedDate) {
+      setSelectedDayEvents([]);
+    }
+  }, [selectedDate, events]);
+
   // Funciones auxiliares
   const getRandomEventTitle = () => {
     const titles = [
@@ -1634,21 +1648,25 @@ const AgendaPersonalizada = () => {
             </div>
 
             {/* EVENTOS DEL DÍA SELECCIONADO - Debajo del calendario */}
-            {selectedDate && selectedDayEvents.length > 0 && (
+            {selectedDate && (
               <div className="mt-8">
                 {/* Header */}
                 <div className="bg-gradient-to-r from-pink-600/30 to-purple-600/30 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-pink-400/30">
                   <h3 className="text-2xl font-bold text-white mb-2 flex items-center">
                     <span className="mr-3">📅</span>
-                    {selectedDate.getDate()} de {format(selectedDate, 'MMMM', { locale: es })}
+                    {isSameDay(selectedDate, new Date()) ? 'Hoy' : `${selectedDate.getDate()} de ${format(selectedDate, 'MMMM', { locale: es })}`}
                   </h3>
                   <p className="text-pink-200 text-sm">
-                    {selectedDayEvents.length} evento{selectedDayEvents.length > 1 ? 's' : ''} cósmico{selectedDayEvents.length > 1 ? 's' : ''}
+                    {selectedDayEvents.length === 0
+                      ? 'No hay eventos cósmicos para este día'
+                      : `${selectedDayEvents.length} evento${selectedDayEvents.length > 1 ? 's' : ''} cósmico${selectedDayEvents.length > 1 ? 's' : ''}`
+                    }
                   </p>
                 </div>
 
-                {/* Grid de eventos en 2 columnas */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Lista de eventos - ancho completo */}
+                {selectedDayEvents.length > 0 && (
+                  <div className="space-y-4">
                   {selectedDayEvents.map((event) => (
                     <div
                       key={event.id}
@@ -1684,7 +1702,8 @@ const AgendaPersonalizada = () => {
                       </div>
                     </div>
                   ))}
-                </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -1801,7 +1820,7 @@ const AgendaPersonalizada = () => {
         {/* TOOLTIP ÉPICO */}
         {hoveredEvent && hoveredEvent.aiInterpretation && (
           <div
-            className="fixed bg-gradient-to-r from-purple-900/95 to-pink-900/95 backdrop-blur-sm border border-purple-400/40 rounded-2xl p-6 shadow-2xl max-w-sm pointer-events-none z-50"
+            className="fixed bg-gradient-to-r from-purple-900/95 to-pink-900/95 backdrop-blur-sm border border-purple-400/40 rounded-2xl p-6 shadow-2xl max-w-sm pointer-events-none z-[102]"
             style={{
               left: Math.min(tooltipPosition.x - 200, window.innerWidth - 400),
               top: tooltipPosition.y - 20,
