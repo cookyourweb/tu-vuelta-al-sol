@@ -223,7 +223,7 @@ export default function PlanetarySection({ activePlanets }: PlanetarySectionProp
 
       {/* MODAL FULLSCREEN PARA PLANETA SELECCIONADO */}
       {showTooltip && selectedPlanet && (
-        <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm overflow-y-auto">
+        <div className="fixed inset-0 z-[150] bg-black/90 backdrop-blur-sm overflow-y-auto">
           <div className="min-h-screen px-4 py-8">
             <div className="max-w-3xl mx-auto bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 rounded-2xl shadow-2xl border border-purple-500/20">
 
@@ -328,14 +328,16 @@ export default function PlanetarySection({ activePlanets }: PlanetarySectionProp
                       <h3 className="text-lg font-semibold text-green-100 mb-3">
                         {interpretation.drawer.como_usar.titulo}
                       </h3>
-                      <ul className="space-y-2">
-                        {interpretation.drawer.como_usar.acciones.map((accion, idx) => (
-                          <li key={idx} className="text-gray-200 flex items-start gap-2">
-                            <span className="text-green-400 mt-1">•</span>
-                            <span>{accion}</span>
-                          </li>
-                        ))}
-                      </ul>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-green-200 font-semibold text-sm mb-1">Acción concreta:</p>
+                          <p className="text-gray-200">{interpretation.drawer.como_usar.accion_concreta}</p>
+                        </div>
+                        <div>
+                          <p className="text-green-200 font-semibold text-sm mb-1">Ejemplo práctico:</p>
+                          <p className="text-gray-200">{interpretation.drawer.como_usar.ejemplo_practico}</p>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Botón para regenerar */}

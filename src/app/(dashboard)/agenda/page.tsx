@@ -1104,8 +1104,8 @@ const AgendaPersonalizada = () => {
 
 
   const handleDayClick = (day: AstronomicalDay) => {
+    // Actualizar fecha seleccionada - el useEffect actualizará selectedDayEvents automáticamente
     setSelectedDate(day.date);
-    setSelectedDayEvents(day.events);
 
     // 🎂 Detectar si es el primer o último día del ciclo solar
     const isFirstDay = yearRange && isSameDay(day.date, yearRange.start);
