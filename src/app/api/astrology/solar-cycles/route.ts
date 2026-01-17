@@ -9,17 +9,16 @@ import SolarCycle, { SolarCycleHelpers } from '@/models/SolarCycle';
 import BirthData from '@/models/BirthData';
 
 /**
- * GET /api/astrology/solar-cycles?userId=xxx
+ * GET /api/astrology/solar-cycles?userId=xxx&yearLabel=YYYY-YYYY
  *
- * Devuelve los ciclos solares activos del usuario
- * - Máximo 2 ciclos (actual y siguiente)
- * - Determina qué ciclo es el actual
- * - Indica si se puede generar el siguiente
+ * Si se proporciona yearLabel, devuelve un ciclo específico con sus eventos
+ * Si no, devuelve la lista de ciclos activos del usuario
  */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
+    const yearLabel = searchParams.get('yearLabel');
 
     if (!userId) {
       return NextResponse.json({
@@ -29,6 +28,30 @@ export async function GET(request: NextRequest) {
     }
 
     await connectDB();
+
+    // 🆕 Si se pide un ciclo específico, devolverlo con sus eventos
+    if (yearLabel) {
+      const cycle = await SolarCycle.findByYear(userId, yearLabel);
+
+      if (!cycle) {
+        return NextResponse.json({
+          success: false,
+          error: `Ciclo ${yearLabel} no encontrado`
+        }, { status: 404 });
+      }
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          cycle: {
+            ...SolarCycleHelpers.formatForDisplay(cycle),
+            events: cycle.events // ✅ Incluir eventos completos
+          }
+        }
+      });
+    }
+
+    // Resto del código original para listar ciclos...
 
     // 1. Obtener datos de nacimiento del usuario
     const birthData = await BirthData.findByUserId(userId);

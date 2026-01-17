@@ -350,26 +350,34 @@ const AgendaPersonalizada = () => {
 
     setLoadingYearEvents(true);
     try {
-      // Buscar el ciclo en los disponibles
-      const cycle = availableCycles.find(c => c.yearLabel === yearLabel);
+      console.log(`🔄 [CYCLES] Cargando eventos del ciclo ${yearLabel} desde BD...`);
 
-      if (!cycle) {
-        console.warn('⚠️ [CYCLES] Ciclo no encontrado en disponibles:', yearLabel);
-        // Si no existe, intentar generar (llamando a fetchYearEvents normal)
+      // Cargar ciclo específico desde la API
+      const response = await fetch(`/api/astrology/solar-cycles?userId=${user.uid}&yearLabel=${yearLabel}`);
+      const data = await response.json();
+
+      if (!data.success || !data.data.cycle) {
+        console.warn('⚠️ [CYCLES] Ciclo no encontrado en BD:', yearLabel);
+        // Si no existe, intentar generar
         await loadYearEvents();
         return;
       }
 
-      // Cargar eventos desde la API (que ahora debería consultar BD)
-      const [startYear] = yearLabel.split('-').map(Number);
-      const forceNextYear = startYear > new Date().getFullYear();
+      const { cycle } = data.data;
 
-      const cycleEvents = await fetchYearEvents(forceNextYear);
-      setEvents(cycleEvents);
+      // Establecer eventos del ciclo
+      setEvents(cycle.events || []);
 
-      console.log(`✅ [CYCLES] Eventos del ciclo ${yearLabel} cargados:`, cycleEvents.length);
+      // Actualizar el rango de fechas
+      setYearRange({
+        start: new Date(cycle.start),
+        end: new Date(cycle.end)
+      });
+
+      console.log(`✅ [CYCLES] ${cycle.events?.length || 0} eventos cargados del ciclo ${yearLabel}`);
     } catch (error) {
       console.error('❌ [CYCLES] Error loading cycle events:', error);
+      setError('Error al cargar eventos del ciclo');
     } finally {
       setLoadingYearEvents(false);
     }
@@ -1629,50 +1637,57 @@ const AgendaPersonalizada = () => {
 
               {/* 🌞 Control de Ciclos Solares */}
               <div className="flex flex-col sm:flex-row items-center gap-3">
-                {/* Grupo de ciclos */}
-                <div className="flex items-center gap-3 bg-gradient-to-r from-purple-600/30 to-pink-600/30 backdrop-blur-sm border border-purple-400/30 rounded-full px-5 py-2.5">
-                  {/* Label del ciclo actual */}
-                  <div className="text-white text-sm font-medium">
+                {/* Selector de Ciclos - Solo mostrar si hay ciclos disponibles */}
+                {availableCycles.length > 0 ? (
+                  <div className="flex items-center gap-2 bg-gradient-to-r from-purple-900/40 to-pink-900/40 backdrop-blur-sm border border-purple-400/30 rounded-xl px-4 py-3">
+                    <span className="text-yellow-400 text-lg">☀️</span>
+                    <span className="text-purple-200 text-sm font-medium mr-2">Ciclo Solar:</span>
+
+                    {/* Tabs para cambiar entre ciclos */}
+                    <div className="flex gap-1 bg-black/20 rounded-lg p-1">
+                      {availableCycles.map(cycle => (
+                        <button
+                          key={cycle.yearLabel}
+                          onClick={() => switchToCycle(cycle.yearLabel)}
+                          disabled={loadingYearEvents}
+                          className={`px-4 py-1.5 rounded-md text-sm font-semibold transition-all duration-200 ${
+                            selectedCycleLabel === cycle.yearLabel
+                              ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                              : 'text-purple-200 hover:text-white hover:bg-white/10'
+                          } disabled:opacity-50 disabled:cursor-not-allowed`}
+                        >
+                          {cycle.yearLabel}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Botón generar nuevo ciclo (solo si se puede) */}
+                    {canGenerateNext && (
+                      <button
+                        onClick={generateNewCycle}
+                        disabled={generatingCycle || loadingYearEvents}
+                        className="ml-2 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold px-4 py-1.5 rounded-lg transition-all duration-200 shadow-lg hover:shadow-yellow-500/50 flex items-center gap-2"
+                      >
+                        {generatingCycle ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            <span>Generando...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>+</span>
+                            <span>Generar {currentCycleLabel ? parseInt(currentCycleLabel.split('-')[1]) : new Date().getFullYear()}-{currentCycleLabel ? parseInt(currentCycleLabel.split('-')[1]) + 1 : new Date().getFullYear() + 1}</span>
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  /* Si no hay ciclos, mostrar solo el label */
+                  <div className="text-white text-sm font-medium bg-gradient-to-r from-purple-600/30 to-pink-600/30 backdrop-blur-sm border border-purple-400/30 rounded-xl px-5 py-3">
                     <span className="text-yellow-400">☀️</span> Ciclo Solar: {selectedCycleLabel || (yearRange ? `${yearRange.start.getFullYear()}-${yearRange.end.getFullYear()}` : '...')}
                   </div>
-
-                  {/* Botones para cambiar entre ciclos (si hay más de 1) */}
-                  {availableCycles.length > 1 && availableCycles.map(cycle => (
-                    <button
-                      key={cycle.yearLabel}
-                      onClick={() => switchToCycle(cycle.yearLabel)}
-                      disabled={loadingYearEvents}
-                      className={`text-white text-xs font-bold py-1.5 px-4 rounded-full transition-all duration-300 shadow-lg flex items-center gap-1.5 ${
-                        selectedCycleLabel === cycle.yearLabel
-                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 cursor-default'
-                          : 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-400 hover:to-cyan-400'
-                      } disabled:opacity-50 disabled:cursor-not-allowed`}
-                    >
-                      Ver Ciclo {cycle.yearLabel}
-                    </button>
-                  ))}
-
-                  {/* Botón generar nuevo ciclo (solo si se puede) */}
-                  {canGenerateNext && (
-                    <button
-                      onClick={generateNewCycle}
-                      disabled={generatingCycle || loadingYearEvents}
-                      className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold py-1.5 px-4 rounded-full transition-all duration-300 shadow-lg hover:shadow-yellow-500/50 flex items-center gap-1.5"
-                    >
-                      {generatingCycle ? (
-                        <>
-                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
-                          <span>Generando...</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>🔄</span>
-                          <span>Generar Nuevo Ciclo {currentCycleLabel ? parseInt(currentCycleLabel.split('-')[1]) : new Date().getFullYear()}-{currentCycleLabel ? parseInt(currentCycleLabel.split('-')[1]) + 1 : new Date().getFullYear() + 1}</span>
-                        </>
-                      )}
-                    </button>
-                  )}
-                </div>
+                )}
 
                 {/* Ver Agenda Libro - Separado del grupo */}
                 <button
