@@ -31,6 +31,42 @@ export interface ISolarCycle extends Document {
   updatedAt: Date;
 }
 
+// ✅ Subdocument schema para eventos astrológicos
+const AstrologicalEventSchema = new Schema({
+  id: {
+    type: String,
+    required: true
+  },
+  date: {
+    type: Date,
+    required: true
+  },
+  title: {
+    type: String,
+    required: true
+  },
+  type: {
+    type: String,
+    required: true
+  },
+  description: {
+    type: String,
+    required: false
+  },
+  interpretation: {
+    type: Schema.Types.Mixed,
+    required: false
+  },
+  importance: {
+    type: String,
+    required: false
+  },
+  metadata: {
+    type: Schema.Types.Mixed,
+    required: false
+  }
+}, { _id: false }); // Disable _id for subdocuments
+
 const SolarCycleSchema = new Schema<ISolarCycle>({
   userId: {
     type: String,
@@ -51,16 +87,7 @@ const SolarCycleSchema = new Schema<ISolarCycle>({
     index: true
   },
   events: {
-    type: [{
-      id: String,
-      date: Date,
-      title: String,
-      type: String,
-      description: String,
-      interpretation: Schema.Types.Mixed,
-      importance: String,
-      metadata: Schema.Types.Mixed
-    }],
+    type: [AstrologicalEventSchema],
     default: []
   },
   solarReturnData: {

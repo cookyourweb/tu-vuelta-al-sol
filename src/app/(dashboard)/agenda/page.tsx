@@ -7,7 +7,7 @@ import { es } from 'date-fns/locale';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Calendar } from 'lucide-react';
+import { Calendar, MapPin, Clock, Home, Sparkles, Sun, BookOpen, Star } from 'lucide-react';
 import type { UserProfile, AstrologicalEvent, EventType } from '@/types/astrology/unified-types';
 
 import EventsLoadingModal from '@/components/astrology/EventsLoadingModal';
@@ -1455,33 +1455,42 @@ const AgendaPersonalizada = () => {
             <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent"> agenda cósmica</span>
           </h1>
 
-          {/* 🎯 CALENDARIO PERSONALIZADO */}
+          {/* CALENDARIO PERSONALIZADO */}
           {userProfile && userProfile.birthDate && (
             <div className="max-w-4xl mx-auto mb-8">
               <div className="bg-gradient-to-r from-purple-600/40 to-pink-600/40 backdrop-blur-md border-2 border-purple-400/50 rounded-2xl p-6 shadow-2xl">
                 <div className="flex items-center justify-center gap-3 mb-4">
-                  <span className="text-3xl">⭐</span>
+                  <Star className="w-8 h-8 text-yellow-300" />
                   <h2 className="text-2xl font-bold text-yellow-300">Calendario Personalizado</h2>
-                  <span className="text-3xl">⭐</span>
+                  <Star className="w-8 h-8 text-yellow-300" />
                 </div>
-                <div className="text-center space-y-2">
-                  <p className="text-white text-lg font-semibold">
-                    🌟 <span className="text-yellow-200">{userProfile.name || 'Usuario'}</span>
-                  </p>
-                  <p className="text-purple-200">
-                    📅 Nacida el <span className="font-bold text-white">{new Date(userProfile.birthDate).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-                  </p>
-                  <p className="text-purple-200">
-                    📍 Nacida en <span className="font-bold text-white">{extractCity(userProfile.birthPlace)}</span>
+                <div className="text-center space-y-3">
+                  <p className="text-white text-lg leading-relaxed">
+                    <span className="font-bold text-yellow-200">{userProfile.name || 'Usuario'}</span>
+                    {' '}nacida {new Date(userProfile.birthDate).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' })}
+                    {' '}en <span className="font-bold">{extractCity(userProfile.birthPlace)}</span>
+                    {userProfile.birthTime && (
+                      <span> {userProfile.birthTime}</span>
+                    )}
                     {userProfile.currentPlace && userProfile.currentPlace !== userProfile.birthPlace ? (
-                      <span> • Vive en <span className="font-bold text-white">{extractCity(userProfile.currentPlace)}</span></span>
+                      <span> y vive en <span className="font-bold">{extractCity(userProfile.currentPlace)}</span></span>
                     ) : (
-                      <span> • Vive en <span className="font-bold text-white">{extractCity(userProfile.birthPlace)}</span></span>
+                      <span> y vive en <span className="font-bold">{extractCity(userProfile.birthPlace)}</span></span>
                     )}
                   </p>
                   <div className="pt-2 border-t border-purple-300/30 mt-3">
-                    <p className="text-sm text-purple-100 leading-relaxed">
-                      ✨ Tu carta dice quién eres • 🌞 Tu retorno muestra qué se activa • 📅 La agenda te enseña cómo vivirlo
+                    <p className="text-sm text-purple-100 leading-relaxed flex items-center justify-center gap-2 flex-wrap">
+                      <span className="flex items-center gap-1">
+                        <Sparkles className="w-4 h-4" /> Tu carta dice quién eres
+                      </span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1">
+                        <Sun className="w-4 h-4" /> Tu retorno muestra qué se activa
+                      </span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1">
+                        <BookOpen className="w-4 h-4" /> La agenda te enseña cómo vivirlo
+                      </span>
                     </p>
                   </div>
                 </div>
