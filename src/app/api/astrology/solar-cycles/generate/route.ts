@@ -252,13 +252,24 @@ export async function POST(request: NextRequest) {
 
     console.log(`✅ [GENERATE-CYCLE] ${transformedEvents.length} eventos transformados`);
 
+    // 🔍 Filtrar eventos inválidos (sin título o fecha)
+    const validEvents = transformedEvents.filter((event: any) => {
+      const isValid = event.title && event.date && event.type;
+      if (!isValid) {
+        console.warn('⚠️ [GENERATE-CYCLE] Evento inválido filtrado:', event);
+      }
+      return isValid;
+    });
+
+    console.log(`✅ [GENERATE-CYCLE] ${validEvents.length} eventos válidos (${transformedEvents.length - validEvents.length} filtrados)`);
+
     // 9. Crear el nuevo ciclo en BD
     const newCycle = new SolarCycle({
       userId,
       cycleStart,
       cycleEnd,
       yearLabel,
-      events: transformedEvents,
+      events: validEvents,
       solarReturnData: eventsData.data,
       generatedAt: new Date(),
       status: 'active'
@@ -277,7 +288,7 @@ export async function POST(request: NextRequest) {
       message: `Ciclo ${yearLabel} generado exitosamente`,
       data: {
         cycle: SolarCycleHelpers.formatForDisplay(newCycle),
-        eventCount: transformedEvents.length
+        eventCount: validEvents.length
       }
     });
 

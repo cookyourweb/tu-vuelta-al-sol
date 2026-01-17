@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Sparkles, X, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Sparkles, X, Loader2, AlertCircle, RefreshCw, Download } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 interface EventData {
@@ -127,6 +127,87 @@ export default function EventInterpretationButton({
     setShowModal(false);
   };
 
+  const handleDownload = () => {
+    if (!interpretation) return;
+
+    // Crear contenido de texto para descarga
+    let content = `🌙 ${interpretation.titulo_evento || 'Evento Astrológico'}\n`;
+    content += `\n📅 ${new Date(event.date).toLocaleDateString('es-ES', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    })}\n`;
+    content += `\n${'='.repeat(60)}\n\n`;
+
+    if (interpretation.clima_del_dia && interpretation.clima_del_dia.length > 0) {
+      content += `Clima del día: ${interpretation.clima_del_dia.join(' · ')}\n\n`;
+    }
+
+    if (interpretation.energias_activas && interpretation.energias_activas.length > 0) {
+      content += `Energías activas este año: ${interpretation.energias_activas.join(' · ')}\n\n`;
+    }
+
+    if (interpretation.mensaje_sintesis) {
+      content += `🔥 PRIORIDAD CRÍTICA\n`;
+      content += `${interpretation.mensaje_sintesis}\n\n`;
+      content += `${'='.repeat(60)}\n\n`;
+    }
+
+    if (interpretation.como_te_afecta) {
+      content += `🧠 ¿CÓMO TE AFECTA A TI?\n`;
+      content += `(personalizado a tu carta y a tu año)\n\n`;
+      content += `${interpretation.como_te_afecta}\n\n`;
+      content += `${'='.repeat(60)}\n\n`;
+    }
+
+    if (interpretation.interpretacion_practica && interpretation.interpretacion_practica.length > 0) {
+      content += `⚙️ INTERPRETACIÓN PRÁCTICA DEL MOMENTO\n`;
+      content += `(cruce real de energías, como lo haría un astrólogo)\n\n`;
+      interpretation.interpretacion_practica.forEach((item: any) => {
+        content += `${item.planeta} activo: ${item.que_pide}\n`;
+      });
+      if (interpretation.sintesis_practica) {
+        content += `\n${interpretation.sintesis_practica}\n`;
+      }
+      content += `\n${'='.repeat(60)}\n\n`;
+    }
+
+    if (interpretation.acciones_concretas && interpretation.acciones_concretas.length > 0) {
+      content += `✅ ACCIONES CONCRETAS PARA HOY\n\n`;
+      interpretation.acciones_concretas.forEach((accion: string, i: number) => {
+        content += `${i + 1}. ${accion}\n`;
+      });
+      content += `\n${'='.repeat(60)}\n\n`;
+    }
+
+    if (interpretation.preguntas_reflexion && interpretation.preguntas_reflexion.length > 0) {
+      content += `🤔 PREGUNTAS PARA REFLEXIONAR\n\n`;
+      interpretation.preguntas_reflexion.forEach((pregunta: string, i: number) => {
+        content += `${i + 1}. ${pregunta}\n`;
+      });
+      content += `\n${'='.repeat(60)}\n\n`;
+    }
+
+    if (interpretation.perspectiva_evolutiva) {
+      content += `🌱 PERSPECTIVA EVOLUTIVA\n\n`;
+      content += `${interpretation.perspectiva_evolutiva}\n\n`;
+    }
+
+    content += `\n\n---\nGenerado por Tu Vuelta al Sol\nwww.tuvueltaalsol.es\n`;
+
+    // Crear blob y descargar
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `interpretacion-${new Date(event.date).toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <>
       {/* BOTÓN */}
@@ -186,7 +267,7 @@ export default function EventInterpretationButton({
 
       {/* MODAL FULLSCREEN - FORMATO AGENDA FÍSICA */}
       {showModal && interpretation && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm overflow-y-auto">
+        <div className="fixed inset-0 z-[250] bg-black/90 backdrop-blur-sm overflow-y-auto">
           <div className="min-h-screen px-4 py-8">
             <div className="max-w-4xl mx-auto bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 rounded-2xl shadow-2xl border border-purple-500/20 mb-8">
 
@@ -222,6 +303,15 @@ export default function EventInterpretationButton({
                   </div>
 
                   <div className="flex gap-2">
+                    {/* Descargar */}
+                    <button
+                      onClick={handleDownload}
+                      className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                      title="Descargar interpretación"
+                    >
+                      <Download className="w-5 h-5 text-purple-200" />
+                    </button>
+
                     {/* Regenerar */}
                     <button
                       onClick={() => handleGenerateInterpretation(true)}
