@@ -1497,6 +1497,9 @@ const AgendaPersonalizada = () => {
           userName={userProfile.name || 'Usuario'}
           startDate={yearRange.start}
           endDate={yearRange.end}
+          sunSign={userProfile.astrological?.sun?.sign}
+          moonSign={userProfile.astrological?.moon?.sign}
+          ascendant={userProfile.astrological?.ascendant?.sign ? `Ascendente ${userProfile.astrological.ascendant.sign}` : undefined}
         />
       </StyleProvider>
     );

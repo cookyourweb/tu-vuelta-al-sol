@@ -26,9 +26,20 @@ interface AgendaLibroProps {
   userName: string;
   startDate: Date;
   endDate: Date;
+  sunSign?: string;
+  moonSign?: string;
+  ascendant?: string;
 }
 
-export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLibroProps) => {
+export const AgendaLibro = ({
+  onClose,
+  userName,
+  startDate,
+  endDate,
+  sunSign,
+  moonSign,
+  ascendant
+}: AgendaLibroProps) => {
   const printRef = useRef<HTMLDivElement>(null);
   const { config } = useStyle();
 
@@ -79,6 +90,9 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
               name={userName}
               startDate={startDate}
               endDate={endDate}
+              sunSign={sunSign}
+              moonSign={moonSign}
+              ascendant={ascendant}
             />
           </div>
           <div id="intencion-anio">
