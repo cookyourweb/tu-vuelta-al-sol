@@ -1059,6 +1059,56 @@ const AgendaPersonalizada = () => {
     }
   };
 
+  // Helper para extraer ciudad de una dirección completa
+  const extractCity = (address: string | undefined): string => {
+    if (!address) return 'Madrid';
+
+    const parts = address.split(',').map(p => p.trim());
+
+    // Buscar "Madrid" específicamente
+    const madridIndex = parts.findIndex(p => p.toLowerCase().includes('madrid') && !p.toLowerCase().includes('comunidad'));
+    if (madridIndex !== -1) {
+      return parts[madridIndex];
+    }
+
+    // Si no encuentra Madrid, buscar ciudad antes de "Comunidad de"
+    const comunidadIndex = parts.findIndex(p => p.toLowerCase().includes('comunidad'));
+    if (comunidadIndex > 0) {
+      return parts[comunidadIndex - 1];
+    }
+
+    // Fallback: devolver las dos últimas partes relevantes (ej: "Madrid, Comunidad de Madrid")
+    if (parts.length >= 2) {
+      const filtered = parts.filter(p =>
+        !p.match(/^\d+$/) && // no números solos
+        !p.toLowerCase().includes('calle') &&
+        !p.toLowerCase().includes('hospital') &&
+        p.length > 2
+      );
+      return filtered.slice(-2, -1)[0] || parts[parts.length - 2];
+    }
+
+    return parts[0] || 'Madrid';
+  };
+
+  // Helper para extraer ciudad y región
+  const extractCityAndRegion = (address: string | undefined): string => {
+    if (!address) return 'Madrid, Comunidad de Madrid';
+
+    const parts = address.split(',').map(p => p.trim());
+
+    // Buscar índice de "Comunidad de"
+    const comunidadIndex = parts.findIndex(p => p.toLowerCase().includes('comunidad'));
+
+    if (comunidadIndex > 0) {
+      const city = parts[comunidadIndex - 1];
+      const region = parts[comunidadIndex];
+      return `${city}, ${region}`;
+    }
+
+    return extractCity(address);
+  };
+
   // Cargar eventos del año completo al iniciar
   useEffect(() => {
     if (!userProfile) {
@@ -1422,17 +1472,16 @@ const AgendaPersonalizada = () => {
                     📅 Nacida el <span className="font-bold text-white">{new Date(userProfile.birthDate).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                   </p>
                   <p className="text-purple-200">
-                    📍 {userProfile.birthPlace ? `${userProfile.birthPlace.split(',')[0]}` : 'Madrid'}
-                    {userProfile.currentPlace && userProfile.currentPlace !== userProfile.birthPlace && (
-                      <span className="ml-2">• Vive en <span className="font-bold text-white">{userProfile.currentPlace.split(',')[0]}</span></span>
-                    )}
-                    {(!userProfile.currentPlace || userProfile.currentPlace === userProfile.birthPlace) && (
-                      <span className="ml-2">• Vive en <span className="font-bold text-white">{userProfile.birthPlace ? userProfile.birthPlace.split(',')[0] : 'Madrid'}</span></span>
+                    📍 Nacida en <span className="font-bold text-white">{extractCity(userProfile.birthPlace)}</span>
+                    {userProfile.currentPlace && userProfile.currentPlace !== userProfile.birthPlace ? (
+                      <span> • Vive en <span className="font-bold text-white">{extractCity(userProfile.currentPlace)}</span></span>
+                    ) : (
+                      <span> • Vive en <span className="font-bold text-white">{extractCity(userProfile.birthPlace)}</span></span>
                     )}
                   </p>
                   <div className="pt-2 border-t border-purple-300/30 mt-3">
-                    <p className="text-sm text-purple-100 italic">
-                      ✨ Tu agenda está calculada específicamente con tu carta natal y retorno solar
+                    <p className="text-sm text-purple-100 leading-relaxed">
+                      ✨ Tu carta dice quién eres • 🌞 Tu retorno muestra qué se activa • 📅 La agenda te enseña cómo vivirlo
                     </p>
                   </div>
                 </div>
