@@ -1144,16 +1144,20 @@ const AgendaPersonalizada = () => {
   // 🎯 Actualizar eventos del día seleccionado cuando cambien los events o selectedDate
   useEffect(() => {
     if (selectedDate && events.length > 0) {
-      const dayEvents = events.filter(event => {
+      let dayEvents = events.filter(event => {
         const eventDate = new Date(event.date);
         return isSameDay(eventDate, selectedDate);
       });
+
+      // Agregar eventos especiales usando helper
+      dayEvents = addSpecialEvents(selectedDate, dayEvents);
+
       setSelectedDayEvents(dayEvents);
       console.log(`📅 [AGENDA] Updated selectedDayEvents for ${selectedDate.toDateString()}: ${dayEvents.length} events`);
     } else if (selectedDate) {
       setSelectedDayEvents([]);
     }
-  }, [selectedDate, events]);
+  }, [selectedDate, events, yearRange, userProfile, canGenerateNext]);
 
   // 🎂 AUTO-GENERAR nuevo ciclo solar el día después del cumpleaños
   useEffect(() => {
@@ -1213,6 +1217,63 @@ const AgendaPersonalizada = () => {
     return signs[Math.floor(Math.random() * signs.length)];
   };
 
+  // 🎂 Helper: Agregar eventos especiales (último día y cumpleaños) a un día
+  const addSpecialEvents = (day: Date, dayEvents: AstrologicalEvent[]): AstrologicalEvent[] => {
+    let enhancedEvents = [...dayEvents];
+
+    // 🌅 EVENTO ESPECIAL: Último día del ciclo
+    if (yearRange) {
+      const lastDayOfCycle = new Date(yearRange.end);
+      lastDayOfCycle.setHours(0, 0, 0, 0);
+      const dayOnly = new Date(day);
+      dayOnly.setHours(0, 0, 0, 0);
+
+      if (lastDayOfCycle.getTime() === dayOnly.getTime()) {
+        const lastDayEvent: AstrologicalEvent = {
+          id: 'last-day-of-cycle',
+          date: day,
+          title: '🌅 Tu ciclo ha llegado al fin',
+          type: 'seasonal',
+          description: 'Hoy es el último día de tu ciclo solar actual. Mañana comienza un nuevo ciclo con tu cumpleaños.',
+          importance: 'high',
+          metadata: {
+            isSpecialEvent: true,
+            eventType: 'cycle_end'
+          }
+        };
+        enhancedEvents = [lastDayEvent, ...enhancedEvents];
+      }
+    }
+
+    // 🎉 EVENTO ESPECIAL: Cumpleaños
+    if (yearRange && userProfile) {
+      const birthDate = new Date(userProfile.birthDate);
+      const birthdayThisYear = new Date(day.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+      birthdayThisYear.setHours(0, 0, 0, 0);
+      const dayOnly = new Date(day);
+      dayOnly.setHours(0, 0, 0, 0);
+
+      if (birthdayThisYear.getTime() === dayOnly.getTime()) {
+        const birthdayEvent: AstrologicalEvent = {
+          id: 'birthday-special',
+          date: day,
+          title: '🎂 ¡Felicidades por tu nueva vuelta al Sol!',
+          type: 'seasonal',
+          description: 'Hoy comienza tu nuevo ciclo solar. Es el momento perfecto para revisar tu Retorno Solar y establecer intenciones para los próximos 12 meses.',
+          importance: 'high',
+          metadata: {
+            isSpecialEvent: true,
+            eventType: 'birthday',
+            canGenerateNewCycle: canGenerateNext
+          }
+        };
+        enhancedEvents = [birthdayEvent, ...enhancedEvents];
+      }
+    }
+
+    return enhancedEvents;
+  };
+
   // 📅 Obtener días del mes actual con eventos (para vista mensual)
   const getCurrentMonthDays = () => {
     const monthStart = startOfMonth(currentMonth);
@@ -1227,10 +1288,13 @@ const AgendaPersonalizada = () => {
     const days = eachDayOfInterval({ start: startDate, end: endDate });
 
     const daysWithEvents = days.map(day => {
-      const dayEvents = events.filter(event => {
+      let dayEvents = events.filter(event => {
         const eventDate = new Date(event.date);
         return isSameDay(day, eventDate);
       });
+
+      // Agregar eventos especiales
+      dayEvents = addSpecialEvents(day, dayEvents);
 
       return {
         date: day,
@@ -1261,10 +1325,13 @@ const AgendaPersonalizada = () => {
       const days = eachDayOfInterval({ start: startDate, end: endDate });
 
       const daysWithEvents = days.map(day => {
-        const dayEvents = events.filter(event => {
+        let dayEvents = events.filter(event => {
           const eventDate = new Date(event.date);
           return isSameDay(day, eventDate);
         });
+
+        // Agregar eventos especiales
+        dayEvents = addSpecialEvents(day, dayEvents);
 
         return {
           date: day,
