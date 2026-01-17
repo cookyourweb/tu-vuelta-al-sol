@@ -351,13 +351,40 @@ export async function POST(request: NextRequest) {
       console.log('🔄 [PLANET] Generando COMPARACIÓN Natal vs Solar Return');
 
       // Obtener carta natal del usuario
-      const chartDoc = await Chart.findOne({ userId });
+      let chartDoc = await Chart.findOne({ userId });
       console.log('📊 Chart document found:', !!chartDoc);
       console.log('📊 Has natalChart:', !!chartDoc?.natalChart);
       console.log('📊 Has planets:', !!chartDoc?.natalChart?.planets);
 
       if (!chartDoc?.natalChart?.planets) {
-        throw new Error('Carta natal no encontrada - se necesita para generar comparación');
+        console.warn('⚠️ MUY IMPORTANTE: No encontrada carta natal, volvemos a generarla');
+
+        // Auto-regenerar carta natal
+        try {
+          const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+          const response = await fetch(`${baseUrl}/api/charts/natal`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId })
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to generate natal chart');
+          }
+
+          const result = await response.json();
+          console.log('✅ Carta natal regenerada exitosamente');
+
+          // Buscar la carta recién generada
+          chartDoc = await Chart.findOne({ userId });
+
+          if (!chartDoc?.natalChart?.planets) {
+            throw new Error('No se pudo generar carta natal automáticamente');
+          }
+        } catch (error) {
+          console.error('❌ Error regenerando carta natal:', error);
+          throw new Error('Carta natal no encontrada y no se pudo regenerar automáticamente');
+        }
       }
 
       // Buscar planeta en carta natal
