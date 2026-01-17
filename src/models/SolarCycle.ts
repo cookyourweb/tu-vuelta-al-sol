@@ -3,7 +3,7 @@
 // src/models/SolarCycle.ts
 // =============================================================================
 
-import { model, models, Schema, Document, Types } from "mongoose";
+import { model, models, Schema, Document, Types, Model } from "mongoose";
 
 // Tipos para eventos astrológicos (reutilizar si existen en otro lugar)
 export interface AstrologicalEvent {
@@ -202,7 +202,18 @@ SolarCycleSchema.methods.isFuture = function() {
   return now < this.cycleStart;
 };
 
-const SolarCycle = models.SolarCycle || model<ISolarCycle>('SolarCycle', SolarCycleSchema);
+// ✅ EXTENDER INTERFACE DEL MODELO con statics
+interface ISolarCycleModel extends Model<ISolarCycle> {
+  getActiveCycles(userId: string): Promise<ISolarCycle[]>;
+  findByYear(userId: string, yearLabel: string): Promise<ISolarCycle | null>;
+  hasNextCycle(userId: string, currentEndYear: number): Promise<boolean>;
+  getLatestCycle(userId: string): Promise<ISolarCycle | null>;
+  markOldCyclesAsCompleted(userId: string): Promise<void>;
+}
+
+const SolarCycle: ISolarCycleModel =
+  (models.SolarCycle as ISolarCycleModel) ||
+  model<ISolarCycle, ISolarCycleModel>('SolarCycle', SolarCycleSchema);
 
 export default SolarCycle;
 
