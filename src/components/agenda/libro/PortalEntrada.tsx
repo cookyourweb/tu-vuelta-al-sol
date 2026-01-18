@@ -2,6 +2,7 @@
 
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useStyle } from '@/context/StyleContext';
 
 interface PortalEntradaProps {
   userName: string;
@@ -25,19 +26,16 @@ export default function PortalEntrada({
   portada,
   apertura
 }: PortalEntradaProps) {
+  const { config } = useStyle();
   const startYear = format(startDate, 'yyyy', { locale: es });
   const endYear = format(endDate, 'yyyy', { locale: es });
 
   return (
     <>
       {/* PORTADA PERSONALIZADA */}
-      <div className="print-page print-no-bg bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-900 flex flex-col items-center justify-center text-center relative overflow-hidden" style={{ padding: '15mm' }}>
+      <div className={`print-page print-no-bg flex flex-col items-center justify-center text-center relative overflow-hidden ${config.headerBg}`} style={{ padding: '15mm' }}>
         {/* Patrón de fondo */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(251, 191, 36, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(251, 191, 36, 0.15) 0%, transparent 50%)',
-          }} />
-        </div>
+        <div className={`absolute inset-0 ${config.pattern} opacity-30`} />
 
         <div className="relative z-10 space-y-8">
           {/* Logo o símbolo del sol */}
