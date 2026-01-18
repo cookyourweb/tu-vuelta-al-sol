@@ -8,6 +8,7 @@ import { addMonths } from 'date-fns';
 
 // Importar componentes del libro
 import PortalEntrada from '@/components/agenda/libro/PortalEntrada';
+import Indice from '@/components/agenda/libro/Indice';
 import TemaCentral from '@/components/agenda/libro/TemaCentral';
 import TuAnioTuViaje from '@/components/agenda/libro/TuAnioTuViaje';
 import SoulChart from '@/components/agenda/libro/SoulChart';
@@ -263,6 +264,12 @@ export default function LibroAgendaPage() {
           endDate={endDate}
           portada={bookContent.portada}
           apertura={bookContent.apertura_del_viaje}
+        />
+
+        {/* ÍNDICE */}
+        <Indice
+          startYear={startDate.getFullYear()}
+          endYear={endDate.getFullYear()}
         />
 
         {/* CARTA DE BIENVENIDA */}
