@@ -4,6 +4,7 @@ import React from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useStyle } from '@/context/StyleContext';
+import PageNumber from './PageNumber';
 
 // ============ LÍNEAS DE ESCRITURA ============
 const LineasEscritura = ({ count = 6, spacing = 28 }: { count?: number; spacing?: number }) => (
@@ -18,7 +19,8 @@ const LineasEscritura = ({ count = 6, spacing = 28 }: { count?: number; spacing?
 export const CartaBienvenida: React.FC<{
   nombre: string;
   cartaBienvenida?: string;
-}> = ({ nombre, cartaBienvenida }) => {
+  pageNumber?: number;
+}> = ({ nombre, cartaBienvenida, pageNumber }) => {
   const { config } = useStyle();
 
   return (
@@ -90,6 +92,9 @@ export const CartaBienvenida: React.FC<{
           </div>
         </div>
       </div>
+
+      {/* Número de página */}
+      {pageNumber && <PageNumber pageNumber={pageNumber} />}
     </div>
   );
 };
@@ -98,7 +103,8 @@ export const CartaBienvenida: React.FC<{
 export const PrimerDiaCiclo: React.FC<{
   fecha: Date;
   nombre: string;
-}> = ({ fecha, nombre }) => {
+  pageNumber?: number;
+}> = ({ fecha, nombre, pageNumber }) => {
   const { config } = useStyle();
 
   return (
@@ -160,6 +166,9 @@ export const PrimerDiaCiclo: React.FC<{
           </p>
         </div>
       </div>
+
+      {/* Número de página */}
+      {pageNumber && <PageNumber pageNumber={pageNumber} />}
     </div>
   );
 };

@@ -8,6 +8,7 @@ import { addMonths } from 'date-fns';
 
 // Importar componentes del libro
 import PortalEntrada from '@/components/agenda/libro/PortalEntrada';
+import TemaCentral from '@/components/agenda/libro/TemaCentral';
 import TuAnioTuViaje from '@/components/agenda/libro/TuAnioTuViaje';
 import SoulChart from '@/components/agenda/libro/SoulChart';
 import RetornoSolar from '@/components/agenda/libro/RetornoSolar';
@@ -255,7 +256,7 @@ export default function LibroAgendaPage() {
       {/* CONTENIDO DEL LIBRO */}
       <div className="book-content bg-white print:bg-white">
 
-        {/* PORTAL DE ENTRADA */}
+        {/* PORTAL DE ENTRADA - Portada + Antes de Empezar */}
         <PortalEntrada
           userName={bookContent.userName}
           startDate={startDate}
@@ -264,16 +265,27 @@ export default function LibroAgendaPage() {
           apertura={bookContent.apertura_del_viaje}
         />
 
-        {/* PRIMER DÍA DEL CICLO */}
-        <PrimerDiaCiclo
-          fecha={startDate}
-          nombre={bookContent.userName}
-        />
-
         {/* CARTA DE BIENVENIDA */}
         <CartaBienvenida
           nombre={bookContent.userName}
           cartaBienvenida={bookContent.apertura_del_viaje?.carta_de_bienvenida}
+          pageNumber={3}
+        />
+
+        {/* TEMA CENTRAL DEL AÑO */}
+        <TemaCentral
+          userName={bookContent.userName}
+          temaCentral={bookContent.apertura_del_viaje?.tema_central_del_año}
+          queSoltar={bookContent.apertura_del_viaje?.que_soltar}
+          ritualInicio={bookContent.apertura_del_viaje?.ritual_de_inicio}
+          pageNumber={4}
+        />
+
+        {/* PRIMER DÍA DEL CICLO */}
+        <PrimerDiaCiclo
+          fecha={startDate}
+          nombre={bookContent.userName}
+          pageNumber={5}
         />
 
         {/* TU AÑO TU VIAJE */}
@@ -281,6 +293,7 @@ export default function LibroAgendaPage() {
           userName={bookContent.userName}
           apertura={bookContent.apertura_del_viaje}
           solarReturn={bookContent.solarReturn}
+          pageNumber={6}
         />
 
         {/* SOUL CHART */}
