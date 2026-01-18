@@ -14,6 +14,86 @@ const LineasEscritura = ({ count = 6, spacing = 28 }: { count?: number; spacing?
   </div>
 );
 
+// ============ CARTA DE BIENVENIDA ============
+export const CartaBienvenida: React.FC<{
+  nombre: string;
+  cartaBienvenida?: string;
+}> = ({ nombre, cartaBienvenida }) => {
+  const { config } = useStyle();
+
+  return (
+    <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
+      {/* Header decorativo */}
+      <div className="text-center mb-8 pb-6 border-b border-cosmic-gold/20">
+        <div className="flex items-center justify-center space-x-2 mb-3">
+          <span className="text-cosmic-gold text-sm">✧</span>
+          <span className={`text-xs uppercase tracking-[0.3em] ${config.iconSecondary}`}>Carta de Bienvenida</span>
+          <span className="text-cosmic-gold text-sm">✧</span>
+        </div>
+        <h2 className="font-display text-4xl text-cosmic-gold mb-3">Un mensaje para ti</h2>
+      </div>
+
+      <div className="flex-1 max-w-2xl mx-auto w-full">
+        {/* Carta con fondo */}
+        <div className="bg-cosmic-purple/5 border border-cosmic-gold/20 rounded-lg p-8">
+          <p className="font-display text-2xl text-cosmic-gold mb-6">Querida {nombre},</p>
+
+          <div className="space-y-5 font-body text-gray-700 leading-relaxed text-lg">
+            {cartaBienvenida ? (
+              <p className="whitespace-pre-line">{cartaBienvenida}</p>
+            ) : (
+              <>
+                <p>
+                  Bienvenida a tu nueva vuelta al Sol. Este libro es tu compañero de viaje durante
+                  los próximos 12 meses, un espacio para registrar, reflexionar y conectar con
+                  los ritmos naturales del universo.
+                </p>
+
+                <p>
+                  Cada página ha sido diseñada pensando en ti, en tu carta natal, en tu retorno solar
+                  y en los eventos astrológicos que marcarán tu año. No es un libro más: es TU libro,
+                  personalizado con las energías que te acompañarán en este ciclo.
+                </p>
+
+                <p>
+                  A lo largo de estas páginas encontrarás interpretaciones profundas, rituales sugeridos,
+                  espacios para escribir y reflexionar. Úsalo como quieras: no hay forma incorrecta
+                  de habitar tu propia historia.
+                </p>
+
+                {/* Frase central con fondo */}
+                <div className="bg-gradient-to-br from-cosmic-gold/20 to-cosmic-purple/10 border-l-4 border-cosmic-gold rounded-r-lg p-6 text-center my-8">
+                  <p className="font-display text-2xl text-cosmic-gold italic">
+                    "Este es tu año. Este es tu viaje."
+                  </p>
+                </div>
+
+                <p>
+                  Que este libro sea un faro en los momentos de oscuridad, un espejo en los momentos
+                  de transformación, y un mapa en los momentos de incertidumbre.
+                </p>
+
+                <p>
+                  Feliz vuelta al Sol.
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Despedida */}
+        <div className="mt-8 text-center">
+          <div className="flex items-center justify-center space-x-2">
+            <span className="text-cosmic-gold">✧</span>
+            <span className="text-cosmic-gold">☉</span>
+            <span className="text-cosmic-gold">✧</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ============ PRIMER DÍA DEL CICLO ============
 export const PrimerDiaCiclo: React.FC<{
   fecha: Date;
@@ -471,4 +551,4 @@ export const Contraportada = () => {
   );
 };
 
-export default { PrimerDiaCiclo, UltimoDiaCiclo, CierreMes, QuienEraQuienSoy, PreparacionProximaVuelta, CartaCierre, PaginaFinalBlanca, Contraportada };
+export default { CartaBienvenida, PrimerDiaCiclo, UltimoDiaCiclo, CierreMes, QuienEraQuienSoy, PreparacionProximaVuelta, CartaCierre, PaginaFinalBlanca, Contraportada };

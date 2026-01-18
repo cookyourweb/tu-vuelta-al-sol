@@ -15,7 +15,7 @@ import CalendarioAnual from '@/components/agenda/libro/CalendarioAnual';
 import MesPage from '@/components/agenda/libro/MesPage';
 import CierreCiclo from '@/components/agenda/libro/CierreCiclo';
 import { EscrituraTerapeutica, Visualizacion, RitualSimbolico, TrabajoEmocional } from '@/components/agenda/libro/TerapiaCreativa';
-import { PrimerDiaCiclo, UltimoDiaCiclo, QuienEraQuienSoy, PreparacionProximaVuelta, CartaCierre, PaginaFinalBlanca, Contraportada } from '@/components/agenda/libro/PaginasEspeciales';
+import { CartaBienvenida, PrimerDiaCiclo, UltimoDiaCiclo, QuienEraQuienSoy, PreparacionProximaVuelta, CartaCierre, PaginaFinalBlanca, Contraportada } from '@/components/agenda/libro/PaginasEspeciales';
 
 interface MonthEvent {
   date: string | Date;
@@ -268,6 +268,12 @@ export default function LibroAgendaPage() {
         <PrimerDiaCiclo
           fecha={startDate}
           nombre={bookContent.userName}
+        />
+
+        {/* CARTA DE BIENVENIDA */}
+        <CartaBienvenida
+          nombre={bookContent.userName}
+          cartaBienvenida={bookContent.apertura_del_viaje?.carta_de_bienvenida}
         />
 
         {/* TU AÑO TU VIAJE */}

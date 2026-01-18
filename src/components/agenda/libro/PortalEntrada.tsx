@@ -103,19 +103,8 @@ export default function PortalEntrada({
               </div>
             )}
 
-            {apertura?.carta_de_bienvenida && (
-              <div>
-                <h3 className="font-display text-2xl text-gray-800 mb-4">
-                  Carta de Bienvenida
-                </h3>
-                <p className="font-body text-lg text-gray-700 leading-relaxed whitespace-pre-line">
-                  {apertura.carta_de_bienvenida}
-                </p>
-              </div>
-            )}
-
             {/* Instrucciones por defecto si no hay contenido de API */}
-            {!apertura?.antes_de_empezar && !apertura?.carta_de_bienvenida && (
+            {!apertura?.antes_de_empezar && (
               <>
                 <div>
                   <h3 className="font-display text-2xl text-gray-800 mb-4">
