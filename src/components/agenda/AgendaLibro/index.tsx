@@ -101,7 +101,33 @@ export const AgendaLibro = ({
         </div>
         <IndiceNavegable />
 
-        {/* 2. TU AÑO 2026-2027 - OVERVIEW */}
+        {/* 2. CARTA DE BIENVENIDA Y TEMA CENTRAL - DESPUÉS DEL ÍNDICE */}
+        <div id="tu-anio-tu-viaje">
+          <div id="carta-bienvenida">
+            <CartaBienvenida name={userName} />
+          </div>
+          <div id="tema-central">
+            <TemaCentralAnio />
+          </div>
+        </div>
+
+        {/* 3. PRIMER DÍA DEL CICLO */}
+        <div id="primer-dia-ciclo">
+          <PrimerDiaCiclo name={userName} fecha={startDate} />
+        </div>
+
+        {/* 4. LO QUE VIENE A MOVER Y SOLTAR */}
+        <div id="viaje-interno">
+          <div id="viene-mover">
+            <LoQueVieneAMover />
+          </div>
+          <div id="pide-soltar">
+            <LoQuePideSoltar />
+          </div>
+          <PaginaIntencionAnual />
+        </div>
+
+        {/* 5. TU AÑO 2026-2027 - OVERVIEW */}
         <div id="tu-anio-overview">
           <TuAnioOverview
             startDate={startDate}
@@ -115,7 +141,7 @@ export const AgendaLibro = ({
           />
         </div>
 
-        {/* 3. CICLOS ANUALES */}
+        {/* 6. CICLOS ANUALES */}
         <div id="ciclos-anuales">
           <LineaTiempoEmocional
             startDate={startDate}
@@ -125,24 +151,7 @@ export const AgendaLibro = ({
           <GrandesAprendizajes />
         </div>
 
-        {/* 4. TU AÑO, TU VIAJE */}
-        <div id="tu-anio-tu-viaje">
-          <div id="carta-bienvenida">
-            <CartaBienvenida name={userName} />
-          </div>
-          <div id="tema-central">
-            <TemaCentralAnio />
-          </div>
-          <div id="viene-mover">
-            <LoQueVieneAMover />
-          </div>
-          <div id="pide-soltar">
-            <LoQuePideSoltar />
-          </div>
-          <PaginaIntencionAnual />
-        </div>
-
-        {/* 3. SOUL CHART */}
+        {/* 7. SOUL CHART */}
         <div id="soul-chart">
           <div id="esencia-natal">
             <EsenciaNatal />
