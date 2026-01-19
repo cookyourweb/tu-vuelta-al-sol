@@ -81,7 +81,7 @@ export const FooterLibro: React.FC<{ pagina?: number }> = ({ pagina }) => {
         Tu Vuelta al Sol by Wunjo Creations
       </a>
       {pagina && <span className={`${config.iconSecondary} opacity-50 font-medium`}>{pagina}</span>}
-      <span className={`${config.iconSecondary} opacity-50`}>☉</span>
+      <span className={`${config.iconSecondary} opacity-50`}></span>
     </div>
   );
 };

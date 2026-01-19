@@ -26,7 +26,10 @@ export const PortadaPersonalizada = ({
   const { config } = useStyle();
 
   return (
-    <div className={`print-page print-no-bg flex flex-col items-center justify-center text-center p-12 relative overflow-hidden ${config.headerBg} ${config.pattern}`}>
+    <div className={`print-page print-no-bg flex flex-col items-center justify-center text-center relative overflow-hidden ${config.headerBg}`} style={{ padding: '15mm' }}>
+      {/* Decoración de fondo */}
+      <div className={`absolute inset-0 ${config.pattern} opacity-30`} />
+
       {/* Decorative circles */}
       <div className={`absolute top-20 left-20 w-32 h-32 border ${config.headerText} opacity-20 rounded-full`} />
       <div className={`absolute bottom-20 right-20 w-48 h-48 border ${config.headerText} opacity-10 rounded-full`} />
