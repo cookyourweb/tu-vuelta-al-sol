@@ -182,7 +182,9 @@ export function useInterpretaciones({
    * @returns Array de eventos del mes con interpretación
    */
   function getEventosForMonth(monthIndex: number): AstrologicalEvent[] {
-    if (!solarCycle) return [];
+    if (!solarCycle || !solarCycle.events || !Array.isArray(solarCycle.events)) {
+      return [];
+    }
 
     return solarCycle.events.filter(event => {
       const eventDate = new Date(event.date);
