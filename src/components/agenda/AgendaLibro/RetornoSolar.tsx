@@ -56,7 +56,7 @@ export const QueEsRetornoSolar = () => {
         </p>
       </div>
 
-      <FooterLibro pagina={12} />
+      <FooterLibro pagina={19} />
     </div>
   );
 };
@@ -95,7 +95,7 @@ export const AscendenteAnio = () => {
         </div>
       </div>
 
-      <FooterLibro pagina={13} />
+      <FooterLibro pagina={20} />
     </div>
   );
 };
@@ -135,7 +135,7 @@ export const SolRetorno = () => {
         </div>
       </div>
 
-      <FooterLibro pagina={14} />
+      <FooterLibro pagina={21} />
     </div>
   );
 };
@@ -174,7 +174,7 @@ export const LunaRetorno = () => {
         </div>
       </div>
 
-      <FooterLibro pagina={15} />
+      <FooterLibro pagina={22} />
     </div>
   );
 };
@@ -261,7 +261,7 @@ export const EjesDelAnio = () => {
         </div>
       </div>
 
-      <FooterLibro pagina={16} />
+      <FooterLibro pagina={23} />
     </div>
   );
 };
@@ -338,7 +338,7 @@ export const EjesDelAnio2 = () => {
         </div>
       </div>
 
-      <FooterLibro pagina={17} />
+      <FooterLibro pagina={24} />
     </div>
   );
 };
@@ -394,7 +394,7 @@ export const IntegracionEjes = () => {
         </div>
       </div>
 
-      <FooterLibro />
+      <FooterLibro pagina={25} />
     </div>
   );
 };
@@ -442,7 +442,7 @@ export const RitualCumpleanos = () => {
         </div>
       </div>
 
-      <FooterLibro pagina={18} />
+      <FooterLibro pagina={26} />
     </div>
   );
 };

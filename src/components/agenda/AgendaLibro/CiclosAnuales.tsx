@@ -79,7 +79,7 @@ export const LineaTiempoEmocional: React.FC<{
         </div>
       </div>
 
-      <FooterLibro />
+      <FooterLibro pagina={11} />
     </div>
   );
 };
@@ -128,7 +128,7 @@ export const MesesClavePuntosGiro: React.FC = () => {
         ))}
       </div>
 
-      <FooterLibro />
+      <FooterLibro pagina={12} />
     </div>
   );
 };
@@ -182,7 +182,7 @@ export const GrandesAprendizajes: React.FC = () => {
         </p>
       </div>
 
-      <FooterLibro />
+      <FooterLibro pagina={13} />
     </div>
   );
 };

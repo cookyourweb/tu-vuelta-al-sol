@@ -165,7 +165,7 @@ export const LoQueVieneAMover = () => {
         </div>
       </div>
 
-      <FooterLibro pagina={5} />
+      <FooterLibro pagina={6} />
     </div>
   );
 };
@@ -208,7 +208,7 @@ export const LoQuePideSoltar = () => {
         </div>
       </div>
 
-      <FooterLibro pagina={6} />
+      <FooterLibro pagina={8} />
     </div>
   );
 };
@@ -244,7 +244,7 @@ export const PaginaIntencionAnual = () => {
         Página de escritura libre
       </div>
 
-      <FooterLibro />
+      <FooterLibro pagina={7} />
     </div>
   );
 };
