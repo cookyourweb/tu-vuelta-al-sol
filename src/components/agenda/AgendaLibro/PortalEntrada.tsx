@@ -61,8 +61,13 @@ export const PortadaPersonalizada = ({
           <span className="text-4xl">↑</span>
         </div>
 
+        {/* Nombre del usuario */}
+        <div className={`text-2xl ${config.headerText} opacity-90 ${config.fontBody} font-light tracking-wide`}>
+          {name}
+        </div>
+
         {/* Datos astrológicos */}
-        <div className={`text-lg ${config.headerText} opacity-80 ${config.fontBody} max-w-2xl mx-auto`}>
+        <div className={`text-lg ${config.headerText} opacity-80 ${config.fontBody} max-w-2xl mx-auto mt-4`}>
           Sol en {sunSign} • Luna en {moonSign} • {ascendant}
         </div>
 

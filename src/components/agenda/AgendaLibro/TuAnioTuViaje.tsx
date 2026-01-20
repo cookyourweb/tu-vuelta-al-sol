@@ -65,8 +65,15 @@ export const CartaBienvenida = ({ name }: TuAnioTuViajeProps) => {
   );
 };
 
-export const TemaCentralAnio = () => {
+interface TemaCentralAnioProps {
+  interpretacion?: string;
+}
+
+export const TemaCentralAnio = ({ interpretacion }: TemaCentralAnioProps) => {
   const { config } = useStyle();
+
+  // Si hay interpretación personalizada, usarla. Si no, usar el texto por defecto.
+  const textoInterpretacion = interpretacion || "Un año de introspección consciente para redefinir tu identidad desde dentro.";
 
   return (
     <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
@@ -77,23 +84,25 @@ export const TemaCentralAnio = () => {
       </div>
 
       <div className={`flex-1 flex flex-col justify-center max-w-2xl mx-auto w-full ${config.fontBody}`}>
-        <div className={`${config.highlightSecondary} rounded-lg p-8 mb-8 text-center`}>
-          <p className={`text-xl italic ${config.iconPrimary} leading-relaxed`}>
-            "Un año de introspección consciente para redefinir tu identidad desde dentro."
-          </p>
+        <div className={`${config.highlightSecondary} rounded-lg p-8 mb-8`}>
+          <div className="space-y-4 text-gray-700 text-base leading-relaxed whitespace-pre-line">
+            {textoInterpretacion}
+          </div>
         </div>
 
-        <div className="space-y-6 text-gray-700 text-lg leading-relaxed">
-          <p>
-            Este ciclo no se mide por logros externos.<br />
-            Se mide por claridad interna.
-          </p>
+        {!interpretacion && (
+          <div className="space-y-6 text-gray-700 text-lg leading-relaxed">
+            <p>
+              Este ciclo no se mide por logros externos.<br />
+              Se mide por claridad interna.
+            </p>
 
-          <p>
-            Este es el año en el que te retiras un poco…<br />
-            para volver mucho más alineada contigo.
-          </p>
-        </div>
+            <p>
+              Este es el año en el que te retiras un poco…<br />
+              para volver mucho más alineada contigo.
+            </p>
+          </div>
+        )}
 
         <div className="text-center mt-12">
           <span className={`${config.iconSecondary} opacity-40 text-2xl`}>☉</span>

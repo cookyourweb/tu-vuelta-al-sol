@@ -72,6 +72,30 @@ export const AgendaLibro = ({
     return eventos.map(formatEventForBook);
   };
 
+  // Helper: Obtener la interpretación del Retorno Solar (primer día del ciclo)
+  const getInterpretacionRetornoSolar = (): string | undefined => {
+    if (!solarCycle || !solarCycle.events || !Array.isArray(solarCycle.events)) {
+      return undefined;
+    }
+
+    // Buscar el evento de tipo 'solar_return' o el evento en la fecha de inicio
+    const eventoRetorno = solarCycle.events.find(event => {
+      if (event.eventType === 'solar_return') return true;
+
+      // También buscar por fecha (primer día del ciclo)
+      const eventDate = new Date(event.date);
+      const cicloStart = new Date(startDate);
+      return eventDate.toDateString() === cicloStart.toDateString();
+    });
+
+    if (eventoRetorno && eventoRetorno.interpretation) {
+      // Formatear la interpretación de manera compacta para el tema central
+      return formatInterpretationCompact(eventoRetorno.interpretation);
+    }
+
+    return undefined;
+  };
+
   // LOADING STATE: Cargando datos iniciales
   if (loading && !solarCycle) {
     return (
@@ -195,7 +219,7 @@ export const AgendaLibro = ({
             <CartaBienvenida name={userName} />
           </div>
           <div id="tema-central">
-            <TemaCentralAnio />
+            <TemaCentralAnio interpretacion={getInterpretacionRetornoSolar()} />
           </div>
         </div>
 
