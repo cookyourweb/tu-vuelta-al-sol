@@ -1500,6 +1500,8 @@ const AgendaPersonalizada = () => {
           sunSign={userProfile.astrological?.sun?.sign}
           moonSign={userProfile.astrological?.moon?.sign}
           ascendant={userProfile.astrological?.ascendant?.sign ? `Ascendente ${userProfile.astrological.ascendant.sign}` : undefined}
+          userId={user?.uid || ''}
+          yearLabel={selectedCycleLabel || ''}
         />
       </StyleProvider>
     );
