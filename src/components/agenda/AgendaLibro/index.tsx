@@ -6,6 +6,8 @@ import { es } from 'date-fns/locale';
 import { useStyle } from '@/context/StyleContext';
 import { StyleSwitcher } from '@/components/agenda/StyleSwitcher';
 import { Printer, X } from 'lucide-react';
+import { useInterpretaciones } from '@/hooks/useInterpretaciones';
+import { formatEventForBook, formatInterpretationCompact } from '@/utils/formatInterpretationForBook';
 
 // Secciones del libro
 import { PortadaPersonalizada, PaginaIntencion } from './PortalEntrada';
@@ -29,6 +31,8 @@ interface AgendaLibroProps {
   sunSign?: string;
   moonSign?: string;
   ascendant?: string;
+  userId: string;          // NUEVO: ID del usuario para cargar interpretaciones
+  yearLabel: string;       // NUEVO: Etiqueta del año (ej: "2025-2026")
 }
 
 export const AgendaLibro = ({
@@ -38,10 +42,22 @@ export const AgendaLibro = ({
   endDate,
   sunSign,
   moonSign,
-  ascendant
+  ascendant,
+  userId,
+  yearLabel
 }: AgendaLibroProps) => {
   const printRef = useRef<HTMLDivElement>(null);
   const { config } = useStyle();
+
+  // Hook para manejar interpretaciones
+  const {
+    solarCycle,
+    loading,
+    generatingMissing,
+    progress,
+    error,
+    getEventosForMonth
+  } = useInterpretaciones({ userId, yearLabel });
 
   const handlePrint = () => {
     // Forzar el layout antes de imprimir
@@ -49,6 +65,78 @@ export const AgendaLibro = ({
       window.print();
     }, 100);
   };
+
+  // Helper: Obtener eventos formateados para un mes específico
+  const getFormattedEventosForMonth = (monthIndex: number) => {
+    const eventos = getEventosForMonth(monthIndex);
+    return eventos.map(formatEventForBook);
+  };
+
+  // LOADING STATE: Cargando datos iniciales
+  if (loading && !solarCycle) {
+    return (
+      <div className="fixed inset-0 bg-gradient-to-br from-purple-900/95 to-pink-900/95 flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl p-8 max-w-md shadow-2xl">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto mb-4"></div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Cargando tu agenda...</h2>
+            <p className="text-gray-600">Preparando tu libro personalizado</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // GENERATING STATE: Generando interpretaciones faltantes
+  if (generatingMissing) {
+    return (
+      <div className="fixed inset-0 bg-gradient-to-br from-purple-900/95 to-pink-900/95 flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl p-8 max-w-md shadow-2xl">
+          <div className="text-center">
+            <div className="mb-6">
+              <div className="text-6xl mb-4">✨</div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                Generando interpretaciones personalizadas
+              </h2>
+              <p className="text-gray-600 mb-4">
+                Esto puede tomar 1-2 minutos la primera vez.<br />
+                ¡Siguientes veces será instantáneo!
+              </p>
+            </div>
+
+            <div className="w-full bg-gray-200 rounded-full h-4 mb-2">
+              <div
+                className="bg-gradient-to-r from-purple-500 to-pink-500 h-4 rounded-full transition-all duration-500"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <p className="text-sm text-gray-500">{progress}%</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ERROR STATE: Error cargando datos
+  if (error) {
+    return (
+      <div className="fixed inset-0 bg-gradient-to-br from-purple-900/95 to-pink-900/95 flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl p-8 max-w-md shadow-2xl">
+          <div className="text-center">
+            <div className="text-6xl mb-4">⚠️</div>
+            <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
+            <p className="text-gray-700 mb-6">{error}</p>
+            <button
+              onClick={onClose}
+              className="px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="libro-container min-h-screen bg-gray-100">
