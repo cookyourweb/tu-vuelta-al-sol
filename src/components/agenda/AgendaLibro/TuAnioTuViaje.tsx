@@ -74,6 +74,7 @@ export const TemaCentralAnio = ({ interpretacion }: TemaCentralAnioProps) => {
 
   // Si hay interpretación personalizada, usarla. Si no, usar el texto por defecto.
   const textoInterpretacion = interpretacion || "Un año de introspección consciente para redefinir tu identidad desde dentro.";
+  const esInterpretacionPersonalizada = !!interpretacion;
 
   return (
     <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
@@ -81,6 +82,17 @@ export const TemaCentralAnio = ({ interpretacion }: TemaCentralAnioProps) => {
         <span className={`${config.iconSecondary} opacity-60 text-sm tracking-[0.3em] uppercase ${config.fontBody}`}>Tu Año, Tu Viaje</span>
         <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient} mt-2`}>El tema central de tu año</h2>
         <div className={`${config.divider} w-16 mx-auto mt-4`} />
+
+        {/* Indicador de interpretación personalizada */}
+        {esInterpretacionPersonalizada ? (
+          <div className="mt-3 inline-flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full">
+            <span className="text-xs font-semibold text-purple-700">✨ Interpretación Personalizada</span>
+          </div>
+        ) : (
+          <div className="mt-3 inline-flex items-center gap-2 px-4 py-1.5 bg-gray-100 rounded-full">
+            <span className="text-xs font-medium text-gray-600">📝 Interpretación Genérica</span>
+          </div>
+        )}
       </div>
 
       <div className={`flex-1 flex flex-col justify-center max-w-2xl mx-auto w-full ${config.fontBody}`}>

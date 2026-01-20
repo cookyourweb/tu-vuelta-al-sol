@@ -75,22 +75,61 @@ export const AgendaLibro = ({
   // Helper: Obtener la interpretación del Retorno Solar (primer día del ciclo)
   const getInterpretacionRetornoSolar = (): string | undefined => {
     if (!solarCycle || !solarCycle.events || !Array.isArray(solarCycle.events)) {
+      console.log('❌ No hay solarCycle.events disponible');
       return undefined;
     }
 
+    console.log('🔍 Buscando evento de Retorno Solar...');
+    console.log('📅 Fecha de inicio del ciclo:', startDate);
+    console.log('📊 Total de eventos:', solarCycle.events.length);
+
     // Buscar el evento de tipo 'solar_return' o el evento en la fecha de inicio
     const eventoRetorno = solarCycle.events.find(event => {
-      if (event.eventType === 'solar_return') return true;
+      console.log('🔎 Revisando evento:', event.eventType, 'en fecha', event.date);
+
+      // Buscar por tipo de evento
+      if (event.eventType === 'solar_return') {
+        console.log('✅ Encontrado por tipo: solar_return');
+        return true;
+      }
+
+      // Buscar eventos de cumpleaños
+      if (event.eventType === 'birthday') {
+        console.log('✅ Encontrado por tipo: birthday');
+        return true;
+      }
 
       // También buscar por fecha (primer día del ciclo)
       const eventDate = new Date(event.date);
       const cicloStart = new Date(startDate);
-      return eventDate.toDateString() === cicloStart.toDateString();
+
+      // Comparar solo año, mes y día (ignorar hora)
+      if (
+        eventDate.getFullYear() === cicloStart.getFullYear() &&
+        eventDate.getMonth() === cicloStart.getMonth() &&
+        eventDate.getDate() === cicloStart.getDate()
+      ) {
+        console.log('✅ Encontrado por fecha coincidente');
+        return true;
+      }
+
+      return false;
     });
 
-    if (eventoRetorno && eventoRetorno.interpretation) {
-      // Formatear la interpretación de manera compacta para el tema central
-      return formatInterpretationCompact(eventoRetorno.interpretation);
+    if (eventoRetorno) {
+      console.log('🎯 Evento encontrado:', eventoRetorno);
+      console.log('📝 Tiene interpretación?', !!eventoRetorno.interpretation);
+
+      if (eventoRetorno.interpretation) {
+        // Formatear la interpretación de manera compacta para el tema central
+        const interpretacionFormateada = formatInterpretationCompact(eventoRetorno.interpretation);
+        console.log('✨ Interpretación formateada:', interpretacionFormateada.substring(0, 100) + '...');
+        return interpretacionFormateada;
+      } else {
+        console.log('⚠️ El evento no tiene interpretación');
+      }
+    } else {
+      console.log('❌ No se encontró evento de Retorno Solar');
     }
 
     return undefined;
