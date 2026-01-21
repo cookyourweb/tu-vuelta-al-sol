@@ -162,7 +162,8 @@ async function getCachedInterpretation(
 async function saveCachedInterpretation(
   userId: string,
   eventId: string,
-  interpretation: UltraPersonalizedEventInterpretation
+  interpretation: UltraPersonalizedEventInterpretation,
+  eventContext: EventContext
 ): Promise<void> {
   try {
     await connectDB();
@@ -171,9 +172,34 @@ async function saveCachedInterpretation(
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 90);
 
+    // Mapear eventType del contexto al formato del modelo
+    const mapEventType = (type: string): 'luna_nueva' | 'luna_llena' | 'transito' | 'aspecto' => {
+      if (type === 'lunar_phase') {
+        // Determinar si es luna nueva o llena por el título
+        if (eventContext.eventTitle.toLowerCase().includes('nueva')) {
+          return 'luna_nueva';
+        } else if (eventContext.eventTitle.toLowerCase().includes('llena')) {
+          return 'luna_llena';
+        }
+        return 'luna_nueva'; // default
+      }
+      if (type === 'planetary_transit' || type === 'retrograde') {
+        return 'transito';
+      }
+      return 'aspecto';
+    };
+
     await EventInterpretation.create({
       userId,
       eventId,
+      eventType: mapEventType(eventContext.eventType),
+      eventDate: new Date(eventContext.eventDate),
+      eventDetails: {
+        sign: eventContext.sign,
+        house: eventContext.house,
+        planetsInvolved: eventContext.planet ? [eventContext.planet] : undefined,
+        transitingPlanet: eventContext.planet,
+      },
       interpretation,
       expiresAt,
       method: 'openai',
@@ -400,7 +426,7 @@ export async function generateUltraPersonalizedInterpretation(
     };
 
     // 4. Guardar en caché para futuro
-    await saveCachedInterpretation(userProfile.userId, eventId, interpretation);
+    await saveCachedInterpretation(userProfile.userId, eventId, interpretation, event);
 
     return interpretation;
 

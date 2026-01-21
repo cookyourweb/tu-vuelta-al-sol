@@ -110,9 +110,24 @@ export async function buildUserProfile(userId: string, currentYear: number) {
   // 3. Extraer datos astrológicos del natalChart
   const natalData = natalChartDoc.natalChart;
 
-  // El natalChart puede tener diferentes estructuras según cómo se generó
-  // Intentamos acceder a las posiciones planetarias de forma flexible
-  const planets = natalData.planets || natalData.planetas || natalData;
+  // El natalChart tiene un array de planetas, no un objeto indexado
+  const planetsArray = natalData.planets || natalData.planetas || [];
+
+  // Helper: Buscar planeta por nombre en el array
+  const findPlanet = (names: string[]): any => {
+    return planetsArray.find((p: any) => names.includes(p.name));
+  };
+
+  // Buscar cada planeta
+  const sol = findPlanet(['Sol', 'Sun']);
+  const luna = findPlanet(['Luna', 'Moon']);
+  const mercurio = findPlanet(['Mercurio', 'Mercury']);
+  const venus = findPlanet(['Venus']);
+  const marte = findPlanet(['Marte', 'Mars']);
+  const saturno = findPlanet(['Saturno', 'Saturn']);
+
+  // Obtener ascendente
+  const ascendente = natalData.ascendant || natalData.ascendente;
 
   const birthDate = new Date(birthData.birthDate);
   const currentAge = currentYear - birthDate.getFullYear();
@@ -123,31 +138,31 @@ export async function buildUserProfile(userId: string, currentYear: number) {
     currentAge,
     natal: {
       sun: {
-        sign: planets.sun?.sign || planets.sol?.signo || 'Desconocido',
-        house: planets.sun?.house || planets.sol?.casa || 1
+        sign: sol?.sign || 'Desconocido',
+        house: sol?.house || sol?.housePosition || sol?.houseNumber || 1
       },
       moon: {
-        sign: planets.moon?.sign || planets.luna?.signo || 'Desconocido',
-        house: planets.moon?.house || planets.luna?.casa || 1
+        sign: luna?.sign || 'Desconocido',
+        house: luna?.house || luna?.housePosition || luna?.houseNumber || 1
       },
       rising: {
-        sign: planets.ascendant?.sign || planets.ascendente?.signo || natalData.ascendant?.sign || 'Desconocido'
+        sign: ascendente?.sign || 'Desconocido'
       },
-      mercury: planets.mercury || planets.mercurio ? {
-        sign: planets.mercury?.sign || planets.mercurio?.signo || 'Desconocido',
-        house: planets.mercury?.house || planets.mercurio?.casa || 1
+      mercury: mercurio ? {
+        sign: mercurio.sign || 'Desconocido',
+        house: mercurio.house || mercurio.housePosition || mercurio.houseNumber || 1
       } : undefined,
-      venus: planets.venus ? {
-        sign: planets.venus?.sign || planets.venus?.signo || 'Desconocido',
-        house: planets.venus?.house || planets.venus?.casa || 1
+      venus: venus ? {
+        sign: venus.sign || 'Desconocido',
+        house: venus.house || venus.housePosition || venus.houseNumber || 1
       } : undefined,
-      mars: planets.mars || planets.marte ? {
-        sign: planets.mars?.sign || planets.marte?.signo || 'Desconocido',
-        house: planets.mars?.house || planets.marte?.casa || 1
+      mars: marte ? {
+        sign: marte.sign || 'Desconocido',
+        house: marte.house || marte.housePosition || marte.houseNumber || 1
       } : undefined,
-      saturn: planets.saturn || planets.saturno ? {
-        sign: planets.saturn?.sign || planets.saturno?.signo || 'Desconocido',
-        house: planets.saturn?.house || planets.saturno?.casa || 1
+      saturn: saturno ? {
+        sign: saturno.sign || 'Desconocido',
+        house: saturno.house || saturno.housePosition || saturno.houseNumber || 1
       } : undefined
     }
   };
@@ -157,7 +172,9 @@ export async function buildUserProfile(userId: string, currentYear: number) {
     name: profile.name,
     age: profile.currentAge,
     sun: profile.natal.sun,
-    moon: profile.natal.moon
+    moon: profile.natal.moon,
+    rising: profile.natal.rising,
+    planetsFound: planetsArray.length
   });
 
   return profile;
