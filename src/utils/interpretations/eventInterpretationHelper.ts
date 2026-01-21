@@ -72,6 +72,7 @@ export function eventToContext(event: AstrologicalEvent) {
   const house = event.metadata?.house || event.metadata?.casa;
 
   return {
+    eventId: event.id, // ✅ NUEVO: Usar el ID único del evento
     eventType,
     eventDate: event.date.toISOString(),
     eventTitle: event.title,

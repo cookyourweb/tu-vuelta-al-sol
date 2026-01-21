@@ -39,6 +39,7 @@ export interface UltraPersonalizedEventInterpretation {
 }
 
 interface EventContext {
+  eventId: string;   // ✅ NUEVO: ID único del evento desde AstrologicalEvent
   eventType: 'lunar_phase' | 'eclipse' | 'retrograde' | 'planetary_transit' | 'seasonal';
   eventDate: string;
   eventTitle: string;
@@ -361,7 +362,8 @@ export async function generateUltraPersonalizedInterpretation(
   }
 ): Promise<UltraPersonalizedEventInterpretation> {
 
-  const eventId = `${event.eventType}_${event.eventDate}_${event.sign}`;
+  // ✅ FIX: Usar el eventId único del evento en lugar de generarlo sintéticamente
+  const eventId = event.eventId;
 
   // 1. Intentar caché primero (ahorro de $$$)
   if (!options?.skipCache) {

@@ -72,8 +72,6 @@ interface TemaCentralAnioProps {
 export const TemaCentralAnio = ({ interpretacion }: TemaCentralAnioProps) => {
   const { config } = useStyle();
 
-  // Si hay interpretación personalizada, usarla. Si no, usar el texto por defecto.
-  const textoInterpretacion = interpretacion || "Un año de introspección consciente para redefinir tu identidad desde dentro.";
   const esInterpretacionPersonalizada = !!interpretacion;
 
   return (
@@ -89,30 +87,44 @@ export const TemaCentralAnio = ({ interpretacion }: TemaCentralAnioProps) => {
             <span className="text-xs font-semibold text-purple-700">✨ Interpretación Personalizada</span>
           </div>
         ) : (
-          <div className="mt-3 inline-flex items-center gap-2 px-4 py-1.5 bg-gray-100 rounded-full">
-            <span className="text-xs font-medium text-gray-600">📝 Interpretación Genérica</span>
+          <div className="mt-3 inline-flex flex-col items-center gap-3 px-6 py-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border-2 border-amber-200 no-print">
+            <span className="text-sm font-semibold text-amber-800">⚠️ Interpretación No Disponible</span>
+            <p className="text-xs text-amber-700 text-center max-w-md">
+              Para ver el tema central de tu año personalizado, necesitas generar primero tu <strong>Retorno Solar (Revolución Solar)</strong>.
+            </p>
+            <a
+              href="/solar-return"
+              className="mt-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-semibold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all no-underline"
+            >
+              Generar Retorno Solar →
+            </a>
+            <p className="text-xs text-amber-600 italic mt-1">
+              Una vez generado, recarga esta página para ver tu interpretación
+            </p>
           </div>
         )}
       </div>
 
       <div className={`flex-1 flex flex-col justify-center max-w-2xl mx-auto w-full ${config.fontBody}`}>
-        <div className={`${config.highlightSecondary} rounded-lg p-8 mb-8`}>
-          <div className="space-y-4 text-gray-700 text-base leading-relaxed whitespace-pre-line">
-            {textoInterpretacion}
+        {esInterpretacionPersonalizada ? (
+          <div className={`${config.highlightSecondary} rounded-lg p-8 mb-8`}>
+            <div className="space-y-4 text-gray-700 text-base leading-relaxed whitespace-pre-line">
+              {interpretacion}
+            </div>
           </div>
-        </div>
-
-        {!interpretacion && (
-          <div className="space-y-6 text-gray-700 text-lg leading-relaxed">
-            <p>
-              Este ciclo no se mide por logros externos.<br />
-              Se mide por claridad interna.
-            </p>
-
-            <p>
-              Este es el año en el que te retiras un poco…<br />
-              para volver mucho más alineada contigo.
-            </p>
+        ) : (
+          <div className={`${config.highlightSecondary} rounded-lg p-8 mb-8 opacity-50`}>
+            <div className="space-y-6 text-gray-500 text-lg leading-relaxed italic text-center">
+              <p>
+                Esta página mostrará el tema central de tu año solar<br />
+                una vez que generes tu Retorno Solar.
+              </p>
+              <p className="text-sm">
+                El Retorno Solar es tu carta astrológica anual,<br />
+                calculada para el momento exacto en que el Sol regresa<br />
+                a la posición que tenía cuando naciste.
+              </p>
+            </div>
           </div>
         )}
 

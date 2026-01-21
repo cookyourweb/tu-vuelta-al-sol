@@ -284,11 +284,13 @@ export const AgendaLibro = ({
             startDate={startDate}
             endDate={endDate}
             userName={userName}
+            hasSolarReturn={!!getInterpretacionRetornoSolar()}
           />
           <TuAnioCiclos
             startDate={startDate}
             endDate={endDate}
             userName={userName}
+            hasSolarReturn={!!getInterpretacionRetornoSolar()}
           />
         </div>
 
