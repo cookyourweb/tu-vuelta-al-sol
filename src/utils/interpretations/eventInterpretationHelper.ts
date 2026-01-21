@@ -11,6 +11,7 @@ import type {
 } from '@/services/eventInterpretationServiceV2';
 import type { AstrologicalEvent } from '@/models/SolarCycle';
 import BirthData from '@/models/BirthData';
+import NatalChart from '@/models/NatalChart';
 
 /**
  * Determina si un evento es lo suficientemente importante para generar interpretación
@@ -83,58 +84,81 @@ export function eventToContext(event: AstrologicalEvent) {
 
 /**
  * Construye el perfil de usuario necesario para generar interpretaciones
+ * ✅ FIX: Ahora obtiene datos astrológicos del NatalChart model, no de BirthData
  */
 export async function buildUserProfile(userId: string, currentYear: number) {
+  // 1. Obtener datos básicos de nacimiento
   const birthData = await BirthData.findByUserId(userId);
 
   if (!birthData) {
     throw new Error('No se encontraron datos del usuario');
   }
 
-  // Cast to any to access dynamic astrological field
-  const birthDataAny = birthData as any;
+  // 2. Obtener carta natal con cálculos astrológicos
+  const natalChartDoc = await NatalChart.findOne({
+    $or: [
+      { userId: userId },
+      { uid: userId }
+    ],
+    chartType: 'natal'
+  });
 
-  if (!birthDataAny.astrological) {
-    throw new Error('No se encontraron datos astrológicos del usuario');
+  if (!natalChartDoc || !natalChartDoc.natalChart) {
+    throw new Error('No se encontraron datos astrológicos del usuario. Por favor, genera tu carta natal primero.');
   }
+
+  // 3. Extraer datos astrológicos del natalChart
+  const natalData = natalChartDoc.natalChart;
+
+  // El natalChart puede tener diferentes estructuras según cómo se generó
+  // Intentamos acceder a las posiciones planetarias de forma flexible
+  const planets = natalData.planets || natalData.planetas || natalData;
 
   const birthDate = new Date(birthData.birthDate);
   const currentAge = currentYear - birthDate.getFullYear();
 
   const profile = {
     userId,
-    name: birthDataAny.name || birthData.fullName || 'Usuario',
+    name: birthData.fullName || 'Usuario',
     currentAge,
     natal: {
       sun: {
-        sign: birthDataAny.astrological.sun?.sign || 'Desconocido',
-        house: birthDataAny.astrological.sun?.house || 1
+        sign: planets.sun?.sign || planets.sol?.signo || 'Desconocido',
+        house: planets.sun?.house || planets.sol?.casa || 1
       },
       moon: {
-        sign: birthDataAny.astrological.moon?.sign || 'Desconocido',
-        house: birthDataAny.astrological.moon?.house || 1
+        sign: planets.moon?.sign || planets.luna?.signo || 'Desconocido',
+        house: planets.moon?.house || planets.luna?.casa || 1
       },
       rising: {
-        sign: birthDataAny.astrological.ascendant?.sign || 'Desconocido'
+        sign: planets.ascendant?.sign || planets.ascendente?.signo || natalData.ascendant?.sign || 'Desconocido'
       },
-      mercury: birthDataAny.astrological.mercury ? {
-        sign: birthDataAny.astrological.mercury.sign,
-        house: birthDataAny.astrological.mercury.house || 1
+      mercury: planets.mercury || planets.mercurio ? {
+        sign: planets.mercury?.sign || planets.mercurio?.signo || 'Desconocido',
+        house: planets.mercury?.house || planets.mercurio?.casa || 1
       } : undefined,
-      venus: birthDataAny.astrological.venus ? {
-        sign: birthDataAny.astrological.venus.sign,
-        house: birthDataAny.astrological.venus.house || 1
+      venus: planets.venus ? {
+        sign: planets.venus?.sign || planets.venus?.signo || 'Desconocido',
+        house: planets.venus?.house || planets.venus?.casa || 1
       } : undefined,
-      mars: birthDataAny.astrological.mars ? {
-        sign: birthDataAny.astrological.mars.sign,
-        house: birthDataAny.astrological.mars.house || 1
+      mars: planets.mars || planets.marte ? {
+        sign: planets.mars?.sign || planets.marte?.signo || 'Desconocido',
+        house: planets.mars?.house || planets.marte?.casa || 1
       } : undefined,
-      saturn: birthDataAny.astrological.saturn ? {
-        sign: birthDataAny.astrological.saturn.sign,
-        house: birthDataAny.astrological.saturn.house || 1
+      saturn: planets.saturn || planets.saturno ? {
+        sign: planets.saturn?.sign || planets.saturno?.signo || 'Desconocido',
+        house: planets.saturn?.house || planets.saturno?.casa || 1
       } : undefined
     }
   };
+
+  console.log('✅ [BUILD_PROFILE] Perfil de usuario construido:', {
+    userId,
+    name: profile.name,
+    age: profile.currentAge,
+    sun: profile.natal.sun,
+    moon: profile.natal.moon
+  });
 
   return profile;
 }
