@@ -149,9 +149,10 @@ export const AgendaLibro = ({
       return undefined;
     }
 
-    // El tema central del año puede estar en varios campos posibles
+    // ✅ NUEVO: El tema central está en apertura_anual.tema_central (nueva estructura)
     const temaCentral =
-      interpretation.tema_central_del_anio ||
+      interpretation.apertura_anual?.tema_central ||
+      interpretation.tema_central_del_anio ||  // Fallback para estructura vieja
       interpretation.tema_central ||
       interpretation.overview ||
       interpretation.mensaje_principal;
@@ -162,6 +163,7 @@ export const AgendaLibro = ({
     }
 
     console.log('⚠️ [SOLAR_RETURN] No se encontró campo de tema central');
+    console.log('📦 [SOLAR_RETURN] Estructura disponible:', Object.keys(interpretation));
     return undefined;
   };
 
