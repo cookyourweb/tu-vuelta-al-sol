@@ -86,7 +86,14 @@ export function useInterpretaciones({
         throw new Error(cycleData.error || 'Error al cargar el ciclo solar');
       }
 
-      setSolarCycle(cycleData.data);
+      // ✅ FIX: La API devuelve data.cycle, no data directamente
+      const cycle = cycleData.data.cycle || cycleData.data;
+
+      console.log('🔍 Ciclo cargado:', cycle);
+      console.log('📊 Tiene events?', !!cycle?.events);
+      console.log('📈 Número de events:', cycle?.events?.length || 0);
+
+      setSolarCycle(cycle);
 
       // 2. Verificar interpretaciones faltantes
       const checkResponse = await fetch(
