@@ -81,6 +81,7 @@ export const AgendaLibro = ({
           setSolarReturnInterpretation(data);
         } else {
           console.log('⚠️ [SOLAR_RETURN] No se encontró interpretación de Retorno Solar');
+          setSolarReturnInterpretation(null);
         }
       } catch (error) {
         console.error('❌ [SOLAR_RETURN] Error al cargar interpretación:', error);
@@ -90,6 +91,29 @@ export const AgendaLibro = ({
     };
 
     fetchSolarReturnInterpretation();
+
+    // ✅ NUEVO: Recargar cuando el usuario vuelve a la pestaña/ventana
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('👁️ [SOLAR_RETURN] Pestaña visible, recargando interpretación...');
+        fetchSolarReturnInterpretation();
+      }
+    };
+
+    const handleFocus = () => {
+      console.log('🎯 [SOLAR_RETURN] Ventana en foco, recargando interpretación...');
+      fetchSolarReturnInterpretation();
+    };
+
+    // Escuchar cambios de visibilidad y foco
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [userId]);
 
   const handlePrint = () => {
