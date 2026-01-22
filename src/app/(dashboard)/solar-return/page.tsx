@@ -183,7 +183,8 @@ export default function SolarReturnPage() {
       // STEP 4: Load Solar Return Interpretation (for comparaciones_planetarias)
       try {
         const token = await user?.getIdToken();
-        const srInterpretationResponse = await fetch(`/api/astrology/interpret-solar-return?userId=${user?.uid}&year=${new Date().getFullYear()}`, {
+        // ✅ FIX: Removed &year= parameter (not in Interpretation model)
+        const srInterpretationResponse = await fetch(`/api/astrology/interpret-solar-return?userId=${user?.uid}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'

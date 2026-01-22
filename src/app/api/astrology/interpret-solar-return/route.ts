@@ -807,7 +807,8 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
-    const year = searchParams.get('year'); // ⭐ FIX: Obtener año para filtrar
+    // ✅ REMOVED: year parameter (field doesn't exist in Interpretation model)
+    // const year = searchParams.get('year');
 
     if (!userId) {
       return NextResponse.json(
@@ -818,17 +819,14 @@ export async function GET(request: NextRequest) {
 
     await connectDB();
 
-    // ⭐ FIX: Filtrar por año si se proporciona
+    // ✅ SIMPLE FILTER: Just get the most recent non-expired Solar Return
     const filter: any = {
       userId,
       chartType: 'solar-return',
       expiresAt: { $gt: new Date() }
     };
 
-    if (year) {
-      filter.year = parseInt(year);
-      console.log(`🔍 [GET SR] Filtering by year: ${year}`);
-    }
+    console.log(`🔍 [GET SR] Finding Solar Return for user: ${userId}`);
 
     const interpretationDoc = await Interpretation.findOne(filter)
     .sort({ generatedAt: -1 })
