@@ -84,7 +84,6 @@ export default function PlanetaryCards() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
-  const [showCards, setShowCards] = useState(false);
 
   const handleGenerateCards = async () => {
     if (!user) {
@@ -113,7 +112,6 @@ export default function PlanetaryCards() {
 
       if (data.success) {
         setCards(data.cards);
-        setShowCards(true);
       } else {
         setError(data.error || 'Error generando fichas planetarias');
       }
@@ -129,83 +127,45 @@ export default function PlanetaryCards() {
     setExpandedCard(expandedCard === planeta ? null : planeta);
   };
 
-  if (!showCards) {
+  // Si no hay fichas generadas, mostrar solo el botón
+  if (cards.length === 0) {
     return (
-      <div className="bg-gradient-to-br from-purple-900/40 to-indigo-900/40 rounded-2xl p-6 border border-purple-400/30">
-        <div className="flex items-center gap-3 mb-4">
-          <span className="text-3xl">🌟</span>
-          <div>
-            <h2 className="text-2xl font-bold text-white">Planetas Activos del Año</h2>
-            <p className="text-purple-200 text-sm">
-              Manuales de uso para cada planeta clave de tu año solar
-            </p>
-          </div>
-        </div>
-
-        <p className="text-purple-100 mb-6 leading-relaxed">
-          Estas fichas te explican cómo los planetas activos este año modulan <strong>TODOS</strong> los eventos
-          de tu agenda (Lunas, retrogradaciones, eclipses). Son tu contexto anual.
-        </p>
-
+      <div className="bg-gradient-to-br from-purple-900/40 to-indigo-900/40 rounded-2xl p-4 border border-purple-400/30">
         <button
           onClick={handleGenerateCards}
           disabled={loading}
-          className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg
-                     bg-gradient-to-r from-purple-600 to-pink-600
-                     hover:from-purple-700 hover:to-pink-700
-                     text-white font-semibold
+          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg
+                     bg-gradient-to-r from-yellow-500 to-orange-500
+                     hover:from-yellow-600 hover:to-orange-600
+                     text-white font-semibold text-sm
                      transition-all duration-200
                      disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (
             <>
-              <Loader2 className="w-5 h-5 animate-spin" />
-              Generando fichas planetarias...
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Generando...
             </>
           ) : (
             <>
-              <Sparkles className="w-5 h-5" />
-              Generar Fichas Planetarias
+              <Sparkles className="w-4 h-4" />
+              Ver Fichas Planetarias
             </>
           )}
         </button>
 
         {error && (
-          <div className="mt-4 p-3 bg-red-900/30 border border-red-400/30 rounded-lg">
-            <div className="flex items-start gap-2">
-              <AlertCircle className="w-5 h-5 text-red-400 mt-0.5" />
-              <div className="flex-1">
-                <p className="text-red-200 text-sm">{error}</p>
-                <button
-                  onClick={handleGenerateCards}
-                  className="mt-2 text-red-100 text-sm underline hover:text-white"
-                >
-                  Reintentar
-                </button>
-              </div>
-            </div>
+          <div className="mt-2 p-2 bg-red-900/30 border border-red-400/30 rounded-lg">
+            <p className="text-red-200 text-xs text-center">{error}</p>
           </div>
         )}
       </div>
     );
   }
 
+  // Si hay fichas generadas, mostrarlas (compacto para sidebar)
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <span className="text-3xl">🌟</span>
-          <div>
-            <h2 className="text-2xl font-bold text-white">Planetas Activos del Año</h2>
-            <p className="text-purple-200 text-sm">
-              {cards.length} {cards.length === 1 ? 'planeta' : 'planetas'} clave de tu año solar
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* FICHAS DE PLANETAS */}
-      <div className="space-y-3">
+    <div className="space-y-2">
         {cards.map((card) => (
           <div
             key={card.planeta}
@@ -214,24 +174,21 @@ export default function PlanetaryCards() {
             {/* HEADER DE LA FICHA */}
             <button
               onClick={() => toggleCard(card.planeta)}
-              className="w-full p-5 flex items-center justify-between hover:bg-white/5 transition-colors"
+              className="w-full p-3 flex items-center justify-between hover:bg-white/5 transition-colors"
             >
-              <div className="flex items-center gap-4">
-                <span className="text-4xl">{card.simbolo}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">{card.simbolo}</span>
                 <div className="text-left">
-                  <h3 className="text-xl font-bold text-white">{card.planeta.toUpperCase()} DEL AÑO</h3>
-                  <p className="text-purple-200 text-sm">
-                    {card.quien_eres_natal.posicion_completa} → {card.que_se_activa_este_anio.posicion_completa}
-                  </p>
-                  <p className="text-yellow-300 text-xs mt-1">
-                    📅 {card.que_se_activa_este_anio.periodo}
+                  <h3 className="text-sm font-bold text-white">{card.planeta}</h3>
+                  <p className="text-purple-200 text-xs">
+                    {card.que_se_activa_este_anio.periodo}
                   </p>
                 </div>
               </div>
               {expandedCard === card.planeta ? (
-                <ChevronUp className="w-6 h-6 text-purple-300" />
+                <ChevronUp className="w-4 h-4 text-purple-300" />
               ) : (
-                <ChevronDown className="w-6 h-6 text-purple-300" />
+                <ChevronDown className="w-4 h-4 text-purple-300" />
               )}
             </button>
 
