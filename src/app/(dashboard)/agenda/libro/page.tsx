@@ -264,12 +264,6 @@ export default function LibroAgendaPage() {
           apertura={bookContent.apertura_del_viaje}
         />
 
-        {/* PRIMER DÍA DEL CICLO */}
-        <PrimerDiaCiclo
-          fecha={startDate}
-          nombre={bookContent.userName}
-        />
-
         {/* TU AÑO TU VIAJE */}
         <TuAnioTuViaje
           userName={bookContent.userName}
@@ -288,6 +282,12 @@ export default function LibroAgendaPage() {
           solarReturn={bookContent.solarReturn}
           tuAñoAstrologico={bookContent.tu_año_astrologico}
           startDate={startDate}
+        />
+
+        {/* PRIMER DÍA DEL CICLO */}
+        <PrimerDiaCiclo
+          fecha={startDate}
+          nombre={bookContent.userName}
         />
 
         {/* CALENDARIO ANUAL */}
