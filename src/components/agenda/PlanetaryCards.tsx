@@ -441,7 +441,6 @@ export default function PlanetaryCards() {
             )}
           </div>
         ))}
-      </div>
     </div>
   );
 }
