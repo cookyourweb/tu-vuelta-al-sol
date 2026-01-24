@@ -85,8 +85,13 @@ export const LineaTiempoEmocional: React.FC<{
 };
 
 // ============ MESES CLAVE Y PUNTOS DE GIRO - CON ESTILOS ============
-export const MesesClavePuntosGiro: React.FC = () => {
+interface MesesClavePuntosGiroProps {
+  lineaTiempo?: any[];
+}
+
+export const MesesClavePuntosGiro: React.FC<MesesClavePuntosGiroProps> = ({ lineaTiempo }) => {
   const { config } = useStyle();
+  const tieneContenidoPersonalizado = !!(lineaTiempo && lineaTiempo.length > 0);
 
   return (
     <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
@@ -104,28 +109,58 @@ export const MesesClavePuntosGiro: React.FC = () => {
 
       {/* Grid de puntos de giro */}
       <div className="flex-1 space-y-4">
-        {[1, 2, 3, 4].map((num) => (
-          <div key={num} className={`${config.highlightSecondary} rounded-lg p-4`}>
-            <div className="flex items-center gap-3 mb-3">
-              <span className={`${config.iconPrimary} text-xl font-bold`}>{num}.</span>
-              <div className="flex-1 border-b-2 border-dashed border-gray-300 h-6" />
+        {tieneContenidoPersonalizado ? (
+          lineaTiempo.slice(0, 6).map((evento, idx) => (
+            <div key={idx} className={`${config.highlightSecondary} rounded-lg p-4`}>
+              <div className="flex items-center gap-3 mb-3">
+                <span className={`${config.iconPrimary} text-xl font-bold`}>{idx + 1}.</span>
+                <h4 className={`${config.iconPrimary} font-medium flex-1`}>
+                  {evento.mes || evento.periodo || evento.titulo || `Evento ${idx + 1}`}
+                </h4>
+              </div>
+              <div className="text-sm mb-2">
+                {evento.evento && (
+                  <div className="mb-2">
+                    <span className={`${config.iconSecondary} text-xs uppercase`}>Evento:</span>
+                    <p className="text-gray-700 mt-1">{evento.evento}</p>
+                  </div>
+                )}
+                {evento.significado && (
+                  <div>
+                    <span className={`${config.iconSecondary} text-xs uppercase`}>Significado:</span>
+                    <p className="text-gray-700 mt-1">{evento.significado}</p>
+                  </div>
+                )}
+                {evento.descripcion && !evento.significado && (
+                  <p className="text-gray-700">{evento.descripcion}</p>
+                )}
+              </div>
             </div>
-            <div className="grid grid-cols-2 gap-4 text-sm mb-3">
-              <div>
-                <span className={`${config.iconSecondary} text-xs uppercase`}>Mes:</span>
-                <div className="h-6 border-b border-dashed border-gray-300 mt-1" />
+          ))
+        ) : (
+          [1, 2, 3, 4].map((num) => (
+            <div key={num} className={`${config.highlightSecondary} rounded-lg p-4`}>
+              <div className="flex items-center gap-3 mb-3">
+                <span className={`${config.iconPrimary} text-xl font-bold`}>{num}.</span>
+                <div className="flex-1 border-b-2 border-dashed border-gray-300 h-6" />
+              </div>
+              <div className="grid grid-cols-2 gap-4 text-sm mb-3">
+                <div>
+                  <span className={`${config.iconSecondary} text-xs uppercase`}>Mes:</span>
+                  <div className="h-6 border-b border-dashed border-gray-300 mt-1" />
+                </div>
+                <div>
+                  <span className={`${config.iconSecondary} text-xs uppercase`}>Evento astrológico:</span>
+                  <div className="h-6 border-b border-dashed border-gray-300 mt-1" />
+                </div>
               </div>
               <div>
-                <span className={`${config.iconSecondary} text-xs uppercase`}>Evento astrológico:</span>
-                <div className="h-6 border-b border-dashed border-gray-300 mt-1" />
+                <span className={`${config.iconSecondary} text-xs uppercase`}>Qué significa para ti:</span>
+                <div className="h-12 border-b border-dashed border-gray-300 mt-1" />
               </div>
             </div>
-            <div>
-              <span className={`${config.iconSecondary} text-xs uppercase`}>Qué significa para ti:</span>
-              <div className="h-12 border-b border-dashed border-gray-300 mt-1" />
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       <FooterLibro pagina={12} />
@@ -134,8 +169,13 @@ export const MesesClavePuntosGiro: React.FC = () => {
 };
 
 // ============ GRANDES APRENDIZAJES - CON ESTILOS ============
-export const GrandesAprendizajes: React.FC = () => {
+interface GrandesAprendizajesProps {
+  clavesIntegracion?: string[];
+}
+
+export const GrandesAprendizajes: React.FC<GrandesAprendizajesProps> = ({ clavesIntegracion }) => {
   const { config } = useStyle();
+  const tieneContenidoPersonalizado = !!(clavesIntegracion && clavesIntegracion.length > 0);
 
   return (
     <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
@@ -147,32 +187,47 @@ export const GrandesAprendizajes: React.FC = () => {
         <h2 className={`text-2xl ${config.titleGradient}`}>Grandes Aprendizajes del Ciclo</h2>
         <div className={`${config.divider} w-24 mx-auto mt-4`} />
         <p className={`text-sm italic ${config.iconSecondary} mt-4`}>
-          Los temas que este año viene a enseñarte, basados en los tránsitos mayores.
+          {tieneContenidoPersonalizado
+            ? 'Claves de integración para tu año basadas en tu Solar Return'
+            : 'Los temas que este año viene a enseñarte, basados en los tránsitos mayores.'}
         </p>
       </div>
 
       {/* Aprendizajes */}
-      <div className="flex-1 space-y-5">
-        <div className={`${config.highlightSecondary} rounded-lg p-5`}>
-          <h4 className={`${config.iconSecondary} font-medium mb-3 flex items-center gap-2`}>
-            <span className="text-lg">♄</span> Saturno te enseña:
-          </h4>
-          <div className="h-20 border-b border-dashed border-gray-300" />
-        </div>
+      <div className="flex-1 space-y-4">
+        {tieneContenidoPersonalizado ? (
+          clavesIntegracion.map((clave, idx) => (
+            <div key={idx} className={`${idx % 3 === 0 ? config.highlightPrimary : idx % 3 === 1 ? config.highlightSecondary : config.highlightAccent} rounded-lg p-5`}>
+              <div className="flex items-start gap-3">
+                <span className={`${config.iconPrimary} text-xl font-bold mt-1`}>✧</span>
+                <p className="text-gray-700 leading-relaxed flex-1">{clave}</p>
+              </div>
+            </div>
+          ))
+        ) : (
+          <>
+            <div className={`${config.highlightSecondary} rounded-lg p-5`}>
+              <h4 className={`${config.iconSecondary} font-medium mb-3 flex items-center gap-2`}>
+                <span className="text-lg">♄</span> Saturno te enseña:
+              </h4>
+              <div className="h-20 border-b border-dashed border-gray-300" />
+            </div>
 
-        <div className={`${config.highlightPrimary} rounded-lg p-5`}>
-          <h4 className={`${config.iconPrimary} font-medium mb-3 flex items-center gap-2`}>
-            <span className="text-lg">♃</span> Júpiter te expande:
-          </h4>
-          <div className="h-20 border-b border-dashed border-gray-300" />
-        </div>
+            <div className={`${config.highlightPrimary} rounded-lg p-5`}>
+              <h4 className={`${config.iconPrimary} font-medium mb-3 flex items-center gap-2`}>
+                <span className="text-lg">♃</span> Júpiter te expande:
+              </h4>
+              <div className="h-20 border-b border-dashed border-gray-300" />
+            </div>
 
-        <div className={`${config.highlightAccent} rounded-lg p-5`}>
-          <h4 className={`${config.iconAccent} font-medium mb-3 flex items-center gap-2`}>
-            <span className="text-lg">♇</span> Plutón transforma:
-          </h4>
-          <div className="h-20 border-b border-dashed border-gray-300" />
-        </div>
+            <div className={`${config.highlightAccent} rounded-lg p-5`}>
+              <h4 className={`${config.iconAccent} font-medium mb-3 flex items-center gap-2`}>
+                <span className="text-lg">♇</span> Plutón transforma:
+              </h4>
+              <div className="h-20 border-b border-dashed border-gray-300" />
+            </div>
+          </>
+        )}
       </div>
 
       {/* Cita */}

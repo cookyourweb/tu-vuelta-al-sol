@@ -242,6 +242,18 @@ export const AgendaLibro = ({
     };
   };
 
+  // Helper: Obtener claves de integración del SR
+  const getClavesIntegracion = (): string[] | undefined => {
+    const interpretation = getSRInterpretation();
+    return interpretation?.claves_integracion;
+  };
+
+  // Helper: Obtener línea de tiempo anual del SR
+  const getLineaTiempoAnual = (): any[] | undefined => {
+    const interpretation = getSRInterpretation();
+    return interpretation?.linea_tiempo_anual;
+  };
+
   // LOADING STATE: Cargando datos iniciales
   if (loading && !solarCycle) {
     return (
@@ -413,8 +425,12 @@ export const AgendaLibro = ({
             startDate={startDate}
             endDate={endDate}
           />
-          <MesesClavePuntosGiro />
-          <GrandesAprendizajes />
+          <MesesClavePuntosGiro
+            lineaTiempo={getLineaTiempoAnual()}
+          />
+          <GrandesAprendizajes
+            clavesIntegracion={getClavesIntegracion()}
+          />
         </div>
 
         {/* 7. SOUL CHART */}
