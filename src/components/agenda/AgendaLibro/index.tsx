@@ -63,6 +63,10 @@ export const AgendaLibro = ({
   const [solarReturnInterpretation, setSolarReturnInterpretation] = useState<any>(null);
   const [loadingSolarReturn, setLoadingSolarReturn] = useState(true);
 
+  // Estado para almacenar la interpretación Natal
+  const [natalInterpretation, setNatalInterpretation] = useState<any>(null);
+  const [loadingNatal, setLoadingNatal] = useState(true);
+
   // Efecto para cargar la interpretación del Retorno Solar desde la BD
   useEffect(() => {
     const fetchSolarReturnInterpretation = async () => {
@@ -114,6 +118,36 @@ export const AgendaLibro = ({
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
     };
+  }, [userId]);
+
+  // Efecto para cargar la interpretación Natal desde la BD
+  useEffect(() => {
+    const fetchNatalInterpretation = async () => {
+      if (!userId) {
+        setLoadingNatal(false);
+        return;
+      }
+
+      try {
+        console.log('🔍 [NATAL] Buscando interpretación Natal...');
+        const response = await fetch(`/api/interpretations?userId=${userId}&chartType=natal`);
+        const data = await response.json();
+
+        if (data.exists && data.interpretation) {
+          console.log('✅ [NATAL] Interpretación encontrada');
+          setNatalInterpretation(data);
+        } else {
+          console.log('⚠️ [NATAL] No se encontró interpretación Natal');
+          setNatalInterpretation(null);
+        }
+      } catch (error) {
+        console.error('❌ [NATAL] Error al cargar interpretación:', error);
+      } finally {
+        setLoadingNatal(false);
+      }
+    };
+
+    fetchNatalInterpretation();
   }, [userId]);
 
   const handlePrint = () => {
@@ -172,6 +206,40 @@ export const AgendaLibro = ({
   const getSombrasDelAno = (): string[] | undefined => {
     const interpretation = getSRInterpretation();
     return interpretation?.sombras_del_ano;
+  };
+
+  // Helper: Obtener interpretación Natal completa
+  const getNatalInterpretation = () => {
+    if (loadingNatal || !natalInterpretation) {
+      return null;
+    }
+    return natalInterpretation.interpretation;
+  };
+
+  // Helper: Obtener esencia natal
+  const getEsenciaNatal = () => {
+    const interpretation = getNatalInterpretation();
+    if (!interpretation) return null;
+
+    return {
+      proposito_vida: interpretation.proposito_vida,
+      emociones: interpretation.emociones,
+      personalidad: interpretation.personalidad,
+      pensamiento: interpretation.como_piensas_y_hablas,
+      amor: interpretation.como_amas,
+      accion: interpretation.como_enfrentas_la_vida
+    };
+  };
+
+  // Helper: Obtener nodos lunares
+  const getNodosLunares = () => {
+    const interpretation = getNatalInterpretation();
+    if (!interpretation?.nodos_lunares) return null;
+
+    return {
+      nodo_sur: interpretation.nodos_lunares.nodo_sur,
+      nodo_norte: interpretation.nodos_lunares.nodo_norte
+    };
   };
 
   // LOADING STATE: Cargando datos iniciales
@@ -352,13 +420,24 @@ export const AgendaLibro = ({
         {/* 7. SOUL CHART */}
         <div id="soul-chart">
           <div id="esencia-natal">
-            <EsenciaNatal />
+            <EsenciaNatal
+              proposito_vida={getEsenciaNatal()?.proposito_vida}
+              emociones={getEsenciaNatal()?.emociones}
+              personalidad={getEsenciaNatal()?.personalidad}
+              pensamiento={getEsenciaNatal()?.pensamiento}
+              amor={getEsenciaNatal()?.amor}
+              accion={getEsenciaNatal()?.accion}
+            />
           </div>
           <div id="nodo-norte">
-            <NodoNorte />
+            <NodoNorte
+              nodo_norte={getNodosLunares()?.nodo_norte}
+            />
           </div>
           <div id="nodo-sur">
-            <NodoSur />
+            <NodoSur
+              nodo_sur={getNodosLunares()?.nodo_sur}
+            />
           </div>
           <div id="planetas-dominantes">
             <PlanetasDominantes />
