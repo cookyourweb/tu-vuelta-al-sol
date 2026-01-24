@@ -138,58 +138,108 @@ export const TemaCentralAnio = ({ interpretacion }: TemaCentralAnioProps) => {
   );
 };
 
-export const LoQueVieneAMover = () => {
+interface LoQueVieneMoverProps {
+  facilidad?: string;
+  incomodidad?: string;
+}
+
+export const LoQueVieneAMover = ({ facilidad, incomodidad }: LoQueVieneMoverProps) => {
   const { config } = useStyle();
+
+  const tieneContenidoPersonalizado = !!(facilidad && incomodidad);
 
   return (
     <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
       <div className="text-center mb-8">
-        <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient}`}>Lo que este año viene a mover</h2>
+        <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient}`}>
+          {tieneContenidoPersonalizado ? 'Cómo se vive siendo tú este año' : 'Lo que este año viene a mover'}
+        </h2>
         <div className={`${config.divider} w-16 mx-auto mt-4`} />
+
+        {!tieneContenidoPersonalizado && (
+          <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-lg no-print">
+            <span className="text-xs text-amber-700">⚠️ Genera tu Retorno Solar para ver contenido personalizado</span>
+          </div>
+        )}
       </div>
 
       <div className={`flex-1 grid grid-cols-1 gap-6 max-w-2xl mx-auto w-full ${config.fontBody}`}>
-        <div className={`${config.highlightPrimary} rounded-lg p-6`}>
-          <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3`}>En tu interior</h3>
-          <ul className="space-y-2 text-gray-700">
-            <li>• Silencios necesarios.</li>
-            <li>• Procesos inconscientes que por fin salen a la luz.</li>
-            <li>• Una redefinición profunda de quién eres cuando no te están mirando.</li>
-          </ul>
-        </div>
+        {tieneContenidoPersonalizado ? (
+          <>
+            {/* Contenido personalizado del Solar Return */}
+            <div className={`${config.highlightPrimary} rounded-lg p-6`}>
+              <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3`}>✅ Lo que fluye naturalmente</h3>
+              <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                {facilidad}
+              </div>
+            </div>
 
-        <div className={`${config.highlightSecondary} rounded-lg p-6`}>
-          <h3 className={`${config.fontDisplay} ${config.iconSecondary} font-medium mb-3`}>En tus relaciones</h3>
-          <ul className="space-y-2 text-gray-700">
-            <li>• Menos personajes.</li>
-            <li>• Más verdad.</li>
-            <li>• Vínculos que respeten tu espacio interno.</li>
-          </ul>
-        </div>
+            <div className={`${config.highlightSecondary} rounded-lg p-6`}>
+              <h3 className={`${config.fontDisplay} ${config.iconSecondary} font-medium mb-3`}>⚠️ Lo que te incomoda</h3>
+              <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                {incomodidad}
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Contenido genérico (fallback) */}
+            <div className={`${config.highlightPrimary} rounded-lg p-6 opacity-50`}>
+              <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3`}>En tu interior</h3>
+              <ul className="space-y-2 text-gray-700">
+                <li>• Silencios necesarios.</li>
+                <li>• Procesos inconscientes que por fin salen a la luz.</li>
+                <li>• Una redefinición profunda de quién eres cuando no te están mirando.</li>
+              </ul>
+            </div>
 
-        <div className={`${config.highlightAccent} rounded-lg p-6`}>
-          <h3 className={`${config.fontDisplay} ${config.iconAccent} font-medium mb-3`}>En tu vida práctica</h3>
-          <ul className="space-y-2 text-gray-700">
-            <li>• Pausas estratégicas.</li>
-            <li>• Decisiones que se gestan antes de ejecutarse.</li>
-            <li>• Cerrar ciclos antes de abrir otros.</li>
-          </ul>
-        </div>
+            <div className={`${config.highlightSecondary} rounded-lg p-6 opacity-50`}>
+              <h3 className={`${config.fontDisplay} ${config.iconSecondary} font-medium mb-3`}>En tus relaciones</h3>
+              <ul className="space-y-2 text-gray-700">
+                <li>• Menos personajes.</li>
+                <li>• Más verdad.</li>
+                <li>• Vínculos que respeten tu espacio interno.</li>
+              </ul>
+            </div>
+
+            <div className={`${config.highlightAccent} rounded-lg p-6 opacity-50`}>
+              <h3 className={`${config.fontDisplay} ${config.iconAccent} font-medium mb-3`}>En tu vida práctica</h3>
+              <ul className="space-y-2 text-gray-700">
+                <li>• Pausas estratégicas.</li>
+                <li>• Decisiones que se gestan antes de ejecutarse.</li>
+                <li>• Cerrar ciclos antes de abrir otros.</li>
+              </ul>
+            </div>
+          </>
+        )}
       </div>
 
-      <FooterLibro pagina={6} />
+      <FooterLibro pagina={5} />
     </div>
   );
 };
 
-export const LoQuePideSoltar = () => {
+interface LoQuePideSoltarProps {
+  reflejos_obsoletos?: string;
+  sombras?: string[];
+}
+
+export const LoQuePideSoltar = ({ reflejos_obsoletos, sombras }: LoQuePideSoltarProps) => {
   const { config } = useStyle();
+
+  const tieneContenidoPersonalizado = !!(reflejos_obsoletos || (sombras && sombras.length > 0));
 
   return (
     <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
       <div className="text-center mb-8">
         <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient}`}>Lo que este año te pide soltar</h2>
         <div className={`${config.divider} w-16 mx-auto mt-4`} />
+
+        {!tieneContenidoPersonalizado && (
+          <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-lg no-print">
+            <span className="text-xs text-amber-700">⚠️ Genera tu Retorno Solar para ver contenido personalizado</span>
+          </div>
+        )}
       </div>
 
       <div className={`flex-1 flex flex-col justify-center max-w-2xl mx-auto w-full ${config.fontBody}`}>
@@ -199,18 +249,48 @@ export const LoQuePideSoltar = () => {
         </p>
 
         <div className="space-y-6">
-          <div className={`flex items-start gap-4 ${config.highlightPrimary} rounded-lg p-4`}>
-            <span className={`${config.iconSecondary} text-2xl`}>☽</span>
-            <span className="text-gray-700">La necesidad de validación externa</span>
-          </div>
-          <div className={`flex items-start gap-4 ${config.highlightSecondary} rounded-lg p-4`}>
-            <span className={`${config.iconSecondary} text-2xl`}>☽</span>
-            <span className="text-gray-700">La urgencia por demostrar</span>
-          </div>
-          <div className={`flex items-start gap-4 ${config.highlightAccent} rounded-lg p-4`}>
-            <span className={`${config.iconSecondary} text-2xl`}>☽</span>
-            <span className="text-gray-700">El miedo a "no estar haciendo suficiente"</span>
-          </div>
+          {tieneContenidoPersonalizado ? (
+            <>
+              {/* Reflejos obsoletos personalizados */}
+              {reflejos_obsoletos && (
+                <div className={`${config.highlightPrimary} rounded-lg p-6`}>
+                  <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3`}>🔄 Reflejos obsoletos</h3>
+                  <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                    {reflejos_obsoletos}
+                  </div>
+                </div>
+              )}
+
+              {/* Sombras del año */}
+              {sombras && sombras.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className={`${config.fontDisplay} text-lg ${config.iconSecondary} font-medium text-center`}>⚠️ Sombras del año</h3>
+                  {sombras.map((sombra, idx) => (
+                    <div key={idx} className={`flex items-start gap-4 ${config.highlightSecondary} rounded-lg p-4`}>
+                      <span className={`${config.iconSecondary} text-2xl`}>☽</span>
+                      <span className="text-gray-700">{sombra}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              {/* Contenido genérico (fallback) */}
+              <div className={`flex items-start gap-4 ${config.highlightPrimary} rounded-lg p-4 opacity-50`}>
+                <span className={`${config.iconSecondary} text-2xl`}>☽</span>
+                <span className="text-gray-700">La necesidad de validación externa</span>
+              </div>
+              <div className={`flex items-start gap-4 ${config.highlightSecondary} rounded-lg p-4 opacity-50`}>
+                <span className={`${config.iconSecondary} text-2xl`}>☽</span>
+                <span className="text-gray-700">La urgencia por demostrar</span>
+              </div>
+              <div className={`flex items-start gap-4 ${config.highlightAccent} rounded-lg p-4 opacity-50`}>
+                <span className={`${config.iconSecondary} text-2xl`}>☽</span>
+                <span className="text-gray-700">El miedo a "no estar haciendo suficiente"</span>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="mt-12 text-center">
@@ -220,7 +300,7 @@ export const LoQuePideSoltar = () => {
         </div>
       </div>
 
-      <FooterLibro pagina={8} />
+      <FooterLibro pagina={6} />
     </div>
   );
 };

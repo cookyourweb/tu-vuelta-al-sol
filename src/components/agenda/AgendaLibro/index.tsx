@@ -129,42 +129,49 @@ export const AgendaLibro = ({
     return eventos.map(formatEventForBook);
   };
 
-  // Helper: Obtener la interpretación del Retorno Solar desde la BD
+  // Helper: Obtener la interpretación completa del SR
+  const getSRInterpretation = () => {
+    if (loadingSolarReturn || !solarReturnInterpretation) {
+      return null;
+    }
+    return solarReturnInterpretation.interpretation;
+  };
+
+  // Helper: Obtener tema central del Retorno Solar
   const getInterpretacionRetornoSolar = (): string | undefined => {
-    if (loadingSolarReturn) {
-      console.log('⏳ [SOLAR_RETURN] Aún cargando...');
-      return undefined;
-    }
+    const interpretation = getSRInterpretation();
+    if (!interpretation) return undefined;
 
-    if (!solarReturnInterpretation) {
-      console.log('⚠️ [SOLAR_RETURN] No hay interpretación disponible');
-      return undefined;
-    }
-
-    // Extraer el tema central del año desde la interpretación
-    const interpretation = solarReturnInterpretation.interpretation;
-
-    if (!interpretation) {
-      console.log('⚠️ [SOLAR_RETURN] Interpretación sin contenido');
-      return undefined;
-    }
-
-    // ✅ NUEVO: El tema central está en apertura_anual.tema_central (nueva estructura)
     const temaCentral =
       interpretation.apertura_anual?.tema_central ||
-      interpretation.tema_central_del_anio ||  // Fallback para estructura vieja
+      interpretation.tema_central_del_anio ||
       interpretation.tema_central ||
       interpretation.overview ||
       interpretation.mensaje_principal;
 
     if (temaCentral) {
       console.log('✅ [SOLAR_RETURN] Tema central encontrado:', temaCentral.substring(0, 100) + '...');
-      return temaCentral;
     }
+    return temaCentral;
+  };
 
-    console.log('⚠️ [SOLAR_RETURN] No se encontró campo de tema central');
-    console.log('📦 [SOLAR_RETURN] Estructura disponible:', Object.keys(interpretation));
-    return undefined;
+  // Helper: Obtener "Cómo se vive siendo tú"
+  const getComoSeViveSiendoTu = () => {
+    const interpretation = getSRInterpretation();
+    if (!interpretation?.como_se_vive_siendo_tu) return null;
+
+    return {
+      facilidad: interpretation.como_se_vive_siendo_tu.facilidad,
+      incomodidad: interpretation.como_se_vive_siendo_tu.incomodidad,
+      reflejos_obsoletos: interpretation.como_se_vive_siendo_tu.reflejos_obsoletos,
+      actitud_nueva: interpretation.como_se_vive_siendo_tu.actitud_nueva
+    };
+  };
+
+  // Helper: Obtener sombras del año
+  const getSombrasDelAno = (): string[] | undefined => {
+    const interpretation = getSRInterpretation();
+    return interpretation?.sombras_del_ano;
   };
 
   // LOADING STATE: Cargando datos iniciales
@@ -302,10 +309,16 @@ export const AgendaLibro = ({
         {/* 4. LO QUE VIENE A MOVER Y SOLTAR */}
         <div id="viaje-interno">
           <div id="viene-mover">
-            <LoQueVieneAMover />
+            <LoQueVieneAMover
+              facilidad={getComoSeViveSiendoTu()?.facilidad}
+              incomodidad={getComoSeViveSiendoTu()?.incomodidad}
+            />
           </div>
           <div id="pide-soltar">
-            <LoQuePideSoltar />
+            <LoQuePideSoltar
+              reflejos_obsoletos={getComoSeViveSiendoTu()?.reflejos_obsoletos}
+              sombras={getSombrasDelAno()}
+            />
           </div>
           <PaginaIntencionAnual />
         </div>
