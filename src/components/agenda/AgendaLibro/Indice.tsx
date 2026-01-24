@@ -32,7 +32,7 @@ export const IndiceNavegable: React.FC = () => {
       icono: <Sparkles className="w-4 h-4" />,
       subsecciones: [
         { titulo: 'Portada Personalizada', pagina: 1, id: 'portada' },
-        { titulo: 'Intención del Año', pagina: 2, id: 'intencion-anio' },
+        { titulo: 'Cómo Usar Este Libro', pagina: 2, id: 'intencion-anio' },
       ]
     },
     {

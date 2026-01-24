@@ -95,7 +95,7 @@ export const PaginaIntencion = () => {
   return (
     <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
       <div className="text-center mb-12">
-        <h2 className={`${config.fontDisplay} text-3xl mb-4 ${config.titleGradient}`}>Este libro es tu espacio</h2>
+        <h2 className={`${config.fontDisplay} text-3xl mb-4 ${config.titleGradient}`}>Cómo Usar Este Libro</h2>
         <div className={config.divider + " w-16 mx-auto"} />
       </div>
 
