@@ -439,6 +439,7 @@ export const AgendaLibro = ({
       txtContent += '                  CARTA NATAL - TU ESENCIA\n';
       txtContent += '═══════════════════════════════════════════════════════════\n\n';
 
+      // ✅ ESTRUCTURA ACTUALIZADA - interpret-natal-clean
       if (natalData.esencia_revolucionaria) {
         txtContent += '━━━ TU ESENCIA REVOLUCIONARIA ━━━\n';
         txtContent += natalData.esencia_revolucionaria + '\n\n';
@@ -449,55 +450,131 @@ export const AgendaLibro = ({
         txtContent += natalData.proposito_vida + '\n\n';
       }
 
-      if (natalData.poder_magnetico) {
-        txtContent += '━━━ TU PODER MAGNÉTICO ━━━\n';
-        txtContent += natalData.poder_magnetico + '\n\n';
+      // Declaración de poder
+      if (natalData.declaracion_poder) {
+        txtContent += '━━━ TU DECLARACIÓN DE PODER ━━━\n';
+        txtContent += `"${natalData.declaracion_poder}"\n\n`;
       }
 
-      if (natalData.patron_energetico) {
-        txtContent += '━━━ TU PATRÓN ENERGÉTICO ━━━\n';
-        txtContent += natalData.patron_energetico + '\n\n';
+      // Nodos Lunares
+      if (natalData.nodos_lunares) {
+        txtContent += '━━━ TU GPS EVOLUTIVO: NODOS LUNARES ━━━\n\n';
+
+        if (natalData.nodos_lunares.nodo_sur) {
+          const ns = natalData.nodos_lunares.nodo_sur;
+          txtContent += `▸ NODO SUR (${ns.signo_casa || 'Tu pasado'})\n`;
+          if (ns.zona_comfort) txtContent += `  Zona de confort: ${ns.zona_comfort}\n`;
+          if (ns.patron_repetitivo) txtContent += `  Patrón repetitivo: ${ns.patron_repetitivo}\n`;
+          txtContent += '\n';
+        }
+
+        if (natalData.nodos_lunares.nodo_norte) {
+          const nn = natalData.nodos_lunares.nodo_norte;
+          txtContent += `▸ NODO NORTE (${nn.signo_casa || 'Tu futuro'})\n`;
+          if (nn.direccion_evolutiva) txtContent += `  Dirección evolutiva: ${nn.direccion_evolutiva}\n`;
+          if (nn.desafio) txtContent += `  Desafío: ${nn.desafio}\n`;
+          txtContent += '\n';
+        }
+
+        if (natalData.nodos_lunares.eje_completo) {
+          txtContent += `${natalData.nodos_lunares.eje_completo}\n\n`;
+        }
       }
 
-      if (natalData.planeta_dominante) {
-        txtContent += '━━━ TU PLANETA DOMINANTE ━━━\n';
-        txtContent += natalData.planeta_dominante + '\n\n';
-      }
+      // Patrones psicológicos
+      if (natalData.patrones_psicologicos && natalData.patrones_psicologicos.length > 0) {
+        txtContent += '━━━ TUS PATRONES PSICOLÓGICOS ━━━\n\n';
+        natalData.patrones_psicologicos.forEach((patron: any, idx: number) => {
+          txtContent += `${idx + 1}. ${patron.nombre_patron || 'Patrón'}\n`;
+          if (patron.planeta_origen) txtContent += `   Origen: ${patron.planeta_origen}\n`;
 
-      if (natalData.super_poderes && natalData.super_poderes.length > 0) {
-        txtContent += '━━━ TUS SÚPER PODERES ━━━\n';
-        natalData.super_poderes.forEach((poder: string, idx: number) => {
-          txtContent += `${idx + 1}. ${poder}\n`;
-        });
-        txtContent += '\n';
-      }
-
-      if (natalData.desafios_evolutivos && natalData.desafios_evolutivos.length > 0) {
-        txtContent += '━━━ DESAFÍOS EVOLUTIVOS ━━━\n';
-        natalData.desafios_evolutivos.forEach((desafio: string, idx: number) => {
-          txtContent += `${idx + 1}. ${desafio}\n`;
-        });
-        txtContent += '\n';
-      }
-
-      if (natalData.mision_vida) {
-        txtContent += '━━━ MISIÓN DE VIDA ━━━\n';
-        txtContent += natalData.mision_vida + '\n\n';
-      }
-
-      // Análisis de planetas (si existe en el formato antiguo)
-      if (natalData.analisis_planetas) {
-        txtContent += '━━━ ANÁLISIS PLANETARIO ━━━\n\n';
-
-        const planetas = ['sol', 'luna', 'mercurio', 'venus', 'marte', 'jupiter', 'saturno'];
-        planetas.forEach((planeta) => {
-          const analisis = natalData.analisis_planetas[planeta];
-          if (analisis && typeof analisis === 'string') {
-            txtContent += `▸ ${planeta.toUpperCase()}:\n  ${analisis}\n\n`;
-          } else if (analisis && analisis.descripcion) {
-            txtContent += `▸ ${planeta.toUpperCase()} en ${analisis.signo || ''}:\n  ${analisis.descripcion}\n\n`;
+          if (patron.como_se_manifiesta && patron.como_se_manifiesta.length > 0) {
+            txtContent += `   Manifestación:\n`;
+            patron.como_se_manifiesta.forEach((manifestacion: string) => {
+              txtContent += `   • ${manifestacion}\n`;
+            });
           }
+
+          if (patron.superpoder_integrado) {
+            txtContent += `   Superpoder: ${patron.superpoder_integrado}\n`;
+          }
+
+          txtContent += '\n';
         });
+      }
+
+      // Ángulos vitales
+      if (natalData.angulos_vitales) {
+        txtContent += '━━━ TUS ÁNGULOS VITALES ━━━\n\n';
+
+        if (natalData.angulos_vitales.ascendente) {
+          const asc = natalData.angulos_vitales.ascendente;
+          txtContent += `▸ ASCENDENTE\n`;
+          if (asc.mascara_social) txtContent += `  ${asc.mascara_social}\n`;
+          if (asc.superpoder) txtContent += `  Superpoder: ${asc.superpoder}\n`;
+          txtContent += '\n';
+        }
+
+        if (natalData.angulos_vitales.medio_cielo) {
+          const mc = natalData.angulos_vitales.medio_cielo;
+          txtContent += `▸ MEDIO CIELO\n`;
+          if (mc.vocacion_soul) txtContent += `  ${mc.vocacion_soul}\n`;
+          if (mc.legado) txtContent += `  Legado: ${mc.legado}\n`;
+          txtContent += '\n';
+        }
+      }
+
+      // Insights transformacionales
+      if (natalData.insights_transformacionales && natalData.insights_transformacionales.length > 0) {
+        txtContent += '━━━ INSIGHTS TRANSFORMACIONALES ━━━\n';
+        natalData.insights_transformacionales.forEach((insight: string) => {
+          txtContent += `${insight}\n`;
+        });
+        txtContent += '\n';
+      }
+
+      // Advertencias
+      if (natalData.advertencias && natalData.advertencias.length > 0) {
+        txtContent += '━━━ ADVERTENCIAS IMPORTANTES ━━━\n';
+        natalData.advertencias.forEach((advertencia: string) => {
+          txtContent += `${advertencia}\n`;
+        });
+        txtContent += '\n';
+      }
+
+      // Plan de acción
+      if (natalData.plan_accion) {
+        txtContent += '━━━ TU PLAN DE ACCIÓN ━━━\n\n';
+
+        if (natalData.plan_accion.hoy_mismo && natalData.plan_accion.hoy_mismo.length > 0) {
+          txtContent += `HOY MISMO:\n`;
+          natalData.plan_accion.hoy_mismo.forEach((accion: string) => {
+            txtContent += `• ${accion}\n`;
+          });
+          txtContent += '\n';
+        }
+
+        if (natalData.plan_accion.esta_semana && natalData.plan_accion.esta_semana.length > 0) {
+          txtContent += `ESTA SEMANA:\n`;
+          natalData.plan_accion.esta_semana.forEach((accion: string) => {
+            txtContent += `• ${accion}\n`;
+          });
+          txtContent += '\n';
+        }
+
+        if (natalData.plan_accion.este_mes && natalData.plan_accion.este_mes.length > 0) {
+          txtContent += `ESTE MES:\n`;
+          natalData.plan_accion.este_mes.forEach((accion: string) => {
+            txtContent += `• ${accion}\n`;
+          });
+          txtContent += '\n';
+        }
+      }
+
+      // Pregunta final de reflexión
+      if (natalData.pregunta_final_reflexion) {
+        txtContent += '━━━ PREGUNTA PARA REFLEXIONAR ━━━\n';
+        txtContent += `${natalData.pregunta_final_reflexion}\n\n`;
       }
     }
 
