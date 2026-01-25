@@ -193,7 +193,8 @@ export const AgendaLibro = ({
         throw new Error('No se encontró la carta natal');
       }
       const natalData = await natalResponse.json();
-      const natalChart = natalData.chart || natalData.data?.chart;
+      // ✅ FIX: Buscar en el campo correcto
+      const natalChart = natalData.natalChart || natalData.chart || natalData.data?.chart;
 
       if (!natalChart) {
         console.error('❌ [AUTO_GEN] Carta natal no encontrada en respuesta:', natalData);
@@ -212,7 +213,8 @@ export const AgendaLibro = ({
         throw new Error('Error al generar carta de Solar Return');
       }
       const srChartData = await srChartResponse.json();
-      const solarReturnChart = srChartData.chart || srChartData.data?.chart;
+      // ✅ FIX: Buscar en el campo correcto
+      const solarReturnChart = srChartData.data?.solarReturnChart || srChartData.solarReturnChart || srChartData.chart;
 
       if (!solarReturnChart) {
         console.error('❌ [AUTO_GEN] Carta SR no encontrada en respuesta:', srChartData);
@@ -323,11 +325,15 @@ export const AgendaLibro = ({
         throw new Error('No se encontró la carta natal');
       }
       const natalData = await natalResponse.json();
-      const natalChart = natalData.chart || natalData.data?.chart;
+      // ✅ FIX: Buscar en el campo correcto
+      const natalChart = natalData.natalChart || natalData.chart || natalData.data?.chart;
 
       if (!natalChart) {
-        throw new Error('Carta natal no encontrada');
+        console.error('❌ [REGENERATE] Estructura de respuesta natal:', natalData);
+        throw new Error('Carta natal no encontrada en la respuesta');
       }
+
+      console.log('✅ [REGENERATE] Carta natal obtenida correctamente');
 
       console.log('☀️ [REGENERATE] Obteniendo carta de Solar Return...');
       const srChartResponse = await fetch(`/api/charts/solar-return?userId=${userId}`);
@@ -335,11 +341,15 @@ export const AgendaLibro = ({
         throw new Error('No se encontró la carta de Solar Return');
       }
       const srChartData = await srChartResponse.json();
-      const solarReturnChart = srChartData.chart || srChartData.data?.solarReturnChart || srChartData.data?.chart;
+      // ✅ FIX: Buscar en el campo correcto primero
+      const solarReturnChart = srChartData.data?.solarReturnChart || srChartData.solarReturnChart || srChartData.chart;
 
       if (!solarReturnChart) {
-        throw new Error('Carta Solar Return no encontrada');
+        console.error('❌ [REGENERATE] Estructura de respuesta SR:', srChartData);
+        throw new Error('Carta Solar Return no encontrada en la respuesta');
       }
+
+      console.log('✅ [REGENERATE] Carta Solar Return obtenida correctamente');
 
       console.log('👤 [REGENERATE] Obteniendo perfil de usuario...');
       const profileResponse = await fetch(`/api/users/${userId}`);
