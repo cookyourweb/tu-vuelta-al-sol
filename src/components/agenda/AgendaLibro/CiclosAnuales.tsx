@@ -22,7 +22,7 @@ export const LineaTiempoEmocional: React.FC<{
   return (
     <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
       {/* Header */}
-      <div className="text-center mb-6">
+      <div className="text-center mb-4">
         <div className="flex items-center justify-center gap-2 mb-2">
           <Calendar className={`w-5 h-5 ${config.iconSecondary}`} />
           <span className={`text-xs uppercase tracking-[0.3em] ${config.iconSecondary}`}>Calendario Astrológico</span>
@@ -31,51 +31,69 @@ export const LineaTiempoEmocional: React.FC<{
         <div className={`${config.divider} w-24 mx-auto mt-4`} />
       </div>
 
-      <p className={`text-center text-sm italic ${config.iconSecondary} mb-6`}>
-        Vista general de tu año: los momentos clave y los ciclos emocionales.
-      </p>
+      {/* Introducción terapéutica */}
+      <div className={`${config.highlightPrimary} rounded-lg p-4 mb-4`}>
+        <p className="text-gray-700 leading-relaxed text-sm mb-2">
+          Tu año tiene ritmo, altibajos, momentos de calma y momentos de intensidad.
+        </p>
+        <p className="text-gray-700 leading-relaxed text-sm">
+          <strong>Instrucciones:</strong> Marca en cada mes la intensidad emocional/energética que sientes
+          (rellena las casillas) y escribe una palabra clave en el espacio de notas.
+        </p>
+      </div>
 
       {/* Grid de meses */}
-      <div className="flex-1 grid grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-4 gap-2 mb-4">
         {months.map((month, index) => (
           <div
             key={index}
-            className={`${config.highlightSecondary} p-3 rounded-lg flex flex-col`}
+            className={`${config.highlightSecondary} p-2 rounded-lg flex flex-col`}
           >
-            <div className="flex items-center justify-between mb-2">
-              <span className={`${config.iconPrimary} font-medium text-sm capitalize`}>
-                {format(month, "MMMM", { locale: es })}
+            <div className="flex items-center justify-between mb-1">
+              <span className={`${config.iconPrimary} font-medium text-xs capitalize`}>
+                {format(month, "MMM", { locale: es })}
               </span>
-              <span className="text-xs text-gray-400">{format(month, "yyyy")}</span>
+              <span className="text-[10px] text-gray-400">{format(month, "yy")}</span>
             </div>
             {/* Espacio para marcar intensidad */}
-            <div className="flex gap-1 mb-2">
+            <div className="flex gap-1 mb-1">
               {[1, 2, 3, 4, 5].map(i => (
-                <div key={i} className={`w-4 h-4 border ${config.cardBorder} bg-white rounded-sm`} />
+                <div key={i} className={`w-3 h-3 border ${config.cardBorder} bg-white rounded-sm`} />
               ))}
             </div>
             {/* Espacio para notas */}
-            <div className="flex-1 border-b border-dashed border-gray-300 min-h-[40px]" />
+            <div className="flex-1 border-b border-dashed border-gray-300 min-h-[30px]" />
           </div>
         ))}
       </div>
 
       {/* Leyenda */}
-      <div className={`${config.highlightPrimary} rounded-lg p-4`}>
-        <h4 className={`${config.iconPrimary} font-medium text-sm mb-3`}>Leyenda de intensidad:</h4>
-        <div className="flex items-center justify-around text-xs">
-          <div className="flex items-center gap-2">
-            <div className={`w-5 h-5 ${config.highlightSecondary} rounded-sm`} />
+      <div className={`${config.highlightSecondary} rounded-lg p-3 mb-3`}>
+        <h4 className={`${config.iconSecondary} font-medium text-xs mb-2`}>Leyenda de intensidad:</h4>
+        <div className="flex items-center justify-around text-[10px]">
+          <div className="flex items-center gap-1">
+            <div className={`w-4 h-4 ${config.highlightSecondary} border ${config.cardBorder} rounded-sm`} />
             <span className="text-gray-600">Calma</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className={`w-5 h-5 ${config.badgeSecondary} rounded-sm`} />
+          <div className="flex items-center gap-1">
+            <div className={`w-4 h-4 ${config.badgeSecondary} rounded-sm`} />
             <span className="text-gray-600">Movimiento</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className={`w-5 h-5 ${config.badgePrimary} rounded-sm`} />
+          <div className="flex items-center gap-1">
+            <div className={`w-4 h-4 ${config.badgePrimary} rounded-sm`} />
             <span className="text-gray-600">Intensidad</span>
           </div>
+        </div>
+      </div>
+
+      {/* Reflexión adicional */}
+      <div className={`${config.highlightPrimary} rounded-lg p-3`}>
+        <h4 className={`${config.iconPrimary} font-medium text-xs mb-2`}>
+          ✍️ Después de completar la línea de tiempo, ¿qué patrón observas?
+        </h4>
+        <div className="space-y-2">
+          <div className={`h-8 border-b border-dashed ${config.iconPrimary} opacity-30`} />
+          <div className={`h-8 border-b border-dashed ${config.iconPrimary} opacity-30`} />
         </div>
       </div>
 
@@ -96,38 +114,51 @@ export const MesesClavePuntosGiro: React.FC<MesesClavePuntosGiroProps> = ({ line
   return (
     <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
       {/* Header */}
-      <div className="text-center mb-6">
+      <div className="text-center mb-5">
         <div className="flex items-center justify-center gap-2 mb-2">
           <TrendingUp className={`w-5 h-5 ${config.iconSecondary}`} />
         </div>
         <h2 className={`text-2xl ${config.titleGradient}`}>Meses Clave y Puntos de Giro</h2>
         <div className={`${config.divider} w-24 mx-auto mt-4`} />
-        <p className={`text-sm italic ${config.iconSecondary} mt-4`}>
-          Los momentos del año donde algo importante se mueve, cambia o culmina.
-        </p>
       </div>
 
+      {/* Introducción terapéutica */}
+      {tieneContenidoPersonalizado && (
+        <div className={`${config.highlightPrimary} rounded-lg p-4 mb-4`}>
+          <p className="text-gray-700 leading-relaxed text-sm">
+            Tu año no es lineal. Hay <strong>momentos clave</strong> donde la energía se concentra,
+            donde las cosas se mueven o culminan. Estos son los puntos de giro que tu Solar Return anticipa.
+          </p>
+        </div>
+      )}
+
+      {!tieneContenidoPersonalizado && (
+        <p className={`text-sm italic ${config.iconSecondary} text-center mb-5`}>
+          Los momentos del año donde algo importante se mueve, cambia o culmina.
+        </p>
+      )}
+
       {/* Grid de puntos de giro */}
-      <div className="flex-1 space-y-4">
+      <div className="space-y-3 mb-5">
         {tieneContenidoPersonalizado ? (
-          lineaTiempo.slice(0, 6).map((evento, idx) => (
-            <div key={idx} className={`${config.highlightSecondary} rounded-lg p-4`}>
-              <div className="flex items-center gap-3 mb-3">
-                <span className={`${config.iconPrimary} text-xl font-bold`}>{idx + 1}.</span>
-                <h4 className={`${config.iconPrimary} font-medium flex-1`}>
+          lineaTiempo.slice(0, 4).map((evento, idx) => (
+            <div key={idx} className={`${config.highlightSecondary} rounded-lg p-3`}>
+              <div className="flex items-center gap-3 mb-2">
+                <span className={`${config.iconPrimary} text-lg font-bold`}>{idx + 1}.</span>
+                <h4 className={`${config.iconPrimary} font-medium flex-1 text-sm`}>
                   {evento.mes || evento.periodo || evento.titulo || `Evento ${idx + 1}`}
                 </h4>
               </div>
-              <div className="text-sm mb-2">
+              <div className="text-xs mb-2">
                 {evento.evento && (
                   <div className="mb-2">
-                    <span className={`${config.iconSecondary} text-xs uppercase`}>Evento:</span>
+                    <span className={`${config.iconSecondary} uppercase`}>Evento:</span>
                     <p className="text-gray-700 mt-1">{evento.evento}</p>
                   </div>
                 )}
                 {evento.significado && (
                   <div>
-                    <span className={`${config.iconSecondary} text-xs uppercase`}>Significado:</span>
+                    <span className={`${config.iconSecondary} uppercase`}>Significado:</span>
                     <p className="text-gray-700 mt-1">{evento.significado}</p>
                   </div>
                 )}
@@ -138,29 +169,50 @@ export const MesesClavePuntosGiro: React.FC<MesesClavePuntosGiroProps> = ({ line
             </div>
           ))
         ) : (
-          [1, 2, 3, 4].map((num) => (
-            <div key={num} className={`${config.highlightSecondary} rounded-lg p-4`}>
-              <div className="flex items-center gap-3 mb-3">
-                <span className={`${config.iconPrimary} text-xl font-bold`}>{num}.</span>
+          [1, 2, 3].map((num) => (
+            <div key={num} className={`${config.highlightSecondary} rounded-lg p-3`}>
+              <div className="flex items-center gap-3 mb-2">
+                <span className={`${config.iconPrimary} text-lg font-bold`}>{num}.</span>
                 <div className="flex-1 border-b-2 border-dashed border-gray-300 h-6" />
               </div>
-              <div className="grid grid-cols-2 gap-4 text-sm mb-3">
+              <div className="grid grid-cols-2 gap-3 text-xs mb-2">
                 <div>
-                  <span className={`${config.iconSecondary} text-xs uppercase`}>Mes:</span>
+                  <span className={`${config.iconSecondary} uppercase`}>Mes:</span>
                   <div className="h-6 border-b border-dashed border-gray-300 mt-1" />
                 </div>
                 <div>
-                  <span className={`${config.iconSecondary} text-xs uppercase`}>Evento astrológico:</span>
+                  <span className={`${config.iconSecondary} uppercase`}>Evento astrológico:</span>
                   <div className="h-6 border-b border-dashed border-gray-300 mt-1" />
                 </div>
               </div>
               <div>
-                <span className={`${config.iconSecondary} text-xs uppercase`}>Qué significa para ti:</span>
-                <div className="h-12 border-b border-dashed border-gray-300 mt-1" />
+                <span className={`${config.iconSecondary} uppercase`}>Qué significa para ti:</span>
+                <div className="h-10 border-b border-dashed border-gray-300 mt-1" />
               </div>
             </div>
           ))
         )}
+      </div>
+
+      {/* Espacio para reflexión personal */}
+      <div className={`${config.highlightSecondary} rounded-lg p-4 mb-3`}>
+        <h4 className={`${config.iconSecondary} font-medium text-sm mb-3`}>
+          ✍️ ¿Qué mes del año sientes que será especialmente importante para ti?
+        </h4>
+        <div className="space-y-2">
+          <div className={`h-10 border-b border-dashed ${config.iconSecondary} opacity-30`} />
+          <div className={`h-10 border-b border-dashed ${config.iconSecondary} opacity-30`} />
+        </div>
+      </div>
+
+      <div className={`${config.highlightPrimary} rounded-lg p-4`}>
+        <h4 className={`${config.iconPrimary} font-medium text-sm mb-3`}>
+          📅 ¿Cómo quieres prepararte para estos puntos de giro?
+        </h4>
+        <div className="space-y-2">
+          <div className={`h-10 border-b border-dashed ${config.iconPrimary} opacity-30`} />
+          <div className={`h-10 border-b border-dashed ${config.iconPrimary} opacity-30`} />
+        </div>
       </div>
 
       <FooterLibro pagina={12} />
@@ -186,53 +238,79 @@ export const GrandesAprendizajes: React.FC<GrandesAprendizajesProps> = ({ claves
         </div>
         <h2 className={`text-2xl ${config.titleGradient}`}>Grandes Aprendizajes del Ciclo</h2>
         <div className={`${config.divider} w-24 mx-auto mt-4`} />
-        <p className={`text-sm italic ${config.iconSecondary} mt-4`}>
-          {tieneContenidoPersonalizado
-            ? 'Claves de integración para tu año basadas en tu Solar Return'
-            : 'Los temas que este año viene a enseñarte, basados en los tránsitos mayores.'}
-        </p>
       </div>
 
-      {/* Aprendizajes */}
-      <div className="flex-1 space-y-4">
+      {/* Introducción terapéutica */}
+      {tieneContenidoPersonalizado && (
+        <div className={`${config.highlightPrimary} rounded-lg p-4 mb-5`}>
+          <p className="text-gray-700 leading-relaxed text-sm">
+            Estas son las <strong>claves de integración</strong> que tu Solar Return revela para este año.
+            No son solo ideas: son semillas que, si las riegas con atención, transforman tu experiencia.
+          </p>
+        </div>
+      )}
+
+      {!tieneContenidoPersonalizado && (
+        <p className={`text-sm italic ${config.iconSecondary} text-center mb-6`}>
+          Los temas que este año viene a enseñarte, basados en los tránsitos mayores.
+        </p>
+      )}
+
+      {/* Aprendizajes del SR */}
+      <div className="space-y-3 mb-6">
         {tieneContenidoPersonalizado ? (
-          clavesIntegracion.map((clave, idx) => (
-            <div key={idx} className={`${idx % 3 === 0 ? config.highlightPrimary : idx % 3 === 1 ? config.highlightSecondary : config.highlightAccent} rounded-lg p-5`}>
+          clavesIntegracion.slice(0, 4).map((clave, idx) => (
+            <div key={idx} className={`${idx % 3 === 0 ? config.highlightPrimary : idx % 3 === 1 ? config.highlightSecondary : config.highlightAccent} rounded-lg p-4`}>
               <div className="flex items-start gap-3">
-                <span className={`${config.iconPrimary} text-xl font-bold mt-1`}>✧</span>
-                <p className="text-gray-700 leading-relaxed flex-1">{clave}</p>
+                <span className={`${config.iconPrimary} text-lg font-bold mt-1`}>✧</span>
+                <p className="text-gray-700 leading-relaxed flex-1 text-sm">{clave}</p>
               </div>
             </div>
           ))
         ) : (
           <>
-            <div className={`${config.highlightSecondary} rounded-lg p-5`}>
-              <h4 className={`${config.iconSecondary} font-medium mb-3 flex items-center gap-2`}>
+            <div className={`${config.highlightSecondary} rounded-lg p-4`}>
+              <h4 className={`${config.iconSecondary} font-medium mb-3 flex items-center gap-2 text-sm`}>
                 <span className="text-lg">♄</span> Saturno te enseña:
               </h4>
-              <div className="h-20 border-b border-dashed border-gray-300" />
+              <div className="h-16 border-b border-dashed border-gray-300" />
             </div>
 
-            <div className={`${config.highlightPrimary} rounded-lg p-5`}>
-              <h4 className={`${config.iconPrimary} font-medium mb-3 flex items-center gap-2`}>
+            <div className={`${config.highlightPrimary} rounded-lg p-4`}>
+              <h4 className={`${config.iconPrimary} font-medium mb-3 flex items-center gap-2 text-sm`}>
                 <span className="text-lg">♃</span> Júpiter te expande:
               </h4>
-              <div className="h-20 border-b border-dashed border-gray-300" />
-            </div>
-
-            <div className={`${config.highlightAccent} rounded-lg p-5`}>
-              <h4 className={`${config.iconAccent} font-medium mb-3 flex items-center gap-2`}>
-                <span className="text-lg">♇</span> Plutón transforma:
-              </h4>
-              <div className="h-20 border-b border-dashed border-gray-300" />
+              <div className="h-16 border-b border-dashed border-gray-300" />
             </div>
           </>
         )}
       </div>
 
+      {/* Espacio para reflexión personal */}
+      <div className={`${config.highlightSecondary} rounded-lg p-4 mb-4`}>
+        <h4 className={`${config.iconSecondary} font-medium text-sm mb-3`}>
+          ✍️ ¿Cuál de estos aprendizajes resuena más contigo ahora?
+        </h4>
+        <div className="space-y-2">
+          <div className={`h-12 border-b border-dashed ${config.iconSecondary} opacity-30`} />
+          <div className={`h-12 border-b border-dashed ${config.iconSecondary} opacity-30`} />
+          <div className={`h-12 border-b border-dashed ${config.iconSecondary} opacity-30`} />
+        </div>
+      </div>
+
+      <div className={`${config.highlightPrimary} rounded-lg p-4`}>
+        <h4 className={`${config.iconPrimary} font-medium text-sm mb-3`}>
+          ✨ ¿Qué acción concreta puedes hacer esta semana para integrar uno de estos aprendizajes?
+        </h4>
+        <div className="space-y-2">
+          <div className={`h-12 border-b border-dashed ${config.iconPrimary} opacity-30`} />
+          <div className={`h-12 border-b border-dashed ${config.iconPrimary} opacity-30`} />
+        </div>
+      </div>
+
       {/* Cita */}
-      <div className={`${config.headerBg} rounded-lg p-4 text-center mt-4`}>
-        <p className={`${config.headerText} text-sm italic`}>
+      <div className={`${config.headerBg} rounded-lg p-3 text-center mt-4`}>
+        <p className={`${config.headerText} text-xs italic`}>
           "No viniste a sobrevivir el año. Viniste a transformarte."
         </p>
       </div>
