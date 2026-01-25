@@ -184,7 +184,14 @@ export const AgendaLibro = ({
       if (!birthDataResponse.ok) {
         throw new Error('No se encontraron datos de nacimiento');
       }
-      const { birthData } = await birthDataResponse.json();
+      const birthDataResult = await birthDataResponse.json();
+      const birthData = birthDataResult.data || birthDataResult.birthData;
+
+      if (!birthData) {
+        console.error('❌ [AUTO_GEN] Birth data no encontrada en respuesta:', birthDataResult);
+        throw new Error('Birth data no encontrada en la respuesta del servidor');
+      }
+      console.log('✅ [AUTO_GEN] Birth data obtenida:', { fullName: birthData.fullName, birthPlace: birthData.birthPlace });
 
       // 2. Obtener carta natal
       console.log('🌟 [AUTO_GEN] Obteniendo carta natal...');
@@ -222,14 +229,14 @@ export const AgendaLibro = ({
       }
       console.log('✅ [AUTO_GEN] Carta Solar Return obtenida correctamente');
 
-      // 4. Obtener perfil de usuario
-      console.log('👤 [AUTO_GEN] Obteniendo perfil de usuario...');
-      const profileResponse = await fetch(`/api/users/${userId}`);
-      let userProfile = null;
-      if (profileResponse.ok) {
-        const profileData = await profileResponse.json();
-        userProfile = profileData.user;
-      }
+      // 4. Construir perfil de usuario desde birthData
+      console.log('👤 [AUTO_GEN] Construyendo perfil de usuario desde birthData...');
+      const userProfile = {
+        name: birthData.fullName || 'Usuario',
+        birthDate: birthData.date || birthData.birthDate,
+        birthPlace: birthData.location || birthData.birthPlace
+      };
+      console.log('✅ [AUTO_GEN] UserProfile construido:', userProfile);
 
       // 5. Generar interpretación del Solar Return
       console.log('🤖 [AUTO_GEN] Generando interpretación con IA...');
@@ -317,7 +324,14 @@ export const AgendaLibro = ({
       if (!birthDataResponse.ok) {
         throw new Error('No se encontraron datos de nacimiento');
       }
-      const { birthData } = await birthDataResponse.json();
+      const birthDataResult = await birthDataResponse.json();
+      const birthData = birthDataResult.data || birthDataResult.birthData;
+
+      if (!birthData) {
+        console.error('❌ [REGENERATE] Birth data no encontrada en respuesta:', birthDataResult);
+        throw new Error('Birth data no encontrada en la respuesta del servidor');
+      }
+      console.log('✅ [REGENERATE] Birth data obtenida:', { fullName: birthData.fullName, birthPlace: birthData.birthPlace });
 
       console.log('🌟 [REGENERATE] Obteniendo carta natal...');
       const natalResponse = await fetch(`/api/charts/natal?userId=${userId}`);
@@ -351,13 +365,13 @@ export const AgendaLibro = ({
 
       console.log('✅ [REGENERATE] Carta Solar Return obtenida correctamente');
 
-      console.log('👤 [REGENERATE] Obteniendo perfil de usuario...');
-      const profileResponse = await fetch(`/api/users/${userId}`);
-      let userProfile = null;
-      if (profileResponse.ok) {
-        const profileData = await profileResponse.json();
-        userProfile = profileData.user;
-      }
+      console.log('👤 [REGENERATE] Construyendo perfil de usuario desde birthData...');
+      const userProfile = {
+        name: birthData.fullName || 'Usuario',
+        birthDate: birthData.date || birthData.birthDate,
+        birthPlace: birthData.location || birthData.birthPlace
+      };
+      console.log('✅ [REGENERATE] UserProfile construido:', userProfile);
 
       // 3. Generar nueva interpretación con regenerate=true
       console.log('🤖 [REGENERATE] Generando nueva interpretación con IA...');
