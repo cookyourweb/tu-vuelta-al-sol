@@ -62,16 +62,19 @@ export const IndiceNavegable: React.FC = () => {
     },
     {
       titulo: 'Retorno Solar',
-      pagina: 12,
+      pagina: 19,
       id: 'retorno-solar',
       icono: <Sun className="w-4 h-4" />,
       subsecciones: [
-        { titulo: '¿Qué es el Retorno Solar?', pagina: 12, id: 'que-es-retorno' },
-        { titulo: 'Ascendente del Año', pagina: 13, id: 'ascendente-anio' },
-        { titulo: 'Sol en Retorno', pagina: 14, id: 'sol-retorno' },
-        { titulo: 'Luna en Retorno', pagina: 15, id: 'luna-retorno' },
-        { titulo: 'Ejes del Año', pagina: 16, id: 'ejes-anio' },
-        { titulo: 'Ritual de Cumpleaños', pagina: 18, id: 'ritual-cumpleanos' },
+        { titulo: '¿Qué es el Retorno Solar?', pagina: 19, id: 'que-es-retorno' },
+        { titulo: 'Ascendente del Año', pagina: 20, id: 'ascendente-anio' },
+        { titulo: 'Sol en Retorno', pagina: 21, id: 'sol-retorno' },
+        { titulo: 'Luna en Retorno', pagina: 22, id: 'luna-retorno' },
+        { titulo: 'Mercurio en Retorno', pagina: 23, id: 'mercurio-retorno' },
+        { titulo: 'Venus en Retorno', pagina: 24, id: 'venus-retorno' },
+        { titulo: 'Marte en Retorno', pagina: 25, id: 'marte-retorno' },
+        { titulo: 'Ejes del Año', pagina: 26, id: 'ejes-anio' },
+        { titulo: 'Ritual de Cumpleaños', pagina: 28, id: 'ritual-cumpleanos' },
       ]
     },
     {

@@ -15,7 +15,7 @@ import { CartaBienvenida, TemaCentralAnio, LoQueVieneAMover, LoQuePideSoltar, Pa
 import { TuAnioOverview, TuAnioCiclos, PaginaCumpleanos } from './TuAnio';
 import { LineaTiempoEmocional, MesesClavePuntosGiro, GrandesAprendizajes } from './CiclosAnuales';
 import { EsenciaNatal, NodoNorte, NodoSur, PlanetasDominantes, PatronesEmocionales } from './SoulChart';
-import { QueEsRetornoSolar, AscendenteAnio, SolRetorno, LunaRetorno, EjesDelAnio, EjesDelAnio2, IntegracionEjes, RitualCumpleanos, MantraAnual } from './RetornoSolar';
+import { QueEsRetornoSolar, AscendenteAnio, SolRetorno, LunaRetorno, MercurioRetorno, VenusRetorno, MarteRetorno, EjesDelAnio, EjesDelAnio2, IntegracionEjes, RitualCumpleanos, MantraAnual } from './RetornoSolar';
 import { IndiceNavegable } from './Indice';
 import { CalendarioYMapaMes, LunasYEjercicios, SemanaConInterpretacion, CierreMes, PrimerDiaCiclo as PrimerDiaCicloMes } from './MesCompleto';
 import { CalendarioMensualTabla } from './CalendarioMensualTabla';
@@ -344,6 +344,12 @@ export const AgendaLibro = ({
     return interpretation?.linea_tiempo_anual;
   };
 
+  // Helper: Obtener comparaciones planetarias del SR
+  const getComparacionesPlanetarias = () => {
+    const interpretation = getSRInterpretation();
+    return interpretation?.comparaciones_planetarias;
+  };
+
   // LOADING STATE: Cargando datos iniciales
   if (loading && !solarCycle) {
     return (
@@ -574,10 +580,19 @@ export const AgendaLibro = ({
             <AscendenteAnio />
           </div>
           <div id="sol-retorno">
-            <SolRetorno />
+            <SolRetorno comparacion={getComparacionesPlanetarias()?.sol} />
           </div>
           <div id="luna-retorno">
-            <LunaRetorno />
+            <LunaRetorno comparacion={getComparacionesPlanetarias()?.luna} />
+          </div>
+          <div id="mercurio-retorno">
+            <MercurioRetorno comparacion={getComparacionesPlanetarias()?.mercurio} />
+          </div>
+          <div id="venus-retorno">
+            <VenusRetorno comparacion={getComparacionesPlanetarias()?.venus} />
+          </div>
+          <div id="marte-retorno">
+            <MarteRetorno comparacion={getComparacionesPlanetarias()?.marte} />
           </div>
           <div id="ejes-anio">
             <EjesDelAnio />
