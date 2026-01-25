@@ -298,82 +298,134 @@ export const AgendaLibro = ({
           txtContent += srData.apertura_anual.eje_del_ano + '\n\n';
         }
 
-        if (srData.apertura_anual.lo_que_viene_a_mover) {
-          txtContent += '━━━ LO QUE VIENE A MOVER ━━━\n';
-          txtContent += srData.apertura_anual.lo_que_viene_a_mover + '\n\n';
+        if (srData.apertura_anual.como_se_siente) {
+          txtContent += '━━━ CÓMO SE SIENTE ━━━\n';
+          txtContent += srData.apertura_anual.como_se_siente + '\n\n';
         }
 
-        if (srData.apertura_anual.lo_que_pide_soltar) {
-          txtContent += '━━━ LO QUE ESTE AÑO TE PIDE SOLTAR ━━━\n';
-          txtContent += srData.apertura_anual.lo_que_pide_soltar + '\n\n';
+        if (srData.apertura_anual.conexion_natal) {
+          txtContent += '━━━ CONEXIÓN CON TU CARTA NATAL ━━━\n';
+          txtContent += srData.apertura_anual.conexion_natal + '\n\n';
         }
       }
 
-      // Comparaciones planetarias Natal vs SR
-      if (srData.comparaciones_planetarias && srData.comparaciones_planetarias.length > 0) {
+      // Cómo se vive siendo tú
+      if (srData.como_se_vive_siendo_tu) {
+        txtContent += '\n━━━ CÓMO SE VIVE SIENDO TÚ ESTE AÑO ━━━\n\n';
+
+        if (srData.como_se_vive_siendo_tu.facilidad) {
+          txtContent += `▸ LO QUE FLUYE:\n  ${srData.como_se_vive_siendo_tu.facilidad}\n\n`;
+        }
+        if (srData.como_se_vive_siendo_tu.incomodidad) {
+          txtContent += `▸ LO QUE INCOMODA:\n  ${srData.como_se_vive_siendo_tu.incomodidad}\n\n`;
+        }
+        if (srData.como_se_vive_siendo_tu.medida_del_ano) {
+          txtContent += `▸ LA MEDIDA DEL AÑO:\n  ${srData.como_se_vive_siendo_tu.medida_del_ano}\n\n`;
+        }
+        if (srData.como_se_vive_siendo_tu.actitud_nueva) {
+          txtContent += `▸ ACTITUD NUEVA:\n  ${srData.como_se_vive_siendo_tu.actitud_nueva}\n\n`;
+        }
+      }
+
+      // Comparaciones planetarias Natal vs SR (es OBJETO, no array)
+      if (srData.comparaciones_planetarias) {
         txtContent += '\n━━━ COMPARACIONES NATAL vs SOLAR RETURN ━━━\n\n';
-        srData.comparaciones_planetarias.forEach((comp: any) => {
-          txtContent += `▸ ${comp.planeta.toUpperCase()}\n`;
-          txtContent += `  Natal: ${comp.natal}\n`;
-          txtContent += `  Solar Return: ${comp.solar_return}\n`;
-          txtContent += `  Significado: ${comp.significado}\n\n`;
+
+        const planetas = ['sol', 'luna', 'mercurio', 'venus', 'marte', 'jupiter', 'saturno'];
+        planetas.forEach((planeta) => {
+          const comp = srData.comparaciones_planetarias[planeta];
+          if (comp) {
+            txtContent += `▸ ${planeta.toUpperCase()}\n`;
+            if (comp.natal?.descripcion) {
+              txtContent += `  Natal: ${comp.natal.descripcion}\n`;
+            }
+            if (comp.solar_return?.descripcion) {
+              txtContent += `  Solar Return: ${comp.solar_return.descripcion}\n`;
+            }
+            if (comp.choque) {
+              txtContent += `  Choque/Tensión: ${comp.choque}\n`;
+            }
+            if (comp.que_hacer) {
+              txtContent += `  Qué hacer: ${comp.que_hacer}\n`;
+            }
+            if (comp.mandato_del_ano) {
+              txtContent += `  Mandato del año: ${comp.mandato_del_ano}\n`;
+            }
+            txtContent += '\n';
+          }
         });
       }
 
-      // Grandes aprendizajes
-      if (srData.grandes_aprendizajes && srData.grandes_aprendizajes.length > 0) {
-        txtContent += '\n━━━ GRANDES APRENDIZAJES Y CLAVES DE INTEGRACIÓN ━━━\n\n';
-        srData.grandes_aprendizajes.forEach((aprendizaje: any, idx: number) => {
-          txtContent += `${idx + 1}. ${aprendizaje.titulo || aprendizaje.tema || ''}\n`;
-          if (aprendizaje.descripcion) txtContent += `   ${aprendizaje.descripcion}\n`;
-          if (aprendizaje.como_integrarlo) txtContent += `   Cómo integrarlo: ${aprendizaje.como_integrarlo}\n`;
-          txtContent += '\n';
+      // Línea de tiempo anual (es OBJETO con períodos, no array)
+      if (srData.linea_tiempo_anual) {
+        txtContent += '\n━━━ LÍNEA DE TIEMPO DEL AÑO ━━━\n\n';
+
+        const periodos = ['mes_1_2', 'mes_3_4', 'mes_6_7', 'mes_9_10', 'mes_12'];
+        periodos.forEach((periodo) => {
+          const evento = srData.linea_tiempo_anual[periodo];
+          if (evento) {
+            txtContent += `▸ ${evento.titulo || periodo.toUpperCase().replace(/_/g, ' ')}\n`;
+            if (evento.descripcion) {
+              txtContent += `  ${evento.descripcion}\n`;
+            }
+            if (evento.accion_clave) {
+              txtContent += `  Acción clave: ${evento.accion_clave}\n`;
+            }
+            txtContent += '\n';
+          }
         });
+      }
+
+      // Sombras del año
+      if (srData.sombras_del_ano && srData.sombras_del_ano.length > 0) {
+        txtContent += '\n━━━ SOMBRAS Y DESAFÍOS DEL AÑO ━━━\n\n';
+        srData.sombras_del_ano.forEach((sombra: string, idx: number) => {
+          txtContent += `${idx + 1}. ${sombra}\n`;
+        });
+        txtContent += '\n';
       }
 
       // Claves de integración
       if (srData.claves_integracion && srData.claves_integracion.length > 0) {
-        txtContent += '━━━ CLAVES DE INTEGRACIÓN ━━━\n';
+        txtContent += '\n━━━ CLAVES DE INTEGRACIÓN ━━━\n\n';
         srData.claves_integracion.forEach((clave: string, idx: number) => {
           txtContent += `${idx + 1}. ${clave}\n`;
         });
         txtContent += '\n';
       }
 
-      // Meses clave y puntos de giro
-      if (srData.meses_clave_puntos_giro && srData.meses_clave_puntos_giro.length > 0) {
-        txtContent += '\n━━━ MESES CLAVE Y PUNTOS DE GIRO ━━━\n\n';
-        srData.meses_clave_puntos_giro.forEach((mes: any) => {
-          txtContent += `▸ ${mes.mes || mes.periodo || ''}\n`;
-          if (mes.evento) txtContent += `  ${mes.evento}\n`;
-          if (mes.que_esperar) txtContent += `  Qué esperar: ${mes.que_esperar}\n`;
-          if (mes.como_prepararte) txtContent += `  Cómo prepararte: ${mes.como_prepararte}\n`;
-          txtContent += '\n';
-        });
+      // Uso del calendario lunar
+      if (srData.uso_calendario_lunar) {
+        txtContent += '\n━━━ USO DEL CALENDARIO LUNAR ━━━\n\n';
+
+        if (srData.uso_calendario_lunar.marco_general) {
+          txtContent += `${srData.uso_calendario_lunar.marco_general}\n\n`;
+        }
+
+        if (srData.uso_calendario_lunar.lunas_clave && srData.uso_calendario_lunar.lunas_clave.length > 0) {
+          txtContent += '▸ LUNAS CLAVE DEL AÑO:\n\n';
+          srData.uso_calendario_lunar.lunas_clave.forEach((luna: any) => {
+            txtContent += `  • ${luna.fase || ''} en ${luna.signo || ''}\n`;
+            if (luna.fecha_aproximada) {
+              txtContent += `    Fecha aprox: ${luna.fecha_aproximada}\n`;
+            }
+            if (luna.por_que_es_clave) {
+              txtContent += `    Por qué es clave: ${luna.por_que_es_clave}\n`;
+            }
+            txtContent += '\n';
+          });
+        }
       }
 
-      // Línea de tiempo anual
-      if (srData.linea_tiempo_anual && srData.linea_tiempo_anual.length > 0) {
-        txtContent += '\n━━━ LÍNEA DE TIEMPO COMPLETA DEL AÑO ━━━\n\n';
-        srData.linea_tiempo_anual.forEach((evento: any, idx: number) => {
-          txtContent += `${idx + 1}. ${evento.mes || evento.periodo || ''}\n`;
-          if (evento.evento) txtContent += `   Evento: ${evento.evento}\n`;
-          if (evento.significado) txtContent += `   Significado: ${evento.significado}\n`;
-          txtContent += '\n';
-        });
-      }
+      // Síntesis final
+      if (srData.sintesis_final) {
+        txtContent += '\n━━━ SÍNTESIS FINAL ━━━\n\n';
 
-      // Ejes del año
-      if (srData.ejes_del_anio) {
-        txtContent += '\n━━━ EJES DEL AÑO ━━━\n\n';
-        if (srData.ejes_del_anio.eje_principal) {
-          txtContent += `▸ EJE PRINCIPAL:\n  ${srData.ejes_del_anio.eje_principal}\n\n`;
+        if (srData.sintesis_final.frase_cierre_potente) {
+          txtContent += `"${srData.sintesis_final.frase_cierre_potente}"\n\n`;
         }
-        if (srData.ejes_del_anio.desafio) {
-          txtContent += `▸ DESAFÍO:\n  ${srData.ejes_del_anio.desafio}\n\n`;
-        }
-        if (srData.ejes_del_anio.oportunidad) {
-          txtContent += `▸ OPORTUNIDAD:\n  ${srData.ejes_del_anio.oportunidad}\n\n`;
+        if (srData.sintesis_final.pregunta_final) {
+          txtContent += `Pregunta para reflexionar: ${srData.sintesis_final.pregunta_final}\n\n`;
         }
       }
     }
@@ -381,26 +433,71 @@ export const AgendaLibro = ({
     // ═══════════════════════════════════════════════════════════
     // CARTA NATAL - ESENCIA
     // ═══════════════════════════════════════════════════════════
-    txtContent += '\n═══════════════════════════════════════════════════════════\n';
-    txtContent += '                  CARTA NATAL - TU ESENCIA\n';
-    txtContent += '═══════════════════════════════════════════════════════════\n\n';
-    txtContent += 'Tu carta natal es el mapa del cielo en el momento exacto de tu nacimiento.\n';
-    txtContent += 'Refleja tu potencial, tus dones, tus desafíos y el camino de tu alma.\n\n';
-
-    // Datos de la natal si existen
     const natalData = natalInterpretation?.interpretation;
     if (natalData) {
-      if (natalData.sol) {
-        txtContent += `━━━ TU SOL EN ${natalData.sol.signo || ''} ━━━\n`;
-        if (natalData.sol.descripcion) txtContent += natalData.sol.descripcion + '\n\n';
+      txtContent += '\n═══════════════════════════════════════════════════════════\n';
+      txtContent += '                  CARTA NATAL - TU ESENCIA\n';
+      txtContent += '═══════════════════════════════════════════════════════════\n\n';
+
+      if (natalData.esencia_revolucionaria) {
+        txtContent += '━━━ TU ESENCIA REVOLUCIONARIA ━━━\n';
+        txtContent += natalData.esencia_revolucionaria + '\n\n';
       }
-      if (natalData.luna) {
-        txtContent += `━━━ TU LUNA EN ${natalData.luna.signo || ''} ━━━\n`;
-        if (natalData.luna.descripcion) txtContent += natalData.luna.descripcion + '\n\n';
+
+      if (natalData.proposito_vida) {
+        txtContent += '━━━ TU PROPÓSITO DE VIDA ━━━\n';
+        txtContent += natalData.proposito_vida + '\n\n';
       }
-      if (natalData.ascendente) {
-        txtContent += `━━━ TU ASCENDENTE EN ${natalData.ascendente.signo || ''} ━━━\n`;
-        if (natalData.ascendente.descripcion) txtContent += natalData.ascendente.descripcion + '\n\n';
+
+      if (natalData.poder_magnetico) {
+        txtContent += '━━━ TU PODER MAGNÉTICO ━━━\n';
+        txtContent += natalData.poder_magnetico + '\n\n';
+      }
+
+      if (natalData.patron_energetico) {
+        txtContent += '━━━ TU PATRÓN ENERGÉTICO ━━━\n';
+        txtContent += natalData.patron_energetico + '\n\n';
+      }
+
+      if (natalData.planeta_dominante) {
+        txtContent += '━━━ TU PLANETA DOMINANTE ━━━\n';
+        txtContent += natalData.planeta_dominante + '\n\n';
+      }
+
+      if (natalData.super_poderes && natalData.super_poderes.length > 0) {
+        txtContent += '━━━ TUS SÚPER PODERES ━━━\n';
+        natalData.super_poderes.forEach((poder: string, idx: number) => {
+          txtContent += `${idx + 1}. ${poder}\n`;
+        });
+        txtContent += '\n';
+      }
+
+      if (natalData.desafios_evolutivos && natalData.desafios_evolutivos.length > 0) {
+        txtContent += '━━━ DESAFÍOS EVOLUTIVOS ━━━\n';
+        natalData.desafios_evolutivos.forEach((desafio: string, idx: number) => {
+          txtContent += `${idx + 1}. ${desafio}\n`;
+        });
+        txtContent += '\n';
+      }
+
+      if (natalData.mision_vida) {
+        txtContent += '━━━ MISIÓN DE VIDA ━━━\n';
+        txtContent += natalData.mision_vida + '\n\n';
+      }
+
+      // Análisis de planetas (si existe en el formato antiguo)
+      if (natalData.analisis_planetas) {
+        txtContent += '━━━ ANÁLISIS PLANETARIO ━━━\n\n';
+
+        const planetas = ['sol', 'luna', 'mercurio', 'venus', 'marte', 'jupiter', 'saturno'];
+        planetas.forEach((planeta) => {
+          const analisis = natalData.analisis_planetas[planeta];
+          if (analisis && typeof analisis === 'string') {
+            txtContent += `▸ ${planeta.toUpperCase()}:\n  ${analisis}\n\n`;
+          } else if (analisis && analisis.descripcion) {
+            txtContent += `▸ ${planeta.toUpperCase()} en ${analisis.signo || ''}:\n  ${analisis.descripcion}\n\n`;
+          }
+        });
       }
     }
 
