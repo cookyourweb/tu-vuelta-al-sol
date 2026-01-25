@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useStyle } from '@/context/StyleContext';
 import { StyleSwitcher } from '@/components/agenda/StyleSwitcher';
-import { Printer, X, FileDown } from 'lucide-react';
+import { Printer, X, FileDown, RefreshCw } from 'lucide-react';
 import { useInterpretaciones } from '@/hooks/useInterpretaciones';
 import { formatEventForBook, formatInterpretationCompact } from '@/utils/formatInterpretationForBook';
 
@@ -274,6 +274,49 @@ export const AgendaLibro = ({
     } catch (error: any) {
       console.error('❌ [AUTO_GEN] Error al generar Solar Return:', error);
       alert(`Error al generar Solar Return: ${error.message}\n\nPor favor, intenta generar manualmente desde la página de Solar Return.`);
+    } finally {
+      setGeneratingSolarReturn(false);
+    }
+  };
+
+  // ==========================================
+  // 🔄 REGENERAR SOLAR RETURN (FORZADO)
+  // ==========================================
+  const handleRegenerateSolarReturn = async () => {
+    if (!userId || generatingSolarReturn) return;
+
+    const confirmRegenerate = window.confirm(
+      '¿Estás seguro de que quieres regenerar la interpretación del Solar Return?\n\n' +
+      'Esto borrará la interpretación actual y creará una nueva con los campos actualizados.'
+    );
+
+    if (!confirmRegenerate) return;
+
+    try {
+      setGeneratingSolarReturn(true);
+      console.log('🔄 [REGENERATE] Borrando interpretación existente...');
+
+      // 1. Borrar la interpretación existente
+      const deleteResponse = await fetch(`/api/interpretations/save?userId=${userId}&chartType=solar-return`, {
+        method: 'DELETE'
+      });
+
+      if (deleteResponse.ok) {
+        console.log('✅ [REGENERATE] Interpretación borrada correctamente');
+      } else {
+        console.warn('⚠️ [REGENERATE] No se pudo borrar la interpretación (puede no existir)');
+      }
+
+      // 2. Generar nueva interpretación
+      console.log('🌅 [REGENERATE] Generando nueva interpretación...');
+      await handleGenerateSolarReturn();
+
+      // 3. Recargar la página para mostrar la nueva interpretación
+      window.location.reload();
+
+    } catch (error) {
+      console.error('❌ [REGENERATE] Error:', error);
+      alert('Error al regenerar la interpretación. Por favor, inténtalo de nuevo.');
     } finally {
       setGeneratingSolarReturn(false);
     }
@@ -659,6 +702,22 @@ export const AgendaLibro = ({
 
           <div className="flex items-center gap-4">
             <StyleSwitcher />
+
+            {/* Botón para regenerar SR si faltan campos */}
+            {solarReturnInterpretation &&
+             (!solarReturnInterpretation.interpretation?.linea_tiempo_emocional ||
+              !solarReturnInterpretation.interpretation?.meses_clave_puntos_giro) && (
+              <button
+                onClick={handleRegenerateSolarReturn}
+                disabled={generatingSolarReturn}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-semibold hover:from-orange-400 hover:to-yellow-400 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                title="La interpretación actual no tiene todos los campos. Regenerar para obtener la versión completa."
+              >
+                <RefreshCw className={`w-4 h-4 ${generatingSolarReturn ? 'animate-spin' : ''}`} />
+                {generatingSolarReturn ? 'Regenerando...' : 'Regenerar SR'}
+              </button>
+            )}
+
             <button
               onClick={handleExportTXT}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold hover:from-blue-400 hover:to-cyan-400 transition-all duration-200 shadow-lg"
