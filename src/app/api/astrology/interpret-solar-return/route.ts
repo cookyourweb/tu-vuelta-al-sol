@@ -77,6 +77,20 @@ interface CompleteSolarReturnInterpretation {
   // CLAVES DE INTEGRACIÓN
   claves_integracion: string[];
 
+  // LÍNEA DE TIEMPO EMOCIONAL (12 meses)
+  linea_tiempo_emocional: Array<{
+    mes: string;
+    intensidad: number; // 1-5
+    palabra_clave: string;
+  }>;
+
+  // MESES CLAVE Y PUNTOS DE GIRO (3 meses críticos)
+  meses_clave_puntos_giro: Array<{
+    mes: string;
+    evento_astrologico: string;
+    significado_para_ti: string;
+  }>;
+
   // USO CALENDARIO LUNAR
   uso_calendario_lunar: {
     marco_general: string;
