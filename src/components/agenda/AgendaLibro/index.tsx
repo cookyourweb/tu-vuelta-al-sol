@@ -287,16 +287,18 @@ export const AgendaLibro = ({
 
     const confirmRegenerate = window.confirm(
       '¿Estás seguro de que quieres regenerar la interpretación del Solar Return?\n\n' +
-      'Esto borrará la interpretación actual y creará una nueva con los campos actualizados.'
+      'Esto borrará la interpretación actual y creará una nueva con los campos actualizados.\n\n' +
+      'El proceso puede tardar 1-2 minutos.'
     );
 
     if (!confirmRegenerate) return;
 
     try {
       setGeneratingSolarReturn(true);
-      console.log('🔄 [REGENERATE] Borrando interpretación existente...');
+      console.log('🔄 [REGENERATE] Iniciando regeneración forzada...');
 
       // 1. Borrar la interpretación existente
+      console.log('🗑️ [REGENERATE] Borrando interpretación existente...');
       const deleteResponse = await fetch(`/api/interpretations/save?userId=${userId}&chartType=solar-return`, {
         method: 'DELETE'
       });
@@ -307,16 +309,77 @@ export const AgendaLibro = ({
         console.warn('⚠️ [REGENERATE] No se pudo borrar la interpretación (puede no existir)');
       }
 
-      // 2. Generar nueva interpretación
-      console.log('🌅 [REGENERATE] Generando nueva interpretación...');
-      await handleGenerateSolarReturn();
+      // 2. Obtener datos necesarios para la generación
+      console.log('📍 [REGENERATE] Obteniendo birth data...');
+      const birthDataResponse = await fetch(`/api/birth-data?userId=${userId}`);
+      if (!birthDataResponse.ok) {
+        throw new Error('No se encontraron datos de nacimiento');
+      }
+      const { birthData } = await birthDataResponse.json();
 
-      // 3. Recargar la página para mostrar la nueva interpretación
+      console.log('🌟 [REGENERATE] Obteniendo carta natal...');
+      const natalResponse = await fetch(`/api/charts/natal?userId=${userId}`);
+      if (!natalResponse.ok) {
+        throw new Error('No se encontró la carta natal');
+      }
+      const natalData = await natalResponse.json();
+      const natalChart = natalData.chart || natalData.data?.chart;
+
+      if (!natalChart) {
+        throw new Error('Carta natal no encontrada');
+      }
+
+      console.log('☀️ [REGENERATE] Obteniendo carta de Solar Return...');
+      const srChartResponse = await fetch(`/api/charts/solar-return?userId=${userId}`);
+      if (!srChartResponse.ok) {
+        throw new Error('No se encontró la carta de Solar Return');
+      }
+      const srChartData = await srChartResponse.json();
+      const solarReturnChart = srChartData.chart || srChartData.data?.solarReturnChart || srChartData.data?.chart;
+
+      if (!solarReturnChart) {
+        throw new Error('Carta Solar Return no encontrada');
+      }
+
+      console.log('👤 [REGENERATE] Obteniendo perfil de usuario...');
+      const profileResponse = await fetch(`/api/users/${userId}`);
+      let userProfile = null;
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json();
+        userProfile = profileData.user;
+      }
+
+      // 3. Generar nueva interpretación con regenerate=true
+      console.log('🤖 [REGENERATE] Generando nueva interpretación con IA...');
+      const interpretResponse = await fetch(`/api/astrology/interpret-solar-return`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          natalChart,
+          solarReturnChart,
+          userProfile,
+          birthData,
+          regenerate: true  // ✅ FORZAR REGENERACIÓN
+        })
+      });
+
+      if (!interpretResponse.ok) {
+        const errorData = await interpretResponse.json();
+        const errorMsg = errorData.error || errorData.message || 'Error desconocido';
+        throw new Error(`Error al generar interpretación: ${errorMsg}`);
+      }
+
+      const interpretData = await interpretResponse.json();
+      console.log('✅ [REGENERATE] Nueva interpretación generada exitosamente');
+
+      // 4. Recargar la página para mostrar la nueva interpretación
+      console.log('🔄 [REGENERATE] Recargando página...');
       window.location.reload();
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ [REGENERATE] Error:', error);
-      alert('Error al regenerar la interpretación. Por favor, inténtalo de nuevo.');
+      alert(`Error al regenerar la interpretación:\n\n${error.message}\n\nPor favor, verifica que tengas una carta de Solar Return generada primero.`);
     } finally {
       setGeneratingSolarReturn(false);
     }
