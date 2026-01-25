@@ -67,9 +67,15 @@ export const CartaBienvenida = ({ name }: TuAnioTuViajeProps) => {
 
 interface TemaCentralAnioProps {
   interpretacion?: string;
+  onGenerateSolarReturn?: () => void;
+  isGenerating?: boolean;
 }
 
-export const TemaCentralAnio = ({ interpretacion }: TemaCentralAnioProps) => {
+export const TemaCentralAnio = ({
+  interpretacion,
+  onGenerateSolarReturn,
+  isGenerating = false
+}: TemaCentralAnioProps) => {
   const { config } = useStyle();
 
   const esInterpretacionPersonalizada = !!interpretacion;
@@ -88,19 +94,42 @@ export const TemaCentralAnio = ({ interpretacion }: TemaCentralAnioProps) => {
           </div>
         ) : (
           <div className="mt-3 inline-flex flex-col items-center gap-3 px-6 py-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border-2 border-amber-200 no-print">
-            <span className="text-sm font-semibold text-amber-800">⚠️ Interpretación No Disponible</span>
-            <p className="text-xs text-amber-700 text-center max-w-md">
-              Para ver el tema central de tu año personalizado, necesitas generar primero tu <strong>Retorno Solar (Revolución Solar)</strong>.
-            </p>
-            <a
-              href="/solar-return"
-              className="mt-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-semibold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all no-underline"
-            >
-              Generar Retorno Solar →
-            </a>
-            <p className="text-xs text-amber-600 italic mt-1">
-              Una vez generado, recarga esta página para ver tu interpretación
-            </p>
+            {isGenerating ? (
+              <>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+                <span className="text-sm font-semibold text-amber-800">✨ Generando tu Retorno Solar...</span>
+                <p className="text-xs text-amber-700 text-center max-w-md">
+                  Esto puede tomar 1-2 minutos. Estamos interpretando tu carta astrológica anual.
+                </p>
+              </>
+            ) : (
+              <>
+                <span className="text-sm font-semibold text-amber-800">⚠️ Interpretación No Disponible</span>
+                <p className="text-xs text-amber-700 text-center max-w-md">
+                  Para ver el tema central de tu año personalizado, necesitas generar tu <strong>Retorno Solar (Revolución Solar)</strong>.
+                </p>
+                {onGenerateSolarReturn ? (
+                  <>
+                    <button
+                      onClick={onGenerateSolarReturn}
+                      className="mt-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-semibold rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all shadow-md"
+                    >
+                      ✨ Generar Ahora (1-2 min)
+                    </button>
+                    <p className="text-xs text-amber-600 italic">
+                      O visita <a href="/solar-return" className="underline hover:text-amber-800">la página de Solar Return</a>
+                    </p>
+                  </>
+                ) : (
+                  <a
+                    href="/solar-return"
+                    className="mt-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-semibold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all no-underline"
+                  >
+                    Generar Retorno Solar →
+                  </a>
+                )}
+              </>
+            )}
           </div>
         )}
       </div>

@@ -62,6 +62,7 @@ export const AgendaLibro = ({
   // Estado para almacenar la interpretación del Retorno Solar
   const [solarReturnInterpretation, setSolarReturnInterpretation] = useState<any>(null);
   const [loadingSolarReturn, setLoadingSolarReturn] = useState(true);
+  const [generatingSolarReturn, setGeneratingSolarReturn] = useState(false);
 
   // Estado para almacenar la interpretación Natal
   const [natalInterpretation, setNatalInterpretation] = useState<any>(null);
@@ -149,6 +150,94 @@ export const AgendaLibro = ({
 
     fetchNatalInterpretation();
   }, [userId]);
+
+  // ==========================================
+  // 🚀 AUTO-GENERAR SOLAR RETURN
+  // ==========================================
+  const handleGenerateSolarReturn = async () => {
+    if (!userId || generatingSolarReturn) return;
+
+    try {
+      setGeneratingSolarReturn(true);
+      console.log('🌅 [AUTO_GEN] Iniciando generación automática de Solar Return...');
+
+      // 1. Obtener birth data
+      console.log('📍 [AUTO_GEN] Obteniendo birth data...');
+      const birthDataResponse = await fetch(`/api/birth-data?userId=${userId}`);
+      if (!birthDataResponse.ok) {
+        throw new Error('No se encontraron datos de nacimiento');
+      }
+      const { birthData } = await birthDataResponse.json();
+
+      // 2. Obtener carta natal
+      console.log('🌟 [AUTO_GEN] Obteniendo carta natal...');
+      const natalResponse = await fetch(`/api/charts/natal?userId=${userId}`);
+      if (!natalResponse.ok) {
+        throw new Error('No se encontró la carta natal');
+      }
+      const natalData = await natalResponse.json();
+      const natalChart = natalData.chart || natalData.data?.chart;
+
+      // 3. Generar carta de Solar Return
+      console.log('☀️ [AUTO_GEN] Generando carta de Solar Return...');
+      const srChartResponse = await fetch(`/api/charts/solar-return?userId=${userId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+      });
+      if (!srChartResponse.ok) {
+        throw new Error('Error al generar carta de Solar Return');
+      }
+      const srChartData = await srChartResponse.json();
+      const solarReturnChart = srChartData.chart || srChartData.data?.chart;
+
+      // 4. Obtener perfil de usuario
+      console.log('👤 [AUTO_GEN] Obteniendo perfil de usuario...');
+      const profileResponse = await fetch(`/api/users/${userId}`);
+      let userProfile = null;
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json();
+        userProfile = profileData.user;
+      }
+
+      // 5. Generar interpretación del Solar Return
+      console.log('🤖 [AUTO_GEN] Generando interpretación con IA...');
+      const interpretResponse = await fetch(`/api/astrology/interpret-solar-return`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          natalChart,
+          solarReturnChart,
+          userProfile,
+          birthData,
+          regenerate: false
+        })
+      });
+
+      if (!interpretResponse.ok) {
+        throw new Error('Error al generar interpretación del Solar Return');
+      }
+
+      const interpretData = await interpretResponse.json();
+      console.log('✅ [AUTO_GEN] Solar Return generado exitosamente');
+
+      // 6. Recargar la interpretación
+      const reloadResponse = await fetch(`/api/interpretations?userId=${userId}&chartType=solar-return`);
+      const reloadData = await reloadResponse.json();
+
+      if (reloadData.exists && reloadData.interpretation) {
+        setSolarReturnInterpretation(reloadData);
+        console.log('✅ [AUTO_GEN] Interpretación cargada en el libro');
+      }
+
+    } catch (error: any) {
+      console.error('❌ [AUTO_GEN] Error al generar Solar Return:', error);
+      alert(`Error al generar Solar Return: ${error.message}\n\nPor favor, intenta generar manualmente desde la página de Solar Return.`);
+    } finally {
+      setGeneratingSolarReturn(false);
+    }
+  };
 
   const handlePrint = () => {
     // Forzar el layout antes de imprimir
@@ -377,7 +466,11 @@ export const AgendaLibro = ({
             <CartaBienvenida name={userName} />
           </div>
           <div id="tema-central">
-            <TemaCentralAnio interpretacion={getInterpretacionRetornoSolar()} />
+            <TemaCentralAnio
+              interpretacion={getInterpretacionRetornoSolar()}
+              onGenerateSolarReturn={handleGenerateSolarReturn}
+              isGenerating={generatingSolarReturn}
+            />
           </div>
         </div>
 
