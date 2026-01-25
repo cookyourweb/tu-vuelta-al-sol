@@ -20,7 +20,9 @@ const LineasEscritura = ({ count = 6, spacing = 28 }: { count?: number; spacing?
 export const PrimerDiaCiclo: React.FC<{
   fecha: Date;
   nombre: string;
-}> = ({ fecha, nombre }) => {
+  temaCentral?: string;
+  mandato?: string;
+}> = ({ fecha, nombre, temaCentral, mandato }) => {
   const { config } = useStyle();
 
   return (
@@ -37,6 +39,30 @@ export const PrimerDiaCiclo: React.FC<{
 
         <div className={`${config.divider} w-32 my-8`} />
 
+        {/* Interpretaciones personalizadas */}
+        {(temaCentral || mandato) && (
+          <div className="max-w-lg space-y-4 mb-8 text-left w-full">
+            {temaCentral && (
+              <div className={`${config.highlightPrimary} p-5 rounded-lg`}>
+                <h3 className={`text-sm font-bold uppercase ${config.iconPrimary} mb-3`}>Tu tema para este ciclo</h3>
+                <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
+                  {temaCentral.length > 200 ? temaCentral.substring(0, 200) + '...' : temaCentral}
+                </p>
+              </div>
+            )}
+
+            {mandato && (
+              <div className={`${config.highlightAccent} p-5 rounded-lg`}>
+                <h3 className={`text-sm font-bold uppercase ${config.iconAccent} mb-3`}>El mandato del año</h3>
+                <p className="text-gray-700 text-sm italic leading-relaxed">
+                  "{mandato}"
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Secciones para escribir */}
         <div className="max-w-md space-y-6 text-left w-full">
           <div className={`${config.highlightSecondary} p-5`}>
             <h3 className={`text-sm font-bold uppercase ${config.iconSecondary} mb-3`}>Intención para este nuevo ciclo</h3>

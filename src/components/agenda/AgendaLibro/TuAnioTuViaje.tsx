@@ -67,18 +67,21 @@ export const CartaBienvenida = ({ name }: TuAnioTuViajeProps) => {
 
 interface TemaCentralAnioProps {
   interpretacion?: string;
+  srInterpretation?: any; // Interpretación completa del SR
   onGenerateSolarReturn?: () => void;
   isGenerating?: boolean;
 }
 
 export const TemaCentralAnio = ({
   interpretacion,
+  srInterpretation,
   onGenerateSolarReturn,
   isGenerating = false
 }: TemaCentralAnioProps) => {
   const { config } = useStyle();
 
   const esInterpretacionPersonalizada = !!interpretacion;
+  const aperturaAnual = srInterpretation?.apertura_anual;
 
   return (
     <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
@@ -136,11 +139,45 @@ export const TemaCentralAnio = ({
 
       <div className={`flex-1 flex flex-col justify-center max-w-2xl mx-auto w-full ${config.fontBody}`}>
         {esInterpretacionPersonalizada ? (
-          <div className={`${config.highlightSecondary} rounded-lg p-8 mb-8`}>
-            <div className="space-y-4 text-gray-700 text-base leading-relaxed whitespace-pre-line">
-              {interpretacion}
+          <>
+            {/* Tema Central */}
+            <div className={`${config.highlightPrimary} rounded-lg p-8 mb-6`}>
+              <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-4 text-lg`}>El tema central</h3>
+              <div className="text-gray-700 text-base leading-relaxed whitespace-pre-line">
+                {interpretacion}
+              </div>
             </div>
-          </div>
+
+            {/* Eje del Año */}
+            {aperturaAnual?.eje_del_ano && (
+              <div className={`${config.highlightSecondary} rounded-lg p-6 mb-4`}>
+                <h3 className={`${config.fontDisplay} ${config.iconSecondary} font-medium mb-3`}>El eje del año</h3>
+                <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                  {aperturaAnual.eje_del_ano}
+                </div>
+              </div>
+            )}
+
+            {/* Cómo se Siente */}
+            {aperturaAnual?.como_se_siente && (
+              <div className={`${config.highlightAccent} rounded-lg p-6 mb-4`}>
+                <h3 className={`${config.fontDisplay} ${config.iconAccent} font-medium mb-3`}>Cómo se siente este año</h3>
+                <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                  {aperturaAnual.como_se_siente}
+                </div>
+              </div>
+            )}
+
+            {/* Conexión Natal */}
+            {aperturaAnual?.conexion_natal && (
+              <div className={`${config.highlightPrimary} rounded-lg p-6`}>
+                <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3`}>Conexión con tu carta natal</h3>
+                <div className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
+                  {aperturaAnual.conexion_natal}
+                </div>
+              </div>
+            )}
+          </>
         ) : (
           <div className={`${config.highlightSecondary} rounded-lg p-8 mb-8 opacity-50`}>
             <div className="space-y-6 text-gray-500 text-lg leading-relaxed italic text-center">
@@ -170,18 +207,26 @@ export const TemaCentralAnio = ({
 interface LoQueVieneMoverProps {
   facilidad?: string;
   incomodidad?: string;
+  medida_del_ano?: string;
+  actitud_nueva?: string;
 }
 
-export const LoQueVieneAMover = ({ facilidad, incomodidad }: LoQueVieneMoverProps) => {
+export const LoQueVieneAMover = ({
+  facilidad,
+  incomodidad,
+  medida_del_ano,
+  actitud_nueva
+}: LoQueVieneMoverProps) => {
   const { config } = useStyle();
 
-  const tieneContenidoPersonalizado = !!(facilidad && incomodidad);
+  const tieneContenidoPersonalizado = !!(facilidad || incomodidad || medida_del_ano || actitud_nueva);
 
   return (
     <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
       <div className="text-center mb-8">
-        <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient}`}>
-          {tieneContenidoPersonalizado ? 'Cómo se vive siendo tú este año' : 'Lo que este año viene a mover'}
+        <span className={`${config.iconSecondary} opacity-60 text-sm tracking-[0.3em] uppercase ${config.fontBody}`}>Tu Año, Tu Viaje</span>
+        <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient} mt-2`}>
+          Cómo se vive siendo tú este año
         </h2>
         <div className={`${config.divider} w-16 mx-auto mt-4`} />
 
@@ -192,23 +237,48 @@ export const LoQueVieneAMover = ({ facilidad, incomodidad }: LoQueVieneMoverProp
         )}
       </div>
 
-      <div className={`flex-1 grid grid-cols-1 gap-6 max-w-2xl mx-auto w-full ${config.fontBody}`}>
+      <div className={`flex-1 space-y-6 max-w-2xl mx-auto w-full ${config.fontBody}`}>
         {tieneContenidoPersonalizado ? (
           <>
-            {/* Contenido personalizado del Solar Return */}
-            <div className={`${config.highlightPrimary} rounded-lg p-6`}>
-              <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3`}>✅ Lo que fluye naturalmente</h3>
-              <div className="text-gray-700 leading-relaxed whitespace-pre-line">
-                {facilidad}
+            {/* Medida del Año */}
+            {medida_del_ano && (
+              <div className={`${config.highlightAccent} rounded-lg p-6`}>
+                <h3 className={`${config.fontDisplay} ${config.iconAccent} font-medium mb-3`}>📏 La medida del año</h3>
+                <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                  {medida_del_ano}
+                </div>
               </div>
-            </div>
+            )}
 
-            <div className={`${config.highlightSecondary} rounded-lg p-6`}>
-              <h3 className={`${config.fontDisplay} ${config.iconSecondary} font-medium mb-3`}>⚠️ Lo que te incomoda</h3>
-              <div className="text-gray-700 leading-relaxed whitespace-pre-line">
-                {incomodidad}
+            {/* Lo que fluye naturalmente */}
+            {facilidad && (
+              <div className={`${config.highlightPrimary} rounded-lg p-6`}>
+                <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3`}>✅ Lo que fluye naturalmente</h3>
+                <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                  {facilidad}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Lo que te incomoda */}
+            {incomodidad && (
+              <div className={`${config.highlightSecondary} rounded-lg p-6`}>
+                <h3 className={`${config.fontDisplay} ${config.iconSecondary} font-medium mb-3`}>⚠️ Lo que te incomoda</h3>
+                <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                  {incomodidad}
+                </div>
+              </div>
+            )}
+
+            {/* Actitud Nueva */}
+            {actitud_nueva && (
+              <div className={`${config.highlightPrimary} rounded-lg p-6`}>
+                <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3`}>✨ La actitud nueva que te pide el año</h3>
+                <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                  {actitud_nueva}
+                </div>
+              </div>
+            )}
           </>
         ) : (
           <>

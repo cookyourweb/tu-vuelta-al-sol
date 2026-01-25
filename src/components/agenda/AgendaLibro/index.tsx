@@ -286,6 +286,7 @@ export const AgendaLibro = ({
     return {
       facilidad: interpretation.como_se_vive_siendo_tu.facilidad,
       incomodidad: interpretation.como_se_vive_siendo_tu.incomodidad,
+      medida_del_ano: interpretation.como_se_vive_siendo_tu.medida_del_ano,
       reflejos_obsoletos: interpretation.como_se_vive_siendo_tu.reflejos_obsoletos,
       actitud_nueva: interpretation.como_se_vive_siendo_tu.actitud_nueva
     };
@@ -468,6 +469,7 @@ export const AgendaLibro = ({
           <div id="tema-central">
             <TemaCentralAnio
               interpretacion={getInterpretacionRetornoSolar()}
+              srInterpretation={getSRInterpretation()}
               onGenerateSolarReturn={handleGenerateSolarReturn}
               isGenerating={generatingSolarReturn}
             />
@@ -476,7 +478,12 @@ export const AgendaLibro = ({
 
         {/* 3. PRIMER DÍA DEL CICLO */}
         <div id="primer-dia-ciclo">
-          <PrimerDiaCiclo name={userName} fecha={startDate} />
+          <PrimerDiaCiclo
+            name={userName}
+            fecha={startDate}
+            temaCentral={getInterpretacionRetornoSolar()}
+            mandato={getSRInterpretation()?.comparaciones_planetarias?.sol?.mandato_del_ano}
+          />
         </div>
 
         {/* 4. LO QUE VIENE A MOVER Y SOLTAR */}
@@ -485,6 +492,8 @@ export const AgendaLibro = ({
             <LoQueVieneAMover
               facilidad={getComoSeViveSiendoTu()?.facilidad}
               incomodidad={getComoSeViveSiendoTu()?.incomodidad}
+              medida_del_ano={getComoSeViveSiendoTu()?.medida_del_ano}
+              actitud_nueva={getComoSeViveSiendoTu()?.actitud_nueva}
             />
           </div>
           <div id="pide-soltar">
