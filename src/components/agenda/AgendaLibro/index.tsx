@@ -189,6 +189,12 @@ export const AgendaLibro = ({
       const natalData = await natalResponse.json();
       const natalChart = natalData.chart || natalData.data?.chart;
 
+      if (!natalChart) {
+        console.error('❌ [AUTO_GEN] Carta natal no encontrada en respuesta:', natalData);
+        throw new Error('Carta natal no encontrada en la respuesta del servidor');
+      }
+      console.log('✅ [AUTO_GEN] Carta natal obtenida correctamente');
+
       // 3. Generar carta de Solar Return
       console.log('☀️ [AUTO_GEN] Generando carta de Solar Return...');
       const srChartResponse = await fetch(`/api/charts/solar-return?userId=${userId}`, {
@@ -202,6 +208,12 @@ export const AgendaLibro = ({
       const srChartData = await srChartResponse.json();
       const solarReturnChart = srChartData.chart || srChartData.data?.chart;
 
+      if (!solarReturnChart) {
+        console.error('❌ [AUTO_GEN] Carta SR no encontrada en respuesta:', srChartData);
+        throw new Error('Carta Solar Return no encontrada en la respuesta del servidor');
+      }
+      console.log('✅ [AUTO_GEN] Carta Solar Return obtenida correctamente');
+
       // 4. Obtener perfil de usuario
       console.log('👤 [AUTO_GEN] Obteniendo perfil de usuario...');
       const profileResponse = await fetch(`/api/users/${userId}`);
@@ -213,6 +225,14 @@ export const AgendaLibro = ({
 
       // 5. Generar interpretación del Solar Return
       console.log('🤖 [AUTO_GEN] Generando interpretación con IA...');
+      console.log('📦 [AUTO_GEN] Datos a enviar:', {
+        userId: userId ? '✅' : '❌',
+        natalChart: natalChart ? '✅' : '❌',
+        solarReturnChart: solarReturnChart ? '✅' : '❌',
+        userProfile: userProfile ? '✅' : '❌',
+        birthData: birthData ? '✅' : '❌'
+      });
+
       const interpretResponse = await fetch(`/api/astrology/interpret-solar-return`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
