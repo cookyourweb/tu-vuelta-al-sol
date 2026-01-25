@@ -71,16 +71,40 @@ export function useInterpretaciones({
       setLoading(true);
       setError(null);
 
+      console.log('🔍 [useInterpretaciones] Iniciando carga de ciclo solar...');
+      console.log('   📋 userId:', userId);
+      console.log('   📅 yearLabel:', yearLabel);
+
       // 1. Obtener ciclo solar
-      const cycleResponse = await fetch(
-        `/api/astrology/solar-cycles?userId=${userId}&yearLabel=${yearLabel}`
-      );
+      const url = `/api/astrology/solar-cycles?userId=${userId}&yearLabel=${yearLabel}`;
+      console.log('   🌐 URL:', url);
+
+      const cycleResponse = await fetch(url);
+      console.log('   📡 Response status:', cycleResponse.status);
 
       if (!cycleResponse.ok) {
-        throw new Error('No se encontró el ciclo solar. Asegúrate de haberlo generado primero.');
+        const errorText = await cycleResponse.text();
+        console.error('   ❌ Error response:', errorText);
+
+        // Intentar parsear como JSON
+        let errorMessage = 'No se encontró el ciclo solar.';
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          // Si no es JSON, usar el texto tal cual
+          errorMessage = errorText || errorMessage;
+        }
+
+        throw new Error(errorMessage + '\n\n💡 Sugerencia: Ve a Agenda y genera un Ciclo Solar haciendo clic en "Generar [año]"');
       }
 
       const cycleData = await cycleResponse.json();
+      console.log('   📦 Cycle data recibida:', {
+        success: cycleData.success,
+        hasCycle: !!cycleData.data?.cycle,
+        hasData: !!cycleData.data
+      });
 
       if (!cycleData.success) {
         throw new Error(cycleData.error || 'Error al cargar el ciclo solar');
@@ -89,9 +113,10 @@ export function useInterpretaciones({
       // ✅ FIX: La API devuelve data.cycle, no data directamente
       const cycle = cycleData.data.cycle || cycleData.data;
 
-      console.log('🔍 Ciclo cargado:', cycle);
-      console.log('📊 Tiene events?', !!cycle?.events);
-      console.log('📈 Número de events:', cycle?.events?.length || 0);
+      console.log('✅ [useInterpretaciones] Ciclo cargado correctamente');
+      console.log('   📊 Tiene events?', !!cycle?.events);
+      console.log('   📈 Número de events:', cycle?.events?.length || 0);
+      console.log('   🏷️  YearLabel del ciclo:', cycle?.yearLabel);
 
       setSolarCycle(cycle);
 
@@ -174,7 +199,9 @@ export function useInterpretaciones({
       if (cycleResponse.ok) {
         const cycleData = await cycleResponse.json();
         if (cycleData.success) {
-          setSolarCycle(cycleData.data);
+          // ✅ FIX: Consistente con loadInterpretaciones - la API devuelve data.cycle
+          const cycle = cycleData.data.cycle || cycleData.data;
+          setSolarCycle(cycle);
         }
       }
     } catch (err) {
