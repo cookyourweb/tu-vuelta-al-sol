@@ -766,9 +766,10 @@ export const AgendaLibro = ({
           <LineaTiempoEmocional
             startDate={startDate}
             endDate={endDate}
+            lineaTiempoData={getSRInterpretation()?.linea_tiempo_emocional}
           />
           <MesesClavePuntosGiro
-            lineaTiempo={getLineaTiempoAnual()}
+            lineaTiempo={getSRInterpretation()?.meses_clave_puntos_giro || getLineaTiempoAnual()}
           />
           <GrandesAprendizajes
             clavesIntegracion={getClavesIntegracion()}

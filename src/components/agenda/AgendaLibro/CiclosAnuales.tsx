@@ -6,10 +6,17 @@ import { Calendar, TrendingUp, Star } from 'lucide-react';
 import { FooterLibro } from './MesCompleto';
 
 // ============ LÍNEA DE TIEMPO EMOCIONAL - CON ESTILOS ============
+interface LineaTiempoEmocionalData {
+  mes: string;
+  intensidad: number;
+  palabra_clave: string;
+}
+
 export const LineaTiempoEmocional: React.FC<{
   startDate: Date;
   endDate: Date;
-}> = ({ startDate, endDate }) => {
+  lineaTiempoData?: LineaTiempoEmocionalData[];
+}> = ({ startDate, endDate, lineaTiempoData }) => {
   const { config } = useStyle();
   const months = [];
   let currentMonth = new Date(startDate);
@@ -18,6 +25,14 @@ export const LineaTiempoEmocional: React.FC<{
     months.push(new Date(currentMonth));
     currentMonth = addMonths(currentMonth, 1);
   }
+
+  // Función para obtener datos del mes si existen
+  const getMonthData = (monthIndex: number) => {
+    if (!lineaTiempoData || !Array.isArray(lineaTiempoData)) return null;
+    return lineaTiempoData[monthIndex];
+  };
+
+  const tieneContenidoPersonalizado = !!(lineaTiempoData && lineaTiempoData.length > 0);
 
   return (
     <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
@@ -36,35 +51,59 @@ export const LineaTiempoEmocional: React.FC<{
         <p className="text-gray-700 leading-relaxed text-sm mb-2">
           Tu año tiene ritmo, altibajos, momentos de calma y momentos de intensidad.
         </p>
-        <p className="text-gray-700 leading-relaxed text-sm">
-          <strong>Instrucciones:</strong> Marca en cada mes la intensidad emocional/energética que sientes
-          (rellena las casillas) y escribe una palabra clave en el espacio de notas.
-        </p>
+        {tieneContenidoPersonalizado ? (
+          <p className="text-gray-700 leading-relaxed text-sm">
+            <strong>Basado en tu Solar Return:</strong> Cada mes tiene una intensidad y palabra clave específica según los eventos astronómicos de tu año.
+          </p>
+        ) : (
+          <p className="text-gray-700 leading-relaxed text-sm">
+            <strong>Instrucciones:</strong> Marca en cada mes la intensidad emocional/energética que sientes
+            (rellena las casillas) y escribe una palabra clave en el espacio de notas.
+          </p>
+        )}
       </div>
 
       {/* Grid de meses */}
       <div className="grid grid-cols-4 gap-2 mb-4">
-        {months.map((month, index) => (
-          <div
-            key={index}
-            className={`${config.highlightSecondary} p-2 rounded-lg flex flex-col`}
-          >
-            <div className="flex items-center justify-between mb-1">
-              <span className={`${config.iconPrimary} font-medium text-xs capitalize`}>
-                {format(month, "MMM", { locale: es })}
-              </span>
-              <span className="text-[10px] text-gray-400">{format(month, "yy")}</span>
+        {months.map((month, index) => {
+          const monthData = getMonthData(index);
+          const intensidad = monthData?.intensidad || 0;
+
+          return (
+            <div
+              key={index}
+              className={`${config.highlightSecondary} p-2 rounded-lg flex flex-col`}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <span className={`${config.iconPrimary} font-medium text-xs capitalize`}>
+                  {format(month, "MMM", { locale: es })}
+                </span>
+                <span className="text-[10px] text-gray-400">{format(month, "yy")}</span>
+              </div>
+              {/* Espacio para marcar intensidad */}
+              <div className="flex gap-1 mb-1">
+                {[1, 2, 3, 4, 5].map(i => (
+                  <div
+                    key={i}
+                    className={`w-3 h-3 border ${config.cardBorder} rounded-sm ${
+                      intensidad >= i ? config.badgePrimary : 'bg-white'
+                    }`}
+                  />
+                ))}
+              </div>
+              {/* Espacio para notas / palabra clave */}
+              <div className="flex-1 min-h-[30px] flex items-center justify-center">
+                {monthData?.palabra_clave ? (
+                  <span className={`text-[10px] ${config.iconPrimary} font-medium text-center`}>
+                    {monthData.palabra_clave}
+                  </span>
+                ) : (
+                  <div className="w-full border-b border-dashed border-gray-300 h-4" />
+                )}
+              </div>
             </div>
-            {/* Espacio para marcar intensidad */}
-            <div className="flex gap-1 mb-1">
-              {[1, 2, 3, 4, 5].map(i => (
-                <div key={i} className={`w-3 h-3 border ${config.cardBorder} bg-white rounded-sm`} />
-              ))}
-            </div>
-            {/* Espacio para notas */}
-            <div className="flex-1 border-b border-dashed border-gray-300 min-h-[30px]" />
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Leyenda */}
