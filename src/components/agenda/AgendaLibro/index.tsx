@@ -161,6 +161,17 @@ export const AgendaLibro = ({
       setGeneratingSolarReturn(true);
       console.log('🌅 [AUTO_GEN] Iniciando generación automática de Solar Return...');
 
+      // 0. Verificar si ya existe SR
+      console.log('🔍 [AUTO_GEN] Verificando si ya existe SR...');
+      const checkResponse = await fetch(`/api/interpretations?userId=${userId}&chartType=solar-return`);
+      const checkData = await checkResponse.json();
+
+      if (checkData.exists && checkData.interpretation) {
+        console.log('✅ [AUTO_GEN] SR ya existe, solo recargando...');
+        setSolarReturnInterpretation(checkData);
+        return;
+      }
+
       // 1. Obtener birth data
       console.log('📍 [AUTO_GEN] Obteniendo birth data...');
       const birthDataResponse = await fetch(`/api/birth-data?userId=${userId}`);
@@ -216,11 +227,14 @@ export const AgendaLibro = ({
       });
 
       if (!interpretResponse.ok) {
-        throw new Error('Error al generar interpretación del Solar Return');
+        const errorData = await interpretResponse.json();
+        const errorMsg = errorData.error || errorData.message || 'Error desconocido';
+        console.error('❌ [AUTO_GEN] Error del endpoint:', errorMsg);
+        throw new Error(`Error al generar interpretación: ${errorMsg}`);
       }
 
       const interpretData = await interpretResponse.json();
-      console.log('✅ [AUTO_GEN] Solar Return generado exitosamente');
+      console.log('✅ [AUTO_GEN] Solar Return generado exitosamente:', interpretData);
 
       // 6. Recargar la interpretación
       const reloadResponse = await fetch(`/api/interpretations?userId=${userId}&chartType=solar-return`);

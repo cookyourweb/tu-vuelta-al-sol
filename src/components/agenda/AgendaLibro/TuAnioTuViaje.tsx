@@ -80,6 +80,8 @@ export const TemaCentralAnio = ({
 }: TemaCentralAnioProps) => {
   const { config } = useStyle();
 
+  // Verificar si hay SR completo, no solo tema central
+  const tieneSolarReturn = !!srInterpretation;
   const esInterpretacionPersonalizada = !!interpretacion;
   const aperturaAnual = srInterpretation?.apertura_anual;
 
@@ -91,7 +93,7 @@ export const TemaCentralAnio = ({
         <div className={`${config.divider} w-16 mx-auto mt-4`} />
 
         {/* Indicador de interpretación personalizada */}
-        {esInterpretacionPersonalizada ? (
+        {tieneSolarReturn ? (
           <div className="mt-3 inline-flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full">
             <span className="text-xs font-semibold text-purple-700">✨ Interpretación Personalizada</span>
           </div>
@@ -138,15 +140,17 @@ export const TemaCentralAnio = ({
       </div>
 
       <div className={`flex-1 flex flex-col justify-center max-w-2xl mx-auto w-full ${config.fontBody}`}>
-        {esInterpretacionPersonalizada ? (
+        {tieneSolarReturn ? (
           <>
             {/* Tema Central */}
-            <div className={`${config.highlightPrimary} rounded-lg p-8 mb-6`}>
-              <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-4 text-lg`}>El tema central</h3>
-              <div className="text-gray-700 text-base leading-relaxed whitespace-pre-line">
-                {interpretacion}
+            {interpretacion && (
+              <div className={`${config.highlightPrimary} rounded-lg p-8 mb-6`}>
+                <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-4 text-lg`}>El tema central</h3>
+                <div className="text-gray-700 text-base leading-relaxed whitespace-pre-line">
+                  {interpretacion}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Eje del Año */}
             {aperturaAnual?.eje_del_ano && (
