@@ -668,8 +668,8 @@ export const AgendaLibro = ({
             // NO imprimir event.description porque ya está incluido en el tipo + signo
             // (evita duplicación: "Luna Nueva" + "Luna Nueva en Piscis")
 
-            // Agregar interpretación del evento si existe
-            const interpretation = solarCycle.interpretations?.[event.eventId];
+            // ✅ Agregar interpretación del evento si existe
+            const interpretation = event.interpretation;
             if (interpretation) {
               if (interpretation.significado_personal) {
                 txtContent += `  💫 ${interpretation.significado_personal}\n`;
