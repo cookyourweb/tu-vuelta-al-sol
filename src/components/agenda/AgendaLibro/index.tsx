@@ -533,8 +533,9 @@ export const AgendaLibro = ({
         const monthKey = eventDate.getMonth();
         const dateKey = format(eventDate, 'yyyy-MM-dd');
 
-        // Crear clave única para deduplicar (fecha + tipo + signo)
-        const eventKey = `${dateKey}-${event.type}-${event.sign || ''}`;
+        // ✅ FIX: Crear clave única para deduplicar (fecha + tipo + signo desde metadata)
+        const sign = event.metadata?.zodiacSign || event.metadata?.sign || event.metadata?.toSign || event.sign || '';
+        const eventKey = `${dateKey}-${event.type}-${sign}`;
 
         // Validación astronómica: Luna Nueva y Luna Llena no pueden estar el mismo día
         if (event.type === 'new_moon' || event.type === 'full_moon') {
@@ -578,8 +579,13 @@ export const AgendaLibro = ({
             const eventType = translateEventType(event.type || event.eventType || '');
 
             txtContent += `▸ ${eventDate} - ${eventType}`;
-            if (event.sign) txtContent += ` en ${event.sign}`;
-            if (event.planet) txtContent += ` (${event.planet})`;
+
+            // ✅ FIX: Leer sign y planet desde metadata
+            const sign = event.metadata?.zodiacSign || event.metadata?.sign || event.metadata?.toSign || event.sign;
+            const planet = event.metadata?.planet || event.planet;
+
+            if (sign) txtContent += ` en ${sign}`;
+            if (planet) txtContent += ` (${planet})`;
             txtContent += '\n';
 
             // NO imprimir event.description porque ya está incluido en el tipo + signo
