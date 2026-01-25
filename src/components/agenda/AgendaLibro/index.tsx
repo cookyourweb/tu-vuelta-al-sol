@@ -526,13 +526,30 @@ export const AgendaLibro = ({
       // Agrupar eventos por mes y deduplicar
       const monthsMap = new Map<number, any[]>();
       const seenEvents = new Set<string>(); // Para deduplicar
+      const seenDates = new Map<string, Set<string>>(); // Para detectar fases lunares en mismo día
 
       solarCycle.events.forEach((event: any) => {
         const eventDate = new Date(event.date);
         const monthKey = eventDate.getMonth();
+        const dateKey = format(eventDate, 'yyyy-MM-dd');
 
         // Crear clave única para deduplicar (fecha + tipo + signo)
-        const eventKey = `${format(eventDate, 'yyyy-MM-dd')}-${event.type}-${event.sign || ''}`;
+        const eventKey = `${dateKey}-${event.type}-${event.sign || ''}`;
+
+        // Validación astronómica: Luna Nueva y Luna Llena no pueden estar el mismo día
+        if (event.type === 'new_moon' || event.type === 'full_moon') {
+          if (!seenDates.has(dateKey)) {
+            seenDates.set(dateKey, new Set());
+          }
+          const phasesOnThisDate = seenDates.get(dateKey)!;
+
+          // Si ya hay una fase lunar este día, saltarla (imposible tener 2 fases el mismo día)
+          if (phasesOnThisDate.has('lunar_phase')) {
+            console.warn(`⚠️ Ignorando ${event.type} duplicada en ${dateKey} (ya hay fase lunar ese día)`);
+            return; // Skip this event
+          }
+          phasesOnThisDate.add('lunar_phase');
+        }
 
         // Solo agregar si no lo hemos visto antes
         if (!seenEvents.has(eventKey)) {
@@ -565,7 +582,8 @@ export const AgendaLibro = ({
             if (event.planet) txtContent += ` (${event.planet})`;
             txtContent += '\n';
 
-            if (event.description) txtContent += `  ${event.description}\n`;
+            // NO imprimir event.description porque ya está incluido en el tipo + signo
+            // (evita duplicación: "Luna Nueva" + "Luna Nueva en Piscis")
 
             // Agregar interpretación del evento si existe
             const interpretation = solarCycle.interpretations?.[event.eventId];
