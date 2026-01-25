@@ -1496,7 +1496,7 @@ const AgendaPersonalizada = () => {
   };
 
   // Si está en modo Agenda Libro, mostrar solo eso
-  if (showAgendaLibro && userProfile && yearRange) {
+  if (showAgendaLibro && userProfile && yearRange && selectedCycleLabel) {
     return (
       <StyleProvider>
         <AgendaLibro
@@ -1508,7 +1508,7 @@ const AgendaPersonalizada = () => {
           moonSign={userProfile.astrological?.moon?.sign}
           ascendant={userProfile.astrological?.ascendant?.sign ? `Ascendente ${userProfile.astrological.ascendant.sign}` : undefined}
           userId={user?.uid || ''}
-          yearLabel={selectedCycleLabel || ''}
+          yearLabel={selectedCycleLabel}
         />
       </StyleProvider>
     );
@@ -1703,7 +1703,13 @@ const AgendaPersonalizada = () => {
 
                 {/* Ver Agenda Libro - Separado del grupo */}
                 <button
-                  onClick={() => setShowAgendaLibro(true)}
+                  onClick={() => {
+                    if (!selectedCycleLabel) {
+                      alert('⚠️ Primero debes generar un Ciclo Solar.\n\nVe a la sección de arriba y haz clic en "Generar [año]".');
+                      return;
+                    }
+                    setShowAgendaLibro(true);
+                  }}
                   className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg hover:shadow-purple-500/25 border border-white/10 px-5 py-2.5 rounded-full flex items-center gap-2"
                   title="Ver tu agenda en formato libro"
                 >
