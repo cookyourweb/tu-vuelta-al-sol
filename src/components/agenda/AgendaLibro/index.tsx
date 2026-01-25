@@ -684,6 +684,9 @@ export const AgendaLibro = ({
           <div id="carta-bienvenida">
             <CartaBienvenida name={userName} />
           </div>
+          <div id="intencion-anual">
+            <PaginaIntencionAnual />
+          </div>
           <div id="tema-central">
             <TemaCentralAnio
               interpretacion={getInterpretacionRetornoSolar()}
@@ -720,7 +723,6 @@ export const AgendaLibro = ({
               sombras={getSombrasDelAno()}
             />
           </div>
-          <PaginaIntencionAnual />
         </div>
 
         {/* 5. TU AÑO 2026-2027 - OVERVIEW */}
