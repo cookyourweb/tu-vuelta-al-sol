@@ -1688,9 +1688,29 @@ const AgendaPersonalizada = () => {
                     )}
                   </div>
                 ) : (
-                  /* Si no hay ciclos, mostrar solo el label */
-                  <div className="text-white text-sm font-medium bg-gradient-to-r from-purple-600/30 to-pink-600/30 backdrop-blur-sm border border-purple-400/30 rounded-xl px-5 py-3">
-                    <span className="text-yellow-400">☀️</span> Ciclo Solar: {selectedCycleLabel || (yearRange ? `${yearRange.start.getFullYear()}-${yearRange.end.getFullYear()}` : '...')}
+                  /* Si no hay ciclos, mostrar botón para generar el primer ciclo */
+                  <div className="flex flex-col sm:flex-row items-center gap-3">
+                    <div className="text-white text-sm font-medium bg-gradient-to-r from-purple-600/30 to-pink-600/30 backdrop-blur-sm border border-purple-400/30 rounded-xl px-5 py-3">
+                      <span className="text-yellow-400">☀️</span> Ciclo Solar: {selectedCycleLabel || (yearRange ? `${yearRange.start.getFullYear()}-${yearRange.end.getFullYear()}` : '...')}
+                    </div>
+                    <button
+                      onClick={generateNewCycle}
+                      disabled={generatingCycle || loadingYearEvents}
+                      className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2.5 px-5 rounded-xl transition-all duration-300 shadow-lg hover:shadow-yellow-500/50 flex items-center gap-2"
+                      title="Generar ciclo solar con eventos astrológicos"
+                    >
+                      {generatingCycle || loadingYearEvents ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          <span>Generando...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-lg">✨</span>
+                          <span>Generar Ciclo Solar</span>
+                        </>
+                      )}
+                    </button>
                   </div>
                 )}
 
