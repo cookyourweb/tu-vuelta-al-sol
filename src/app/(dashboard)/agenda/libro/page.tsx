@@ -141,7 +141,6 @@ interface BookContent {
     integrar_lo_vivido?: string;
     carta_de_cierre?: string;
     preparacion_proximo_ciclo?: string;
-    preparar_proxima_vuelta?: string;
   };
   frase_final?: string;
 }
