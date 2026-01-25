@@ -509,15 +509,40 @@ export const AgendaLibro = ({
       txtContent += '                CALENDARIO DE TU AÑO SOLAR\n';
       txtContent += '═══════════════════════════════════════════════════════════\n\n';
 
-      // Agrupar eventos por mes
+      // Helper para traducir tipos de eventos
+      const translateEventType = (type: string): string => {
+        const translations: { [key: string]: string } = {
+          'new_moon': 'Luna Nueva',
+          'full_moon': 'Luna Llena',
+          'planetary_transit': 'Tránsito planetario',
+          'retrograde': 'Retrogradación',
+          'eclipse': 'Eclipse',
+          'solar_eclipse': 'Eclipse Solar',
+          'lunar_eclipse': 'Eclipse Lunar'
+        };
+        return translations[type] || type;
+      };
+
+      // Agrupar eventos por mes y deduplicar
       const monthsMap = new Map<number, any[]>();
+      const seenEvents = new Set<string>(); // Para deduplicar
+
       solarCycle.events.forEach((event: any) => {
         const eventDate = new Date(event.date);
         const monthKey = eventDate.getMonth();
-        if (!monthsMap.has(monthKey)) {
-          monthsMap.set(monthKey, []);
+
+        // Crear clave única para deduplicar (fecha + tipo + signo)
+        const eventKey = `${format(eventDate, 'yyyy-MM-dd')}-${event.type}-${event.sign || ''}`;
+
+        // Solo agregar si no lo hemos visto antes
+        if (!seenEvents.has(eventKey)) {
+          seenEvents.add(eventKey);
+
+          if (!monthsMap.has(monthKey)) {
+            monthsMap.set(monthKey, []);
+          }
+          monthsMap.get(monthKey)?.push(event);
         }
-        monthsMap.get(monthKey)?.push(event);
       });
 
       // Generar 12 meses desde startDate
@@ -533,14 +558,23 @@ export const AgendaLibro = ({
         if (monthEvents.length > 0) {
           monthEvents.forEach((event: any) => {
             const eventDate = format(new Date(event.date), "d 'de' MMMM", { locale: es });
-            txtContent += `▸ ${eventDate} - ${event.type || event.eventType || 'Evento'}\n`;
-            if (event.sign) txtContent += `  Signo: ${event.sign}\n`;
+            const eventType = translateEventType(event.type || event.eventType || '');
+
+            txtContent += `▸ ${eventDate} - ${eventType}`;
+            if (event.sign) txtContent += ` en ${event.sign}`;
+            if (event.planet) txtContent += ` (${event.planet})`;
+            txtContent += '\n';
+
             if (event.description) txtContent += `  ${event.description}\n`;
 
             // Agregar interpretación del evento si existe
             const interpretation = solarCycle.interpretations?.[event.eventId];
             if (interpretation) {
-              txtContent += `  Interpretación: ${interpretation}\n`;
+              if (interpretation.significado_personal) {
+                txtContent += `  💫 ${interpretation.significado_personal}\n`;
+              } else if (typeof interpretation === 'string') {
+                txtContent += `  💫 ${interpretation}\n`;
+              }
             }
             txtContent += '\n';
           });
