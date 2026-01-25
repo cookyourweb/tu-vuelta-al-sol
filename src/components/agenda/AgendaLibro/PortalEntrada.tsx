@@ -160,3 +160,134 @@ export const PaginaIntencion = () => {
     </div>
   );
 };
+
+// ============ PÁGINA DE INTENCIÓN DEL AÑO (CON SR) ============
+interface PaginaIntencionAnualProps {
+  temaCentral?: string;
+  ejeDelAno?: string;
+  userName?: string;
+}
+
+export const PaginaIntencionAnualSR = ({
+  temaCentral,
+  ejeDelAno,
+  userName = ''
+}: PaginaIntencionAnualProps) => {
+  const { config } = useStyle();
+
+  // Extraer palabras clave del tema central (simplificado)
+  const getPalabrasClave = () => {
+    if (!temaCentral) return 'transformación';
+    const lower = temaCentral.toLowerCase();
+    if (lower.includes('sanación') || lower.includes('sanar')) return 'sanación';
+    if (lower.includes('descanso') || lower.includes('pausa')) return 'descanso';
+    if (lower.includes('introspección') || lower.includes('interno')) return 'introspección';
+    if (lower.includes('cambio') || lower.includes('transformación')) return 'transformación';
+    if (lower.includes('cierre') || lower.includes('completar')) return 'cierre';
+    return 'crecimiento';
+  };
+
+  const palabraClave = getPalabrasClave();
+
+  return (
+    <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
+      <div className="text-center mb-10">
+        <h2 className={`${config.fontDisplay} text-3xl mb-4 ${config.titleGradient}`}>
+          La Intención de Tu Año
+        </h2>
+        <div className={config.divider + " w-16 mx-auto"} />
+      </div>
+
+      <div className={`space-y-8 max-w-2xl mx-auto w-full ${config.fontBody}`}>
+        {/* Introducción terapéutica */}
+        <div className={`${config.highlightPrimary} rounded-lg p-6`}>
+          <p className="text-gray-700 leading-relaxed mb-4">
+            Hola {userName},
+          </p>
+          <p className="text-gray-700 leading-relaxed mb-4">
+            Es importante que te des un rato de tranquilidad para pensar en este año
+            como <strong>el año de {palabraClave}</strong>.
+          </p>
+          <p className="text-gray-700 leading-relaxed">
+            Tu cerebro, una vez que empiezas a visualizarlo y escribirlo, empieza a cambiar.
+            Los hábitos, las decisiones, la forma en que respondes a la vida... todo se reorganiza
+            cuando le das una dirección clara.
+          </p>
+        </div>
+
+        {/* Lo que se activa este año */}
+        {temaCentral && (
+          <div className={`${config.highlightSecondary} rounded-lg p-6`}>
+            <h3 className={`${config.fontDisplay} ${config.iconSecondary} font-medium mb-3`}>
+              Lo que se activa este año para ti:
+            </h3>
+            <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+              {temaCentral}
+            </div>
+          </div>
+        )}
+
+        {ejeDelAno && (
+          <div className={`${config.highlightAccent} rounded-lg p-6`}>
+            <h3 className={`${config.fontDisplay} ${config.iconAccent} font-medium mb-3`}>
+              El eje que sostiene todo:
+            </h3>
+            <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+              {ejeDelAno}
+            </div>
+          </div>
+        )}
+
+        {/* Instrucción terapéutica */}
+        <div className={`border-l-4 ${config.cardBorder} pl-6 italic text-gray-600`}>
+          <p className="leading-relaxed">
+            Ahora que sabes qué se activa, tómate unos minutos para escribir.<br />
+            No pienses demasiado. Deja que fluya.<br />
+            Nadie más leerá esto.
+          </p>
+        </div>
+
+        {/* Preguntas para escribir */}
+        <div className="space-y-6 mt-8">
+          <div className={`${config.highlightSecondary} p-5`}>
+            <h3 className={`text-sm font-bold uppercase ${config.iconSecondary} mb-3`}>
+              ¿Cómo quiero sentirme al final de este año?
+            </h3>
+            <div className="space-y-3">
+              <div className={`h-16 border-b border-dashed ${config.iconSecondary} opacity-30`} />
+              <div className={`h-16 border-b border-dashed ${config.iconSecondary} opacity-30`} />
+              <div className={`h-16 border-b border-dashed ${config.iconSecondary} opacity-30`} />
+            </div>
+          </div>
+
+          <div className={`${config.highlightPrimary} p-5`}>
+            <h3 className={`text-sm font-bold uppercase ${config.iconPrimary} mb-3`}>
+              ¿Qué necesito soltar para que esto suceda?
+            </h3>
+            <div className="space-y-3">
+              <div className={`h-16 border-b border-dashed ${config.iconPrimary} opacity-30`} />
+              <div className={`h-16 border-b border-dashed ${config.iconPrimary} opacity-30`} />
+              <div className={`h-16 border-b border-dashed ${config.iconPrimary} opacity-30`} />
+            </div>
+          </div>
+
+          <div className={`${config.highlightAccent} p-5`}>
+            <h3 className={`text-sm font-bold uppercase ${config.iconAccent} mb-3`}>
+              Mi intención para este ciclo:
+            </h3>
+            <div className="space-y-3">
+              <div className={`h-20 border-b border-dashed ${config.iconAccent} opacity-30`} />
+              <div className={`h-20 border-b border-dashed ${config.iconAccent} opacity-30`} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className={`mt-auto text-center ${config.iconSecondary} opacity-40 text-2xl`}>
+        ✧
+      </div>
+
+      <FooterLibro pagina={3} />
+    </div>
+  );
+};

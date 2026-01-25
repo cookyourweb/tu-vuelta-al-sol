@@ -33,11 +33,12 @@ export const IndiceNavegable: React.FC = () => {
       subsecciones: [
         { titulo: 'Portada Personalizada', pagina: 1, id: 'portada' },
         { titulo: 'Cómo Usar Este Libro', pagina: 2, id: 'intencion-anio' },
+        { titulo: 'La Intención de Tu Año', pagina: 3, id: 'intencion-anual-sr' },
       ]
     },
     {
       titulo: 'Tu Año, Tu Viaje',
-      pagina: 3,
+      pagina: 4,
       id: 'tu-anio-tu-viaje',
       icono: <BookOpen className="w-4 h-4" />,
       subsecciones: [

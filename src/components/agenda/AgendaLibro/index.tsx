@@ -10,7 +10,7 @@ import { useInterpretaciones } from '@/hooks/useInterpretaciones';
 import { formatEventForBook, formatInterpretationCompact } from '@/utils/formatInterpretationForBook';
 
 // Secciones del libro
-import { PortadaPersonalizada, PaginaIntencion } from './PortalEntrada';
+import { PortadaPersonalizada, PaginaIntencion, PaginaIntencionAnualSR } from './PortalEntrada';
 import { CartaBienvenida, TemaCentralAnio, LoQueVieneAMover, LoQuePideSoltar, PaginaIntencionAnual } from './TuAnioTuViaje';
 import { TuAnioOverview, TuAnioCiclos, PaginaCumpleanos } from './TuAnio';
 import { LineaTiempoEmocional, MesesClavePuntosGiro, GrandesAprendizajes } from './CiclosAnuales';
@@ -477,6 +477,13 @@ export const AgendaLibro = ({
           </div>
           <div id="intencion-anio">
             <PaginaIntencion />
+          </div>
+          <div id="intencion-anual-sr">
+            <PaginaIntencionAnualSR
+              temaCentral={getInterpretacionRetornoSolar()}
+              ejeDelAno={getSRInterpretation()?.apertura_anual?.eje_del_ano}
+              userName={userName}
+            />
           </div>
         </div>
         <IndiceNavegable />
