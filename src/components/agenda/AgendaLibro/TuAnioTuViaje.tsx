@@ -60,7 +60,7 @@ export const CartaBienvenida = ({ name }: TuAnioTuViajeProps) => {
         Con amor cósmico ✧
       </div>
 
-      <FooterLibro pagina={3} />
+      <FooterLibro pagina={4} />
     </div>
   );
 };
@@ -203,7 +203,7 @@ export const TemaCentralAnio = ({
         </div>
       </div>
 
-      <FooterLibro pagina={4} />
+      <FooterLibro pagina={6} />
     </div>
   );
 };
@@ -317,7 +317,7 @@ export const LoQueVieneAMover = ({
         )}
       </div>
 
-      <FooterLibro pagina={5} />
+      <FooterLibro pagina={7} />
     </div>
   );
 };
@@ -403,7 +403,7 @@ export const LoQuePideSoltar = ({ reflejos_obsoletos, sombras }: LoQuePideSoltar
         </div>
       </div>
 
-      <FooterLibro pagina={6} />
+      <FooterLibro pagina={8} />
     </div>
   );
 };
@@ -439,7 +439,7 @@ export const PaginaIntencionAnual = () => {
         Página de escritura libre
       </div>
 
-      <FooterLibro pagina={7} />
+      <FooterLibro pagina={5} />
     </div>
   );
 };
