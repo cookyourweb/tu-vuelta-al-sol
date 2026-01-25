@@ -231,10 +231,21 @@ export const AgendaLibro = ({
 
       // 4. Construir perfil de usuario desde birthData
       console.log('👤 [AUTO_GEN] Construyendo perfil de usuario desde birthData...');
+
+      // Calcular edad desde birthDate
+      const birthDateStr = birthData.date || birthData.birthDate;
+      const birthDateObj = new Date(birthDateStr);
+      const now = new Date();
+      let age = now.getFullYear() - birthDateObj.getFullYear();
+      const hasHadBirthdayThisYear = (now.getMonth() > birthDateObj.getMonth()) ||
+        (now.getMonth() === birthDateObj.getMonth() && now.getDate() >= birthDateObj.getDate());
+      if (!hasHadBirthdayThisYear) age -= 1;
+
       const userProfile = {
         name: birthData.fullName || 'Usuario',
-        birthDate: birthData.date || birthData.birthDate,
-        birthPlace: birthData.location || birthData.birthPlace
+        birthDate: birthDateStr,
+        birthPlace: birthData.location || birthData.birthPlace,
+        age: age
       };
       console.log('✅ [AUTO_GEN] UserProfile construido:', userProfile);
 
@@ -366,10 +377,21 @@ export const AgendaLibro = ({
       console.log('✅ [REGENERATE] Carta Solar Return obtenida correctamente');
 
       console.log('👤 [REGENERATE] Construyendo perfil de usuario desde birthData...');
+
+      // Calcular edad desde birthDate
+      const birthDateStr = birthData.date || birthData.birthDate;
+      const birthDateObj = new Date(birthDateStr);
+      const now = new Date();
+      let age = now.getFullYear() - birthDateObj.getFullYear();
+      const hasHadBirthdayThisYear = (now.getMonth() > birthDateObj.getMonth()) ||
+        (now.getMonth() === birthDateObj.getMonth() && now.getDate() >= birthDateObj.getDate());
+      if (!hasHadBirthdayThisYear) age -= 1;
+
       const userProfile = {
         name: birthData.fullName || 'Usuario',
-        birthDate: birthData.date || birthData.birthDate,
-        birthPlace: birthData.location || birthData.birthPlace
+        birthDate: birthDateStr,
+        birthPlace: birthData.location || birthData.birthPlace,
+        age: age
       };
       console.log('✅ [REGENERATE] UserProfile construido:', userProfile);
 
