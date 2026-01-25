@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useStyle } from '@/context/StyleContext';
 import { StyleSwitcher } from '@/components/agenda/StyleSwitcher';
-import { Printer, X } from 'lucide-react';
+import { Printer, X, FileDown } from 'lucide-react';
 import { useInterpretaciones } from '@/hooks/useInterpretaciones';
 import { formatEventForBook, formatInterpretationCompact } from '@/utils/formatInterpretationForBook';
 
@@ -260,6 +260,81 @@ export const AgendaLibro = ({
     }, 100);
   };
 
+  const handleExportTXT = () => {
+    // Construir contenido del libro en formato texto plano
+    let txtContent = '';
+
+    // Portada
+    txtContent += '═══════════════════════════════════════════════════════════\n';
+    txtContent += '           TU VUELTA AL SOL - AGENDA ASTROLÓGICA\n';
+    txtContent += '═══════════════════════════════════════════════════════════\n\n';
+    txtContent += `Agenda de: ${userName}\n`;
+    txtContent += `Período: ${format(startDate, "d 'de' MMMM 'de' yyyy", { locale: es })} - ${format(endDate, "d 'de' MMMM 'de' yyyy", { locale: es })}\n`;
+    if (sunSign) txtContent += `Sol en: ${sunSign}\n`;
+    if (moonSign) txtContent += `Luna en: ${moonSign}\n`;
+    if (ascendant) txtContent += `Ascendente: ${ascendant}\n`;
+    txtContent += '\n\n';
+
+    // Solar Return si existe
+    const srData = getSRInterpretation();
+    if (srData) {
+      txtContent += '───────────────────────────────────────────────────────────\n';
+      txtContent += '                    SOLAR RETURN\n';
+      txtContent += '───────────────────────────────────────────────────────────\n\n';
+
+      if (srData.apertura_anual?.tema_central) {
+        txtContent += 'TEMA CENTRAL DEL AÑO:\n';
+        txtContent += srData.apertura_anual.tema_central + '\n\n';
+      }
+
+      if (srData.apertura_anual?.eje_del_ano) {
+        txtContent += 'EJE DEL AÑO:\n';
+        txtContent += srData.apertura_anual.eje_del_ano + '\n\n';
+      }
+
+      if (srData.claves_integracion && srData.claves_integracion.length > 0) {
+        txtContent += 'CLAVES DE INTEGRACIÓN:\n';
+        srData.claves_integracion.forEach((clave: string, idx: number) => {
+          txtContent += `${idx + 1}. ${clave}\n`;
+        });
+        txtContent += '\n';
+      }
+
+      if (srData.linea_tiempo_anual && srData.linea_tiempo_anual.length > 0) {
+        txtContent += 'LÍNEA DE TIEMPO DEL AÑO:\n';
+        srData.linea_tiempo_anual.forEach((evento: any, idx: number) => {
+          txtContent += `\n${idx + 1}. ${evento.mes || evento.periodo || ''}\n`;
+          if (evento.evento) txtContent += `   Evento: ${evento.evento}\n`;
+          if (evento.significado) txtContent += `   Significado: ${evento.significado}\n`;
+        });
+        txtContent += '\n';
+      }
+    }
+
+    // Aspectos Natales principales
+    txtContent += '\n───────────────────────────────────────────────────────────\n';
+    txtContent += '                  CARTA NATAL - ESENCIA\n';
+    txtContent += '───────────────────────────────────────────────────────────\n\n';
+    txtContent += 'Tu carta natal es el mapa del cielo en el momento exacto de tu nacimiento.\n';
+    txtContent += 'Refleja tu potencial, tus dones, tus desafíos y el camino de tu alma.\n\n';
+
+    // Cerrar con mensaje
+    txtContent += '\n\n───────────────────────────────────────────────────────────\n';
+    txtContent += '        Este es tu año. Confía en el proceso.\n';
+    txtContent += '───────────────────────────────────────────────────────────\n';
+
+    // Crear y descargar archivo
+    const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `tu-vuelta-al-sol-${userName.toLowerCase().replace(/\s+/g, '-')}-${format(startDate, 'yyyy')}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   // Helper: Obtener eventos formateados para un mes específico
   const getFormattedEventosForMonth = (monthIndex: number) => {
     const eventos = getEventosForMonth(monthIndex);
@@ -445,6 +520,13 @@ export const AgendaLibro = ({
 
           <div className="flex items-center gap-4">
             <StyleSwitcher />
+            <button
+              onClick={handleExportTXT}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold hover:from-blue-400 hover:to-cyan-400 transition-all duration-200 shadow-lg"
+            >
+              <FileDown className="w-4 h-4" />
+              Exportar TXT
+            </button>
             <button
               onClick={handlePrint}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg"
