@@ -18,6 +18,14 @@ export const LineaTiempoEmocional: React.FC<{
   lineaTiempoData?: LineaTiempoData[];
 }> = ({ startDate, endDate, lineaTiempoData }) => {
   const { config } = useStyle();
+
+  // 🔍 DEBUG: Verificar datos recibidos
+  console.log('🔍 [LineaTiempoEmocional] Props recibidas:', {
+    lineaTiempoData,
+    length: lineaTiempoData?.length,
+    sample: lineaTiempoData?.[0]
+  });
+
   const months = [];
   let currentMonth = new Date(startDate);
 
@@ -145,6 +153,14 @@ interface MesesClavePuntosGiroProps {
 
 export const MesesClavePuntosGiro: React.FC<MesesClavePuntosGiroProps> = ({ lineaTiempo }) => {
   const { config } = useStyle();
+
+  // 🔍 DEBUG: Verificar datos recibidos
+  console.log('🔍 [MesesClavePuntosGiro] Props recibidas:', {
+    lineaTiempo,
+    length: lineaTiempo?.length,
+    sample: lineaTiempo?.[0]
+  });
+
   const tieneContenidoPersonalizado = !!(lineaTiempo && lineaTiempo.length > 0);
 
   return (

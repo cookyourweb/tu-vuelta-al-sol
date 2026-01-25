@@ -83,6 +83,12 @@ export const AgendaLibro = ({
 
         if (data.exists && data.interpretation) {
           console.log('✅ [SOLAR_RETURN] Interpretación encontrada:', data.interpretation);
+
+          // 🔍 DEBUG: Verificar campos específicos para páginas 11-12
+          console.log('🔍 [DEBUG] linea_tiempo_emocional:', data.interpretation.linea_tiempo_emocional);
+          console.log('🔍 [DEBUG] meses_clave_puntos_giro:', data.interpretation.meses_clave_puntos_giro);
+          console.log('🔍 [DEBUG] Todas las keys:', Object.keys(data.interpretation));
+
           setSolarReturnInterpretation(data);
         } else {
           console.log('⚠️ [SOLAR_RETURN] No se encontró interpretación de Retorno Solar');
