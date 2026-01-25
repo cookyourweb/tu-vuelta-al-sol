@@ -846,13 +846,6 @@ export const AgendaLibro = ({
           <div id="intencion-anio">
             <PaginaIntencion />
           </div>
-          <div id="intencion-anual-sr">
-            <PaginaIntencionAnualSR
-              temaCentral={getInterpretacionRetornoSolar()}
-              ejeDelAno={getSRInterpretation()?.apertura_anual?.eje_del_ano}
-              userName={userName}
-            />
-          </div>
         </div>
         <IndiceNavegable />
 
@@ -867,6 +860,14 @@ export const AgendaLibro = ({
               srInterpretation={getSRInterpretation()}
               onGenerateSolarReturn={handleGenerateSolarReturn}
               isGenerating={generatingSolarReturn}
+            />
+          </div>
+          {/* INTENCIÓN DEL AÑO - Justo después del tema central */}
+          <div id="intencion-anual-sr">
+            <PaginaIntencionAnualSR
+              temaCentral={getInterpretacionRetornoSolar()}
+              ejeDelAno={getSRInterpretation()?.apertura_anual?.eje_del_ano}
+              userName={userName}
             />
           </div>
         </div>
@@ -897,7 +898,6 @@ export const AgendaLibro = ({
               sombras={getSombrasDelAno()}
             />
           </div>
-          <PaginaIntencionAnual />
         </div>
 
         {/* 5. TU AÑO 2026-2027 - OVERVIEW */}
@@ -921,9 +921,10 @@ export const AgendaLibro = ({
           <LineaTiempoEmocional
             startDate={startDate}
             endDate={endDate}
+            lineaTiempoData={solarReturnInterpretation?.interpretation?.linea_tiempo_emocional}
           />
           <MesesClavePuntosGiro
-            lineaTiempo={getLineaTiempoAnual()}
+            lineaTiempo={solarReturnInterpretation?.interpretation?.meses_clave_puntos_giro || getLineaTiempoAnual()}
           />
           <GrandesAprendizajes
             clavesIntegracion={getClavesIntegracion()}

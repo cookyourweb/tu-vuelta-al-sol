@@ -6,10 +6,17 @@ import { Calendar, TrendingUp, Star } from 'lucide-react';
 import { FooterLibro } from './MesCompleto';
 
 // ============ LÍNEA DE TIEMPO EMOCIONAL - CON ESTILOS ============
+interface LineaTiempoData {
+  mes: string;
+  intensidad: number; // 1-5
+  palabra_clave: string;
+}
+
 export const LineaTiempoEmocional: React.FC<{
   startDate: Date;
   endDate: Date;
-}> = ({ startDate, endDate }) => {
+  lineaTiempoData?: LineaTiempoData[];
+}> = ({ startDate, endDate, lineaTiempoData }) => {
   const { config } = useStyle();
   const months = [];
   let currentMonth = new Date(startDate);
@@ -18,6 +25,12 @@ export const LineaTiempoEmocional: React.FC<{
     months.push(new Date(currentMonth));
     currentMonth = addMonths(currentMonth, 1);
   }
+
+  // Si hay datos personalizados, usarlos
+  const getMonthData = (monthIndex: number): LineaTiempoData | undefined => {
+    if (!lineaTiempoData || lineaTiempoData.length === 0) return undefined;
+    return lineaTiempoData[monthIndex];
+  };
 
   return (
     <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
@@ -44,27 +57,50 @@ export const LineaTiempoEmocional: React.FC<{
 
       {/* Grid de meses */}
       <div className="grid grid-cols-4 gap-2 mb-4">
-        {months.map((month, index) => (
-          <div
-            key={index}
-            className={`${config.highlightSecondary} p-2 rounded-lg flex flex-col`}
-          >
-            <div className="flex items-center justify-between mb-1">
-              <span className={`${config.iconPrimary} font-medium text-xs capitalize`}>
-                {format(month, "MMM", { locale: es })}
-              </span>
-              <span className="text-[10px] text-gray-400">{format(month, "yy")}</span>
+        {months.map((month, index) => {
+          const monthData = getMonthData(index);
+          const intensidad = monthData?.intensidad || 0;
+          const palabraClave = monthData?.palabra_clave || '';
+
+          return (
+            <div
+              key={index}
+              className={`${config.highlightSecondary} p-2 rounded-lg flex flex-col`}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <span className={`${config.iconPrimary} font-medium text-xs capitalize`}>
+                  {format(month, "MMM", { locale: es })}
+                </span>
+                <span className="text-[10px] text-gray-400">{format(month, "yy")}</span>
+              </div>
+              {/* Espacio para marcar intensidad - PRE-RELLENADO si hay datos */}
+              <div className="flex gap-1 mb-1">
+                {[1, 2, 3, 4, 5].map(i => {
+                  const isFilled = i <= intensidad;
+                  const fillClass = isFilled
+                    ? i <= 2 ? config.highlightSecondary : i <= 3 ? config.badgeSecondary : config.badgePrimary
+                    : '';
+                  return (
+                    <div
+                      key={i}
+                      className={`w-3 h-3 border ${config.cardBorder} ${isFilled ? fillClass : 'bg-white'} rounded-sm`}
+                    />
+                  );
+                })}
+              </div>
+              {/* Espacio para notas - Mostrar palabra clave si existe */}
+              <div className="flex-1 min-h-[30px] flex items-center justify-center">
+                {palabraClave ? (
+                  <span className={`text-[10px] ${config.iconPrimary} font-medium italic`}>
+                    {palabraClave}
+                  </span>
+                ) : (
+                  <div className="w-full border-b border-dashed border-gray-300" />
+                )}
+              </div>
             </div>
-            {/* Espacio para marcar intensidad */}
-            <div className="flex gap-1 mb-1">
-              {[1, 2, 3, 4, 5].map(i => (
-                <div key={i} className={`w-3 h-3 border ${config.cardBorder} bg-white rounded-sm`} />
-              ))}
-            </div>
-            {/* Espacio para notas */}
-            <div className="flex-1 border-b border-dashed border-gray-300 min-h-[30px]" />
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Leyenda */}
@@ -150,19 +186,19 @@ export const MesesClavePuntosGiro: React.FC<MesesClavePuntosGiroProps> = ({ line
                 </h4>
               </div>
               <div className="text-xs mb-2">
-                {evento.evento && (
+                {(evento.evento_astrologico || evento.evento) && (
                   <div className="mb-2">
-                    <span className={`${config.iconSecondary} uppercase`}>Evento:</span>
-                    <p className="text-gray-700 mt-1">{evento.evento}</p>
+                    <span className={`${config.iconSecondary} uppercase`}>Evento astrológico:</span>
+                    <p className="text-gray-700 mt-1">{evento.evento_astrologico || evento.evento}</p>
                   </div>
                 )}
-                {evento.significado && (
+                {(evento.significado_para_ti || evento.significado) && (
                   <div>
-                    <span className={`${config.iconSecondary} uppercase`}>Significado:</span>
-                    <p className="text-gray-700 mt-1">{evento.significado}</p>
+                    <span className={`${config.iconSecondary} uppercase`}>Qué significa para ti:</span>
+                    <p className="text-gray-700 mt-1">{evento.significado_para_ti || evento.significado}</p>
                   </div>
                 )}
-                {evento.descripcion && !evento.significado && (
+                {evento.descripcion && !evento.significado && !evento.significado_para_ti && (
                   <p className="text-gray-700">{evento.descripcion}</p>
                 )}
               </div>

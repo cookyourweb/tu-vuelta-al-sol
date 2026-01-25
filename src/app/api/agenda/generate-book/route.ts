@@ -572,6 +572,32 @@ Responde ÚNICAMENTE con JSON válido (sin markdown, sin backticks):
     "eclipses_intro": "String 60-80 palabras: Qué son los eclipses. Cambios que no negocian. Qué se mueve, qué se transforma."
   },
 
+  "linea_tiempo_emocional": [
+    ${data.monthsData.map((month, index) => `{
+      "mes": "${month.nombreCorto}",
+      "intensidad": Number 1-5 (1=calma, 2=movimiento ligero, 3=movimiento, 4=alta intensidad, 5=máxima intensidad). Basado en los eventos astrológicos: ${month.lunas_nuevas.length} Lunas Nuevas, ${month.lunas_llenas.length} Lunas Llenas, ${month.eclipses.length} Eclipses, ${month.ingresos_destacados.length} ingresos. Los meses con eclipses son intensidad 4-5. Meses con retrogradaciones son intensidad 3-4. Meses tranquilos son intensidad 1-2.,
+      "palabra_clave": "String 1 palabra: Una palabra que resuma la energía de ${month.nombreCorto} para ${data.userName}. Ejemplos: Transformación, Calma, Decisión, Apertura, Cierre, Intensidad, Claridad, etc."
+    }`).join(',\n    ')}
+  ],
+
+  "meses_clave_puntos_giro": [
+    {
+      "mes": "String: Nombre del mes más importante del año (usualmente con eclipse o retrogradación importante)",
+      "evento_astrologico": "String 30-40 palabras: Descripción del evento astrológico principal (eclipse, retrogradación, ingreso planetario importante)",
+      "significado_para_ti": "String 60-80 palabras: Qué significa este evento específicamente para ${data.userName} según su carta natal y retorno solar. Qué área de vida se activa, qué se mueve, qué se transforma."
+    },
+    {
+      "mes": "String: Segundo mes más importante",
+      "evento_astrologico": "String 30-40 palabras",
+      "significado_para_ti": "String 60-80 palabras"
+    },
+    {
+      "mes": "String: Tercer mes más importante",
+      "evento_astrologico": "String 30-40 palabras",
+      "significado_para_ti": "String 60-80 palabras"
+    }
+  ],
+
   "mes_a_mes": [
     ${data.monthsData.map((month, index) => `{
       "mes": "${month.nombreCorto}",
