@@ -263,6 +263,13 @@ const AgendaPersonalizada = () => {
     }
   }, []);
 
+  // 🌞 EFECTO: Cargar ciclos disponibles al montar el componente
+  React.useEffect(() => {
+    if (user?.uid) {
+      fetchAvailableCycles();
+    }
+  }, [user?.uid]);
+
   // 🌞 NUEVO: Fetch ciclos disponibles del usuario
   const fetchAvailableCycles = async () => {
     if (!user?.uid) return;
