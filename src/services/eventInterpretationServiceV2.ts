@@ -234,7 +234,7 @@ ${natal.venus ? `- Venus en ${natal.venus.sign} Casa ${natal.venus.house}` : ''}
 
   // Construir contexto SR si existe
   let srContext = '';
-  if (solarReturn) {
+  if (solarReturn && solarReturn.sun) {
     srContext = `
 RETORNO SOLAR (año ${solarReturn.year}):
 - Sol SR en Casa ${solarReturn.sun.house} → ${getSolarReturnSunMeaning(solarReturn.sun.house)}
