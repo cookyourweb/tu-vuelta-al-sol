@@ -255,6 +255,22 @@ Required JSON structure:
   },
   "sombras_del_ano": ["Sombra 1: (40-50 words)", "Sombra 2:", "Sombra 3:"],
   "claves_integracion": ["Frase práctica 1 (10-15 words)", "Frase 2", "Frase 3"],
+  "linea_tiempo_emocional": [
+    {
+      "mes": "Febrero 2025",
+      "intensidad": 3,
+      "palabra_clave": "Activación"
+    },
+    {...11 more months - TOTAL 12 months from birthday to birthday, covering complete solar year...}
+  ],
+  "meses_clave_puntos_giro": [
+    {
+      "mes": "Mayo 2025",
+      "evento_astrologico": "Eclipse Solar en Tauro",
+      "significado_para_ti": "string (80-100 words) - Por qué este mes es CRÍTICO para este usuario específico"
+    },
+    {...2 more critical months - TOTAL 3 months, the most important turning points of the year...}
+  ],
   "uso_calendario_lunar": {
     "marco_general": "string (80-100 words) - CÓMO USAR las lunas este año específico",
     "lunas_clave": [
@@ -298,6 +314,8 @@ Required JSON structure:
 - Each planet MUST have mandato_del_ano (with observador tone + sugerencias)
 - Timeline MUST have accion_clave
 - Lunar calendar: 3 lunas clave ONLY (not 12 months, not 24 dates)
+- linea_tiempo_emocional: MUST have 12 months (complete solar year from birthday to birthday) with intensidad 1-5 and palabra_clave
+- meses_clave_puntos_giro: MUST have 3 critical turning point months with specific astrological events and personal meaning
 - Use first name only (${userProfile.name?.split(' ')[0]}) 1-3 times maximum
 - ${natalInterpretations ? 'USE PROVIDED NATAL INTERPRETATIONS in natal.descripcion of each planet' : 'Generate permanent identity descriptions based on natal chart'}
 
@@ -356,6 +374,8 @@ Required JSON structure:
         'linea_tiempo_anual',
         'sombras_del_ano',
         'claves_integracion',
+        'linea_tiempo_emocional',
+        'meses_clave_puntos_giro',
         'uso_calendario_lunar',
         'sintesis_final',
         'analisis_tecnico'
