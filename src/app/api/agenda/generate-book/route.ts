@@ -536,6 +536,8 @@ Responde ÚNICAMENTE con JSON válido (sin markdown, sin backticks):
     "soul_chart": {
       "nodo_sur": "String 80-100 palabras: De dónde vienes. Los patrones que se repiten. El aprendizaje del pasado.",
       "nodo_norte": "String 80-100 palabras: Hacia dónde creces. El aprendizaje que madura.",
+      "planeta_dominante": "String 60-80 palabras: Tu planeta dominante y qué arquetipo te representa. Cómo se manifiesta en tu vida.",
+      "patron_alma": "String 80-100 palabras: El patrón profundo de tu alma. Los temas recurrentes en esta vida. La energía que subyace en tus elecciones.",
       "patrones_inconscientes": "String 60-80 palabras: Los patrones emocionales que se repiten y piden conciencia."
     },
 
@@ -544,9 +546,14 @@ Responde ÚNICAMENTE con JSON válido (sin markdown, sin backticks):
 
   "tu_año_astrologico": {
     "retorno_solar": {
-      "ascendente_del_año": "String 60-80 palabras: Clima emocional del año. Área de mayor movimiento. Dónde se pide presencia.",
+      "asc_significado": "String 60-80 palabras: Significado del ascendente del retorno solar. Clima emocional del año. Área de mayor movimiento. Dónde se pide presencia.",
+      "sol_en_casa": "String 80-100 palabras: Interpretación del Sol en la casa donde cae en el retorno solar. Qué área de vida tendrá más brillo y protagonismo este año.",
+      "luna_en_casa": "String 80-100 palabras: Interpretación de la Luna en la casa donde cae en el retorno solar. Dónde estarán tus necesidades emocionales y qué te nutrirá.",
+      "planetas_angulares": "String 100-120 palabras: Interpretación de los planetas en casas angulares (1, 4, 7, 10) del retorno solar. Son las energías más activas del año.",
+      "ritual_inicio": "String 80-100 palabras: Ritual para cerrar el ciclo anterior y nombrar lo que empieza. Ceremonia de cumpleaños consciente.",
+      "ascendente_del_año": "String 60-80 palabras: El ascendente de este año solar y su significado. Cómo te presentarás al mundo.",
       "tema_principal": "String 80-100 palabras: El tema principal del año según el Retorno Solar. Qué viene a mover, qué pide soltar.",
-      "ritual_de_cumpleaños": "String 80-100 palabras: Ritual para cerrar el ciclo anterior y nombrar lo que empieza.",
+      "ritual_de_cumpleaños": "String 80-100 palabras: Ritual personalizado para tu cumpleaños. Incluye intención, vela, y compromiso.",
       "mantra_del_año": "String 30-40 palabras en PRIMERA PERSONA: Mantra personalizado para el año completo."
     }
   },
@@ -554,12 +561,42 @@ Responde ÚNICAMENTE con JSON válido (sin markdown, sin backticks):
   "calendario_personalizado": {
     "descripcion": "String 100-120 palabras: Cómo usar el calendario. Fechas clave, momentos de inicio, momentos de cierre. Eventos que no pasan desapercibidos.",
 
+    "meses_clave": "String 120-150 palabras: Análisis personalizado de los meses de mayor intensidad astrológica para ${data.userName}. Qué esperar en esos meses, cómo prepararse, qué áreas de vida estarán más activas.",
+
+    "aprendizajes_del_año": "String 150-180 palabras: Los aprendizajes principales que este año trae para ${data.userName}. Considera los tránsitos más importantes, los eclipses, y los temas del retorno solar. Qué viene a enseñar este ciclo en lo personal, relacional, vocacional y espiritual.",
+
     "lunas_nuevas_intro": "String 60-80 palabras: Qué son las Lunas Nuevas. Sembrar conciencia. Qué iniciar, qué intención plantar.",
 
     "lunas_llenas_intro": "String 60-80 palabras: Qué son las Lunas Llenas. Iluminar y soltar. Qué se revela, qué se integra.",
 
     "eclipses_intro": "String 60-80 palabras: Qué son los eclipses. Cambios que no negocian. Qué se mueve, qué se transforma."
   },
+
+  "linea_tiempo_emocional": [
+    ${data.monthsData.map((month, index) => `{
+      "mes": "${month.nombreCorto}",
+      "intensidad": Number 1-5 (1=calma, 2=movimiento ligero, 3=movimiento, 4=alta intensidad, 5=máxima intensidad). Basado en los eventos astrológicos: ${month.lunas_nuevas.length} Lunas Nuevas, ${month.lunas_llenas.length} Lunas Llenas, ${month.eclipses.length} Eclipses, ${month.ingresos_destacados.length} ingresos. Los meses con eclipses son intensidad 4-5. Meses con retrogradaciones son intensidad 3-4. Meses tranquilos son intensidad 1-2.,
+      "palabra_clave": "String 1 palabra: Una palabra que resuma la energía de ${month.nombreCorto} para ${data.userName}. Ejemplos: Transformación, Calma, Decisión, Apertura, Cierre, Intensidad, Claridad, etc."
+    }`).join(',\n    ')}
+  ],
+
+  "meses_clave_puntos_giro": [
+    {
+      "mes": "String: Nombre del mes más importante del año (usualmente con eclipse o retrogradación importante)",
+      "evento_astrologico": "String 30-40 palabras: Descripción del evento astrológico principal (eclipse, retrogradación, ingreso planetario importante)",
+      "significado_para_ti": "String 60-80 palabras: Qué significa este evento específicamente para ${data.userName} según su carta natal y retorno solar. Qué área de vida se activa, qué se mueve, qué se transforma."
+    },
+    {
+      "mes": "String: Segundo mes más importante",
+      "evento_astrologico": "String 30-40 palabras",
+      "significado_para_ti": "String 60-80 palabras"
+    },
+    {
+      "mes": "String: Tercer mes más importante",
+      "evento_astrologico": "String 30-40 palabras",
+      "significado_para_ti": "String 60-80 palabras"
+    }
+  ],
 
   "mes_a_mes": [
     ${data.monthsData.map((month, index) => `{
@@ -576,7 +613,7 @@ Responde ÚNICAMENTE con JSON válido (sin markdown, sin backticks):
 
     "carta_de_cierre": "String 150-180 palabras: Carta personalizada para despedirte del año. Honrar el proceso. Tono de cierre emocional, validación, gratitud.",
 
-    "preparar_proxima_vuelta": "String 80-100 palabras: Lo que queda sembrado. Lo que continúa. Preparación para la próxima vuelta al Sol."
+    "preparacion_proximo_ciclo": "String 80-100 palabras: Lo que queda sembrado. Lo que continúa. Preparación para la próxima vuelta al Sol."
   },
 
   "frase_final": "String 20-30 palabras: Frase para la contraportada. 'Nada de lo que viviste fue en vano. Todo fue parte del camino de regreso a ti.' (puedes adaptar pero mantén ese espíritu)."

@@ -1,19 +1,21 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useStyle } from '@/context/StyleContext';
 import { StyleSwitcher } from '@/components/agenda/StyleSwitcher';
-import { Printer, X } from 'lucide-react';
+import { Printer, X, FileDown, RefreshCw } from 'lucide-react';
+import { useInterpretaciones } from '@/hooks/useInterpretaciones';
+import { formatEventForBook, formatInterpretationCompact } from '@/utils/formatInterpretationForBook';
 
 // Secciones del libro
-import { PortadaPersonalizada, PaginaIntencion } from './PortalEntrada';
+import { PortadaPersonalizada, PaginaIntencion, PaginaIntencionAnualSR } from './PortalEntrada';
 import { CartaBienvenida, TemaCentralAnio, LoQueVieneAMover, LoQuePideSoltar, PaginaIntencionAnual } from './TuAnioTuViaje';
 import { TuAnioOverview, TuAnioCiclos, PaginaCumpleanos } from './TuAnio';
 import { LineaTiempoEmocional, MesesClavePuntosGiro, GrandesAprendizajes } from './CiclosAnuales';
 import { EsenciaNatal, NodoNorte, NodoSur, PlanetasDominantes, PatronesEmocionales } from './SoulChart';
-import { QueEsRetornoSolar, AscendenteAnio, SolRetorno, LunaRetorno, EjesDelAnio, EjesDelAnio2, IntegracionEjes, RitualCumpleanos, MantraAnual } from './RetornoSolar';
+import { QueEsRetornoSolar, AscendenteAnio, SolRetorno, LunaRetorno, MercurioRetorno, VenusRetorno, MarteRetorno, EjesDelAnio, EjesDelAnio2, IntegracionEjes, RitualCumpleanos, MantraAnual } from './RetornoSolar';
 import { IndiceNavegable } from './Indice';
 import { CalendarioYMapaMes, LunasYEjercicios, SemanaConInterpretacion, CierreMes, PrimerDiaCiclo as PrimerDiaCicloMes } from './MesCompleto';
 import { CalendarioMensualTabla } from './CalendarioMensualTabla';
@@ -26,11 +28,408 @@ interface AgendaLibroProps {
   userName: string;
   startDate: Date;
   endDate: Date;
+  sunSign?: string;
+  moonSign?: string;
+  ascendant?: string;
+  userId: string;          // NUEVO: ID del usuario para cargar interpretaciones
+  yearLabel: string;       // NUEVO: Etiqueta del año (ej: "2025-2026")
 }
 
-export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLibroProps) => {
+export const AgendaLibro = ({
+  onClose,
+  userName,
+  startDate,
+  endDate,
+  sunSign,
+  moonSign,
+  ascendant,
+  userId,
+  yearLabel
+}: AgendaLibroProps) => {
   const printRef = useRef<HTMLDivElement>(null);
   const { config } = useStyle();
+
+  // Hook para manejar interpretaciones
+  const {
+    solarCycle,
+    loading,
+    generatingMissing,
+    progress,
+    error,
+    getEventosForMonth
+  } = useInterpretaciones({ userId, yearLabel });
+
+  // Estado para almacenar la interpretación del Retorno Solar
+  const [solarReturnInterpretation, setSolarReturnInterpretation] = useState<any>(null);
+  const [loadingSolarReturn, setLoadingSolarReturn] = useState(true);
+  const [generatingSolarReturn, setGeneratingSolarReturn] = useState(false);
+
+  // Estado para almacenar la interpretación Natal
+  const [natalInterpretation, setNatalInterpretation] = useState<any>(null);
+  const [loadingNatal, setLoadingNatal] = useState(true);
+
+  // Efecto para cargar la interpretación del Retorno Solar desde la BD
+  useEffect(() => {
+    const fetchSolarReturnInterpretation = async () => {
+      if (!userId) {
+        setLoadingSolarReturn(false);
+        return;
+      }
+
+      try {
+        console.log('🔍 [SOLAR_RETURN] Buscando interpretación de Retorno Solar...');
+        const response = await fetch(`/api/interpretations?userId=${userId}&chartType=solar-return`);
+        const data = await response.json();
+
+        if (data.exists && data.interpretation) {
+          console.log('✅ [SOLAR_RETURN] Interpretación encontrada:', data.interpretation);
+
+          // 🔍 DEBUG: Verificar campos específicos para páginas 11-12
+          console.log('🔍 [DEBUG] linea_tiempo_emocional:', data.interpretation.linea_tiempo_emocional);
+          console.log('🔍 [DEBUG] meses_clave_puntos_giro:', data.interpretation.meses_clave_puntos_giro);
+          console.log('🔍 [DEBUG] Todas las keys:', Object.keys(data.interpretation));
+
+          setSolarReturnInterpretation(data);
+        } else {
+          console.log('⚠️ [SOLAR_RETURN] No se encontró interpretación de Retorno Solar');
+          setSolarReturnInterpretation(null);
+        }
+      } catch (error) {
+        console.error('❌ [SOLAR_RETURN] Error al cargar interpretación:', error);
+      } finally {
+        setLoadingSolarReturn(false);
+      }
+    };
+
+    fetchSolarReturnInterpretation();
+
+    // ✅ NUEVO: Recargar cuando el usuario vuelve a la pestaña/ventana
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('👁️ [SOLAR_RETURN] Pestaña visible, recargando interpretación...');
+        fetchSolarReturnInterpretation();
+      }
+    };
+
+    const handleFocus = () => {
+      console.log('🎯 [SOLAR_RETURN] Ventana en foco, recargando interpretación...');
+      fetchSolarReturnInterpretation();
+    };
+
+    // Escuchar cambios de visibilidad y foco
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [userId]);
+
+  // Efecto para cargar la interpretación Natal desde la BD
+  useEffect(() => {
+    const fetchNatalInterpretation = async () => {
+      if (!userId) {
+        setLoadingNatal(false);
+        return;
+      }
+
+      try {
+        console.log('🔍 [NATAL] Buscando interpretación Natal...');
+        const response = await fetch(`/api/interpretations?userId=${userId}&chartType=natal`);
+        const data = await response.json();
+
+        if (data.exists && data.interpretation) {
+          console.log('✅ [NATAL] Interpretación encontrada');
+          setNatalInterpretation(data);
+        } else {
+          console.log('⚠️ [NATAL] No se encontró interpretación Natal');
+          setNatalInterpretation(null);
+        }
+      } catch (error) {
+        console.error('❌ [NATAL] Error al cargar interpretación:', error);
+      } finally {
+        setLoadingNatal(false);
+      }
+    };
+
+    fetchNatalInterpretation();
+  }, [userId]);
+
+  // ==========================================
+  // 🚀 AUTO-GENERAR SOLAR RETURN
+  // ==========================================
+  const handleGenerateSolarReturn = async () => {
+    if (!userId || generatingSolarReturn) return;
+
+    try {
+      setGeneratingSolarReturn(true);
+      console.log('🌅 [AUTO_GEN] Iniciando generación automática de Solar Return...');
+
+      // 0. Verificar si ya existe SR
+      console.log('🔍 [AUTO_GEN] Verificando si ya existe SR...');
+      const checkResponse = await fetch(`/api/interpretations?userId=${userId}&chartType=solar-return`);
+      const checkData = await checkResponse.json();
+
+      if (checkData.exists && checkData.interpretation) {
+        console.log('✅ [AUTO_GEN] SR ya existe, solo recargando...');
+        setSolarReturnInterpretation(checkData);
+        return;
+      }
+
+      // 1. Obtener birth data
+      console.log('📍 [AUTO_GEN] Obteniendo birth data...');
+      const birthDataResponse = await fetch(`/api/birth-data?userId=${userId}`);
+      if (!birthDataResponse.ok) {
+        throw new Error('No se encontraron datos de nacimiento');
+      }
+      const birthDataResult = await birthDataResponse.json();
+      const birthData = birthDataResult.data || birthDataResult.birthData;
+
+      if (!birthData) {
+        console.error('❌ [AUTO_GEN] Birth data no encontrada en respuesta:', birthDataResult);
+        throw new Error('Birth data no encontrada en la respuesta del servidor');
+      }
+      console.log('✅ [AUTO_GEN] Birth data obtenida:', { fullName: birthData.fullName, birthPlace: birthData.birthPlace });
+
+      // 2. Obtener carta natal
+      console.log('🌟 [AUTO_GEN] Obteniendo carta natal...');
+      const natalResponse = await fetch(`/api/charts/natal?userId=${userId}`);
+      if (!natalResponse.ok) {
+        throw new Error('No se encontró la carta natal');
+      }
+      const natalData = await natalResponse.json();
+      // ✅ FIX: Buscar en el campo correcto
+      const natalChart = natalData.natalChart || natalData.chart || natalData.data?.chart;
+
+      if (!natalChart) {
+        console.error('❌ [AUTO_GEN] Carta natal no encontrada en respuesta:', natalData);
+        throw new Error('Carta natal no encontrada en la respuesta del servidor');
+      }
+      console.log('✅ [AUTO_GEN] Carta natal obtenida correctamente');
+
+      // 3. Generar carta de Solar Return
+      console.log('☀️ [AUTO_GEN] Generando carta de Solar Return...');
+      const srChartResponse = await fetch(`/api/charts/solar-return?userId=${userId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+      });
+      if (!srChartResponse.ok) {
+        throw new Error('Error al generar carta de Solar Return');
+      }
+      const srChartData = await srChartResponse.json();
+      // ✅ FIX: Buscar en el campo correcto
+      const solarReturnChart = srChartData.data?.solarReturnChart || srChartData.solarReturnChart || srChartData.chart;
+
+      if (!solarReturnChart) {
+        console.error('❌ [AUTO_GEN] Carta SR no encontrada en respuesta:', srChartData);
+        throw new Error('Carta Solar Return no encontrada en la respuesta del servidor');
+      }
+      console.log('✅ [AUTO_GEN] Carta Solar Return obtenida correctamente');
+
+      // 4. Construir perfil de usuario desde birthData
+      console.log('👤 [AUTO_GEN] Construyendo perfil de usuario desde birthData...');
+
+      // Calcular edad desde birthDate
+      const birthDateStr = birthData.date || birthData.birthDate;
+      const birthDateObj = new Date(birthDateStr);
+      const now = new Date();
+      let age = now.getFullYear() - birthDateObj.getFullYear();
+      const hasHadBirthdayThisYear = (now.getMonth() > birthDateObj.getMonth()) ||
+        (now.getMonth() === birthDateObj.getMonth() && now.getDate() >= birthDateObj.getDate());
+      if (!hasHadBirthdayThisYear) age -= 1;
+
+      const userProfile = {
+        name: birthData.fullName || 'Usuario',
+        birthDate: birthDateStr,
+        birthPlace: birthData.location || birthData.birthPlace,
+        age: age
+      };
+      console.log('✅ [AUTO_GEN] UserProfile construido:', userProfile);
+
+      // 5. Generar interpretación del Solar Return
+      console.log('🤖 [AUTO_GEN] Generando interpretación con IA...');
+      console.log('📦 [AUTO_GEN] Datos a enviar:', {
+        userId: userId ? '✅' : '❌',
+        natalChart: natalChart ? '✅' : '❌',
+        solarReturnChart: solarReturnChart ? '✅' : '❌',
+        userProfile: userProfile ? '✅' : '❌',
+        birthData: birthData ? '✅' : '❌'
+      });
+
+      const interpretResponse = await fetch(`/api/astrology/interpret-solar-return`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          natalChart,
+          solarReturnChart,
+          userProfile,
+          birthData,
+          regenerate: false
+        })
+      });
+
+      if (!interpretResponse.ok) {
+        const errorData = await interpretResponse.json();
+        const errorMsg = errorData.error || errorData.message || 'Error desconocido';
+        console.error('❌ [AUTO_GEN] Error del endpoint:', errorMsg);
+        throw new Error(`Error al generar interpretación: ${errorMsg}`);
+      }
+
+      const interpretData = await interpretResponse.json();
+      console.log('✅ [AUTO_GEN] Solar Return generado exitosamente:', interpretData);
+
+      // 6. Recargar la interpretación
+      const reloadResponse = await fetch(`/api/interpretations?userId=${userId}&chartType=solar-return`);
+      const reloadData = await reloadResponse.json();
+
+      if (reloadData.exists && reloadData.interpretation) {
+        setSolarReturnInterpretation(reloadData);
+        console.log('✅ [AUTO_GEN] Interpretación cargada en el libro');
+      }
+
+    } catch (error: any) {
+      console.error('❌ [AUTO_GEN] Error al generar Solar Return:', error);
+      alert(`Error al generar Solar Return: ${error.message}\n\nPor favor, intenta generar manualmente desde la página de Solar Return.`);
+    } finally {
+      setGeneratingSolarReturn(false);
+    }
+  };
+
+  // ==========================================
+  // 🔄 REGENERAR SOLAR RETURN (FORZADO)
+  // ==========================================
+  const handleRegenerateSolarReturn = async () => {
+    if (!userId || generatingSolarReturn) return;
+
+    const confirmRegenerate = window.confirm(
+      '¿Estás seguro de que quieres regenerar la interpretación del Solar Return?\n\n' +
+      'Esto borrará la interpretación actual y creará una nueva con los campos actualizados.\n\n' +
+      'El proceso puede tardar 1-2 minutos.'
+    );
+
+    if (!confirmRegenerate) return;
+
+    try {
+      setGeneratingSolarReturn(true);
+      console.log('🔄 [REGENERATE] Iniciando regeneración forzada...');
+
+      // 1. Borrar la interpretación existente
+      console.log('🗑️ [REGENERATE] Borrando interpretación existente...');
+      const deleteResponse = await fetch(`/api/interpretations/save?userId=${userId}&chartType=solar-return`, {
+        method: 'DELETE'
+      });
+
+      if (deleteResponse.ok) {
+        console.log('✅ [REGENERATE] Interpretación borrada correctamente');
+      } else {
+        console.warn('⚠️ [REGENERATE] No se pudo borrar la interpretación (puede no existir)');
+      }
+
+      // 2. Obtener datos necesarios para la generación
+      console.log('📍 [REGENERATE] Obteniendo birth data...');
+      const birthDataResponse = await fetch(`/api/birth-data?userId=${userId}`);
+      if (!birthDataResponse.ok) {
+        throw new Error('No se encontraron datos de nacimiento');
+      }
+      const birthDataResult = await birthDataResponse.json();
+      const birthData = birthDataResult.data || birthDataResult.birthData;
+
+      if (!birthData) {
+        console.error('❌ [REGENERATE] Birth data no encontrada en respuesta:', birthDataResult);
+        throw new Error('Birth data no encontrada en la respuesta del servidor');
+      }
+      console.log('✅ [REGENERATE] Birth data obtenida:', { fullName: birthData.fullName, birthPlace: birthData.birthPlace });
+
+      console.log('🌟 [REGENERATE] Obteniendo carta natal...');
+      const natalResponse = await fetch(`/api/charts/natal?userId=${userId}`);
+      if (!natalResponse.ok) {
+        throw new Error('No se encontró la carta natal');
+      }
+      const natalData = await natalResponse.json();
+      // ✅ FIX: Buscar en el campo correcto
+      const natalChart = natalData.natalChart || natalData.chart || natalData.data?.chart;
+
+      if (!natalChart) {
+        console.error('❌ [REGENERATE] Estructura de respuesta natal:', natalData);
+        throw new Error('Carta natal no encontrada en la respuesta');
+      }
+
+      console.log('✅ [REGENERATE] Carta natal obtenida correctamente');
+
+      console.log('☀️ [REGENERATE] Obteniendo carta de Solar Return...');
+      const srChartResponse = await fetch(`/api/charts/solar-return?userId=${userId}`);
+      if (!srChartResponse.ok) {
+        throw new Error('No se encontró la carta de Solar Return');
+      }
+      const srChartData = await srChartResponse.json();
+      // ✅ FIX: Buscar en el campo correcto primero
+      const solarReturnChart = srChartData.data?.solarReturnChart || srChartData.solarReturnChart || srChartData.chart;
+
+      if (!solarReturnChart) {
+        console.error('❌ [REGENERATE] Estructura de respuesta SR:', srChartData);
+        throw new Error('Carta Solar Return no encontrada en la respuesta');
+      }
+
+      console.log('✅ [REGENERATE] Carta Solar Return obtenida correctamente');
+
+      console.log('👤 [REGENERATE] Construyendo perfil de usuario desde birthData...');
+
+      // Calcular edad desde birthDate
+      const birthDateStr = birthData.date || birthData.birthDate;
+      const birthDateObj = new Date(birthDateStr);
+      const now = new Date();
+      let age = now.getFullYear() - birthDateObj.getFullYear();
+      const hasHadBirthdayThisYear = (now.getMonth() > birthDateObj.getMonth()) ||
+        (now.getMonth() === birthDateObj.getMonth() && now.getDate() >= birthDateObj.getDate());
+      if (!hasHadBirthdayThisYear) age -= 1;
+
+      const userProfile = {
+        name: birthData.fullName || 'Usuario',
+        birthDate: birthDateStr,
+        birthPlace: birthData.location || birthData.birthPlace,
+        age: age
+      };
+      console.log('✅ [REGENERATE] UserProfile construido:', userProfile);
+
+      // 3. Generar nueva interpretación con regenerate=true
+      console.log('🤖 [REGENERATE] Generando nueva interpretación con IA...');
+      const interpretResponse = await fetch(`/api/astrology/interpret-solar-return`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          natalChart,
+          solarReturnChart,
+          userProfile,
+          birthData,
+          regenerate: true  // ✅ FORZAR REGENERACIÓN
+        })
+      });
+
+      if (!interpretResponse.ok) {
+        const errorData = await interpretResponse.json();
+        const errorMsg = errorData.error || errorData.message || 'Error desconocido';
+        throw new Error(`Error al generar interpretación: ${errorMsg}`);
+      }
+
+      const interpretData = await interpretResponse.json();
+      console.log('✅ [REGENERATE] Nueva interpretación generada exitosamente');
+
+      // 4. Recargar la página para mostrar la nueva interpretación
+      console.log('🔄 [REGENERATE] Recargando página...');
+      window.location.reload();
+
+    } catch (error: any) {
+      console.error('❌ [REGENERATE] Error:', error);
+      alert(`Error al regenerar la interpretación:\n\n${error.message}\n\nPor favor, verifica que tengas una carta de Solar Return generada primero.`);
+    } finally {
+      setGeneratingSolarReturn(false);
+    }
+  };
 
   const handlePrint = () => {
     // Forzar el layout antes de imprimir
@@ -38,6 +437,364 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
       window.print();
     }, 100);
   };
+
+  const handleExportTXT = () => {
+    // Construir contenido del libro en formato texto plano
+    let txtContent = '';
+
+    // ═══════════════════════════════════════════════════════════
+    // PORTADA
+    // ═══════════════════════════════════════════════════════════
+    txtContent += '═══════════════════════════════════════════════════════════\n';
+    txtContent += '           TU VUELTA AL SOL - AGENDA ASTROLÓGICA\n';
+    txtContent += '═══════════════════════════════════════════════════════════\n\n';
+    txtContent += `Agenda de: ${userName}\n`;
+    txtContent += `Período: ${format(startDate, "d 'de' MMMM 'de' yyyy", { locale: es })} - ${format(endDate, "d 'de' MMMM 'de' yyyy", { locale: es })}\n`;
+    if (sunSign) txtContent += `Sol en: ${sunSign}\n`;
+    if (moonSign) txtContent += `Luna en: ${moonSign}\n`;
+    if (ascendant) txtContent += `Ascendente: ${ascendant}\n`;
+    txtContent += '\n\n';
+
+    // ═══════════════════════════════════════════════════════════
+    // SOLAR RETURN - INTERPRETACIÓN COMPLETA
+    // ═══════════════════════════════════════════════════════════
+    const srData = getSRInterpretation();
+    if (srData) {
+      txtContent += '═══════════════════════════════════════════════════════════\n';
+      txtContent += '                    SOLAR RETURN\n';
+      txtContent += '═══════════════════════════════════════════════════════════\n\n';
+
+      // APERTURA ANUAL
+      if (srData.apertura_anual) {
+        txtContent += '───────────────────────────────────────────────────────────\n';
+        txtContent += '              APERTURA ANUAL - TU AÑO\n';
+        txtContent += '───────────────────────────────────────────────────────────\n\n';
+
+        if (srData.apertura_anual.tema_central) {
+          txtContent += 'TEMA CENTRAL DEL AÑO:\n';
+          txtContent += srData.apertura_anual.tema_central + '\n\n';
+        }
+
+        if (srData.apertura_anual.eje_del_ano) {
+          txtContent += 'EJE DEL AÑO:\n';
+          txtContent += srData.apertura_anual.eje_del_ano + '\n\n';
+        }
+
+        if (srData.apertura_anual.lo_que_viene_a_mover) {
+          txtContent += 'LO QUE VIENE A MOVER:\n';
+          txtContent += srData.apertura_anual.lo_que_viene_a_mover + '\n\n';
+        }
+
+        if (srData.apertura_anual.lo_que_pide_soltar) {
+          txtContent += 'LO QUE PIDE SOLTAR:\n';
+          txtContent += srData.apertura_anual.lo_que_pide_soltar + '\n\n';
+        }
+      }
+
+      // COMPARACIONES PLANETARIAS
+      if (srData.comparaciones_planetarias && Object.keys(srData.comparaciones_planetarias).length > 0) {
+        txtContent += '\n───────────────────────────────────────────────────────────\n';
+        txtContent += '           COMPARACIONES NATAL VS SOLAR RETURN\n';
+        txtContent += '───────────────────────────────────────────────────────────\n\n';
+
+        const comparaciones = srData.comparaciones_planetarias;
+
+        if (comparaciones.sol) {
+          txtContent += '☉ SOL:\n';
+          txtContent += `   Natal: ${comparaciones.sol.natal}\n`;
+          txtContent += `   SR: ${comparaciones.sol.solar_return}\n`;
+          if (comparaciones.sol.significado) txtContent += `   Significado: ${comparaciones.sol.significado}\n`;
+          txtContent += '\n';
+        }
+
+        if (comparaciones.luna) {
+          txtContent += '☽ LUNA:\n';
+          txtContent += `   Natal: ${comparaciones.luna.natal}\n`;
+          txtContent += `   SR: ${comparaciones.luna.solar_return}\n`;
+          if (comparaciones.luna.significado) txtContent += `   Significado: ${comparaciones.luna.significado}\n`;
+          txtContent += '\n';
+        }
+
+        if (comparaciones.mercurio) {
+          txtContent += '☿ MERCURIO:\n';
+          txtContent += `   Natal: ${comparaciones.mercurio.natal}\n`;
+          txtContent += `   SR: ${comparaciones.mercurio.solar_return}\n`;
+          if (comparaciones.mercurio.significado) txtContent += `   Significado: ${comparaciones.mercurio.significado}\n`;
+          txtContent += '\n';
+        }
+
+        if (comparaciones.venus) {
+          txtContent += '♀ VENUS:\n';
+          txtContent += `   Natal: ${comparaciones.venus.natal}\n`;
+          txtContent += `   SR: ${comparaciones.venus.solar_return}\n`;
+          if (comparaciones.venus.significado) txtContent += `   Significado: ${comparaciones.venus.significado}\n`;
+          txtContent += '\n';
+        }
+
+        if (comparaciones.marte) {
+          txtContent += '♂ MARTE:\n';
+          txtContent += `   Natal: ${comparaciones.marte.natal}\n`;
+          txtContent += `   SR: ${comparaciones.marte.solar_return}\n`;
+          if (comparaciones.marte.significado) txtContent += `   Significado: ${comparaciones.marte.significado}\n`;
+          txtContent += '\n';
+        }
+      }
+
+      // CLAVES DE INTEGRACIÓN
+      if (srData.claves_integracion && srData.claves_integracion.length > 0) {
+        txtContent += '\n───────────────────────────────────────────────────────────\n';
+        txtContent += '              GRANDES APRENDIZAJES DEL CICLO\n';
+        txtContent += '───────────────────────────────────────────────────────────\n\n';
+        srData.claves_integracion.forEach((clave: string, idx: number) => {
+          txtContent += `${idx + 1}. ${clave}\n\n`;
+        });
+      }
+
+      // LÍNEA DE TIEMPO ANUAL
+      if (srData.linea_tiempo_anual && Array.isArray(srData.linea_tiempo_anual) && srData.linea_tiempo_anual.length > 0) {
+        txtContent += '\n───────────────────────────────────────────────────────────\n';
+        txtContent += '            MESES CLAVE Y PUNTOS DE GIRO\n';
+        txtContent += '───────────────────────────────────────────────────────────\n\n';
+        srData.linea_tiempo_anual.forEach((evento: any, idx: number) => {
+          txtContent += `${idx + 1}. ${evento.mes || evento.periodo || evento.titulo || 'Evento'}\n`;
+          if (evento.evento) txtContent += `   → Evento: ${evento.evento}\n`;
+          if (evento.significado) txtContent += `   → Significado: ${evento.significado}\n`;
+          if (evento.descripcion && !evento.significado) txtContent += `   → ${evento.descripcion}\n`;
+          txtContent += '\n';
+        });
+      }
+
+      // EJES DEL AÑO
+      if (srData.ejes_del_ano) {
+        txtContent += '\n───────────────────────────────────────────────────────────\n';
+        txtContent += '                  EJES DEL AÑO\n';
+        txtContent += '───────────────────────────────────────────────────────────\n\n';
+
+        if (srData.ejes_del_ano.eje_principal) {
+          txtContent += 'EJE PRINCIPAL:\n';
+          txtContent += srData.ejes_del_ano.eje_principal + '\n\n';
+        }
+
+        if (srData.ejes_del_ano.desafio) {
+          txtContent += 'DESAFÍO:\n';
+          txtContent += srData.ejes_del_ano.desafio + '\n\n';
+        }
+
+        if (srData.ejes_del_ano.oportunidad) {
+          txtContent += 'OPORTUNIDAD:\n';
+          txtContent += srData.ejes_del_ano.oportunidad + '\n\n';
+        }
+      }
+    }
+
+    // CARTA NATAL
+    txtContent += '\n═══════════════════════════════════════════════════════════\n';
+    txtContent += '                  CARTA NATAL - ESENCIA\n';
+    txtContent += '═══════════════════════════════════════════════════════════\n\n';
+    txtContent += 'Tu carta natal es el mapa del cielo en el momento exacto de tu nacimiento.\n';
+    txtContent += 'Refleja tu potencial, tus dones, tus desafíos y el camino de tu alma.\n\n';
+
+    if (sunSign) {
+      txtContent += `SOL EN ${sunSign.toUpperCase()}:\n`;
+      txtContent += 'Tu esencia, tu identidad, tu propósito vital.\n\n';
+    }
+
+    if (moonSign) {
+      txtContent += `LUNA EN ${moonSign.toUpperCase()}:\n`;
+      txtContent += 'Tus necesidades emocionales, tu mundo interior.\n\n';
+    }
+
+    if (ascendant) {
+      txtContent += `ASCENDENTE EN ${ascendant.toUpperCase()}:\n`;
+      txtContent += 'Tu máscara social, cómo te perciben los demás.\n\n';
+    }
+
+    // Cerrar con mensaje
+    txtContent += '\n\n═══════════════════════════════════════════════════════════\n';
+    txtContent += '        Este es tu año. Confía en el proceso.\n';
+    txtContent += '═══════════════════════════════════════════════════════════\n';
+
+    // Crear y descargar archivo
+    const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `tu-vuelta-al-sol-${userName.toLowerCase().replace(/\s+/g, '-')}-${format(startDate, 'yyyy')}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // Helper: Obtener eventos formateados para un mes específico
+  const getFormattedEventosForMonth = (monthIndex: number) => {
+    const eventos = getEventosForMonth(monthIndex);
+    return eventos.map(formatEventForBook);
+  };
+
+  // Helper: Obtener la interpretación completa del SR
+  const getSRInterpretation = () => {
+    if (loadingSolarReturn || !solarReturnInterpretation) {
+      return null;
+    }
+    return solarReturnInterpretation.interpretation;
+  };
+
+  // Helper: Obtener tema central del Retorno Solar
+  const getInterpretacionRetornoSolar = (): string | undefined => {
+    const interpretation = getSRInterpretation();
+    if (!interpretation) return undefined;
+
+    const temaCentral =
+      interpretation.apertura_anual?.tema_central ||
+      interpretation.tema_central_del_anio ||
+      interpretation.tema_central ||
+      interpretation.overview ||
+      interpretation.mensaje_principal;
+
+    if (temaCentral) {
+      console.log('✅ [SOLAR_RETURN] Tema central encontrado:', temaCentral.substring(0, 100) + '...');
+    }
+    return temaCentral;
+  };
+
+  // Helper: Obtener "Cómo se vive siendo tú"
+  const getComoSeViveSiendoTu = () => {
+    const interpretation = getSRInterpretation();
+    if (!interpretation?.como_se_vive_siendo_tu) return null;
+
+    return {
+      facilidad: interpretation.como_se_vive_siendo_tu.facilidad,
+      incomodidad: interpretation.como_se_vive_siendo_tu.incomodidad,
+      medida_del_ano: interpretation.como_se_vive_siendo_tu.medida_del_ano,
+      reflejos_obsoletos: interpretation.como_se_vive_siendo_tu.reflejos_obsoletos,
+      actitud_nueva: interpretation.como_se_vive_siendo_tu.actitud_nueva
+    };
+  };
+
+  // Helper: Obtener sombras del año
+  const getSombrasDelAno = (): string[] | undefined => {
+    const interpretation = getSRInterpretation();
+    return interpretation?.sombras_del_ano;
+  };
+
+  // Helper: Obtener interpretación Natal completa
+  const getNatalInterpretation = () => {
+    if (loadingNatal || !natalInterpretation) {
+      return null;
+    }
+    return natalInterpretation.interpretation;
+  };
+
+  // Helper: Obtener esencia natal
+  const getEsenciaNatal = () => {
+    const interpretation = getNatalInterpretation();
+    if (!interpretation) return null;
+
+    return {
+      proposito_vida: interpretation.proposito_vida,
+      emociones: interpretation.emociones,
+      personalidad: interpretation.personalidad,
+      pensamiento: interpretation.como_piensas_y_hablas,
+      amor: interpretation.como_amas,
+      accion: interpretation.como_enfrentas_la_vida
+    };
+  };
+
+  // Helper: Obtener nodos lunares
+  const getNodosLunares = () => {
+    const interpretation = getNatalInterpretation();
+    if (!interpretation?.nodos_lunares) return null;
+
+    return {
+      nodo_sur: interpretation.nodos_lunares.nodo_sur,
+      nodo_norte: interpretation.nodos_lunares.nodo_norte
+    };
+  };
+
+  // Helper: Obtener claves de integración del SR
+  const getClavesIntegracion = (): string[] | undefined => {
+    const interpretation = getSRInterpretation();
+    return interpretation?.claves_integracion;
+  };
+
+  // Helper: Obtener línea de tiempo anual del SR
+  const getLineaTiempoAnual = (): any[] | undefined => {
+    const interpretation = getSRInterpretation();
+    return interpretation?.linea_tiempo_anual;
+  };
+
+  // Helper: Obtener comparaciones planetarias del SR
+  const getComparacionesPlanetarias = () => {
+    const interpretation = getSRInterpretation();
+    return interpretation?.comparaciones_planetarias;
+  };
+
+  // LOADING STATE: Cargando datos iniciales
+  if (loading && !solarCycle) {
+    return (
+      <div className="fixed inset-0 bg-gradient-to-br from-purple-900/95 to-pink-900/95 flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl p-8 max-w-md shadow-2xl">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto mb-4"></div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Cargando tu agenda...</h2>
+            <p className="text-gray-600">Preparando tu libro personalizado</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // GENERATING STATE: Generando interpretaciones faltantes
+  if (generatingMissing) {
+    return (
+      <div className="fixed inset-0 bg-gradient-to-br from-purple-900/95 to-pink-900/95 flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl p-8 max-w-md shadow-2xl">
+          <div className="text-center">
+            <div className="mb-6">
+              <div className="text-6xl mb-4">✨</div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                Generando interpretaciones personalizadas
+              </h2>
+              <p className="text-gray-600 mb-4">
+                Esto puede tomar 1-2 minutos la primera vez.<br />
+                ¡Siguientes veces será instantáneo!
+              </p>
+            </div>
+
+            <div className="w-full bg-gray-200 rounded-full h-4 mb-2">
+              <div
+                className="bg-gradient-to-r from-purple-500 to-pink-500 h-4 rounded-full transition-all duration-500"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <p className="text-sm text-gray-500">{progress}%</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ERROR STATE: Error cargando datos
+  if (error) {
+    return (
+      <div className="fixed inset-0 bg-gradient-to-br from-purple-900/95 to-pink-900/95 flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl p-8 max-w-md shadow-2xl">
+          <div className="text-center">
+            <div className="text-6xl mb-4">⚠️</div>
+            <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
+            <p className="text-gray-700 mb-6">{error}</p>
+            <button
+              onClick={onClose}
+              className="px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="libro-container min-h-screen bg-gray-100">
@@ -54,6 +811,29 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
 
           <div className="flex items-center gap-4">
             <StyleSwitcher />
+
+            {/* Botón para regenerar SR si faltan campos */}
+            {solarReturnInterpretation &&
+             (!solarReturnInterpretation.interpretation?.linea_tiempo_emocional ||
+              !solarReturnInterpretation.interpretation?.meses_clave_puntos_giro) && (
+              <button
+                onClick={handleRegenerateSolarReturn}
+                disabled={generatingSolarReturn}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-semibold hover:from-orange-400 hover:to-yellow-400 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                title="La interpretación actual no tiene todos los campos. Regenerar para obtener la versión completa."
+              >
+                <RefreshCw className={`w-4 h-4 ${generatingSolarReturn ? 'animate-spin' : ''}`} />
+                {generatingSolarReturn ? 'Regenerando...' : 'Regenerar SR'}
+              </button>
+            )}
+
+            <button
+              onClick={handleExportTXT}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold hover:from-blue-400 hover:to-cyan-400 transition-all duration-200 shadow-lg"
+            >
+              <FileDown className="w-4 h-4" />
+              Exportar TXT
+            </button>
             <button
               onClick={handlePrint}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg"
@@ -79,6 +859,9 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
               name={userName}
               startDate={startDate}
               endDate={endDate}
+              sunSign={sunSign}
+              moonSign={moonSign}
+              ascendant={ascendant}
             />
           </div>
           <div id="intencion-anio">
@@ -87,57 +870,112 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
         </div>
         <IndiceNavegable />
 
-        {/* 2. TU AÑO 2026-2027 - OVERVIEW */}
+        {/* 2. CARTA DE BIENVENIDA Y TEMA CENTRAL - DESPUÉS DEL ÍNDICE */}
+        <div id="tu-anio-tu-viaje">
+          <div id="carta-bienvenida">
+            <CartaBienvenida name={userName} />
+          </div>
+          <div id="intencion-anual">
+            <PaginaIntencionAnual />
+          </div>
+          <div id="tema-central">
+            <TemaCentralAnio
+              interpretacion={getInterpretacionRetornoSolar()}
+              srInterpretation={getSRInterpretation()}
+              onGenerateSolarReturn={handleGenerateSolarReturn}
+              isGenerating={generatingSolarReturn}
+            />
+          </div>
+          {/* INTENCIÓN DEL AÑO - Justo después del tema central */}
+          <div id="intencion-anual-sr">
+            <PaginaIntencionAnualSR
+              temaCentral={getInterpretacionRetornoSolar()}
+              ejeDelAno={getSRInterpretation()?.apertura_anual?.eje_del_ano}
+              userName={userName}
+            />
+          </div>
+        </div>
+
+        {/* 3. PRIMER DÍA DEL CICLO */}
+        <div id="primer-dia-ciclo">
+          <PrimerDiaCiclo
+            name={userName}
+            fecha={startDate}
+            temaCentral={getInterpretacionRetornoSolar()}
+            mandato={getSRInterpretation()?.comparaciones_planetarias?.sol?.mandato_del_ano}
+          />
+        </div>
+
+        {/* 4. LO QUE VIENE A MOVER Y SOLTAR */}
+        <div id="viaje-interno">
+          <div id="viene-mover">
+            <LoQueVieneAMover
+              facilidad={getComoSeViveSiendoTu()?.facilidad}
+              incomodidad={getComoSeViveSiendoTu()?.incomodidad}
+              medida_del_ano={getComoSeViveSiendoTu()?.medida_del_ano}
+              actitud_nueva={getComoSeViveSiendoTu()?.actitud_nueva}
+            />
+          </div>
+          <div id="pide-soltar">
+            <LoQuePideSoltar
+              reflejos_obsoletos={getComoSeViveSiendoTu()?.reflejos_obsoletos}
+              sombras={getSombrasDelAno()}
+            />
+          </div>
+        </div>
+
+        {/* 5. TU AÑO 2026-2027 - OVERVIEW */}
         <div id="tu-anio-overview">
           <TuAnioOverview
             startDate={startDate}
             endDate={endDate}
             userName={userName}
+            hasSolarReturn={!!getInterpretacionRetornoSolar()}
           />
           <TuAnioCiclos
             startDate={startDate}
             endDate={endDate}
             userName={userName}
+            hasSolarReturn={!!getInterpretacionRetornoSolar()}
           />
         </div>
 
-        {/* 3. CICLOS ANUALES */}
+        {/* 6. CICLOS ANUALES */}
         <div id="ciclos-anuales">
           <LineaTiempoEmocional
             startDate={startDate}
             endDate={endDate}
+            lineaTiempoData={solarReturnInterpretation?.interpretation?.linea_tiempo_emocional}
           />
-          <MesesClavePuntosGiro />
-          <GrandesAprendizajes />
+          <MesesClavePuntosGiro
+            lineaTiempo={solarReturnInterpretation?.interpretation?.meses_clave_puntos_giro || getLineaTiempoAnual()}
+          />
+          <GrandesAprendizajes
+            clavesIntegracion={getClavesIntegracion()}
+          />
         </div>
 
-        {/* 4. TU AÑO, TU VIAJE */}
-        <div id="tu-anio-tu-viaje">
-          <div id="carta-bienvenida">
-            <CartaBienvenida name={userName} />
-          </div>
-          <div id="tema-central">
-            <TemaCentralAnio />
-          </div>
-          <div id="viene-mover">
-            <LoQueVieneAMover />
-          </div>
-          <div id="pide-soltar">
-            <LoQuePideSoltar />
-          </div>
-          <PaginaIntencionAnual />
-        </div>
-
-        {/* 3. SOUL CHART */}
+        {/* 7. SOUL CHART */}
         <div id="soul-chart">
           <div id="esencia-natal">
-            <EsenciaNatal />
+            <EsenciaNatal
+              proposito_vida={getEsenciaNatal()?.proposito_vida}
+              emociones={getEsenciaNatal()?.emociones}
+              personalidad={getEsenciaNatal()?.personalidad}
+              pensamiento={getEsenciaNatal()?.pensamiento}
+              amor={getEsenciaNatal()?.amor}
+              accion={getEsenciaNatal()?.accion}
+            />
           </div>
           <div id="nodo-norte">
-            <NodoNorte />
+            <NodoNorte
+              nodo_norte={getNodosLunares()?.nodo_norte}
+            />
           </div>
           <div id="nodo-sur">
-            <NodoSur />
+            <NodoSur
+              nodo_sur={getNodosLunares()?.nodo_sur}
+            />
           </div>
           <div id="planetas-dominantes">
             <PlanetasDominantes />
@@ -156,10 +994,19 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
             <AscendenteAnio />
           </div>
           <div id="sol-retorno">
-            <SolRetorno />
+            <SolRetorno comparacion={getComparacionesPlanetarias()?.sol} />
           </div>
           <div id="luna-retorno">
-            <LunaRetorno />
+            <LunaRetorno comparacion={getComparacionesPlanetarias()?.luna} />
+          </div>
+          <div id="mercurio-retorno">
+            <MercurioRetorno comparacion={getComparacionesPlanetarias()?.mercurio} />
+          </div>
+          <div id="venus-retorno">
+            <VenusRetorno comparacion={getComparacionesPlanetarias()?.venus} />
+          </div>
+          <div id="marte-retorno">
+            <MarteRetorno comparacion={getComparacionesPlanetarias()?.marte} />
           </div>
           <div id="ejes-anio">
             <EjesDelAnio />
@@ -181,129 +1028,8 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate }: AgendaLib
               nombreZodiaco="Capicornio → Acuario"
               simboloZodiaco="♑"
               temaDelMes="Inicios conscientes"
-          eventos={[
-            {
-              dia: 6,
-              tipo: 'ingreso',
-              titulo: 'Venus → Piscis',
-              signo: 'Piscis',
-              interpretacion: `🌊 VENUS INGRESA EN PISCIS - Activación de tu Casa [X]
-
-Qué se activa en tu Natal:
-Venus transitando por Piscis toca [área de vida según casa natal]. Con tu Venus en [signo], esto te invita a conectar desde una dimensión más espiritual y compasiva con [área específica]. Si tienes planetas en signos de agua (Cáncer, Escorpio, Piscis), este tránsito resonará especialmente contigo.
-
-Cómo lo vives según tu Retorno Solar:
-En tu carta de retorno solar, Venus está en [signo/casa], lo que indica que este año el amor y las relaciones están enfocados en [tema]. Este ingreso de Venus en Piscis activará [aspecto específico del retorno], potenciando tu necesidad de [acción concreta].
-
-Qué hacer con esta energía:
-• Dedica tiempo a actividades que nutran tu alma: arte, música, meditación
-• Revisa tus relaciones: ¿estás dando desde el amor o desde la necesidad?
-• Conecta con tu lado más intuitivo y empático
-• Si hay algo que sanar en el terreno afectivo, este es el momento
-
-Pregunta para reflexionar:
-¿Cómo puedo amar de forma más incondicional, empezando por mí?`
-            },
-            {
-              dia: 13,
-              tipo: 'lunaLlena',
-              titulo: 'Luna Llena en Cáncer',
-              signo: 'Cáncer',
-              interpretacion: `🌕 LUNA LLENA EN CÁNCER - Culminación Emocional en Casa [X]
-
-Qué se activa en tu Natal:
-Esta Luna Llena ilumina tu Casa [X] natal, el área de [tema de vida]. Con tu Luna natal en [signo], tienes una forma particular de gestionar las emociones: [descripción]. Esta lunación te pide integrar [aprendizaje específico].
-
-Aspectos clave desde tu Natal:
-• Tu Luna hace [aspecto] con [planeta], lo que significa que [interpretación]
-• Esta Luna Llena activa tu eje [casas], conectando [área 1] con [área 2]
-• Si tienes planetas en Cáncer o Capricornio, sentirás esta lunación con especial intensidad
-
-Cómo lo vives según tu Retorno Solar:
-La Luna Llena cae en la Casa [X] de tu retorno solar. Este año, el foco emocional está en [tema anual]. Esta culminación marca el punto medio de un proceso que comenzó en la Luna Nueva de [fecha anterior], relacionado con [tema específico].
-
-Qué soltar ahora:
-• Patrones familiares que ya no te sirven
-• Necesidad de controlar cómo otros te cuidan
-• Miedo a mostrar tus verdaderas necesidades emocionales
-• Relaciones donde das más de lo que recibes
-
-Ritual sugerido:
-Escribe una carta a tu niño/a interior. Pregúntale qué necesita para sentirse seguro/a. Luego, comprométete a darle eso desde tu yo adulto.
-
-Pregunta para reflexionar:
-¿Qué necesito soltar para permitirme recibir el cuidado que merezco?`
-            },
-            {
-              dia: 20,
-              tipo: 'ingreso',
-              titulo: 'Sol → Acuario',
-              signo: 'Acuario',
-              interpretacion: `⚡ SOL INGRESA EN ACUARIO - Nueva Temporada en Casa [X]
-
-Qué se activa en tu Natal:
-El Sol ilumina tu Casa [X] natal durante el próximo mes, el sector de [área de vida]. Con tu Sol natal en [signo], tu esencia es [cualidad]. Este tránsito te invita a brillar en [área específica] desde una perspectiva más innovadora y desapegada.
-
-Conexión con tu propósito natal:
-• Tu Sol natal hace [aspecto] con [planeta], lo que te da [cualidad]
-• Este tránsito activa [configuración específica], favoreciendo [acción]
-• Urano (regente de Acuario) está en tu Casa [X], conectando con [tema]
-
-Cómo lo vives según tu Retorno Solar:
-En tu retorno solar, el Sol está en Casa [X], indicando que este año tu identidad se está reconfigurando a través de [tema]. Este ingreso en Acuario activa [área del retorno], invitándote a [acción concreta].
-
-Temas centrales del mes:
-• Innovación y ruptura de estructuras obsoletas
-• Conexión con tu comunidad y tribu afín
-• Expresión auténtica de tu individualidad
-• Proyectos colaborativos y visión de futuro
-
-Qué hacer:
-• Conecta con personas que compartan tu visión
-• Atrévete a proponer ideas diferentes, aunque parezcan "raras"
-• Revisa tus redes sociales: ¿reflejan quién eres realmente?
-• Empieza ese proyecto innovador que tienes guardado
-
-Pregunta para reflexionar:
-¿En qué área de mi vida necesito más libertad para ser auténticamente yo?`
-            },
-            {
-              dia: 29,
-              tipo: 'lunaNueva',
-              titulo: 'Luna Nueva en Acuario',
-              signo: 'Acuario',
-              interpretacion: `🌑 LUNA NUEVA EN ACUARIO - Siembra de Intenciones en Casa [X]
-
-Qué se activa en tu Natal:
-Esta Luna Nueva planta semillas en tu Casa [X] natal, el área de [tema de vida]. Es un ciclo de 6 meses (hasta la Luna Llena en Acuario de [fecha futura]) donde podrás manifestar [objetivo]. Tu Luna natal en [signo] te da una forma [cualidad] de procesar esta energía.
-
-Configuración específica para ti:
-• Esta lunación hace [aspecto] con tu [planeta natal], potenciando [cualidad]
-• Se activa tu eje [casas], conectando [área 1] con [área 2]
-• Urano cerca de esta Luna Nueva añade un factor de cambio inesperado
-
-Cómo lo vives según tu Retorno Solar:
-La Luna Nueva cae en la Casa [X] de tu retorno, señalando un nuevo comienzo en [área específica]. Este es uno de los momentos clave del año para [acción]. Tu Ascendente de retorno en [signo] sugiere que esto se manifestará a través de [forma concreta].
-
-Intenciones poderosas para sembrar:
-• "Me permito ser diferente y celebro mi autenticidad"
-• "Atraigo a mi tribu, personas que me entienden sin explicaciones"
-• "Confío en mi visión única del futuro"
-• "Me libero de la necesidad de encajar en moldes ajenos"
-
-Ritual de Luna Nueva:
-1. Escribe 10 deseos relacionados con libertad, comunidad y autenticidad
-2. Elige los 3 que más te resuenen
-3. Para cada uno, escribe UN paso concreto que darás en los próximos 15 días
-4. Enciende una vela blanca y lee tus intenciones en voz alta
-
-Pregunta para reflexionar:
-Si no tuviera miedo al rechazo, ¿qué aspecto de mí mostraría al mundo?
-
-Fecha clave: Marca en tu agenda la Luna Llena en Acuario de [fecha] para hacer balance.`
-            }
-          ]}
-        />
+              eventos={getFormattedEventosForMonth(0)}
+            />
 
         <LunasYEjercicios
           monthDate={new Date(2026, 0, 1)}
@@ -356,40 +1082,142 @@ Fecha clave: Marca en tu agenda la Luna Llena en Acuario de [fecha] para hacer b
               simboloZodiaco="♒"
               temaDelMes="Renacimiento solar"
               birthday={new Date(2026, 1, 10)} // Marca el día 10 como cumpleaños
-              eventos={[
-                {
-                  dia: 10,
-                  tipo: 'cumpleanos',
-                  titulo: '¡Tu Cumpleaños! 🎂',
-                  interpretacion: `🎂 TU RETORNO SOLAR
-
-Hoy el Sol regresa exactamente al grado donde estaba cuando naciste. Este es tu nuevo año personal.
-
-Qué significa:
-Este momento marca el inicio de un nuevo ciclo de 12 meses donde tu identidad, propósito y dirección vital se reconfiguran. La energía de este día marca el tono de todo tu año solar.
-
-Ritual sugerido:
-• Dedica tiempo a estar contigo misma
-• Enciende una vela dorada al amanecer
-• Escribe 3 intenciones para tu nuevo año solar
-• Revisa las páginas de "Tu Año 2026-2027" en este libro
-• Celebra tu existencia y tu evolución
-
-Pregunta para reflexionar:
-¿Quién quiero ser en este nuevo ciclo que comienza hoy?`
-                },
-                {
-                  dia: 12,
-                  tipo: 'lunaNueva',
-                  titulo: 'Luna Nueva en Acuario',
-                  signo: 'Acuario',
-                  interpretacion: 'Luna Nueva cerca de tu cumpleaños: momento perfecto para sembrar intenciones para tu nuevo año solar. Conecta con tu visión única y auténtica.'
-                }
-              ]}
+              eventos={getFormattedEventosForMonth(1)}
             />
 
             <CierreMes monthDate={new Date(2026, 1, 1)} />
           </div>
+
+          {/* MARZO 2026 */}
+          <div id="mes-marzo">
+            <CalendarioMensualTabla
+              monthDate={new Date(2026, 2, 1)}
+              mesNumero={3}
+              nombreZodiaco="Piscis → Aries"
+              simboloZodiaco="♓"
+              temaDelMes="Culminación y renacimiento"
+              eventos={getFormattedEventosForMonth(2)}
+            />
+            <CierreMes monthDate={new Date(2026, 2, 1)} />
+          </div>
+
+          {/* ABRIL 2026 */}
+          <div id="mes-abril">
+            <CalendarioMensualTabla
+              monthDate={new Date(2026, 3, 1)}
+              mesNumero={4}
+              nombreZodiaco="Aries → Tauro"
+              simboloZodiaco="♈"
+              temaDelMes="Acción y manifestación"
+              eventos={getFormattedEventosForMonth(3)}
+            />
+            <CierreMes monthDate={new Date(2026, 3, 1)} />
+          </div>
+
+          {/* MAYO 2026 */}
+          <div id="mes-mayo">
+            <CalendarioMensualTabla
+              monthDate={new Date(2026, 4, 1)}
+              mesNumero={5}
+              nombreZodiaco="Tauro → Géminis"
+              simboloZodiaco="♉"
+              temaDelMes="Estabilidad y placer"
+              eventos={getFormattedEventosForMonth(4)}
+            />
+            <CierreMes monthDate={new Date(2026, 4, 1)} />
+          </div>
+
+          {/* JUNIO 2026 */}
+          <div id="mes-junio">
+            <CalendarioMensualTabla
+              monthDate={new Date(2026, 5, 1)}
+              mesNumero={6}
+              nombreZodiaco="Géminis → Cáncer"
+              simboloZodiaco="♊"
+              temaDelMes="Comunicación y versatilidad"
+              eventos={getFormattedEventosForMonth(5)}
+            />
+            <CierreMes monthDate={new Date(2026, 5, 1)} />
+          </div>
+
+          {/* JULIO 2026 */}
+          <div id="mes-julio">
+            <CalendarioMensualTabla
+              monthDate={new Date(2026, 6, 1)}
+              mesNumero={7}
+              nombreZodiaco="Cáncer → Leo"
+              simboloZodiaco="♋"
+              temaDelMes="Nutrición emocional"
+              eventos={getFormattedEventosForMonth(6)}
+            />
+            <CierreMes monthDate={new Date(2026, 6, 1)} />
+          </div>
+
+          {/* AGOSTO 2026 */}
+          <div id="mes-agosto">
+            <CalendarioMensualTabla
+              monthDate={new Date(2026, 7, 1)}
+              mesNumero={8}
+              nombreZodiaco="Leo → Virgo"
+              simboloZodiaco="♌"
+              temaDelMes="Expresión y creatividad"
+              eventos={getFormattedEventosForMonth(7)}
+            />
+            <CierreMes monthDate={new Date(2026, 7, 1)} />
+          </div>
+
+          {/* SEPTIEMBRE 2026 */}
+          <div id="mes-septiembre">
+            <CalendarioMensualTabla
+              monthDate={new Date(2026, 8, 1)}
+              mesNumero={9}
+              nombreZodiaco="Virgo → Libra"
+              simboloZodiaco="♍"
+              temaDelMes="Discernimiento y servicio"
+              eventos={getFormattedEventosForMonth(8)}
+            />
+            <CierreMes monthDate={new Date(2026, 8, 1)} />
+          </div>
+
+          {/* OCTUBRE 2026 */}
+          <div id="mes-octubre">
+            <CalendarioMensualTabla
+              monthDate={new Date(2026, 9, 1)}
+              mesNumero={10}
+              nombreZodiaco="Libra → Escorpio"
+              simboloZodiaco="♎"
+              temaDelMes="Equilibrio y relaciones"
+              eventos={getFormattedEventosForMonth(9)}
+            />
+            <CierreMes monthDate={new Date(2026, 9, 1)} />
+          </div>
+
+          {/* NOVIEMBRE 2026 */}
+          <div id="mes-noviembre">
+            <CalendarioMensualTabla
+              monthDate={new Date(2026, 10, 1)}
+              mesNumero={11}
+              nombreZodiaco="Escorpio → Sagitario"
+              simboloZodiaco="♏"
+              temaDelMes="Transformación profunda"
+              eventos={getFormattedEventosForMonth(10)}
+            />
+            <CierreMes monthDate={new Date(2026, 10, 1)} />
+          </div>
+
+          {/* DICIEMBRE 2026 */}
+          <div id="mes-diciembre">
+            <CalendarioMensualTabla
+              monthDate={new Date(2026, 11, 1)}
+              mesNumero={12}
+              nombreZodiaco="Sagitario → Capricornio"
+              simboloZodiaco="♐"
+              temaDelMes="Expansión y sabiduría"
+              eventos={getFormattedEventosForMonth(11)}
+            />
+            <CierreMes monthDate={new Date(2026, 11, 1)} />
+          </div>
+
         </div>
 
         {/* TERAPIA ASTROLÓGICA CREATIVA */}

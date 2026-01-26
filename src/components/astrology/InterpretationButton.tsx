@@ -170,14 +170,26 @@ const InterpretationButton: React.FC<InterpretationButtonProps> = ({
 
           // ✅ FIX: Check correct field names based on type
           if (type === 'solar-return') {
-            console.log(`✅ Esencia revolucionaria anual:`,
-              data.interpretation.esencia_revolucionaria_anual?.substring(0, 100) || 'NOT FOUND');
-            console.log(`✅ Propósito de vida anual:`,
-              data.interpretation.proposito_vida_anual?.substring(0, 100) || 'NOT FOUND');
+            // ✅ NEW STRUCTURE: Check for apertura_anual (3 capas structure)
+            const hasNewStructure = data.interpretation.apertura_anual?.tema_central &&
+                                   data.interpretation.como_se_vive_siendo_tu;
 
-            // ✅ VALIDATE: If fields are undefined, don't use cache
-            if (!data.interpretation.esencia_revolucionaria_anual ||
-                !data.interpretation.proposito_vida_anual) {
+            // Legacy structure check (for backwards compatibility)
+            const hasLegacyStructure = data.interpretation.esencia_revolucionaria_anual &&
+                                      data.interpretation.proposito_vida_anual;
+
+            if (hasNewStructure) {
+              console.log(`✅ Apertura anual (tema central):`,
+                data.interpretation.apertura_anual.tema_central?.substring(0, 100) || 'NOT FOUND');
+              console.log(`✅ Como se vive siendo tú:`,
+                data.interpretation.como_se_vive_siendo_tu?.facilidad?.substring(0, 100) || 'NOT FOUND');
+            } else if (hasLegacyStructure) {
+              console.log(`✅ Esencia revolucionaria anual (legacy):`,
+                data.interpretation.esencia_revolucionaria_anual?.substring(0, 100) || 'NOT FOUND');
+              console.log(`✅ Propósito de vida anual (legacy):`,
+                data.interpretation.proposito_vida_anual?.substring(0, 100) || 'NOT FOUND');
+            } else {
+              // Neither structure found - invalid cache
               console.warn('⚠️ Cached interpretation has incorrect structure, will regenerate');
               setHasRecentInterpretation(false);
               setSavedInterpretations([]);

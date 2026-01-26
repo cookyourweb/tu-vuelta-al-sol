@@ -3,8 +3,25 @@
 import { useStyle } from "@/context/StyleContext";
 import { FooterLibro } from './MesCompleto';
 
-export const EsenciaNatal = () => {
+interface EsenciaNatalProps {
+  proposito_vida?: string;
+  emociones?: string;
+  personalidad?: string;
+  pensamiento?: string;
+  amor?: string;
+  accion?: string;
+}
+
+export const EsenciaNatal = ({
+  proposito_vida,
+  emociones,
+  personalidad,
+  pensamiento,
+  amor,
+  accion
+}: EsenciaNatalProps) => {
   const { config } = useStyle();
+  const tieneContenidoPersonalizado = !!(proposito_vida || personalidad || emociones);
 
   return (
     <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
@@ -19,64 +36,145 @@ export const EsenciaNatal = () => {
           Antes de mirar hacia dónde vas, recordemos de dónde vienes.
         </p>
 
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          <div className={`${config.highlightPrimary} rounded-lg p-4`}>
-            <span className={`${config.iconSecondary} text-2xl`}>☉</span>
-            <h4 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mt-2`}>Sol en Acuario</h4>
-            <p className="text-sm text-gray-600 mt-1">Casa 1 (identidad, presencia, yo)</p>
-            <p className="text-sm text-gray-700 mt-2">
-              Tu esencia es libre, auténtica y orientada a la verdad personal.
-              Viniste a ser tú, no una versión adaptada.
-            </p>
-          </div>
-          <div className={`${config.highlightSecondary} rounded-lg p-4`}>
-            <span className={`${config.iconSecondary} text-2xl`}>☽</span>
-            <h4 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mt-2`}>Luna en Libra</h4>
-            <p className="text-sm text-gray-600 mt-1">Casa 8 (emociones profundas, transformación)</p>
-            <p className="text-sm text-gray-700 mt-2">
-              Necesitas equilibrio emocional, pero a través de procesos intensos.
-              Sientes profundamente y transformas a través del vínculo.
-            </p>
-          </div>
-          <div className={`${config.highlightAccent} rounded-lg p-4`}>
-            <span className={`${config.iconSecondary} text-2xl`}>↑</span>
-            <h4 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mt-2`}>Ascendente Acuario</h4>
-            <p className="text-sm text-gray-600 mt-1">Casa 1 (forma de empezar, identidad visible)</p>
-            <p className="text-sm text-gray-700 mt-2">
-              Te muestras independiente, diferente, mentalmente libre.
-              Tu camino siempre empieza rompiendo moldes.
-            </p>
-          </div>
-          <div className={`${config.highlightPrimary} rounded-lg p-4`}>
-            <span className={`${config.iconSecondary} text-2xl`}>☿</span>
-            <h4 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mt-2`}>Mercurio en Piscis</h4>
-            <p className="text-sm text-gray-600 mt-1">Casa 1 (mente, comunicación)</p>
-            <p className="text-sm text-gray-700 mt-2">
-              Piensas y comunicas desde la intuición.
-              Lees el ambiente antes de que nadie diga nada.
-            </p>
-          </div>
-        </div>
+        {tieneContenidoPersonalizado ? (
+          <>
+            <div className="space-y-4 mb-8">
+              {proposito_vida && (
+                <div className={`${config.highlightPrimary} rounded-lg p-6`}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className={`${config.iconSecondary} text-2xl`}>☉</span>
+                    <h4 className={`${config.fontDisplay} ${config.iconPrimary} font-medium`}>Tu propósito de vida</h4>
+                  </div>
+                  <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                    {proposito_vida}
+                  </div>
+                </div>
+              )}
 
-        <div className={`${config.highlightSecondary} rounded-lg p-6`}>
-          <h4 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3`}>Resumen de tu carta</h4>
-          <div className={`space-y-2 text-gray-700 ${config.fontBody}`}>
-            <p><strong>Predominio de Aire + Agua</strong></p>
-            <p className="text-sm">– Aire: mente, conciencia, visión</p>
-            <p className="text-sm">– Agua: sensibilidad, intuición, empatía</p>
-            <p className="text-sm mt-3">Menos Tierra → necesidad de anclaje consciente</p>
-            <p className="text-sm">Menos Fuego → acción solo cuando hay sentido</p>
-          </div>
-        </div>
+              {personalidad && (
+                <div className={`${config.highlightSecondary} rounded-lg p-6`}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className={`${config.iconSecondary} text-2xl`}>↑</span>
+                    <h4 className={`${config.fontDisplay} ${config.iconPrimary} font-medium`}>Tu personalidad</h4>
+                  </div>
+                  <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                    {personalidad}
+                  </div>
+                </div>
+              )}
+
+              {emociones && (
+                <div className={`${config.highlightAccent} rounded-lg p-6`}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className={`${config.iconSecondary} text-2xl`}>☽</span>
+                    <h4 className={`${config.fontDisplay} ${config.iconPrimary} font-medium`}>Tu mundo emocional</h4>
+                  </div>
+                  <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                    {emociones}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {pensamiento && (
+                <div className={`${config.highlightPrimary} rounded-lg p-4`}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`${config.iconSecondary} text-xl`}>☿</span>
+                    <h5 className={`${config.fontDisplay} ${config.iconPrimary} text-sm font-medium`}>Cómo piensas</h5>
+                  </div>
+                  <p className="text-sm text-gray-700">{pensamiento}</p>
+                </div>
+              )}
+
+              {amor && (
+                <div className={`${config.highlightSecondary} rounded-lg p-4`}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`${config.iconSecondary} text-xl`}>♀</span>
+                    <h5 className={`${config.fontDisplay} ${config.iconPrimary} text-sm font-medium`}>Cómo amas</h5>
+                  </div>
+                  <p className="text-sm text-gray-700">{amor}</p>
+                </div>
+              )}
+
+              {accion && (
+                <div className={`${config.highlightAccent} rounded-lg p-4`}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`${config.iconSecondary} text-xl`}>♂</span>
+                    <h5 className={`${config.fontDisplay} ${config.iconPrimary} text-sm font-medium`}>Cómo actúas</h5>
+                  </div>
+                  <p className="text-sm text-gray-700">{accion}</p>
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              <div className={`${config.highlightPrimary} rounded-lg p-4`}>
+                <span className={`${config.iconSecondary} text-2xl`}>☉</span>
+                <h4 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mt-2`}>Sol en Acuario</h4>
+                <p className="text-sm text-gray-600 mt-1">Casa 1 (identidad, presencia, yo)</p>
+                <p className="text-sm text-gray-700 mt-2">
+                  Tu esencia es libre, auténtica y orientada a la verdad personal.
+                  Viniste a ser tú, no una versión adaptada.
+                </p>
+              </div>
+              <div className={`${config.highlightSecondary} rounded-lg p-4`}>
+                <span className={`${config.iconSecondary} text-2xl`}>☽</span>
+                <h4 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mt-2`}>Luna en Libra</h4>
+                <p className="text-sm text-gray-600 mt-1">Casa 8 (emociones profundas, transformación)</p>
+                <p className="text-sm text-gray-700 mt-2">
+                  Necesitas equilibrio emocional, pero a través de procesos intensos.
+                  Sientes profundamente y transformas a través del vínculo.
+                </p>
+              </div>
+              <div className={`${config.highlightAccent} rounded-lg p-4`}>
+                <span className={`${config.iconSecondary} text-2xl`}>↑</span>
+                <h4 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mt-2`}>Ascendente Acuario</h4>
+                <p className="text-sm text-gray-600 mt-1">Casa 1 (forma de empezar, identidad visible)</p>
+                <p className="text-sm text-gray-700 mt-2">
+                  Te muestras independiente, diferente, mentalmente libre.
+                  Tu camino siempre empieza rompiendo moldes.
+                </p>
+              </div>
+              <div className={`${config.highlightPrimary} rounded-lg p-4`}>
+                <span className={`${config.iconSecondary} text-2xl`}>☿</span>
+                <h4 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mt-2`}>Mercurio en Piscis</h4>
+                <p className="text-sm text-gray-600 mt-1">Casa 1 (mente, comunicación)</p>
+                <p className="text-sm text-gray-700 mt-2">
+                  Piensas y comunicas desde la intuición.
+                  Lees el ambiente antes de que nadie diga nada.
+                </p>
+              </div>
+            </div>
+
+            <div className={`${config.highlightSecondary} rounded-lg p-6`}>
+              <h4 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3`}>Resumen de tu carta</h4>
+              <div className={`space-y-2 text-gray-700 ${config.fontBody}`}>
+                <p><strong>Predominio de Aire + Agua</strong></p>
+                <p className="text-sm">– Aire: mente, conciencia, visión</p>
+                <p className="text-sm">– Agua: sensibilidad, intuición, empatía</p>
+                <p className="text-sm mt-3">Menos Tierra → necesidad de anclaje consciente</p>
+                <p className="text-sm">Menos Fuego → acción solo cuando hay sentido</p>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
-      <FooterLibro pagina={7} />
+      <FooterLibro pagina={14} />
     </div>
   );
 };
 
-export const NodoNorte = () => {
+interface NodoNorteProps {
+  nodo_norte?: string;
+}
+
+export const NodoNorte = ({ nodo_norte }: NodoNorteProps) => {
   const { config } = useStyle();
+  const tieneContenidoPersonalizado = !!nodo_norte;
 
   return (
     <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
@@ -88,37 +186,70 @@ export const NodoNorte = () => {
       </div>
 
       <div className={`flex-1 max-w-2xl mx-auto w-full space-y-6 ${config.fontBody}`}>
-        <div className={`${config.highlightPrimary} rounded-lg p-6`}>
-          <p className="text-gray-700 text-lg leading-relaxed">
-            Cuando eliges ser emocionalmente auténtica, incluso con miedo, creces.
-            Este punto de tu carta te invita a dejar de protegerte tanto y a habitarte con más verdad.
-          </p>
-        </div>
+        {tieneContenidoPersonalizado ? (
+          <>
+            <div className={`${config.highlightPrimary} rounded-lg p-6`}>
+              <div className="text-gray-700 text-lg leading-relaxed whitespace-pre-line">
+                {nodo_norte}
+              </div>
+            </div>
 
-        <div className={`border-l-4 ${config.cardBorder} pl-6`}>
-          <p className={`${config.iconSecondary} italic mb-4`}>Pregunta terapéutica:</p>
-          <p className="text-gray-700 text-lg">
-            "¿Dónde sientes que te llama la vida, pero dudas en responder?"
-          </p>
-        </div>
+            <div className={`border-l-4 ${config.cardBorder} pl-6`}>
+              <p className={`${config.iconSecondary} italic mb-4`}>Pregunta terapéutica:</p>
+              <p className="text-gray-700 text-lg">
+                "¿Dónde sientes que te llama la vida, pero dudas en responder?"
+              </p>
+            </div>
 
-        <div className={`${config.highlightSecondary} rounded-lg p-6`}>
-          <p className={`${config.iconSecondary} opacity-60 text-sm mb-3`}>Tu respuesta:</p>
-          <div className="space-y-4">
-            <div className={`h-16 border-b border-dashed ${config.iconSecondary} opacity-30`} />
-            <div className={`h-16 border-b border-dashed ${config.iconSecondary} opacity-30`} />
-            <div className="h-16" />
-          </div>
-        </div>
+            <div className={`${config.highlightSecondary} rounded-lg p-6`}>
+              <p className={`${config.iconSecondary} opacity-60 text-sm mb-3`}>Tu respuesta:</p>
+              <div className="space-y-4">
+                <div className={`h-16 border-b border-dashed ${config.iconSecondary} opacity-30`} />
+                <div className={`h-16 border-b border-dashed ${config.iconSecondary} opacity-30`} />
+                <div className="h-16" />
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className={`${config.highlightPrimary} rounded-lg p-6`}>
+              <p className="text-gray-700 text-lg leading-relaxed">
+                Cuando eliges ser emocionalmente auténtica, incluso con miedo, creces.
+                Este punto de tu carta te invita a dejar de protegerte tanto y a habitarte con más verdad.
+              </p>
+            </div>
+
+            <div className={`border-l-4 ${config.cardBorder} pl-6`}>
+              <p className={`${config.iconSecondary} italic mb-4`}>Pregunta terapéutica:</p>
+              <p className="text-gray-700 text-lg">
+                "¿Dónde sientes que te llama la vida, pero dudas en responder?"
+              </p>
+            </div>
+
+            <div className={`${config.highlightSecondary} rounded-lg p-6`}>
+              <p className={`${config.iconSecondary} opacity-60 text-sm mb-3`}>Tu respuesta:</p>
+              <div className="space-y-4">
+                <div className={`h-16 border-b border-dashed ${config.iconSecondary} opacity-30`} />
+                <div className={`h-16 border-b border-dashed ${config.iconSecondary} opacity-30`} />
+                <div className="h-16" />
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
-      <FooterLibro pagina={8} />
+      <FooterLibro pagina={15} />
     </div>
   );
 };
 
-export const NodoSur = () => {
+interface NodoSurProps {
+  nodo_sur?: string;
+}
+
+export const NodoSur = ({ nodo_sur }: NodoSurProps) => {
   const { config } = useStyle();
+  const tieneContenidoPersonalizado = !!nodo_sur;
 
   return (
     <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
@@ -129,31 +260,59 @@ export const NodoSur = () => {
       </div>
 
       <div className={`flex-1 max-w-2xl mx-auto w-full space-y-6 ${config.fontBody}`}>
-        <div className={`${config.highlightPrimary} rounded-lg p-6`}>
-          <p className="text-gray-700 text-lg leading-relaxed">
-            Cuando te adaptas demasiado, te pierdes.
-            Aquí está la tendencia a sostener más de lo que te corresponde.
-          </p>
-        </div>
+        {tieneContenidoPersonalizado ? (
+          <>
+            <div className={`${config.highlightPrimary} rounded-lg p-6`}>
+              <div className="text-gray-700 text-lg leading-relaxed whitespace-pre-line">
+                {nodo_sur}
+              </div>
+            </div>
 
-        <div className={`border-l-4 ${config.cardBorder} pl-6`}>
-          <p className={`${config.iconSecondary} italic mb-4`}>Pregunta terapéutica:</p>
-          <p className="text-gray-700 text-lg">
-            "¿Qué patrón repites esperando resultados distintos?"
-          </p>
-        </div>
+            <div className={`border-l-4 ${config.cardBorder} pl-6`}>
+              <p className={`${config.iconSecondary} italic mb-4`}>Pregunta terapéutica:</p>
+              <p className="text-gray-700 text-lg">
+                "¿Qué patrón repites esperando resultados distintos?"
+              </p>
+            </div>
 
-        <div className={`${config.highlightSecondary} rounded-lg p-6`}>
-          <p className={`${config.iconSecondary} opacity-60 text-sm mb-3`}>Tu respuesta:</p>
-          <div className="space-y-4">
-            <div className={`h-16 border-b border-dashed ${config.iconSecondary} opacity-30`} />
-            <div className={`h-16 border-b border-dashed ${config.iconSecondary} opacity-30`} />
-            <div className="h-16" />
-          </div>
-        </div>
+            <div className={`${config.highlightSecondary} rounded-lg p-6`}>
+              <p className={`${config.iconSecondary} opacity-60 text-sm mb-3`}>Tu respuesta:</p>
+              <div className="space-y-4">
+                <div className={`h-16 border-b border-dashed ${config.iconSecondary} opacity-30`} />
+                <div className={`h-16 border-b border-dashed ${config.iconSecondary} opacity-30`} />
+                <div className="h-16" />
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className={`${config.highlightPrimary} rounded-lg p-6`}>
+              <p className="text-gray-700 text-lg leading-relaxed">
+                Cuando te adaptas demasiado, te pierdes.
+                Aquí está la tendencia a sostener más de lo que te corresponde.
+              </p>
+            </div>
+
+            <div className={`border-l-4 ${config.cardBorder} pl-6`}>
+              <p className={`${config.iconSecondary} italic mb-4`}>Pregunta terapéutica:</p>
+              <p className="text-gray-700 text-lg">
+                "¿Qué patrón repites esperando resultados distintos?"
+              </p>
+            </div>
+
+            <div className={`${config.highlightSecondary} rounded-lg p-6`}>
+              <p className={`${config.iconSecondary} opacity-60 text-sm mb-3`}>Tu respuesta:</p>
+              <div className="space-y-4">
+                <div className={`h-16 border-b border-dashed ${config.iconSecondary} opacity-30`} />
+                <div className={`h-16 border-b border-dashed ${config.iconSecondary} opacity-30`} />
+                <div className="h-16" />
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
-      <FooterLibro pagina={9} />
+      <FooterLibro pagina={16} />
     </div>
   );
 };
@@ -207,7 +366,7 @@ export const PlanetasDominantes = () => {
         </div>
       </div>
 
-      <FooterLibro pagina={10} />
+      <FooterLibro pagina={17} />
     </div>
   );
 };
@@ -262,7 +421,7 @@ export const PatronesEmocionales = () => {
         </div>
       </div>
 
-      <FooterLibro pagina={11} />
+      <FooterLibro pagina={18} />
     </div>
   );
 };

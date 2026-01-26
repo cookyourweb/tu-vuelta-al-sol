@@ -3,7 +3,7 @@
 // 🔧 CORRECCIÓN CRÍTICA 1: BirthData model - Campos consistentes
 // src/models/BirthData.ts
 
-import { model, models, Schema, Document, Types } from "mongoose";
+import { model, models, Schema, Document, Types, Model } from "mongoose";
 
 // ✅ MANTENER COMPATIBILIDAD CON DATOS EXISTENTES
 export interface IBirthData extends Document {
@@ -146,7 +146,15 @@ BirthDataSchema.methods.getSolarReturnCoordinates = function() {
   };
 };
 
-const BirthData = models.BirthData || model<IBirthData>('BirthData', BirthDataSchema);
+// ✅ EXTENDER INTERFACE DEL MODELO con statics
+interface IBirthDataModel extends Model<IBirthData> {
+  findByUserId(userId: string): Promise<IBirthData | null>;
+  findAllByUserId(userId: string): Promise<IBirthData[]>;
+}
+
+const BirthData: IBirthDataModel =
+  (models.BirthData as IBirthDataModel) ||
+  model<IBirthData, IBirthDataModel>('BirthData', BirthDataSchema);
 
 // ✅ FUNCIÓN DE CASTING robusta
 export function castBirthData(data: any): IBirthData | null {
