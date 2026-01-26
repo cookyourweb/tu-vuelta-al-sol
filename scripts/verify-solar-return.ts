@@ -83,14 +83,20 @@ async function verifySolarReturn() {
     
     // Check 2: Location used
     const locationUsed = chart.solarReturnChart?.location || 'Unknown';
-    const correctLocation = birthData.livesInSamePlace 
-      ? birthData.birthPlace 
+    const correctLocation = birthData.livesInSamePlace
+      ? birthData.birthPlace
       : birthData.currentPlace;
-    
+
     console.log(`   2. Location Check:`);
-    console.log(`      Should use: ${correctLocation}`);
+    console.log(`      Should use: ${correctLocation || 'N/A'}`);
     console.log(`      Actually used: ${locationUsed}`);
-    console.log(`      Match: ${locationUsed.includes(correctLocation.split(',')[0]) ? '✅' : '❌'}\n`);
+
+    if (correctLocation) {
+      const locationMatch = locationUsed.includes(correctLocation.split(',')[0]);
+      console.log(`      Match: ${locationMatch ? '✅' : '❌'}\n`);
+    } else {
+      console.log(`      Match: ⚠️  (No location data)\n`);
+    }
     
     // Check 3: Ascendant changed
     const natalAsc = chart.natalChart?.ascendant?.sign;
