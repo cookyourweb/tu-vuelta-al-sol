@@ -1497,9 +1497,9 @@ const AgendaPersonalizada = () => {
           userName={userProfile.name || 'Usuario'}
           startDate={yearRange.start}
           endDate={yearRange.end}
-          sunSign={userProfile.astrological?.sun?.sign}
-          moonSign={userProfile.astrological?.moon?.sign}
-          ascendant={userProfile.astrological?.ascendant?.sign ? `Ascendente ${userProfile.astrological.ascendant.sign}` : undefined}
+          sunSign={userProfile.astrological?.signs?.sun}
+          moonSign={userProfile.astrological?.signs?.moon}
+          ascendant={userProfile.astrological?.signs?.ascendant ? `Ascendente ${userProfile.astrological.signs.ascendant}` : undefined}
           userId={user?.uid || ''}
           yearLabel={selectedCycleLabel || ''}
         />
@@ -1552,11 +1552,7 @@ const AgendaPersonalizada = () => {
                     {userProfile.birthTime && (
                       <span> {userProfile.birthTime}</span>
                     )}
-                    {userProfile.currentPlace && userProfile.currentPlace !== userProfile.birthPlace ? (
-                      <span> y vive en <span className="font-bold">{extractCity(userProfile.currentPlace)}</span></span>
-                    ) : (
-                      <span> y vive en <span className="font-bold">{extractCity(userProfile.birthPlace)}</span></span>
-                    )}
+                    <span> y vive en <span className="font-bold">{extractCity(userProfile.birthPlace)}</span></span>
                   </p>
                   <div className="pt-2 border-t border-purple-300/30 mt-3">
                     <p className="text-sm text-purple-100 leading-relaxed flex items-center justify-center gap-2 flex-wrap">
