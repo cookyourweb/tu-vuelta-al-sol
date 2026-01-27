@@ -597,6 +597,40 @@ export const AgendaLibro = ({
     }
 
     // ═══════════════════════════════════════════════════════════
+    // CICLOS ANUALES Y MESES CLAVE
+    // ═══════════════════════════════════════════════════════════
+    if (srData) {
+      // LÍNEA DE TIEMPO EMOCIONAL
+      if (solarReturnInterpretation?.interpretation?.linea_tiempo_emocional) {
+        txtContent += '\n═══════════════════════════════════════════════════════════\n';
+        txtContent += '              LÍNEA DE TIEMPO EMOCIONAL\n';
+        txtContent += '═══════════════════════════════════════════════════════════\n\n';
+
+        solarReturnInterpretation.interpretation.linea_tiempo_emocional.forEach((mes: any) => {
+          txtContent += `▸ ${mes.mes}: Intensidad ${mes.intensidad}/10\n`;
+          if (mes.palabra_clave) txtContent += `  Palabra clave: ${mes.palabra_clave}\n`;
+          txtContent += '\n';
+        });
+      }
+
+      // MESES CLAVE Y PUNTOS DE GIRO
+      if (solarReturnInterpretation?.interpretation?.meses_clave_puntos_giro) {
+        txtContent += '\n═══════════════════════════════════════════════════════════\n';
+        txtContent += '           MESES CLAVE Y PUNTOS DE GIRO\n';
+        txtContent += '═══════════════════════════════════════════════════════════\n\n';
+
+        solarReturnInterpretation.interpretation.meses_clave_puntos_giro.forEach((punto: any, idx: number) => {
+          txtContent += `${idx + 1}. ${punto.mes || punto.periodo}\n`;
+          if (punto.evento_astrologico) txtContent += `   Evento: ${punto.evento_astrologico}\n`;
+          if (punto.significado) txtContent += `   Significado: ${punto.significado}\n`;
+          txtContent += '\n';
+        });
+      }
+
+      // GRANDES APRENDIZAJES (ya incluido arriba como "claves de integración")
+    }
+
+    // ═══════════════════════════════════════════════════════════
     // CALENDARIO DE TU AÑO SOLAR
     // ═══════════════════════════════════════════════════════════
     if (solarCycle && solarCycle.events) {
@@ -633,40 +667,101 @@ export const AgendaLibro = ({
           let tipoEvento = event.type || 'Evento';
 
           // Traducir tipos de eventos
-          if (event.type === 'lunar_phase') tipoEvento = event.title?.includes('Nueva') ? 'Luna Nueva' : 'Luna Llena';
-          else if (event.type === 'retrograde') tipoEvento = 'Retrogradación';
-          else if (event.type === 'eclipse') tipoEvento = 'Eclipse';
-          else if (event.type === 'planetary_transit') tipoEvento = 'Tránsito planetario';
+          if (event.type === 'new_moon') {
+            tipoEvento = 'Luna Nueva';
+          } else if (event.type === 'full_moon') {
+            tipoEvento = 'Luna Llena';
+          } else if (event.type === 'lunar_phase') {
+            tipoEvento = event.title?.includes('Nueva') ? 'Luna Nueva' : 'Luna Llena';
+          } else if (event.type === 'retrograde') {
+            tipoEvento = 'Retrogradación';
+          } else if (event.type === 'eclipse') {
+            tipoEvento = 'Eclipse';
+          } else if (event.type === 'planetary_transit') {
+            tipoEvento = 'Tránsito planetario';
+          }
 
-          txtContent += `▸ ${dia} de ${mesKey.split(' ')[0].toLowerCase()} - ${tipoEvento}\n`;
+          txtContent += `▸ ${dia} de ${mesKey.split(' ')[0].toLowerCase()} - ${tipoEvento}`;
 
           if (event.title) {
-            txtContent += `\n`;
+            txtContent += `: ${event.title}`;
           }
+
+          txtContent += `\n\n`;
         });
       });
     }
 
-    // CARTA NATAL
+    // ═══════════════════════════════════════════════════════════
+    // SOUL CHART - CARTA NATAL COMPLETA
+    // ═══════════════════════════════════════════════════════════
+    const natalData = getNatalInterpretation();
     txtContent += '\n═══════════════════════════════════════════════════════════\n';
-    txtContent += '                  CARTA NATAL - ESENCIA\n';
+    txtContent += '                  CARTA NATAL - TU ESENCIA\n';
     txtContent += '═══════════════════════════════════════════════════════════\n\n';
-    txtContent += 'Tu carta natal es el mapa del cielo en el momento exacto de tu nacimiento.\n';
-    txtContent += 'Refleja tu potencial, tus dones, tus desafíos y el camino de tu alma.\n\n';
 
-    if (sunSign) {
-      txtContent += `SOL EN ${sunSign.toUpperCase()}:\n`;
-      txtContent += 'Tu esencia, tu identidad, tu propósito vital.\n\n';
-    }
+    if (natalData) {
+      // ESENCIA NATAL
+      const esencia = getEsenciaNatal();
+      if (esencia) {
+        if (esencia.proposito_vida) {
+          txtContent += '━━━ TU PROPÓSITO VITAL ━━━\n';
+          txtContent += esencia.proposito_vida + '\n\n';
+        }
 
-    if (moonSign) {
-      txtContent += `LUNA EN ${moonSign.toUpperCase()}:\n`;
-      txtContent += 'Tus necesidades emocionales, tu mundo interior.\n\n';
-    }
+        if (esencia.emociones) {
+          txtContent += '━━━ TU MUNDO EMOCIONAL ━━━\n';
+          txtContent += esencia.emociones + '\n\n';
+        }
 
-    if (ascendant) {
-      txtContent += `ASCENDENTE EN ${ascendant.toUpperCase()}:\n`;
-      txtContent += 'Tu máscara social, cómo te perciben los demás.\n\n';
+        if (esencia.pensamiento) {
+          txtContent += '━━━ CÓMO PIENSAS Y TE COMUNICAS ━━━\n';
+          txtContent += esencia.pensamiento + '\n\n';
+        }
+
+        if (esencia.amor) {
+          txtContent += '━━━ CÓMO AMAS ━━━\n';
+          txtContent += esencia.amor + '\n\n';
+        }
+
+        if (esencia.accion) {
+          txtContent += '━━━ CÓMO ACTÚAS ━━━\n';
+          txtContent += esencia.accion + '\n\n';
+        }
+      }
+
+      // NODOS LUNARES
+      const nodos = getNodosLunares();
+      if (nodos) {
+        if (nodos.nodo_sur) {
+          txtContent += '\n━━━ NODO SUR (De dónde vienes) ━━━\n';
+          txtContent += nodos.nodo_sur + '\n\n';
+        }
+
+        if (nodos.nodo_norte) {
+          txtContent += '━━━ NODO NORTE (Hacia dónde vas) ━━━\n';
+          txtContent += nodos.nodo_norte + '\n\n';
+        }
+      }
+    } else {
+      // Fallback si no hay interpretación completa
+      txtContent += 'Tu carta natal es el mapa del cielo en el momento exacto de tu nacimiento.\n';
+      txtContent += 'Refleja tu potencial, tus dones, tus desafíos y el camino de tu alma.\n\n';
+
+      if (sunSign) {
+        txtContent += `SOL EN ${sunSign.toUpperCase()}:\n`;
+        txtContent += 'Tu esencia, tu identidad, tu propósito vital.\n\n';
+      }
+
+      if (moonSign) {
+        txtContent += `LUNA EN ${moonSign.toUpperCase()}:\n`;
+        txtContent += 'Tus necesidades emocionales, tu mundo interior.\n\n';
+      }
+
+      if (ascendant) {
+        txtContent += `ASCENDENTE EN ${ascendant.toUpperCase()}:\n`;
+        txtContent += 'Tu máscara social, cómo te perciben los demás.\n\n';
+      }
     }
 
     // Cerrar con mensaje
@@ -956,17 +1051,7 @@ export const AgendaLibro = ({
           </div>
         </div>
 
-        {/* 3. PRIMER DÍA DEL CICLO */}
-        <div id="primer-dia-ciclo">
-          <PrimerDiaCiclo
-            name={userName}
-            fecha={startDate}
-            temaCentral={getInterpretacionRetornoSolar()}
-            mandato={getSRInterpretation()?.comparaciones_planetarias?.sol?.mandato_del_ano}
-          />
-        </div>
-
-        {/* 4. LO QUE VIENE A MOVER Y SOLTAR */}
+        {/* 3. LO QUE VIENE A MOVER Y SOLTAR */}
         <div id="viaje-interno">
           <div id="viene-mover">
             <LoQueVieneAMover
@@ -984,7 +1069,7 @@ export const AgendaLibro = ({
           </div>
         </div>
 
-        {/* 5. TU AÑO 2026-2027 - OVERVIEW */}
+        {/* 4. TU AÑO 2026-2027 - OVERVIEW */}
         <div id="tu-anio-overview">
           <TuAnioOverview
             startDate={startDate}
@@ -1000,7 +1085,7 @@ export const AgendaLibro = ({
           />
         </div>
 
-        {/* 6. CICLOS ANUALES */}
+        {/* 5. CICLOS ANUALES */}
         <div id="ciclos-anuales">
           <LineaTiempoEmocional
             startDate={startDate}
@@ -1015,7 +1100,7 @@ export const AgendaLibro = ({
           />
         </div>
 
-        {/* 7. SOUL CHART */}
+        {/* 6. SOUL CHART */}
         <div id="soul-chart">
           <div id="esencia-natal">
             <EsenciaNatal
@@ -1045,7 +1130,7 @@ export const AgendaLibro = ({
           </div>
         </div>
 
-        {/* 4. RETORNO SOLAR */}
+        {/* 7. RETORNO SOLAR */}
         <div id="retorno-solar">
           <div id="que-es-retorno">
             <QueEsRetornoSolar />
@@ -1073,13 +1158,22 @@ export const AgendaLibro = ({
             <EjesDelAnio2 />
             <IntegracionEjes />
           </div>
+          {/* PRIMER DÍA DEL CICLO - Justo antes de Ritual de Cumpleaños */}
+          <div id="primer-dia-ciclo">
+            <PrimerDiaCiclo
+              name={userName}
+              fecha={startDate}
+              temaCentral={getInterpretacionRetornoSolar()}
+              mandato={getSRInterpretation()?.comparaciones_planetarias?.sol?.mandato_del_ano}
+            />
+          </div>
           <div id="ritual-cumpleanos">
             <RitualCumpleanos />
           </div>
           <MantraAnual />
         </div>
 
-        {/* 5. CALENDARIO MENSUAL (formato tabla profesional) */}
+        {/* 8. CALENDARIO MENSUAL (formato tabla profesional) */}
         <div id="calendario-mensual">
           <div id="mes-enero">
             <CalendarioMensualTabla
