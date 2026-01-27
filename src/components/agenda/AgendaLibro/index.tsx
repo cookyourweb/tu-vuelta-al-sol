@@ -631,68 +631,6 @@ export const AgendaLibro = ({
     }
 
     // ═══════════════════════════════════════════════════════════
-    // CALENDARIO DE TU AÑO SOLAR
-    // ═══════════════════════════════════════════════════════════
-    if (solarCycle && solarCycle.events) {
-      txtContent += '\n═══════════════════════════════════════════════════════════\n';
-      txtContent += '                CALENDARIO DE TU AÑO SOLAR\n';
-      txtContent += '═══════════════════════════════════════════════════════════\n\n';
-
-      // Agrupar eventos por mes
-      const eventosPorMes: { [key: string]: any[] } = {};
-      const meses = [
-        'ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO',
-        'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'
-      ];
-
-      solarCycle.events.forEach((event: any) => {
-        const eventDate = new Date(event.date);
-        const mesNombre = meses[eventDate.getMonth()];
-        const year = eventDate.getFullYear();
-        const mesKey = `${mesNombre} ${year}`;
-
-        if (!eventosPorMes[mesKey]) {
-          eventosPorMes[mesKey] = [];
-        }
-        eventosPorMes[mesKey].push(event);
-      });
-
-      // Imprimir eventos por mes
-      Object.keys(eventosPorMes).sort().forEach((mesKey) => {
-        txtContent += `\n━━━ ${mesKey} ━━━\n\n`;
-
-        eventosPorMes[mesKey].forEach((event: any) => {
-          const eventDate = new Date(event.date);
-          const dia = eventDate.getDate();
-          let tipoEvento = event.type || 'Evento';
-
-          // Traducir tipos de eventos
-          if (event.type === 'new_moon') {
-            tipoEvento = 'Luna Nueva';
-          } else if (event.type === 'full_moon') {
-            tipoEvento = 'Luna Llena';
-          } else if (event.type === 'lunar_phase') {
-            tipoEvento = event.title?.includes('Nueva') ? 'Luna Nueva' : 'Luna Llena';
-          } else if (event.type === 'retrograde') {
-            tipoEvento = 'Retrogradación';
-          } else if (event.type === 'eclipse') {
-            tipoEvento = 'Eclipse';
-          } else if (event.type === 'planetary_transit') {
-            tipoEvento = 'Tránsito planetario';
-          }
-
-          txtContent += `▸ ${dia} de ${mesKey.split(' ')[0].toLowerCase()} - ${tipoEvento}`;
-
-          if (event.title) {
-            txtContent += `: ${event.title}`;
-          }
-
-          txtContent += `\n\n`;
-        });
-      });
-    }
-
-    // ═══════════════════════════════════════════════════════════
     // SOUL CHART - CARTA NATAL COMPLETA
     // ═══════════════════════════════════════════════════════════
     const natalData = getNatalInterpretation();
@@ -763,6 +701,182 @@ export const AgendaLibro = ({
         txtContent += 'Tu máscara social, cómo te perciben los demás.\n\n';
       }
     }
+
+    // ═══════════════════════════════════════════════════════════
+    // EJES DEL AÑO
+    // ═══════════════════════════════════════════════════════════
+    txtContent += '\n═══════════════════════════════════════════════════════════\n';
+    txtContent += '                    LOS EJES DEL AÑO\n';
+    txtContent += '═══════════════════════════════════════════════════════════\n\n';
+    txtContent += 'Este año no se sostiene por eventos aislados, sino por cuatro puntos clave\n';
+    txtContent += 'que marcan cómo vives, decides y te posicionas en el mundo.\n\n';
+    txtContent += 'No son exigencias externas. Son ajustes internos.\n\n';
+
+    txtContent += '━━━ ASCENDENTE DEL RETORNO (Casa 1) ━━━\n';
+    txtContent += 'Tu nueva máscara. La actitud con la que inicias este ciclo.\n';
+    txtContent += 'Este año no eres exactamente quien eras hace 12 meses.\n\n';
+
+    txtContent += '━━━ FONDO DEL CIELO (IC) - Casa 4 ━━━\n';
+    txtContent += 'Tu base emocional, tu hogar interior.\n';
+    txtContent += 'Todo lo que construyes este año se sostiene desde aquí.\n\n';
+
+    txtContent += '━━━ MEDIO CIELO (MC) - Casa 10 ━━━\n';
+    txtContent += 'Vocación, dirección, propósito visible.\n';
+    txtContent += 'Este año no busca logros espectaculares ni reconocimiento inmediato. Busca sentido.\n\n';
+
+    txtContent += '━━━ DESCENDENTE (DSC) - Casa 7 ━━━\n';
+    txtContent += 'Relaciones, vínculos, espejo emocional.\n';
+    txtContent += 'Este año las relaciones funcionan como espejo directo.\n';
+    txtContent += 'Lo que no está equilibrado se nota más. Lo que es verdadero, se profundiza.\n\n';
+
+    txtContent += '▸ Frase guía del eje del año:\n';
+    txtContent += '"Me permito ser honesta conmigo antes de intentar encajar en el mundo."\n\n';
+
+    // ═══════════════════════════════════════════════════════════
+    // PRIMER DÍA DEL CICLO
+    // ═══════════════════════════════════════════════════════════
+    txtContent += '\n═══════════════════════════════════════════════════════════\n';
+    txtContent += '               PRIMER DÍA DE TU CICLO\n';
+    txtContent += '═══════════════════════════════════════════════════════════\n\n';
+    txtContent += `${format(startDate, "d 'de' MMMM 'de' yyyy", { locale: es })}\n`;
+    txtContent += `¡Feliz cumpleaños, ${userName}!\n\n`;
+
+    const temaCentral = getInterpretacionRetornoSolar();
+    const mandato = srData?.comparaciones_planetarias?.sol?.mandato_del_ano;
+
+    if (temaCentral) {
+      txtContent += '━━━ TU TEMA PARA ESTE CICLO ━━━\n';
+      txtContent += (temaCentral.length > 200 ? temaCentral.substring(0, 200) + '...' : temaCentral) + '\n\n';
+    }
+
+    if (mandato) {
+      txtContent += '━━━ EL MANDATO DEL AÑO ━━━\n';
+      txtContent += `"${mandato}"\n\n`;
+    }
+
+    txtContent += '━━━ INTENCIÓN PARA ESTE NUEVO CICLO ━━━\n';
+    txtContent += '(Espacio para escribir tu intención personal)\n\n';
+
+    // ═══════════════════════════════════════════════════════════
+    // RITUAL DE CUMPLEAÑOS
+    // ═══════════════════════════════════════════════════════════
+    txtContent += '\n═══════════════════════════════════════════════════════════\n';
+    txtContent += '                  RITUAL DE CUMPLEAÑOS\n';
+    txtContent += '═══════════════════════════════════════════════════════════\n\n';
+    txtContent += 'Un pequeño ritual para honrar tu nuevo ciclo solar.\n\n';
+
+    txtContent += '━━━ NECESITAS ━━━\n';
+    txtContent += '• Una vela (preferiblemente dorada o blanca)\n';
+    txtContent += '• Papel y bolígrafo\n';
+    txtContent += '• Un momento de soledad\n\n';
+
+    txtContent += '━━━ EL RITUAL ━━━\n';
+    txtContent += '1. Enciende la vela y respira profundo tres veces.\n';
+    txtContent += '2. Escribe una carta a la versión de ti que cumple años el próximo año.\n';
+    txtContent += '3. Cuéntale qué esperas haber aprendido, sentido, soltado.\n';
+    txtContent += '4. Guarda la carta sin leerla hasta tu próximo cumpleaños.\n';
+    txtContent += '5. Apaga la vela con gratitud.\n\n';
+
+    txtContent += 'Si resuena contigo, pruébalo.\n\n';
+
+    // ═══════════════════════════════════════════════════════════
+    // CALENDARIO DE TU AÑO SOLAR (ORDENADO CRONOLÓGICAMENTE)
+    // ═══════════════════════════════════════════════════════════
+    if (solarCycle && solarCycle.events) {
+      txtContent += '\n═══════════════════════════════════════════════════════════\n';
+      txtContent += '                CALENDARIO DE TU AÑO SOLAR\n';
+      txtContent += '═══════════════════════════════════════════════════════════\n\n';
+
+      // Agrupar eventos por mes
+      const eventosPorMes: { [key: string]: { eventos: any[], monthDate: Date } } = {};
+      const meses = [
+        'ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO',
+        'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'
+      ];
+
+      solarCycle.events.forEach((event: any) => {
+        const eventDate = new Date(event.date);
+        const mesNombre = meses[eventDate.getMonth()];
+        const year = eventDate.getFullYear();
+        const mesKey = `${mesNombre} ${year}`;
+
+        if (!eventosPorMes[mesKey]) {
+          eventosPorMes[mesKey] = { eventos: [], monthDate: eventDate };
+        }
+        eventosPorMes[mesKey].eventos.push(event);
+      });
+
+      // Ordenar meses cronológicamente desde el mes de cumpleaños
+      const birthdayMonth = startDate.getMonth();
+      const birthdayYear = startDate.getFullYear();
+
+      const sortedKeys = Object.keys(eventosPorMes).sort((a, b) => {
+        const dateA = eventosPorMes[a].monthDate;
+        const dateB = eventosPorMes[b].monthDate;
+
+        // Calcular posición relativa al cumpleaños
+        let monthsFromBirthdayA = (dateA.getFullYear() - birthdayYear) * 12 + dateA.getMonth() - birthdayMonth;
+        let monthsFromBirthdayB = (dateB.getFullYear() - birthdayYear) * 12 + dateB.getMonth() - birthdayMonth;
+
+        // Ajustar para que los meses después del cumpleaños este año y antes del próximo estén en orden
+        if (monthsFromBirthdayA < 0) monthsFromBirthdayA += 12;
+        if (monthsFromBirthdayB < 0) monthsFromBirthdayB += 12;
+
+        return monthsFromBirthdayA - monthsFromBirthdayB;
+      });
+
+      // Imprimir eventos por mes en orden cronológico
+      sortedKeys.forEach((mesKey) => {
+        txtContent += `\n━━━ ${mesKey} ━━━\n\n`;
+
+        eventosPorMes[mesKey].eventos.forEach((event: any) => {
+          const eventDate = new Date(event.date);
+          const dia = eventDate.getDate();
+          let tipoEvento = event.type || 'Evento';
+
+          // Traducir tipos de eventos
+          if (event.type === 'new_moon') {
+            tipoEvento = 'Luna Nueva';
+          } else if (event.type === 'full_moon') {
+            tipoEvento = 'Luna Llena';
+          } else if (event.type === 'lunar_phase') {
+            tipoEvento = event.title?.includes('Nueva') ? 'Luna Nueva' : 'Luna Llena';
+          } else if (event.type === 'retrograde') {
+            tipoEvento = 'Retrogradación';
+          } else if (event.type === 'eclipse') {
+            tipoEvento = 'Eclipse';
+          } else if (event.type === 'planetary_transit') {
+            tipoEvento = 'Tránsito planetario';
+          }
+
+          txtContent += `▸ ${dia} de ${mesKey.split(' ')[0].toLowerCase()} - ${tipoEvento}`;
+
+          if (event.title) {
+            txtContent += `: ${event.title}`;
+          }
+
+          txtContent += `\n`;
+        });
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // CIERRE DEL CICLO
+    // ═══════════════════════════════════════════════════════════
+    txtContent += '\n\n═══════════════════════════════════════════════════════════\n';
+    txtContent += '                  CIERRE DEL CICLO\n';
+    txtContent += '═══════════════════════════════════════════════════════════\n\n';
+    txtContent += `${format(endDate, "d 'de' MMMM 'de' yyyy", { locale: es })}\n`;
+    txtContent += `Cierre y preparación, ${userName}\n\n`;
+
+    txtContent += '━━━ LO MÁS IMPORTANTE QUE APRENDÍ ━━━\n';
+    txtContent += '(Espacio para reflexión personal)\n\n';
+
+    txtContent += '━━━ ¿QUIÉN ERA HACE UN AÑO? ¿QUIÉN SOY HOY? ━━━\n';
+    txtContent += '(Espacio para reflexión personal)\n\n';
+
+    txtContent += '━━━ CARTA DE GRATITUD A MÍ MISMO/A ━━━\n';
+    txtContent += '(Espacio para reflexión personal)\n\n';
 
     // Cerrar con mensaje
     txtContent += '\n\n═══════════════════════════════════════════════════════════\n';
