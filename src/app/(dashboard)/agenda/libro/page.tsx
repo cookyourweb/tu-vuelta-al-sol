@@ -19,6 +19,7 @@ import CierreCiclo from '@/components/agenda/libro/CierreCiclo';
 import { EscrituraTerapeutica, Visualizacion, RitualSimbolico, TrabajoEmocional } from '@/components/agenda/libro/TerapiaCreativa';
 import { CartaBienvenida, PrimerDiaCiclo, UltimoDiaCiclo, QuienEraQuienSoy, PreparacionProximaVuelta, CartaCierre, PaginaFinalBlanca, Contraportada } from '@/components/agenda/libro/PaginasEspeciales';
 import { StyleProvider } from '@/context/StyleContext';
+import '@/styles/print-libro.css';
 
 interface MonthEvent {
   date: string | Date;
@@ -271,6 +272,7 @@ export default function LibroAgendaPage() {
         <Indice
           startYear={startDate.getFullYear()}
           endYear={endDate.getFullYear()}
+          startDate={startDate}
         />
 
         {/* CARTA DE BIENVENIDA */}

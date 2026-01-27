@@ -1,14 +1,43 @@
 'use client';
 
 import { useStyle } from '@/context/StyleContext';
+import { format, addMonths } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 interface IndiceProps {
   startYear: number;
   endYear: number;
+  startDate?: Date;
+  birthMonth?: number; // 0-indexed month of birthday
 }
 
-export default function Indice({ startYear, endYear }: IndiceProps) {
+export default function Indice({ startYear, endYear, startDate, birthMonth }: IndiceProps) {
   const { config } = useStyle();
+
+  // Generate real month names from the solar cycle (birthday to birthday)
+  const monthNames: string[] = [];
+  if (startDate) {
+    for (let i = 0; i < 12; i++) {
+      const monthDate = addMonths(startDate, i);
+      const name = format(monthDate, 'MMMM yyyy', { locale: es });
+      // Capitalize first letter
+      monthNames.push(name.charAt(0).toUpperCase() + name.slice(1));
+    }
+  } else if (birthMonth !== undefined) {
+    const baseDate = new Date(startYear, birthMonth, 1);
+    for (let i = 0; i < 12; i++) {
+      const monthDate = addMonths(baseDate, i);
+      const name = format(monthDate, 'MMMM yyyy', { locale: es });
+      monthNames.push(name.charAt(0).toUpperCase() + name.slice(1));
+    }
+  } else {
+    // Fallback: Jan-Dec
+    for (let i = 0; i < 12; i++) {
+      const monthDate = new Date(startYear, i, 1);
+      const name = format(monthDate, 'MMMM yyyy', { locale: es });
+      monthNames.push(name.charAt(0).toUpperCase() + name.slice(1));
+    }
+  }
 
   const secciones = [
     { titulo: 'Carta de Bienvenida', pagina: 3 },
@@ -18,10 +47,7 @@ export default function Indice({ startYear, endYear }: IndiceProps) {
     { titulo: 'Soul Chart - Tu Mapa Interior', pagina: 7 },
     { titulo: `Retorno Solar ${startYear}-${endYear}`, pagina: 8 },
     { titulo: 'Calendario Anual', pagina: 9 },
-    { titulo: 'Mes a Mes', pagina: 10, subsecciones: [
-      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-    ]},
+    { titulo: 'Mes a Mes', pagina: 10, subsecciones: monthNames },
     { titulo: 'Terapia Astrológica Creativa', pagina: null },
     { titulo: 'Cierre del Ciclo', pagina: null },
     { titulo: 'Último Día del Ciclo', pagina: null },

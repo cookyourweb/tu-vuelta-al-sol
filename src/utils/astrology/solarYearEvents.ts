@@ -118,8 +118,8 @@ export function calculateLunarPhases(startDate: Date, endDate: Date): LunarPhase
           });
         }
 
-        // Search for Full Moon (phase = 2) after this New Moon
-        const fullMoonSearch = Astronomy.SearchMoonPhase(2, newMoonDate, 20);
+        // Search for Full Moon (phase = 180°) after this New Moon
+        const fullMoonSearch = Astronomy.SearchMoonPhase(180, newMoonDate, 20);
         if (fullMoonSearch && fullMoonSearch.date.getTime() <= endDate.getTime()) {
           const fullMoonDate = fullMoonSearch.date; // Convert AstroTime to Date
 
