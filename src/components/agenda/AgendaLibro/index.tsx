@@ -11,7 +11,7 @@ import { formatEventForBook, formatInterpretationCompact } from '@/utils/formatI
 
 // Secciones del libro
 import { PortadaPersonalizada, PaginaIntencion, PaginaIntencionAnualSR } from './PortalEntrada';
-import { CartaBienvenida, TemaCentralAnio, LoQueVieneAMover, LoQuePideSoltar, PaginaIntencionAnual } from './TuAnioTuViaje';
+import { CartaBienvenida, GuiaAgenda, TemaCentralAnio, LoQueVieneAMover, LoQuePideSoltar, PaginaIntencionAnual } from './TuAnioTuViaje';
 import { TuAnioOverview, TuAnioCiclos, PaginaCumpleanos } from './TuAnio';
 import { LineaTiempoEmocional, MesesClavePuntosGiro, GrandesAprendizajes } from './CiclosAnuales';
 import { EsenciaNatal, NodoNorte, NodoSur, PlanetasDominantes, PatronesEmocionales } from './SoulChart';
@@ -456,6 +456,55 @@ export const AgendaLibro = ({
     txtContent += '\n\n';
 
     // ═══════════════════════════════════════════════════════════
+    // PRIMER DÍA DEL CICLO - ¡FELIZ CUMPLEAÑOS!
+    // ═══════════════════════════════════════════════════════════
+    txtContent += '═══════════════════════════════════════════════════════════\n';
+    txtContent += '               PRIMER DÍA DE TU CICLO\n';
+    txtContent += '═══════════════════════════════════════════════════════════\n\n';
+    txtContent += `${format(startDate, "d 'de' MMMM 'de' yyyy", { locale: es })}\n`;
+    txtContent += `¡Feliz cumpleaños, ${userName}!\n\n`;
+
+    const temaCentral = getInterpretacionRetornoSolar();
+    const mandato = getSRInterpretation()?.comparaciones_planetarias?.sol?.mandato_del_ano;
+
+    if (temaCentral) {
+      txtContent += '━━━ TU TEMA PARA ESTE CICLO ━━━\n';
+      txtContent += (temaCentral.length > 200 ? temaCentral.substring(0, 200) + '...' : temaCentral) + '\n\n';
+    }
+
+    if (mandato) {
+      txtContent += '━━━ EL MANDATO DEL AÑO ━━━\n';
+      txtContent += `"${mandato}"\n\n`;
+    }
+
+    txtContent += '━━━ INTENCIÓN PARA ESTE NUEVO CICLO ━━━\n';
+    txtContent += '(Espacio para escribir tu intención personal)\n\n';
+
+    // ═══════════════════════════════════════════════════════════
+    // GUÍA DE LA AGENDA
+    // ═══════════════════════════════════════════════════════════
+    txtContent += '\n═══════════════════════════════════════════════════════════\n';
+    txtContent += '          QUÉ VAS A ENCONTRAR EN ESTA AGENDA\n';
+    txtContent += '═══════════════════════════════════════════════════════════\n\n';
+    txtContent += '🌟 Tu Retorno Solar:\n';
+    txtContent += '   El tema central de tu año, cómo se siente este ciclo y qué vino a moverte.\n';
+    txtContent += '   Una interpretación profunda de tu carta astrológica anual.\n\n';
+    txtContent += '💫 Tu Carta Natal:\n';
+    txtContent += '   Tu esencia, tus dones, tu propósito vital.\n';
+    txtContent += '   El mapa del cielo en el momento exacto de tu nacimiento.\n\n';
+    txtContent += '📅 Calendario Astrológico:\n';
+    txtContent += '   12 meses con Lunas Nuevas, Lunas Llenas, eclipses, retrogradaciones\n';
+    txtContent += '   y tránsitos importantes. Cada mes tiene espacio para escribir y reflexionar.\n\n';
+    txtContent += '✨ Ejercicios y Rituales:\n';
+    txtContent += '   Prácticas creativas, visualizaciones, rituales simbólicos y espacios para escribir.\n';
+    txtContent += '   Herramientas para integrar la astrología en tu vida diaria.\n\n';
+    txtContent += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    txtContent += 'Esta agenda es tu compañera de viaje.\n';
+    txtContent += 'No la uses de forma lineal si no quieres.\n';
+    txtContent += 'Abre donde te llame la intuición.\n';
+    txtContent += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+
+    // ═══════════════════════════════════════════════════════════
     // SOLAR RETURN - INTERPRETACIÓN COMPLETA
     // ═══════════════════════════════════════════════════════════
     const srData = getSRInterpretation();
@@ -731,31 +780,6 @@ export const AgendaLibro = ({
 
     txtContent += '▸ Frase guía del eje del año:\n';
     txtContent += '"Me permito ser honesta conmigo antes de intentar encajar en el mundo."\n\n';
-
-    // ═══════════════════════════════════════════════════════════
-    // PRIMER DÍA DEL CICLO
-    // ═══════════════════════════════════════════════════════════
-    txtContent += '\n═══════════════════════════════════════════════════════════\n';
-    txtContent += '               PRIMER DÍA DE TU CICLO\n';
-    txtContent += '═══════════════════════════════════════════════════════════\n\n';
-    txtContent += `${format(startDate, "d 'de' MMMM 'de' yyyy", { locale: es })}\n`;
-    txtContent += `¡Feliz cumpleaños, ${userName}!\n\n`;
-
-    const temaCentral = getInterpretacionRetornoSolar();
-    const mandato = srData?.comparaciones_planetarias?.sol?.mandato_del_ano;
-
-    if (temaCentral) {
-      txtContent += '━━━ TU TEMA PARA ESTE CICLO ━━━\n';
-      txtContent += (temaCentral.length > 200 ? temaCentral.substring(0, 200) + '...' : temaCentral) + '\n\n';
-    }
-
-    if (mandato) {
-      txtContent += '━━━ EL MANDATO DEL AÑO ━━━\n';
-      txtContent += `"${mandato}"\n\n`;
-    }
-
-    txtContent += '━━━ INTENCIÓN PARA ESTE NUEVO CICLO ━━━\n';
-    txtContent += '(Espacio para escribir tu intención personal)\n\n';
 
     // ═══════════════════════════════════════════════════════════
     // RITUAL DE CUMPLEAÑOS
@@ -1139,10 +1163,23 @@ export const AgendaLibro = ({
         </div>
         <IndiceNavegable />
 
-        {/* 2. CARTA DE BIENVENIDA Y TEMA CENTRAL - DESPUÉS DEL ÍNDICE */}
+        {/* 2. ¡FELIZ CUMPLEAÑOS! - PRIMER DÍA DEL CICLO */}
+        <div id="primer-dia-ciclo-inicio">
+          <PrimerDiaCiclo
+            name={userName}
+            fecha={startDate}
+            temaCentral={getInterpretacionRetornoSolar()}
+            mandato={getSRInterpretation()?.comparaciones_planetarias?.sol?.mandato_del_ano}
+          />
+        </div>
+
+        {/* 3. CARTA DE BIENVENIDA Y GUÍA */}
         <div id="tu-anio-tu-viaje">
           <div id="carta-bienvenida">
             <CartaBienvenida name={userName} />
+          </div>
+          <div id="guia-agenda">
+            <GuiaAgenda />
           </div>
           <div id="intencion-anual">
             <PaginaIntencionAnual />
@@ -1272,15 +1309,7 @@ export const AgendaLibro = ({
             <EjesDelAnio2 />
             <IntegracionEjes />
           </div>
-          {/* PRIMER DÍA DEL CICLO - Justo antes de Ritual de Cumpleaños */}
-          <div id="primer-dia-ciclo">
-            <PrimerDiaCiclo
-              name={userName}
-              fecha={startDate}
-              temaCentral={getInterpretacionRetornoSolar()}
-              mandato={getSRInterpretation()?.comparaciones_planetarias?.sol?.mandato_del_ano}
-            />
-          </div>
+          {/* RITUAL DE CUMPLEAÑOS */}
           <div id="ritual-cumpleanos">
             <RitualCumpleanos />
           </div>

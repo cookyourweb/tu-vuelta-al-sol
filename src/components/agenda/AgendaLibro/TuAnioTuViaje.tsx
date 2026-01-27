@@ -65,6 +65,65 @@ export const CartaBienvenida = ({ name }: TuAnioTuViajeProps) => {
   );
 };
 
+// NUEVO COMPONENTE: Guía de navegación de la agenda
+export const GuiaAgenda = () => {
+  const { config } = useStyle();
+
+  return (
+    <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
+      <div className="text-center mb-8">
+        <span className={`${config.iconSecondary} opacity-60 text-sm tracking-[0.3em] uppercase ${config.fontBody}`}>Guía de Navegación</span>
+        <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient} mt-2`}>Qué vas a encontrar en esta agenda</h2>
+        <div className={`${config.divider} w-16 mx-auto mt-4`} />
+      </div>
+
+      <div className={`flex-1 space-y-6 max-w-2xl mx-auto w-full ${config.fontBody}`}>
+        <div className={`${config.highlightPrimary} rounded-lg p-6`}>
+          <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3 text-lg`}>🌟 Tu Retorno Solar</h3>
+          <p className="text-gray-700 leading-relaxed">
+            El tema central de tu año, cómo se siente este ciclo y qué vino a moverte.
+            Una interpretación profunda de tu carta astrológica anual.
+          </p>
+        </div>
+
+        <div className={`${config.highlightSecondary} rounded-lg p-6`}>
+          <h3 className={`${config.fontDisplay} ${config.iconSecondary} font-medium mb-3 text-lg`}>💫 Tu Carta Natal</h3>
+          <p className="text-gray-700 leading-relaxed">
+            Tu esencia, tus dones, tu propósito vital.
+            El mapa del cielo en el momento exacto de tu nacimiento.
+          </p>
+        </div>
+
+        <div className={`${config.highlightAccent} rounded-lg p-6`}>
+          <h3 className={`${config.fontDisplay} ${config.iconAccent} font-medium mb-3 text-lg`}>📅 Calendario Astrológico</h3>
+          <p className="text-gray-700 leading-relaxed">
+            12 meses con Lunas Nuevas, Lunas Llenas, eclipses, retrogradaciones y tránsitos importantes.
+            Cada mes tiene espacio para escribir y reflexionar.
+          </p>
+        </div>
+
+        <div className={`${config.highlightPrimary} rounded-lg p-6`}>
+          <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3 text-lg`}>✨ Ejercicios y Rituales</h3>
+          <p className="text-gray-700 leading-relaxed">
+            Prácticas creativas, visualizaciones, rituales simbólicos y espacios para escribir.
+            Herramientas para integrar la astrología en tu vida diaria.
+          </p>
+        </div>
+
+        <div className="text-center mt-8 p-6 border-2 border-dashed border-gray-200 rounded-lg">
+          <p className={`${config.iconSecondary} text-sm italic`}>
+            Esta agenda es tu compañera de viaje.<br />
+            No la uses de forma lineal si no quieres.<br />
+            Abre donde te llame la intuición.
+          </p>
+        </div>
+      </div>
+
+      <FooterLibro pagina={5} />
+    </div>
+  );
+};
+
 interface TemaCentralAnioProps {
   interpretacion?: string;
   srInterpretation?: any; // Interpretación completa del SR
