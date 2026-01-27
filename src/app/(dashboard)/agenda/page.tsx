@@ -1140,12 +1140,12 @@ const AgendaPersonalizada = () => {
     fetchAvailableCycles();
   }, [user?.uid]);
 
-  // 📅 Inicializar currentMonth al MES ACTUAL (no al mes de cumpleaños)
+  // 📅 Inicializar currentMonth al MES DE CUMPLEAÑOS (inicio del ciclo solar)
   useEffect(() => {
     if (yearRange && yearRange.start) {
-      const today = new Date();
-      console.log('📅 [AGENDA] Setting currentMonth to CURRENT month:', today);
-      setCurrentMonth(today);
+      const birthdayMonth = yearRange.start;
+      console.log('📅 [AGENDA] Setting currentMonth to BIRTHDAY month:', birthdayMonth);
+      setCurrentMonth(birthdayMonth);
     }
   }, [yearRange]);
 

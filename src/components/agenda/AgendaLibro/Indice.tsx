@@ -26,27 +26,18 @@ export const IndiceNavegable: React.FC = () => {
 
   const secciones: SeccionIndice[] = [
     {
-      titulo: 'Portal de Entrada',
-      pagina: 1,
-      id: 'portal-entrada',
-      icono: <Sparkles className="w-4 h-4" />,
-      subsecciones: [
-        { titulo: 'Portada Personalizada', pagina: 1, id: 'portada' },
-        { titulo: 'Cómo Usar Este Libro', pagina: 2, id: 'intencion-anio' },
-        { titulo: 'La Intención de Tu Año', pagina: 3, id: 'intencion-anual-sr' },
-      ]
-    },
-    {
       titulo: 'Tu Año, Tu Viaje',
-      pagina: 4,
+      pagina: 1,
       id: 'tu-anio-tu-viaje',
       icono: <BookOpen className="w-4 h-4" />,
       subsecciones: [
-        { titulo: 'Carta de Bienvenida', pagina: 4, id: 'carta-bienvenida' },
-        { titulo: 'La Intención de Tu Año', pagina: 5, id: 'intencion-anual' },
-        { titulo: 'Tema Central del Año', pagina: 6, id: 'tema-central' },
-        { titulo: 'Lo Que Viene a Mover', pagina: 7, id: 'viene-mover' },
-        { titulo: 'Lo Que Pide Soltar', pagina: 8, id: 'pide-soltar' },
+        { titulo: 'Portada Personalizada', pagina: 1, id: 'portada' },
+        { titulo: 'Cómo Usar Este Libro', pagina: 2, id: 'intencion-anio' },
+        { titulo: 'Carta de Bienvenida', pagina: 3, id: 'carta-bienvenida' },
+        { titulo: 'La Intención de Tu Año', pagina: 4, id: 'intencion-anual' },
+        { titulo: 'Tema Central del Año', pagina: 5, id: 'tema-central' },
+        { titulo: 'Lo Que Viene a Mover', pagina: 6, id: 'viene-mover' },
+        { titulo: 'Lo Que Pide Soltar', pagina: 7, id: 'pide-soltar' },
       ]
     },
     {

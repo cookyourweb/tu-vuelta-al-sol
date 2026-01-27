@@ -289,13 +289,6 @@ export default function LibroAgendaPage() {
           pageNumber={4}
         />
 
-        {/* PRIMER DÍA DEL CICLO */}
-        <PrimerDiaCiclo
-          fecha={startDate}
-          nombre={bookContent.userName}
-          pageNumber={5}
-        />
-
         {/* TU AÑO TU VIAJE */}
         <TuAnioTuViaje
           userName={bookContent.userName}
@@ -324,6 +317,13 @@ export default function LibroAgendaPage() {
           monthsData={bookContent.monthsData}
           yearEvents={bookContent.yearEvents}
           calendarioPersonalizado={bookContent.calendario_personalizado}
+        />
+
+        {/* PRIMER DÍA DEL CICLO - Justo antes del calendario mensual */}
+        <PrimerDiaCiclo
+          fecha={startDate}
+          nombre={bookContent.userName}
+          pageNumber={5}
         />
 
         {/* MES A MES */}

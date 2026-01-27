@@ -202,10 +202,7 @@ export const PaginaIntencionAnualSR = ({
         {/* Introducción terapéutica */}
         <div className={`${config.highlightPrimary} rounded-lg p-6`}>
           <p className="text-gray-700 leading-relaxed mb-4">
-            Hola {userName},
-          </p>
-          <p className="text-gray-700 leading-relaxed mb-4">
-            Es importante que te des un rato de tranquilidad para pensar en este año
+            {userName}, es importante que te des un rato de tranquilidad para pensar en este año
             como <strong>el año de {palabraClave}</strong>.
           </p>
           <p className="text-gray-700 leading-relaxed">
