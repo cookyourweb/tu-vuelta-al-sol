@@ -105,12 +105,20 @@ export async function POST(request: NextRequest) {
     }
 
     // 5. Calcular eventos del año (de cumpleaños a cumpleaños)
-    const currentYear = new Date().getFullYear();
+    // El ciclo solar va del último cumpleaños al siguiente.
+    // Si el cumpleaños de este año aún no ha pasado, el ciclo actual
+    // empezó el año pasado.
+    const now = new Date();
+    const currentYear = now.getFullYear();
     const birthMonth = new Date(birthData.birthDate).getMonth();
     const birthDay = new Date(birthData.birthDate).getDate();
 
-    const startDate = new Date(currentYear, birthMonth, birthDay);
-    const endDate = new Date(currentYear + 1, birthMonth, birthDay);
+    const birthdayThisYear = new Date(currentYear, birthMonth, birthDay);
+    const hasBirthdayPassedThisYear = now >= birthdayThisYear;
+
+    const startYear = hasBirthdayPassedThisYear ? currentYear : currentYear - 1;
+    const startDate = new Date(startYear, birthMonth, birthDay);
+    const endDate = new Date(startYear + 1, birthMonth, birthDay);
 
     console.log(`📅 Calculating events from ${startDate.toISOString()} to ${endDate.toISOString()}`);
 
