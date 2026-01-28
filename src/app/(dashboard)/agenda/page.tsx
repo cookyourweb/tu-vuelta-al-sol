@@ -277,7 +277,14 @@ const AgendaPersonalizada = () => {
         setCurrentCycleLabel(data.data.currentCycleLabel);
         setCanGenerateNext(data.data.canGenerateNext);
 
-        // Si no hay ciclo seleccionado, usar el predeterminado
+        // 🆕 Si NO hay ciclos, auto-generar el primero
+        if (!data.data.cycles || data.data.cycles.length === 0) {
+          console.log('📅 [CYCLES] No hay ciclos, auto-generando el primero...');
+          await autoGenerateFirstCycle();
+          return; // fetchAvailableCycles se llamará de nuevo después de generar
+        }
+
+        // Si no hay ciclo seleccionado, usar el predeterminado (que ahora sabemos que existe)
         if (!selectedCycleLabel) {
           setSelectedCycleLabel(data.data.defaultCycle);
         }
@@ -288,6 +295,36 @@ const AgendaPersonalizada = () => {
       console.error('❌ [CYCLES] Error fetching cycles:', error);
     } finally {
       setLoadingCycles(false);
+    }
+  };
+
+  // 🆕 Auto-generar primer ciclo cuando el usuario no tiene ninguno
+  const autoGenerateFirstCycle = async () => {
+    if (!user?.uid) return;
+
+    setGeneratingCycle(true);
+    try {
+      console.log('🔄 [CYCLES] Auto-generando primer ciclo solar...');
+
+      const response = await fetch('/api/astrology/solar-cycles/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.uid })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        console.log('✅ [CYCLES] Primer ciclo auto-generado:', data.data.cycle.yearLabel);
+        // Recargar ciclos disponibles
+        await fetchAvailableCycles();
+      } else {
+        console.error('❌ [CYCLES] Error auto-generando primer ciclo:', data.error);
+      }
+    } catch (error) {
+      console.error('❌ [CYCLES] Error auto-generando primer ciclo:', error);
+    } finally {
+      setGeneratingCycle(false);
     }
   };
 
@@ -1713,8 +1750,9 @@ const AgendaPersonalizada = () => {
                 {/* Ver Agenda Libro - Separado del grupo */}
                 <button
                   onClick={() => setShowAgendaLibro(true)}
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg hover:shadow-purple-500/25 border border-white/10 px-5 py-2.5 rounded-full flex items-center gap-2"
-                  title="Ver tu agenda en formato libro"
+                  disabled={!selectedCycleLabel || loadingCycles || generatingCycle}
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-purple-500/25 border border-white/10 px-5 py-2.5 rounded-full flex items-center gap-2"
+                  title={!selectedCycleLabel ? "Primero genera un ciclo solar" : "Ver tu agenda en formato libro"}
                 >
                   <span className="text-lg">📖</span>
                   <span className="text-white font-bold text-sm">Ver Agenda Libro</span>
