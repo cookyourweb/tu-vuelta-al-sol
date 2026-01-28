@@ -1,4 +1,10 @@
 // src/app/api/agenda/generate-book/route.ts
+// ============================================================================
+// OPTIMIZADO: Reutiliza datos existentes de BD (natal, SR, eventos)
+// Solo pide a OpenAI el texto narrativo que NO existe en ningún sitio.
+// Coste anterior: ~$0.15-0.25 | Coste optimizado: ~$0.05-0.08
+// ============================================================================
+
 import { NextRequest, NextResponse } from 'next/server';
 import * as admin from 'firebase-admin';
 import connectDB from '@/lib/db';
@@ -14,14 +20,13 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-// ✅ POST: Generar contenido completo del libro-agenda
 export async function POST(request: NextRequest) {
   try {
-    console.log('📘 ===== GENERATE BOOK REQUEST =====');
+    console.log('📘 ===== GENERATE BOOK (OPTIMIZED) =====');
 
     // 🔒 AUTHENTICATION
     const authHeader = request.headers.get('authorization');
-    let token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
 
     if (!token) {
       return NextResponse.json({
@@ -30,7 +35,6 @@ export async function POST(request: NextRequest) {
       }, { status: 401 });
     }
 
-    // Initialize Firebase Admin
     if (!admin.apps.length) {
       admin.initializeApp({
         credential: admin.credential.cert({
@@ -43,71 +47,56 @@ export async function POST(request: NextRequest) {
 
     const decodedToken = await admin.auth().verifyIdToken(token);
     const userId = decodedToken.uid;
-
-    console.log('👤 User authenticated:', userId);
+    console.log('👤 User:', userId);
 
     await connectDB();
 
-    // 1. Obtener datos del usuario
+    // =========================================================================
+    // PASO 1: CARGAR TODO DE BD (sin llamar a OpenAI)
+    // =========================================================================
+
     const user = await User.findOne({ uid: userId }).lean().exec() as any;
-    const birthData = await require('@/models/BirthData').default.findOne({ userId }).lean().exec() as any;
+    const BirthData = require('@/models/BirthData').default;
+    const birthData = await BirthData.findOne({ userId }).lean().exec() as any;
 
     if (!birthData) {
-      return NextResponse.json({
-        success: false,
-        error: 'No birth data found for user'
-      }, { status: 404 });
+      return NextResponse.json({ success: false, error: 'No birth data found' }, { status: 404 });
     }
-
-    // Debug: ver qué campos están disponibles
-    console.log('🔍 User object:', JSON.stringify(user, null, 2));
-    console.log('🔍 BirthData object:', JSON.stringify(birthData, null, 2));
 
     const userName = user?.fullName || user?.name || user?.displayName || birthData?.name || birthData?.fullName || 'Usuario';
     const userAge = calculateAge(birthData.birthDate);
 
-    console.log(`📊 User data: ${userName}, ${userAge} años`);
-
-    // 2. Obtener carta natal
+    // Carta natal
     const natalChart = await NatalChart.findOne({ userId }).lean().exec() as any;
     if (!natalChart) {
-      return NextResponse.json({
-        success: false,
-        error: 'No natal chart found for user'
-      }, { status: 404 });
+      return NextResponse.json({ success: false, error: 'No natal chart found' }, { status: 404 });
     }
 
-    // 3. Obtener interpretación natal
+    // Interpretación natal (YA GENERADA — la reutilizamos)
     const natalInterpretation = await Interpretation.findOne({
-      userId,
-      chartType: 'natal',
-      expiresAt: { $gt: new Date() }
-    })
-    .sort({ generatedAt: -1 })
-    .lean()
-    .exec() as any;
+      userId, chartType: 'natal', expiresAt: { $gt: new Date() }
+    }).sort({ generatedAt: -1 }).lean().exec() as any;
 
-    // 4. Obtener retorno solar
+    // Retorno solar (YA GENERADO — lo reutilizamos)
     const solarReturn = await Interpretation.findOne({
-      userId,
-      chartType: 'solar-return',
-      expiresAt: { $gt: new Date() }
-    })
-    .sort({ generatedAt: -1 })
-    .lean()
-    .exec() as any;
+      userId, chartType: 'solar-return', expiresAt: { $gt: new Date() }
+    }).sort({ generatedAt: -1 }).lean().exec() as any;
 
     if (!solarReturn) {
       return NextResponse.json({
         success: false,
-        error: 'No solar return found. User must generate solar return first.'
+        error: 'No solar return found. Generate solar return first.'
       }, { status: 404 });
     }
 
-    // 5. Calcular eventos del año (de cumpleaños a cumpleaños)
-    // El ciclo solar va del último cumpleaños al siguiente.
-    // Si el cumpleaños de este año aún no ha pasado, el ciclo actual
-    // empezó el año pasado.
+    console.log('✅ BD data loaded: natal, SR, birthData');
+    console.log(`   Natal interpretation: ${natalInterpretation ? 'YES' : 'NO'}`);
+    console.log(`   Solar Return: YES`);
+
+    // =========================================================================
+    // PASO 2: CALCULAR FECHAS Y EVENTOS
+    // =========================================================================
+
     const now = new Date();
     const currentYear = now.getFullYear();
     const birthMonth = new Date(birthData.birthDate).getMonth();
@@ -115,229 +104,141 @@ export async function POST(request: NextRequest) {
 
     const birthdayThisYear = new Date(currentYear, birthMonth, birthDay);
     const hasBirthdayPassedThisYear = now >= birthdayThisYear;
-
     const startYear = hasBirthdayPassedThisYear ? currentYear : currentYear - 1;
     const startDate = new Date(startYear, birthMonth, birthDay);
     const endDate = new Date(startYear + 1, birthMonth, birthDay);
 
-    console.log(`📅 Calculating events from ${startDate.toISOString()} to ${endDate.toISOString()}`);
+    console.log(`📅 Cycle: ${format(startDate, 'dd MMM yyyy', { locale: es })} → ${format(endDate, 'dd MMM yyyy', { locale: es })}`);
 
-    // calculateSolarYearEvents solo necesita la fecha de inicio (cumpleaños)
-    const solarEvents = await calculateSolarYearEvents(startDate);
+    // Intentar cargar eventos del SolarCycle en BD primero
+    const SolarCycle = require('@/models/SolarCycle').default;
+    const yearLabel = `${startYear}-${startYear + 1}`;
+    const existingCycle = await SolarCycle.findOne({ userId, yearLabel }).lean().exec() as any;
 
-    // Convertir eventos a formato plano para facilitar el procesamiento
-    const yearEvents = [
-      ...solarEvents.lunarPhases.map(phase => ({
-        type: phase.type === 'new_moon' ? 'luna-nueva' : 'luna-llena',
-        date: phase.date,
-        sign: phase.sign,
-        house: 1, // TODO: calcular casa real
-        description: phase.description,
-        degree: phase.degree
-      })),
-      ...solarEvents.eclipses.map(eclipse => ({
-        type: eclipse.type === 'solar' ? 'eclipse-solar' : 'eclipse-lunar',
-        date: eclipse.date,
-        sign: eclipse.sign,
-        house: 1, // TODO: calcular casa real
-        description: eclipse.description,
-        degree: eclipse.degree
-      })),
-      ...solarEvents.planetaryIngresses.map(ingress => ({
-        type: 'ingreso-planetario',
-        date: ingress.date,
-        sign: ingress.toSign,
-        planet: ingress.planet,
-        house: 1, // TODO: calcular casa real
-        description: ingress.description
-      })),
-      ...solarEvents.retrogrades.map(retro => ({
-        type: 'retrogrado-inicio',
-        date: retro.startDate,
-        sign: retro.startSign,
-        planet: retro.planet,
-        house: 1, // TODO: calcular casa real
-        description: retro.description
-      }))
-    ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    let yearEvents: any[];
 
-    console.log(`✅ Events calculated: ${yearEvents.length} total events`);
-
-    // Debug: check date formats
-    if (yearEvents.length > 0) {
-      console.log('🔍 Sample event dates:');
-      console.log('First event date:', yearEvents[0].date, 'type:', typeof yearEvents[0].date);
-      console.log('First event date toISOString:', yearEvents[0].date.toISOString());
+    if (existingCycle?.events?.length > 0) {
+      // ✅ REUTILIZAR eventos del ciclo ya calculado en BD
+      console.log(`✅ Reusing ${existingCycle.events.length} events from SolarCycle BD`);
+      yearEvents = existingCycle.events.map((e: any) => ({
+        type: mapEventType(e.type),
+        date: new Date(e.date),
+        sign: e.metadata?.zodiacSign || e.metadata?.sign || '',
+        planet: e.metadata?.planet || '',
+        house: e.metadata?.house || 1,
+        description: e.description || e.title || ''
+      })).sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    } else {
+      // Calcular eventos con astronomy-engine (fallback)
+      console.log('⚡ Calculating events with astronomy-engine...');
+      const solarEvents = await calculateSolarYearEvents(startDate);
+      yearEvents = [
+        ...solarEvents.lunarPhases.map(p => ({
+          type: p.type === 'new_moon' ? 'luna-nueva' : 'luna-llena',
+          date: p.date, sign: p.sign, house: 1, description: p.description, degree: p.degree
+        })),
+        ...solarEvents.eclipses.map(e => ({
+          type: e.type === 'solar' ? 'eclipse-solar' : 'eclipse-lunar',
+          date: e.date, sign: e.sign, house: 1, description: e.description, degree: e.degree
+        })),
+        ...solarEvents.planetaryIngresses.map(i => ({
+          type: 'ingreso-planetario',
+          date: i.date, sign: i.toSign, planet: i.planet, house: 1, description: i.description
+        })),
+        ...solarEvents.retrogrades.map(r => ({
+          type: 'retrogrado-inicio',
+          date: r.startDate, sign: r.startSign, planet: r.planet, house: 1, description: r.description
+        }))
+      ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     }
 
-    // 5.5. Agrupar eventos por mes
-    const monthsData = groupEventsByMonth(yearEvents, startDate, endDate);
-    console.log(`📅 Months grouped: ${monthsData.length} months`);
+    console.log(`📊 ${yearEvents.length} events total`);
 
-    // 5.6. ✨ CARGAR/GENERAR INTERPRETACIONES DE EVENTOS (Estrategia Híbrida)
-    console.log('🔍 Loading event interpretations (hybrid strategy)...');
+    // Agrupar por mes
+    const monthsData = groupEventsByMonth(yearEvents, startDate, endDate);
+
+    // =========================================================================
+    // PASO 3: CARGAR INTERPRETACIONES DE EVENTOS YA EXISTENTES EN BD
+    // =========================================================================
 
     const EventInterpretation = require('@/models/EventInterpretation').default;
-    const { generateEventId } = require('@/models/EventInterpretation');
     const eventInterpretations: { [eventId: string]: any } = {};
 
-    // Extraer solo eventos clave (lunas nuevas, lunas llenas)
-    const keyEvents = yearEvents.filter(e =>
-      e.type === 'luna-nueva' ||
-      e.type === 'luna-llena'
-    );
+    // Cargar TODAS las interpretaciones ya generadas para este usuario
+    const existingInterps = await EventInterpretation.find({
+      userId,
+      expiresAt: { $gt: new Date() }
+    }).lean().exec() as any[];
 
-    // 🔒 SISTEMA DE LÍMITES: Control de costos API
-    const isAdmin = user?.email?.includes('@admin') || user?.email?.includes('cookyourweb');
-    const hasSubscription = user?.subscription?.status === 'active' || user?.hasPurchasedAgenda === true;
-
-    // Definir límite de meses con interpretación IA
-    let monthsWithAI = 12; // Por defecto todo el año
-
-    if (!isAdmin && !hasSubscription) {
-      monthsWithAI = 3; // Solo 3 meses para usuarios gratuitos
-      console.log('🆓 FREE USER: Limiting AI interpretations to 3 months');
-    } else {
-      console.log('💎 PREMIUM USER: Full year AI interpretations enabled');
-    }
-
-    // Filtrar eventos solo de los primeros N meses
-    const cutoffDate = new Date(startDate);
-    cutoffDate.setMonth(cutoffDate.getMonth() + monthsWithAI);
-
-    const eventsWithinLimit = keyEvents.filter(e => {
-      const eventDate = new Date(e.date);
-      return eventDate < cutoffDate;
-    });
-
-    console.log(`📌 Total key events: ${keyEvents.length}`);
-    console.log(`✅ Events within AI limit (${monthsWithAI} months): ${eventsWithinLimit.length}`);
-
-    // Verificar que tengamos natal interpretation (ya fue consultada arriba en línea 81)
-    if (!natalInterpretation) {
-      console.warn('⚠️ No natal interpretation found, skipping event interpretations');
-    } else {
-      // Cargar dependencias una sola vez
-      const { generateEventInterpretationPrompt } = require('@/utils/prompts/eventInterpretationPrompt');
-      const { calculateExpirationDate } = require('@/models/EventInterpretation');
-
-      // Para cada evento dentro del límite, buscar o generar interpretación
-      for (const event of eventsWithinLimit) {
-        try {
-          // Normalizar tipo de evento para generateEventId (usar underscore)
-          const eventType = event.type.replace('-', '_') as 'luna_nueva' | 'luna_llena';
-          const eventDate = format(new Date(event.date), 'yyyy-MM-dd');
-
-          // Generar ID del evento
-          const eventId = generateEventId({
-            type: eventType,
-            date: eventDate,
-            sign: event.sign
-          });
-
-          // Verificar si ya lo procesamos en esta ejecución
-          if (eventInterpretations[eventId]) {
-            console.log(`⏭️  Skip (already processed): ${eventId}`);
-            continue;
-          }
-
-          // Buscar interpretación existente en BD
-          const existingInterp = await EventInterpretation.findByUserAndEvent(userId, eventId);
-
-          if (existingInterp && !existingInterp.isExpired()) {
-            // ✅ Usar interpretación de caché
-            eventInterpretations[eventId] = existingInterp.interpretation;
-            console.log(`✅ Cached: ${eventId}`);
-          } else {
-            // 🤖 Generar nueva interpretación con OpenAI
-            console.log(`🤖 Generating: ${eventId}`);
-
-            const eventPrompt = generateEventInterpretationPrompt({
-              userName,
-              userAge,
-              userBirthPlace: birthData.city || birthData.birthPlace || 'Desconocido',
-              event: {
-                type: eventType,
-                date: eventDate,
-                sign: event.sign,
-                house: event.house || 1
-              },
-              natalChart: natalChart.natalChart || natalChart,
-              solarReturn: solarReturn?.interpretation || {},
-              natalInterpretation: natalInterpretation.interpretation || {}
-            });
-
-            const completion = await openai.chat.completions.create({
-              model: 'gpt-4o',
-              messages: [
-                {
-                  role: 'system',
-                  content: 'Eres un astrólogo evolutivo experto. Respondes ÚNICAMENTE con JSON válido en español, sin markdown ni comentarios.'
-                },
-                {
-                  role: 'user',
-                  content: eventPrompt
-                }
-              ],
-              temperature: 0.8,
-              max_tokens: 3000,
-              response_format: { type: 'json_object' }
-            });
-
-            const responseText = completion.choices[0].message.content;
-            if (responseText) {
-              const parsedInterp = JSON.parse(responseText);
-
-              // Guardar en BD para futuros usos
-              await EventInterpretation.findOneAndUpdate(
-                { userId, eventId },
-                {
-                  $set: {
-                    userId,
-                    eventId,
-                    eventType,
-                    eventDate: new Date(eventDate),
-                    eventDetails: {
-                      sign: event.sign,
-                      house: event.house || 1
-                    },
-                    interpretation: parsedInterp,
-                    generatedAt: new Date(),
-                    expiresAt: calculateExpirationDate(),
-                    method: 'openai',
-                    cached: false
-                  }
-                },
-                { upsert: true, new: true }
-              );
-
-              eventInterpretations[eventId] = parsedInterp;
-              console.log(`✅ Saved: ${eventId}`);
-            }
-          }
-        } catch (eventError) {
-          console.error(`❌ Error processing ${event.type} on ${event.date}:`, eventError);
-          // Continuar con el siguiente evento
-        }
+    if (existingInterps?.length > 0) {
+      for (const interp of existingInterps) {
+        eventInterpretations[interp.eventId] = interp.interpretation;
       }
+      console.log(`✅ Loaded ${existingInterps.length} event interpretations from cache`);
+    } else {
+      console.log('⚠️ No cached event interpretations found');
     }
 
-    console.log(`✅ Event interpretations ready: ${Object.keys(eventInterpretations).length}/${keyEvents.length}`);
+    // =========================================================================
+    // PASO 4: ENSAMBLAR DATOS EXISTENTES (sin OpenAI)
+    // =========================================================================
 
-    // 6. Generar contenido del libro con OpenAI
-    console.log('🤖 Generating book content with OpenAI...');
+    const natal = natalInterpretation?.interpretation || {};
+    const sr = solarReturn?.interpretation || {};
+    const chartData = natalChart.natalChart || natalChart;
+    const sol = chartData.planets?.find((p: any) => p.name === 'Sol' || p.name === 'Sun');
+    const luna = chartData.planets?.find((p: any) => p.name === 'Luna' || p.name === 'Moon');
+    const ascendente = chartData.ascendant;
 
-    const bookPrompt = generateBookPrompt({
+    // Datos que YA EXISTEN y NO necesitan OpenAI
+    const assembledFromBD = {
+      // Del natal
+      planeta_dominante: natal.planeta_dominante || '',
+      proposito_vida: natal.proposito_vida || '',
+      patron_energetico: natal.patron_energetico || '',
+      super_poderes: natal.super_poderes || [],
+      desafios_evolutivos: natal.desafios_evolutivos || [],
+      mision_vida: natal.mision_vida || '',
+      esencia: natal.esencia_revolucionaria || '',
+
+      // Del solar return
+      tema_central_anio: sr.tema_central_del_anio || sr.esencia_revolucionaria_anual || sr.tema_anual || '',
+      declaracion_poder: sr.declaracion_poder_anual || '',
+      rituales_recomendados: sr.rituales_recomendados || [],
+      insights: sr.insights_transformacionales || [],
+      advertencias: sr.advertencias || [],
+      eventos_clave: sr.eventos_clave_del_anio || [],
+      plan_accion: sr.plan_accion || '',
+      integracion_final: sr.integracion_final || '',
+
+      // Datos de la carta
+      sol_signo: sol?.sign || '',
+      sol_casa: sol?.house || '',
+      luna_signo: luna?.sign || '',
+      luna_casa: luna?.house || '',
+      ascendente_signo: ascendente?.sign || '',
+    };
+
+    console.log('✅ Assembled existing data from BD');
+    console.log(`   Tema año: "${assembledFromBD.tema_central_anio.substring(0, 50)}..."`);
+    console.log(`   Superpoderes: ${assembledFromBD.super_poderes.length}`);
+    console.log(`   Rituales SR: ${assembledFromBD.rituales_recomendados.length}`);
+
+    // =========================================================================
+    // PASO 5: PEDIR A OPENAI SOLO LO QUE NO EXISTE
+    // Solo texto narrativo del libro: portada, bienvenida, 12 portadas mes,
+    // cierre, frase final. Todo lo demás viene de BD.
+    // =========================================================================
+
+    console.log('🤖 Requesting ONLY narrative text from OpenAI...');
+
+    const narrativePrompt = buildNarrativePrompt({
       userName,
       userAge,
-      birthData,
-      natalChart: natalChart.natalChart || natalChart,
-      natalInterpretation: natalInterpretation?.interpretation || {},
-      solarReturn: solarReturn.interpretation || {},
-      yearEvents,
-      monthsData,
       startDate,
-      endDate
+      endDate,
+      assembledFromBD,
+      monthsData,
     });
 
     const completion = await openai.chat.completions.create({
@@ -345,49 +246,137 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: 'system',
-          content: 'Eres un astrólogo evolutivo y terapeuta simbólico experto en crear agendas astrológicas personalizadas. Respondes ÚNICAMENTE con JSON válido en español, sin markdown ni comentarios. Tu voz es cálida, directa, terapéutica y motivadora.'
+          content: 'Eres un astrólogo evolutivo y terapeuta simbólico. Respondes ÚNICAMENTE con JSON válido en español, sin markdown. Voz cálida, directa, terapéutica.'
         },
-        {
-          role: 'user',
-          content: bookPrompt
-        }
+        { role: 'user', content: narrativePrompt }
       ],
       temperature: 0.85,
-      max_tokens: 8000,
+      max_tokens: 4000,
       response_format: { type: 'json_object' }
     });
 
     const responseText = completion.choices[0].message.content;
+    if (!responseText) throw new Error('Empty response from OpenAI');
 
-    if (!responseText) {
-      throw new Error('Empty response from OpenAI');
-    }
-
-    console.log('✅ OpenAI response received');
-
-    // 7. Parsear JSON
-    let bookContent;
+    let narrative;
     try {
-      bookContent = JSON.parse(responseText);
-    } catch (parseError) {
-      console.error('❌ JSON parse error:', parseError);
-      throw new Error('Failed to parse OpenAI response as JSON');
+      narrative = JSON.parse(responseText);
+    } catch {
+      console.error('❌ JSON parse error, raw:', responseText?.substring(0, 200));
+      throw new Error('Failed to parse OpenAI response');
     }
 
-    console.log('✅ Book content generated successfully');
+    console.log('✅ Narrative text received from OpenAI');
+
+    // =========================================================================
+    // PASO 6: COMBINAR BD + NARRATIVA EN ESTRUCTURA FINAL DEL LIBRO
+    // =========================================================================
+
+    const bookContent = {
+      userName,
+      userAge,
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+
+      // Carta natal (datos crudos para componentes visuales)
+      natalChart: chartData,
+
+      // Solar return (datos crudos)
+      solarReturn: sr,
+
+      // PORTADA — de OpenAI
+      portada: narrative.portada || {
+        titulo: `Tu Vuelta al Sol ${startYear}-${startYear + 1}`,
+        subtitulo: assembledFromBD.tema_central_anio,
+        dedicatoria: `Para ${userName}`
+      },
+
+      // APERTURA — OpenAI + BD
+      apertura_del_viaje: {
+        antes_de_empezar: narrative.antes_de_empezar || '',
+        carta_de_bienvenida: narrative.carta_de_bienvenida || '',
+        tema_central_del_año: assembledFromBD.tema_central_anio,
+        que_soltar: narrative.que_soltar || '',
+        ritual_de_inicio: assembledFromBD.rituales_recomendados?.[0] || narrative.ritual_de_inicio || '',
+      },
+
+      // TU MAPA INTERIOR — de BD (natal interpretation)
+      tu_mapa_interior: {
+        carta_natal_explicada: narrative.carta_natal_explicada || assembledFromBD.esencia,
+        soul_chart: {
+          nodo_sur: natal.nodo_sur || narrative.nodo_sur || '',
+          nodo_norte: natal.nodo_norte || narrative.nodo_norte || '',
+          planeta_dominante: assembledFromBD.planeta_dominante,
+          patron_alma: assembledFromBD.patron_energetico,
+          patrones_inconscientes: Array.isArray(assembledFromBD.desafios_evolutivos)
+            ? assembledFromBD.desafios_evolutivos.join('. ')
+            : assembledFromBD.desafios_evolutivos || '',
+        },
+        integrar_proposito: assembledFromBD.proposito_vida,
+      },
+
+      // TU AÑO ASTROLÓGICO — de BD (solar return interpretation)
+      tu_año_astrologico: {
+        retorno_solar: {
+          asc_significado: sr.ascendente_significado || sr.asc_significado || '',
+          sol_en_casa: sr.sol_en_casa || '',
+          luna_en_casa: sr.luna_en_casa || '',
+          planetas_angulares: sr.planetas_angulares || '',
+          ritual_inicio: assembledFromBD.rituales_recomendados?.[0] || narrative.ritual_de_inicio || '',
+          ascendente_del_año: sr.ascendente_del_año || `${ascendente?.sign || ''}`,
+          tema_principal: assembledFromBD.tema_central_anio,
+          ritual_de_cumpleaños: narrative.ritual_de_cumpleanos || assembledFromBD.rituales_recomendados?.[1] || '',
+          mantra_del_año: assembledFromBD.declaracion_poder || narrative.mantra_del_anio || '',
+        }
+      },
+
+      // CALENDARIO — de BD + OpenAI solo para intros
+      calendario_personalizado: {
+        descripcion: narrative.calendario_descripcion || '',
+        meses_clave: narrative.meses_clave || '',
+        aprendizajes_del_año: assembledFromBD.insights?.join('\n\n') || narrative.aprendizajes || '',
+        lunas_nuevas_intro: narrative.lunas_nuevas_intro || 'Las Lunas Nuevas son momentos de siembra. Un tiempo para plantar intenciones, abrir nuevos capítulos y conectar con lo que quieres cultivar.',
+        lunas_llenas_intro: narrative.lunas_llenas_intro || 'Las Lunas Llenas iluminan lo que estaba oculto. Son momentos de culminación, revelación e integración.',
+        eclipses_intro: narrative.eclipses_intro || 'Los eclipses son portales de cambio acelerado. Marcan antes y después en tu historia personal.',
+      },
+
+      // LÍNEA DE TIEMPO EMOCIONAL — de OpenAI (necesita interpretación creativa)
+      linea_tiempo_emocional: narrative.linea_tiempo_emocional || [],
+
+      // MESES CLAVE — de OpenAI
+      meses_clave_puntos_giro: narrative.meses_clave_puntos_giro || [],
+
+      // MES A MES — de OpenAI (portadas y rituales mensuales)
+      mes_a_mes: narrative.mes_a_mes || [],
+
+      // CIERRE — OpenAI + BD
+      cierre_del_ciclo: {
+        integrar_lo_vivido: narrative.integrar_lo_vivido || '',
+        carta_de_cierre: narrative.carta_de_cierre || '',
+        preparacion_proximo_ciclo: narrative.preparacion_proximo_ciclo || assembledFromBD.integracion_final || '',
+      },
+
+      // FRASE FINAL — de OpenAI
+      frase_final: narrative.frase_final || 'Nada de lo que viviste fue en vano. Todo fue parte del camino de regreso a ti.',
+
+      // DATOS PARA COMPONENTES
+      yearEvents: yearEvents.slice(0, 100),
+      monthsData,
+      eventInterpretations,
+    };
+
+    console.log('✅ Book assembled successfully (BD + OpenAI narrative)');
 
     return NextResponse.json({
       success: true,
-      book: {
-        ...bookContent,
-        yearEvents: yearEvents.slice(0, 100), // Primeros 100 eventos
-        monthsData,
-        eventInterpretations, // ✨ Interpretaciones de eventos
-        userName, // Para EventInterpretationPrint
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString()
-      },
-      generatedAt: new Date().toISOString()
+      book: bookContent,
+      generatedAt: new Date().toISOString(),
+      optimization: {
+        source: 'hybrid',
+        bdFieldsReused: Object.keys(assembledFromBD).length,
+        openaiTokensRequested: 4000,
+        eventInterpretationsFromCache: Object.keys(eventInterpretations).length,
+      }
     });
 
   } catch (error) {
@@ -399,40 +388,47 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// ✅ HELPER: Calcular edad
+// =============================================================================
+// HELPERS
+// =============================================================================
+
 function calculateAge(birthDate: string | Date): number {
   if (!birthDate) return 30;
-
   const birth = new Date(birthDate);
   const today = new Date();
   let age = today.getFullYear() - birth.getFullYear();
   const monthDiff = today.getMonth() - birth.getMonth();
-
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-    age--;
-  }
-
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
   return age || 30;
 }
 
-// ✅ HELPER: Agrupar eventos por mes
+/** Mapea tipos de evento del SolarCycle al formato plano */
+function mapEventType(type: string): string {
+  const map: Record<string, string> = {
+    'new_moon': 'luna-nueva',
+    'full_moon': 'luna-llena',
+    'eclipse': 'eclipse-solar',
+    'retrograde': 'retrogrado-inicio',
+    'planetary_transit': 'ingreso-planetario',
+    'seasonal': 'estacional',
+  };
+  return map[type] || type;
+}
+
+/** Agrupa eventos por mes (12 meses desde startDate) */
 function groupEventsByMonth(events: any[], startDate: Date, endDate: Date): any[] {
   const monthsData: any[] = [];
-
-  // Crear array de 12 meses desde startDate
   const currentMonth = new Date(startDate);
 
   for (let i = 0; i < 12; i++) {
     const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
     const monthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
 
-    // Filtrar eventos de este mes
     const monthEvents = events.filter(event => {
       const eventDate = new Date(event.date);
       return eventDate >= monthStart && eventDate <= monthEnd;
     });
 
-    // Categorizar eventos por tipo
     const lunas_nuevas = monthEvents.filter(e => e.type === 'luna-nueva');
     const lunas_llenas = monthEvents.filter(e => e.type === 'luna-llena');
     const eclipses = monthEvents.filter(e => e.type === 'eclipse-solar' || e.type === 'eclipse-lunar');
@@ -446,229 +442,121 @@ function groupEventsByMonth(events: any[], startDate: Date, endDate: Date): any[
       fin: monthEnd.toISOString(),
       lunas_nuevas: lunas_nuevas.map(e => ({
         fecha: e.date instanceof Date ? e.date.toISOString() : new Date(e.date).toISOString(),
-        signo: e.sign,
-        casa: e.house,
-        descripcion: e.description
+        signo: e.sign, casa: e.house, descripcion: e.description
       })),
       lunas_llenas: lunas_llenas.map(e => ({
         fecha: e.date instanceof Date ? e.date.toISOString() : new Date(e.date).toISOString(),
-        signo: e.sign,
-        casa: e.house,
-        descripcion: e.description
+        signo: e.sign, casa: e.house, descripcion: e.description
       })),
       eclipses: eclipses.map(e => ({
         fecha: e.date instanceof Date ? e.date.toISOString() : new Date(e.date).toISOString(),
-        tipo: e.type,
-        signo: e.sign,
-        casa: e.house,
-        descripcion: e.description
+        tipo: e.type, signo: e.sign, casa: e.house, descripcion: e.description
       })),
       ingresos_destacados: ingresos.slice(0, 3).map(e => ({
         fecha: format(new Date(e.date), 'dd MMM', { locale: es }),
         planeta: e.planet || e.description?.split(' ')[0],
-        signo: e.sign,
-        descripcion: e.description
+        signo: e.sign, descripcion: e.description
+      })),
+      retrogrados: retrogrados.map(e => ({
+        fecha: e.date instanceof Date ? e.date.toISOString() : new Date(e.date).toISOString(),
+        planeta: e.planet, signo: e.sign, descripcion: e.description
       })),
       total_eventos: monthEvents.length
     });
 
-    // Avanzar al siguiente mes
     currentMonth.setMonth(currentMonth.getMonth() + 1);
   }
 
   return monthsData;
 }
 
-// ✅ GENERAR PROMPT COMPLETO DEL LIBRO
-function generateBookPrompt(data: {
+// =============================================================================
+// PROMPT OPTIMIZADO — Solo pide texto narrativo nuevo
+// =============================================================================
+
+function buildNarrativePrompt(data: {
   userName: string;
   userAge: number;
-  birthData: any;
-  natalChart: any;
-  natalInterpretation: any;
-  solarReturn: any;
-  yearEvents: any[];
-  monthsData: any[];
   startDate: Date;
   endDate: Date;
+  assembledFromBD: any;
+  monthsData: any[];
 }): string {
-  const sol = data.natalChart.planets?.find((p: any) => p.name === 'Sol' || p.name === 'Sun');
-  const luna = data.natalChart.planets?.find((p: any) => p.name === 'Luna' || p.name === 'Moon');
-  const ascendente = data.natalChart.ascendant;
+  const bd = data.assembledFromBD;
+  const period = `${format(data.startDate, 'dd MMMM yyyy', { locale: es })} al ${format(data.endDate, 'dd MMMM yyyy', { locale: es })}`;
 
-  return `
-# 📘 GENERA UNA AGENDA ASTROLÓGICA PERSONALIZADA COMPLETA
+  return `# GENERA TEXTO NARRATIVO para la Agenda Astrológica de ${data.userName}
 
-## 👤 DATOS DEL USUARIO
+## CONTEXTO (YA INTERPRETADO — NO regenerar, solo usar como base)
+- Nombre: ${data.userName}, ${data.userAge} años
+- Sol: ${bd.sol_signo} Casa ${bd.sol_casa} | Luna: ${bd.luna_signo} Casa ${bd.luna_casa} | Ascendente: ${bd.ascendente_signo}
+- Tema del año: ${bd.tema_central_anio}
+- Mantra del año: ${bd.declaracion_poder}
+- Superpoderes: ${Array.isArray(bd.super_poderes) ? bd.super_poderes.slice(0, 3).join(', ') : bd.super_poderes}
+- Desafíos: ${Array.isArray(bd.desafios_evolutivos) ? bd.desafios_evolutivos.slice(0, 3).join(', ') : bd.desafios_evolutivos}
+- Período: ${period}
 
-**Nombre:** ${data.userName}
-**Edad:** ${data.userAge} años
-**Fecha de nacimiento:** ${data.birthData.birthDate}
-**Lugar de nacimiento:** ${data.birthData.city || data.birthData.birthPlace}
+## MESES DEL AÑO (para mes_a_mes)
+${data.monthsData.map((m, i) => `${i + 1}. ${m.nombreCorto}: ${m.lunas_nuevas.length} Luna Nueva, ${m.lunas_llenas.length} Luna Llena, ${m.eclipses.length} Eclipse, ${m.total_eventos} eventos total`).join('\n')}
 
-**Año de la agenda:** ${data.startDate.getFullYear()}-${data.endDate.getFullYear()}
-**Período:** Del ${format(data.startDate, 'dd MMMM yyyy', { locale: es })} al ${format(data.endDate, 'dd MMMM yyyy', { locale: es })}
-
-## 🌟 CARTA NATAL
-
-**Sol:** ${sol?.sign} Casa ${sol?.house}
-**Luna:** ${luna?.sign} Casa ${luna?.house}
-**Ascendente:** ${ascendente?.sign}
-
-**Tema del Retorno Solar:** ${data.solarReturn.tema_anual || data.solarReturn.esencia_revolucionaria_anual || 'Transformación personal'}
-
-## 📋 ESTRUCTURA JSON REQUERIDA
-
-Responde ÚNICAMENTE con JSON válido (sin markdown, sin backticks):
+## GENERA SOLO ESTE JSON (texto narrativo nuevo):
 
 {
   "portada": {
     "titulo": "Tu Vuelta al Sol ${data.startDate.getFullYear()}-${data.endDate.getFullYear()}",
-    "subtitulo": "String 30-40 palabras: Frase-mantra personalizada del año basada en el retorno solar",
+    "subtitulo": "30-40 palabras: Frase-mantra del año basada en: ${bd.tema_central_anio}",
     "dedicatoria": "Para ${data.userName}"
   },
 
-  "apertura_del_viaje": {
-    "antes_de_empezar": "String 80-100 palabras: Cómo usar esta agenda. Tono cálido, íntimo. No es un libro para 'hacer bien', es un espacio para habitarte.",
+  "antes_de_empezar": "80-100 palabras: Cómo usar esta agenda. Tono cálido, íntimo.",
 
-    "carta_de_bienvenida": "String 150-200 palabras: Carta personalizada para ${data.userName}. Este año empieza aquí. El tono del ciclo. Qué se abre, qué se cierra. Usa su nombre, su edad, su signo solar. Voz cercana, no sentenciosa.",
+  "carta_de_bienvenida": "150-200 palabras: Carta para ${data.userName}. Usa su nombre, edad (${data.userAge}), Sol en ${bd.sol_signo}. El tono del ciclo. Qué se abre.",
 
-    "tema_central_del_año": "String 100-120 palabras: La pregunta que acompaña a ${data.userName} este año. La energía que atraviesa. El aprendizaje que insiste. Basado en su Retorno Solar y Nodo Norte.",
+  "carta_natal_explicada": "150-180 palabras: Explica la carta de ${data.userName} para vivirla. Luna ${bd.luna_signo}, Sol ${bd.sol_signo}, Asc ${bd.ascendente_signo}. Lenguaje aplicado.",
 
-    "ritual_de_inicio": "String 80-100 palabras: Ritual simbólico para preparar el año. Anclar una intención consciente. Mantra de apertura personalizado en PRIMERA PERSONA."
-  },
+  "que_soltar": "80-100 palabras: Lo que ${data.userName} necesita soltar este año según sus desafíos: ${Array.isArray(bd.desafios_evolutivos) ? bd.desafios_evolutivos.slice(0, 2).join(', ') : ''}",
 
-  "tu_mapa_interior": {
-    "carta_natal_explicada": "String 150-180 palabras: Explica la carta natal de ${data.userName} para vivirla. Su forma de sentir (Luna en ${luna?.sign}), su forma de decidir (Sol en ${sol?.sign}), su manera de vincularse, su ritmo natural. Lenguaje aplicado, no técnico.",
+  "ritual_de_inicio": "80-100 palabras: Ritual simbólico para abrir el año. Mantra en PRIMERA PERSONA.",
 
-    "soul_chart": {
-      "nodo_sur": "String 80-100 palabras: De dónde vienes. Los patrones que se repiten. El aprendizaje del pasado.",
-      "nodo_norte": "String 80-100 palabras: Hacia dónde creces. El aprendizaje que madura.",
-      "planeta_dominante": "String 60-80 palabras: Tu planeta dominante y qué arquetipo te representa. Cómo se manifiesta en tu vida.",
-      "patron_alma": "String 80-100 palabras: El patrón profundo de tu alma. Los temas recurrentes en esta vida. La energía que subyace en tus elecciones.",
-      "patrones_inconscientes": "String 60-80 palabras: Los patrones emocionales que se repiten y piden conciencia."
-    },
+  "calendario_descripcion": "100-120 palabras: Cómo usar el calendario.",
 
-    "integrar_proposito": "String 100-120 palabras: Cómo integrar tu propósito en la vida real. Trabajo, relaciones, decisiones, límites y deseo. Concreto, accionable."
-  },
+  "meses_clave": "120-150 palabras: Los meses de mayor intensidad para ${data.userName}.",
 
-  "tu_año_astrologico": {
-    "retorno_solar": {
-      "asc_significado": "String 60-80 palabras: Significado del ascendente del retorno solar. Clima emocional del año. Área de mayor movimiento. Dónde se pide presencia.",
-      "sol_en_casa": "String 80-100 palabras: Interpretación del Sol en la casa donde cae en el retorno solar. Qué área de vida tendrá más brillo y protagonismo este año.",
-      "luna_en_casa": "String 80-100 palabras: Interpretación de la Luna en la casa donde cae en el retorno solar. Dónde estarán tus necesidades emocionales y qué te nutrirá.",
-      "planetas_angulares": "String 100-120 palabras: Interpretación de los planetas en casas angulares (1, 4, 7, 10) del retorno solar. Son las energías más activas del año.",
-      "ritual_inicio": "String 80-100 palabras: Ritual para cerrar el ciclo anterior y nombrar lo que empieza. Ceremonia de cumpleaños consciente.",
-      "ascendente_del_año": "String 60-80 palabras: El ascendente de este año solar y su significado. Cómo te presentarás al mundo.",
-      "tema_principal": "String 80-100 palabras: El tema principal del año según el Retorno Solar. Qué viene a mover, qué pide soltar.",
-      "ritual_de_cumpleaños": "String 80-100 palabras: Ritual personalizado para tu cumpleaños. Incluye intención, vela, y compromiso.",
-      "mantra_del_año": "String 30-40 palabras en PRIMERA PERSONA: Mantra personalizado para el año completo."
-    }
-  },
-
-  "calendario_personalizado": {
-    "descripcion": "String 100-120 palabras: Cómo usar el calendario. Fechas clave, momentos de inicio, momentos de cierre. Eventos que no pasan desapercibidos.",
-
-    "meses_clave": "String 120-150 palabras: Análisis personalizado de los meses de mayor intensidad astrológica para ${data.userName}. Qué esperar en esos meses, cómo prepararse, qué áreas de vida estarán más activas.",
-
-    "aprendizajes_del_año": "String 150-180 palabras: Los aprendizajes principales que este año trae para ${data.userName}. Considera los tránsitos más importantes, los eclipses, y los temas del retorno solar. Qué viene a enseñar este ciclo en lo personal, relacional, vocacional y espiritual.",
-
-    "lunas_nuevas_intro": "String 60-80 palabras: Qué son las Lunas Nuevas. Sembrar conciencia. Qué iniciar, qué intención plantar.",
-
-    "lunas_llenas_intro": "String 60-80 palabras: Qué son las Lunas Llenas. Iluminar y soltar. Qué se revela, qué se integra.",
-
-    "eclipses_intro": "String 60-80 palabras: Qué son los eclipses. Cambios que no negocian. Qué se mueve, qué se transforma."
-  },
+  "lunas_nuevas_intro": "60-80 palabras: Qué son las Lunas Nuevas.",
+  "lunas_llenas_intro": "60-80 palabras: Qué son las Lunas Llenas.",
+  "eclipses_intro": "60-80 palabras: Qué son los eclipses.",
 
   "linea_tiempo_emocional": [
-    ${data.monthsData.map((month, index) => `{
-      "mes": "${month.nombreCorto}",
-      "intensidad": Number 1-5 (1=calma, 2=movimiento ligero, 3=movimiento, 4=alta intensidad, 5=máxima intensidad). Basado en los eventos astrológicos: ${month.lunas_nuevas.length} Lunas Nuevas, ${month.lunas_llenas.length} Lunas Llenas, ${month.eclipses.length} Eclipses, ${month.ingresos_destacados.length} ingresos. Los meses con eclipses son intensidad 4-5. Meses con retrogradaciones son intensidad 3-4. Meses tranquilos son intensidad 1-2.,
-      "palabra_clave": "String 1 palabra: Una palabra que resuma la energía de ${month.nombreCorto} para ${data.userName}. Ejemplos: Transformación, Calma, Decisión, Apertura, Cierre, Intensidad, Claridad, etc."
-    }`).join(',\n    ')}
+    ${data.monthsData.map(m => `{ "mes": "${m.nombreCorto}", "intensidad": "número 1-5 según ${m.eclipses.length} eclipses ${m.total_eventos} eventos", "palabra_clave": "1 palabra" }`).join(',\n    ')}
   ],
 
   "meses_clave_puntos_giro": [
-    {
-      "mes": "String: Nombre del mes más importante del año (usualmente con eclipse o retrogradación importante)",
-      "evento_astrologico": "String 30-40 palabras: Descripción del evento astrológico principal (eclipse, retrogradación, ingreso planetario importante)",
-      "significado_para_ti": "String 60-80 palabras: Qué significa este evento específicamente para ${data.userName} según su carta natal y retorno solar. Qué área de vida se activa, qué se mueve, qué se transforma."
-    },
-    {
-      "mes": "String: Segundo mes más importante",
-      "evento_astrologico": "String 30-40 palabras",
-      "significado_para_ti": "String 60-80 palabras"
-    },
-    {
-      "mes": "String: Tercer mes más importante",
-      "evento_astrologico": "String 30-40 palabras",
-      "significado_para_ti": "String 60-80 palabras"
-    }
+    { "mes": "nombre del mes más intenso", "evento_astrologico": "30 palabras", "significado_para_ti": "60 palabras para ${data.userName}" },
+    { "mes": "segundo mes", "evento_astrologico": "30 palabras", "significado_para_ti": "60 palabras" },
+    { "mes": "tercer mes", "evento_astrologico": "30 palabras", "significado_para_ti": "60 palabras" }
   ],
 
   "mes_a_mes": [
-    ${data.monthsData.map((month, index) => `{
-      "mes": "${month.nombreCorto}",
-      "portada_mes": "String 40-60 palabras: Frase de apertura del mes. ¿Qué energía trae ${month.nombreCorto}?",
-      "interpretacion_mensual": "String 120-150 palabras: Qué se mueve en ${month.nombreCorto} para ${data.userName}. Considera los eventos: ${month.lunas_nuevas.length} Lunas Nuevas, ${month.lunas_llenas.length} Lunas Llenas, ${month.eclipses.length} Eclipses, ${month.ingresos_destacados.length} ingresos planetarios.",
-      "ritual_del_mes": "String 60-80 palabras: Práctica o ritual específico para ${month.nombreCorto}. Anclar la intención del mes.",
-      "mantra_mensual": "String 20-30 palabras en PRIMERA PERSONA: Mantra personal para ${month.nombreCorto}."
-    }`).join(',\n    ')}
+    ${data.monthsData.map(m => `{ "mes": "${m.nombreCorto}", "portada_mes": "40-60 palabras: energía de ${m.nombreCorto}", "interpretacion_mensual": "120-150 palabras para ${data.userName}", "ritual_del_mes": "60-80 palabras", "mantra_mensual": "20-30 palabras en PRIMERA PERSONA" }`).join(',\n    ')}
   ],
 
-  "cierre_del_ciclo": {
-    "integrar_lo_vivido": "String 100-120 palabras: Preguntas guía para integrar: Qué aprendiste, qué soltaste, qué se transformó.",
+  "ritual_de_cumpleanos": "80-100 palabras: Ritual de cumpleaños personalizado.",
+  "mantra_del_anio": "30-40 palabras en PRIMERA PERSONA.",
 
-    "carta_de_cierre": "String 150-180 palabras: Carta personalizada para despedirte del año. Honrar el proceso. Tono de cierre emocional, validación, gratitud.",
+  "nodo_sur": "80-100 palabras: De dónde viene ${data.userName}. Patrones pasados.",
+  "nodo_norte": "80-100 palabras: Hacia dónde crece ${data.userName}.",
 
-    "preparacion_proximo_ciclo": "String 80-100 palabras: Lo que queda sembrado. Lo que continúa. Preparación para la próxima vuelta al Sol."
-  },
+  "integrar_lo_vivido": "100-120 palabras: Preguntas guía para integrar el año.",
+  "carta_de_cierre": "150-180 palabras: Carta de despedida del año.",
+  "preparacion_proximo_ciclo": "80-100 palabras: Lo que queda sembrado.",
 
-  "frase_final": "String 20-30 palabras: Frase para la contraportada. 'Nada de lo que viviste fue en vano. Todo fue parte del camino de regreso a ti.' (puedes adaptar pero mantén ese espíritu)."
+  "frase_final": "20-30 palabras: Frase para la contraportada."
 }
 
----
-
-## ⚠️ INSTRUCCIONES CRÍTICAS - VOZ "TU VUELTA AL SOL"
-
-**IDENTIDAD DE VOZ:**
-- No impresionas → acompañas
-- No sententcias → explicas
-- No prometes milagros → ofreces conciencia
-- No hablas desde arriba → caminas al lado
-
-**RITMO:**
-- Frases medias
-- Pausas intencionales
-- Preguntas que abren
-- Silencios implícitos
-
-**PALABRAS CLAVE:**
-proceso, conciencia, integración, maduración, sostener, permitir, observar, elegir, habitar, transformar, cerrar ciclo, anclar, escucha interna
-
-**EVITA:**
-- "karma" sin contexto
-- "misión" grandilocuente
-- "todo pasa por algo" sin explicación
-- Lenguaje esotérico/críptico
-
-**ESTRUCTURA EMOCIONAL:**
-1. Reconozco lo que sientes
-2. Explico por qué ocurre (astrológicamente)
-3. Abro una posibilidad de conciencia
-4. Te devuelvo el poder de elegir
-
-**PERSONALIZACIÓN:**
-- Usa el nombre ${data.userName} al menos 3 veces
-- Menciona su edad, su Sol, su Luna
-- Referencias concretas a su carta
-- NO genérico
-
-**TONO:**
-Cálido, íntimo, directo, terapéutico, motivador sin exagerar, disruptivo suave.
-
----
-
-**AHORA GENERA EL CONTENIDO COMPLETO DE LA AGENDA PARA ${data.userName.toUpperCase()}.**
-`;
+## VOZ "TU VUELTA AL SOL"
+- No impresionas → acompañas. No sentencias → explicas. No prometes → ofreces conciencia.
+- Frases medias, pausas intencionales, preguntas que abren.
+- Usa el nombre ${data.userName} al menos 3 veces.
+- Palabras clave: proceso, conciencia, integración, habitar, transformar, anclar.
+- EVITA: "karma", "misión" grandilocuente, "todo pasa por algo".`;
 }
