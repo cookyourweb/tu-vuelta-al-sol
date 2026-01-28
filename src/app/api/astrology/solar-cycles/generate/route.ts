@@ -22,7 +22,7 @@ import BirthData from '@/models/BirthData';
  */
 export async function POST(request: NextRequest) {
   try {
-    const { userId, forceYear } = await request.json();
+    const { userId, forceYear, forceRegenerate } = await request.json();
 
     if (!userId) {
       return NextResponse.json({
@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     console.log('🌞 [GENERATE-CYCLE] Iniciando generación para usuario:', userId);
+    if (forceRegenerate) console.log('🔄 [GENERATE-CYCLE] Modo FORCE REGENERATE activado');
 
     // 1. Obtener datos de nacimiento
     const birthData = await BirthData.findByUserId(userId);
@@ -80,19 +81,27 @@ export async function POST(request: NextRequest) {
 
     console.log('📅 [GENERATE-CYCLE] Generando ciclo:', yearLabel);
 
-    // 4. Validar que el ciclo no existe ya
+    // 4. Validar que el ciclo no existe ya (a menos que sea forceRegenerate)
     const existingCycle = await SolarCycle.findByYear(userId, yearLabel);
 
     if (existingCycle) {
-      return NextResponse.json({
-        success: false,
-        error: `El ciclo ${yearLabel} ya existe`,
-        cycle: SolarCycleHelpers.formatForDisplay(existingCycle)
-      }, { status: 409 });
+      if (forceRegenerate) {
+        // 🔄 Eliminar ciclo existente para regenerarlo
+        console.log(`🗑️ [GENERATE-CYCLE] Eliminando ciclo existente ${yearLabel} para regenerar...`);
+        await SolarCycle.deleteOne({ _id: existingCycle._id });
+        console.log(`✅ [GENERATE-CYCLE] Ciclo ${yearLabel} eliminado`);
+      } else {
+        return NextResponse.json({
+          success: false,
+          error: `El ciclo ${yearLabel} ya existe`,
+          cycle: SolarCycleHelpers.formatForDisplay(existingCycle)
+        }, { status: 409 });
+      }
     }
 
-    // 5. Validar que no se salte más de 1 año
-    if (latestCycle) {
+    // 5. Validar que no se salte más de 1 año (skip si estamos regenerando)
+    const isRegenerating = forceRegenerate && existingCycle;
+    if (latestCycle && !isRegenerating) {
       const latestEndYear = latestCycle.cycleEnd.getFullYear();
 
       // Solo permitir generar el año inmediatamente siguiente

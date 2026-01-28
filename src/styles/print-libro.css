@@ -34,7 +34,7 @@
   /* Cada página debe ocupar exactamente una hoja A5 */
   .print-page {
     width: 148mm !important; /* A5 ancho */
-    height: 297mm !important; /* A5 alto */
+    height: 210mm !important; /* A5 alto (corregido de 297mm que era A4) */
     page-break-after: always;
     page-break-inside: avoid;
     margin: 0;
