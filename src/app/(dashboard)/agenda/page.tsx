@@ -318,6 +318,22 @@ const AgendaPersonalizada = () => {
         console.log('✅ [CYCLES] Primer ciclo auto-generado:', data.data.cycle.yearLabel);
         // Recargar ciclos disponibles
         await fetchAvailableCycles();
+      } else if (data.error?.includes('ya existe') || response.status === 409) {
+        // 🆕 El ciclo ya existe - esto puede pasar por race condition o cache
+        // Simplemente recargar los ciclos sin mostrar error
+        console.log('ℹ️ [CYCLES] El ciclo ya existe, recargando lista de ciclos...');
+        // Forzar recarga de ciclos sin pasar por autoGenerate
+        setLoadingCycles(true);
+        const reloadResponse = await fetch(`/api/astrology/solar-cycles?userId=${user.uid}`);
+        const reloadData = await reloadResponse.json();
+        if (reloadData.success && reloadData.data.cycles?.length > 0) {
+          setAvailableCycles(reloadData.data.cycles);
+          setCurrentCycleLabel(reloadData.data.currentCycleLabel);
+          setCanGenerateNext(reloadData.data.canGenerateNext);
+          setSelectedCycleLabel(reloadData.data.defaultCycle);
+          console.log('✅ [CYCLES] Ciclos recargados:', reloadData.data.cycles);
+        }
+        setLoadingCycles(false);
       } else {
         console.error('❌ [CYCLES] Error auto-generando primer ciclo:', data.error);
       }
