@@ -268,6 +268,7 @@ const AgendaPersonalizada = () => {
     if (!user?.uid) return;
 
     setLoadingCycles(true);
+    setError(null);
     try {
       const response = await fetch(`/api/astrology/solar-cycles?userId=${user.uid}`);
       const data = await response.json();
@@ -290,9 +291,19 @@ const AgendaPersonalizada = () => {
         }
 
         console.log('✅ [CYCLES] Ciclos disponibles:', data.data.cycles);
+      } else {
+        // 🆕 Manejar errores específicos de la API
+        if (data.error?.includes('datos de nacimiento') || response.status === 404) {
+          console.warn('⚠️ [CYCLES] Usuario sin datos de nacimiento - redirigir a configuración');
+          setError('Necesitas completar tus datos de nacimiento primero. Ve a "Datos de Nacimiento" para configurarlos.');
+        } else {
+          console.error('❌ [CYCLES] Error en API:', data.error);
+          setError(data.error || 'Error al cargar ciclos solares');
+        }
       }
     } catch (error) {
       console.error('❌ [CYCLES] Error fetching cycles:', error);
+      setError('Error de conexión al cargar ciclos');
     } finally {
       setLoadingCycles(false);
     }
@@ -316,8 +327,17 @@ const AgendaPersonalizada = () => {
 
       if (data.success) {
         console.log('✅ [CYCLES] Primer ciclo auto-generado:', data.data.cycle.yearLabel);
-        // Recargar ciclos disponibles
-        await fetchAvailableCycles();
+        // Recargar ciclos disponibles (sin llamar autoGenerate de nuevo)
+        setLoadingCycles(true);
+        const reloadResponse = await fetch(`/api/astrology/solar-cycles?userId=${user.uid}`);
+        const reloadData = await reloadResponse.json();
+        if (reloadData.success && reloadData.data.cycles?.length > 0) {
+          setAvailableCycles(reloadData.data.cycles);
+          setCurrentCycleLabel(reloadData.data.currentCycleLabel);
+          setCanGenerateNext(reloadData.data.canGenerateNext);
+          setSelectedCycleLabel(reloadData.data.defaultCycle);
+        }
+        setLoadingCycles(false);
       } else if (data.error?.includes('ya existe') || response.status === 409) {
         // 🆕 El ciclo ya existe - esto puede pasar por race condition o cache
         // Simplemente recargar los ciclos sin mostrar error
@@ -334,8 +354,13 @@ const AgendaPersonalizada = () => {
           console.log('✅ [CYCLES] Ciclos recargados:', reloadData.data.cycles);
         }
         setLoadingCycles(false);
+      } else if (data.error?.includes('datos de nacimiento') || response.status === 404) {
+        // 🆕 Usuario sin datos de nacimiento
+        console.warn('⚠️ [CYCLES] No se puede generar ciclo: faltan datos de nacimiento');
+        setError('Necesitas completar tus datos de nacimiento primero. Ve a "Datos de Nacimiento" para configurarlos.');
       } else {
         console.error('❌ [CYCLES] Error auto-generando primer ciclo:', data.error);
+        setError(data.error || 'Error al generar ciclo solar');
       }
     } catch (error) {
       console.error('❌ [CYCLES] Error auto-generando primer ciclo:', error);
@@ -1861,15 +1886,27 @@ const AgendaPersonalizada = () => {
 
         {/* ERROR BANNER - Si hay errores cargando eventos */}
         {error && (
-          <div className="mb-6 bg-red-900/50 border border-red-500/50 rounded-xl p-4 backdrop-blur-sm">
+          <div className={`mb-6 ${error.includes('datos de nacimiento') ? 'bg-orange-900/50 border-orange-500/50' : 'bg-red-900/50 border-red-500/50'} border rounded-xl p-4 backdrop-blur-sm`}>
             <div className="flex items-start gap-3">
-              <span className="text-2xl">⚠️</span>
+              <span className="text-2xl">{error.includes('datos de nacimiento') ? '📋' : '⚠️'}</span>
               <div className="flex-1">
-                <h3 className="text-red-200 font-bold mb-1">Problema al cargar eventos</h3>
-                <p className="text-red-300 text-sm">{error}</p>
-                <p className="text-red-400 text-xs mt-2">
-                  Por favor, revisa la consola del navegador para más detalles o intenta recargar la página.
-                </p>
+                <h3 className={`${error.includes('datos de nacimiento') ? 'text-orange-200' : 'text-red-200'} font-bold mb-1`}>
+                  {error.includes('datos de nacimiento') ? 'Configuración requerida' : 'Problema al cargar eventos'}
+                </h3>
+                <p className={`${error.includes('datos de nacimiento') ? 'text-orange-300' : 'text-red-300'} text-sm`}>{error}</p>
+                {error.includes('datos de nacimiento') ? (
+                  <Link
+                    href="/birth-data"
+                    className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg transition-colors text-sm font-medium"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    Ir a Datos de Nacimiento
+                  </Link>
+                ) : (
+                  <p className="text-red-400 text-xs mt-2">
+                    Por favor, revisa la consola del navegador para más detalles o intenta recargar la página.
+                  </p>
+                )}
               </div>
             </div>
           </div>

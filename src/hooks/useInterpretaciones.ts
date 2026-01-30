@@ -77,7 +77,11 @@ export function useInterpretaciones({
       );
 
       if (!cycleResponse.ok) {
-        throw new Error('No se encontró el ciclo solar. Asegúrate de haberlo generado primero.');
+        const errorData = await cycleResponse.json().catch(() => ({}));
+        if (errorData.error?.includes('datos de nacimiento')) {
+          throw new Error('Necesitas completar tus datos de nacimiento primero.');
+        }
+        throw new Error(errorData.error || 'No se encontró el ciclo solar. Asegúrate de haberlo generado primero.');
       }
 
       const cycleData = await cycleResponse.json();
@@ -174,7 +178,8 @@ export function useInterpretaciones({
       if (cycleResponse.ok) {
         const cycleData = await cycleResponse.json();
         if (cycleData.success) {
-          setSolarCycle(cycleData.data);
+          // ✅ FIX: La API devuelve data.cycle, no data directamente
+          setSolarCycle(cycleData.data.cycle || cycleData.data);
         }
       }
     } catch (err) {
