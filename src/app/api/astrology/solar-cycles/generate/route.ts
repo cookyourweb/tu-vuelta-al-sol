@@ -7,6 +7,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import SolarCycle, { SolarCycleHelpers } from '@/models/SolarCycle';
 import BirthData from '@/models/BirthData';
+import NatalChart from '@/models/NatalChart';
+import { calculateSolarYearEvents } from '@/utils/astrology/solarYearEvents';
+import { calculateHouseForEvent } from '@/utils/eventMapping';
 
 /**
  * POST /api/astrology/solar-cycles/generate
@@ -130,48 +133,56 @@ export async function POST(request: NextRequest) {
       end: cycleEnd.toISOString().split('T')[0]
     });
 
-    // 7. Llamar a la API de solar-year-events para calcular los eventos
-    const apiUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/astrology/solar-year-events`;
+    // 7. Calcular eventos directamente (sin HTTP fetch)
+    console.log('🔄 [GENERATE-CYCLE] Calculando eventos astrológicos...');
 
-    const eventsResponse = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        birthDate: birthData.birthDate,
-        birthTime: birthData.birthTime,
-        birthPlace: birthData.birthPlace,
-        currentYear: targetStartYear,
-        userId: userId
-      })
+    // Crear fecha con hora de nacimiento si está disponible
+    const eventBirthDate = new Date(birthData.birthDate);
+    if (birthData.birthTime) {
+      const [hours, minutes] = birthData.birthTime.split(':').map(Number);
+      eventBirthDate.setHours(hours, minutes, 0, 0);
+    }
+    eventBirthDate.setFullYear(targetStartYear);
+
+    const events = await calculateSolarYearEvents(eventBirthDate);
+    console.log('✅ [GENERATE-CYCLE] Eventos calculados:', {
+      lunarPhases: events.lunarPhases.length,
+      retrogrades: events.retrogrades.length,
+      eclipses: events.eclipses.length,
+      planetaryIngresses: events.planetaryIngresses.length,
+      seasonalEvents: events.seasonalEvents.length
     });
 
-    if (!eventsResponse.ok) {
-      throw new Error('Error al calcular eventos del año solar');
-    }
-
-    const eventsData = await eventsResponse.json();
-
-    if (!eventsData.success) {
-      throw new Error(eventsData.error || 'Error al calcular eventos');
+    // Cargar carta natal para cálculo de casas
+    let natalChart = null;
+    try {
+      const natalDoc = await NatalChart.findOne({ userId }).lean();
+      if (natalDoc) {
+        natalChart = (natalDoc as any).natalChart || natalDoc;
+        console.log('✅ [GENERATE-CYCLE] Carta natal cargada para casas');
+      }
+    } catch (err) {
+      console.warn('⚠️ [GENERATE-CYCLE] No se pudo cargar carta natal:', err);
     }
 
     // 8. Transformar eventos al formato de AstrologicalEvent
-    const transformedEvents = [];
+    const transformedEvents: any[] = [];
 
     // Lunar Phases
-    eventsData.data.events.lunarPhases?.forEach((phase: any) => {
-      const eventDate = new Date(phase.date);
+    events.lunarPhases?.forEach((phase: any) => {
+      const eventDate = phase.date instanceof Date ? phase.date : new Date(phase.date);
       if (eventDate >= cycleStart && eventDate < cycleEnd) {
+        const phaseName = phase.type === 'new_moon' ? 'Luna Nueva' : 'Luna Llena';
         transformedEvents.push({
-          id: `lunar-${phase.date}`,
+          id: `lunar-${eventDate.toISOString()}`,
           date: eventDate,
-          title: phase.phase,
+          title: phaseName,
           type: phase.type,
-          description: `${phase.phase} en ${phase.zodiacSign}`,
+          description: `${phaseName} en ${phase.sign}`,
           importance: 'medium',
           metadata: {
-            zodiacSign: phase.zodiacSign,
-            house: phase.house,
+            zodiacSign: phase.sign,
+            house: natalChart ? calculateHouseForEvent(phase.sign, phase.degree || 0, natalChart) : undefined,
             degree: phase.degree
           }
         });
@@ -179,41 +190,41 @@ export async function POST(request: NextRequest) {
     });
 
     // Retrogrades
-    eventsData.data.events.retrogrades?.forEach((retro: any) => {
-      const startDate = new Date(retro.startDate);
+    events.retrogrades?.forEach((retro: any) => {
+      const startDate = retro.startDate instanceof Date ? retro.startDate : new Date(retro.startDate);
       if (startDate >= cycleStart && startDate < cycleEnd) {
         transformedEvents.push({
-          id: `retro-${retro.planet}-${retro.startDate}`,
+          id: `retro-${retro.planet}-${startDate.toISOString()}`,
           date: startDate,
           title: `${retro.planet} Retrógrado`,
           type: 'retrograde',
-          description: `${retro.planet} inicia retrogradación en ${retro.sign}`,
+          description: `${retro.planet} inicia retrogradación en ${retro.startSign}`,
           importance: 'high',
           metadata: {
             planet: retro.planet,
-            sign: retro.sign,
-            house: retro.house,
-            endDate: retro.endDate
+            sign: retro.startSign,
+            house: natalChart ? calculateHouseForEvent(retro.startSign, retro.startDegree || 0, natalChart) : undefined,
+            endDate: retro.endDate instanceof Date ? retro.endDate.toISOString() : retro.endDate
           }
         });
       }
     });
 
     // Eclipses
-    eventsData.data.events.eclipses?.forEach((eclipse: any) => {
-      const eventDate = new Date(eclipse.date);
+    events.eclipses?.forEach((eclipse: any) => {
+      const eventDate = eclipse.date instanceof Date ? eclipse.date : new Date(eclipse.date);
       if (eventDate >= cycleStart && eventDate < cycleEnd) {
         transformedEvents.push({
-          id: `eclipse-${eclipse.date}`,
+          id: `eclipse-${eventDate.toISOString()}`,
           date: eventDate,
           title: eclipse.type,
           type: 'eclipse',
-          description: `${eclipse.type} en ${eclipse.zodiacSign}`,
+          description: `${eclipse.type} en ${eclipse.sign}`,
           importance: 'high',
           metadata: {
             eclipseType: eclipse.type,
-            zodiacSign: eclipse.zodiacSign,
-            house: eclipse.house,
+            zodiacSign: eclipse.sign,
+            house: natalChart ? calculateHouseForEvent(eclipse.sign, eclipse.degree || 0, natalChart) : undefined,
             degree: eclipse.degree
           }
         });
@@ -221,32 +232,32 @@ export async function POST(request: NextRequest) {
     });
 
     // Planetary Ingresses
-    eventsData.data.events.planetaryIngresses?.forEach((ingress: any) => {
-      const eventDate = new Date(ingress.date);
+    events.planetaryIngresses?.forEach((ingress: any) => {
+      const eventDate = ingress.date instanceof Date ? ingress.date : new Date(ingress.date);
       if (eventDate >= cycleStart && eventDate < cycleEnd) {
         transformedEvents.push({
-          id: `ingress-${ingress.planet}-${ingress.date}`,
+          id: `ingress-${ingress.planet}-${eventDate.toISOString()}`,
           date: eventDate,
-          title: `${ingress.planet} → ${ingress.newSign}`,
+          title: `${ingress.planet} → ${ingress.toSign}`,
           type: 'planetary_transit',
-          description: `${ingress.planet} entra en ${ingress.newSign}`,
+          description: `${ingress.planet} entra en ${ingress.toSign}`,
           importance: 'medium',
           metadata: {
             planet: ingress.planet,
-            fromSign: ingress.previousSign,
-            toSign: ingress.newSign,
-            house: ingress.house
+            fromSign: ingress.fromSign,
+            toSign: ingress.toSign,
+            house: natalChart ? calculateHouseForEvent(ingress.toSign, ingress.toDegree || 0, natalChart) : undefined
           }
         });
       }
     });
 
     // Seasonal Events
-    eventsData.data.events.seasonalEvents?.forEach((seasonal: any) => {
-      const eventDate = new Date(seasonal.date);
+    events.seasonalEvents?.forEach((seasonal: any) => {
+      const eventDate = seasonal.date instanceof Date ? seasonal.date : new Date(seasonal.date);
       if (eventDate >= cycleStart && eventDate < cycleEnd) {
         transformedEvents.push({
-          id: `seasonal-${seasonal.date}`,
+          id: `seasonal-${eventDate.toISOString()}`,
           date: eventDate,
           title: seasonal.name,
           type: 'seasonal',
@@ -279,7 +290,7 @@ export async function POST(request: NextRequest) {
       cycleEnd,
       yearLabel,
       events: validEvents,
-      solarReturnData: eventsData.data,
+      solarReturnData: { events }, // Guardar los eventos calculados directamente
       generatedAt: new Date(),
       status: 'active'
     });
