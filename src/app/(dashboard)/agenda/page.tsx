@@ -1218,12 +1218,13 @@ const AgendaPersonalizada = () => {
     fetchAvailableCycles();
   }, [user?.uid]);
 
-  // 📅 Inicializar currentMonth al MES DE CUMPLEAÑOS (inicio del ciclo solar)
+  // 📅 NO sobrescribir currentMonth - debe mantenerse en el mes actual (HOY)
+  // El calendario ya se inicializa con new Date() y debe mostrar el día de hoy
+  // El yearRange solo define los límites del ciclo solar, no el mes a mostrar
   useEffect(() => {
     if (yearRange && yearRange.start) {
-      const birthdayMonth = yearRange.start;
-      console.log('📅 [AGENDA] Setting currentMonth to BIRTHDAY month:', birthdayMonth);
-      setCurrentMonth(birthdayMonth);
+      console.log('📅 [AGENDA] Ciclo solar va de:', yearRange.start.toLocaleDateString('es-ES'), 'a', yearRange.end?.toLocaleDateString('es-ES'));
+      // NO setCurrentMonth aquí - mantener el mes actual para que muestre HOY
     }
   }, [yearRange]);
 
