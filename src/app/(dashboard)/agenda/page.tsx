@@ -2111,6 +2111,10 @@ const AgendaPersonalizada = () => {
                         rounded-2xl p-4 border border-white/20 hover:shadow-lg transition-all duration-200
                         cursor-pointer hover:scale-105
                       `}
+                      onClick={() => {
+                        setModalEvent(event);
+                        setShowEventModal(true);
+                      }}
                       onMouseEnter={(e) => handleEventHover(event, e)}
                       onMouseLeave={handleEventLeave}
                     >
@@ -2133,8 +2137,9 @@ const AgendaPersonalizada = () => {
 
                       <p className="text-gray-200 text-sm mb-3">{event.description}</p>
 
-                      <div className="text-purple-300 text-xs italic">
-                        Hover para ver interpretación completa ✨
+                      <div className="text-purple-300 text-xs italic flex items-center justify-between">
+                        <span>Click para ver detalles completos ✨</span>
+                        <span>→</span>
                       </div>
                     </div>
                   ))}
@@ -2254,7 +2259,7 @@ const AgendaPersonalizada = () => {
         </div>
 
         {/* TOOLTIP ÉPICO */}
-        {hoveredEvent && hoveredEvent.aiInterpretation && (
+        {hoveredEvent && (
           <div
             className="fixed bg-gradient-to-r from-purple-900/95 to-pink-900/95 backdrop-blur-sm border border-purple-400/40 rounded-2xl p-6 shadow-2xl max-w-sm pointer-events-none z-[202]"
             style={{
@@ -2274,35 +2279,48 @@ const AgendaPersonalizada = () => {
               </div>
             </div>
 
-            {/* Contenido */}
-            <div className="space-y-3">
-              <div className="bg-white/10 rounded-lg p-3 border border-white/20">
-                <div className="text-yellow-300 font-semibold text-sm mb-1 flex items-center">
-                  <span className="mr-2">🔥</span>SIGNIFICADO:
-                </div>
-                <div className="text-white text-sm leading-relaxed">
-                  {hoveredEvent.aiInterpretation.meaning}
-                </div>
-              </div>
-
-              <div className="bg-white/10 rounded-lg p-3 border border-white/20">
-                <div className="text-emerald-300 font-semibold text-sm mb-1 flex items-center">
-                  <span className="mr-2">⚡</span>CONSEJO:
-                </div>
-                <div className="text-white text-sm leading-relaxed">
-                  {hoveredEvent.aiInterpretation.advice}
-                </div>
-              </div>
-
-              {hoveredEvent.aiInterpretation.mantra && (
-                <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-400/30 rounded-lg p-3 text-center">
-                  <div className="text-yellow-300 font-semibold text-sm mb-1">✨ MANTRA:</div>
-                  <div className="text-white text-sm font-medium italic">
-                    "{hoveredEvent.aiInterpretation.mantra}"
+            {/* Contenido con o sin AI */}
+            {hoveredEvent.aiInterpretation ? (
+              <div className="space-y-3">
+                <div className="bg-white/10 rounded-lg p-3 border border-white/20">
+                  <div className="text-yellow-300 font-semibold text-sm mb-1 flex items-center">
+                    <span className="mr-2">🔥</span>SIGNIFICADO:
+                  </div>
+                  <div className="text-white text-sm leading-relaxed">
+                    {hoveredEvent.aiInterpretation.meaning}
                   </div>
                 </div>
-              )}
-            </div>
+
+                <div className="bg-white/10 rounded-lg p-3 border border-white/20">
+                  <div className="text-emerald-300 font-semibold text-sm mb-1 flex items-center">
+                    <span className="mr-2">⚡</span>CONSEJO:
+                  </div>
+                  <div className="text-white text-sm leading-relaxed">
+                    {hoveredEvent.aiInterpretation.advice}
+                  </div>
+                </div>
+
+                {hoveredEvent.aiInterpretation.mantra && (
+                  <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-400/30 rounded-lg p-3 text-center">
+                    <div className="text-yellow-300 font-semibold text-sm mb-1">✨ MANTRA:</div>
+                    <div className="text-white text-sm font-medium italic">
+                      "{hoveredEvent.aiInterpretation.mantra}"
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="bg-white/10 rounded-lg p-3 border border-white/20">
+                  <div className="text-white text-sm leading-relaxed">
+                    {hoveredEvent.description}
+                  </div>
+                </div>
+                <div className="text-purple-300 text-xs text-center">
+                  Click para ver más detalles →
+                </div>
+              </div>
+            )}
           </div>
         )}
 

@@ -96,6 +96,39 @@ para que el usuario pueda importarlo en Outlook, Google Calendar, Apple Calendar
 - Usuarios premium: 12 meses completos
 - La lógica de límite ya existe en `generate-book/route.ts` (líneas 190-202)
 
+### 3.3 Límite de 2 meses para usuarios gratuitos (Agenda y Libro)
+**Estado:** PENDIENTE — NUEVA FUNCIONALIDAD
+**Descripción:** Mostrar solo 2 meses del ciclo solar a usuarios gratuitos.
+Si quieren ver más meses, deben comprar la agenda.
+**Implementación:**
+```
+AGENDA CALENDARIO (src/app/(dashboard)/agenda/page.tsx):
+- Obtener estado de compra del usuario: hasPurchasedAgenda (de User model o context)
+- Si NO ha comprado:
+  - Mostrar solo 2 meses desde el inicio del ciclo
+  - Deshabilitar navegación a meses futuros (blur o lock icon)
+  - Mostrar CTA: "Desbloquea tu ciclo completo" → /compra/agenda
+- Si ha comprado: mostrar todos los 12 meses del ciclo
+
+LIBRO AGENDA (src/app/(dashboard)/libro/page.tsx):
+- Similar lógica: solo generar/mostrar 2 meses si usuario gratuito
+- Portada, primer mes, segundo mes, y luego página promocional
+- CTA: "Desbloquea tu libro completo" con preview de lo que incluye
+- Usuarios premium: libro completo con los 12 meses
+
+UI/UX:
+- Meses bloqueados: overlay con blur/opacidad + candado
+- Tooltip: "Este mes estará disponible cuando compres tu agenda"
+- Contador: "2 de 12 meses desbloqueados"
+```
+**Archivos a modificar:**
+- `src/app/(dashboard)/agenda/page.tsx` — lógica de filtrado de meses
+- `src/app/(dashboard)/libro/page.tsx` — lógica de generación limitada
+- `src/components/agenda/AgendaCalendar.tsx` — UI de meses bloqueados
+- `src/components/agenda/AgendaLibro/` — componentes con restricción
+- `src/models/User.ts` — verificar campo `hasPurchasedAgenda`
+**Prioridad:** ALTA — incentivo directo a la compra
+
 ---
 
 ## PRIORIDAD 4 — MEJORAS DE UX
