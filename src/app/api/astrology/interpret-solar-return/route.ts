@@ -350,7 +350,7 @@ Required JSON structure:
       console.log(`🤖 OpenAI attempt ${attempts + 1}/${MAX_ATTEMPTS}`);
 
       const completion = await openai.chat.completions.create({
-        model: 'gpt-4o-2024-08-06',
+        model: 'gpt-4o-mini', // ✅ OPTIMIZED: 3-5x faster, fits within Vercel Pro 60s limit (per docs)
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: prompt }
