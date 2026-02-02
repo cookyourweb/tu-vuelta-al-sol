@@ -999,9 +999,25 @@ export const AgendaLibro = ({
     const interpretation = getNatalInterpretation();
     if (!interpretation?.nodos_lunares) return null;
 
+    // Función para convertir nodo objeto a string
+    const formatNodo = (nodo: any): string | undefined => {
+      if (!nodo) return undefined;
+      if (typeof nodo === 'string') return nodo;
+
+      // Si es objeto con {signo_casa, direccion_evolutiva, desafio}
+      const parts: string[] = [];
+      if (nodo.signo_casa) parts.push(nodo.signo_casa);
+      if (nodo.direccion_evolutiva) parts.push(`Dirección evolutiva: ${nodo.direccion_evolutiva}`);
+      if (nodo.desafio) parts.push(`Desafío: ${nodo.desafio}`);
+      if (nodo.patrones_pasados) parts.push(`Patrones pasados: ${nodo.patrones_pasados}`);
+      if (nodo.zona_confort) parts.push(`Zona de confort: ${nodo.zona_confort}`);
+
+      return parts.length > 0 ? parts.join('\n\n') : undefined;
+    };
+
     return {
-      nodo_sur: interpretation.nodos_lunares.nodo_sur,
-      nodo_norte: interpretation.nodos_lunares.nodo_norte
+      nodo_sur: formatNodo(interpretation.nodos_lunares.nodo_sur),
+      nodo_norte: formatNodo(interpretation.nodos_lunares.nodo_norte)
     };
   };
 
