@@ -3,8 +3,106 @@
 import React from 'react';
 import { useStyle } from '@/context/StyleContext';
 
+// Props interface for therapy pages
+interface TerapiaCreativaProps {
+  patronesInconscientes?: string; // Patrones de carta natal
+  desafiosEvolutivos?: string[];  // Desafíos evolutivos
+  nodoSur?: string;               // Nodo sur (zona de confort)
+}
+
+// ============ TU ZONA CONOCIDA (Nueva página) ============
+export const TuZonaConocida: React.FC<TerapiaCreativaProps> = ({
+  patronesInconscientes,
+  desafiosEvolutivos,
+  nodoSur
+}) => {
+  const { config } = useStyle();
+
+  return (
+    <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
+      {/* Header decorativo */}
+      <div className="text-center mb-8">
+        <div className="flex items-center justify-center space-x-3 mb-4">
+          <span className="text-cosmic-gold text-xl">✧</span>
+          <span className={`text-xs uppercase tracking-[0.3em] ${config.iconSecondary}`}>Terapia Astrológica Creativa</span>
+          <span className="text-cosmic-gold text-xl">✧</span>
+        </div>
+        <h2 className="font-display text-4xl text-cosmic-gold mb-4">Tu zona conocida</h2>
+        <div className="w-24 h-1 bg-gradient-to-r from-transparent via-cosmic-gold to-transparent mx-auto"></div>
+      </div>
+
+      <div className="flex-1 max-w-2xl mx-auto w-full space-y-5">
+        {/* Lo que dice tu carta natal */}
+        <div className="bg-cosmic-purple/5 border border-cosmic-gold/20 rounded-lg p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-cosmic-gold text-lg">☽</span>
+            <h4 className="font-display text-lg text-cosmic-gold">Lo que tu carta natal revela</h4>
+          </div>
+          <p className="font-body text-gray-700 leading-relaxed text-sm">
+            Según tu carta natal, estos son los patrones que tiendes a repetir:
+          </p>
+
+          {nodoSur && (
+            <div className="mt-3 bg-white/50 rounded p-3">
+              <p className="font-body text-sm text-gray-700 font-semibold mb-1">Tu Nodo Sur (zona de confort):</p>
+              <p className="font-body text-sm text-gray-600 italic">{nodoSur}</p>
+            </div>
+          )}
+
+          {patronesInconscientes && (
+            <div className="mt-3 bg-white/50 rounded p-3">
+              <p className="font-body text-sm text-gray-700 font-semibold mb-1">Patrones inconscientes:</p>
+              <p className="font-body text-sm text-gray-600">{patronesInconscientes}</p>
+            </div>
+          )}
+
+          {desafiosEvolutivos && desafiosEvolutivos.length > 0 && (
+            <div className="mt-3 bg-white/50 rounded p-3">
+              <p className="font-body text-sm text-gray-700 font-semibold mb-1">Desafíos a trabajar:</p>
+              <ul className="font-body text-sm text-gray-600 list-disc list-inside">
+                {desafiosEvolutivos.slice(0, 3).map((d, i) => (
+                  <li key={i}>{d}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+
+        {/* Pregunta terapéutica */}
+        <div className="bg-gradient-to-br from-cosmic-gold/10 to-cosmic-purple/5 border-l-4 border-cosmic-gold rounded-r-lg p-5">
+          <p className="font-display text-cosmic-gold mb-2 text-base">Pregunta para reflexionar:</p>
+          <p className="font-body text-gray-800 text-lg italic leading-relaxed">
+            "¿Qué patrón repites esperando resultados distintos?"
+          </p>
+        </div>
+
+        {/* Espacio de escritura */}
+        <div className="border-2 border-dashed border-cosmic-gold/30 rounded-lg p-5">
+          <div className="flex items-center justify-center mb-3">
+            <span className="text-cosmic-gold text-sm">✦ Tu reflexión ✦</span>
+          </div>
+          <div className="space-y-3">
+            <div className="h-14 border-b border-dashed border-gray-300" />
+            <div className="h-14 border-b border-dashed border-gray-300" />
+            <div className="h-14 border-b border-dashed border-gray-300" />
+            <div className="h-14 border-b border-dashed border-gray-300" />
+            <div className="h-14" />
+          </div>
+        </div>
+
+        {/* Cierre reflexivo */}
+        <div className="text-center pt-2">
+          <p className="font-body text-gray-600 italic text-sm">
+            "Lo que repites te muestra dónde tu alma pide atención."
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ============ ESCRITURA TERAPÉUTICA ============
-export const EscrituraTerapeutica = () => {
+export const EscrituraTerapeutica: React.FC<TerapiaCreativaProps> = () => {
   const { config } = useStyle();
 
   return (
@@ -324,4 +422,4 @@ export const TrabajoEmocional = () => {
   );
 };
 
-export default { EscrituraTerapeutica, Visualizacion, RitualSimbolico, TrabajoEmocional };
+export default { TuZonaConocida, EscrituraTerapeutica, Visualizacion, RitualSimbolico, TrabajoEmocional };

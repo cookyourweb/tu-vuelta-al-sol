@@ -16,7 +16,7 @@ import RetornoSolar from '@/components/agenda/libro/RetornoSolar';
 import CalendarioAnual from '@/components/agenda/libro/CalendarioAnual';
 import MesPage from '@/components/agenda/libro/MesPage';
 import CierreCiclo from '@/components/agenda/libro/CierreCiclo';
-import { EscrituraTerapeutica, Visualizacion, RitualSimbolico, TrabajoEmocional } from '@/components/agenda/libro/TerapiaCreativa';
+import { TuZonaConocida, EscrituraTerapeutica, Visualizacion, RitualSimbolico, TrabajoEmocional } from '@/components/agenda/libro/TerapiaCreativa';
 import { CartaBienvenida, PrimerDiaCiclo, UltimoDiaCiclo, QuienEraQuienSoy, PreparacionProximaVuelta, CartaCierre, PaginaFinalBlanca, Contraportada } from '@/components/agenda/libro/PaginasEspeciales';
 import { StyleProvider } from '@/context/StyleContext';
 import '@/styles/print-libro.css';
@@ -312,6 +312,13 @@ export default function LibroAgendaPage() {
           startDate={startDate}
         />
 
+        {/* PRIMER DÍA DEL CICLO - Antes del calendario */}
+        <PrimerDiaCiclo
+          fecha={startDate}
+          nombre={bookContent.userName}
+          pageNumber={5}
+        />
+
         {/* CALENDARIO ANUAL */}
         <CalendarioAnual
           startDate={startDate}
@@ -319,13 +326,6 @@ export default function LibroAgendaPage() {
           monthsData={bookContent.monthsData}
           yearEvents={bookContent.yearEvents}
           calendarioPersonalizado={bookContent.calendario_personalizado}
-        />
-
-        {/* PRIMER DÍA DEL CICLO - Justo antes del calendario mensual */}
-        <PrimerDiaCiclo
-          fecha={startDate}
-          nombre={bookContent.userName}
-          pageNumber={5}
         />
 
         {/* MES A MES */}
@@ -339,18 +339,19 @@ export default function LibroAgendaPage() {
               const monthDate = addMonths(startDate, index);
 
               // Combinar todos los eventos del mes para MesPage
+              // ✅ Propiedades actualizadas: date, signo, description, house (no fecha/descripcion/casa)
               const allMonthEvents: MonthEvent[] = [
-                ...monthData.lunas_nuevas.map(e => ({ date: e.fecha, type: 'luna-nueva', sign: e.signo, description: e.descripcion, house: e.casa })),
-                ...monthData.lunas_llenas.map(e => ({ date: e.fecha, type: 'luna-llena', sign: e.signo, description: e.descripcion, house: e.casa })),
-                ...monthData.eclipses.map(e => ({ date: e.fecha, type: e.tipo, sign: e.signo, description: e.descripcion, house: e.casa })),
-                ...monthData.ingresos_destacados.map(e => ({ date: e.fecha, type: 'ingreso', sign: e.signo, description: e.descripcion, house: 1 })) // ingresos no tienen casa
+                ...monthData.lunas_nuevas.map(e => ({ date: e.date, type: 'luna-nueva', sign: e.signo, description: e.description, house: e.house })),
+                ...monthData.lunas_llenas.map(e => ({ date: e.date, type: 'luna-llena', sign: e.signo, description: e.description, house: e.house })),
+                ...monthData.eclipses.map(e => ({ date: e.date, type: e.type, sign: e.signo, description: e.description, house: e.house })),
+                ...monthData.ingresos_destacados.map(e => ({ date: e.date, type: 'ingreso', sign: e.signo, description: e.description, house: 1 }))
               ];
 
               return (
                 <MesPage
                   key={index}
                   monthDate={monthDate}
-                
+                  monthData={monthData}
                   interpretation={monthInterp}
                   allEvents={allMonthEvents}
                   userName={bookContent.userName}
@@ -362,6 +363,15 @@ export default function LibroAgendaPage() {
         )}
 
         {/* TERAPIA ASTROLÓGICA CREATIVA */}
+        <TuZonaConocida
+          patronesInconscientes={bookContent.tu_mapa_interior?.soul_chart?.patrones_inconscientes}
+          desafiosEvolutivos={
+            typeof bookContent.tu_mapa_interior?.soul_chart?.patrones_inconscientes === 'string'
+              ? bookContent.tu_mapa_interior?.soul_chart?.patrones_inconscientes.split('. ').filter(Boolean)
+              : []
+          }
+          nodoSur={bookContent.tu_mapa_interior?.soul_chart?.nodo_sur}
+        />
         <EscrituraTerapeutica />
         <Visualizacion />
         <RitualSimbolico />

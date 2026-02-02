@@ -440,26 +440,27 @@ function groupEventsByMonth(events: any[], startDate: Date, endDate: Date): any[
       nombreCorto: format(monthStart, 'MMMM', { locale: es }),
       inicio: monthStart.toISOString(),
       fin: monthEnd.toISOString(),
+      // ✅ Usar 'date' (no 'fecha') para consistencia con tipos TypeScript
       lunas_nuevas: lunas_nuevas.map(e => ({
-        fecha: e.date instanceof Date ? e.date.toISOString() : new Date(e.date).toISOString(),
-        signo: e.sign, casa: e.house, descripcion: e.description
+        date: e.date instanceof Date ? e.date.toISOString() : new Date(e.date).toISOString(),
+        signo: e.sign, house: e.house, description: e.description
       })),
       lunas_llenas: lunas_llenas.map(e => ({
-        fecha: e.date instanceof Date ? e.date.toISOString() : new Date(e.date).toISOString(),
-        signo: e.sign, casa: e.house, descripcion: e.description
+        date: e.date instanceof Date ? e.date.toISOString() : new Date(e.date).toISOString(),
+        signo: e.sign, house: e.house, description: e.description
       })),
       eclipses: eclipses.map(e => ({
-        fecha: e.date instanceof Date ? e.date.toISOString() : new Date(e.date).toISOString(),
-        tipo: e.type, signo: e.sign, casa: e.house, descripcion: e.description
+        date: e.date instanceof Date ? e.date.toISOString() : new Date(e.date).toISOString(),
+        type: e.type, signo: e.sign, house: e.house, description: e.description
       })),
       ingresos_destacados: ingresos.slice(0, 3).map(e => ({
-        fecha: format(new Date(e.date), 'dd MMM', { locale: es }),
+        date: format(new Date(e.date), 'dd MMM', { locale: es }),
         planeta: e.planet || e.description?.split(' ')[0],
-        signo: e.sign, descripcion: e.description
+        signo: e.sign, description: e.description
       })),
       retrogrados: retrogrados.map(e => ({
-        fecha: e.date instanceof Date ? e.date.toISOString() : new Date(e.date).toISOString(),
-        planeta: e.planet, signo: e.sign, descripcion: e.description
+        date: e.date instanceof Date ? e.date.toISOString() : new Date(e.date).toISOString(),
+        planeta: e.planet, signo: e.sign, description: e.description
       })),
       total_eventos: monthEvents.length
     });
