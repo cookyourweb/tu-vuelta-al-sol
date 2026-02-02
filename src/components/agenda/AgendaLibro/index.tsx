@@ -18,6 +18,7 @@ import { EsenciaNatal, NodoNorte, NodoSur, PlanetasDominantes, PatronesEmocional
 import { QueEsRetornoSolar, AscendenteAnio, SolRetorno, LunaRetorno, MercurioRetorno, VenusRetorno, MarteRetorno, EjesDelAnio, EjesDelAnio2, IntegracionEjes, RitualCumpleanos, MantraAnual } from './RetornoSolar';
 import { IndiceNavegable } from './Indice';
 import { CalendarioYMapaMes, LunasYEjercicios, SemanaConInterpretacion, CierreMes, PrimerDiaCiclo as PrimerDiaCicloMes } from './MesCompleto';
+import { TransitosDelMes } from './TransitosDelMes';
 import { CalendarioMensualTabla } from './CalendarioMensualTabla';
 import { EscrituraTerapeutica, Visualizacion, RitualSimbolico, TrabajoEmocional } from './TerapiaCreativa';
 import { PrimerDiaCiclo, UltimoDiaCiclo, QuienEraQuienSoy, PreparacionProximaVuelta, CartaCierre, PaginaFinalBlanca, Contraportada } from './PaginasEspeciales';
@@ -1183,6 +1184,37 @@ export const AgendaLibro = ({
     return eventos.filter(e => e.tipo === 'lunaNueva' || e.tipo === 'lunaLlena');
   };
 
+  // Helper: Filtrar eventos de tránsitos (retrogradaciones e ingresos) para TransitosDelMes
+  const getTransitEventsForMonth = (monthIndex: number) => {
+    const eventos = getFormattedEventosForMonth(monthIndex);
+    return eventos
+      .filter(e => e.tipo === 'retrogrado' || e.tipo === 'ingreso' || e.tipo === 'especial')
+      .map(e => ({
+        dia: e.dia,
+        tipo: e.tipo as 'retrogrado' | 'ingreso' | 'especial',
+        titulo: e.titulo,
+        signo: e.signo,
+        interpretacion: e.interpretacion
+      }));
+  };
+
+  // Helper: Obtener reflexión mensual sobre tránsitos desde SR
+  const getMonthlyTransitReflection = (monthIndex: number): string | undefined => {
+    const interpretation = getSRInterpretation();
+    if (!interpretation?.linea_tiempo_emocional) return undefined;
+
+    const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+                       'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const monthData = interpretation.linea_tiempo_emocional.find((m: any) =>
+      m.mes?.toLowerCase().includes(monthNames[monthIndex])
+    );
+
+    if (monthData?.palabra_clave) {
+      return `Este mes la palabra clave es "${monthData.palabra_clave}" con intensidad ${monthData.intensidad || 5}/10.`;
+    }
+    return undefined;
+  };
+
   // LOADING STATE: Cargando datos iniciales
   if (loading && !solarCycle) {
     return (
@@ -1508,6 +1540,11 @@ export const AgendaLibro = ({
               ejercicioCentral={getMonthlyThemeData(0).ejercicioCentral}
               mantra={getMonthlyThemeData(0).mantra}
             />
+            <TransitosDelMes
+              monthDate={new Date(2026, 0, 1)}
+              transitos={getTransitEventsForMonth(0)}
+              reflexionMensual={getMonthlyTransitReflection(0)}
+            />
             <CierreMes monthDate={new Date(2026, 0, 1)} />
           </div>
 
@@ -1534,6 +1571,11 @@ export const AgendaLibro = ({
               ejercicioCentral={getMonthlyThemeData(1).ejercicioCentral}
               mantra={getMonthlyThemeData(1).mantra}
             />
+            <TransitosDelMes
+              monthDate={new Date(2026, 1, 1)}
+              transitos={getTransitEventsForMonth(1)}
+              reflexionMensual={getMonthlyTransitReflection(1)}
+            />
             <CierreMes monthDate={new Date(2026, 1, 1)} />
           </div>
 
@@ -1552,6 +1594,11 @@ export const AgendaLibro = ({
               eventos={getLunarEventsForMonth(2)}
               ejercicioCentral={getMonthlyThemeData(2).ejercicioCentral}
               mantra={getMonthlyThemeData(2).mantra}
+            />
+            <TransitosDelMes
+              monthDate={new Date(2026, 2, 1)}
+              transitos={getTransitEventsForMonth(2)}
+              reflexionMensual={getMonthlyTransitReflection(2)}
             />
             <CierreMes monthDate={new Date(2026, 2, 1)} />
           </div>
@@ -1572,6 +1619,11 @@ export const AgendaLibro = ({
               ejercicioCentral={getMonthlyThemeData(3).ejercicioCentral}
               mantra={getMonthlyThemeData(3).mantra}
             />
+            <TransitosDelMes
+              monthDate={new Date(2026, 3, 1)}
+              transitos={getTransitEventsForMonth(3)}
+              reflexionMensual={getMonthlyTransitReflection(3)}
+            />
             <CierreMes monthDate={new Date(2026, 3, 1)} />
           </div>
 
@@ -1590,6 +1642,11 @@ export const AgendaLibro = ({
               eventos={getLunarEventsForMonth(4)}
               ejercicioCentral={getMonthlyThemeData(4).ejercicioCentral}
               mantra={getMonthlyThemeData(4).mantra}
+            />
+            <TransitosDelMes
+              monthDate={new Date(2026, 4, 1)}
+              transitos={getTransitEventsForMonth(4)}
+              reflexionMensual={getMonthlyTransitReflection(4)}
             />
             <CierreMes monthDate={new Date(2026, 4, 1)} />
           </div>
@@ -1610,6 +1667,11 @@ export const AgendaLibro = ({
               ejercicioCentral={getMonthlyThemeData(5).ejercicioCentral}
               mantra={getMonthlyThemeData(5).mantra}
             />
+            <TransitosDelMes
+              monthDate={new Date(2026, 5, 1)}
+              transitos={getTransitEventsForMonth(5)}
+              reflexionMensual={getMonthlyTransitReflection(5)}
+            />
             <CierreMes monthDate={new Date(2026, 5, 1)} />
           </div>
 
@@ -1628,6 +1690,11 @@ export const AgendaLibro = ({
               eventos={getLunarEventsForMonth(6)}
               ejercicioCentral={getMonthlyThemeData(6).ejercicioCentral}
               mantra={getMonthlyThemeData(6).mantra}
+            />
+            <TransitosDelMes
+              monthDate={new Date(2026, 6, 1)}
+              transitos={getTransitEventsForMonth(6)}
+              reflexionMensual={getMonthlyTransitReflection(6)}
             />
             <CierreMes monthDate={new Date(2026, 6, 1)} />
           </div>
@@ -1648,6 +1715,11 @@ export const AgendaLibro = ({
               ejercicioCentral={getMonthlyThemeData(7).ejercicioCentral}
               mantra={getMonthlyThemeData(7).mantra}
             />
+            <TransitosDelMes
+              monthDate={new Date(2026, 7, 1)}
+              transitos={getTransitEventsForMonth(7)}
+              reflexionMensual={getMonthlyTransitReflection(7)}
+            />
             <CierreMes monthDate={new Date(2026, 7, 1)} />
           </div>
 
@@ -1666,6 +1738,11 @@ export const AgendaLibro = ({
               eventos={getLunarEventsForMonth(8)}
               ejercicioCentral={getMonthlyThemeData(8).ejercicioCentral}
               mantra={getMonthlyThemeData(8).mantra}
+            />
+            <TransitosDelMes
+              monthDate={new Date(2026, 8, 1)}
+              transitos={getTransitEventsForMonth(8)}
+              reflexionMensual={getMonthlyTransitReflection(8)}
             />
             <CierreMes monthDate={new Date(2026, 8, 1)} />
           </div>
@@ -1686,6 +1763,11 @@ export const AgendaLibro = ({
               ejercicioCentral={getMonthlyThemeData(9).ejercicioCentral}
               mantra={getMonthlyThemeData(9).mantra}
             />
+            <TransitosDelMes
+              monthDate={new Date(2026, 9, 1)}
+              transitos={getTransitEventsForMonth(9)}
+              reflexionMensual={getMonthlyTransitReflection(9)}
+            />
             <CierreMes monthDate={new Date(2026, 9, 1)} />
           </div>
 
@@ -1705,6 +1787,11 @@ export const AgendaLibro = ({
               ejercicioCentral={getMonthlyThemeData(10).ejercicioCentral}
               mantra={getMonthlyThemeData(10).mantra}
             />
+            <TransitosDelMes
+              monthDate={new Date(2026, 10, 1)}
+              transitos={getTransitEventsForMonth(10)}
+              reflexionMensual={getMonthlyTransitReflection(10)}
+            />
             <CierreMes monthDate={new Date(2026, 10, 1)} />
           </div>
 
@@ -1723,6 +1810,11 @@ export const AgendaLibro = ({
               eventos={getLunarEventsForMonth(11)}
               ejercicioCentral={getMonthlyThemeData(11).ejercicioCentral}
               mantra={getMonthlyThemeData(11).mantra}
+            />
+            <TransitosDelMes
+              monthDate={new Date(2026, 11, 1)}
+              transitos={getTransitEventsForMonth(11)}
+              reflexionMensual={getMonthlyTransitReflection(11)}
             />
             <CierreMes monthDate={new Date(2026, 11, 1)} />
           </div>

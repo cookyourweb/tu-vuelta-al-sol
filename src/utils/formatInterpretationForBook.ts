@@ -171,9 +171,18 @@ export function detectLunarPhase(title: string, eventType: string): 'lunaNueva' 
  * @returns Objeto formateado para CalendarioMensualTabla
  */
 export function formatEventForBook(event: any) {
+  // Usar detectLunarPhase para eventos lunares, mapEventType para el resto
+  let tipo: 'lunaNueva' | 'lunaLlena' | 'ingreso' | 'retrogrado' | 'eclipse' | 'cumpleanos' | 'especial';
+
+  if (event.type === 'lunar_phase' || event.type === 'new_moon' || event.type === 'full_moon') {
+    tipo = detectLunarPhase(event.title, event.type);
+  } else {
+    tipo = mapEventType(event.type);
+  }
+
   return {
     dia: new Date(event.date).getDate(),
-    tipo: detectLunarPhase(event.title, event.type),
+    tipo,
     titulo: event.title,
     signo: event.sign || 'N/A',
     interpretacion: formatInterpretationForBook(event.interpretation)
