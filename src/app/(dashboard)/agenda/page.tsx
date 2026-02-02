@@ -1675,10 +1675,10 @@ const AgendaPersonalizada = () => {
                 {showPersonalityModal && (
                   <>
                     <div
-                      className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[200]"
+                      className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999]"
                       onClick={() => setShowPersonalityModal(false)}
                     />
-                    <div className="fixed inset-0 flex items-center justify-center z-[201] p-6">
+                    <div className="fixed inset-0 flex items-center justify-center z-[10000] p-6">
                       <div className="bg-gradient-to-br from-purple-900/95 to-pink-900/95 backdrop-blur-sm border border-purple-400/40 rounded-3xl shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-y-auto p-6 text-white">
                         <h3 className="text-2xl font-bold mb-4">Perfil de Personalidad</h3>
                         <p className="whitespace-pre-line leading-relaxed">
@@ -2261,7 +2261,7 @@ const AgendaPersonalizada = () => {
         {/* TOOLTIP ÉPICO */}
         {hoveredEvent && (
           <div
-            className="fixed bg-gradient-to-r from-purple-900/95 to-pink-900/95 backdrop-blur-sm border border-purple-400/40 rounded-2xl p-6 shadow-2xl max-w-sm pointer-events-none z-[202]"
+            className="fixed bg-gradient-to-r from-purple-900/95 to-pink-900/95 backdrop-blur-sm border border-purple-400/40 rounded-2xl p-6 shadow-2xl max-w-sm pointer-events-none z-[10001]"
             style={{
               left: Math.min(tooltipPosition.x - 200, window.innerWidth - 400),
               top: tooltipPosition.y - 20,
@@ -2329,12 +2329,12 @@ const AgendaPersonalizada = () => {
           <>
             {/* Overlay */}
             <div
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200]"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999]"
               onClick={closeEventModal}
             />
 
             {/* Modal centrado */}
-            <div className="fixed inset-0 flex items-center justify-center z-[201] p-4">
+            <div className="fixed inset-0 flex items-center justify-center z-[10000] p-4">
               <div className="bg-gradient-to-br from-purple-900/95 to-pink-900/95 backdrop-blur-sm border border-purple-400/40 rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
                 {/* Header del modal */}
                 <div className="bg-gradient-to-r from-purple-600/80 to-pink-600/80 p-6 border-b border-white/20">
@@ -2675,12 +2675,12 @@ const AgendaPersonalizada = () => {
           <>
             {/* Overlay */}
             <div
-              className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[200]"
+              className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999]"
               onClick={() => setShowDayModal(false)}
             />
 
             {/* Modal fullscreen */}
-            <div className="fixed inset-0 flex items-center justify-center z-[201] p-4">
+            <div className="fixed inset-0 flex items-center justify-center z-[10000] p-4">
               <div className="bg-gradient-to-br from-purple-900/95 to-pink-900/95 backdrop-blur-sm border border-purple-400/40 rounded-3xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden">
                 {/* Header del modal */}
                 <div className="bg-gradient-to-r from-purple-600/80 to-pink-600/80 p-6 border-b border-white/20">

@@ -1160,14 +1160,14 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           </div>
         )}
 
-        {/* ✅ Botón para generar o abrir drawer (solo natal tiene drawer) */}
-        {chartType === 'natal' && (
+        {/* ✅ Botón para generar o abrir drawer (natal y solar-return) */}
+        {(chartType === 'natal' || chartType === 'solar-return') && (
           <button
             onMouseDown={async (e) => {
               e.stopPropagation();
               e.preventDefault();
 
-              const hasAI = interpretation?.drawer;
+              const hasAI = interpretation?.drawer || solarReturnData;
 
               if (!hasAI && userId) {
                 // ⭐ GENERAR ÁNGULO INDIVIDUAL
@@ -1180,7 +1180,7 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                 }, 5000);
 
                 try {
-                  console.log('🎯 Generando ángulo individual: Ascendente');
+                  console.log('🎯 Generando ángulo individual: Ascendente, chartType:', chartType);
 
                   const response = await fetch('/api/astrology/interpret-angle', {
                     method: 'POST',
@@ -1189,7 +1189,8 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                       userId,
                       angleName: 'Ascendente',
                       sign: ascendant.sign,
-                      degree: ascendant.degree
+                      degree: ascendant.degree,
+                      chartType // ✅ Pasar chartType (natal o solar-return)
                     })
                   });
 
@@ -1200,8 +1201,10 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
                     const token = await user!.getIdToken();
 
-                    // ⭐ NATAL: Refrescar interpretaciones natales
-                    const refreshEndpoint = `/api/astrology/interpret-natal?userId=${userId}`;
+                    // ⭐ REFRESCAR según chartType
+                    const refreshEndpoint = chartType === 'solar-return'
+                      ? `/api/astrology/interpret-solar-return?userId=${userId}`
+                      : `/api/astrology/interpret-natal?userId=${userId}`;
 
                     const refreshResponse = await fetch(refreshEndpoint, {
                       headers: {
@@ -1212,12 +1215,23 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                     const refreshResult = await refreshResponse.json();
 
                     if (refreshResult.success) {
-                      setNatalInterpretations(refreshResult.data);
-                      const newInterpretation = refreshResult.data?.angles?.Ascendente;
-
-                      if (newInterpretation?.drawer && onOpenDrawer) {
-                        console.log('✅ Abriendo drawer para: Ascendente');
-                        onOpenDrawer(newInterpretation.drawer);
+                      if (chartType === 'solar-return') {
+                        // Para SR, actualizar solarReturnInterpretation si tenemos setter
+                        const newInterpretation = refreshResult.interpretation?.angulos_vitales?.ascendente;
+                        if (newInterpretation && onOpenDrawer) {
+                          console.log('✅ Abriendo drawer para: Ascendente SR');
+                          onOpenDrawer({
+                            title: `Ascendente en ${ascendant.sign} - Tu Retorno Solar`,
+                            content: newInterpretation.significado || newInterpretation.descripcion || 'Interpretación generada'
+                          });
+                        }
+                      } else {
+                        setNatalInterpretations(refreshResult.data);
+                        const newInterpretation = refreshResult.data?.angles?.Ascendente;
+                        if (newInterpretation?.drawer && onOpenDrawer) {
+                          console.log('✅ Abriendo drawer para: Ascendente');
+                          onOpenDrawer(newInterpretation.drawer);
+                        }
                       }
                     }
                   }
@@ -1375,14 +1389,14 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
           </div>
         )}
 
-        {/* ✅ Botón para generar o abrir drawer (solo natal tiene drawer) */}
-        {chartType === 'natal' && (
+        {/* ✅ Botón para generar o abrir drawer (natal y solar-return) */}
+        {(chartType === 'natal' || chartType === 'solar-return') && (
           <button
             onMouseDown={async (e) => {
               e.stopPropagation();
               e.preventDefault();
 
-              const hasAI = interpretation?.drawer;
+              const hasAI = interpretation?.drawer || solarReturnData;
 
               if (!hasAI && userId) {
                 // ⭐ GENERAR ÁNGULO INDIVIDUAL
@@ -1395,7 +1409,7 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                 }, 5000);
 
                 try {
-                  console.log('🎯 Generando ángulo individual: Medio Cielo');
+                  console.log('🎯 Generando ángulo individual: Medio Cielo, chartType:', chartType);
 
                   const response = await fetch('/api/astrology/interpret-angle', {
                     method: 'POST',
@@ -1404,7 +1418,8 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                       userId,
                       angleName: 'Medio Cielo',
                       sign: midheaven.sign,
-                      degree: midheaven.degree
+                      degree: midheaven.degree,
+                      chartType // ✅ Pasar chartType
                     })
                   });
 
@@ -1415,8 +1430,10 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
 
                     const token = await user!.getIdToken();
 
-                    // ⭐ NATAL: Refrescar interpretaciones natales
-                    const refreshEndpoint = `/api/astrology/interpret-natal?userId=${userId}`;
+                    // ⭐ REFRESCAR según chartType
+                    const refreshEndpoint = chartType === 'solar-return'
+                      ? `/api/astrology/interpret-solar-return?userId=${userId}`
+                      : `/api/astrology/interpret-natal?userId=${userId}`;
 
                     const refreshResponse = await fetch(refreshEndpoint, {
                       headers: {
@@ -1427,12 +1444,23 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
                     const refreshResult = await refreshResponse.json();
 
                     if (refreshResult.success) {
-                      setNatalInterpretations(refreshResult.data);
-                      const newInterpretation = refreshResult.data?.angles?.MedioCielo;
-
-                      if (newInterpretation?.drawer && onOpenDrawer) {
-                        console.log('✅ Abriendo drawer para: Medio Cielo');
-                        onOpenDrawer(newInterpretation.drawer);
+                      if (chartType === 'solar-return') {
+                        // Para SR, abrir drawer con interpretación
+                        const newInterpretation = refreshResult.interpretation?.angulos_vitales?.medio_cielo;
+                        if (newInterpretation && onOpenDrawer) {
+                          console.log('✅ Abriendo drawer para: Medio Cielo SR');
+                          onOpenDrawer({
+                            title: `Medio Cielo en ${midheaven.sign} - Tu Retorno Solar`,
+                            content: newInterpretation.significado || newInterpretation.descripcion || 'Interpretación generada'
+                          });
+                        }
+                      } else {
+                        setNatalInterpretations(refreshResult.data);
+                        const newInterpretation = refreshResult.data?.angles?.MedioCielo;
+                        if (newInterpretation?.drawer && onOpenDrawer) {
+                          console.log('✅ Abriendo drawer para: Medio Cielo');
+                          onOpenDrawer(newInterpretation.drawer);
+                        }
                       }
                     }
                   }
