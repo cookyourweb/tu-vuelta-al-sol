@@ -120,14 +120,23 @@ export async function POST(request: NextRequest) {
     if (existingCycle?.events?.length > 0) {
       // ✅ REUTILIZAR eventos del ciclo ya calculado en BD
       console.log(`✅ Reusing ${existingCycle.events.length} events from SolarCycle BD`);
-      yearEvents = existingCycle.events.map((e: any) => ({
-        type: mapEventType(e.type),
-        date: new Date(e.date),
-        sign: e.metadata?.zodiacSign || e.metadata?.sign || '',
-        planet: e.metadata?.planet || '',
-        house: e.metadata?.house || 1,
-        description: e.description || e.title || ''
-      })).sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      yearEvents = existingCycle.events.map((e: any) => {
+        // Extraer signo de múltiples fuentes posibles
+        const sign = e.metadata?.zodiacSign
+          || e.metadata?.sign
+          || e.metadata?.toSign  // Para ingresos
+          || extractSignFromDescription(e.description || e.title || '')
+          || '';
+
+        return {
+          type: mapEventType(e.type),
+          date: new Date(e.date),
+          sign,
+          planet: e.metadata?.planet || '',
+          house: e.metadata?.house || 1,
+          description: e.description || e.title || ''
+        };
+      }).sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
     } else {
       // Calcular eventos con astronomy-engine (fallback)
       console.log('⚡ Calculating events with astronomy-engine...');
@@ -413,6 +422,27 @@ function mapEventType(type: string): string {
     'seasonal': 'estacional',
   };
   return map[type] || type;
+}
+
+/** Extrae el signo zodiacal de una descripción como "Luna Nueva en Acuario 28.5°" */
+function extractSignFromDescription(description: string): string {
+  if (!description) return '';
+
+  const ZODIAC_SIGNS = [
+    'Aries', 'Tauro', 'Géminis', 'Geminis', 'Cáncer', 'Cancer', 'Leo', 'Virgo',
+    'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'
+  ];
+
+  // Buscar patrón "en [Signo]" o simplemente el nombre del signo
+  const normalizedDesc = description.toLowerCase();
+
+  for (const sign of ZODIAC_SIGNS) {
+    if (normalizedDesc.includes(sign.toLowerCase())) {
+      return sign;
+    }
+  }
+
+  return '';
 }
 
 /** Agrupa eventos por mes (12 meses desde startDate) */
