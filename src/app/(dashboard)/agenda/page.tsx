@@ -1082,6 +1082,9 @@ const AgendaPersonalizada = () => {
 
   // Si está en modo Agenda Libro, mostrar solo eso
   if (showAgendaLibro && userProfile && yearRange) {
+    // Extraer fecha de nacimiento para el libro
+    const birthDateForBook = userProfile.birthDate ? new Date(userProfile.birthDate) : undefined;
+
     return (
       <StyleProvider>
         <AgendaLibro
@@ -1089,6 +1092,8 @@ const AgendaPersonalizada = () => {
           userName={userProfile.name || 'Usuario'}
           startDate={yearRange.start}
           endDate={yearRange.end}
+          events={events}
+          birthDate={birthDateForBook}
         />
       </StyleProvider>
     );
