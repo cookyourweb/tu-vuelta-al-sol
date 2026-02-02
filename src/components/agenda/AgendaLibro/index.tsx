@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useStyle } from '@/context/StyleContext';
 import { StyleSwitcher } from '@/components/agenda/StyleSwitcher';
-import { Printer, X, FileDown, RefreshCw } from 'lucide-react';
+import { Printer, X, FileDown, RefreshCw, Download, Info } from 'lucide-react';
 import { useInterpretaciones } from '@/hooks/useInterpretaciones';
 import { formatEventForBook, formatInterpretationCompact } from '@/utils/formatInterpretationForBook';
 
@@ -68,6 +68,9 @@ export const AgendaLibro = ({
   // Estado para almacenar la interpretación Natal
   const [natalInterpretation, setNatalInterpretation] = useState<any>(null);
   const [loadingNatal, setLoadingNatal] = useState(true);
+
+  // Estado para mostrar instrucciones de PDF
+  const [showPdfInstructions, setShowPdfInstructions] = useState(false);
 
   // Efecto para cargar la interpretación del Retorno Solar desde la BD
   useEffect(() => {
@@ -437,6 +440,18 @@ export const AgendaLibro = ({
     window.setTimeout(() => {
       window.print();
     }, 100);
+  };
+
+  const handleExportPDF = () => {
+    setShowPdfInstructions(true);
+  };
+
+  const handleConfirmPDF = () => {
+    setShowPdfInstructions(false);
+    // Pequeño delay para que se cierre el modal antes de imprimir
+    window.setTimeout(() => {
+      window.print();
+    }, 200);
   };
 
   const handleExportTXT = () => {
@@ -1314,17 +1329,27 @@ export const AgendaLibro = ({
 
             <button
               onClick={handleExportTXT}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold hover:from-blue-400 hover:to-cyan-400 transition-all duration-200 shadow-lg"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-200 border border-white/20 text-sm"
+              title="Descargar texto plano"
             >
               <FileDown className="w-4 h-4" />
-              Exportar TXT
+              TXT
+            </button>
+            <button
+              onClick={handleExportPDF}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 to-orange-500 text-white font-semibold hover:from-red-400 hover:to-orange-400 transition-all duration-200 shadow-lg"
+              title="Guardar como PDF"
+            >
+              <Download className="w-4 h-4" />
+              Guardar PDF
             </button>
             <button
               onClick={handlePrint}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg"
+              title="Imprimir directamente"
             >
               <Printer className="w-4 h-4" />
-              Imprimir Libro
+              Imprimir
             </button>
           </div>
         </div>
@@ -1333,6 +1358,77 @@ export const AgendaLibro = ({
           Agenda de <span className="font-semibold">{userName}</span> · {format(startDate, "d MMM yyyy", { locale: es })} - {format(endDate, "d MMM yyyy", { locale: es })}
         </p>
       </div>
+
+      {/* Modal de instrucciones para PDF */}
+      {showPdfInstructions && (
+        <div className="no-print fixed inset-0 bg-black/70 flex items-center justify-center z-[100]" onClick={() => setShowPdfInstructions(false)}>
+          <div className="bg-white rounded-2xl p-6 max-w-md mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-gradient-to-r from-red-500 to-orange-500 p-2 rounded-full">
+                <Download className="w-6 h-6 text-white" />
+              </div>
+              <h2 className="text-xl font-bold text-gray-800">Guardar como PDF</h2>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              <div className="flex items-start gap-3">
+                <span className="bg-purple-100 text-purple-700 font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-sm">1</span>
+                <p className="text-gray-700 text-sm">Haz clic en "Continuar" para abrir el diálogo de impresión</p>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <span className="bg-purple-100 text-purple-700 font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-sm">2</span>
+                <div className="text-sm">
+                  <p className="text-gray-700">En "Destino" o "Impresora", selecciona:</p>
+                  <p className="font-semibold text-purple-700">"Guardar como PDF"</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <span className="bg-purple-100 text-purple-700 font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-sm">3</span>
+                <div className="text-sm">
+                  <p className="text-gray-700">Configura estas opciones:</p>
+                  <ul className="text-gray-600 text-xs mt-1 space-y-1">
+                    <li>• Tamaño: <span className="font-medium">A5</span></li>
+                    <li>• Márgenes: <span className="font-medium">Ninguno</span></li>
+                    <li>• Gráficos de fondo: <span className="font-medium">Activado</span></li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <span className="bg-purple-100 text-purple-700 font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-sm">4</span>
+                <p className="text-gray-700 text-sm">Haz clic en "Guardar" y elige dónde guardar tu PDF</p>
+              </div>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+              <div className="flex items-center gap-2 mb-1">
+                <Info className="w-4 h-4 text-amber-600" />
+                <span className="text-amber-800 font-semibold text-sm">Consejo</span>
+              </div>
+              <p className="text-amber-700 text-xs">
+                Para mejor calidad, usa Chrome o Edge. Safari puede tener limitaciones con los colores de fondo.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowPdfInstructions(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleConfirmPDF}
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-red-500 to-orange-500 text-white font-semibold rounded-lg hover:from-red-400 hover:to-orange-400 transition-all"
+              >
+                Continuar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Contenido del libro */}
       <div ref={printRef} className="container mx-auto py-8 space-y-0 print:p-0">

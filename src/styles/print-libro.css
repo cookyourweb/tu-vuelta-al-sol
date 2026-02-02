@@ -1,5 +1,6 @@
 /* ============================================
    ESTILOS DE IMPRESIÓN PARA LIBRO A5
+   Tu Vuelta al Sol - Agenda Astrológica Personalizada
    ============================================ */
 
 @media print {
@@ -9,8 +10,32 @@
     margin: 0;
   }
 
+  /* Páginas pares e impares para encuadernación */
+  @page :left {
+    margin-left: 5mm;
+    margin-right: 3mm;
+  }
+
+  @page :right {
+    margin-left: 3mm;
+    margin-right: 5mm;
+  }
+
+  /* Primera página sin margen adicional */
+  @page :first {
+    margin: 0;
+  }
+
   /* Ocultar elementos que no se deben imprimir */
   .no-print {
+    display: none !important;
+  }
+
+  /* Ocultar overlay de generación y modales */
+  [role="dialog"],
+  [class*="modal"],
+  [class*="overlay"],
+  [class*="loading"] {
     display: none !important;
   }
 
@@ -182,6 +207,71 @@
   /* Mantener el patrón muy sutil en portada/contraportada */
   .print-no-bg [class*="pattern"] {
     opacity: 0.05 !important;
+  }
+
+  /* ============================================
+     MEJORAS PARA CALIDAD PDF
+     ============================================ */
+
+  /* Asegurar nitidez de texto */
+  .print-page * {
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Colores consistentes para tránsitos */
+  .print-page [class*="bg-rose-50"] {
+    background-color: #fff1f2 !important;
+  }
+  .print-page [class*="bg-teal-50"] {
+    background-color: #f0fdfa !important;
+  }
+  .print-page [class*="bg-violet-50"] {
+    background-color: #f5f3ff !important;
+  }
+  .print-page [class*="bg-amber-50"] {
+    background-color: #fffbeb !important;
+  }
+  .print-page [class*="bg-indigo-50"] {
+    background-color: #eef2ff !important;
+  }
+
+  /* Bordes de tarjetas visibles */
+  .print-page [class*="rounded-lg"] {
+    border-radius: 8px !important;
+  }
+
+  /* Espaciado consistente en secciones */
+  .print-page [class*="space-y-"] > * + * {
+    margin-top: 8px;
+  }
+
+  /* Asegurar que los iconos Lucide se vean */
+  .print-page svg[class*="lucide"] {
+    stroke-width: 2px;
+  }
+
+  /* Líneas de escritura más visibles para impresión */
+  .print-page .border-b.border-gray-200,
+  .print-page .border-b.border-gray-100 {
+    border-bottom-width: 1px !important;
+    border-bottom-color: #d1d5db !important;
+  }
+
+  /* Evitar cortes en tarjetas de eventos */
+  .print-page [class*="border-2"][class*="rounded-lg"] {
+    page-break-inside: avoid;
+  }
+
+  /* Marca de agua sutil en cada página (opcional) */
+  .print-page::after {
+    content: "";
+    position: absolute;
+    bottom: 5mm;
+    right: 5mm;
+    width: 10mm;
+    height: 10mm;
+    opacity: 0.03;
+    pointer-events: none;
   }
 }
 
