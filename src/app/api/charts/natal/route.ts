@@ -16,8 +16,8 @@ import axios from 'axios';
 // Configuración de Prokerala
 const API_BASE_URL = 'https://api.prokerala.com/v2';
 const TOKEN_URL = 'https://api.prokerala.com/token';
-const CLIENT_ID = process.env.DEFPROKERALA_CLIENT_ID;
-const CLIENT_SECRET = process.env.DEFPROKERALA_CLIENT_SECRET;
+const CLIENT_ID = process.env.PROKERALA_CLIENT_ID;
+const CLIENT_SECRET = process.env.PROKERALA_CLIENT_SECRET;
 
 // Cache de token
 let tokenCache: { token: string; expires: number } | null = null;

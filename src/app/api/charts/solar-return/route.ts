@@ -93,8 +93,8 @@ function calculateSolarReturnPeriod(birthDate: Date) {
  */
 async function callProkeralaSolarReturn(birthData: any, returnYear: number) {
   try {
-    const CLIENT_ID = process.env.DEFPROKERALA_CLIENT_ID;
-    const CLIENT_SECRET = process.env.DEFPROKERALA_CLIENT_SECRET;
+    const CLIENT_ID = process.env.PROKERALA_CLIENT_ID;
+    const CLIENT_SECRET = process.env.PROKERALA_CLIENT_SECRET;
 
     if (!CLIENT_ID || !CLIENT_SECRET) {
       throw new Error('Credenciales Prokerala faltantes');
