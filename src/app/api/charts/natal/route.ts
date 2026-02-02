@@ -7,9 +7,9 @@ import axios from 'axios';
 
 /**
  * ✅ API CHARTS/NATAL - LLAMADA DIRECTA A PROKERALA (VERSIÓN LIMPIA)
- * 
+ *
  * GET: Obtiene carta guardada
- * POST: Genera nueva carta llamando DIRECTAMENTE a Prokerala API con natal-planet-position
+ * POST: Genera nueva carta llamando DIRECTAMENTE a Prokerala API con natal-chart
  * DELETE: Elimina carta guardada (para forzar regeneración)
  */
 
@@ -173,7 +173,8 @@ async function callProkeralaAPI(
     console.log('🔧 Datos procesados:', { datetime, coordinates });
     
     // ✅ LLAMADA GET con parámetros en URL (NO POST)
-    const url = new URL(`${API_BASE_URL}/astrology/natal-planet-position`);
+    // ✅ FIX: Cambiar a natal-chart endpoint (natal-planet-position requiere plan diferente)
+    const url = new URL(`${API_BASE_URL}/astrology/natal-chart`);
     url.searchParams.append('profile[datetime]', datetime);
     url.searchParams.append('profile[coordinates]', coordinates);
     url.searchParams.append('birth_time_unknown', 'false');
@@ -849,7 +850,7 @@ export async function POST(request: NextRequest) {
           natalChart,
           debug: {
             method: 'direct_prokerala_clean',
-            endpoint: 'natal-planet-position',
+            endpoint: 'natal-chart',
             timestamp: new Date().toISOString(),
             ascendant_detected: natalChart.ascendant?.sign
           }
@@ -886,7 +887,7 @@ export async function POST(request: NextRequest) {
           fallback: true,
           debug: {
             method: 'fallback',
-            originalEndpoint: 'natal-planet-position',
+            originalEndpoint: 'natal-chart',
             error: apiError instanceof Error ? apiError.message : 'Unknown',
             timestamp: new Date().toISOString()
           }
