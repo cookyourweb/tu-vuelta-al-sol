@@ -294,16 +294,30 @@ export default function NatalChartPage() {
 
       console.log('🔍 Cargando carta natal para usuario:', user?.uid);
 
-      // Intentar cargar carta existente
-      const result = await authenticatedGet(`/api/charts/natal?userId=${user?.uid}`);
+      // ✅ FIX: Check if chart exists without throwing error on 404
+      let chartExists = false;
+      let existingChart = null;
 
-      console.log('📡 Respuesta carta natal:', result);
+      try {
+        const result = await authenticatedGet(`/api/charts/natal?userId=${user?.uid}`);
+        console.log('📡 Respuesta carta natal:', result);
 
-      if (result.success && result.natalChart) {
+        if (result.success && result.natalChart) {
+          chartExists = true;
+          existingChart = result.natalChart;
+        }
+      } catch (error) {
+        // ✅ 404 is normal for first-time users - don't treat as error
+        console.log('📝 No se encontró carta existente (primera vez), generaremos una nueva');
+        chartExists = false;
+      }
+
+      // ✅ Si existe carta, cargarla
+      if (chartExists && existingChart) {
         console.log('✅ Carta natal cargada correctamente');
         setDebugInfo('✅ Carta natal cargada');
 
-        const processedData = processChartData(result.natalChart);
+        const processedData = processChartData(existingChart);
         setChartData(processedData);
 
         // 🔍 DIAGNOSE: Check planets count
@@ -315,9 +329,9 @@ export default function NatalChartPage() {
         return;
       }
 
-      // Si no existe, generar automáticamente
-      setDebugInfo('📝 Generando carta natal automáticamente...');
-      console.log('📝 No existe carta natal, generando...');
+      // ✅ Si no existe, generar automáticamente (PRIMERA VEZ)
+      setDebugInfo('📝 Generando tu primera carta natal...');
+      console.log('📝 Primera vez - generando carta natal automáticamente...');
 
       const generateResponse = await fetch('/api/charts/natal', {
         method: 'POST',

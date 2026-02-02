@@ -173,8 +173,8 @@ async function callProkeralaAPI(
     console.log('🔧 Datos procesados:', { datetime, coordinates });
     
     // ✅ LLAMADA GET con parámetros en URL (NO POST)
-    // ✅ FIX: Cambiar a natal-chart endpoint (natal-planet-position requiere plan diferente)
-    const url = new URL(`${API_BASE_URL}/astrology/natal-chart`);
+    // Intentar con natal-planet-position (más datos) primero
+    const url = new URL(`${API_BASE_URL}/astrology/natal-planet-position`);
     url.searchParams.append('profile[datetime]', datetime);
     url.searchParams.append('profile[coordinates]', coordinates);
     url.searchParams.append('birth_time_unknown', 'false');
