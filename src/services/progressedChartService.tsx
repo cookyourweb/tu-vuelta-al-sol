@@ -10,8 +10,8 @@ import { calculateAllAspects } from '@/utils/astrology/aspectCalculations';
 let tokenCache: { token: string; expires: number } | null = null;
 
 async function getNewProkeralaToken(): Promise<string> {
-  const clientId = process.env.PROKERALA_CLIENT_ID || '';
-  const clientSecret = process.env.PROKERALA_CLIENT_SECRET || '';
+  const clientId = process.env.DEFPROKERALA_CLIENT_ID || '';
+  const clientSecret = process.env.DEFPROKERALA_CLIENT_SECRET || '';
   const tokenUrl = 'https://api.prokerala.com/token';
 
   if (!clientId || !clientSecret) {

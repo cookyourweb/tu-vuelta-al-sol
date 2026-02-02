@@ -7,8 +7,8 @@ const TOKEN_ENDPOINT = 'https://api.prokerala.com/token';
 const PROKERALA_API_BASE_URL = 'https://api.prokerala.com/v2';
 
 // Usar variables de entorno exactamente como están definidas
-const CLIENT_ID = process.env.PROKERALA_CLIENT_ID;
-const CLIENT_SECRET = process.env.PROKERALA_CLIENT_SECRET;
+const CLIENT_ID = process.env.DEFPROKERALA_CLIENT_ID;
+const CLIENT_SECRET = process.env.DEFPROKERALA_CLIENT_SECRET;
 
 interface TokenResponse {
   access_token: string;

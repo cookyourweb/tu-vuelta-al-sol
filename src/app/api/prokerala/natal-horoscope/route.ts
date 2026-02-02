@@ -6,8 +6,8 @@ const PROKERALA_API_BASE_URL = 'https://api.prokerala.com/v2';
 const TOKEN_ENDPOINT = PROKERALA_API_BASE_URL + '/token';
 const NATAL_CHART_ENDPOINT = PROKERALA_API_BASE_URL + '/astrology/natal-chart';
 
-const CLIENT_ID = process.env.PROKERALA_CLIENT_ID;
-const CLIENT_SECRET = process.env.PROKERALA_CLIENT_SECRET;
+const CLIENT_ID = process.env.DEFPROKERALA_CLIENT_ID;
+const CLIENT_SECRET = process.env.DEFPROKERALA_CLIENT_SECRET;
 
 export async function POST(request: NextRequest) {
   try {

@@ -3,8 +3,8 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   // Leer EXACTAMENTE las mismas variables que usa natal-chart
-  const CLIENT_ID = process.env.PROKERALA_CLIENT_ID;
-  const CLIENT_SECRET = process.env.PROKERALA_CLIENT_SECRET;
+  const CLIENT_ID = process.env.DEFPROKERALA_CLIENT_ID;
+  const CLIENT_SECRET = process.env.DEFPROKERALA_CLIENT_SECRET;
 
   return NextResponse.json({
     timestamp: new Date().toISOString(),

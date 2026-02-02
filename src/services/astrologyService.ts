@@ -57,8 +57,8 @@ export interface NatalChart {
 // API access configuration
 const API_BASE_URL = 'https://api.prokerala.com/v2';
 const TOKEN_ENDPOINT = 'https://api.prokerala.com/token';
-const CLIENT_ID = process.env.PROKERALA_CLIENT_ID;
-const CLIENT_SECRET = process.env.PROKERALA_CLIENT_SECRET;
+const CLIENT_ID = process.env.DEFPROKERALA_CLIENT_ID;
+const CLIENT_SECRET = process.env.DEFPROKERALA_CLIENT_SECRET;
 
 // Token cache
 let tokenCache: { token: string; expires: number } | null = null;

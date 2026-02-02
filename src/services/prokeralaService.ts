@@ -113,8 +113,8 @@ interface ProkeralaApiResponse {
 
 const API_BASE_URL = 'https://api.prokerala.com/v2';
 const TOKEN_ENDPOINT = 'https://api.prokerala.com/token';
-const CLIENT_ID = process.env.PROKERALA_CLIENT_ID;
-const CLIENT_SECRET = process.env.PROKERALA_CLIENT_SECRET;
+const CLIENT_ID = process.env.DEFPROKERALA_CLIENT_ID;
+const CLIENT_SECRET = process.env.DEFPROKERALA_CLIENT_SECRET;
 
 // Cache de token mejorado
 interface TokenCache {
