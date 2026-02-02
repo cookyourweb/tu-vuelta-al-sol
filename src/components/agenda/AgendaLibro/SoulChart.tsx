@@ -317,53 +317,122 @@ export const NodoSur = ({ nodo_sur }: NodoSurProps) => {
   );
 };
 
-export const PlanetasDominantes = () => {
+interface PlanetasDominantesProps {
+  como_piensas?: string;
+  proposito_vida?: string;
+  emociones?: string;
+  como_amas?: string;
+  como_actuas?: string;
+}
+
+export const PlanetasDominantes = ({
+  como_piensas,
+  proposito_vida,
+  emociones,
+  como_amas,
+  como_actuas
+}: PlanetasDominantesProps) => {
   const { config } = useStyle();
+  const tieneContenidoPersonalizado = !!(como_piensas || proposito_vida || emociones);
 
   return (
     <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
-      <div className="text-center mb-8">
+      <div className="text-center mb-6">
         <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient}`}>Planetas dominantes del alma</h2>
         <div className={`${config.divider} w-16 mx-auto mt-4`} />
       </div>
 
       <div className={`flex-1 max-w-2xl mx-auto w-full ${config.fontBody}`}>
-        <p className="text-gray-600 text-center mb-8 italic text-sm">
+        <p className="text-gray-600 text-center mb-6 italic text-sm">
           Tu mente intuitiva, tu identidad fuerte y tu mundo emocional profundo
           no funcionan separados. Este año aprenderán a escucharse sin empujarse.
         </p>
 
-        <div className="space-y-4">
-          <div className={`${config.highlightPrimary} rounded-lg p-5`}>
-            <div className="flex items-center gap-3 mb-3">
-              <span className={`${config.iconSecondary} text-xl`}>☿</span>
-              <span className={`${config.fontDisplay} ${config.iconPrimary}`}>Mercurio (mente intuitiva)</span>
-            </div>
-            <p className="text-gray-700 text-sm">
-              Tu forma de procesar información es profundamente sensible y perceptiva.
-            </p>
-          </div>
+        {tieneContenidoPersonalizado ? (
+          <div className="space-y-3">
+            {como_piensas && (
+              <div className={`${config.highlightPrimary} rounded-lg p-4`}>
+                <div className="flex items-center gap-3 mb-2">
+                  <span className={`${config.iconSecondary} text-xl`}>☿</span>
+                  <span className={`${config.fontDisplay} ${config.iconPrimary} text-sm font-medium`}>Cómo piensas (Mercurio)</span>
+                </div>
+                <p className="text-gray-700 text-sm leading-relaxed">{como_piensas}</p>
+              </div>
+            )}
 
-          <div className={`${config.highlightSecondary} rounded-lg p-5`}>
-            <div className="flex items-center gap-3 mb-3">
-              <span className={`${config.iconSecondary} text-xl`}>☉</span>
-              <span className={`${config.fontDisplay} ${config.iconPrimary}`}>Sol (identidad fuerte)</span>
-            </div>
-            <p className="text-gray-700 text-sm">
-              Tu esencia auténtica busca expresarse sin máscaras ni adaptaciones.
-            </p>
-          </div>
+            {proposito_vida && (
+              <div className={`${config.highlightSecondary} rounded-lg p-4`}>
+                <div className="flex items-center gap-3 mb-2">
+                  <span className={`${config.iconSecondary} text-xl`}>☉</span>
+                  <span className={`${config.fontDisplay} ${config.iconPrimary} text-sm font-medium`}>Tu propósito (Sol)</span>
+                </div>
+                <p className="text-gray-700 text-sm leading-relaxed">{proposito_vida}</p>
+              </div>
+            )}
 
-          <div className={`${config.highlightAccent} rounded-lg p-5`}>
-            <div className="flex items-center gap-3 mb-3">
-              <span className={`${config.iconSecondary} text-xl`}>☽</span>
-              <span className={`${config.fontDisplay} ${config.iconPrimary}`}>Luna (mundo emocional profundo)</span>
-            </div>
-            <p className="text-gray-700 text-sm">
-              Tus emociones son intensas y transformadoras, especialmente en los vínculos.
-            </p>
+            {emociones && (
+              <div className={`${config.highlightAccent} rounded-lg p-4`}>
+                <div className="flex items-center gap-3 mb-2">
+                  <span className={`${config.iconSecondary} text-xl`}>☽</span>
+                  <span className={`${config.fontDisplay} ${config.iconPrimary} text-sm font-medium`}>Tus emociones (Luna)</span>
+                </div>
+                <p className="text-gray-700 text-sm leading-relaxed">{emociones}</p>
+              </div>
+            )}
+
+            {como_amas && (
+              <div className={`${config.highlightPrimary} rounded-lg p-4`}>
+                <div className="flex items-center gap-3 mb-2">
+                  <span className={`${config.iconSecondary} text-xl`}>♀</span>
+                  <span className={`${config.fontDisplay} ${config.iconPrimary} text-sm font-medium`}>Cómo amas (Venus)</span>
+                </div>
+                <p className="text-gray-700 text-sm leading-relaxed">{como_amas}</p>
+              </div>
+            )}
+
+            {como_actuas && (
+              <div className={`${config.highlightSecondary} rounded-lg p-4`}>
+                <div className="flex items-center gap-3 mb-2">
+                  <span className={`${config.iconSecondary} text-xl`}>♂</span>
+                  <span className={`${config.fontDisplay} ${config.iconPrimary} text-sm font-medium`}>Cómo actúas (Marte)</span>
+                </div>
+                <p className="text-gray-700 text-sm leading-relaxed">{como_actuas}</p>
+              </div>
+            )}
           </div>
-        </div>
+        ) : (
+          <div className="space-y-4">
+            <div className={`${config.highlightPrimary} rounded-lg p-5`}>
+              <div className="flex items-center gap-3 mb-3">
+                <span className={`${config.iconSecondary} text-xl`}>☿</span>
+                <span className={`${config.fontDisplay} ${config.iconPrimary}`}>Mercurio (mente intuitiva)</span>
+              </div>
+              <p className="text-gray-700 text-sm">
+                Tu forma de procesar información es profundamente sensible y perceptiva.
+              </p>
+            </div>
+
+            <div className={`${config.highlightSecondary} rounded-lg p-5`}>
+              <div className="flex items-center gap-3 mb-3">
+                <span className={`${config.iconSecondary} text-xl`}>☉</span>
+                <span className={`${config.fontDisplay} ${config.iconPrimary}`}>Sol (identidad fuerte)</span>
+              </div>
+              <p className="text-gray-700 text-sm">
+                Tu esencia auténtica busca expresarse sin máscaras ni adaptaciones.
+              </p>
+            </div>
+
+            <div className={`${config.highlightAccent} rounded-lg p-5`}>
+              <div className="flex items-center gap-3 mb-3">
+                <span className={`${config.iconSecondary} text-xl`}>☽</span>
+                <span className={`${config.fontDisplay} ${config.iconPrimary}`}>Luna (mundo emocional profundo)</span>
+              </div>
+              <p className="text-gray-700 text-sm">
+                Tus emociones son intensas y transformadoras, especialmente en los vínculos.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       <FooterLibro pagina={17} />
@@ -371,52 +440,76 @@ export const PlanetasDominantes = () => {
   );
 };
 
-export const PatronesEmocionales = () => {
+interface PatronesEmocionalesProps {
+  patrones?: string[];
+  sombra?: string;
+}
+
+export const PatronesEmocionales = ({ patrones, sombra }: PatronesEmocionalesProps) => {
   const { config } = useStyle();
+  const tieneContenidoPersonalizado = !!(patrones && patrones.length > 0);
 
   return (
     <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
-      <div className="text-center mb-8">
+      <div className="text-center mb-6">
         <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient}`}>Patrones emocionales a observar</h2>
         <div className={`${config.divider} w-16 mx-auto mt-4`} />
       </div>
 
-      <div className={`flex-1 max-w-2xl mx-auto w-full space-y-6 ${config.fontBody}`}>
+      <div className={`flex-1 max-w-2xl mx-auto w-full space-y-5 ${config.fontBody}`}>
         <p className="text-gray-600 text-center italic text-sm">
           Lo que haces sin darte cuenta. Lo que repites sin saber por qué.
         </p>
 
-        <div className={`${config.highlightPrimary} rounded-lg p-6`}>
-          <p className={`${config.iconSecondary} text-sm mb-4`}>
+        <div className={`${config.highlightPrimary} rounded-lg p-5`}>
+          <p className={`${config.iconSecondary} text-sm mb-3`}>
             Basado en tu carta natal, estos son tus patrones emocionales más profundos:
           </p>
-          <ul className="space-y-3 text-gray-700">
-            <li className="flex items-start gap-3">
-              <span className={config.iconSecondary}>–</span>
-              <span>Absorber emociones ajenas</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className={config.iconSecondary}>–</span>
-              <span>Dudar de tu propio ritmo</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className={config.iconSecondary}>–</span>
-              <span>Postergarte por armonía</span>
-            </li>
+          <ul className="space-y-2 text-gray-700">
+            {tieneContenidoPersonalizado ? (
+              patrones.map((patron, idx) => (
+                <li key={idx} className="flex items-start gap-3">
+                  <span className={config.iconSecondary}>–</span>
+                  <span className="text-sm">{patron}</span>
+                </li>
+              ))
+            ) : (
+              <>
+                <li className="flex items-start gap-3">
+                  <span className={config.iconSecondary}>–</span>
+                  <span>Absorber emociones ajenas</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className={config.iconSecondary}>–</span>
+                  <span>Dudar de tu propio ritmo</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className={config.iconSecondary}>–</span>
+                  <span>Postergarte por armonía</span>
+                </li>
+              </>
+            )}
           </ul>
         </div>
 
+        {sombra && (
+          <div className={`${config.highlightSecondary} rounded-lg p-5`}>
+            <p className={`${config.iconSecondary} text-sm mb-2 font-medium`}>Tu sombra a integrar:</p>
+            <p className="text-gray-700 text-sm leading-relaxed">{sombra}</p>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 gap-4">
-          <div className={`border-l-4 ${config.cardBorder} pl-6`}>
-            <p className={`${config.iconSecondary} italic mb-2`}>Pregunta para reflexionar:</p>
-            <p className="text-gray-700">"Cuando repito, ¿qué estoy buscando?"</p>
-            <div className={`h-16 border-b border-dashed ${config.iconSecondary} opacity-30 mt-4`} />
+          <div className={`border-l-4 ${config.cardBorder} pl-5`}>
+            <p className={`${config.iconSecondary} italic mb-2 text-sm`}>Pregunta para reflexionar:</p>
+            <p className="text-gray-700 text-sm">"Cuando repito, ¿qué estoy buscando?"</p>
+            <div className={`h-12 border-b border-dashed ${config.iconSecondary} opacity-30 mt-3`} />
           </div>
 
-          <div className={`border-l-4 ${config.cardBorder} pl-6`}>
-            <p className={`${config.iconSecondary} italic mb-2`}>Y también:</p>
-            <p className="text-gray-700">"¿Qué parte de mí quiere evolucionar ahora?"</p>
-            <div className={`h-16 border-b border-dashed ${config.iconSecondary} opacity-30 mt-4`} />
+          <div className={`border-l-4 ${config.cardBorder} pl-5`}>
+            <p className={`${config.iconSecondary} italic mb-2 text-sm`}>Y también:</p>
+            <p className="text-gray-700 text-sm">"¿Qué parte de mí quiere evolucionar ahora?"</p>
+            <div className={`h-12 border-b border-dashed ${config.iconSecondary} opacity-30 mt-3`} />
           </div>
         </div>
       </div>

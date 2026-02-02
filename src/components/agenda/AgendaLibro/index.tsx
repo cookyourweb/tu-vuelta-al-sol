@@ -1021,6 +1021,40 @@ export const AgendaLibro = ({
     };
   };
 
+  // Helper: Obtener planetas dominantes
+  const getPlanetasDominantes = () => {
+    const interpretation = getNatalInterpretation();
+    if (!interpretation) return null;
+
+    return {
+      como_piensas: interpretation.como_piensas_y_hablas,
+      proposito_vida: interpretation.proposito_vida,
+      emociones: interpretation.emociones,
+      como_amas: interpretation.como_amas,
+      como_actuas: interpretation.como_enfrentas_la_vida
+    };
+  };
+
+  // Helper: Obtener patrones emocionales
+  const getPatronesEmocionales = () => {
+    const interpretation = getNatalInterpretation();
+    if (!interpretation) return null;
+
+    // Buscar patrones en diferentes campos posibles
+    const patrones = interpretation.patrones_emocionales ||
+                     interpretation.patrones ||
+                     interpretation.patrones_a_observar;
+
+    const sombra = interpretation.sombra ||
+                   interpretation.aspectos_sombra ||
+                   interpretation.desafios_emocionales;
+
+    return {
+      patrones: Array.isArray(patrones) ? patrones : patrones ? [patrones] : undefined,
+      sombra: typeof sombra === 'string' ? sombra : sombra?.descripcion
+    };
+  };
+
   // Helper: Obtener claves de integración del SR
   const getClavesIntegracion = (): string[] | undefined => {
     const interpretation = getSRInterpretation();
@@ -1037,6 +1071,116 @@ export const AgendaLibro = ({
   const getComparacionesPlanetarias = () => {
     const interpretation = getSRInterpretation();
     return interpretation?.comparaciones_planetarias;
+  };
+
+  // Helper: Obtener integración de ejes del SR
+  const getIntegracionEjes = () => {
+    const interpretation = getSRInterpretation();
+    if (!interpretation?.ejes) return null;
+
+    const ejes = interpretation.ejes;
+    return {
+      asc: ejes.ascendente?.interpretacion || ejes.asc?.interpretacion || ejes.ascendente || ejes.asc,
+      mc: ejes.medio_cielo?.interpretacion || ejes.mc?.interpretacion || ejes.medio_cielo || ejes.mc,
+      dsc: ejes.descendente?.interpretacion || ejes.dsc?.interpretacion || ejes.descendente || ejes.dsc,
+      ic: ejes.fondo_cielo?.interpretacion || ejes.ic?.interpretacion || ejes.fondo_cielo || ejes.ic,
+      frase_guia: interpretation.frase_guia || interpretation.mantra_anual || ejes.frase_guia
+    };
+  };
+
+  // Helper: Obtener datos mensuales personalizados (ejercicio, mantra, etc.)
+  const getMonthlyThemeData = (monthIndex: number) => {
+    const interpretation = getSRInterpretation();
+    const zodiacSigns = [
+      { name: 'Capricornio', symbol: '♑', element: 'tierra' },
+      { name: 'Acuario', symbol: '♒', element: 'aire' },
+      { name: 'Piscis', symbol: '♓', element: 'agua' },
+      { name: 'Aries', symbol: '♈', element: 'fuego' },
+      { name: 'Tauro', symbol: '♉', element: 'tierra' },
+      { name: 'Géminis', symbol: '♊', element: 'aire' },
+      { name: 'Cáncer', symbol: '♋', element: 'agua' },
+      { name: 'Leo', symbol: '♌', element: 'fuego' },
+      { name: 'Virgo', symbol: '♍', element: 'tierra' },
+      { name: 'Libra', symbol: '♎', element: 'aire' },
+      { name: 'Escorpio', symbol: '♏', element: 'agua' },
+      { name: 'Sagitario', symbol: '♐', element: 'fuego' }
+    ];
+
+    const monthlyThemes = [
+      { // Enero - Capricornio
+        ejercicio: { titulo: 'Revisar automatismos', descripcion: 'Identifica una acción que haces por inercia y pregúntate: ¿esto me sigue sirviendo?' },
+        mantra: 'Arranco desde mi verdad, no desde la prisa'
+      },
+      { // Febrero - Acuario
+        ejercicio: { titulo: 'Conectar con tu visión única', descripcion: 'Escribe cómo sería tu vida ideal sin las expectativas de otros. ¿Qué deseas realmente?' },
+        mantra: 'Mi singularidad es mi mayor fortaleza'
+      },
+      { // Marzo - Piscis
+        ejercicio: { titulo: 'Soltar el control', descripcion: 'Practica confiar en el flujo de la vida. Medita 10 minutos observando sin juzgar.' },
+        mantra: 'Me dejo llevar por la corriente de mi intuición'
+      },
+      { // Abril - Aries
+        ejercicio: { titulo: 'Actuar sin pensar demasiado', descripcion: 'Elige algo que has estado postergando y hazlo hoy. La acción genera claridad.' },
+        mantra: 'Me permito empezar aunque no esté listo'
+      },
+      { // Mayo - Tauro
+        ejercicio: { titulo: 'Cultivar el placer consciente', descripcion: 'Dedica tiempo a disfrutar algo con todos tus sentidos. Come, pasea, o crea algo bello.' },
+        mantra: 'Merezco disfrutar del camino, no solo del destino'
+      },
+      { // Junio - Géminis
+        ejercicio: { titulo: 'Explorar nuevas perspectivas', descripcion: 'Lee algo fuera de tu zona habitual o conversa con alguien muy diferente a ti.' },
+        mantra: 'Cada conversación me expande'
+      },
+      { // Julio - Cáncer
+        ejercicio: { titulo: 'Nutrir tu hogar interior', descripcion: 'Crea un espacio seguro para tus emociones. Escribe una carta a tu yo niño/a.' },
+        mantra: 'Mi vulnerabilidad es sagrada'
+      },
+      { // Agosto - Leo
+        ejercicio: { titulo: 'Brillar sin disculpas', descripcion: 'Haz algo que te haga sentir orgulloso/a de ti. Celebra un logro, por pequeño que sea.' },
+        mantra: 'Mi luz inspira a otros a brillar'
+      },
+      { // Septiembre - Virgo
+        ejercicio: { titulo: 'Ordenar con amor', descripcion: 'Organiza un área de tu vida (física o emocional) que necesite atención.' },
+        mantra: 'En los detalles encuentro mi maestría'
+      },
+      { // Octubre - Libra
+        ejercicio: { titulo: 'Buscar el equilibrio', descripcion: 'Identifica dónde estás dando de más o de menos. ¿Qué necesita ajustarse?' },
+        mantra: 'Mis relaciones me reflejan'
+      },
+      { // Noviembre - Escorpio
+        ejercicio: { titulo: 'Transformar la sombra', descripcion: 'Escribe sobre algo que temes o evitas. La conciencia transforma.' },
+        mantra: 'De mis profundidades nace mi poder'
+      },
+      { // Diciembre - Sagitario
+        ejercicio: { titulo: 'Expandir horizontes', descripcion: 'Planifica algo que te emocione: un viaje, un curso, una aventura interior.' },
+        mantra: 'Mi búsqueda de sentido me guía'
+      }
+    ];
+
+    // Intentar obtener datos personalizados del SR si existen
+    const lineaTiempo = interpretation?.linea_tiempo_emocional;
+    let monthData = lineaTiempo?.find((m: any) => {
+      const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+                         'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+      return m.mes?.toLowerCase().includes(monthNames[monthIndex]);
+    });
+
+    const defaultTheme = monthlyThemes[monthIndex] || monthlyThemes[0];
+
+    return {
+      ejercicioCentral: defaultTheme.ejercicio,
+      mantra: monthData?.palabra_clave
+        ? `${defaultTheme.mantra} · ${monthData.palabra_clave}`
+        : defaultTheme.mantra,
+      intensidad: monthData?.intensidad || 5,
+      palabraClave: monthData?.palabra_clave
+    };
+  };
+
+  // Helper: Filtrar eventos lunares para LunasYEjercicios
+  const getLunarEventsForMonth = (monthIndex: number) => {
+    const eventos = getFormattedEventosForMonth(monthIndex);
+    return eventos.filter(e => e.tipo === 'lunaNueva' || e.tipo === 'lunaLlena');
   };
 
   // LOADING STATE: Cargando datos iniciales
@@ -1182,7 +1326,7 @@ export const AgendaLibro = ({
         {/* 2. ¡FELIZ CUMPLEAÑOS! - PRIMER DÍA DEL CICLO */}
         <div id="primer-dia-ciclo-inicio">
           <PrimerDiaCiclo
-            name={userName}
+            nombre={userName}
             fecha={startDate}
             temaCentral={getInterpretacionRetornoSolar()}
             mandato={getSRInterpretation()?.comparaciones_planetarias?.sol?.mandato_del_ano}
@@ -1290,10 +1434,19 @@ export const AgendaLibro = ({
             />
           </div>
           <div id="planetas-dominantes">
-            <PlanetasDominantes />
+            <PlanetasDominantes
+              como_piensas={getPlanetasDominantes()?.como_piensas}
+              proposito_vida={getPlanetasDominantes()?.proposito_vida}
+              emociones={getPlanetasDominantes()?.emociones}
+              como_amas={getPlanetasDominantes()?.como_amas}
+              como_actuas={getPlanetasDominantes()?.como_actuas}
+            />
           </div>
           <div id="patrones-emocionales">
-            <PatronesEmocionales />
+            <PatronesEmocionales
+              patrones={getPatronesEmocionales()?.patrones}
+              sombra={getPatronesEmocionales()?.sombra}
+            />
           </div>
         </div>
 
@@ -1323,7 +1476,13 @@ export const AgendaLibro = ({
           <div id="ejes-anio">
             <EjesDelAnio />
             <EjesDelAnio2 />
-            <IntegracionEjes />
+            <IntegracionEjes
+              asc={getIntegracionEjes()?.asc}
+              mc={getIntegracionEjes()?.mc}
+              dsc={getIntegracionEjes()?.dsc}
+              ic={getIntegracionEjes()?.ic}
+              frase_guia={getIntegracionEjes()?.frase_guia}
+            />
           </div>
           {/* RITUAL DE CUMPLEAÑOS */}
           <div id="ritual-cumpleanos">
@@ -1343,40 +1502,12 @@ export const AgendaLibro = ({
               temaDelMes="Inicios conscientes"
               eventos={getFormattedEventosForMonth(0)}
             />
-
-        <LunasYEjercicios
-          monthDate={new Date(2026, 0, 1)}
-          eventos={[
-            {
-              dia: 13,
-              tipo: 'lunaLlena',
-              titulo: 'Luna Llena en Cáncer',
-              interpretacion: 'Culminación emocional. Momento para soltar lo que ya no te pertenece en el ámbito familiar y emocional.'
-            },
-            {
-              dia: 29,
-              tipo: 'lunaNueva',
-              titulo: 'Luna Nueva en Acuario',
-              interpretacion: 'Siembra intenciones sobre libertad, comunidad e innovación. Tiempo de conectar con tu visión única.'
-            }
-          ]}
-          ejercicioCentral={{
-            titulo: 'Revisar automatismos',
-            descripcion: 'Durante este mes, identifica una acción que haces por inercia y pregúntate: ¿esto me sigue sirviendo?'
-          }}
-          mantra="Arranco desde mi verdad, no desde la prisa"
-        />
-        <SemanaConInterpretacion
-          weekStart={new Date(2026, 0, 5)}
-          weekNumber={1}
-          mesNombre="Enero 2026"
-          tematica="Pausa y revisión"
-          eventos={[
-            { dia: 6, tipo: 'ingreso', titulo: 'Venus → Piscis', signo: 'Piscis' }
-          ]}
-          interpretacionSemanal="Esta primera semana del año es para bajar el ritmo y revisar qué quieres cultivar realmente. No hay prisa."
-          ejercicioSemana="Escribe 3 cosas que NO quieres repetir este año."
-        />
+            <LunasYEjercicios
+              monthDate={new Date(2026, 0, 1)}
+              eventos={getLunarEventsForMonth(0)}
+              ejercicioCentral={getMonthlyThemeData(0).ejercicioCentral}
+              mantra={getMonthlyThemeData(0).mantra}
+            />
             <CierreMes monthDate={new Date(2026, 0, 1)} />
           </div>
 
@@ -1384,7 +1515,7 @@ export const AgendaLibro = ({
           <div id="mes-febrero">
             {/* PÁGINA ESPECIAL DE CUMPLEAÑOS */}
             <PaginaCumpleanos
-              birthDate={new Date(2026, 1, 10)} // 10 de febrero
+              birthDate={startDate}
               userName={userName}
             />
 
@@ -1394,10 +1525,15 @@ export const AgendaLibro = ({
               nombreZodiaco="Acuario → Piscis"
               simboloZodiaco="♒"
               temaDelMes="Renacimiento solar"
-              birthday={new Date(2026, 1, 10)} // Marca el día 10 como cumpleaños
+              birthday={startDate}
               eventos={getFormattedEventosForMonth(1)}
             />
-
+            <LunasYEjercicios
+              monthDate={new Date(2026, 1, 1)}
+              eventos={getLunarEventsForMonth(1)}
+              ejercicioCentral={getMonthlyThemeData(1).ejercicioCentral}
+              mantra={getMonthlyThemeData(1).mantra}
+            />
             <CierreMes monthDate={new Date(2026, 1, 1)} />
           </div>
 
@@ -1410,6 +1546,12 @@ export const AgendaLibro = ({
               simboloZodiaco="♓"
               temaDelMes="Culminación y renacimiento"
               eventos={getFormattedEventosForMonth(2)}
+            />
+            <LunasYEjercicios
+              monthDate={new Date(2026, 2, 1)}
+              eventos={getLunarEventsForMonth(2)}
+              ejercicioCentral={getMonthlyThemeData(2).ejercicioCentral}
+              mantra={getMonthlyThemeData(2).mantra}
             />
             <CierreMes monthDate={new Date(2026, 2, 1)} />
           </div>
@@ -1424,6 +1566,12 @@ export const AgendaLibro = ({
               temaDelMes="Acción y manifestación"
               eventos={getFormattedEventosForMonth(3)}
             />
+            <LunasYEjercicios
+              monthDate={new Date(2026, 3, 1)}
+              eventos={getLunarEventsForMonth(3)}
+              ejercicioCentral={getMonthlyThemeData(3).ejercicioCentral}
+              mantra={getMonthlyThemeData(3).mantra}
+            />
             <CierreMes monthDate={new Date(2026, 3, 1)} />
           </div>
 
@@ -1436,6 +1584,12 @@ export const AgendaLibro = ({
               simboloZodiaco="♉"
               temaDelMes="Estabilidad y placer"
               eventos={getFormattedEventosForMonth(4)}
+            />
+            <LunasYEjercicios
+              monthDate={new Date(2026, 4, 1)}
+              eventos={getLunarEventsForMonth(4)}
+              ejercicioCentral={getMonthlyThemeData(4).ejercicioCentral}
+              mantra={getMonthlyThemeData(4).mantra}
             />
             <CierreMes monthDate={new Date(2026, 4, 1)} />
           </div>
@@ -1450,6 +1604,12 @@ export const AgendaLibro = ({
               temaDelMes="Comunicación y versatilidad"
               eventos={getFormattedEventosForMonth(5)}
             />
+            <LunasYEjercicios
+              monthDate={new Date(2026, 5, 1)}
+              eventos={getLunarEventsForMonth(5)}
+              ejercicioCentral={getMonthlyThemeData(5).ejercicioCentral}
+              mantra={getMonthlyThemeData(5).mantra}
+            />
             <CierreMes monthDate={new Date(2026, 5, 1)} />
           </div>
 
@@ -1462,6 +1622,12 @@ export const AgendaLibro = ({
               simboloZodiaco="♋"
               temaDelMes="Nutrición emocional"
               eventos={getFormattedEventosForMonth(6)}
+            />
+            <LunasYEjercicios
+              monthDate={new Date(2026, 6, 1)}
+              eventos={getLunarEventsForMonth(6)}
+              ejercicioCentral={getMonthlyThemeData(6).ejercicioCentral}
+              mantra={getMonthlyThemeData(6).mantra}
             />
             <CierreMes monthDate={new Date(2026, 6, 1)} />
           </div>
@@ -1476,6 +1642,12 @@ export const AgendaLibro = ({
               temaDelMes="Expresión y creatividad"
               eventos={getFormattedEventosForMonth(7)}
             />
+            <LunasYEjercicios
+              monthDate={new Date(2026, 7, 1)}
+              eventos={getLunarEventsForMonth(7)}
+              ejercicioCentral={getMonthlyThemeData(7).ejercicioCentral}
+              mantra={getMonthlyThemeData(7).mantra}
+            />
             <CierreMes monthDate={new Date(2026, 7, 1)} />
           </div>
 
@@ -1488,6 +1660,12 @@ export const AgendaLibro = ({
               simboloZodiaco="♍"
               temaDelMes="Discernimiento y servicio"
               eventos={getFormattedEventosForMonth(8)}
+            />
+            <LunasYEjercicios
+              monthDate={new Date(2026, 8, 1)}
+              eventos={getLunarEventsForMonth(8)}
+              ejercicioCentral={getMonthlyThemeData(8).ejercicioCentral}
+              mantra={getMonthlyThemeData(8).mantra}
             />
             <CierreMes monthDate={new Date(2026, 8, 1)} />
           </div>
@@ -1502,6 +1680,12 @@ export const AgendaLibro = ({
               temaDelMes="Equilibrio y relaciones"
               eventos={getFormattedEventosForMonth(9)}
             />
+            <LunasYEjercicios
+              monthDate={new Date(2026, 9, 1)}
+              eventos={getLunarEventsForMonth(9)}
+              ejercicioCentral={getMonthlyThemeData(9).ejercicioCentral}
+              mantra={getMonthlyThemeData(9).mantra}
+            />
             <CierreMes monthDate={new Date(2026, 9, 1)} />
           </div>
 
@@ -1515,6 +1699,12 @@ export const AgendaLibro = ({
               temaDelMes="Transformación profunda"
               eventos={getFormattedEventosForMonth(10)}
             />
+            <LunasYEjercicios
+              monthDate={new Date(2026, 10, 1)}
+              eventos={getLunarEventsForMonth(10)}
+              ejercicioCentral={getMonthlyThemeData(10).ejercicioCentral}
+              mantra={getMonthlyThemeData(10).mantra}
+            />
             <CierreMes monthDate={new Date(2026, 10, 1)} />
           </div>
 
@@ -1527,6 +1717,12 @@ export const AgendaLibro = ({
               simboloZodiaco="♐"
               temaDelMes="Expansión y sabiduría"
               eventos={getFormattedEventosForMonth(11)}
+            />
+            <LunasYEjercicios
+              monthDate={new Date(2026, 11, 1)}
+              eventos={getLunarEventsForMonth(11)}
+              ejercicioCentral={getMonthlyThemeData(11).ejercicioCentral}
+              mantra={getMonthlyThemeData(11).mantra}
             />
             <CierreMes monthDate={new Date(2026, 11, 1)} />
           </div>

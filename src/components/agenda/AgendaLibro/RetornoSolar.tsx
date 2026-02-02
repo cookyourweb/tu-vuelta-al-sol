@@ -391,53 +391,81 @@ export const EjesDelAnio2 = () => {
   );
 };
 
-export const IntegracionEjes = () => {
+interface IntegracionEjesProps {
+  asc?: string;
+  mc?: string;
+  dsc?: string;
+  ic?: string;
+  frase_guia?: string;
+}
+
+export const IntegracionEjes = ({ asc, mc, dsc, ic, frase_guia }: IntegracionEjesProps) => {
   const { config } = useStyle();
+  const tieneContenidoPersonalizado = !!(asc || mc || dsc || ic);
 
   return (
     <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
-      <div className="text-center mb-8">
+      <div className="text-center mb-6">
         <span className={`${config.iconSecondary} text-3xl`}>✧</span>
         <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient} mt-4`}>Integración de los cuatro ejes</h2>
         <div className={`${config.divider} w-16 mx-auto mt-4`} />
       </div>
 
-      <div className={`flex-1 max-w-2xl mx-auto w-full space-y-8 ${config.fontBody}`}>
-        <p className="text-gray-700 text-lg leading-relaxed text-center">
+      <div className={`flex-1 max-w-2xl mx-auto w-full space-y-5 ${config.fontBody}`}>
+        <p className="text-gray-700 text-base leading-relaxed text-center">
           Este año te enseña a:
         </p>
 
-        <div className="space-y-4">
-          <div className={`${config.highlightPrimary} rounded-lg p-4 flex items-center gap-4`}>
-            <span className={`${config.iconSecondary} text-xl`}>↑</span>
-            <p className="text-gray-700">Ser sin definirte del todo <span className="text-gray-400 text-sm">(ASC)</span></p>
+        <div className="space-y-3">
+          <div className={`${config.highlightPrimary} rounded-lg p-4`}>
+            <div className="flex items-center gap-3 mb-2">
+              <span className={`${config.iconSecondary} text-xl`}>↑</span>
+              <span className={`${config.iconPrimary} font-medium text-sm`}>Ascendente (ASC) - Identidad</span>
+            </div>
+            <p className="text-gray-700 text-sm leading-relaxed">
+              {asc || 'Ser sin definirte del todo. Permitirte evolucionar sin forzar una versión fija de ti.'}
+            </p>
           </div>
 
-          <div className={`${config.highlightSecondary} rounded-lg p-4 flex items-center gap-4`}>
-            <span className={`${config.iconSecondary} text-xl`}>⬆</span>
-            <p className="text-gray-700">Replantear tu rumbo sin exigirte resultados <span className="text-gray-400 text-sm">(MC)</span></p>
+          <div className={`${config.highlightSecondary} rounded-lg p-4`}>
+            <div className="flex items-center gap-3 mb-2">
+              <span className={`${config.iconSecondary} text-xl`}>⬆</span>
+              <span className={`${config.iconPrimary} font-medium text-sm`}>Medio Cielo (MC) - Propósito</span>
+            </div>
+            <p className="text-gray-700 text-sm leading-relaxed">
+              {mc || 'Replantear tu rumbo sin exigirte resultados. Encontrar sentido antes que logros.'}
+            </p>
           </div>
 
-          <div className={`${config.highlightAccent} rounded-lg p-4 flex items-center gap-4`}>
-            <span className={`${config.iconSecondary} text-xl`}>↓</span>
-            <p className="text-gray-700">Relacionarte sin traicionarte <span className="text-gray-400 text-sm">(DSC)</span></p>
+          <div className={`${config.highlightAccent} rounded-lg p-4`}>
+            <div className="flex items-center gap-3 mb-2">
+              <span className={`${config.iconSecondary} text-xl`}>↓</span>
+              <span className={`${config.iconPrimary} font-medium text-sm`}>Descendente (DSC) - Relaciones</span>
+            </div>
+            <p className="text-gray-700 text-sm leading-relaxed">
+              {dsc || 'Relacionarte sin traicionarte. Mantener tu esencia en el vínculo con otros.'}
+            </p>
           </div>
 
-          <div className={`${config.highlightPrimary} rounded-lg p-4 flex items-center gap-4`}>
-            <span className={`${config.iconSecondary} text-xl`}>⬇</span>
-            <p className="text-gray-700">Cuidar tu base emocional como prioridad <span className="text-gray-400 text-sm">(IC)</span></p>
+          <div className={`${config.highlightPrimary} rounded-lg p-4`}>
+            <div className="flex items-center gap-3 mb-2">
+              <span className={`${config.iconSecondary} text-xl`}>⬇</span>
+              <span className={`${config.iconPrimary} font-medium text-sm`}>Fondo de Cielo (IC) - Raíces</span>
+            </div>
+            <p className="text-gray-700 text-sm leading-relaxed">
+              {ic || 'Cuidar tu base emocional como prioridad. Nutrir tus raíces internas.'}
+            </p>
           </div>
         </div>
 
-        <p className="text-gray-500 text-center italic mt-6">
-          Nada de esto ocurre de golpe.<br />
-          Se entrena día a día.
+        <p className="text-gray-500 text-center italic text-sm mt-4">
+          Nada de esto ocurre de golpe. Se entrena día a día.
         </p>
 
-        <div className={`bg-gradient-to-r ${config.headerBg} rounded-lg p-8 text-center mt-8`}>
-          <p className={`text-gray-400 text-sm uppercase tracking-widest mb-4 ${config.fontBody}`}>Frase guía del eje del año</p>
-          <p className={`${config.fontDisplay} text-xl ${config.headerText} italic leading-relaxed`}>
-            "Me permito ser honesta conmigo antes de intentar encajar en el mundo."
+        <div className={`bg-gradient-to-r ${config.headerBg} rounded-lg p-6 text-center mt-4`}>
+          <p className={`text-gray-400 text-xs uppercase tracking-widest mb-3 ${config.fontBody}`}>Frase guía del eje del año</p>
+          <p className={`${config.fontDisplay} text-lg ${config.headerText} italic leading-relaxed`}>
+            "{frase_guia || 'Me permito ser honesta conmigo antes de intentar encajar en el mundo.'}"
           </p>
         </div>
       </div>
