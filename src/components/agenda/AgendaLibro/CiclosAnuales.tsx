@@ -141,7 +141,7 @@ export const LineaTiempoEmocional: React.FC<{
         </div>
       </div>
 
-      <FooterLibro pagina={16} />
+      <FooterLibro pagina={12} />
     </div>
   );
 };
@@ -267,7 +267,7 @@ export const MesesClavePuntosGiro: React.FC<MesesClavePuntosGiroProps> = ({ line
         </div>
       </div>
 
-      <FooterLibro pagina={17} />
+      <FooterLibro pagina={13} />
     </div>
   );
 };
@@ -367,7 +367,7 @@ export const GrandesAprendizajes: React.FC<GrandesAprendizajesProps> = ({ claves
         </p>
       </div>
 
-      <FooterLibro pagina={18} />
+      <FooterLibro pagina={14} />
     </div>
   );
 };

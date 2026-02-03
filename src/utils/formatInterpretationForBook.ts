@@ -165,17 +165,56 @@ export function detectLunarPhase(title: string, eventType: string): 'lunaNueva' 
 }
 
 /**
+ * Extrae el signo zodiacal del título del evento si no está disponible directamente
+ *
+ * @param title - Título del evento (ej: "Luna Nueva en Acuario")
+ * @returns El signo zodiacal o undefined si no se encuentra
+ */
+function extractSignFromTitle(title: string): string | undefined {
+  const signos = [
+    'Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo',
+    'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'
+  ];
+
+  for (const signo of signos) {
+    if (title.toLowerCase().includes(signo.toLowerCase())) {
+      return signo;
+    }
+  }
+
+  // Fallback para nombres en inglés
+  const signosIngles: Record<string, string> = {
+    'aries': 'Aries', 'taurus': 'Tauro', 'gemini': 'Géminis',
+    'cancer': 'Cáncer', 'leo': 'Leo', 'virgo': 'Virgo',
+    'libra': 'Libra', 'scorpio': 'Escorpio', 'sagittarius': 'Sagitario',
+    'capricorn': 'Capricornio', 'aquarius': 'Acuario', 'pisces': 'Piscis'
+  };
+
+  const titleLower = title.toLowerCase();
+  for (const [eng, esp] of Object.entries(signosIngles)) {
+    if (titleLower.includes(eng)) {
+      return esp;
+    }
+  }
+
+  return undefined;
+}
+
+/**
  * Formatea un evento completo para el libro, mapeando todos los campos necesarios
  *
  * @param event - Evento astrológico desde el SolarCycle
  * @returns Objeto formateado para CalendarioMensualTabla
  */
 export function formatEventForBook(event: any) {
+  // Obtener signo del evento o extraerlo del título
+  const signo = event.sign || extractSignFromTitle(event.title) || '';
+
   return {
     dia: new Date(event.date).getDate(),
     tipo: detectLunarPhase(event.title, event.type),
     titulo: event.title,
-    signo: event.sign || 'N/A',
+    signo: signo,
     interpretacion: formatInterpretationForBook(event.interpretation)
   };
 }

@@ -2254,6 +2254,23 @@ const AgendaPersonalizada = () => {
                   Explorar más ✨
                 </Link>
               </div>
+
+              {/* CTA para Astrólogos */}
+              <div className="mt-4 bg-gradient-to-r from-indigo-900/60 to-purple-900/60 backdrop-blur-sm rounded-2xl p-6 border border-indigo-400/30 text-center">
+                <div className="text-2xl mb-3">🌟</div>
+                <h4 className="text-white font-bold mb-2">El futuro de la astrología es ahora</h4>
+                <p className="text-indigo-200 text-sm mb-4">
+                  ¿Quieres saber cómo la IA está transformando la práctica astrológica profesional?
+                </p>
+                <a
+                  href="https://wa.me/34666666666?text=Hola%2C%20me%20interesa%20saber%20más%20sobre%20IA%20para%20astrólogos"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-6 py-3 rounded-full font-semibold hover:from-indigo-400 hover:to-purple-400 transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  Contacta conmigo →
+                </a>
+              </div>
             </div>
           </div>
         </div>

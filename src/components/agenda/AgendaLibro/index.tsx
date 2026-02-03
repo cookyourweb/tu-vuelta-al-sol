@@ -857,6 +857,18 @@ export const AgendaLibro = ({
           const eventDate = new Date(event.date);
           const dia = eventDate.getDate();
           let tipoEvento = event.type || 'Evento';
+          let signo = event.sign || '';
+
+          // Extraer signo del título si no está definido
+          if (!signo && event.title) {
+            const signos = ['Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'];
+            for (const s of signos) {
+              if (event.title.toLowerCase().includes(s.toLowerCase())) {
+                signo = s;
+                break;
+              }
+            }
+          }
 
           // Traducir tipos de eventos
           if (event.type === 'new_moon') {
@@ -873,9 +885,26 @@ export const AgendaLibro = ({
             tipoEvento = 'Tránsito planetario';
           }
 
+          // Formatear evento evitando redundancia
           txtContent += `▸ ${dia} de ${mesKey.split(' ')[0].toLowerCase()} - ${tipoEvento}`;
 
-          if (event.title) {
+          // Agregar información adicional del signo o título solo si aporta valor
+          if (tipoEvento === 'Luna Nueva' || tipoEvento === 'Luna Llena') {
+            // Para lunas, mostrar el signo si está disponible
+            if (signo) {
+              txtContent += ` en ${signo}`;
+            }
+          } else if (tipoEvento === 'Tránsito planetario' && event.title) {
+            // Para tránsitos, mostrar planeta y signo
+            txtContent += `: ${event.title}`;
+          } else if (tipoEvento === 'Retrogradación' && event.title) {
+            // Para retrógrados, mostrar el planeta
+            txtContent += `: ${event.title}`;
+          } else if (tipoEvento === 'Eclipse' && event.title) {
+            // Para eclipses, mostrar tipo (solar/lunar) y signo
+            txtContent += `: ${event.title}`;
+          } else if (event.title && !event.title.toLowerCase().includes(tipoEvento.toLowerCase())) {
+            // Solo agregar título si no es redundante
             txtContent += `: ${event.title}`;
           }
 
@@ -1197,9 +1226,7 @@ export const AgendaLibro = ({
           <div id="guia-agenda">
             <GuiaAgenda />
           </div>
-          <div id="intencion-anual">
-            <PaginaIntencionAnual />
-          </div>
+          {/* PRIMERO: Interpretación del tema central */}
           <div id="tema-central">
             <TemaCentralAnio
               interpretacion={getInterpretacionRetornoSolar()}
@@ -1208,7 +1235,7 @@ export const AgendaLibro = ({
               isGenerating={generatingSolarReturn}
             />
           </div>
-          {/* INTENCIÓN DEL AÑO - Justo después del tema central */}
+          {/* DESPUÉS: Espacio para escribir intención (tras leer interpretación) */}
           <div id="intencion-anual-sr">
             <PaginaIntencionAnualSR
               temaCentral={getInterpretacionRetornoSolar()}
