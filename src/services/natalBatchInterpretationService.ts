@@ -2,9 +2,11 @@
 // 🎯 NATAL BATCH INTERPRETATION SERVICE
 // src/services/natalBatchInterpretationService.ts
 // Generates 12 interpretations: 2 angles + 10 planets
+// OPTIMIZADO: Usa gpt-4o-mini para chunks individuales
 // =============================================================================
 
 import OpenAI from 'openai';
+import { getModelParams, logModelUsage } from '@/config/aiModels';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -197,9 +199,11 @@ Generate the JSON now:`;
 // =============================================================================
 
 async function generateSingleInterpretation(prompt: string): Promise<InterpretacionCompleta> {
+  const modelParams = getModelParams('natal_interpretation_chunk');
+
   try {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: modelParams.model,
       messages: [
         {
           role: 'system',
@@ -215,10 +219,15 @@ You MUST respond ONLY with valid JSON. No markdown, no explanations, JUST the JS
           content: prompt,
         },
       ],
-      temperature: 0.85,
-      max_tokens: 1500,
+      temperature: modelParams.temperature,
+      max_tokens: modelParams.max_tokens,
       response_format: { type: 'json_object' },
     });
+
+    // Log usage for cost tracking
+    if (completion.usage) {
+      logModelUsage('natal_interpretation_chunk', completion.usage.prompt_tokens, completion.usage.completion_tokens);
+    }
 
     const response = completion.choices[0]?.message?.content;
     if (!response) throw new Error('No response from OpenAI');

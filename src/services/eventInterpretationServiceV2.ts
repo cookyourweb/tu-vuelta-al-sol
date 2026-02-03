@@ -7,12 +7,14 @@
 // - Contexto completo Natal + Solar Return
 // - Plantilla definitiva reutilizable
 // - Tono acompañante vs explicativo
+// - OPTIMIZADO: Usa gpt-4o-mini para reducir costos 96%
 // =============================================================================
 
 import OpenAI from 'openai';
 import connectDB from '@/lib/db';
 import Interpretation from '@/models/Interpretation';
 import EventInterpretation from '@/models/EventInterpretation';
+import { getModelParams, logModelUsage } from '@/config/aiModels';
 
 // =============================================================================
 // TYPES
@@ -392,17 +394,23 @@ export async function generateUltraPersonalizedInterpretation(
   // 3. Generar con OpenAI
   const client = getOpenAIClient();
   const prompt = buildUltraPersonalizedPrompt(event, userProfile);
+  const modelParams = getModelParams('event_interpretation');
 
-  console.log(`🤖 [AI] Generating ultra-personalized interpretation for ${userProfile.name}`);
+  console.log(`🤖 [AI] Generating ultra-personalized interpretation for ${userProfile.name} using ${modelParams.model}`);
 
   try {
     const response = await client.chat.completions.create({
-      model: 'gpt-4o',
+      model: modelParams.model,
       messages: [{ role: 'user', content: prompt }],
-      temperature: 0.75,  // Menos creativo, más consistente
-      max_tokens: 1200,   // Más espacio para contenido completo
+      temperature: modelParams.temperature,
+      max_tokens: modelParams.max_tokens,
       response_format: { type: 'json_object' }
     });
+
+    // Log usage for cost tracking
+    if (response.usage) {
+      logModelUsage('event_interpretation', response.usage.prompt_tokens, response.usage.completion_tokens);
+    }
 
     const content = response.choices[0]?.message?.content;
     if (!content) {

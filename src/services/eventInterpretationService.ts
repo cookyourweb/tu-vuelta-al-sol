@@ -4,9 +4,11 @@
 // =============================================================================
 // Genera interpretaciones personalizadas para eventos astrológicos
 // considerando la carta natal y solar return del usuario
+// OPTIMIZADO: Usa gpt-4o-mini para reducir costos 96%
 // =============================================================================
 
 import OpenAI from 'openai';
+import { getModelParams, logModelUsage } from '@/config/aiModels';
 
 // =============================================================================
 // TYPES
@@ -138,14 +140,21 @@ Responde SOLO con JSON en este formato:
   "opportunities": ["...", "..."]
 }`;
 
+  const modelParams = getModelParams('event_interpretation');
+
   try {
     const response = await client.chat.completions.create({
-      model: 'gpt-4o',
+      model: modelParams.model,
       messages: [{ role: 'user', content: prompt }],
-      temperature: 0.8,
-      max_tokens: 800,
+      temperature: modelParams.temperature,
+      max_tokens: modelParams.max_tokens,
       response_format: { type: 'json_object' }
     });
+
+    // Log usage for cost tracking
+    if (response.usage) {
+      logModelUsage('event_interpretation', response.usage.prompt_tokens, response.usage.completion_tokens);
+    }
 
     const content = response.choices[0]?.message?.content;
     if (!content) {
