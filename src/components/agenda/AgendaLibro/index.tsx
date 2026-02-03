@@ -472,42 +472,17 @@ export const AgendaLibro = ({
     txtContent += '\n\n';
 
     // ═══════════════════════════════════════════════════════════
-    // PRIMER DÍA DEL CICLO - ¡FELIZ CUMPLEAÑOS!
+    // GUÍA DE LA AGENDA (Natal primero, SR segundo)
     // ═══════════════════════════════════════════════════════════
     txtContent += '═══════════════════════════════════════════════════════════\n';
-    txtContent += '               PRIMER DÍA DE TU CICLO\n';
-    txtContent += '═══════════════════════════════════════════════════════════\n\n';
-    txtContent += `${format(startDate, "d 'de' MMMM 'de' yyyy", { locale: es })}\n`;
-    txtContent += `¡Feliz cumpleaños, ${userName}!\n\n`;
-
-    const temaCentral = getInterpretacionRetornoSolar();
-    const mandato = getSRInterpretation()?.comparaciones_planetarias?.sol?.mandato_del_ano;
-
-    if (temaCentral) {
-      txtContent += '━━━ TU TEMA PARA ESTE CICLO ━━━\n';
-      txtContent += (temaCentral.length > 200 ? temaCentral.substring(0, 200) + '...' : temaCentral) + '\n\n';
-    }
-
-    if (mandato) {
-      txtContent += '━━━ EL MANDATO DEL AÑO ━━━\n';
-      txtContent += `"${mandato}"\n\n`;
-    }
-
-    txtContent += '━━━ INTENCIÓN PARA ESTE NUEVO CICLO ━━━\n';
-    txtContent += '(Espacio para escribir tu intención personal)\n\n';
-
-    // ═══════════════════════════════════════════════════════════
-    // GUÍA DE LA AGENDA
-    // ═══════════════════════════════════════════════════════════
-    txtContent += '\n═══════════════════════════════════════════════════════════\n';
     txtContent += '          QUÉ VAS A ENCONTRAR EN ESTA AGENDA\n';
     txtContent += '═══════════════════════════════════════════════════════════\n\n';
-    txtContent += '🌟 Tu Retorno Solar:\n';
-    txtContent += '   El tema central de tu año, cómo se siente este ciclo y qué vino a moverte.\n';
-    txtContent += '   Una interpretación profunda de tu carta astrológica anual.\n\n';
     txtContent += '💫 Tu Carta Natal:\n';
     txtContent += '   Tu esencia, tus dones, tu propósito vital.\n';
     txtContent += '   El mapa del cielo en el momento exacto de tu nacimiento.\n\n';
+    txtContent += '🌟 Tu Retorno Solar:\n';
+    txtContent += '   El tema central de tu año, cómo se siente este ciclo y qué vino a moverte.\n';
+    txtContent += '   Una interpretación profunda de tu carta astrológica anual.\n\n';
     txtContent += '📅 Calendario Astrológico:\n';
     txtContent += '   12 meses con Lunas Nuevas, Lunas Llenas, eclipses, retrogradaciones\n';
     txtContent += '   y tránsitos importantes. Cada mes tiene espacio para escribir y reflexionar.\n\n';
@@ -521,7 +496,79 @@ export const AgendaLibro = ({
     txtContent += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
 
     // ═══════════════════════════════════════════════════════════
-    // SOLAR RETURN - INTERPRETACIÓN COMPLETA
+    // CARTA NATAL - TU ESENCIA (PRIMERO)
+    // ═══════════════════════════════════════════════════════════
+    const natalData = getNatalInterpretation();
+    txtContent += '═══════════════════════════════════════════════════════════\n';
+    txtContent += '                  CARTA NATAL - TU ESENCIA\n';
+    txtContent += '═══════════════════════════════════════════════════════════\n\n';
+
+    if (natalData) {
+      // ESENCIA NATAL
+      const esencia = getEsenciaNatal();
+      if (esencia) {
+        if (esencia.proposito_vida) {
+          txtContent += '━━━ TU PROPÓSITO VITAL ━━━\n';
+          txtContent += esencia.proposito_vida + '\n\n';
+        }
+
+        if (esencia.emociones) {
+          txtContent += '━━━ TU MUNDO EMOCIONAL ━━━\n';
+          txtContent += esencia.emociones + '\n\n';
+        }
+
+        if (esencia.pensamiento) {
+          txtContent += '━━━ CÓMO PIENSAS Y TE COMUNICAS ━━━\n';
+          txtContent += esencia.pensamiento + '\n\n';
+        }
+
+        if (esencia.amor) {
+          txtContent += '━━━ CÓMO AMAS ━━━\n';
+          txtContent += esencia.amor + '\n\n';
+        }
+
+        if (esencia.accion) {
+          txtContent += '━━━ CÓMO ACTÚAS ━━━\n';
+          txtContent += esencia.accion + '\n\n';
+        }
+      }
+
+      // NODOS LUNARES
+      const nodos = getNodosLunares();
+      if (nodos) {
+        if (nodos.nodo_sur) {
+          txtContent += '━━━ NODO SUR (De dónde vienes) ━━━\n';
+          txtContent += nodos.nodo_sur + '\n\n';
+        }
+
+        if (nodos.nodo_norte) {
+          txtContent += '━━━ NODO NORTE (Hacia dónde vas) ━━━\n';
+          txtContent += nodos.nodo_norte + '\n\n';
+        }
+      }
+    } else {
+      // Fallback si no hay interpretación completa
+      txtContent += 'Tu carta natal es el mapa del cielo en el momento exacto de tu nacimiento.\n';
+      txtContent += 'Refleja tu potencial, tus dones, tus desafíos y el camino de tu alma.\n\n';
+
+      if (sunSign) {
+        txtContent += `SOL EN ${sunSign.toUpperCase()}:\n`;
+        txtContent += 'Tu esencia, tu identidad, tu propósito vital.\n\n';
+      }
+
+      if (moonSign) {
+        txtContent += `LUNA EN ${moonSign.toUpperCase()}:\n`;
+        txtContent += 'Tus necesidades emocionales, tu mundo interior.\n\n';
+      }
+
+      if (ascendant) {
+        txtContent += `ASCENDENTE EN ${ascendant.toUpperCase()}:\n`;
+        txtContent += 'Tu máscara social, cómo te perciben los demás.\n\n';
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // RETORNO SOLAR - INTERPRETACIÓN COMPLETA (DESPUÉS DE NATAL)
     // ═══════════════════════════════════════════════════════════
     const srData = getSRInterpretation();
     if (srData) {
@@ -696,78 +743,6 @@ export const AgendaLibro = ({
     }
 
     // ═══════════════════════════════════════════════════════════
-    // SOUL CHART - CARTA NATAL COMPLETA
-    // ═══════════════════════════════════════════════════════════
-    const natalData = getNatalInterpretation();
-    txtContent += '\n═══════════════════════════════════════════════════════════\n';
-    txtContent += '                  CARTA NATAL - TU ESENCIA\n';
-    txtContent += '═══════════════════════════════════════════════════════════\n\n';
-
-    if (natalData) {
-      // ESENCIA NATAL
-      const esencia = getEsenciaNatal();
-      if (esencia) {
-        if (esencia.proposito_vida) {
-          txtContent += '━━━ TU PROPÓSITO VITAL ━━━\n';
-          txtContent += esencia.proposito_vida + '\n\n';
-        }
-
-        if (esencia.emociones) {
-          txtContent += '━━━ TU MUNDO EMOCIONAL ━━━\n';
-          txtContent += esencia.emociones + '\n\n';
-        }
-
-        if (esencia.pensamiento) {
-          txtContent += '━━━ CÓMO PIENSAS Y TE COMUNICAS ━━━\n';
-          txtContent += esencia.pensamiento + '\n\n';
-        }
-
-        if (esencia.amor) {
-          txtContent += '━━━ CÓMO AMAS ━━━\n';
-          txtContent += esencia.amor + '\n\n';
-        }
-
-        if (esencia.accion) {
-          txtContent += '━━━ CÓMO ACTÚAS ━━━\n';
-          txtContent += esencia.accion + '\n\n';
-        }
-      }
-
-      // NODOS LUNARES
-      const nodos = getNodosLunares();
-      if (nodos) {
-        if (nodos.nodo_sur) {
-          txtContent += '\n━━━ NODO SUR (De dónde vienes) ━━━\n';
-          txtContent += nodos.nodo_sur + '\n\n';
-        }
-
-        if (nodos.nodo_norte) {
-          txtContent += '━━━ NODO NORTE (Hacia dónde vas) ━━━\n';
-          txtContent += nodos.nodo_norte + '\n\n';
-        }
-      }
-    } else {
-      // Fallback si no hay interpretación completa
-      txtContent += 'Tu carta natal es el mapa del cielo en el momento exacto de tu nacimiento.\n';
-      txtContent += 'Refleja tu potencial, tus dones, tus desafíos y el camino de tu alma.\n\n';
-
-      if (sunSign) {
-        txtContent += `SOL EN ${sunSign.toUpperCase()}:\n`;
-        txtContent += 'Tu esencia, tu identidad, tu propósito vital.\n\n';
-      }
-
-      if (moonSign) {
-        txtContent += `LUNA EN ${moonSign.toUpperCase()}:\n`;
-        txtContent += 'Tus necesidades emocionales, tu mundo interior.\n\n';
-      }
-
-      if (ascendant) {
-        txtContent += `ASCENDENTE EN ${ascendant.toUpperCase()}:\n`;
-        txtContent += 'Tu máscara social, cómo te perciben los demás.\n\n';
-      }
-    }
-
-    // ═══════════════════════════════════════════════════════════
     // EJES DEL AÑO
     // ═══════════════════════════════════════════════════════════
     txtContent += '\n═══════════════════════════════════════════════════════════\n';
@@ -818,6 +793,47 @@ export const AgendaLibro = ({
     txtContent += '5. Apaga la vela con gratitud.\n\n';
 
     txtContent += 'Si resuena contigo, pruébalo.\n\n';
+
+    // ═══════════════════════════════════════════════════════════
+    // PRIMER DÍA DE TU CICLO (después de leer todas las interpretaciones)
+    // ═══════════════════════════════════════════════════════════
+    txtContent += '═══════════════════════════════════════════════════════════\n';
+    txtContent += '               PRIMER DÍA DE TU CICLO\n';
+    txtContent += '═══════════════════════════════════════════════════════════\n\n';
+    txtContent += `${format(startDate, "d 'de' MMMM 'de' yyyy", { locale: es })}\n`;
+    txtContent += `¡Feliz cumpleaños, ${userName}!\n\n`;
+
+    txtContent += 'Ahora que ya has leído quién eres y qué se activa este año,\n';
+    txtContent += 'es momento de hacer una pausa antes de comenzar.\n\n';
+
+    txtContent += '━━━ RITUAL DE APERTURA ━━━\n';
+    txtContent += '🕯️ Busca un lugar tranquilo\n';
+    txtContent += '☕ Prepárate una infusión\n';
+    txtContent += '✨ Enciende una vela si lo deseas\n\n';
+
+    const temaCentral = getInterpretacionRetornoSolar();
+    const mandato = getSRInterpretation()?.comparaciones_planetarias?.sol?.mandato_del_ano;
+
+    if (temaCentral) {
+      txtContent += '━━━ TU TEMA PARA ESTE CICLO ━━━\n';
+      txtContent += (temaCentral.length > 200 ? temaCentral.substring(0, 200) + '...' : temaCentral) + '\n\n';
+    }
+
+    if (mandato) {
+      txtContent += '━━━ LA INVITACIÓN DEL AÑO ━━━\n';
+      txtContent += `"${mandato}"\n\n`;
+    }
+
+    txtContent += '━━━ PREGUNTAS PARA REFLEXIONAR ━━━\n';
+    txtContent += '• ¿Qué sensaciones te ha dejado esta lectura?\n';
+    txtContent += '• ¿Qué palabras o frases resuenan más contigo?\n';
+    txtContent += '• ¿Hay algo que ya sabías pero necesitabas confirmar?\n\n';
+
+    txtContent += '━━━ MI INTENCIÓN PARA ESTA VUELTA AL SOL ━━━\n';
+    txtContent += '(Espacio para escribir tu intención personal)\n\n';
+    txtContent += '________________________________________________________________\n\n';
+    txtContent += '________________________________________________________________\n\n';
+    txtContent += '________________________________________________________________\n\n';
 
     // ═══════════════════════════════════════════════════════════
     // CALENDARIO DE TU AÑO SOLAR (ORDENADO CRONOLÓGICAMENTE)
