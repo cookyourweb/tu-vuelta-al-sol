@@ -4,10 +4,21 @@
    ============================================ */
 
 @media print {
-  /* Configuración global de página A5 */
+  /* Configuración global de página A5 con márgenes para encuadernación */
   @page {
     size: A5 portrait;
-    margin: 0;
+    /* Margen para encuadernación: izq mayor, der menor */
+    margin: 10mm 12mm 10mm 15mm;
+  }
+
+  /* Páginas impares (derecha): margen encuadernación a la izquierda */
+  @page :right {
+    margin: 10mm 12mm 10mm 15mm;
+  }
+
+  /* Páginas pares (izquierda): margen encuadernación a la derecha */
+  @page :left {
+    margin: 10mm 15mm 10mm 12mm;
   }
 
   /* Páginas pares e impares para encuadernación */
@@ -58,15 +69,17 @@
 
   /* Cada página debe ocupar exactamente una hoja A5 */
   .print-page {
-    width: 148mm !important; /* A5 ancho */
-    height: 210mm !important; /* A5 alto (corregido de 297mm que era A4) */
+    width: 100% !important; /* Ocupar todo el ancho disponible (dentro de márgenes) */
+    min-height: 100vh !important; /* Altura completa de página */
+    height: auto !important;
     page-break-after: always;
     page-break-inside: avoid;
     margin: 0;
-    padding: 0;
-    overflow: hidden;
+    padding: 8mm !important; /* Padding interno adicional */
+    overflow: visible;
     position: relative;
     background: white;
+    box-sizing: border-box;
   }
 
   /* La última página no debe tener page-break */

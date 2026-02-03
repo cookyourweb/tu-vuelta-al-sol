@@ -376,7 +376,7 @@ export const LoQueVieneAMover = ({
         )}
       </div>
 
-      <FooterLibro pagina={7} />
+      <FooterLibro pagina={8} />
     </div>
   );
 };
@@ -462,7 +462,7 @@ export const LoQuePideSoltar = ({ reflejos_obsoletos, sombras }: LoQuePideSoltar
         </div>
       </div>
 
-      <FooterLibro pagina={8} />
+      <FooterLibro pagina={9} />
     </div>
   );
 };

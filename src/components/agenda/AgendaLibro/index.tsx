@@ -889,6 +889,18 @@ export const AgendaLibro = ({
           const eventDate = new Date(event.date);
           const dia = eventDate.getDate();
           let tipoEvento = event.type || 'Evento';
+          let signo = event.sign || '';
+
+          // Extraer signo del título si no está definido
+          if (!signo && event.title) {
+            const signos = ['Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'];
+            for (const s of signos) {
+              if (event.title.toLowerCase().includes(s.toLowerCase())) {
+                signo = s;
+                break;
+              }
+            }
+          }
 
           // Traducir tipos de eventos
           if (event.type === 'new_moon') {
@@ -905,9 +917,26 @@ export const AgendaLibro = ({
             tipoEvento = 'Tránsito planetario';
           }
 
+          // Formatear evento evitando redundancia
           txtContent += `▸ ${dia} de ${mesKey.split(' ')[0].toLowerCase()} - ${tipoEvento}`;
 
-          if (event.title) {
+          // Agregar información adicional del signo o título solo si aporta valor
+          if (tipoEvento === 'Luna Nueva' || tipoEvento === 'Luna Llena') {
+            // Para lunas, mostrar el signo si está disponible
+            if (signo) {
+              txtContent += ` en ${signo}`;
+            }
+          } else if (tipoEvento === 'Tránsito planetario' && event.title) {
+            // Para tránsitos, mostrar planeta y signo
+            txtContent += `: ${event.title}`;
+          } else if (tipoEvento === 'Retrogradación' && event.title) {
+            // Para retrógrados, mostrar el planeta
+            txtContent += `: ${event.title}`;
+          } else if (tipoEvento === 'Eclipse' && event.title) {
+            // Para eclipses, mostrar tipo (solar/lunar) y signo
+            txtContent += `: ${event.title}`;
+          } else if (event.title && !event.title.toLowerCase().includes(tipoEvento.toLowerCase())) {
+            // Solo agregar título si no es redundante
             txtContent += `: ${event.title}`;
           }
 
@@ -1515,10 +1544,93 @@ export const AgendaLibro = ({
 
         <IndiceNavegable />
 
-        {/* ═══════════════════════════════════════════════════════════════
-            SECCIÓN 2: CARTA NATAL (Soul Chart) - PRIMERO
-            ═══════════════════════════════════════════════════════════════ */}
-        {/* 2. SOUL CHART */}
+        {/* 2. ¡FELIZ CUMPLEAÑOS! - PRIMER DÍA DEL CICLO */}
+        <div id="primer-dia-ciclo-inicio">
+          <PrimerDiaCiclo
+            nombre={userName}
+            fecha={startDate}
+            temaCentral={getInterpretacionRetornoSolar()}
+            mandato={getSRInterpretation()?.comparaciones_planetarias?.sol?.mandato_del_ano}
+          />
+        </div>
+
+        {/* 3. CARTA DE BIENVENIDA Y GUÍA */}
+        <div id="tu-anio-tu-viaje">
+          <div id="carta-bienvenida">
+            <CartaBienvenida name={userName} />
+          </div>
+          <div id="guia-agenda">
+            <GuiaAgenda />
+          </div>
+          {/* PRIMERO: Interpretación del tema central */}
+          <div id="tema-central">
+            <TemaCentralAnio
+              interpretacion={getInterpretacionRetornoSolar()}
+              srInterpretation={getSRInterpretation()}
+              onGenerateSolarReturn={handleGenerateSolarReturn}
+              isGenerating={generatingSolarReturn}
+            />
+          </div>
+          {/* DESPUÉS: Espacio para escribir intención (tras leer interpretación) */}
+          <div id="intencion-anual-sr">
+            <PaginaIntencionAnualSR
+              temaCentral={getInterpretacionRetornoSolar()}
+              ejeDelAno={getSRInterpretation()?.apertura_anual?.eje_del_ano}
+              userName={userName}
+            />
+          </div>
+        </div>
+
+        {/* 3. LO QUE VIENE A MOVER Y SOLTAR */}
+        <div id="viaje-interno">
+          <div id="viene-mover">
+            <LoQueVieneAMover
+              facilidad={getComoSeViveSiendoTu()?.facilidad}
+              incomodidad={getComoSeViveSiendoTu()?.incomodidad}
+              medida_del_ano={getComoSeViveSiendoTu()?.medida_del_ano}
+              actitud_nueva={getComoSeViveSiendoTu()?.actitud_nueva}
+            />
+          </div>
+          <div id="pide-soltar">
+            <LoQuePideSoltar
+              reflejos_obsoletos={getComoSeViveSiendoTu()?.reflejos_obsoletos}
+              sombras={getSombrasDelAno()}
+            />
+          </div>
+        </div>
+
+        {/* 4. TU AÑO 2026-2027 - OVERVIEW */}
+        <div id="tu-anio-overview">
+          <TuAnioOverview
+            startDate={startDate}
+            endDate={endDate}
+            userName={userName}
+            hasSolarReturn={!!getInterpretacionRetornoSolar()}
+          />
+          <TuAnioCiclos
+            startDate={startDate}
+            endDate={endDate}
+            userName={userName}
+            hasSolarReturn={!!getInterpretacionRetornoSolar()}
+          />
+        </div>
+
+        {/* 5. CICLOS ANUALES */}
+        <div id="ciclos-anuales">
+          <LineaTiempoEmocional
+            startDate={startDate}
+            endDate={endDate}
+            lineaTiempoData={solarReturnInterpretation?.interpretation?.linea_tiempo_emocional}
+          />
+          <MesesClavePuntosGiro
+            lineaTiempo={solarReturnInterpretation?.interpretation?.meses_clave_puntos_giro || getLineaTiempoAnual()}
+          />
+          <GrandesAprendizajes
+            clavesIntegracion={getClavesIntegracion()}
+          />
+        </div>
+
+        {/* 6. SOUL CHART */}
         <div id="soul-chart">
           <div id="esencia-natal">
             <EsenciaNatal
