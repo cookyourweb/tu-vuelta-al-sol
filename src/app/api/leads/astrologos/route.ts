@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import Lead from '@/models/Lead';
+import vapiService from '@/services/vapiService';
 
 // ==========================================
 // 📥 POST: CREAR NUEVO LEAD DE ASTRÓLOGO
@@ -61,11 +62,32 @@ export async function POST(request: NextRequest) {
 
     console.log('✨ [LEAD] Nuevo lead creado:', email);
 
-    // TODO: Aquí podrías integrar:
-    // 1. Enviar email de bienvenida
-    // 2. Notificar a Vapi para llamada automática
-    // 3. Agregar a lista de email marketing
-    // 4. Notificar por Telegram/Slack
+    // 🤖 LLAMADA AUTOMÁTICA CON VAPI
+    // Solo llamar si está configurado y hay teléfono válido
+    if (process.env.VAPI_API_KEY && process.env.VAPI_ASSISTANT_ID && telefono) {
+      try {
+        const call = await vapiService.createOutboundCall({
+          phoneNumber: telefono,
+          assistantId: process.env.VAPI_ASSISTANT_ID,
+          customerName: nombre,
+          metadata: {
+            leadId: newLead._id.toString(),
+            email,
+            experiencia,
+            interes
+          }
+        });
+
+        // Actualizar lead con ID de llamada
+        newLead.notas = `Llamada Vapi iniciada: ${call.id}`;
+        await newLead.save();
+
+        console.log('📞 [LEAD] Llamada Vapi iniciada para:', nombre);
+      } catch (vapiError: any) {
+        console.error('⚠️ [LEAD] Error al iniciar llamada Vapi:', vapiError.message);
+        // No fallar el lead si Vapi falla
+      }
+    }
 
     return NextResponse.json({
       success: true,
