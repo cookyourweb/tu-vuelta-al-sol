@@ -1,232 +1,212 @@
 # Tu Vuelta al Sol — LO QUE FALTA
 
-**Última actualización:** 28 enero 2026
+**Última actualización:** 3 febrero 2026
 
 ---
 
-## PRIORIDAD 1 — BUGS CRÍTICOS DEL LIBRO
+## VISIÓN DE LA AGENDA TOP
 
-### 1.1 Optimizar generación del libro (NO regenerar lo que ya existe)
-**Estado:** DISEÑADO, pendiente implementar
-**Problema:** `generate-book/route.ts` pide a OpenAI que regenere TODO (8000 tokens),
-incluyendo datos que ya existen en BD (interpretación natal, retorno solar, eventos).
+La agenda debe ser una **guía hiper-personalizada** que:
+1. **PRIMERO** te cuente QUIÉN ERES (Carta Natal)
+2. **SEGUNDO** te explique QUÉ SE ACTIVA ESTE AÑO (Retorno Solar)
+3. **TERCERO** te deje REFLEXIONAR y poner intención (después de entender)
+4. **CUARTO** te GUÍE mes a mes con eventos personalizados (no genéricos)
+5. **QUINTO** te permita CERRAR el ciclo con reflexión
+
+**Principio fundamental**: Espacios para escribir SIEMPRE después de la interpretación.
+
+---
+
+## PRIORIDAD 1 — CONTENIDO PERSONALIZADO DEL LIBRO
+
+### 1.1 Planetas Dominantes (P18) — Interpretaciones personalizadas
+**Estado:** PENDIENTE
+**Problema:** `PlanetasDominantes` muestra contenido hardcoded genérico
 **Solución:**
-- Extraer de BD: tema del año, planeta dominante, propósito, superpoderes,
-  desafíos, rituales, mantra del año, insights, advertencias, comparaciones planetarias
-- Pasar como CONTEXTO al prompt, no pedir que los regenere
-- OpenAI solo genera: portada, carta bienvenida, 12 portadas mes, cierre, frase final
-- Reducción estimada: de ~8000 tokens salida → ~3000 tokens (ahorro 60%)
-- Coste actual: ~$0.15-0.25 por libro → Objetivo: ~$0.06-0.10
+- Pasar props con datos de BD: `proposito_vida`, `emociones`, `como_piensas`, `como_amas`, `como_actuas`
+- Mostrar: "☉ Sol en [SIGNO]: [interpretación personalizada de BD]"
+- Ya existe helper `getPlanetasDominantes()` en index.tsx
 
-### 1.2 Calendario empieza en mes del cumpleaños
-**Estado:** FIX PUSHEADO (commit `65ec163`)
-- Si cumpleaños es febrero y hoy es enero 2026, ciclo = Feb 2025 → Feb 2026
-- Corregido en `generate-book/route.ts`
+### 1.2 Integración de Cuatro Ejes (P25) — Interpretación clara
+**Estado:** PENDIENTE
+**Problema:** `IntegracionEjes` muestra descripción genérica de ASC/DSC/MC/IC
+**Solución:**
+- Extraer de BD: `angulos_vitales.ascendente`, `angulos_vitales.medio_cielo`
+- Mostrar signo específico: "Ascendente en [SIGNO]: [interpretación]"
+- Añadir: "MC en [SIGNO]: Tu dirección vocacional este año..."
 
-### 1.3 Luna Nueva y Luna Llena en el mismo día
-**Estado:** FIX PUSHEADO (commit `6fab685`)
-- `SearchMoonPhase(2)` → `SearchMoonPhase(180)` (180° = Luna Llena)
+### 1.3 Interpretaciones de Lunas mensuales — Personalización
+**Estado:** PENDIENTE
+**Problema:** Las lunas en `LunasYEjercicios` no explican qué significan PARA EL USUARIO
+**Solución:**
+- Para cada Luna Nueva/Llena, añadir: "Cae en tu Casa [X]"
+- Explicar: "Con tu [planeta] en [signo], esta luna activa..."
+- Calcular casa donde cae la luna según ascendente natal
 
-### 1.4 Impresión A5 con page breaks
-**Estado:** FIX PUSHEADO (commit `6fab685`)
-- `print-libro.css` ahora se importa en `libro/page.tsx`
-
-### 1.5 Índice con meses del ciclo solar (no Ene-Dic)
-**Estado:** FIX PUSHEADO (commit `6fab685`)
-- Indice recibe `startDate` y genera meses reales: Feb 2025, Mar 2025... Ene 2026
-
----
-
-## PRIORIDAD 2 — FUNCIONALIDADES DEL LIBRO
-
-### 2.1 Exportar calendario a Outlook/Gmail (iCal/ICS)
-**Estado:** PENDIENTE — NUEVA FUNCIONALIDAD
-**Descripción:** Generar archivo .ics con todos los eventos del año solar
-para que el usuario pueda importarlo en Outlook, Google Calendar, Apple Calendar.
-**Implementación:**
-```
-- Crear endpoint: POST /api/agenda/export-ics
-- Recibe: userId, yearLabel
-- Lee eventos del SolarCycle de BD
-- Genera archivo .ics (formato iCalendar RFC 5545)
-- Cada evento incluye:
-  - SUMMARY: título (ej: "Luna Nueva en Acuario ♒")
-  - DTSTART: fecha del evento
-  - DESCRIPTION: interpretación personalizada resumida
-  - CATEGORIES: tipo (luna-nueva, eclipse, retrogrado, ingreso)
-  - VALARM: recordatorio 1 día antes
-- Botón "Exportar a Calendario" en /agenda con opciones:
-  - Descargar .ics (universal)
-  - Link directo Google Calendar (gcal:// URL scheme)
-  - Link directo Outlook (outlook:// URL scheme)
-```
-**Librerías:** `ics` (npm) o generación manual del formato
-**Prioridad:** ALTA — diferenciador competitivo enorme
-
-### 2.2 Completar exportación TXT del libro
-**Estado:** PARCIAL
-**Falta:**
-- Secciones de terapia creativa en el TXT
-- Interpretaciones de eventos por mes en el TXT
-- Formato más limpio para los eventos (evitar duplicados Luna Nueva/Llena mismo día — ya corregido)
-
-### 2.3 Mejorar separación de páginas en impresión PDF
-**Estado:** CSS IMPORTADO, falta verificar
-- Verificar que cada `print-page` ocupa exactamente 1 hoja A5
-- Verificar que no se cortan contenidos entre páginas
-- Ajustar padding/margin si contenido desborda
+### 1.4 Tránsitos planetarios personalizados
+**Estado:** PENDIENTE
+**Problema:** Los ingresos planetarios son genéricos
+**Solución:**
+- Mostrar: "Mercurio entra en Piscis → afecta tu Casa [X]"
+- Si el planeta transita sobre un planeta natal importante, destacarlo
+- Requiere: cálculo de casas según ascendente del usuario
 
 ---
 
-## PRIORIDAD 3 — SISTEMA DE PAGOS
+## PRIORIDAD 2 — SINCRONIZACIÓN TXT ↔ LIBRO VISUAL
 
-### 3.1 Completar flujo Stripe
+### 2.1 TXT tiene orden diferente al libro
+**Estado:** PENDIENTE
+**Problema:** El TXT pone "PRIMER DÍA DE TU CICLO" con espacio para escribir ANTES de interpretaciones
+**Solución:**
+- Reorganizar `handleExportTXT()` para que coincida con libro visual:
+  1. Portada
+  2. Qué vas a encontrar (Carta Natal primero, luego Retorno Solar)
+  3. Carta Natal completa (actualmente vacía!)
+  4. Retorno Solar completo
+  5. Ciclos y Overview
+  6. Ritual + Primer día + Intención (DESPUÉS de interpretaciones)
+  7. Calendario
+  8. Cierre
+
+### 2.2 Carta Natal vacía en TXT
+**Estado:** PENDIENTE
+**Problema:** El TXT no exporta contenido de Esencia Natal, Nodos, Planetas Dominantes
+**Solución:**
+- Añadir sección completa de Carta Natal en `handleExportTXT()`
+- Usar mismos datos que se pasan a componentes visuales
+
+### 2.3 Formato de eventos en TXT
+**Estado:** PENDIENTE
+**Problema:** Eventos muestran "Luna Nueva: Luna Nueva" (redundante)
+**Solución:**
+- Cambiar a: "Luna Nueva en [SIGNO]"
+- Añadir casa si está disponible
+
+---
+
+## PRIORIDAD 3 — VERIFICAR PDF/IMPRESIÓN A5
+
+### 3.1 Verificar page breaks en PDF
+**Estado:** PENDIENTE VERIFICACIÓN
+**Acción:**
+- [ ] Generar PDF y verificar cada página
+- [ ] Confirmar que `.print-page` ocupa exactamente 1 hoja A5
+- [ ] Verificar que no se corta contenido entre páginas
+- [ ] Ajustar padding si contenido desborda
+
+---
+
+## PRIORIDAD 4 — SISTEMA DE PAGOS
+
+### 4.1 Completar flujo Stripe
 **Estado:** PARCIALMENTE IMPLEMENTADO
 **Falta:**
 - Webhook de confirmación de pago
 - Activar flag `hasPurchasedAgenda` tras pago exitoso
 - Página de éxito post-pago (`/compra/success`)
 - Página de cancelación (`/compra/cancel`)
-- Panel admin para ver pedidos
 
-### 3.2 Sistema preview gratuita → pago
-**Estado:** DISEÑADO (ver `ESTRATEGIA_PREVIEW_PAGO.md`)
-**Implementación:**
-- Usuarios gratuitos: 3 meses con interpretaciones AI
-- Usuarios premium: 12 meses completos
-- La lógica de límite ya existe en `generate-book/route.ts` (líneas 190-202)
-
-### 3.3 Límite de 2 meses para usuarios gratuitos (Agenda y Libro)
-**Estado:** PENDIENTE — NUEVA FUNCIONALIDAD
-**Descripción:** Mostrar solo 2 meses del ciclo solar a usuarios gratuitos.
-Si quieren ver más meses, deben comprar la agenda.
+### 4.2 Límite de 2 meses para usuarios gratuitos
+**Estado:** PENDIENTE
+**Descripción:** Mostrar solo 2 meses del ciclo solar a usuarios gratuitos
 **Implementación:**
 ```
-AGENDA CALENDARIO (src/app/(dashboard)/agenda/page.tsx):
-- Obtener estado de compra del usuario: hasPurchasedAgenda (de User model o context)
-- Si NO ha comprado:
-  - Mostrar solo 2 meses desde el inicio del ciclo
-  - Deshabilitar navegación a meses futuros (blur o lock icon)
-  - Mostrar CTA: "Desbloquea tu ciclo completo" → /compra/agenda
-- Si ha comprado: mostrar todos los 12 meses del ciclo
+AGENDA CALENDARIO:
+- Si NO ha comprado: mostrar solo 2 meses
+- Deshabilitar navegación a meses futuros (blur + candado)
+- CTA: "Desbloquea tu ciclo completo" → /compra/agenda
 
-LIBRO AGENDA (src/app/(dashboard)/libro/page.tsx):
-- Similar lógica: solo generar/mostrar 2 meses si usuario gratuito
-- Portada, primer mes, segundo mes, y luego página promocional
-- CTA: "Desbloquea tu libro completo" con preview de lo que incluye
-- Usuarios premium: libro completo con los 12 meses
-
-UI/UX:
-- Meses bloqueados: overlay con blur/opacidad + candado
-- Tooltip: "Este mes estará disponible cuando compres tu agenda"
-- Contador: "2 de 12 meses desbloqueados"
+LIBRO AGENDA:
+- Similar: solo generar/mostrar 2 meses si usuario gratuito
+- CTA: "Desbloquea tu libro completo"
 ```
-**Archivos a modificar:**
-- `src/app/(dashboard)/agenda/page.tsx` — lógica de filtrado de meses
-- `src/app/(dashboard)/libro/page.tsx` — lógica de generación limitada
-- `src/components/agenda/AgendaCalendar.tsx` — UI de meses bloqueados
-- `src/components/agenda/AgendaLibro/` — componentes con restricción
-- `src/models/User.ts` — verificar campo `hasPurchasedAgenda`
 **Prioridad:** ALTA — incentivo directo a la compra
 
 ---
 
-## PRIORIDAD 4 — MEJORAS DE UX
+## PRIORIDAD 5 — NUEVAS FUNCIONALIDADES
 
-### 4.1 Reemplazar emojis por iconos Lucide en eventos
+### 5.1 Exportar calendario a Google Calendar/Outlook (iCal)
+**Estado:** PENDIENTE — NUEVA FUNCIONALIDAD
+**Descripción:** Generar archivo .ics con todos los eventos del año
+**Implementación:**
+```
+POST /api/agenda/export-ics
+- Recibe: userId, yearLabel
+- Lee eventos del SolarCycle
+- Genera archivo .ics (RFC 5545)
+- Cada evento: SUMMARY, DTSTART, DESCRIPTION, VALARM (1 día antes)
+- Botón "Exportar a Calendario" con opciones:
+  - Descargar .ics
+  - Link Google Calendar
+  - Link Outlook
+```
+**Prioridad:** ALTA — diferenciador competitivo
+
+### 5.2 PDF mejorado del libro
 **Estado:** PENDIENTE
-- `getEventIcon()` en `agenda/page.tsx` usa emojis (🪐 🌙 ⏪)
-- Reemplazar por componentes SVG de Lucide React
+**Descripción:** Mejorar calidad de exportación PDF
+**Implementación:**
+- Verificar estilos de impresión
+- Optimizar para impresión física
+- Considerar Puppeteer para generación server-side (libro físico 80€)
 
-### 4.2 Lazy loading de componentes del libro
-**Estado:** EN PROGRESO (ver `TRABAJO_EN_PROGRESO_CARGA_LAZY.md`)
-- NO COMMITEAR hasta que esté completo
-
-### 4.3 Regeneración automática del ciclo en cumpleaños
-**Estado:** IMPLEMENTADO PARCIALMENTE
-- Existe detección de `isDayAfterBirthday` en `agenda/page.tsx`
-- Genera ciclo siguiente automáticamente
-- Falta: notificación por email al usuario
+### 5.3 Optimización de costes OpenAI
+**Estado:** PARCIALMENTE IMPLEMENTADO (commit affc0b0)
+**Descripción:** No regenerar datos que ya existen en BD
+**Objetivo:** De ~$0.15-0.25 por libro → ~$0.06-0.10 (reducción 60-80%)
 
 ---
 
-## PRIORIDAD 5 — FUTURO
+## PRIORIDAD 6 — MEJORAS FUTURAS
 
-### 5.1 Generación PDF server-side con Puppeteer
-**Estado:** PENDIENTE
-- Actualmente se usa `window.print()` del navegador
-- Para el libro físico (80€) necesitamos PDF generado en servidor
-- Puppeteer ya está en `package.json` pero no se usa
+### 6.1 Objetos simbólicos y tienda
+- Diseñado en `OBJETOS_SIMBOLICOS_Y_TIENDA.md`
+- Objetos personalizados basados en carta natal
 
-### 5.2 Objetos simbólicos y tienda
-**Estado:** DISEÑADO (ver `OBJETOS_SIMBOLICOS_Y_TIENDA.md`)
-- Capa futura: objetos personalizados basados en carta natal
-- Integración con tienda online
+### 6.2 Generación PDF server-side con Puppeteer
+- Para libro físico (80€) necesitamos PDF profesional
+- Puppeteer ya está en `package.json`
 
-### 5.3 Modelo de datos Agenda dedicado
-**Estado:** DISEÑADO (ver `ANALISIS_AGENDA_COMPLETO.md`)
-- Modelo `Agenda` separado del `SolarCycle`
-- Incluiría: agenda generada, eventos personalizados, metadata de generación
-- No es urgente: `SolarCycle` + `EventInterpretation` cubren la funcionalidad actual
-
-### 5.4 Limpiar documentación
-**Estado:** PENDIENTE
-- Archivar 5 archivos RESUMEN_SESION obsoletos
-- Consolidar 3 archivos índice en 1 (`INDICE_DOCUMENTACION.md`)
-- Mover docs completados a subcarpeta `documentacion/archivo/`
+### 6.3 Notificación email en cumpleaños
+- Detectar `isDayAfterBirthday`
+- Enviar email con link a nuevo ciclo
 
 ---
 
-## PLAN OPTIMIZADO DE GENERACIÓN DEL LIBRO (detalle técnico)
+## BUGS CORREGIDOS (no reabrir)
 
-### Estado actual (costoso):
-```
-generate-book/route.ts:
-1. Lee NatalChart, Interpretation(natal), Interpretation(solar-return) de BD
-2. Calcula eventos del año con astronomy-engine
-3. Agrupa eventos por mes
-4. Genera interpretaciones de eventos con OpenAI (loop de 24+ llamadas)
-5. Genera contenido narrativo del libro con OpenAI (1 llamada grande, 8000 tokens)
-6. Devuelve todo al frontend
-```
-**Coste total: ~$0.50-1.00 por libro + ~$0.78 por interpretaciones de eventos**
+| Bug | Estado | Commit |
+|-----|--------|--------|
+| Luna Llena SearchMoonPhase(180) | ✅ CORREGIDO | `6fab685` |
+| Calendario empieza en enero | ✅ CORREGIDO | `65ec163`, `f858d27` |
+| CSS A5 no importado | ✅ CORREGIDO | `6fab685` |
+| Índice con meses hardcoded | ✅ CORREGIDO | `6fab685` |
+| NodosLunares objeto→string | ✅ CORREGIDO | `a13159c` |
+| Modal z-index detrás header | ✅ CORREGIDO | `f57042f` |
+| Botón ASC/MC solo natal | ✅ CORREGIDO | `f57042f` |
+| Eventos calendario sin signo | ✅ CORREGIDO | `b484eff` |
 
-### Estado objetivo (optimizado):
-```
-generate-book/route.ts OPTIMIZADO:
-1. Lee NatalChart, Interpretation(natal), Interpretation(solar-return) de BD
-2. Lee SolarCycle con eventos ya calculados de BD (NO recalcular)
-3. Lee EventInterpretation ya generadas de BD (NO regenerar)
-4. Ensambla datos existentes en estructura del libro:
-   - tu_mapa_interior.planeta_dominante = natal.planeta_dominante
-   - tu_mapa_interior.soul_chart = natal.patron_energetico + desafios
-   - tu_año_astrologico = solar-return.tema_central + comparaciones
-   - calendario = SolarCycle.events + EventInterpretation
-5. Pide a OpenAI SOLO texto narrativo nuevo (~3000 tokens):
-   - portada (título, subtítulo, dedicatoria)
-   - carta_de_bienvenida (150 palabras)
-   - 12x portada_mes + ritual_del_mes + mantra (cortos)
-   - cierre_del_ciclo (200 palabras)
-   - frase_final (30 palabras)
-6. Devuelve todo al frontend
-```
-**Coste objetivo: ~$0.06-0.10 por libro (reducción 80-90%)**
-**Tiempo: de ~2-3 min → ~15-30 seg**
+---
 
-### Datos reutilizables (ya en BD):
-| Campo del libro | Fuente en BD | Campo exacto |
-|---|---|---|
-| Planeta dominante | Interpretation(natal) | `planeta_dominante` |
-| Propósito de vida | Interpretation(natal) | `proposito_vida` |
-| Patrón energético | Interpretation(natal) | `patron_energetico` |
-| Superpoderes | Interpretation(natal) | `super_poderes[]` |
-| Desafíos evolutivos | Interpretation(natal) | `desafios_evolutivos[]` |
-| Tema del año | Interpretation(SR) | `tema_central_del_anio` |
-| Mantra del año | Interpretation(SR) | `declaracion_poder_anual` |
-| Rituales | Interpretation(SR) | `rituales_recomendados[]` |
-| Insights | Interpretation(SR) | `insights_transformacionales[]` |
-| Advertencias | Interpretation(SR) | `advertencias[]` |
-| Eventos clave | Interpretation(SR) | `eventos_clave_del_anio[]` |
-| Comparaciones planetarias | Interpretation(SR) | Secciones por planeta (Sol, Luna, etc.) |
-| Eventos del año | SolarCycle | `events[]` (78 eventos) |
-| Interpretación por evento | EventInterpretation | `interpretation` por cada evento |
+## ARCHIVOS CLAVE A MODIFICAR
+
+| Tarea | Archivo(s) |
+|-------|-----------|
+| Planetas personalizados | `SoulChart.tsx`, `index.tsx` (getPlanetasDominantes) |
+| Ejes personalizados | `RetornoSolar.tsx` (IntegracionEjes) |
+| Lunas personalizadas | `MesPage.tsx`, `LunasYEjercicios.tsx` |
+| TXT sincronizado | `index.tsx` (handleExportTXT) |
+| Límite 2 meses | `agenda/page.tsx`, `libro/page.tsx` |
+| Export iCal | Nueva API `/api/agenda/export-ics` |
+
+---
+
+## ORDEN DE TRABAJO SUGERIDO
+
+1. **Personalizar contenido** (P1.1, P1.2, P1.3) — Valor para el usuario
+2. **Sincronizar TXT** (P2.1, P2.2) — Coherencia
+3. **Verificar PDF** (P3.1) — Calidad
+4. **Pagos** (P4.1, P4.2) — Monetización
+5. **iCal export** (P5.1) — Diferenciador
