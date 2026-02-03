@@ -99,12 +99,42 @@ export async function POST(request: NextRequest) {
     console.log('🔄 Generating new interpretation...');
 
     // 1. Buscar carta natal del usuario
-    const natalChart = await NatalChart.findOne({ userId }).lean().exec() as any;
+    let natalChart = await NatalChart.findOne({ userId }).lean().exec() as any;
     if (!natalChart) {
-      return NextResponse.json({
-        success: false,
-        error: 'No natal chart found for user'
-      }, { status: 404 });
+      console.warn('⚠️ MUY IMPORTANTE: No encontrada carta natal, volvemos a generarla');
+
+      // Auto-regenerar carta natal
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+        const response = await fetch(`${baseUrl}/api/charts/natal`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to generate natal chart');
+        }
+
+        const result = await response.json();
+        console.log('✅ Carta natal regenerada exitosamente');
+
+        // Buscar la carta recién generada
+        natalChart = await NatalChart.findOne({ userId }).lean().exec() as any;
+
+        if (!natalChart) {
+          return NextResponse.json({
+            success: false,
+            error: 'No se pudo generar carta natal'
+          }, { status: 500 });
+        }
+      } catch (error) {
+        console.error('❌ Error regenerando carta natal:', error);
+        return NextResponse.json({
+          success: false,
+          error: 'No se pudo generar carta natal automáticamente'
+        }, { status: 500 });
+      }
     }
 
     console.log('📊 Found natal chart');

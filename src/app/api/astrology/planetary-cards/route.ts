@@ -12,6 +12,8 @@ import connectDB from '@/lib/db';
 import NatalChart from '@/models/NatalChart';
 import Interpretation from '@/models/Interpretation';
 import User from '@/models/User';
+import Chart from '@/models/Chart';
+import PlanetaryCard from '@/models/PlanetaryCard';
 import OpenAI from 'openai';
 import {
   generatePlanetaryCardPrompt,
@@ -88,8 +90,10 @@ export async function POST(request: NextRequest) {
 
     console.log('📊 Found natal chart');
 
-    // ✅ 2. Buscar Solar Return actual
+    // ✅ 2. Buscar Solar Return actual (OPCIONAL - si existe, mejor contexto)
     const currentYear = new Date().getFullYear();
+
+    // Buscar interpretación del Solar Return
     const solarReturn = await Interpretation.findOne({
       userId,
       chartType: 'solar-return',
@@ -99,14 +103,17 @@ export async function POST(request: NextRequest) {
     .lean()
     .exec() as any;
 
-    if (!solarReturn) {
-      return NextResponse.json({
-        success: false,
-        error: 'No Solar Return found. User must generate Solar Return first.'
-      }, { status: 404 });
-    }
+    // Buscar la CARTA del Solar Return (con posiciones planetarias)
+    const chartDoc = await Chart.findOne({ userId }).lean().exec() as any;
+    const solarReturnChart = chartDoc?.solarReturnChart;
 
-    console.log('🌅 Found Solar Return');
+    if (solarReturn && solarReturnChart) {
+      console.log('🌅 Found Solar Return interpretation + chart - generating enhanced planetary cards');
+    } else if (solarReturn && !solarReturnChart) {
+      console.log('⚠️ Found Solar Return interpretation but no chart data - using interpretation only');
+    } else {
+      console.log('⚠️ No Solar Return found - generating basic planetary cards based on natal + transits');
+    }
 
     // ✅ 3. Buscar interpretación natal (opcional, para contexto)
     const natalInterpretation = await Interpretation.findOne({
@@ -132,9 +139,12 @@ export async function POST(request: NextRequest) {
     // ✅ 5. Determinar qué planetas generar
     const planetsToGenerate = planets && planets.length > 0
       ? planets
-      : determineActivePlanets(solarReturn.interpretation || solarReturn);
+      : (solarReturn && solarReturnChart)
+        ? determineActivePlanets(solarReturn.interpretation || solarReturn)
+        : ['Sol', 'Luna', 'Mercurio', 'Venus', 'Marte']; // Planetas básicos si no hay SR
 
     console.log('🌟 Planets to generate:', planetsToGenerate);
+    console.log('📊 Solar Return Chart available:', !!solarReturnChart);
 
     // ✅ 6. Generar fichas para cada planeta
     const planetaryCards: any[] = [];
@@ -150,7 +160,7 @@ export async function POST(request: NextRequest) {
         birthDate, // Para calcular fechas del año solar
         planetName,
         natalChart: natalChart.natalChart || natalChart,
-        solarReturn: solarReturn.interpretation || solarReturn,
+        solarReturn: solarReturnChart || null, // Usar la CARTA, no la interpretación
         natalInterpretation: natalInterpretation?.interpretation
       };
 
@@ -208,14 +218,44 @@ export async function POST(request: NextRequest) {
 
     console.log(`✅ Generated ${planetaryCards.length} planetary cards`);
 
-    // ✅ 7. Retornar fichas
+    // ✅ 7. Guardar fichas en MongoDB para caché
+    try {
+      // Calcular fecha de expiración (próximo cumpleaños)
+      const birthDate = new Date(user?.birthDate || birthData?.birthDate || new Date());
+      const nextBirthday = new Date(birthDate);
+      nextBirthday.setFullYear(currentYear + 1);
+
+      // Eliminar fichas antiguas del mismo año
+      await PlanetaryCard.deleteMany({
+        userId,
+        solarReturnYear: currentYear
+      });
+
+      // Guardar nuevas fichas
+      const cardsToSave = planetaryCards.map(card => ({
+        userId,
+        ...card,
+        solarReturnYear: currentYear,
+        expiresAt: nextBirthday,
+        generatedAt: new Date()
+      }));
+
+      await PlanetaryCard.insertMany(cardsToSave);
+      console.log(`💾 Saved ${cardsToSave.length} planetary cards to MongoDB`);
+    } catch (cacheError) {
+      console.error('⚠️ Error caching planetary cards:', cacheError);
+      // No fallar si el caché falla, solo continuar
+    }
+
+    // ✅ 8. Retornar fichas
     return NextResponse.json({
       success: true,
       cards: planetaryCards,
       totalCards: planetaryCards.length,
       userName,
       solarReturnYear: currentYear,
-      generatedAt: new Date()
+      generatedAt: new Date(),
+      cached: false
     });
 
   } catch (error) {
@@ -233,22 +273,81 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
+    console.log('🌟 ===== PLANETARY CARDS GET REQUEST =====');
 
-    if (!userId) {
+    // 🔒 AUTHENTICATION
+    const authHeader = request.headers.get('authorization');
+    let token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+
+    if (!token) {
       return NextResponse.json({
         success: false,
-        error: 'userId is required'
-      }, { status: 400 });
+        error: 'Unauthorized - No authentication token provided'
+      }, { status: 401 });
     }
 
-    // TODO: Implementar caché de fichas planetarias en MongoDB
-    // Por ahora, retornar mensaje indicando que deben generarse
+    // Initialize Firebase Admin
+    if (!admin.apps.length) {
+      admin.initializeApp({
+        credential: admin.credential.cert({
+          projectId: process.env.FIREBASE_PROJECT_ID!,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL!,
+          privateKey: process.env.FIREBASE_PRIVATE_KEY!.replace(/\\n/g, '\n'),
+        }),
+      });
+    }
 
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    const userId = decodedToken.uid;
+
+    console.log('👤 User authenticated:', userId);
+
+    await connectDB();
+
+    // Buscar el año solar actual del usuario
+    const currentYear = new Date().getFullYear();
+
+    // Buscar fichas planetarias cacheadas para el año solar actual
+    const cachedCards = await PlanetaryCard.find({
+      userId,
+      solarReturnYear: currentYear,
+      expiresAt: { $gt: new Date() } // Solo fichas no expiradas
+    }).lean().exec();
+
+    if (cachedCards && cachedCards.length > 0) {
+      console.log(`✅ [PLANETARY-CARDS] Found ${cachedCards.length} cached cards for user ${userId}`);
+
+      // Convertir a formato del frontend
+      const formattedCards = cachedCards.map(card => ({
+        planeta: card.planeta,
+        simbolo: card.simbolo,
+        quien_eres_natal: card.quien_eres_natal,
+        que_se_activa_este_anio: card.que_se_activa_este_anio,
+        cruce_real: card.cruce_real,
+        reglas_del_anio: card.reglas_del_anio,
+        como_se_activa_segun_momento: card.como_se_activa_segun_momento,
+        sombras_a_vigilar: card.sombras_a_vigilar,
+        ritmo_de_trabajo: card.ritmo_de_trabajo,
+        apoyo_fisico: card.apoyo_fisico,
+        frase_ancla_del_anio: card.frase_ancla_del_anio,
+        generatedAt: card.generatedAt,
+        cached: true
+      }));
+
+      return NextResponse.json({
+        success: true,
+        cards: formattedCards,
+        totalCards: formattedCards.length,
+        solarReturnYear: currentYear,
+        cached: true
+      });
+    }
+
+    // No hay fichas cacheadas
+    console.log('⚠️ [PLANETARY-CARDS] No cached cards found');
     return NextResponse.json({
       success: false,
-      message: 'Planetary cards are not cached yet. Use POST to generate them.',
+      message: 'No cached planetary cards found. Use POST to generate them.',
       cached: false
     }, { status: 404 });
 

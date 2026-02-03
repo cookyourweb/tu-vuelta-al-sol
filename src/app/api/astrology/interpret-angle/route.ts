@@ -19,9 +19,9 @@ export const maxDuration = 60;
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userId, angleName, sign, degree } = body;
+    const { userId, angleName, sign, degree, chartType = 'natal' } = body;
 
-    console.log('🎯 [ANGLE] Generating interpretation for:', angleName);
+    console.log('🎯 [ANGLE] Generating interpretation for:', angleName, 'chartType:', chartType);
 
     if (!userId || !angleName || !sign) {
       return NextResponse.json(
@@ -85,23 +85,44 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ [ANGLE] Generated interpretation for:', angleName);
 
-    // Save to MongoDB
+    // Save to MongoDB - diferente estructura para natal vs solar-return
     const angleKey = angleName === 'Ascendente' ? 'Ascendente' : 'MedioCielo';
+    const srAngleKey = angleName === 'Ascendente' ? 'ascendente' : 'medio_cielo';
 
-    console.log(`📝 [ANGLE] Guardando en sección: angles.${angleKey}`);
+    if (chartType === 'solar-return') {
+      console.log(`📝 [ANGLE] Guardando en Solar Return: angulos_vitales.${srAngleKey}`);
 
-    await db.collection('interpretations').updateOne(
-      { userId, chartType: 'natal' },
-      {
-        $set: {
-          [`interpretations.angles.${angleKey}`]: interpretation,
-          updatedAt: new Date(),
+      await db.collection('interpretations').updateOne(
+        { userId, chartType: 'solar-return' },
+        {
+          $set: {
+            [`interpretation.angulos_vitales.${srAngleKey}`]: {
+              signo: sign,
+              grado: degree,
+              significado: interpretation?.core || interpretation?.significado || 'Interpretación generada',
+              ...interpretation
+            },
+            updatedAt: new Date(),
+          },
         },
-      },
-      { upsert: true }
-    );
+        { upsert: true }
+      );
+      console.log('✅ [ANGLE] Saved to MongoDB (SR):', `angulos_vitales.${srAngleKey}`);
+    } else {
+      console.log(`📝 [ANGLE] Guardando en sección: angles.${angleKey}`);
 
-    console.log('✅ [ANGLE] Saved to MongoDB:', `angles.${angleKey}`);
+      await db.collection('interpretations').updateOne(
+        { userId, chartType: 'natal' },
+        {
+          $set: {
+            [`interpretations.angles.${angleKey}`]: interpretation,
+            updatedAt: new Date(),
+          },
+        },
+        { upsert: true }
+      );
+      console.log('✅ [ANGLE] Saved to MongoDB:', `angles.${angleKey}`);
+    }
 
     return NextResponse.json({
       success: true,

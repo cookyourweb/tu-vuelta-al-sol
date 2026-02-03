@@ -1,196 +1,439 @@
 'use client';
 
-import React, { useRef, useMemo } from 'react';
-import { format, addMonths, isSameMonth, getMonth, getYear } from 'date-fns';
+import React, { useRef, useState, useEffect } from 'react';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useStyle } from '@/context/StyleContext';
 import { StyleSwitcher } from '@/components/agenda/StyleSwitcher';
-import { Printer, X } from 'lucide-react';
-import type { AstrologicalEvent } from '@/types/astrology/unified-types';
+import { Printer, X, FileDown, RefreshCw, Download, Info } from 'lucide-react';
+import { useInterpretaciones } from '@/hooks/useInterpretaciones';
+import { formatEventForBook, formatInterpretationCompact } from '@/utils/formatInterpretationForBook';
 
 // Secciones del libro
-import { PortadaPersonalizada, PaginaIntencion } from './PortalEntrada';
-import { CartaBienvenida, TemaCentralAnio, LoQueVieneAMover, LoQuePideSoltar, PaginaIntencionAnual } from './TuAnioTuViaje';
+import { PortadaPersonalizada, PaginaIntencion, PaginaIntencionAnualSR } from './PortalEntrada';
+import { CartaBienvenida, GuiaAgenda, TemaCentralAnio, LoQueVieneAMover, LoQuePideSoltar, PaginaIntencionAnual } from './TuAnioTuViaje';
 import { TuAnioOverview, TuAnioCiclos, PaginaCumpleanos } from './TuAnio';
 import { LineaTiempoEmocional, MesesClavePuntosGiro, GrandesAprendizajes } from './CiclosAnuales';
 import { EsenciaNatal, NodoNorte, NodoSur, PlanetasDominantes, PatronesEmocionales } from './SoulChart';
-import { QueEsRetornoSolar, AscendenteAnio, SolRetorno, LunaRetorno, EjesDelAnio, EjesDelAnio2, IntegracionEjes, RitualCumpleanos, MantraAnual } from './RetornoSolar';
+import { QueEsRetornoSolar, AscendenteAnio, SolRetorno, LunaRetorno, MercurioRetorno, VenusRetorno, MarteRetorno, EjesDelAnio, EjesDelAnio2, IntegracionEjes, RitualCumpleanos, MantraAnual } from './RetornoSolar';
 import { IndiceNavegable } from './Indice';
 import { CalendarioYMapaMes, LunasYEjercicios, SemanaConInterpretacion, CierreMes, PrimerDiaCiclo as PrimerDiaCicloMes } from './MesCompleto';
+import { TransitosDelMes } from './TransitosDelMes';
 import { CalendarioMensualTabla } from './CalendarioMensualTabla';
 import { EscrituraTerapeutica, Visualizacion, RitualSimbolico, TrabajoEmocional } from './TerapiaCreativa';
 import { PrimerDiaCiclo, UltimoDiaCiclo, QuienEraQuienSoy, PreparacionProximaVuelta, CartaCierre, PaginaFinalBlanca, Contraportada } from './PaginasEspeciales';
 import '@/styles/print-libro.css';
-
-// ============ TIPOS PARA EVENTOS DEL LIBRO ============
-interface EventoMes {
-  dia: number;
-  tipo: 'lunaNueva' | 'lunaLlena' | 'eclipse' | 'retrogrado' | 'ingreso' | 'especial' | 'cumpleanos';
-  titulo: string;
-  signo?: string;
-  interpretacion?: string;
-}
-
-interface MesData {
-  monthDate: Date;
-  mesNumero: number;
-  nombreZodiaco: string;
-  simboloZodiaco: string;
-  temaDelMes: string;
-  eventos: EventoMes[];
-  isBirthdayMonth: boolean;
-}
-
-// ============ CONSTANTES DE ZODIACO ============
-const SIGNOS_ZODIACO = [
-  { nombre: 'Capricornio → Acuario', simbolo: '♑', meses: [0] },   // Enero
-  { nombre: 'Acuario → Piscis', simbolo: '♒', meses: [1] },        // Febrero
-  { nombre: 'Piscis → Aries', simbolo: '♓', meses: [2] },          // Marzo
-  { nombre: 'Aries → Tauro', simbolo: '♈', meses: [3] },           // Abril
-  { nombre: 'Tauro → Géminis', simbolo: '♉', meses: [4] },         // Mayo
-  { nombre: 'Géminis → Cáncer', simbolo: '♊', meses: [5] },        // Junio
-  { nombre: 'Cáncer → Leo', simbolo: '♋', meses: [6] },            // Julio
-  { nombre: 'Leo → Virgo', simbolo: '♌', meses: [7] },             // Agosto
-  { nombre: 'Virgo → Libra', simbolo: '♍', meses: [8] },           // Septiembre
-  { nombre: 'Libra → Escorpio', simbolo: '♎', meses: [9] },        // Octubre
-  { nombre: 'Escorpio → Sagitario', simbolo: '♏', meses: [10] },   // Noviembre
-  { nombre: 'Sagitario → Capricornio', simbolo: '♐', meses: [11] } // Diciembre
-];
-
-const TEMAS_MES = [
-  'Inicios conscientes',
-  'Conexión y visión',
-  'Renacimiento y sueños',
-  'Impulso y acción',
-  'Estabilidad y valores',
-  'Comunicación y curiosidad',
-  'Hogar y emociones',
-  'Expresión y creatividad',
-  'Orden y servicio',
-  'Equilibrio y relaciones',
-  'Transformación profunda',
-  'Expansión y sabiduría'
-];
-
-// ============ FUNCIONES DE TRANSFORMACIÓN ============
-
-/**
- * Transforma AstrologicalEvent a EventoMes para el calendario del libro
- */
-function transformEventToEventoMes(event: AstrologicalEvent): EventoMes {
-  const eventDate = new Date(event.date);
-  const dia = eventDate.getDate();
-
-  // Determinar el tipo de evento
-  let tipo: EventoMes['tipo'] = 'especial';
-  const titleLower = event.title?.toLowerCase() || '';
-  const typeLower = event.type?.toLowerCase() || '';
-
-  if (titleLower.includes('luna nueva') || typeLower === 'lunar_phase' && titleLower.includes('nueva')) {
-    tipo = 'lunaNueva';
-  } else if (titleLower.includes('luna llena') || typeLower === 'lunar_phase' && titleLower.includes('llena')) {
-    tipo = 'lunaLlena';
-  } else if (titleLower.includes('eclipse') || typeLower === 'eclipse') {
-    tipo = 'eclipse';
-  } else if (titleLower.includes('retrógrado') || titleLower.includes('retrogrado') || typeLower === 'retrograde') {
-    tipo = 'retrogrado';
-  } else if (titleLower.includes('entra en') || titleLower.includes('ingresa') || typeLower === 'planetary_transit') {
-    tipo = 'ingreso';
-  }
-
-  // Limpiar el título de emojis para el libro impreso
-  const tituloLimpio = event.title
-    ?.replace(/🌙|🌑|🌕|⏪|🪐|🌸|☀️|⚡|✨|🔥|💫/g, '')
-    .trim() || 'Evento astrológico';
-
-  // Construir interpretación desde personalInterpretation o aiInterpretation
-  let interpretacion = '';
-  const interp = event.personalInterpretation || event.aiInterpretation;
-  if (interp) {
-    if (interp.meaning) interpretacion += interp.meaning + '\n\n';
-    if (interp.advice) interpretacion += '💡 ' + interp.advice + '\n\n';
-    if (interp.mantra) interpretacion += '✨ Mantra: ' + interp.mantra;
-  } else if (event.description) {
-    interpretacion = event.description;
-  }
-
-  return {
-    dia,
-    tipo,
-    titulo: tituloLimpio,
-    signo: event.sign,
-    interpretacion: interpretacion.trim() || undefined
-  };
-}
-
-/**
- * Agrupa eventos por mes y genera los datos de cada mes
- */
-function generateMonthsData(
-  startDate: Date,
-  endDate: Date,
-  events: AstrologicalEvent[],
-  birthDate?: Date
-): MesData[] {
-  const months: MesData[] = [];
-  let currentDate = new Date(startDate);
-  let mesNumero = 1;
-
-  while (currentDate < endDate && mesNumero <= 12) {
-    const monthIndex = getMonth(currentDate);
-    const year = getYear(currentDate);
-
-    // Filtrar eventos de este mes
-    const monthEvents = events.filter(event => {
-      const eventDate = new Date(event.date);
-      return isSameMonth(eventDate, currentDate);
-    });
-
-    // Transformar a formato EventoMes
-    const eventosDelMes: EventoMes[] = monthEvents.map(transformEventToEventoMes);
-
-    // Verificar si es el mes del cumpleaños
-    const isBirthdayMonth = birthDate ?
-      getMonth(birthDate) === monthIndex : false;
-
-    // Obtener info del zodiaco
-    const zodiacoInfo = SIGNOS_ZODIACO[monthIndex] || SIGNOS_ZODIACO[0];
-
-    months.push({
-      monthDate: new Date(year, monthIndex, 1),
-      mesNumero,
-      nombreZodiaco: zodiacoInfo.nombre,
-      simboloZodiaco: zodiacoInfo.simbolo,
-      temaDelMes: TEMAS_MES[monthIndex] || 'Exploración consciente',
-      eventos: eventosDelMes,
-      isBirthdayMonth
-    });
-
-    // Avanzar al siguiente mes
-    currentDate = addMonths(currentDate, 1);
-    mesNumero++;
-  }
-
-  return months;
-}
 
 interface AgendaLibroProps {
   onClose: () => void;
   userName: string;
   startDate: Date;
   endDate: Date;
-  events?: AstrologicalEvent[];
-  birthDate?: Date;
+  sunSign?: string;
+  moonSign?: string;
+  ascendant?: string;
+  userId: string;          // NUEVO: ID del usuario para cargar interpretaciones
+  yearLabel: string;       // NUEVO: Etiqueta del año (ej: "2025-2026")
 }
 
-export const AgendaLibro = ({ onClose, userName, startDate, endDate, events = [], birthDate }: AgendaLibroProps) => {
+export const AgendaLibro = ({
+  onClose,
+  userName,
+  startDate,
+  endDate,
+  sunSign,
+  moonSign,
+  ascendant,
+  userId,
+  yearLabel
+}: AgendaLibroProps) => {
   const printRef = useRef<HTMLDivElement>(null);
   const { config } = useStyle();
 
-  // Generar datos de los 12 meses dinámicamente
-  const monthsData = useMemo(() => {
-    return generateMonthsData(startDate, endDate, events, birthDate);
-  }, [startDate, endDate, events, birthDate]);
+  // Hook para manejar interpretaciones
+  const {
+    solarCycle,
+    loading,
+    generatingMissing,
+    progress,
+    error,
+    getEventosForMonth
+  } = useInterpretaciones({ userId, yearLabel });
+
+  // Estado para almacenar la interpretación del Retorno Solar
+  const [solarReturnInterpretation, setSolarReturnInterpretation] = useState<any>(null);
+  const [loadingSolarReturn, setLoadingSolarReturn] = useState(true);
+  const [generatingSolarReturn, setGeneratingSolarReturn] = useState(false);
+
+  // Estado para almacenar la interpretación Natal
+  const [natalInterpretation, setNatalInterpretation] = useState<any>(null);
+  const [loadingNatal, setLoadingNatal] = useState(true);
+
+  // Estado para mostrar instrucciones de PDF
+  const [showPdfInstructions, setShowPdfInstructions] = useState(false);
+
+  // Efecto para cargar la interpretación del Retorno Solar desde la BD
+  useEffect(() => {
+    const fetchSolarReturnInterpretation = async () => {
+      if (!userId) {
+        setLoadingSolarReturn(false);
+        return;
+      }
+
+      try {
+        console.log('🔍 [SOLAR_RETURN] Buscando interpretación de Retorno Solar...');
+        const response = await fetch(`/api/interpretations?userId=${userId}&chartType=solar-return`);
+        const data = await response.json();
+
+        if (data.exists && data.interpretation) {
+          console.log('✅ [SOLAR_RETURN] Interpretación encontrada:', data.interpretation);
+
+          // 🔍 DEBUG: Verificar campos específicos para páginas 11-12
+          console.log('🔍 [DEBUG] linea_tiempo_emocional:', data.interpretation.linea_tiempo_emocional);
+          console.log('🔍 [DEBUG] meses_clave_puntos_giro:', data.interpretation.meses_clave_puntos_giro);
+          console.log('🔍 [DEBUG] Todas las keys:', Object.keys(data.interpretation));
+
+          setSolarReturnInterpretation(data);
+        } else {
+          console.log('⚠️ [SOLAR_RETURN] No se encontró interpretación de Retorno Solar');
+          setSolarReturnInterpretation(null);
+        }
+      } catch (error) {
+        console.error('❌ [SOLAR_RETURN] Error al cargar interpretación:', error);
+      } finally {
+        setLoadingSolarReturn(false);
+      }
+    };
+
+    fetchSolarReturnInterpretation();
+
+    // ✅ NUEVO: Recargar cuando el usuario vuelve a la pestaña/ventana
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('👁️ [SOLAR_RETURN] Pestaña visible, recargando interpretación...');
+        fetchSolarReturnInterpretation();
+      }
+    };
+
+    const handleFocus = () => {
+      console.log('🎯 [SOLAR_RETURN] Ventana en foco, recargando interpretación...');
+      fetchSolarReturnInterpretation();
+    };
+
+    // Escuchar cambios de visibilidad y foco
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [userId]);
+
+  // Efecto para cargar la interpretación Natal desde la BD
+  useEffect(() => {
+    const fetchNatalInterpretation = async () => {
+      if (!userId) {
+        setLoadingNatal(false);
+        return;
+      }
+
+      try {
+        console.log('🔍 [NATAL] Buscando interpretación Natal...');
+        const response = await fetch(`/api/interpretations?userId=${userId}&chartType=natal`);
+        const data = await response.json();
+
+        if (data.exists && data.interpretation) {
+          console.log('✅ [NATAL] Interpretación encontrada');
+          setNatalInterpretation(data);
+        } else {
+          console.log('⚠️ [NATAL] No se encontró interpretación Natal');
+          setNatalInterpretation(null);
+        }
+      } catch (error) {
+        console.error('❌ [NATAL] Error al cargar interpretación:', error);
+      } finally {
+        setLoadingNatal(false);
+      }
+    };
+
+    fetchNatalInterpretation();
+  }, [userId]);
+
+  // ==========================================
+  // 🚀 AUTO-GENERAR SOLAR RETURN
+  // ==========================================
+  const handleGenerateSolarReturn = async () => {
+    if (!userId || generatingSolarReturn) return;
+
+    try {
+      setGeneratingSolarReturn(true);
+      console.log('🌅 [AUTO_GEN] Iniciando generación automática de Solar Return...');
+
+      // 0. Verificar si ya existe SR
+      console.log('🔍 [AUTO_GEN] Verificando si ya existe SR...');
+      const checkResponse = await fetch(`/api/interpretations?userId=${userId}&chartType=solar-return`);
+      const checkData = await checkResponse.json();
+
+      if (checkData.exists && checkData.interpretation) {
+        console.log('✅ [AUTO_GEN] SR ya existe, solo recargando...');
+        setSolarReturnInterpretation(checkData);
+        return;
+      }
+
+      // 1. Obtener birth data
+      console.log('📍 [AUTO_GEN] Obteniendo birth data...');
+      const birthDataResponse = await fetch(`/api/birth-data?userId=${userId}`);
+      if (!birthDataResponse.ok) {
+        throw new Error('No se encontraron datos de nacimiento');
+      }
+      const birthDataResult = await birthDataResponse.json();
+      const birthData = birthDataResult.data || birthDataResult.birthData;
+
+      if (!birthData) {
+        console.error('❌ [AUTO_GEN] Birth data no encontrada en respuesta:', birthDataResult);
+        throw new Error('Birth data no encontrada en la respuesta del servidor');
+      }
+      console.log('✅ [AUTO_GEN] Birth data obtenida:', { fullName: birthData.fullName, birthPlace: birthData.birthPlace });
+
+      // 2. Obtener carta natal
+      console.log('🌟 [AUTO_GEN] Obteniendo carta natal...');
+      const natalResponse = await fetch(`/api/charts/natal?userId=${userId}`);
+      if (!natalResponse.ok) {
+        throw new Error('No se encontró la carta natal');
+      }
+      const natalData = await natalResponse.json();
+      // ✅ FIX: Buscar en el campo correcto
+      const natalChart = natalData.natalChart || natalData.chart || natalData.data?.chart;
+
+      if (!natalChart) {
+        console.error('❌ [AUTO_GEN] Carta natal no encontrada en respuesta:', natalData);
+        throw new Error('Carta natal no encontrada en la respuesta del servidor');
+      }
+      console.log('✅ [AUTO_GEN] Carta natal obtenida correctamente');
+
+      // 3. Generar carta de Solar Return
+      console.log('☀️ [AUTO_GEN] Generando carta de Solar Return...');
+      const srChartResponse = await fetch(`/api/charts/solar-return?userId=${userId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+      });
+      if (!srChartResponse.ok) {
+        throw new Error('Error al generar carta de Solar Return');
+      }
+      const srChartData = await srChartResponse.json();
+      // ✅ FIX: Buscar en el campo correcto
+      const solarReturnChart = srChartData.data?.solarReturnChart || srChartData.solarReturnChart || srChartData.chart;
+
+      if (!solarReturnChart) {
+        console.error('❌ [AUTO_GEN] Carta SR no encontrada en respuesta:', srChartData);
+        throw new Error('Carta Solar Return no encontrada en la respuesta del servidor');
+      }
+      console.log('✅ [AUTO_GEN] Carta Solar Return obtenida correctamente');
+
+      // 4. Construir perfil de usuario desde birthData
+      console.log('👤 [AUTO_GEN] Construyendo perfil de usuario desde birthData...');
+
+      // Calcular edad desde birthDate
+      const birthDateStr = birthData.date || birthData.birthDate;
+      const birthDateObj = new Date(birthDateStr);
+      const now = new Date();
+      let age = now.getFullYear() - birthDateObj.getFullYear();
+      const hasHadBirthdayThisYear = (now.getMonth() > birthDateObj.getMonth()) ||
+        (now.getMonth() === birthDateObj.getMonth() && now.getDate() >= birthDateObj.getDate());
+      if (!hasHadBirthdayThisYear) age -= 1;
+
+      const userProfile = {
+        name: birthData.fullName || 'Usuario',
+        birthDate: birthDateStr,
+        birthPlace: birthData.location || birthData.birthPlace,
+        age: age
+      };
+      console.log('✅ [AUTO_GEN] UserProfile construido:', userProfile);
+
+      // 5. Generar interpretación del Solar Return
+      console.log('🤖 [AUTO_GEN] Generando interpretación con IA...');
+      console.log('📦 [AUTO_GEN] Datos a enviar:', {
+        userId: userId ? '✅' : '❌',
+        natalChart: natalChart ? '✅' : '❌',
+        solarReturnChart: solarReturnChart ? '✅' : '❌',
+        userProfile: userProfile ? '✅' : '❌',
+        birthData: birthData ? '✅' : '❌'
+      });
+
+      const interpretResponse = await fetch(`/api/astrology/interpret-solar-return`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          natalChart,
+          solarReturnChart,
+          userProfile,
+          birthData,
+          regenerate: false
+        })
+      });
+
+      if (!interpretResponse.ok) {
+        const errorData = await interpretResponse.json();
+        const errorMsg = errorData.error || errorData.message || 'Error desconocido';
+        console.error('❌ [AUTO_GEN] Error del endpoint:', errorMsg);
+        throw new Error(`Error al generar interpretación: ${errorMsg}`);
+      }
+
+      const interpretData = await interpretResponse.json();
+      console.log('✅ [AUTO_GEN] Solar Return generado exitosamente:', interpretData);
+
+      // 6. Recargar la interpretación
+      const reloadResponse = await fetch(`/api/interpretations?userId=${userId}&chartType=solar-return`);
+      const reloadData = await reloadResponse.json();
+
+      if (reloadData.exists && reloadData.interpretation) {
+        setSolarReturnInterpretation(reloadData);
+        console.log('✅ [AUTO_GEN] Interpretación cargada en el libro');
+      }
+
+    } catch (error: any) {
+      console.error('❌ [AUTO_GEN] Error al generar Solar Return:', error);
+      alert(`Error al generar Solar Return: ${error.message}\n\nPor favor, intenta generar manualmente desde la página de Solar Return.`);
+    } finally {
+      setGeneratingSolarReturn(false);
+    }
+  };
+
+  // ==========================================
+  // 🔄 REGENERAR SOLAR RETURN (FORZADO)
+  // ==========================================
+  const handleRegenerateSolarReturn = async () => {
+    if (!userId || generatingSolarReturn) return;
+
+    const confirmRegenerate = window.confirm(
+      '¿Estás seguro de que quieres regenerar la interpretación del Solar Return?\n\n' +
+      'Esto borrará la interpretación actual y creará una nueva con los campos actualizados.\n\n' +
+      'El proceso puede tardar 1-2 minutos.'
+    );
+
+    if (!confirmRegenerate) return;
+
+    try {
+      setGeneratingSolarReturn(true);
+      console.log('🔄 [REGENERATE] Iniciando regeneración forzada...');
+
+      // 1. Borrar la interpretación existente
+      console.log('🗑️ [REGENERATE] Borrando interpretación existente...');
+      const deleteResponse = await fetch(`/api/interpretations/save?userId=${userId}&chartType=solar-return`, {
+        method: 'DELETE'
+      });
+
+      if (deleteResponse.ok) {
+        console.log('✅ [REGENERATE] Interpretación borrada correctamente');
+      } else {
+        console.warn('⚠️ [REGENERATE] No se pudo borrar la interpretación (puede no existir)');
+      }
+
+      // 2. Obtener datos necesarios para la generación
+      console.log('📍 [REGENERATE] Obteniendo birth data...');
+      const birthDataResponse = await fetch(`/api/birth-data?userId=${userId}`);
+      if (!birthDataResponse.ok) {
+        throw new Error('No se encontraron datos de nacimiento');
+      }
+      const birthDataResult = await birthDataResponse.json();
+      const birthData = birthDataResult.data || birthDataResult.birthData;
+
+      if (!birthData) {
+        console.error('❌ [REGENERATE] Birth data no encontrada en respuesta:', birthDataResult);
+        throw new Error('Birth data no encontrada en la respuesta del servidor');
+      }
+      console.log('✅ [REGENERATE] Birth data obtenida:', { fullName: birthData.fullName, birthPlace: birthData.birthPlace });
+
+      console.log('🌟 [REGENERATE] Obteniendo carta natal...');
+      const natalResponse = await fetch(`/api/charts/natal?userId=${userId}`);
+      if (!natalResponse.ok) {
+        throw new Error('No se encontró la carta natal');
+      }
+      const natalData = await natalResponse.json();
+      // ✅ FIX: Buscar en el campo correcto
+      const natalChart = natalData.natalChart || natalData.chart || natalData.data?.chart;
+
+      if (!natalChart) {
+        console.error('❌ [REGENERATE] Estructura de respuesta natal:', natalData);
+        throw new Error('Carta natal no encontrada en la respuesta');
+      }
+
+      console.log('✅ [REGENERATE] Carta natal obtenida correctamente');
+
+      console.log('☀️ [REGENERATE] Obteniendo carta de Solar Return...');
+      const srChartResponse = await fetch(`/api/charts/solar-return?userId=${userId}`);
+      if (!srChartResponse.ok) {
+        throw new Error('No se encontró la carta de Solar Return');
+      }
+      const srChartData = await srChartResponse.json();
+      // ✅ FIX: Buscar en el campo correcto primero
+      const solarReturnChart = srChartData.data?.solarReturnChart || srChartData.solarReturnChart || srChartData.chart;
+
+      if (!solarReturnChart) {
+        console.error('❌ [REGENERATE] Estructura de respuesta SR:', srChartData);
+        throw new Error('Carta Solar Return no encontrada en la respuesta');
+      }
+
+      console.log('✅ [REGENERATE] Carta Solar Return obtenida correctamente');
+
+      console.log('👤 [REGENERATE] Construyendo perfil de usuario desde birthData...');
+
+      // Calcular edad desde birthDate
+      const birthDateStr = birthData.date || birthData.birthDate;
+      const birthDateObj = new Date(birthDateStr);
+      const now = new Date();
+      let age = now.getFullYear() - birthDateObj.getFullYear();
+      const hasHadBirthdayThisYear = (now.getMonth() > birthDateObj.getMonth()) ||
+        (now.getMonth() === birthDateObj.getMonth() && now.getDate() >= birthDateObj.getDate());
+      if (!hasHadBirthdayThisYear) age -= 1;
+
+      const userProfile = {
+        name: birthData.fullName || 'Usuario',
+        birthDate: birthDateStr,
+        birthPlace: birthData.location || birthData.birthPlace,
+        age: age
+      };
+      console.log('✅ [REGENERATE] UserProfile construido:', userProfile);
+
+      // 3. Generar nueva interpretación con regenerate=true
+      console.log('🤖 [REGENERATE] Generando nueva interpretación con IA...');
+      const interpretResponse = await fetch(`/api/astrology/interpret-solar-return`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          natalChart,
+          solarReturnChart,
+          userProfile,
+          birthData,
+          regenerate: true  // ✅ FORZAR REGENERACIÓN
+        })
+      });
+
+      if (!interpretResponse.ok) {
+        const errorData = await interpretResponse.json();
+        const errorMsg = errorData.error || errorData.message || 'Error desconocido';
+        throw new Error(`Error al generar interpretación: ${errorMsg}`);
+      }
+
+      const interpretData = await interpretResponse.json();
+      console.log('✅ [REGENERATE] Nueva interpretación generada exitosamente');
+
+      // 4. Recargar la página para mostrar la nueva interpretación
+      console.log('🔄 [REGENERATE] Recargando página...');
+      window.location.reload();
+
+    } catch (error: any) {
+      console.error('❌ [REGENERATE] Error:', error);
+      alert(`Error al regenerar la interpretación:\n\n${error.message}\n\nPor favor, verifica que tengas una carta de Solar Return generada primero.`);
+    } finally {
+      setGeneratingSolarReturn(false);
+    }
+  };
 
   const handlePrint = () => {
     // Forzar el layout antes de imprimir
@@ -198,6 +441,860 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate, events = []
       window.print();
     }, 100);
   };
+
+  const handleExportPDF = () => {
+    setShowPdfInstructions(true);
+  };
+
+  const handleConfirmPDF = () => {
+    setShowPdfInstructions(false);
+    // Pequeño delay para que se cierre el modal antes de imprimir
+    window.setTimeout(() => {
+      window.print();
+    }, 200);
+  };
+
+  const handleExportTXT = () => {
+    // Construir contenido del libro en formato texto plano
+    let txtContent = '';
+
+    // ═══════════════════════════════════════════════════════════
+    // PORTADA
+    // ═══════════════════════════════════════════════════════════
+    txtContent += '═══════════════════════════════════════════════════════════\n';
+    txtContent += '           TU VUELTA AL SOL - AGENDA ASTROLÓGICA\n';
+    txtContent += '═══════════════════════════════════════════════════════════\n\n';
+    txtContent += `Agenda de: ${userName}\n`;
+    txtContent += `Período: ${format(startDate, "d 'de' MMMM 'de' yyyy", { locale: es })} - ${format(endDate, "d 'de' MMMM 'de' yyyy", { locale: es })}\n`;
+    if (sunSign) txtContent += `Sol en: ${sunSign}\n`;
+    if (moonSign) txtContent += `Luna en: ${moonSign}\n`;
+    if (ascendant) txtContent += `Ascendente: ${ascendant}\n`;
+    txtContent += '\n\n';
+
+    // ═══════════════════════════════════════════════════════════
+    // PRIMER DÍA DEL CICLO - ¡FELIZ CUMPLEAÑOS!
+    // ═══════════════════════════════════════════════════════════
+    txtContent += '═══════════════════════════════════════════════════════════\n';
+    txtContent += '               PRIMER DÍA DE TU CICLO\n';
+    txtContent += '═══════════════════════════════════════════════════════════\n\n';
+    txtContent += `${format(startDate, "d 'de' MMMM 'de' yyyy", { locale: es })}\n`;
+    txtContent += `¡Feliz cumpleaños, ${userName}!\n\n`;
+
+    const temaCentral = getInterpretacionRetornoSolar();
+    const mandato = getSRInterpretation()?.comparaciones_planetarias?.sol?.mandato_del_ano;
+
+    if (temaCentral) {
+      txtContent += '━━━ TU TEMA PARA ESTE CICLO ━━━\n';
+      txtContent += (temaCentral.length > 200 ? temaCentral.substring(0, 200) + '...' : temaCentral) + '\n\n';
+    }
+
+    if (mandato) {
+      txtContent += '━━━ EL MANDATO DEL AÑO ━━━\n';
+      txtContent += `"${mandato}"\n\n`;
+    }
+
+    txtContent += '━━━ INTENCIÓN PARA ESTE NUEVO CICLO ━━━\n';
+    txtContent += '(Espacio para escribir tu intención personal)\n\n';
+
+    // ═══════════════════════════════════════════════════════════
+    // GUÍA DE LA AGENDA
+    // ═══════════════════════════════════════════════════════════
+    txtContent += '\n═══════════════════════════════════════════════════════════\n';
+    txtContent += '          QUÉ VAS A ENCONTRAR EN ESTA AGENDA\n';
+    txtContent += '═══════════════════════════════════════════════════════════\n\n';
+    txtContent += '🌟 Tu Retorno Solar:\n';
+    txtContent += '   El tema central de tu año, cómo se siente este ciclo y qué vino a moverte.\n';
+    txtContent += '   Una interpretación profunda de tu carta astrológica anual.\n\n';
+    txtContent += '💫 Tu Carta Natal:\n';
+    txtContent += '   Tu esencia, tus dones, tu propósito vital.\n';
+    txtContent += '   El mapa del cielo en el momento exacto de tu nacimiento.\n\n';
+    txtContent += '📅 Calendario Astrológico:\n';
+    txtContent += '   12 meses con Lunas Nuevas, Lunas Llenas, eclipses, retrogradaciones\n';
+    txtContent += '   y tránsitos importantes. Cada mes tiene espacio para escribir y reflexionar.\n\n';
+    txtContent += '✨ Ejercicios y Rituales:\n';
+    txtContent += '   Prácticas creativas, visualizaciones, rituales simbólicos y espacios para escribir.\n';
+    txtContent += '   Herramientas para integrar la astrología en tu vida diaria.\n\n';
+    txtContent += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    txtContent += 'Esta agenda es tu compañera de viaje.\n';
+    txtContent += 'No la uses de forma lineal si no quieres.\n';
+    txtContent += 'Abre donde te llame la intuición.\n';
+    txtContent += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+
+    // ═══════════════════════════════════════════════════════════
+    // SOLAR RETURN - INTERPRETACIÓN COMPLETA
+    // ═══════════════════════════════════════════════════════════
+    const srData = getSRInterpretation();
+    if (srData) {
+      txtContent += '═══════════════════════════════════════════════════════════\n';
+      txtContent += '                 TU RETORNO SOLAR DEL AÑO\n';
+      txtContent += '═══════════════════════════════════════════════════════════\n\n';
+
+      // APERTURA ANUAL - COMPLETA
+      if (srData.apertura_anual) {
+        if (srData.apertura_anual.tema_central) {
+          txtContent += '━━━ TEMA CENTRAL DEL AÑO ━━━\n';
+          txtContent += srData.apertura_anual.tema_central + '\n\n';
+        }
+
+        if (srData.apertura_anual.eje_del_ano) {
+          txtContent += '━━━ EJE DEL AÑO ━━━\n';
+          txtContent += srData.apertura_anual.eje_del_ano + '\n\n';
+        }
+
+        if (srData.apertura_anual.como_se_siente) {
+          txtContent += '━━━ CÓMO SE SIENTE ━━━\n';
+          txtContent += srData.apertura_anual.como_se_siente + '\n\n';
+        }
+
+        if (srData.apertura_anual.conexion_natal) {
+          txtContent += '━━━ CONEXIÓN CON TU CARTA NATAL ━━━\n';
+          txtContent += srData.apertura_anual.conexion_natal + '\n\n';
+        }
+      }
+
+      // CÓMO SE VIVE SIENDO TÚ
+      if (srData.como_se_vive_siendo_tu) {
+        txtContent += '\n━━━ CÓMO SE VIVE SIENDO TÚ ESTE AÑO ━━━\n\n';
+
+        if (srData.como_se_vive_siendo_tu.facilidad) {
+          txtContent += '▸ LO QUE FLUYE:\n';
+          txtContent += '  ' + srData.como_se_vive_siendo_tu.facilidad + '\n\n';
+        }
+
+        if (srData.como_se_vive_siendo_tu.incomodidad) {
+          txtContent += '▸ LO QUE INCOMODA:\n';
+          txtContent += '  ' + srData.como_se_vive_siendo_tu.incomodidad + '\n\n';
+        }
+
+        if (srData.como_se_vive_siendo_tu.medida_del_ano) {
+          txtContent += '▸ LA MEDIDA DEL AÑO:\n';
+          txtContent += '  ' + srData.como_se_vive_siendo_tu.medida_del_ano + '\n\n';
+        }
+
+        if (srData.como_se_vive_siendo_tu.actitud_nueva) {
+          txtContent += '▸ ACTITUD NUEVA:\n';
+          txtContent += '  ' + srData.como_se_vive_siendo_tu.actitud_nueva + '\n\n';
+        }
+      }
+
+      // COMPARACIONES PLANETARIAS COMPLETAS
+      if (srData.comparaciones_planetarias && Object.keys(srData.comparaciones_planetarias).length > 0) {
+        txtContent += '\n━━━ COMPARACIONES NATAL vs SOLAR RETURN ━━━\n\n';
+
+        const comparaciones = srData.comparaciones_planetarias;
+        const planetas = ['sol', 'luna', 'mercurio', 'venus', 'marte', 'jupiter', 'saturno'];
+        const simbolos: Record<string, string> = {
+          'sol': '▸ SOL',
+          'luna': '▸ LUNA',
+          'mercurio': '▸ MERCURIO',
+          'venus': '▸ VENUS',
+          'marte': '▸ MARTE',
+          'jupiter': '▸ JUPITER',
+          'saturno': '▸ SATURNO'
+        };
+
+        planetas.forEach((planeta) => {
+          const comp = comparaciones[planeta];
+          if (comp) {
+            txtContent += `${simbolos[planeta]}\n`;
+
+            if (comp.natal) {
+              if (typeof comp.natal === 'string') {
+                txtContent += `  Natal: ${comp.natal}\n`;
+              } else if (comp.natal.descripcion) {
+                txtContent += `  Natal: ${comp.natal.descripcion}\n`;
+              }
+            }
+
+            if (comp.solar_return) {
+              if (typeof comp.solar_return === 'string') {
+                txtContent += `  Solar Return: ${comp.solar_return}\n`;
+              } else if (comp.solar_return.descripcion) {
+                txtContent += `  Solar Return: ${comp.solar_return.descripcion}\n`;
+              }
+            }
+
+            if (comp.choque) {
+              txtContent += `  Choque/Tensión: ${comp.choque}\n`;
+            }
+
+            if (comp.que_hacer) {
+              txtContent += `  Qué hacer: ${comp.que_hacer}\n`;
+            }
+
+            if (comp.mandato_del_ano) {
+              txtContent += `  Mandato del año: ${comp.mandato_del_ano}\n`;
+            }
+
+            txtContent += '\n';
+          }
+        });
+      }
+
+      // LÍNEA DE TIEMPO DEL AÑO
+      if (srData.linea_tiempo_anual && Array.isArray(srData.linea_tiempo_anual) && srData.linea_tiempo_anual.length > 0) {
+        txtContent += '\n━━━ LÍNEA DE TIEMPO DEL AÑO ━━━\n\n';
+        srData.linea_tiempo_anual.forEach((fase: any, idx: number) => {
+          txtContent += `▸ ${fase.periodo || fase.mes || `Fase ${idx + 1}`}\n`;
+          if (fase.descripcion) txtContent += `  ${fase.descripcion}\n`;
+          if (fase.accion_clave) txtContent += `  Acción clave: ${fase.accion_clave}\n`;
+          txtContent += '\n';
+        });
+      }
+
+      // SOMBRAS Y DESAFÍOS DEL AÑO
+      if (srData.sombras_del_ano && Array.isArray(srData.sombras_del_ano) && srData.sombras_del_ano.length > 0) {
+        txtContent += '\n━━━ SOMBRAS Y DESAFÍOS DEL AÑO ━━━\n\n';
+        srData.sombras_del_ano.forEach((sombra: string, idx: number) => {
+          txtContent += `${idx + 1}. ${sombra}\n`;
+        });
+        txtContent += '\n';
+      }
+
+      // CLAVES DE INTEGRACIÓN
+      if (srData.claves_integracion && srData.claves_integracion.length > 0) {
+        txtContent += '\n━━━ CLAVES DE INTEGRACIÓN ━━━\n\n';
+        srData.claves_integracion.forEach((clave: string, idx: number) => {
+          txtContent += `${idx + 1}. ${clave}\n`;
+        });
+        txtContent += '\n';
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // CICLOS ANUALES Y MESES CLAVE
+    // ═══════════════════════════════════════════════════════════
+    if (srData) {
+      // LÍNEA DE TIEMPO EMOCIONAL
+      if (solarReturnInterpretation?.interpretation?.linea_tiempo_emocional) {
+        txtContent += '\n═══════════════════════════════════════════════════════════\n';
+        txtContent += '              LÍNEA DE TIEMPO EMOCIONAL\n';
+        txtContent += '═══════════════════════════════════════════════════════════\n\n';
+
+        solarReturnInterpretation.interpretation.linea_tiempo_emocional.forEach((mes: any) => {
+          txtContent += `▸ ${mes.mes}: Intensidad ${mes.intensidad}/10\n`;
+          if (mes.palabra_clave) txtContent += `  Palabra clave: ${mes.palabra_clave}\n`;
+          txtContent += '\n';
+        });
+      }
+
+      // MESES CLAVE Y PUNTOS DE GIRO
+      if (solarReturnInterpretation?.interpretation?.meses_clave_puntos_giro) {
+        txtContent += '\n═══════════════════════════════════════════════════════════\n';
+        txtContent += '           MESES CLAVE Y PUNTOS DE GIRO\n';
+        txtContent += '═══════════════════════════════════════════════════════════\n\n';
+
+        solarReturnInterpretation.interpretation.meses_clave_puntos_giro.forEach((punto: any, idx: number) => {
+          txtContent += `${idx + 1}. ${punto.mes || punto.periodo}\n`;
+          if (punto.evento_astrologico) txtContent += `   Evento: ${punto.evento_astrologico}\n`;
+          if (punto.significado) txtContent += `   Significado: ${punto.significado}\n`;
+          txtContent += '\n';
+        });
+      }
+
+      // GRANDES APRENDIZAJES (ya incluido arriba como "claves de integración")
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // SOUL CHART - CARTA NATAL COMPLETA
+    // ═══════════════════════════════════════════════════════════
+    const natalData = getNatalInterpretation();
+    txtContent += '\n═══════════════════════════════════════════════════════════\n';
+    txtContent += '                  CARTA NATAL - TU ESENCIA\n';
+    txtContent += '═══════════════════════════════════════════════════════════\n\n';
+
+    if (natalData) {
+      // ESENCIA NATAL
+      const esencia = getEsenciaNatal();
+      if (esencia) {
+        if (esencia.proposito_vida) {
+          txtContent += '━━━ TU PROPÓSITO VITAL ━━━\n';
+          txtContent += esencia.proposito_vida + '\n\n';
+        }
+
+        if (esencia.emociones) {
+          txtContent += '━━━ TU MUNDO EMOCIONAL ━━━\n';
+          txtContent += esencia.emociones + '\n\n';
+        }
+
+        if (esencia.pensamiento) {
+          txtContent += '━━━ CÓMO PIENSAS Y TE COMUNICAS ━━━\n';
+          txtContent += esencia.pensamiento + '\n\n';
+        }
+
+        if (esencia.amor) {
+          txtContent += '━━━ CÓMO AMAS ━━━\n';
+          txtContent += esencia.amor + '\n\n';
+        }
+
+        if (esencia.accion) {
+          txtContent += '━━━ CÓMO ACTÚAS ━━━\n';
+          txtContent += esencia.accion + '\n\n';
+        }
+      }
+
+      // NODOS LUNARES
+      const nodos = getNodosLunares();
+      if (nodos) {
+        if (nodos.nodo_sur) {
+          txtContent += '\n━━━ NODO SUR (De dónde vienes) ━━━\n';
+          txtContent += nodos.nodo_sur + '\n\n';
+        }
+
+        if (nodos.nodo_norte) {
+          txtContent += '━━━ NODO NORTE (Hacia dónde vas) ━━━\n';
+          txtContent += nodos.nodo_norte + '\n\n';
+        }
+      }
+    } else {
+      // Fallback si no hay interpretación completa
+      txtContent += 'Tu carta natal es el mapa del cielo en el momento exacto de tu nacimiento.\n';
+      txtContent += 'Refleja tu potencial, tus dones, tus desafíos y el camino de tu alma.\n\n';
+
+      if (sunSign) {
+        txtContent += `SOL EN ${sunSign.toUpperCase()}:\n`;
+        txtContent += 'Tu esencia, tu identidad, tu propósito vital.\n\n';
+      }
+
+      if (moonSign) {
+        txtContent += `LUNA EN ${moonSign.toUpperCase()}:\n`;
+        txtContent += 'Tus necesidades emocionales, tu mundo interior.\n\n';
+      }
+
+      if (ascendant) {
+        txtContent += `ASCENDENTE EN ${ascendant.toUpperCase()}:\n`;
+        txtContent += 'Tu máscara social, cómo te perciben los demás.\n\n';
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // EJES DEL AÑO
+    // ═══════════════════════════════════════════════════════════
+    txtContent += '\n═══════════════════════════════════════════════════════════\n';
+    txtContent += '                    LOS EJES DEL AÑO\n';
+    txtContent += '═══════════════════════════════════════════════════════════\n\n';
+    txtContent += 'Este año no se sostiene por eventos aislados, sino por cuatro puntos clave\n';
+    txtContent += 'que marcan cómo vives, decides y te posicionas en el mundo.\n\n';
+    txtContent += 'No son exigencias externas. Son ajustes internos.\n\n';
+
+    txtContent += '━━━ ASCENDENTE DEL RETORNO (Casa 1) ━━━\n';
+    txtContent += 'Tu nueva máscara. La actitud con la que inicias este ciclo.\n';
+    txtContent += 'Este año no eres exactamente quien eras hace 12 meses.\n\n';
+
+    txtContent += '━━━ FONDO DEL CIELO (IC) - Casa 4 ━━━\n';
+    txtContent += 'Tu base emocional, tu hogar interior.\n';
+    txtContent += 'Todo lo que construyes este año se sostiene desde aquí.\n\n';
+
+    txtContent += '━━━ MEDIO CIELO (MC) - Casa 10 ━━━\n';
+    txtContent += 'Vocación, dirección, propósito visible.\n';
+    txtContent += 'Este año no busca logros espectaculares ni reconocimiento inmediato. Busca sentido.\n\n';
+
+    txtContent += '━━━ DESCENDENTE (DSC) - Casa 7 ━━━\n';
+    txtContent += 'Relaciones, vínculos, espejo emocional.\n';
+    txtContent += 'Este año las relaciones funcionan como espejo directo.\n';
+    txtContent += 'Lo que no está equilibrado se nota más. Lo que es verdadero, se profundiza.\n\n';
+
+    txtContent += '▸ Frase guía del eje del año:\n';
+    txtContent += '"Me permito ser honesta conmigo antes de intentar encajar en el mundo."\n\n';
+
+    // ═══════════════════════════════════════════════════════════
+    // RITUAL DE CUMPLEAÑOS
+    // ═══════════════════════════════════════════════════════════
+    txtContent += '\n═══════════════════════════════════════════════════════════\n';
+    txtContent += '                  RITUAL DE CUMPLEAÑOS\n';
+    txtContent += '═══════════════════════════════════════════════════════════\n\n';
+    txtContent += 'Un pequeño ritual para honrar tu nuevo ciclo solar.\n\n';
+
+    txtContent += '━━━ NECESITAS ━━━\n';
+    txtContent += '• Una vela (preferiblemente dorada o blanca)\n';
+    txtContent += '• Papel y bolígrafo\n';
+    txtContent += '• Un momento de soledad\n\n';
+
+    txtContent += '━━━ EL RITUAL ━━━\n';
+    txtContent += '1. Enciende la vela y respira profundo tres veces.\n';
+    txtContent += '2. Escribe una carta a la versión de ti que cumple años el próximo año.\n';
+    txtContent += '3. Cuéntale qué esperas haber aprendido, sentido, soltado.\n';
+    txtContent += '4. Guarda la carta sin leerla hasta tu próximo cumpleaños.\n';
+    txtContent += '5. Apaga la vela con gratitud.\n\n';
+
+    txtContent += 'Si resuena contigo, pruébalo.\n\n';
+
+    // ═══════════════════════════════════════════════════════════
+    // CALENDARIO DE TU AÑO SOLAR (ORDENADO CRONOLÓGICAMENTE)
+    // ═══════════════════════════════════════════════════════════
+    if (solarCycle && solarCycle.events) {
+      txtContent += '\n═══════════════════════════════════════════════════════════\n';
+      txtContent += '                CALENDARIO DE TU AÑO SOLAR\n';
+      txtContent += '═══════════════════════════════════════════════════════════\n\n';
+
+      // Agrupar eventos por mes
+      const eventosPorMes: { [key: string]: { eventos: any[], monthDate: Date } } = {};
+      const meses = [
+        'ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO',
+        'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'
+      ];
+
+      solarCycle.events.forEach((event: any) => {
+        const eventDate = new Date(event.date);
+        const mesNombre = meses[eventDate.getMonth()];
+        const year = eventDate.getFullYear();
+        const mesKey = `${mesNombre} ${year}`;
+
+        if (!eventosPorMes[mesKey]) {
+          eventosPorMes[mesKey] = { eventos: [], monthDate: eventDate };
+        }
+        eventosPorMes[mesKey].eventos.push(event);
+      });
+
+      // Ordenar meses cronológicamente desde el mes de cumpleaños
+      const birthdayMonth = startDate.getMonth();
+      const birthdayYear = startDate.getFullYear();
+
+      const sortedKeys = Object.keys(eventosPorMes).sort((a, b) => {
+        const dateA = eventosPorMes[a].monthDate;
+        const dateB = eventosPorMes[b].monthDate;
+
+        // Calcular posición relativa al cumpleaños
+        let monthsFromBirthdayA = (dateA.getFullYear() - birthdayYear) * 12 + dateA.getMonth() - birthdayMonth;
+        let monthsFromBirthdayB = (dateB.getFullYear() - birthdayYear) * 12 + dateB.getMonth() - birthdayMonth;
+
+        // Ajustar para que los meses después del cumpleaños este año y antes del próximo estén en orden
+        if (monthsFromBirthdayA < 0) monthsFromBirthdayA += 12;
+        if (monthsFromBirthdayB < 0) monthsFromBirthdayB += 12;
+
+        return monthsFromBirthdayA - monthsFromBirthdayB;
+      });
+
+      // Imprimir eventos por mes en orden cronológico
+      sortedKeys.forEach((mesKey) => {
+        txtContent += `\n━━━ ${mesKey} ━━━\n\n`;
+
+        eventosPorMes[mesKey].eventos.forEach((event: any) => {
+          const eventDate = new Date(event.date);
+          const dia = eventDate.getDate();
+          let tipoEvento = event.type || 'Evento';
+
+          // Traducir tipos de eventos
+          if (event.type === 'new_moon') {
+            tipoEvento = 'Luna Nueva';
+          } else if (event.type === 'full_moon') {
+            tipoEvento = 'Luna Llena';
+          } else if (event.type === 'lunar_phase') {
+            tipoEvento = event.title?.includes('Nueva') ? 'Luna Nueva' : 'Luna Llena';
+          } else if (event.type === 'retrograde') {
+            tipoEvento = 'Retrogradación';
+          } else if (event.type === 'eclipse') {
+            tipoEvento = 'Eclipse';
+          } else if (event.type === 'planetary_transit') {
+            tipoEvento = 'Tránsito planetario';
+          }
+
+          txtContent += `▸ ${dia} de ${mesKey.split(' ')[0].toLowerCase()} - ${tipoEvento}`;
+
+          if (event.title) {
+            txtContent += `: ${event.title}`;
+          }
+
+          txtContent += `\n`;
+        });
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // CIERRE DEL CICLO
+    // ═══════════════════════════════════════════════════════════
+    txtContent += '\n\n═══════════════════════════════════════════════════════════\n';
+    txtContent += '                  CIERRE DEL CICLO\n';
+    txtContent += '═══════════════════════════════════════════════════════════\n\n';
+    txtContent += `${format(endDate, "d 'de' MMMM 'de' yyyy", { locale: es })}\n`;
+    txtContent += `Cierre y preparación, ${userName}\n\n`;
+
+    txtContent += '━━━ LO MÁS IMPORTANTE QUE APRENDÍ ━━━\n';
+    txtContent += '(Espacio para reflexión personal)\n\n';
+
+    txtContent += '━━━ ¿QUIÉN ERA HACE UN AÑO? ¿QUIÉN SOY HOY? ━━━\n';
+    txtContent += '(Espacio para reflexión personal)\n\n';
+
+    txtContent += '━━━ CARTA DE GRATITUD A MÍ MISMO/A ━━━\n';
+    txtContent += '(Espacio para reflexión personal)\n\n';
+
+    // Cerrar con mensaje
+    txtContent += '\n\n═══════════════════════════════════════════════════════════\n';
+    txtContent += '        Este es tu año. Confía en el proceso.\n';
+    txtContent += '═══════════════════════════════════════════════════════════\n';
+
+    // Crear y descargar archivo
+    const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `tu-vuelta-al-sol-${userName.toLowerCase().replace(/\s+/g, '-')}-${format(startDate, 'yyyy')}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // Helper: Obtener eventos formateados para un mes específico
+  const getFormattedEventosForMonth = (monthIndex: number) => {
+    const eventos = getEventosForMonth(monthIndex);
+    return eventos.map(formatEventForBook);
+  };
+
+  // Helper: Obtener la interpretación completa del SR
+  const getSRInterpretation = () => {
+    if (loadingSolarReturn || !solarReturnInterpretation) {
+      return null;
+    }
+    return solarReturnInterpretation.interpretation;
+  };
+
+  // Helper: Obtener tema central del Retorno Solar
+  const getInterpretacionRetornoSolar = (): string | undefined => {
+    const interpretation = getSRInterpretation();
+    if (!interpretation) return undefined;
+
+    const temaCentral =
+      interpretation.apertura_anual?.tema_central ||
+      interpretation.tema_central_del_anio ||
+      interpretation.tema_central ||
+      interpretation.overview ||
+      interpretation.mensaje_principal;
+
+    if (temaCentral) {
+      console.log('✅ [SOLAR_RETURN] Tema central encontrado:', temaCentral.substring(0, 100) + '...');
+    }
+    return temaCentral;
+  };
+
+  // Helper: Obtener "Cómo se vive siendo tú"
+  const getComoSeViveSiendoTu = () => {
+    const interpretation = getSRInterpretation();
+    if (!interpretation?.como_se_vive_siendo_tu) return null;
+
+    return {
+      facilidad: interpretation.como_se_vive_siendo_tu.facilidad,
+      incomodidad: interpretation.como_se_vive_siendo_tu.incomodidad,
+      medida_del_ano: interpretation.como_se_vive_siendo_tu.medida_del_ano,
+      reflejos_obsoletos: interpretation.como_se_vive_siendo_tu.reflejos_obsoletos,
+      actitud_nueva: interpretation.como_se_vive_siendo_tu.actitud_nueva
+    };
+  };
+
+  // Helper: Obtener sombras del año
+  const getSombrasDelAno = (): string[] | undefined => {
+    const interpretation = getSRInterpretation();
+    return interpretation?.sombras_del_ano;
+  };
+
+  // Helper: Obtener interpretación Natal completa
+  const getNatalInterpretation = () => {
+    if (loadingNatal || !natalInterpretation) {
+      return null;
+    }
+    return natalInterpretation.interpretation;
+  };
+
+  // Helper: Obtener esencia natal
+  const getEsenciaNatal = () => {
+    const interpretation = getNatalInterpretation();
+    if (!interpretation) return null;
+
+    return {
+      proposito_vida: interpretation.proposito_vida,
+      emociones: interpretation.emociones,
+      personalidad: interpretation.personalidad,
+      pensamiento: interpretation.como_piensas_y_hablas,
+      amor: interpretation.como_amas,
+      accion: interpretation.como_enfrentas_la_vida
+    };
+  };
+
+  // Helper: Obtener nodos lunares
+  const getNodosLunares = () => {
+    const interpretation = getNatalInterpretation();
+    if (!interpretation?.nodos_lunares) return null;
+
+    // Función para convertir nodo objeto a string
+    const formatNodo = (nodo: any): string | undefined => {
+      if (!nodo) return undefined;
+      if (typeof nodo === 'string') return nodo;
+
+      // Si es objeto con {signo_casa, direccion_evolutiva, desafio}
+      const parts: string[] = [];
+      if (nodo.signo_casa) parts.push(nodo.signo_casa);
+      if (nodo.direccion_evolutiva) parts.push(`Dirección evolutiva: ${nodo.direccion_evolutiva}`);
+      if (nodo.desafio) parts.push(`Desafío: ${nodo.desafio}`);
+      if (nodo.patrones_pasados) parts.push(`Patrones pasados: ${nodo.patrones_pasados}`);
+      if (nodo.zona_confort) parts.push(`Zona de confort: ${nodo.zona_confort}`);
+
+      return parts.length > 0 ? parts.join('\n\n') : undefined;
+    };
+
+    return {
+      nodo_sur: formatNodo(interpretation.nodos_lunares.nodo_sur),
+      nodo_norte: formatNodo(interpretation.nodos_lunares.nodo_norte)
+    };
+  };
+
+  // Helper: Obtener planetas dominantes
+  const getPlanetasDominantes = () => {
+    const interpretation = getNatalInterpretation();
+    if (!interpretation) return null;
+
+    return {
+      como_piensas: interpretation.como_piensas_y_hablas,
+      proposito_vida: interpretation.proposito_vida,
+      emociones: interpretation.emociones,
+      como_amas: interpretation.como_amas,
+      como_actuas: interpretation.como_enfrentas_la_vida
+    };
+  };
+
+  // Helper: Obtener patrones emocionales
+  const getPatronesEmocionales = () => {
+    const interpretation = getNatalInterpretation();
+    if (!interpretation) return null;
+
+    // Buscar patrones en diferentes campos posibles
+    const patrones = interpretation.patrones_emocionales ||
+                     interpretation.patrones ||
+                     interpretation.patrones_a_observar;
+
+    const sombra = interpretation.sombra ||
+                   interpretation.aspectos_sombra ||
+                   interpretation.desafios_emocionales;
+
+    return {
+      patrones: Array.isArray(patrones) ? patrones : patrones ? [patrones] : undefined,
+      sombra: typeof sombra === 'string' ? sombra : sombra?.descripcion
+    };
+  };
+
+  // Helper: Obtener claves de integración del SR
+  const getClavesIntegracion = (): string[] | undefined => {
+    const interpretation = getSRInterpretation();
+    return interpretation?.claves_integracion;
+  };
+
+  // Helper: Obtener línea de tiempo anual del SR
+  const getLineaTiempoAnual = (): any[] | undefined => {
+    const interpretation = getSRInterpretation();
+    return interpretation?.linea_tiempo_anual;
+  };
+
+  // Helper: Obtener comparaciones planetarias del SR
+  const getComparacionesPlanetarias = () => {
+    const interpretation = getSRInterpretation();
+    return interpretation?.comparaciones_planetarias;
+  };
+
+  // Helper: Obtener integración de ejes del SR
+  const getIntegracionEjes = () => {
+    const interpretation = getSRInterpretation();
+    if (!interpretation?.ejes) return null;
+
+    const ejes = interpretation.ejes;
+    return {
+      asc: ejes.ascendente?.interpretacion || ejes.asc?.interpretacion || ejes.ascendente || ejes.asc,
+      mc: ejes.medio_cielo?.interpretacion || ejes.mc?.interpretacion || ejes.medio_cielo || ejes.mc,
+      dsc: ejes.descendente?.interpretacion || ejes.dsc?.interpretacion || ejes.descendente || ejes.dsc,
+      ic: ejes.fondo_cielo?.interpretacion || ejes.ic?.interpretacion || ejes.fondo_cielo || ejes.ic,
+      frase_guia: interpretation.frase_guia || interpretation.mantra_anual || ejes.frase_guia
+    };
+  };
+
+  // Helper: Obtener datos mensuales personalizados (ejercicio, mantra, etc.)
+  const getMonthlyThemeData = (monthIndex: number) => {
+    const interpretation = getSRInterpretation();
+    const zodiacSigns = [
+      { name: 'Capricornio', symbol: '♑', element: 'tierra' },
+      { name: 'Acuario', symbol: '♒', element: 'aire' },
+      { name: 'Piscis', symbol: '♓', element: 'agua' },
+      { name: 'Aries', symbol: '♈', element: 'fuego' },
+      { name: 'Tauro', symbol: '♉', element: 'tierra' },
+      { name: 'Géminis', symbol: '♊', element: 'aire' },
+      { name: 'Cáncer', symbol: '♋', element: 'agua' },
+      { name: 'Leo', symbol: '♌', element: 'fuego' },
+      { name: 'Virgo', symbol: '♍', element: 'tierra' },
+      { name: 'Libra', symbol: '♎', element: 'aire' },
+      { name: 'Escorpio', symbol: '♏', element: 'agua' },
+      { name: 'Sagitario', symbol: '♐', element: 'fuego' }
+    ];
+
+    const monthlyThemes = [
+      { // Enero - Capricornio
+        ejercicio: { titulo: 'Revisar automatismos', descripcion: 'Identifica una acción que haces por inercia y pregúntate: ¿esto me sigue sirviendo?' },
+        mantra: 'Arranco desde mi verdad, no desde la prisa'
+      },
+      { // Febrero - Acuario
+        ejercicio: { titulo: 'Conectar con tu visión única', descripcion: 'Escribe cómo sería tu vida ideal sin las expectativas de otros. ¿Qué deseas realmente?' },
+        mantra: 'Mi singularidad es mi mayor fortaleza'
+      },
+      { // Marzo - Piscis
+        ejercicio: { titulo: 'Soltar el control', descripcion: 'Practica confiar en el flujo de la vida. Medita 10 minutos observando sin juzgar.' },
+        mantra: 'Me dejo llevar por la corriente de mi intuición'
+      },
+      { // Abril - Aries
+        ejercicio: { titulo: 'Actuar sin pensar demasiado', descripcion: 'Elige algo que has estado postergando y hazlo hoy. La acción genera claridad.' },
+        mantra: 'Me permito empezar aunque no esté listo'
+      },
+      { // Mayo - Tauro
+        ejercicio: { titulo: 'Cultivar el placer consciente', descripcion: 'Dedica tiempo a disfrutar algo con todos tus sentidos. Come, pasea, o crea algo bello.' },
+        mantra: 'Merezco disfrutar del camino, no solo del destino'
+      },
+      { // Junio - Géminis
+        ejercicio: { titulo: 'Explorar nuevas perspectivas', descripcion: 'Lee algo fuera de tu zona habitual o conversa con alguien muy diferente a ti.' },
+        mantra: 'Cada conversación me expande'
+      },
+      { // Julio - Cáncer
+        ejercicio: { titulo: 'Nutrir tu hogar interior', descripcion: 'Crea un espacio seguro para tus emociones. Escribe una carta a tu yo niño/a.' },
+        mantra: 'Mi vulnerabilidad es sagrada'
+      },
+      { // Agosto - Leo
+        ejercicio: { titulo: 'Brillar sin disculpas', descripcion: 'Haz algo que te haga sentir orgulloso/a de ti. Celebra un logro, por pequeño que sea.' },
+        mantra: 'Mi luz inspira a otros a brillar'
+      },
+      { // Septiembre - Virgo
+        ejercicio: { titulo: 'Ordenar con amor', descripcion: 'Organiza un área de tu vida (física o emocional) que necesite atención.' },
+        mantra: 'En los detalles encuentro mi maestría'
+      },
+      { // Octubre - Libra
+        ejercicio: { titulo: 'Buscar el equilibrio', descripcion: 'Identifica dónde estás dando de más o de menos. ¿Qué necesita ajustarse?' },
+        mantra: 'Mis relaciones me reflejan'
+      },
+      { // Noviembre - Escorpio
+        ejercicio: { titulo: 'Transformar la sombra', descripcion: 'Escribe sobre algo que temes o evitas. La conciencia transforma.' },
+        mantra: 'De mis profundidades nace mi poder'
+      },
+      { // Diciembre - Sagitario
+        ejercicio: { titulo: 'Expandir horizontes', descripcion: 'Planifica algo que te emocione: un viaje, un curso, una aventura interior.' },
+        mantra: 'Mi búsqueda de sentido me guía'
+      }
+    ];
+
+    // Intentar obtener datos personalizados del SR si existen
+    const lineaTiempo = interpretation?.linea_tiempo_emocional;
+    let monthData = lineaTiempo?.find((m: any) => {
+      const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+                         'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+      return m.mes?.toLowerCase().includes(monthNames[monthIndex]);
+    });
+
+    const defaultTheme = monthlyThemes[monthIndex] || monthlyThemes[0];
+
+    return {
+      ejercicioCentral: defaultTheme.ejercicio,
+      mantra: monthData?.palabra_clave
+        ? `${defaultTheme.mantra} · ${monthData.palabra_clave}`
+        : defaultTheme.mantra,
+      intensidad: monthData?.intensidad || 5,
+      palabraClave: monthData?.palabra_clave
+    };
+  };
+
+  // Helper: Filtrar eventos lunares para LunasYEjercicios
+  const getLunarEventsForMonth = (monthIndex: number) => {
+    const eventos = getFormattedEventosForMonth(monthIndex);
+    return eventos.filter(e => e.tipo === 'lunaNueva' || e.tipo === 'lunaLlena');
+  };
+
+  // Helper: Filtrar eventos de tránsitos (retrogradaciones e ingresos) para TransitosDelMes
+  const getTransitEventsForMonth = (monthIndex: number) => {
+    const eventos = getFormattedEventosForMonth(monthIndex);
+    return eventos
+      .filter(e => e.tipo === 'retrogrado' || e.tipo === 'ingreso' || e.tipo === 'especial')
+      .map(e => ({
+        dia: e.dia,
+        tipo: e.tipo as 'retrogrado' | 'ingreso' | 'especial',
+        titulo: e.titulo,
+        signo: e.signo,
+        interpretacion: e.interpretacion
+      }));
+  };
+
+  // Helper: Obtener reflexión mensual sobre tránsitos desde SR
+  const getMonthlyTransitReflection = (monthIndex: number): string | undefined => {
+    const interpretation = getSRInterpretation();
+    if (!interpretation?.linea_tiempo_emocional) return undefined;
+
+    const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+                       'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const monthData = interpretation.linea_tiempo_emocional.find((m: any) =>
+      m.mes?.toLowerCase().includes(monthNames[monthIndex])
+    );
+
+    if (monthData?.palabra_clave) {
+      return `Este mes la palabra clave es "${monthData.palabra_clave}" con intensidad ${monthData.intensidad || 5}/10.`;
+    }
+    return undefined;
+  };
+
+  // LOADING STATE: Cargando datos iniciales
+  if (loading && !solarCycle) {
+    return (
+      <div className="fixed inset-0 bg-gradient-to-br from-purple-900/95 to-pink-900/95 flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl p-8 max-w-md shadow-2xl">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto mb-4"></div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Cargando tu agenda...</h2>
+            <p className="text-gray-600">Preparando tu libro personalizado</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // GENERATING STATE: Generando interpretaciones faltantes
+  if (generatingMissing) {
+    return (
+      <div className="fixed inset-0 bg-gradient-to-br from-purple-900/95 to-pink-900/95 flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl p-8 max-w-md shadow-2xl">
+          <div className="text-center">
+            <div className="mb-6">
+              <div className="text-6xl mb-4">✨</div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                Generando interpretaciones personalizadas
+              </h2>
+              <p className="text-gray-600 mb-4">
+                Esto puede tomar 1-2 minutos la primera vez.<br />
+                ¡Siguientes veces será instantáneo!
+              </p>
+            </div>
+
+            <div className="w-full bg-gray-200 rounded-full h-4 mb-2">
+              <div
+                className="bg-gradient-to-r from-purple-500 to-pink-500 h-4 rounded-full transition-all duration-500"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <p className="text-sm text-gray-500">{progress}%</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ERROR STATE: Error cargando datos
+  if (error) {
+    return (
+      <div className="fixed inset-0 bg-gradient-to-br from-purple-900/95 to-pink-900/95 flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl p-8 max-w-md shadow-2xl">
+          <div className="text-center">
+            <div className="text-6xl mb-4">⚠️</div>
+            <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
+            <p className="text-gray-700 mb-6">{error}</p>
+            <button
+              onClick={onClose}
+              className="px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="libro-container min-h-screen bg-gray-100">
@@ -214,12 +1311,45 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate, events = []
 
           <div className="flex items-center gap-4">
             <StyleSwitcher />
+
+            {/* Botón para regenerar SR si faltan campos */}
+            {solarReturnInterpretation &&
+             (!solarReturnInterpretation.interpretation?.linea_tiempo_emocional ||
+              !solarReturnInterpretation.interpretation?.meses_clave_puntos_giro) && (
+              <button
+                onClick={handleRegenerateSolarReturn}
+                disabled={generatingSolarReturn}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-semibold hover:from-orange-400 hover:to-yellow-400 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                title="La interpretación actual no tiene todos los campos. Regenerar para obtener la versión completa."
+              >
+                <RefreshCw className={`w-4 h-4 ${generatingSolarReturn ? 'animate-spin' : ''}`} />
+                {generatingSolarReturn ? 'Regenerando...' : 'Regenerar SR'}
+              </button>
+            )}
+
+            <button
+              onClick={handleExportTXT}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-200 border border-white/20 text-sm"
+              title="Descargar texto plano"
+            >
+              <FileDown className="w-4 h-4" />
+              TXT
+            </button>
+            <button
+              onClick={handleExportPDF}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 to-orange-500 text-white font-semibold hover:from-red-400 hover:to-orange-400 transition-all duration-200 shadow-lg"
+              title="Guardar como PDF"
+            >
+              <Download className="w-4 h-4" />
+              Guardar PDF
+            </button>
             <button
               onClick={handlePrint}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg"
+              title="Imprimir directamente"
             >
               <Printer className="w-4 h-4" />
-              Imprimir Libro
+              Imprimir
             </button>
           </div>
         </div>
@@ -228,6 +1358,77 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate, events = []
           Agenda de <span className="font-semibold">{userName}</span> · {format(startDate, "d MMM yyyy", { locale: es })} - {format(endDate, "d MMM yyyy", { locale: es })}
         </p>
       </div>
+
+      {/* Modal de instrucciones para PDF */}
+      {showPdfInstructions && (
+        <div className="no-print fixed inset-0 bg-black/70 flex items-center justify-center z-[100]" onClick={() => setShowPdfInstructions(false)}>
+          <div className="bg-white rounded-2xl p-6 max-w-md mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-gradient-to-r from-red-500 to-orange-500 p-2 rounded-full">
+                <Download className="w-6 h-6 text-white" />
+              </div>
+              <h2 className="text-xl font-bold text-gray-800">Guardar como PDF</h2>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              <div className="flex items-start gap-3">
+                <span className="bg-purple-100 text-purple-700 font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-sm">1</span>
+                <p className="text-gray-700 text-sm">Haz clic en "Continuar" para abrir el diálogo de impresión</p>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <span className="bg-purple-100 text-purple-700 font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-sm">2</span>
+                <div className="text-sm">
+                  <p className="text-gray-700">En "Destino" o "Impresora", selecciona:</p>
+                  <p className="font-semibold text-purple-700">"Guardar como PDF"</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <span className="bg-purple-100 text-purple-700 font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-sm">3</span>
+                <div className="text-sm">
+                  <p className="text-gray-700">Configura estas opciones:</p>
+                  <ul className="text-gray-600 text-xs mt-1 space-y-1">
+                    <li>• Tamaño: <span className="font-medium">A5</span></li>
+                    <li>• Márgenes: <span className="font-medium">Ninguno</span></li>
+                    <li>• Gráficos de fondo: <span className="font-medium">Activado</span></li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <span className="bg-purple-100 text-purple-700 font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-sm">4</span>
+                <p className="text-gray-700 text-sm">Haz clic en "Guardar" y elige dónde guardar tu PDF</p>
+              </div>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+              <div className="flex items-center gap-2 mb-1">
+                <Info className="w-4 h-4 text-amber-600" />
+                <span className="text-amber-800 font-semibold text-sm">Consejo</span>
+              </div>
+              <p className="text-amber-700 text-xs">
+                Para mejor calidad, usa Chrome o Edge. Safari puede tener limitaciones con los colores de fondo.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowPdfInstructions(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleConfirmPDF}
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-red-500 to-orange-500 text-white font-semibold rounded-lg hover:from-red-400 hover:to-orange-400 transition-all"
+              >
+                Continuar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Contenido del libro */}
       <div ref={printRef} className="container mx-auto py-8 space-y-0 print:p-0">
@@ -239,6 +1440,9 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate, events = []
               name={userName}
               startDate={startDate}
               endDate={endDate}
+              sunSign={sunSign}
+              moonSign={moonSign}
+              ascendant={ascendant}
             />
           </div>
           <div id="intencion-anio">
@@ -247,67 +1451,134 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate, events = []
         </div>
         <IndiceNavegable />
 
-        {/* 2. TU AÑO 2026-2027 - OVERVIEW */}
+        {/* 2. ¡FELIZ CUMPLEAÑOS! - PRIMER DÍA DEL CICLO */}
+        <div id="primer-dia-ciclo-inicio">
+          <PrimerDiaCiclo
+            nombre={userName}
+            fecha={startDate}
+            temaCentral={getInterpretacionRetornoSolar()}
+            mandato={getSRInterpretation()?.comparaciones_planetarias?.sol?.mandato_del_ano}
+          />
+        </div>
+
+        {/* 3. CARTA DE BIENVENIDA Y GUÍA */}
+        <div id="tu-anio-tu-viaje">
+          <div id="carta-bienvenida">
+            <CartaBienvenida name={userName} />
+          </div>
+          <div id="guia-agenda">
+            <GuiaAgenda />
+          </div>
+          <div id="intencion-anual">
+            <PaginaIntencionAnual />
+          </div>
+          <div id="tema-central">
+            <TemaCentralAnio
+              interpretacion={getInterpretacionRetornoSolar()}
+              srInterpretation={getSRInterpretation()}
+              onGenerateSolarReturn={handleGenerateSolarReturn}
+              isGenerating={generatingSolarReturn}
+            />
+          </div>
+          {/* INTENCIÓN DEL AÑO - Justo después del tema central */}
+          <div id="intencion-anual-sr">
+            <PaginaIntencionAnualSR
+              temaCentral={getInterpretacionRetornoSolar()}
+              ejeDelAno={getSRInterpretation()?.apertura_anual?.eje_del_ano}
+              userName={userName}
+            />
+          </div>
+        </div>
+
+        {/* 3. LO QUE VIENE A MOVER Y SOLTAR */}
+        <div id="viaje-interno">
+          <div id="viene-mover">
+            <LoQueVieneAMover
+              facilidad={getComoSeViveSiendoTu()?.facilidad}
+              incomodidad={getComoSeViveSiendoTu()?.incomodidad}
+              medida_del_ano={getComoSeViveSiendoTu()?.medida_del_ano}
+              actitud_nueva={getComoSeViveSiendoTu()?.actitud_nueva}
+            />
+          </div>
+          <div id="pide-soltar">
+            <LoQuePideSoltar
+              reflejos_obsoletos={getComoSeViveSiendoTu()?.reflejos_obsoletos}
+              sombras={getSombrasDelAno()}
+            />
+          </div>
+        </div>
+
+        {/* 4. TU AÑO 2026-2027 - OVERVIEW */}
         <div id="tu-anio-overview">
           <TuAnioOverview
             startDate={startDate}
             endDate={endDate}
             userName={userName}
+            hasSolarReturn={!!getInterpretacionRetornoSolar()}
           />
           <TuAnioCiclos
             startDate={startDate}
             endDate={endDate}
             userName={userName}
+            hasSolarReturn={!!getInterpretacionRetornoSolar()}
           />
         </div>
 
-        {/* 3. CICLOS ANUALES */}
+        {/* 5. CICLOS ANUALES */}
         <div id="ciclos-anuales">
           <LineaTiempoEmocional
             startDate={startDate}
             endDate={endDate}
+            lineaTiempoData={solarReturnInterpretation?.interpretation?.linea_tiempo_emocional}
           />
-          <MesesClavePuntosGiro />
-          <GrandesAprendizajes />
+          <MesesClavePuntosGiro
+            lineaTiempo={solarReturnInterpretation?.interpretation?.meses_clave_puntos_giro || getLineaTiempoAnual()}
+          />
+          <GrandesAprendizajes
+            clavesIntegracion={getClavesIntegracion()}
+          />
         </div>
 
-        {/* 4. TU AÑO, TU VIAJE */}
-        <div id="tu-anio-tu-viaje">
-          <div id="carta-bienvenida">
-            <CartaBienvenida name={userName} />
-          </div>
-          <div id="tema-central">
-            <TemaCentralAnio />
-          </div>
-          <div id="viene-mover">
-            <LoQueVieneAMover />
-          </div>
-          <div id="pide-soltar">
-            <LoQuePideSoltar />
-          </div>
-          <PaginaIntencionAnual />
-        </div>
-
-        {/* 3. SOUL CHART */}
+        {/* 6. SOUL CHART */}
         <div id="soul-chart">
           <div id="esencia-natal">
-            <EsenciaNatal />
+            <EsenciaNatal
+              proposito_vida={getEsenciaNatal()?.proposito_vida}
+              emociones={getEsenciaNatal()?.emociones}
+              personalidad={getEsenciaNatal()?.personalidad}
+              pensamiento={getEsenciaNatal()?.pensamiento}
+              amor={getEsenciaNatal()?.amor}
+              accion={getEsenciaNatal()?.accion}
+            />
           </div>
           <div id="nodo-norte">
-            <NodoNorte />
+            <NodoNorte
+              nodo_norte={getNodosLunares()?.nodo_norte}
+            />
           </div>
           <div id="nodo-sur">
-            <NodoSur />
+            <NodoSur
+              nodo_sur={getNodosLunares()?.nodo_sur}
+            />
           </div>
           <div id="planetas-dominantes">
-            <PlanetasDominantes />
+            <PlanetasDominantes
+              como_piensas={getPlanetasDominantes()?.como_piensas}
+              proposito_vida={getPlanetasDominantes()?.proposito_vida}
+              emociones={getPlanetasDominantes()?.emociones}
+              como_amas={getPlanetasDominantes()?.como_amas}
+              como_actuas={getPlanetasDominantes()?.como_actuas}
+            />
           </div>
           <div id="patrones-emocionales">
-            <PatronesEmocionales />
+            <PatronesEmocionales
+              patrones={getPatronesEmocionales()?.patrones}
+              sombra={getPatronesEmocionales()?.sombra}
+            />
           </div>
         </div>
 
-        {/* 4. RETORNO SOLAR */}
+        {/* 7. RETORNO SOLAR */}
         <div id="retorno-solar">
           <div id="que-es-retorno">
             <QueEsRetornoSolar />
@@ -316,90 +1587,334 @@ export const AgendaLibro = ({ onClose, userName, startDate, endDate, events = []
             <AscendenteAnio />
           </div>
           <div id="sol-retorno">
-            <SolRetorno />
+            <SolRetorno comparacion={getComparacionesPlanetarias()?.sol} />
           </div>
           <div id="luna-retorno">
-            <LunaRetorno />
+            <LunaRetorno comparacion={getComparacionesPlanetarias()?.luna} />
+          </div>
+          <div id="mercurio-retorno">
+            <MercurioRetorno comparacion={getComparacionesPlanetarias()?.mercurio} />
+          </div>
+          <div id="venus-retorno">
+            <VenusRetorno comparacion={getComparacionesPlanetarias()?.venus} />
+          </div>
+          <div id="marte-retorno">
+            <MarteRetorno comparacion={getComparacionesPlanetarias()?.marte} />
           </div>
           <div id="ejes-anio">
             <EjesDelAnio />
             <EjesDelAnio2 />
-            <IntegracionEjes />
+            <IntegracionEjes
+              asc={getIntegracionEjes()?.asc}
+              mc={getIntegracionEjes()?.mc}
+              dsc={getIntegracionEjes()?.dsc}
+              ic={getIntegracionEjes()?.ic}
+              frase_guia={getIntegracionEjes()?.frase_guia}
+            />
           </div>
+          {/* RITUAL DE CUMPLEAÑOS */}
           <div id="ritual-cumpleanos">
             <RitualCumpleanos />
           </div>
           <MantraAnual />
         </div>
 
-        {/* 5. CALENDARIO MENSUAL (12 meses dinámicos) */}
+        {/* 8. CALENDARIO MENSUAL (formato tabla profesional) */}
         <div id="calendario-mensual">
-          {monthsData.map((mesData, index) => {
-            // Calcular fecha de cumpleaños para este mes si aplica
-            const birthdayInMonth = birthDate && mesData.isBirthdayMonth
-              ? new Date(getYear(mesData.monthDate), getMonth(birthDate), birthDate.getDate())
-              : undefined;
+          <div id="mes-enero">
+            <CalendarioMensualTabla
+              monthDate={new Date(2026, 0, 1)}
+              mesNumero={1}
+              nombreZodiaco="Capicornio → Acuario"
+              simboloZodiaco="♑"
+              temaDelMes="Inicios conscientes"
+              eventos={getFormattedEventosForMonth(0)}
+            />
+            <LunasYEjercicios
+              monthDate={new Date(2026, 0, 1)}
+              eventos={getLunarEventsForMonth(0)}
+              ejercicioCentral={getMonthlyThemeData(0).ejercicioCentral}
+              mantra={getMonthlyThemeData(0).mantra}
+            />
+            <TransitosDelMes
+              monthDate={new Date(2026, 0, 1)}
+              transitos={getTransitEventsForMonth(0)}
+              reflexionMensual={getMonthlyTransitReflection(0)}
+            />
+            <CierreMes monthDate={new Date(2026, 0, 1)} />
+          </div>
 
-            // Filtrar solo eventos de lunas para el componente LunasYEjercicios
-            const eventosLunares = mesData.eventos.filter(
-              e => e.tipo === 'lunaNueva' || e.tipo === 'lunaLlena'
-            );
+          {/* FEBRERO 2026 - MES DE CUMPLEAÑOS (EJEMPLO) */}
+          <div id="mes-febrero">
+            {/* PÁGINA ESPECIAL DE CUMPLEAÑOS */}
+            <PaginaCumpleanos
+              birthDate={startDate}
+              userName={userName}
+            />
 
-            return (
-              <div key={`mes-${index}`} id={`mes-${index + 1}`}>
-                {/* Página especial de cumpleaños si es el mes del cumpleaños */}
-                {mesData.isBirthdayMonth && birthDate && (
-                  <PaginaCumpleanos
-                    birthDate={new Date(getYear(mesData.monthDate), getMonth(birthDate), birthDate.getDate())}
-                    userName={userName}
-                  />
-                )}
+            <CalendarioMensualTabla
+              monthDate={new Date(2026, 1, 1)}
+              mesNumero={2}
+              nombreZodiaco="Acuario → Piscis"
+              simboloZodiaco="♒"
+              temaDelMes="Renacimiento solar"
+              birthday={startDate}
+              eventos={getFormattedEventosForMonth(1)}
+            />
+            <LunasYEjercicios
+              monthDate={new Date(2026, 1, 1)}
+              eventos={getLunarEventsForMonth(1)}
+              ejercicioCentral={getMonthlyThemeData(1).ejercicioCentral}
+              mantra={getMonthlyThemeData(1).mantra}
+            />
+            <TransitosDelMes
+              monthDate={new Date(2026, 1, 1)}
+              transitos={getTransitEventsForMonth(1)}
+              reflexionMensual={getMonthlyTransitReflection(1)}
+            />
+            <CierreMes monthDate={new Date(2026, 1, 1)} />
+          </div>
 
-                {/* Calendario del mes con eventos */}
-                <CalendarioMensualTabla
-                  monthDate={mesData.monthDate}
-                  mesNumero={mesData.mesNumero}
-                  nombreZodiaco={mesData.nombreZodiaco}
-                  simboloZodiaco={mesData.simboloZodiaco}
-                  temaDelMes={mesData.temaDelMes}
-                  eventos={mesData.eventos}
-                  birthday={birthdayInMonth}
-                />
+          {/* MARZO 2026 */}
+          <div id="mes-marzo">
+            <CalendarioMensualTabla
+              monthDate={new Date(2026, 2, 1)}
+              mesNumero={3}
+              nombreZodiaco="Piscis → Aries"
+              simboloZodiaco="♓"
+              temaDelMes="Culminación y renacimiento"
+              eventos={getFormattedEventosForMonth(2)}
+            />
+            <LunasYEjercicios
+              monthDate={new Date(2026, 2, 1)}
+              eventos={getLunarEventsForMonth(2)}
+              ejercicioCentral={getMonthlyThemeData(2).ejercicioCentral}
+              mantra={getMonthlyThemeData(2).mantra}
+            />
+            <TransitosDelMes
+              monthDate={new Date(2026, 2, 1)}
+              transitos={getTransitEventsForMonth(2)}
+              reflexionMensual={getMonthlyTransitReflection(2)}
+            />
+            <CierreMes monthDate={new Date(2026, 2, 1)} />
+          </div>
 
-                {/* Página de lunas y ejercicios si hay eventos lunares */}
-                {eventosLunares.length > 0 && (
-                  <LunasYEjercicios
-                    monthDate={mesData.monthDate}
-                    eventos={eventosLunares.map(e => ({
-                      dia: e.dia,
-                      tipo: e.tipo as 'lunaNueva' | 'lunaLlena',
-                      titulo: e.titulo,
-                      interpretacion: e.interpretacion || `Evento lunar importante para reflexión y conexión interior.`
-                    }))}
-                    ejercicioCentral={{
-                      titulo: `Ejercicio de ${format(mesData.monthDate, 'MMMM', { locale: es })}`,
-                      descripcion: `Este mes, dedica tiempo a observar cómo las fases lunares influyen en tu energía y emociones.`
-                    }}
-                    mantra={`Fluyo con los ciclos naturales de ${format(mesData.monthDate, 'MMMM', { locale: es })}`}
-                  />
-                )}
+          {/* ABRIL 2026 */}
+          <div id="mes-abril">
+            <CalendarioMensualTabla
+              monthDate={new Date(2026, 3, 1)}
+              mesNumero={4}
+              nombreZodiaco="Aries → Tauro"
+              simboloZodiaco="♈"
+              temaDelMes="Acción y manifestación"
+              eventos={getFormattedEventosForMonth(3)}
+            />
+            <LunasYEjercicios
+              monthDate={new Date(2026, 3, 1)}
+              eventos={getLunarEventsForMonth(3)}
+              ejercicioCentral={getMonthlyThemeData(3).ejercicioCentral}
+              mantra={getMonthlyThemeData(3).mantra}
+            />
+            <TransitosDelMes
+              monthDate={new Date(2026, 3, 1)}
+              transitos={getTransitEventsForMonth(3)}
+              reflexionMensual={getMonthlyTransitReflection(3)}
+            />
+            <CierreMes monthDate={new Date(2026, 3, 1)} />
+          </div>
 
-                {/* Cierre del mes */}
-                <CierreMes monthDate={mesData.monthDate} />
-              </div>
-            );
-          })}
+          {/* MAYO 2026 */}
+          <div id="mes-mayo">
+            <CalendarioMensualTabla
+              monthDate={new Date(2026, 4, 1)}
+              mesNumero={5}
+              nombreZodiaco="Tauro → Géminis"
+              simboloZodiaco="♉"
+              temaDelMes="Estabilidad y placer"
+              eventos={getFormattedEventosForMonth(4)}
+            />
+            <LunasYEjercicios
+              monthDate={new Date(2026, 4, 1)}
+              eventos={getLunarEventsForMonth(4)}
+              ejercicioCentral={getMonthlyThemeData(4).ejercicioCentral}
+              mantra={getMonthlyThemeData(4).mantra}
+            />
+            <TransitosDelMes
+              monthDate={new Date(2026, 4, 1)}
+              transitos={getTransitEventsForMonth(4)}
+              reflexionMensual={getMonthlyTransitReflection(4)}
+            />
+            <CierreMes monthDate={new Date(2026, 4, 1)} />
+          </div>
 
-          {/* Mensaje si no hay meses generados */}
-          {monthsData.length === 0 && (
-            <div className="print-page bg-white flex flex-col items-center justify-center" style={{ padding: '15mm' }}>
-              <p className="text-gray-500 text-center">
-                No hay eventos cargados para este período.
-                <br />
-                Por favor, asegúrate de que los eventos astrológicos estén disponibles.
-              </p>
-            </div>
-          )}
+          {/* JUNIO 2026 */}
+          <div id="mes-junio">
+            <CalendarioMensualTabla
+              monthDate={new Date(2026, 5, 1)}
+              mesNumero={6}
+              nombreZodiaco="Géminis → Cáncer"
+              simboloZodiaco="♊"
+              temaDelMes="Comunicación y versatilidad"
+              eventos={getFormattedEventosForMonth(5)}
+            />
+            <LunasYEjercicios
+              monthDate={new Date(2026, 5, 1)}
+              eventos={getLunarEventsForMonth(5)}
+              ejercicioCentral={getMonthlyThemeData(5).ejercicioCentral}
+              mantra={getMonthlyThemeData(5).mantra}
+            />
+            <TransitosDelMes
+              monthDate={new Date(2026, 5, 1)}
+              transitos={getTransitEventsForMonth(5)}
+              reflexionMensual={getMonthlyTransitReflection(5)}
+            />
+            <CierreMes monthDate={new Date(2026, 5, 1)} />
+          </div>
+
+          {/* JULIO 2026 */}
+          <div id="mes-julio">
+            <CalendarioMensualTabla
+              monthDate={new Date(2026, 6, 1)}
+              mesNumero={7}
+              nombreZodiaco="Cáncer → Leo"
+              simboloZodiaco="♋"
+              temaDelMes="Nutrición emocional"
+              eventos={getFormattedEventosForMonth(6)}
+            />
+            <LunasYEjercicios
+              monthDate={new Date(2026, 6, 1)}
+              eventos={getLunarEventsForMonth(6)}
+              ejercicioCentral={getMonthlyThemeData(6).ejercicioCentral}
+              mantra={getMonthlyThemeData(6).mantra}
+            />
+            <TransitosDelMes
+              monthDate={new Date(2026, 6, 1)}
+              transitos={getTransitEventsForMonth(6)}
+              reflexionMensual={getMonthlyTransitReflection(6)}
+            />
+            <CierreMes monthDate={new Date(2026, 6, 1)} />
+          </div>
+
+          {/* AGOSTO 2026 */}
+          <div id="mes-agosto">
+            <CalendarioMensualTabla
+              monthDate={new Date(2026, 7, 1)}
+              mesNumero={8}
+              nombreZodiaco="Leo → Virgo"
+              simboloZodiaco="♌"
+              temaDelMes="Expresión y creatividad"
+              eventos={getFormattedEventosForMonth(7)}
+            />
+            <LunasYEjercicios
+              monthDate={new Date(2026, 7, 1)}
+              eventos={getLunarEventsForMonth(7)}
+              ejercicioCentral={getMonthlyThemeData(7).ejercicioCentral}
+              mantra={getMonthlyThemeData(7).mantra}
+            />
+            <TransitosDelMes
+              monthDate={new Date(2026, 7, 1)}
+              transitos={getTransitEventsForMonth(7)}
+              reflexionMensual={getMonthlyTransitReflection(7)}
+            />
+            <CierreMes monthDate={new Date(2026, 7, 1)} />
+          </div>
+
+          {/* SEPTIEMBRE 2026 */}
+          <div id="mes-septiembre">
+            <CalendarioMensualTabla
+              monthDate={new Date(2026, 8, 1)}
+              mesNumero={9}
+              nombreZodiaco="Virgo → Libra"
+              simboloZodiaco="♍"
+              temaDelMes="Discernimiento y servicio"
+              eventos={getFormattedEventosForMonth(8)}
+            />
+            <LunasYEjercicios
+              monthDate={new Date(2026, 8, 1)}
+              eventos={getLunarEventsForMonth(8)}
+              ejercicioCentral={getMonthlyThemeData(8).ejercicioCentral}
+              mantra={getMonthlyThemeData(8).mantra}
+            />
+            <TransitosDelMes
+              monthDate={new Date(2026, 8, 1)}
+              transitos={getTransitEventsForMonth(8)}
+              reflexionMensual={getMonthlyTransitReflection(8)}
+            />
+            <CierreMes monthDate={new Date(2026, 8, 1)} />
+          </div>
+
+          {/* OCTUBRE 2026 */}
+          <div id="mes-octubre">
+            <CalendarioMensualTabla
+              monthDate={new Date(2026, 9, 1)}
+              mesNumero={10}
+              nombreZodiaco="Libra → Escorpio"
+              simboloZodiaco="♎"
+              temaDelMes="Equilibrio y relaciones"
+              eventos={getFormattedEventosForMonth(9)}
+            />
+            <LunasYEjercicios
+              monthDate={new Date(2026, 9, 1)}
+              eventos={getLunarEventsForMonth(9)}
+              ejercicioCentral={getMonthlyThemeData(9).ejercicioCentral}
+              mantra={getMonthlyThemeData(9).mantra}
+            />
+            <TransitosDelMes
+              monthDate={new Date(2026, 9, 1)}
+              transitos={getTransitEventsForMonth(9)}
+              reflexionMensual={getMonthlyTransitReflection(9)}
+            />
+            <CierreMes monthDate={new Date(2026, 9, 1)} />
+          </div>
+
+          {/* NOVIEMBRE 2026 */}
+          <div id="mes-noviembre">
+            <CalendarioMensualTabla
+              monthDate={new Date(2026, 10, 1)}
+              mesNumero={11}
+              nombreZodiaco="Escorpio → Sagitario"
+              simboloZodiaco="♏"
+              temaDelMes="Transformación profunda"
+              eventos={getFormattedEventosForMonth(10)}
+            />
+            <LunasYEjercicios
+              monthDate={new Date(2026, 10, 1)}
+              eventos={getLunarEventsForMonth(10)}
+              ejercicioCentral={getMonthlyThemeData(10).ejercicioCentral}
+              mantra={getMonthlyThemeData(10).mantra}
+            />
+            <TransitosDelMes
+              monthDate={new Date(2026, 10, 1)}
+              transitos={getTransitEventsForMonth(10)}
+              reflexionMensual={getMonthlyTransitReflection(10)}
+            />
+            <CierreMes monthDate={new Date(2026, 10, 1)} />
+          </div>
+
+          {/* DICIEMBRE 2026 */}
+          <div id="mes-diciembre">
+            <CalendarioMensualTabla
+              monthDate={new Date(2026, 11, 1)}
+              mesNumero={12}
+              nombreZodiaco="Sagitario → Capricornio"
+              simboloZodiaco="♐"
+              temaDelMes="Expansión y sabiduría"
+              eventos={getFormattedEventosForMonth(11)}
+            />
+            <LunasYEjercicios
+              monthDate={new Date(2026, 11, 1)}
+              eventos={getLunarEventsForMonth(11)}
+              ejercicioCentral={getMonthlyThemeData(11).ejercicioCentral}
+              mantra={getMonthlyThemeData(11).mantra}
+            />
+            <TransitosDelMes
+              monthDate={new Date(2026, 11, 1)}
+              transitos={getTransitEventsForMonth(11)}
+              reflexionMensual={getMonthlyTransitReflection(11)}
+            />
+            <CierreMes monthDate={new Date(2026, 11, 1)} />
+          </div>
+
         </div>
 
         {/* TERAPIA ASTROLÓGICA CREATIVA */}

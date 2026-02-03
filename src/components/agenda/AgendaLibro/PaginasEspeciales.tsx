@@ -7,6 +7,15 @@ import { useStyle } from '@/context/StyleContext';
 import { Sun, Moon, Star, Heart, Sparkles } from 'lucide-react';
 import { FooterLibro } from './MesCompleto';
 
+// ============ HELPER: Normalizar fecha para evitar problemas de timezone ============
+// Cuando una fecha UTC se convierte a local, puede cambiar el día
+// Esta función crea una fecha local con los mismos valores de año/mes/día
+const normalizeDateForDisplay = (date: Date): Date => {
+  // Si la fecha viene de UTC, crear nueva fecha local con los mismos valores
+  const normalized = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  return normalized;
+};
+
 // ============ LÍNEAS DE ESCRITURA ============
 const LineasEscritura = ({ count = 6, spacing = 28 }: { count?: number; spacing?: number }) => (
   <div className="flex flex-col">
@@ -20,15 +29,20 @@ const LineasEscritura = ({ count = 6, spacing = 28 }: { count?: number; spacing?
 export const PrimerDiaCiclo: React.FC<{
   fecha: Date;
   nombre: string;
-}> = ({ fecha, nombre }) => {
+  temaCentral?: string;
+  mandato?: string;
+}> = ({ fecha, nombre, temaCentral, mandato }) => {
   const { config } = useStyle();
+
+  // Normalizar fecha para evitar problemas de timezone
+  const fechaNormalizada = normalizeDateForDisplay(fecha);
 
   return (
     <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '20mm' }}>
       <div className="flex-1 flex flex-col items-center justify-center text-center">
         <Sun className={`w-16 h-16 ${config.iconAccent} mb-6`} />
         <span className={`text-xs uppercase tracking-[0.3em] ${config.iconSecondary}`}>
-          {format(fecha, "d 'de' MMMM, yyyy", { locale: es })}
+          {format(fechaNormalizada, "d 'de' MMMM, yyyy", { locale: es })}
         </span>
         <h1 className={`text-4xl font-display ${config.titleGradient} mt-4 mb-2`}>
           Primer Día de Tu Ciclo
@@ -37,6 +51,30 @@ export const PrimerDiaCiclo: React.FC<{
 
         <div className={`${config.divider} w-32 my-8`} />
 
+        {/* Interpretaciones personalizadas */}
+        {(temaCentral || mandato) && (
+          <div className="max-w-lg space-y-4 mb-8 text-left w-full">
+            {temaCentral && (
+              <div className={`${config.highlightPrimary} p-5 rounded-lg`}>
+                <h3 className={`text-sm font-bold uppercase ${config.iconPrimary} mb-3`}>Tu tema para este ciclo</h3>
+                <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
+                  {temaCentral.length > 200 ? temaCentral.substring(0, 200) + '...' : temaCentral}
+                </p>
+              </div>
+            )}
+
+            {mandato && (
+              <div className={`${config.highlightAccent} p-5 rounded-lg`}>
+                <h3 className={`text-sm font-bold uppercase ${config.iconAccent} mb-3`}>El mandato del año</h3>
+                <p className="text-gray-700 text-sm italic leading-relaxed">
+                  "{mandato}"
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Secciones para escribir */}
         <div className="max-w-md space-y-6 text-left w-full">
           <div className={`${config.highlightSecondary} p-5`}>
             <h3 className={`text-sm font-bold uppercase ${config.iconSecondary} mb-3`}>Intención para este nuevo ciclo</h3>
@@ -67,12 +105,15 @@ export const UltimoDiaCiclo: React.FC<{
 }> = ({ fecha, nombre }) => {
   const { config } = useStyle();
 
+  // Normalizar fecha para evitar problemas de timezone
+  const fechaNormalizada = normalizeDateForDisplay(fecha);
+
   return (
     <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '20mm' }}>
       <div className="flex-1 flex flex-col items-center justify-center text-center">
         <Moon className={`w-16 h-16 ${config.iconPrimary} mb-6`} />
         <span className={`text-xs uppercase tracking-[0.3em] ${config.iconSecondary}`}>
-          {format(fecha, "d 'de' MMMM, yyyy", { locale: es })}
+          {format(fechaNormalizada, "d 'de' MMMM, yyyy", { locale: es })}
         </span>
         <h1 className={`text-4xl font-display ${config.titleGradient} mt-4 mb-2`}>
           Último Día del Ciclo

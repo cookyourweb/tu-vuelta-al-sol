@@ -1,4 +1,5 @@
 import React from 'react';
+import { Calendar } from 'lucide-react';
 import SectionNavigation from './SectionNavigation';
 import { getMonthWithYear, formatDate } from './helpers';
 
@@ -17,7 +18,7 @@ export default function SolarReturnTimelineSection({
         {/* Header mejorado */}
         <div className="text-center mb-12">
           <div className="inline-block bg-gradient-to-r from-purple-600/30 to-pink-600/30 backdrop-blur-sm rounded-2xl px-6 py-3 mb-4 border border-purple-400/30">
-            <span className="text-4xl">📅</span>
+            <Calendar className="h-10 w-10 text-purple-300 mx-auto" />
           </div>
           <h3 className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-300 mb-3">
             Línea de Tiempo Solar Return
@@ -45,8 +46,8 @@ export default function SolarReturnTimelineSection({
                   <span className="text-2xl">🎯</span>
                   Activación del Ciclo Anual
                 </h4>
-                <p className="text-rose-200 text-sm md:text-base mb-3 font-medium">
-                  📅 {formatDate(birthData?.date || birthData?.birthDate)} {new Date().getFullYear()}
+                <p className="text-rose-200 text-sm md:text-base mb-3 font-medium flex items-center gap-2">
+                  <Calendar className="h-4 w-4" /> {formatDate(birthData?.date || birthData?.birthDate)} {new Date().getFullYear()}
                 </p>
                 <p className="text-rose-50 text-sm md:text-base leading-relaxed">
                   Las primeras 4 semanas marcan el <strong>TONO</strong> del año. Cada acción cuenta <strong>DOBLE</strong>.
@@ -157,8 +158,8 @@ export default function SolarReturnTimelineSection({
                   <span className="text-2xl">🌙</span>
                   Cierre e Integración
                 </h4>
-                <p className="text-purple-200 text-sm md:text-base mb-3 font-medium">
-                  📅 {formatDate(birthData?.date || birthData?.birthDate)} {new Date().getFullYear() + 1}
+                <p className="text-purple-200 text-sm md:text-base mb-3 font-medium flex items-center gap-2">
+                  <Calendar className="h-4 w-4" /> {formatDate(birthData?.date || birthData?.birthDate)} {new Date().getFullYear() + 1}
                 </p>
                 <p className="text-purple-50 text-sm md:text-base leading-relaxed">
                   Último mes para <strong>cerrar ciclos</strong> conscientes y preparar siguiente revolución.

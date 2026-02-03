@@ -71,7 +71,7 @@ const IconoEvento = ({ tipo, className = "w-4 h-4" }: { tipo: string; className?
 export const FooterLibro: React.FC<{ pagina?: number }> = ({ pagina }) => {
   const { config } = useStyle();
   return (
-    <div className="absolute bottom-4 left-0 right-0 flex justify-between items-center px-8 text-[10px]">
+    <div className="absolute bottom-4 left-0 right-0 flex justify-between items-center px-8 text-xs">
       <a
         href="https://wunjocreations.es"
         target="_blank"
@@ -80,8 +80,14 @@ export const FooterLibro: React.FC<{ pagina?: number }> = ({ pagina }) => {
       >
         Tu Vuelta al Sol by Wunjo Creations
       </a>
-      {pagina && <span className={`${config.iconSecondary} opacity-50 font-medium`}>{pagina}</span>}
-      <span className={`${config.iconSecondary} opacity-50`}>☉</span>
+
+      <span className={`${config.iconSecondary} opacity-70 font-semibold text-sm`}>
+        {pagina || ''}
+      </span>
+
+      <span className={`${config.iconSecondary} opacity-50`}>
+        {/* Espacio para simetría */}
+      </span>
     </div>
   );
 };
@@ -527,7 +533,7 @@ export const PrimerDiaCiclo: React.FC<{
         </div>
       </div>
 
-      <FooterLibro />
+      <FooterLibro pagina={5} />
     </div>
   );
 };

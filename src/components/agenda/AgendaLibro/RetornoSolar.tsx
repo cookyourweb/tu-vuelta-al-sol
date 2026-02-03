@@ -56,7 +56,7 @@ export const QueEsRetornoSolar = () => {
         </p>
       </div>
 
-      <FooterLibro pagina={12} />
+      <FooterLibro pagina={19} />
     </div>
   );
 };
@@ -95,88 +95,136 @@ export const AscendenteAnio = () => {
         </div>
       </div>
 
-      <FooterLibro pagina={13} />
+      <FooterLibro pagina={20} />
     </div>
   );
 };
 
-export const SolRetorno = () => {
+// ============ COMPONENTE GENÉRICO PARA COMPARACIONES PLANETARIAS ============
+interface ComparacionPlanetariaProps {
+  planetName: string;
+  planetSymbol: string;
+  pageNumber: number;
+  comparacion?: {
+    natal: {
+      posicion: string;
+      descripcion: string;
+    };
+    solar_return: {
+      posicion: string;
+      descripcion: string;
+    };
+    choque: string;
+    que_hacer: string;
+    mandato_del_ano: string;
+  };
+}
+
+const ComparacionPlanetaria = ({
+  planetName,
+  planetSymbol,
+  pageNumber,
+  comparacion
+}: ComparacionPlanetariaProps) => {
   const { config } = useStyle();
+  const tieneContenidoPersonalizado = !!comparacion;
 
   return (
     <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
       <div className="text-center mb-8">
-        <span className={`${config.iconSecondary} text-4xl`}>☉</span>
-        <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient} mt-4`}>Sol del Retorno</h2>
-        <p className={`text-gray-500 mt-2 ${config.fontBody}`}>Acuario – Casa 12 (inconsciente, cierre de ciclo)</p>
+        <span className={`${config.iconSecondary} text-4xl`}>{planetSymbol}</span>
+        <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient} mt-4`}>
+          {planetName} del Retorno
+        </h2>
         <div className={`${config.divider} w-16 mx-auto mt-4`} />
       </div>
 
       <div className={`flex-1 max-w-2xl mx-auto w-full space-y-6 ${config.fontBody}`}>
-        <div className={`${config.highlightSecondary} rounded-lg p-6`}>
-          <p className="text-gray-700 text-lg leading-relaxed mb-6">
-            Este año no es para exponerte.<br />
-            Es para cerrar, sanar y preparar.
-          </p>
-          <div className="space-y-4">
-            <div>
-              <span className={`${config.iconSecondary} text-sm font-medium`}>Activa:</span>
-              <p className="text-gray-700 mt-1">introspección · sanación · retiro consciente</p>
+        {tieneContenidoPersonalizado ? (
+          <>
+            {/* Natal */}
+            <div className={`${config.highlightPrimary} rounded-lg p-6`}>
+              <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3 flex items-center gap-2`}>
+                <span className="text-xl">{planetSymbol}</span>
+                Tu {planetName} Natal
+              </h3>
+              <p className={`text-xs ${config.iconSecondary} mb-2`}>{comparacion.natal.posicion}</p>
+              <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                {comparacion.natal.descripcion}
+              </p>
             </div>
-            <div>
-              <span className={`${config.iconSecondary} text-sm font-medium`}>Reta:</span>
-              <p className="text-gray-700 mt-1">la sensación de "no estar haciendo suficiente"</p>
+
+            {/* Solar Return */}
+            <div className={`${config.highlightSecondary} rounded-lg p-6`}>
+              <h3 className={`${config.fontDisplay} ${config.iconSecondary} font-medium mb-3 flex items-center gap-2`}>
+                <span className="text-xl">☉</span>
+                Tu {planetName} en Solar Return
+              </h3>
+              <p className={`text-xs ${config.iconSecondary} mb-2`}>{comparacion.solar_return.posicion}</p>
+              <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                {comparacion.solar_return.descripcion}
+              </p>
             </div>
-            <div>
-              <span className={`${config.iconSecondary} text-sm font-medium`}>Cómo trabajarlo:</span>
-              <p className="text-gray-700 mt-1">confiando en los procesos invisibles</p>
+
+            {/* El Choque */}
+            <div className={`${config.highlightAccent} rounded-lg p-6`}>
+              <h3 className={`${config.fontDisplay} ${config.iconAccent} font-medium mb-3`}>⚡ El choque</h3>
+              <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                {comparacion.choque}
+              </p>
             </div>
+
+            {/* Qué Hacer */}
+            <div className={`${config.highlightPrimary} rounded-lg p-6`}>
+              <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3`}>✅ Qué hacer</h3>
+              <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                {comparacion.que_hacer}
+              </p>
+            </div>
+
+            {/* Mandato del Año */}
+            {comparacion.mandato_del_ano && (
+              <div className={`border-l-4 ${config.cardBorder} pl-6`}>
+                <p className={`${config.iconSecondary} text-sm font-medium mb-2`}>Mandato del año:</p>
+                <p className="text-gray-700 text-lg italic leading-relaxed">
+                  "{comparacion.mandato_del_ano}"
+                </p>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className={`${config.highlightSecondary} rounded-lg p-8 opacity-50`}>
+            <p className="text-gray-500 text-center italic">
+              Genera tu Retorno Solar para ver la comparación<br />
+              entre tu {planetName} Natal y tu {planetName} en este año.
+            </p>
           </div>
-        </div>
+        )}
       </div>
 
-      <FooterLibro pagina={14} />
+      <FooterLibro pagina={pageNumber} />
     </div>
   );
 };
 
-export const LunaRetorno = () => {
-  const { config } = useStyle();
+export const SolRetorno = ({ comparacion }: { comparacion?: any }) => {
+  return <ComparacionPlanetaria planetName="Sol" planetSymbol="☉" pageNumber={21} comparacion={comparacion} />;
+};
 
-  return (
-    <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
-      <div className="text-center mb-8">
-        <span className={`${config.iconSecondary} text-4xl`}>☽</span>
-        <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient} mt-4`}>Luna del Retorno</h2>
-        <p className={`text-gray-500 mt-2 ${config.fontBody}`}>Leo – Casa 5 (creatividad, disfrute)</p>
-        <div className={`${config.divider} w-16 mx-auto mt-4`} />
-      </div>
+export const LunaRetorno = ({ comparacion }: { comparacion?: any }) => {
+  return <ComparacionPlanetaria planetName="Luna" planetSymbol="☽" pageNumber={22} comparacion={comparacion} />;
+};
 
-      <div className={`flex-1 max-w-2xl mx-auto w-full space-y-6 ${config.fontBody}`}>
-        <div className={`${config.highlightAccent} rounded-lg p-6`}>
-          <p className="text-gray-700 text-lg leading-relaxed mb-6">
-            Tu necesidad emocional es expresarte sin juicio.
-          </p>
-          <div className="space-y-4">
-            <div>
-              <span className={`${config.iconSecondary} text-sm font-medium`}>Activa:</span>
-              <p className="text-gray-700 mt-1">alegría · juego · expresión auténtica</p>
-            </div>
-            <div>
-              <span className={`${config.iconSecondary} text-sm font-medium`}>Reta:</span>
-              <p className="text-gray-700 mt-1">buscar aprobación</p>
-            </div>
-            <div>
-              <span className={`${config.iconSecondary} text-sm font-medium`}>Cómo trabajarlo:</span>
-              <p className="text-gray-700 mt-1">crear sin mostrar, disfrutar sin explicar</p>
-            </div>
-          </div>
-        </div>
-      </div>
+export const MercurioRetorno = ({ comparacion }: { comparacion?: any }) => {
+  return <ComparacionPlanetaria planetName="Mercurio" planetSymbol="☿" pageNumber={23} comparacion={comparacion} />;
+};
 
-      <FooterLibro pagina={15} />
-    </div>
-  );
+export const VenusRetorno = ({ comparacion }: { comparacion?: any }) => {
+  return <ComparacionPlanetaria planetName="Venus" planetSymbol="♀" pageNumber={24} comparacion={comparacion} />;
+};
+
+export const MarteRetorno = ({ comparacion }: { comparacion?: any }) => {
+  return <ComparacionPlanetaria planetName="Marte" planetSymbol="♂" pageNumber={25} comparacion={comparacion} />;
 };
 
 export const EjesDelAnio = () => {
@@ -261,7 +309,7 @@ export const EjesDelAnio = () => {
         </div>
       </div>
 
-      <FooterLibro pagina={16} />
+      <FooterLibro pagina={23} />
     </div>
   );
 };
@@ -338,63 +386,91 @@ export const EjesDelAnio2 = () => {
         </div>
       </div>
 
-      <FooterLibro pagina={17} />
+      <FooterLibro pagina={24} />
     </div>
   );
 };
 
-export const IntegracionEjes = () => {
+interface IntegracionEjesProps {
+  asc?: string;
+  mc?: string;
+  dsc?: string;
+  ic?: string;
+  frase_guia?: string;
+}
+
+export const IntegracionEjes = ({ asc, mc, dsc, ic, frase_guia }: IntegracionEjesProps) => {
   const { config } = useStyle();
+  const tieneContenidoPersonalizado = !!(asc || mc || dsc || ic);
 
   return (
     <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
-      <div className="text-center mb-8">
+      <div className="text-center mb-6">
         <span className={`${config.iconSecondary} text-3xl`}>✧</span>
         <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient} mt-4`}>Integración de los cuatro ejes</h2>
         <div className={`${config.divider} w-16 mx-auto mt-4`} />
       </div>
 
-      <div className={`flex-1 max-w-2xl mx-auto w-full space-y-8 ${config.fontBody}`}>
-        <p className="text-gray-700 text-lg leading-relaxed text-center">
+      <div className={`flex-1 max-w-2xl mx-auto w-full space-y-5 ${config.fontBody}`}>
+        <p className="text-gray-700 text-base leading-relaxed text-center">
           Este año te enseña a:
         </p>
 
-        <div className="space-y-4">
-          <div className={`${config.highlightPrimary} rounded-lg p-4 flex items-center gap-4`}>
-            <span className={`${config.iconSecondary} text-xl`}>↑</span>
-            <p className="text-gray-700">Ser sin definirte del todo <span className="text-gray-400 text-sm">(ASC)</span></p>
+        <div className="space-y-3">
+          <div className={`${config.highlightPrimary} rounded-lg p-4`}>
+            <div className="flex items-center gap-3 mb-2">
+              <span className={`${config.iconSecondary} text-xl`}>↑</span>
+              <span className={`${config.iconPrimary} font-medium text-sm`}>Ascendente (ASC) - Identidad</span>
+            </div>
+            <p className="text-gray-700 text-sm leading-relaxed">
+              {asc || 'Ser sin definirte del todo. Permitirte evolucionar sin forzar una versión fija de ti.'}
+            </p>
           </div>
 
-          <div className={`${config.highlightSecondary} rounded-lg p-4 flex items-center gap-4`}>
-            <span className={`${config.iconSecondary} text-xl`}>⬆</span>
-            <p className="text-gray-700">Replantear tu rumbo sin exigirte resultados <span className="text-gray-400 text-sm">(MC)</span></p>
+          <div className={`${config.highlightSecondary} rounded-lg p-4`}>
+            <div className="flex items-center gap-3 mb-2">
+              <span className={`${config.iconSecondary} text-xl`}>⬆</span>
+              <span className={`${config.iconPrimary} font-medium text-sm`}>Medio Cielo (MC) - Propósito</span>
+            </div>
+            <p className="text-gray-700 text-sm leading-relaxed">
+              {mc || 'Replantear tu rumbo sin exigirte resultados. Encontrar sentido antes que logros.'}
+            </p>
           </div>
 
-          <div className={`${config.highlightAccent} rounded-lg p-4 flex items-center gap-4`}>
-            <span className={`${config.iconSecondary} text-xl`}>↓</span>
-            <p className="text-gray-700">Relacionarte sin traicionarte <span className="text-gray-400 text-sm">(DSC)</span></p>
+          <div className={`${config.highlightAccent} rounded-lg p-4`}>
+            <div className="flex items-center gap-3 mb-2">
+              <span className={`${config.iconSecondary} text-xl`}>↓</span>
+              <span className={`${config.iconPrimary} font-medium text-sm`}>Descendente (DSC) - Relaciones</span>
+            </div>
+            <p className="text-gray-700 text-sm leading-relaxed">
+              {dsc || 'Relacionarte sin traicionarte. Mantener tu esencia en el vínculo con otros.'}
+            </p>
           </div>
 
-          <div className={`${config.highlightPrimary} rounded-lg p-4 flex items-center gap-4`}>
-            <span className={`${config.iconSecondary} text-xl`}>⬇</span>
-            <p className="text-gray-700">Cuidar tu base emocional como prioridad <span className="text-gray-400 text-sm">(IC)</span></p>
+          <div className={`${config.highlightPrimary} rounded-lg p-4`}>
+            <div className="flex items-center gap-3 mb-2">
+              <span className={`${config.iconSecondary} text-xl`}>⬇</span>
+              <span className={`${config.iconPrimary} font-medium text-sm`}>Fondo de Cielo (IC) - Raíces</span>
+            </div>
+            <p className="text-gray-700 text-sm leading-relaxed">
+              {ic || 'Cuidar tu base emocional como prioridad. Nutrir tus raíces internas.'}
+            </p>
           </div>
         </div>
 
-        <p className="text-gray-500 text-center italic mt-6">
-          Nada de esto ocurre de golpe.<br />
-          Se entrena día a día.
+        <p className="text-gray-500 text-center italic text-sm mt-4">
+          Nada de esto ocurre de golpe. Se entrena día a día.
         </p>
 
-        <div className={`bg-gradient-to-r ${config.headerBg} rounded-lg p-8 text-center mt-8`}>
-          <p className={`text-gray-400 text-sm uppercase tracking-widest mb-4 ${config.fontBody}`}>Frase guía del eje del año</p>
-          <p className={`${config.fontDisplay} text-xl ${config.headerText} italic leading-relaxed`}>
-            "Me permito ser honesta conmigo antes de intentar encajar en el mundo."
+        <div className={`bg-gradient-to-r ${config.headerBg} rounded-lg p-6 text-center mt-4`}>
+          <p className={`text-gray-400 text-xs uppercase tracking-widest mb-3 ${config.fontBody}`}>Frase guía del eje del año</p>
+          <p className={`${config.fontDisplay} text-lg ${config.headerText} italic leading-relaxed`}>
+            "{frase_guia || 'Me permito ser honesta conmigo antes de intentar encajar en el mundo.'}"
           </p>
         </div>
       </div>
 
-      <FooterLibro />
+      <FooterLibro pagina={25} />
     </div>
   );
 };
@@ -442,7 +518,7 @@ export const RitualCumpleanos = () => {
         </div>
       </div>
 
-      <FooterLibro pagina={18} />
+      <FooterLibro pagina={26} />
     </div>
   );
 };
