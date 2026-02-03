@@ -78,19 +78,19 @@ export const GuiaAgenda = () => {
       </div>
 
       <div className={`flex-1 space-y-6 max-w-2xl mx-auto w-full ${config.fontBody}`}>
-        <div className={`${config.highlightPrimary} rounded-lg p-6`}>
-          <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3 text-lg`}>🌟 Tu Retorno Solar</h3>
-          <p className="text-gray-700 leading-relaxed">
-            El tema central de tu año, cómo se siente este ciclo y qué vino a moverte.
-            Una interpretación profunda de tu carta astrológica anual.
-          </p>
-        </div>
-
         <div className={`${config.highlightSecondary} rounded-lg p-6`}>
           <h3 className={`${config.fontDisplay} ${config.iconSecondary} font-medium mb-3 text-lg`}>💫 Tu Carta Natal</h3>
           <p className="text-gray-700 leading-relaxed">
             Tu esencia, tus dones, tu propósito vital.
             El mapa del cielo en el momento exacto de tu nacimiento.
+          </p>
+        </div>
+
+        <div className={`${config.highlightPrimary} rounded-lg p-6`}>
+          <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3 text-lg`}>🌟 Tu Retorno Solar</h3>
+          <p className="text-gray-700 leading-relaxed">
+            El tema central de tu año, cómo se siente este ciclo y qué vino a moverte.
+            Una interpretación profunda de tu carta astrológica anual.
           </p>
         </div>
 

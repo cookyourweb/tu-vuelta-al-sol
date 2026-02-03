@@ -26,6 +26,8 @@ const LineasEscritura = ({ count = 6, spacing = 28 }: { count?: number; spacing?
 );
 
 // ============ PRIMER DÍA DEL CICLO ============
+// Esta página va DESPUÉS de todas las interpretaciones (Natal + Solar Return)
+// Para que el usuario reflexione con toda la información que acaba de leer
 export const PrimerDiaCiclo: React.FC<{
   fecha: Date;
   nombre: string;
@@ -39,56 +41,53 @@ export const PrimerDiaCiclo: React.FC<{
 
   return (
     <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '20mm' }}>
-      <div className="flex-1 flex flex-col items-center justify-center text-center">
-        <Sun className={`w-16 h-16 ${config.iconAccent} mb-6`} />
+      <div className="flex-1 flex flex-col items-center text-center">
+        <Sun className={`w-14 h-14 ${config.iconAccent} mb-4`} />
         <span className={`text-xs uppercase tracking-[0.3em] ${config.iconSecondary}`}>
           {format(fechaNormalizada, "d 'de' MMMM, yyyy", { locale: es })}
         </span>
-        <h1 className={`text-4xl font-display ${config.titleGradient} mt-4 mb-2`}>
-          Primer Día de Tu Ciclo
+        <h1 className={`text-3xl font-display ${config.titleGradient} mt-3 mb-2`}>
+          Antes de Empezar
         </h1>
-        <p className={`text-lg ${config.iconSecondary} mb-8`}>¡Feliz cumpleaños, {nombre}!</p>
+        <p className={`text-base ${config.iconSecondary} mb-4`}>Ritual de apertura para {nombre}</p>
 
-        <div className={`${config.divider} w-32 my-8`} />
+        <div className={`${config.divider} w-24 my-4`} />
 
-        {/* Interpretaciones personalizadas */}
-        {(temaCentral || mandato) && (
-          <div className="max-w-lg space-y-4 mb-8 text-left w-full">
-            {temaCentral && (
-              <div className={`${config.highlightPrimary} p-5 rounded-lg`}>
-                <h3 className={`text-sm font-bold uppercase ${config.iconPrimary} mb-3`}>Tu tema para este ciclo</h3>
-                <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
-                  {temaCentral.length > 200 ? temaCentral.substring(0, 200) + '...' : temaCentral}
-                </p>
-              </div>
-            )}
-
-            {mandato && (
-              <div className={`${config.highlightAccent} p-5 rounded-lg`}>
-                <h3 className={`text-sm font-bold uppercase ${config.iconAccent} mb-3`}>El mandato del año</h3>
-                <p className="text-gray-700 text-sm italic leading-relaxed">
-                  "{mandato}"
-                </p>
-              </div>
-            )}
-          </div>
-        )}
+        {/* Introducción al ritual */}
+        <div className={`max-w-lg text-left mb-6 ${config.highlightSecondary} p-5 rounded-lg`}>
+          <p className="text-gray-700 text-sm leading-relaxed mb-4">
+            <strong>Ahora que ya has leído quién eres y qué se activa este año</strong>,
+            es momento de hacer una pausa consciente.
+          </p>
+          <p className="text-gray-700 text-sm leading-relaxed mb-4">
+            Antes de empezar con tu agenda:
+          </p>
+          <ul className="text-gray-600 text-sm space-y-2 ml-4">
+            <li>🕯️ Busca un lugar tranquilo</li>
+            <li>☕ Prepárate una infusión o tu bebida favorita</li>
+            <li>✨ Enciende una vela si te apetece</li>
+            <li>🌬️ Respira profundo tres veces</li>
+          </ul>
+          <p className="text-gray-600 text-sm italic mt-4">
+            Este es tu momento. Sin prisas, sin presión. Solo tú y tu nuevo ciclo.
+          </p>
+        </div>
 
         {/* Secciones para escribir */}
-        <div className="max-w-md space-y-6 text-left w-full">
-          <div className={`${config.highlightSecondary} p-5`}>
-            <h3 className={`text-sm font-bold uppercase ${config.iconSecondary} mb-3`}>Intención para este nuevo ciclo</h3>
-            <LineasEscritura count={4} spacing={28} />
+        <div className="max-w-md space-y-4 text-left w-full">
+          <div className={`${config.highlightPrimary} p-4`}>
+            <h3 className={`text-xs font-bold uppercase ${config.iconPrimary} mb-2`}>¿Qué sensaciones te ha dejado esta lectura?</h3>
+            <LineasEscritura count={3} spacing={24} />
           </div>
 
-          <div className={`${config.highlightAccent} p-5`}>
-            <h3 className={`text-sm font-bold uppercase ${config.iconAccent} mb-3`}>¿Qué quiero cultivar este año?</h3>
-            <LineasEscritura count={4} spacing={28} />
+          <div className={`${config.highlightAccent} p-4`}>
+            <h3 className={`text-xs font-bold uppercase ${config.iconAccent} mb-2`}>¿Qué palabra resume lo que quieres para este año?</h3>
+            <LineasEscritura count={2} spacing={24} />
           </div>
 
-          <div className={`${config.highlightPrimary} p-5`}>
-            <h3 className={`text-sm font-bold uppercase ${config.iconPrimary} mb-3`}>¿Qué decido soltar?</h3>
-            <LineasEscritura count={4} spacing={28} />
+          <div className={`${config.highlightSecondary} p-4`}>
+            <h3 className={`text-xs font-bold uppercase ${config.iconSecondary} mb-2`}>¿Qué te inspira empezar hoy?</h3>
+            <LineasEscritura count={3} spacing={24} />
           </div>
         </div>
       </div>

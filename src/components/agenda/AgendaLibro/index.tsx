@@ -1230,6 +1230,49 @@ export const AgendaLibro = ({
     return undefined;
   };
 
+  // Helper: Generar los 12 meses del ciclo empezando desde el cumpleaños
+  const generateCalendarMonths = () => {
+    const months = [];
+    const birthdayMonth = startDate.getMonth(); // 0-11
+    const birthdayYear = startDate.getFullYear();
+
+    // Datos de los signos zodiacales por mes
+    const zodiacData = [
+      { nombre: 'Capricornio → Acuario', simbolo: '♑', tema: 'Estructura y visión' },
+      { nombre: 'Acuario → Piscis', simbolo: '♒', tema: 'Innovación y conexión' },
+      { nombre: 'Piscis → Aries', simbolo: '♓', tema: 'Cierre y renacimiento' },
+      { nombre: 'Aries → Tauro', simbolo: '♈', tema: 'Acción y manifestación' },
+      { nombre: 'Tauro → Géminis', simbolo: '♉', tema: 'Estabilidad y placer' },
+      { nombre: 'Géminis → Cáncer', simbolo: '♊', tema: 'Comunicación y curiosidad' },
+      { nombre: 'Cáncer → Leo', simbolo: '♋', tema: 'Nutrición emocional' },
+      { nombre: 'Leo → Virgo', simbolo: '♌', tema: 'Expresión y creatividad' },
+      { nombre: 'Virgo → Libra', simbolo: '♍', tema: 'Discernimiento y servicio' },
+      { nombre: 'Libra → Escorpio', simbolo: '♎', tema: 'Equilibrio y relaciones' },
+      { nombre: 'Escorpio → Sagitario', simbolo: '♏', tema: 'Transformación profunda' },
+      { nombre: 'Sagitario → Capricornio', simbolo: '♐', tema: 'Expansión y sabiduría' }
+    ];
+
+    for (let i = 0; i < 12; i++) {
+      const monthIndex = (birthdayMonth + i) % 12;
+      const yearOffset = birthdayMonth + i >= 12 ? 1 : 0;
+      const year = birthdayYear + yearOffset;
+      const monthDate = new Date(year, monthIndex, 1);
+      const isBirthdayMonth = i === 0; // Primer mes es el del cumpleaños
+
+      months.push({
+        monthDate,
+        mesNumero: i + 1,
+        monthIndex,
+        isBirthdayMonth,
+        ...zodiacData[monthIndex]
+      });
+    }
+
+    return months;
+  };
+
+  const calendarMonths = generateCalendarMonths();
+
   // LOADING STATE: Cargando datos iniciales
   if (loading && !solarCycle) {
     return (
@@ -1433,7 +1476,9 @@ export const AgendaLibro = ({
       {/* Contenido del libro */}
       <div ref={printRef} className="container mx-auto py-8 space-y-0 print:p-0">
 
-        {/* 1. PORTAL DE ENTRADA */}
+        {/* ═══════════════════════════════════════════════════════════════
+            SECCIÓN 1: BIENVENIDA Y PRESENTACIÓN
+            ═══════════════════════════════════════════════════════════════ */}
         <div id="portal-entrada">
           <div id="portada">
             <PortadaPersonalizada
@@ -1445,101 +1490,19 @@ export const AgendaLibro = ({
               ascendant={ascendant}
             />
           </div>
-          <div id="intencion-anio">
-            <PaginaIntencion />
-          </div>
         </div>
+
+        <div id="bienvenida">
+          <CartaBienvenida name={userName} />
+          <GuiaAgenda />
+        </div>
+
         <IndiceNavegable />
 
-        {/* 2. ¡FELIZ CUMPLEAÑOS! - PRIMER DÍA DEL CICLO */}
-        <div id="primer-dia-ciclo-inicio">
-          <PrimerDiaCiclo
-            nombre={userName}
-            fecha={startDate}
-            temaCentral={getInterpretacionRetornoSolar()}
-            mandato={getSRInterpretation()?.comparaciones_planetarias?.sol?.mandato_del_ano}
-          />
-        </div>
-
-        {/* 3. CARTA DE BIENVENIDA Y GUÍA */}
-        <div id="tu-anio-tu-viaje">
-          <div id="carta-bienvenida">
-            <CartaBienvenida name={userName} />
-          </div>
-          <div id="guia-agenda">
-            <GuiaAgenda />
-          </div>
-          <div id="intencion-anual">
-            <PaginaIntencionAnual />
-          </div>
-          <div id="tema-central">
-            <TemaCentralAnio
-              interpretacion={getInterpretacionRetornoSolar()}
-              srInterpretation={getSRInterpretation()}
-              onGenerateSolarReturn={handleGenerateSolarReturn}
-              isGenerating={generatingSolarReturn}
-            />
-          </div>
-          {/* INTENCIÓN DEL AÑO - Justo después del tema central */}
-          <div id="intencion-anual-sr">
-            <PaginaIntencionAnualSR
-              temaCentral={getInterpretacionRetornoSolar()}
-              ejeDelAno={getSRInterpretation()?.apertura_anual?.eje_del_ano}
-              userName={userName}
-            />
-          </div>
-        </div>
-
-        {/* 3. LO QUE VIENE A MOVER Y SOLTAR */}
-        <div id="viaje-interno">
-          <div id="viene-mover">
-            <LoQueVieneAMover
-              facilidad={getComoSeViveSiendoTu()?.facilidad}
-              incomodidad={getComoSeViveSiendoTu()?.incomodidad}
-              medida_del_ano={getComoSeViveSiendoTu()?.medida_del_ano}
-              actitud_nueva={getComoSeViveSiendoTu()?.actitud_nueva}
-            />
-          </div>
-          <div id="pide-soltar">
-            <LoQuePideSoltar
-              reflejos_obsoletos={getComoSeViveSiendoTu()?.reflejos_obsoletos}
-              sombras={getSombrasDelAno()}
-            />
-          </div>
-        </div>
-
-        {/* 4. TU AÑO 2026-2027 - OVERVIEW */}
-        <div id="tu-anio-overview">
-          <TuAnioOverview
-            startDate={startDate}
-            endDate={endDate}
-            userName={userName}
-            hasSolarReturn={!!getInterpretacionRetornoSolar()}
-          />
-          <TuAnioCiclos
-            startDate={startDate}
-            endDate={endDate}
-            userName={userName}
-            hasSolarReturn={!!getInterpretacionRetornoSolar()}
-          />
-        </div>
-
-        {/* 5. CICLOS ANUALES */}
-        <div id="ciclos-anuales">
-          <LineaTiempoEmocional
-            startDate={startDate}
-            endDate={endDate}
-            lineaTiempoData={solarReturnInterpretation?.interpretation?.linea_tiempo_emocional}
-          />
-          <MesesClavePuntosGiro
-            lineaTiempo={solarReturnInterpretation?.interpretation?.meses_clave_puntos_giro || getLineaTiempoAnual()}
-          />
-          <GrandesAprendizajes
-            clavesIntegracion={getClavesIntegracion()}
-          />
-        </div>
-
-        {/* 6. SOUL CHART */}
+        {/* ═══════════════════════════════════════════════════════════════
+            SECCIÓN 2: CARTA NATAL (Soul Chart) - PRIMERO
+            ═══════════════════════════════════════════════════════════════ */}
+        {/* 2. SOUL CHART */}
         <div id="soul-chart">
           <div id="esencia-natal">
             <EsenciaNatal
@@ -1578,7 +1541,9 @@ export const AgendaLibro = ({
           </div>
         </div>
 
-        {/* 7. RETORNO SOLAR */}
+        {/* ═══════════════════════════════════════════════════════════════
+            SECCIÓN 3: RETORNO SOLAR - DESPUÉS DE CARTA NATAL
+            ═══════════════════════════════════════════════════════════════ */}
         <div id="retorno-solar">
           <div id="que-es-retorno">
             <QueEsRetornoSolar />
@@ -1612,309 +1577,107 @@ export const AgendaLibro = ({
               frase_guia={getIntegracionEjes()?.frase_guia}
             />
           </div>
-          {/* RITUAL DE CUMPLEAÑOS */}
-          <div id="ritual-cumpleanos">
-            <RitualCumpleanos />
-          </div>
           <MantraAnual />
         </div>
 
-        {/* 8. CALENDARIO MENSUAL (formato tabla profesional) */}
+        {/* ═══════════════════════════════════════════════════════════════
+            SECCIÓN 4: CICLOS Y OVERVIEW DEL AÑO
+            ═══════════════════════════════════════════════════════════════ */}
+        <div id="ciclos-anuales">
+          <LineaTiempoEmocional
+            startDate={startDate}
+            endDate={endDate}
+            lineaTiempoData={solarReturnInterpretation?.interpretation?.linea_tiempo_emocional}
+          />
+          <MesesClavePuntosGiro
+            lineaTiempo={solarReturnInterpretation?.interpretation?.meses_clave_puntos_giro || getLineaTiempoAnual()}
+          />
+          <GrandesAprendizajes
+            clavesIntegracion={getClavesIntegracion()}
+          />
+        </div>
+
+        <div id="tu-anio-overview">
+          <TuAnioOverview
+            startDate={startDate}
+            endDate={endDate}
+            userName={userName}
+            hasSolarReturn={!!getInterpretacionRetornoSolar()}
+          />
+          <TuAnioCiclos
+            startDate={startDate}
+            endDate={endDate}
+            userName={userName}
+            hasSolarReturn={!!getInterpretacionRetornoSolar()}
+          />
+        </div>
+
+        {/* ═══════════════════════════════════════════════════════════════
+            SECCIÓN 5: RITUAL DE CUMPLEAÑOS Y REFLEXIÓN
+            (DESPUÉS de todas las interpretaciones)
+            ═══════════════════════════════════════════════════════════════ */}
+        <div id="ritual-cumpleanos">
+          <RitualCumpleanos />
+        </div>
+
+        {/* PRIMER DÍA DEL CICLO - Ahora el usuario ya leyó todo */}
+        <div id="primer-dia-ciclo">
+          <PrimerDiaCiclo
+            nombre={userName}
+            fecha={startDate}
+            temaCentral={getInterpretacionRetornoSolar()}
+            mandato={getSRInterpretation()?.comparaciones_planetarias?.sol?.mandato_del_ano}
+          />
+        </div>
+
+        {/* PÁGINA DE INTENCIÓN - Para escribir después de reflexionar */}
+        <div id="intencion-anual">
+          <PaginaIntencionAnual />
+          <PaginaIntencionAnualSR
+            temaCentral={getInterpretacionRetornoSolar()}
+            ejeDelAno={getSRInterpretation()?.apertura_anual?.eje_del_ano}
+            userName={userName}
+          />
+        </div>
+
+        {/* ═══════════════════════════════════════════════════════════════
+            SECCIÓN 6: CALENDARIO MENSUAL DINÁMICO
+            Empieza desde el mes del cumpleaños
+            ═══════════════════════════════════════════════════════════════ */}
         <div id="calendario-mensual">
-          <div id="mes-enero">
-            <CalendarioMensualTabla
-              monthDate={new Date(2026, 0, 1)}
-              mesNumero={1}
-              nombreZodiaco="Capicornio → Acuario"
-              simboloZodiaco="♑"
-              temaDelMes="Inicios conscientes"
-              eventos={getFormattedEventosForMonth(0)}
-            />
-            <LunasYEjercicios
-              monthDate={new Date(2026, 0, 1)}
-              eventos={getLunarEventsForMonth(0)}
-              ejercicioCentral={getMonthlyThemeData(0).ejercicioCentral}
-              mantra={getMonthlyThemeData(0).mantra}
-            />
-            <TransitosDelMes
-              monthDate={new Date(2026, 0, 1)}
-              transitos={getTransitEventsForMonth(0)}
-              reflexionMensual={getMonthlyTransitReflection(0)}
-            />
-            <CierreMes monthDate={new Date(2026, 0, 1)} />
-          </div>
+          {calendarMonths.map((month, index) => (
+            <div key={`mes-${index}`} id={`mes-${month.mesNumero}`}>
+              {/* Página especial de cumpleaños solo en el primer mes */}
+              {month.isBirthdayMonth && (
+                <PaginaCumpleanos
+                  birthDate={startDate}
+                  userName={userName}
+                />
+              )}
 
-          {/* FEBRERO 2026 - MES DE CUMPLEAÑOS (EJEMPLO) */}
-          <div id="mes-febrero">
-            {/* PÁGINA ESPECIAL DE CUMPLEAÑOS */}
-            <PaginaCumpleanos
-              birthDate={startDate}
-              userName={userName}
-            />
-
-            <CalendarioMensualTabla
-              monthDate={new Date(2026, 1, 1)}
-              mesNumero={2}
-              nombreZodiaco="Acuario → Piscis"
-              simboloZodiaco="♒"
-              temaDelMes="Renacimiento solar"
-              birthday={startDate}
-              eventos={getFormattedEventosForMonth(1)}
-            />
-            <LunasYEjercicios
-              monthDate={new Date(2026, 1, 1)}
-              eventos={getLunarEventsForMonth(1)}
-              ejercicioCentral={getMonthlyThemeData(1).ejercicioCentral}
-              mantra={getMonthlyThemeData(1).mantra}
-            />
-            <TransitosDelMes
-              monthDate={new Date(2026, 1, 1)}
-              transitos={getTransitEventsForMonth(1)}
-              reflexionMensual={getMonthlyTransitReflection(1)}
-            />
-            <CierreMes monthDate={new Date(2026, 1, 1)} />
-          </div>
-
-          {/* MARZO 2026 */}
-          <div id="mes-marzo">
-            <CalendarioMensualTabla
-              monthDate={new Date(2026, 2, 1)}
-              mesNumero={3}
-              nombreZodiaco="Piscis → Aries"
-              simboloZodiaco="♓"
-              temaDelMes="Culminación y renacimiento"
-              eventos={getFormattedEventosForMonth(2)}
-            />
-            <LunasYEjercicios
-              monthDate={new Date(2026, 2, 1)}
-              eventos={getLunarEventsForMonth(2)}
-              ejercicioCentral={getMonthlyThemeData(2).ejercicioCentral}
-              mantra={getMonthlyThemeData(2).mantra}
-            />
-            <TransitosDelMes
-              monthDate={new Date(2026, 2, 1)}
-              transitos={getTransitEventsForMonth(2)}
-              reflexionMensual={getMonthlyTransitReflection(2)}
-            />
-            <CierreMes monthDate={new Date(2026, 2, 1)} />
-          </div>
-
-          {/* ABRIL 2026 */}
-          <div id="mes-abril">
-            <CalendarioMensualTabla
-              monthDate={new Date(2026, 3, 1)}
-              mesNumero={4}
-              nombreZodiaco="Aries → Tauro"
-              simboloZodiaco="♈"
-              temaDelMes="Acción y manifestación"
-              eventos={getFormattedEventosForMonth(3)}
-            />
-            <LunasYEjercicios
-              monthDate={new Date(2026, 3, 1)}
-              eventos={getLunarEventsForMonth(3)}
-              ejercicioCentral={getMonthlyThemeData(3).ejercicioCentral}
-              mantra={getMonthlyThemeData(3).mantra}
-            />
-            <TransitosDelMes
-              monthDate={new Date(2026, 3, 1)}
-              transitos={getTransitEventsForMonth(3)}
-              reflexionMensual={getMonthlyTransitReflection(3)}
-            />
-            <CierreMes monthDate={new Date(2026, 3, 1)} />
-          </div>
-
-          {/* MAYO 2026 */}
-          <div id="mes-mayo">
-            <CalendarioMensualTabla
-              monthDate={new Date(2026, 4, 1)}
-              mesNumero={5}
-              nombreZodiaco="Tauro → Géminis"
-              simboloZodiaco="♉"
-              temaDelMes="Estabilidad y placer"
-              eventos={getFormattedEventosForMonth(4)}
-            />
-            <LunasYEjercicios
-              monthDate={new Date(2026, 4, 1)}
-              eventos={getLunarEventsForMonth(4)}
-              ejercicioCentral={getMonthlyThemeData(4).ejercicioCentral}
-              mantra={getMonthlyThemeData(4).mantra}
-            />
-            <TransitosDelMes
-              monthDate={new Date(2026, 4, 1)}
-              transitos={getTransitEventsForMonth(4)}
-              reflexionMensual={getMonthlyTransitReflection(4)}
-            />
-            <CierreMes monthDate={new Date(2026, 4, 1)} />
-          </div>
-
-          {/* JUNIO 2026 */}
-          <div id="mes-junio">
-            <CalendarioMensualTabla
-              monthDate={new Date(2026, 5, 1)}
-              mesNumero={6}
-              nombreZodiaco="Géminis → Cáncer"
-              simboloZodiaco="♊"
-              temaDelMes="Comunicación y versatilidad"
-              eventos={getFormattedEventosForMonth(5)}
-            />
-            <LunasYEjercicios
-              monthDate={new Date(2026, 5, 1)}
-              eventos={getLunarEventsForMonth(5)}
-              ejercicioCentral={getMonthlyThemeData(5).ejercicioCentral}
-              mantra={getMonthlyThemeData(5).mantra}
-            />
-            <TransitosDelMes
-              monthDate={new Date(2026, 5, 1)}
-              transitos={getTransitEventsForMonth(5)}
-              reflexionMensual={getMonthlyTransitReflection(5)}
-            />
-            <CierreMes monthDate={new Date(2026, 5, 1)} />
-          </div>
-
-          {/* JULIO 2026 */}
-          <div id="mes-julio">
-            <CalendarioMensualTabla
-              monthDate={new Date(2026, 6, 1)}
-              mesNumero={7}
-              nombreZodiaco="Cáncer → Leo"
-              simboloZodiaco="♋"
-              temaDelMes="Nutrición emocional"
-              eventos={getFormattedEventosForMonth(6)}
-            />
-            <LunasYEjercicios
-              monthDate={new Date(2026, 6, 1)}
-              eventos={getLunarEventsForMonth(6)}
-              ejercicioCentral={getMonthlyThemeData(6).ejercicioCentral}
-              mantra={getMonthlyThemeData(6).mantra}
-            />
-            <TransitosDelMes
-              monthDate={new Date(2026, 6, 1)}
-              transitos={getTransitEventsForMonth(6)}
-              reflexionMensual={getMonthlyTransitReflection(6)}
-            />
-            <CierreMes monthDate={new Date(2026, 6, 1)} />
-          </div>
-
-          {/* AGOSTO 2026 */}
-          <div id="mes-agosto">
-            <CalendarioMensualTabla
-              monthDate={new Date(2026, 7, 1)}
-              mesNumero={8}
-              nombreZodiaco="Leo → Virgo"
-              simboloZodiaco="♌"
-              temaDelMes="Expresión y creatividad"
-              eventos={getFormattedEventosForMonth(7)}
-            />
-            <LunasYEjercicios
-              monthDate={new Date(2026, 7, 1)}
-              eventos={getLunarEventsForMonth(7)}
-              ejercicioCentral={getMonthlyThemeData(7).ejercicioCentral}
-              mantra={getMonthlyThemeData(7).mantra}
-            />
-            <TransitosDelMes
-              monthDate={new Date(2026, 7, 1)}
-              transitos={getTransitEventsForMonth(7)}
-              reflexionMensual={getMonthlyTransitReflection(7)}
-            />
-            <CierreMes monthDate={new Date(2026, 7, 1)} />
-          </div>
-
-          {/* SEPTIEMBRE 2026 */}
-          <div id="mes-septiembre">
-            <CalendarioMensualTabla
-              monthDate={new Date(2026, 8, 1)}
-              mesNumero={9}
-              nombreZodiaco="Virgo → Libra"
-              simboloZodiaco="♍"
-              temaDelMes="Discernimiento y servicio"
-              eventos={getFormattedEventosForMonth(8)}
-            />
-            <LunasYEjercicios
-              monthDate={new Date(2026, 8, 1)}
-              eventos={getLunarEventsForMonth(8)}
-              ejercicioCentral={getMonthlyThemeData(8).ejercicioCentral}
-              mantra={getMonthlyThemeData(8).mantra}
-            />
-            <TransitosDelMes
-              monthDate={new Date(2026, 8, 1)}
-              transitos={getTransitEventsForMonth(8)}
-              reflexionMensual={getMonthlyTransitReflection(8)}
-            />
-            <CierreMes monthDate={new Date(2026, 8, 1)} />
-          </div>
-
-          {/* OCTUBRE 2026 */}
-          <div id="mes-octubre">
-            <CalendarioMensualTabla
-              monthDate={new Date(2026, 9, 1)}
-              mesNumero={10}
-              nombreZodiaco="Libra → Escorpio"
-              simboloZodiaco="♎"
-              temaDelMes="Equilibrio y relaciones"
-              eventos={getFormattedEventosForMonth(9)}
-            />
-            <LunasYEjercicios
-              monthDate={new Date(2026, 9, 1)}
-              eventos={getLunarEventsForMonth(9)}
-              ejercicioCentral={getMonthlyThemeData(9).ejercicioCentral}
-              mantra={getMonthlyThemeData(9).mantra}
-            />
-            <TransitosDelMes
-              monthDate={new Date(2026, 9, 1)}
-              transitos={getTransitEventsForMonth(9)}
-              reflexionMensual={getMonthlyTransitReflection(9)}
-            />
-            <CierreMes monthDate={new Date(2026, 9, 1)} />
-          </div>
-
-          {/* NOVIEMBRE 2026 */}
-          <div id="mes-noviembre">
-            <CalendarioMensualTabla
-              monthDate={new Date(2026, 10, 1)}
-              mesNumero={11}
-              nombreZodiaco="Escorpio → Sagitario"
-              simboloZodiaco="♏"
-              temaDelMes="Transformación profunda"
-              eventos={getFormattedEventosForMonth(10)}
-            />
-            <LunasYEjercicios
-              monthDate={new Date(2026, 10, 1)}
-              eventos={getLunarEventsForMonth(10)}
-              ejercicioCentral={getMonthlyThemeData(10).ejercicioCentral}
-              mantra={getMonthlyThemeData(10).mantra}
-            />
-            <TransitosDelMes
-              monthDate={new Date(2026, 10, 1)}
-              transitos={getTransitEventsForMonth(10)}
-              reflexionMensual={getMonthlyTransitReflection(10)}
-            />
-            <CierreMes monthDate={new Date(2026, 10, 1)} />
-          </div>
-
-          {/* DICIEMBRE 2026 */}
-          <div id="mes-diciembre">
-            <CalendarioMensualTabla
-              monthDate={new Date(2026, 11, 1)}
-              mesNumero={12}
-              nombreZodiaco="Sagitario → Capricornio"
-              simboloZodiaco="♐"
-              temaDelMes="Expansión y sabiduría"
-              eventos={getFormattedEventosForMonth(11)}
-            />
-            <LunasYEjercicios
-              monthDate={new Date(2026, 11, 1)}
-              eventos={getLunarEventsForMonth(11)}
-              ejercicioCentral={getMonthlyThemeData(11).ejercicioCentral}
-              mantra={getMonthlyThemeData(11).mantra}
-            />
-            <TransitosDelMes
-              monthDate={new Date(2026, 11, 1)}
-              transitos={getTransitEventsForMonth(11)}
-              reflexionMensual={getMonthlyTransitReflection(11)}
-            />
-            <CierreMes monthDate={new Date(2026, 11, 1)} />
-          </div>
-
+              <CalendarioMensualTabla
+                monthDate={month.monthDate}
+                mesNumero={month.mesNumero}
+                nombreZodiaco={month.nombre}
+                simboloZodiaco={month.simbolo}
+                temaDelMes={month.tema}
+                birthday={month.isBirthdayMonth ? startDate : undefined}
+                eventos={getFormattedEventosForMonth(month.monthIndex)}
+              />
+              <LunasYEjercicios
+                monthDate={month.monthDate}
+                eventos={getLunarEventsForMonth(month.monthIndex)}
+                ejercicioCentral={getMonthlyThemeData(month.monthIndex).ejercicioCentral}
+                mantra={getMonthlyThemeData(month.monthIndex).mantra}
+              />
+              <TransitosDelMes
+                monthDate={month.monthDate}
+                transitos={getTransitEventsForMonth(month.monthIndex)}
+                reflexionMensual={getMonthlyTransitReflection(month.monthIndex)}
+              />
+              <CierreMes monthDate={month.monthDate} />
+            </div>
+          ))}
         </div>
 
         {/* TERAPIA ASTROLÓGICA CREATIVA */}
