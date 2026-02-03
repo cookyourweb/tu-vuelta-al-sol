@@ -60,7 +60,7 @@ export const CartaBienvenida = ({ name }: TuAnioTuViajeProps) => {
         Con amor cósmico ✧
       </div>
 
-      <FooterLibro pagina={4} />
+      <FooterLibro pagina={2} />
     </div>
   );
 };
@@ -119,7 +119,7 @@ export const GuiaAgenda = () => {
         </div>
       </div>
 
-      <FooterLibro pagina={5} />
+      <FooterLibro pagina={3} />
     </div>
   );
 };
@@ -498,7 +498,7 @@ export const PaginaIntencionAnual = () => {
         Página de escritura libre
       </div>
 
-      <FooterLibro pagina={5} />
+      <FooterLibro pagina={29} />
     </div>
   );
 };

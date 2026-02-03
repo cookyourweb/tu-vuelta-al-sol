@@ -56,7 +56,7 @@ export const QueEsRetornoSolar = () => {
         </p>
       </div>
 
-      <FooterLibro pagina={19} />
+      <FooterLibro pagina={10} />
     </div>
   );
 };
@@ -95,7 +95,7 @@ export const AscendenteAnio = () => {
         </div>
       </div>
 
-      <FooterLibro pagina={20} />
+      <FooterLibro pagina={11} />
     </div>
   );
 };
@@ -208,23 +208,23 @@ const ComparacionPlanetaria = ({
 };
 
 export const SolRetorno = ({ comparacion }: { comparacion?: any }) => {
-  return <ComparacionPlanetaria planetName="Sol" planetSymbol="☉" pageNumber={21} comparacion={comparacion} />;
+  return <ComparacionPlanetaria planetName="Sol" planetSymbol="☉" pageNumber={12} comparacion={comparacion} />;
 };
 
 export const LunaRetorno = ({ comparacion }: { comparacion?: any }) => {
-  return <ComparacionPlanetaria planetName="Luna" planetSymbol="☽" pageNumber={22} comparacion={comparacion} />;
+  return <ComparacionPlanetaria planetName="Luna" planetSymbol="☽" pageNumber={13} comparacion={comparacion} />;
 };
 
 export const MercurioRetorno = ({ comparacion }: { comparacion?: any }) => {
-  return <ComparacionPlanetaria planetName="Mercurio" planetSymbol="☿" pageNumber={23} comparacion={comparacion} />;
+  return <ComparacionPlanetaria planetName="Mercurio" planetSymbol="☿" pageNumber={14} comparacion={comparacion} />;
 };
 
 export const VenusRetorno = ({ comparacion }: { comparacion?: any }) => {
-  return <ComparacionPlanetaria planetName="Venus" planetSymbol="♀" pageNumber={24} comparacion={comparacion} />;
+  return <ComparacionPlanetaria planetName="Venus" planetSymbol="♀" pageNumber={15} comparacion={comparacion} />;
 };
 
 export const MarteRetorno = ({ comparacion }: { comparacion?: any }) => {
-  return <ComparacionPlanetaria planetName="Marte" planetSymbol="♂" pageNumber={25} comparacion={comparacion} />;
+  return <ComparacionPlanetaria planetName="Marte" planetSymbol="♂" pageNumber={16} comparacion={comparacion} />;
 };
 
 export const EjesDelAnio = () => {
@@ -309,7 +309,7 @@ export const EjesDelAnio = () => {
         </div>
       </div>
 
-      <FooterLibro pagina={23} />
+      <FooterLibro pagina={17} />
     </div>
   );
 };
@@ -386,7 +386,7 @@ export const EjesDelAnio2 = () => {
         </div>
       </div>
 
-      <FooterLibro pagina={24} />
+      <FooterLibro pagina={18} />
     </div>
   );
 };
@@ -470,7 +470,7 @@ export const IntegracionEjes = ({ asc, mc, dsc, ic, frase_guia }: IntegracionEje
         </div>
       </div>
 
-      <FooterLibro pagina={25} />
+      <FooterLibro pagina={19} />
     </div>
   );
 };
@@ -518,7 +518,7 @@ export const RitualCumpleanos = () => {
         </div>
       </div>
 
-      <FooterLibro pagina={26} />
+      <FooterLibro pagina={27} />
     </div>
   );
 };
@@ -545,6 +545,8 @@ export const MantraAnual = () => {
           Deja que te guíe.
         </p>
       </div>
+
+      <FooterLibro pagina={21} />
     </div>
   );
 };

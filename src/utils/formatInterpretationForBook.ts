@@ -41,7 +41,7 @@ interface EventInterpretation {
  */
 export function formatInterpretationForBook(interpretation: EventInterpretation | null | undefined): string {
   if (!interpretation) {
-    return 'Interpretación no disponible. Genera tus interpretaciones personalizadas desde la agenda online.';
+    return '';
   }
 
   let texto = '';
@@ -184,7 +184,7 @@ export function formatEventForBook(event: any) {
     dia: new Date(event.date).getDate(),
     tipo,
     titulo: event.title,
-    signo: event.sign || 'N/A',
+    signo: event.sign || undefined,
     interpretacion: formatInterpretationForBook(event.interpretation)
   };
 }
