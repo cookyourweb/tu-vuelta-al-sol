@@ -2262,14 +2262,12 @@ const AgendaPersonalizada = () => {
                 <p className="text-indigo-200 text-sm mb-4">
                   ¿Quieres saber cómo la IA está transformando la práctica astrológica profesional?
                 </p>
-                <a
-                  href="https://wa.me/34666666666?text=Hola%2C%20me%20interesa%20saber%20más%20sobre%20IA%20para%20astrólogos"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Link
+                  href="/formacion-astrologos"
                   className="block w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-6 py-3 rounded-full font-semibold hover:from-indigo-400 hover:to-purple-400 transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
-                  Contacta conmigo →
-                </a>
+                  Descubre más →
+                </Link>
               </div>
             </div>
           </div>
