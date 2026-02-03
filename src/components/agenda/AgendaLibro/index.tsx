@@ -1707,7 +1707,10 @@ export const AgendaLibro = ({
         {/* CIERRE DEL CICLO */}
         <div id="cierre-ciclo">
           <QuienEraQuienSoy />
-          <PreparacionProximaVuelta />
+          <PreparacionProximaVuelta
+            clavesIntegracion={getClavesIntegracion()}
+            temaCentral={getInterpretacionRetornoSolar()}
+          />
           <CartaCierre name={userName} />
           <PaginaFinalBlanca />
         </div>

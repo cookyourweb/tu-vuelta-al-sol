@@ -234,46 +234,81 @@ export const QuienEraQuienSoy = () => {
   );
 };
 
-export const PreparacionProximaVuelta = () => {
+interface PreparacionProximaVueltaProps {
+  clavesIntegracion?: string[];
+  aprendizajesAnio?: string;
+  temaCentral?: string;
+}
+
+export const PreparacionProximaVuelta = ({
+  clavesIntegracion,
+  aprendizajesAnio,
+  temaCentral
+}: PreparacionProximaVueltaProps) => {
   const { config } = useStyle();
 
   return (
     <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
       {/* Header */}
-      <div className="text-center mb-6 pb-4 border-b-2 border-gray-200">
-        <Sun className={`w-8 h-8 mx-auto ${config.iconPrimary}`} />
-        <h2 className={`text-2xl font-display mt-3 ${config.titleGradient}`}>Preparación para la próxima vuelta al Sol</h2>
-        <p className={`text-sm italic mt-2 ${config.iconSecondary}`}>
+      <div className="text-center mb-5 pb-3 border-b-2 border-gray-200">
+        <Sun className={`w-7 h-7 mx-auto ${config.iconPrimary}`} />
+        <h2 className={`text-xl font-display mt-2 ${config.titleGradient}`}>Preparación para la próxima vuelta al Sol</h2>
+        <p className={`text-xs italic mt-1 ${config.iconSecondary}`}>
           El ciclo termina, pero tú continúas.
         </p>
       </div>
 
-      <div className="flex-1 max-w-2xl mx-auto w-full space-y-5">
-        {/* Lo que llevo */}
-        <div className={`${config.highlightPrimary} p-5`}>
-          <div className="flex items-center gap-2 mb-3">
-            <Heart className={`w-4 h-4 ${config.iconPrimary}`} />
-            <h4 className={`text-sm font-bold uppercase ${config.iconPrimary}`}>Lo que llevo conmigo al próximo año</h4>
+      <div className="flex-1 max-w-2xl mx-auto w-full space-y-4">
+        {/* Recordatorio del tema del año */}
+        {temaCentral && (
+          <div className={`${config.highlightSecondary} p-4 rounded-lg mb-4`}>
+            <p className={`text-xs uppercase tracking-wider ${config.iconSecondary} mb-2`}>Este año trabajaste en:</p>
+            <p className="text-sm text-gray-700 italic leading-relaxed line-clamp-3">
+              {temaCentral.length > 150 ? temaCentral.substring(0, 150) + '...' : temaCentral}
+            </p>
           </div>
-          <LineasEscritura count={5} spacing={28} />
+        )}
+
+        {/* Claves de integración del año */}
+        {clavesIntegracion && clavesIntegracion.length > 0 && (
+          <div className={`${config.highlightPrimary} p-4 rounded-lg`}>
+            <p className={`text-xs uppercase tracking-wider ${config.iconPrimary} mb-2`}>Tus claves de integración fueron:</p>
+            <ul className="space-y-1">
+              {clavesIntegracion.slice(0, 3).map((clave, idx) => (
+                <li key={idx} className="text-sm text-gray-700 flex items-start gap-2">
+                  <span className={config.iconSecondary}>✧</span>
+                  <span>{clave}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Lo que llevo */}
+        <div className={`${config.highlightPrimary} p-4`}>
+          <div className="flex items-center gap-2 mb-2">
+            <Heart className={`w-4 h-4 ${config.iconPrimary}`} />
+            <h4 className={`text-xs font-bold uppercase ${config.iconPrimary}`}>Lo que llevo conmigo</h4>
+          </div>
+          <LineasEscritura count={4} spacing={24} />
         </div>
 
         {/* Lo que dejo */}
-        <div className={`${config.highlightSecondary} p-5`}>
-          <div className="flex items-center gap-2 mb-3">
+        <div className={`${config.highlightSecondary} p-4`}>
+          <div className="flex items-center gap-2 mb-2">
             <Star className={`w-4 h-4 ${config.iconSecondary}`} />
-            <h4 className={`text-sm font-bold uppercase ${config.iconSecondary}`}>Lo que dejo aquí</h4>
+            <h4 className={`text-xs font-bold uppercase ${config.iconSecondary}`}>Lo que dejo aquí</h4>
           </div>
-          <LineasEscritura count={5} spacing={28} />
+          <LineasEscritura count={4} spacing={24} />
         </div>
 
         {/* Deseo */}
-        <div className={`${config.highlightAccent} p-5`}>
-          <div className="flex items-center gap-2 mb-3">
+        <div className={`${config.highlightAccent} p-4`}>
+          <div className="flex items-center gap-2 mb-2">
             <Sparkles className={`w-4 h-4 ${config.iconAccent}`} />
-            <h4 className={`text-sm font-bold uppercase ${config.iconAccent}`}>Mi deseo para el próximo ciclo</h4>
+            <h4 className={`text-xs font-bold uppercase ${config.iconAccent}`}>Mi deseo para el próximo ciclo</h4>
           </div>
-          <LineasEscritura count={4} spacing={28} />
+          <LineasEscritura count={3} spacing={24} />
         </div>
       </div>
 
