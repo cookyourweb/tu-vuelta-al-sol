@@ -21,25 +21,23 @@ Sistema automatizado de captación de leads para astrólogos interesados en form
 
 ### Vapi
 
+Variables de entorno necesarias (configurar en Vercel):
 ```env
-VAPI_API_KEY=f9d7b50c-23d7-4e1a-9f18-3026dbbaf3f0
-VAPI_ASSISTANT_ID=ba294f7a-f44a-476f-ad37-6d31d9204797
+VAPI_API_KEY=<obtener de dashboard.vapi.ai>
+VAPI_ASSISTANT_ID=<ID del asistente Sara>
 VAPI_PHONE_NUMBER_ID=<pendiente - configurar después de verificación>
 ```
 
 - **Dashboard**: https://dashboard.vapi.ai
 - **Asistente creado**: "Sara - Formacion Astrologos"
-- **ID del Asistente**: `ba294f7a-f44a-476f-ad37-6d31d9204797`
 
 ### Zadarma (SIP Trunk)
 
+Variables necesarias (obtener del panel de Zadarma):
 ```
-Número: +34919933516
-Estado: PENDIENTE DE VERIFICACIÓN
-
 SIP Server: sip.zadarma.com
-Username: 381594
-Password: c6Hq1Dpt9m
+Username: <ver en panel Zadarma>
+Password: <ver en panel Zadarma>
 ```
 
 - **Panel Zadarma**: https://my.zadarma.com
@@ -132,20 +130,20 @@ El asistente "Sara - Formacion Astrologos" está configurado con:
 3. Rellenar:
    - **SIP Trunk Termination URI**: `sip.zadarma.com`
    - **Outbound Authentication**:
-     - Username: `381594`
-     - Password: `c6Hq1Dpt9m`
+     - Username: `<usuario SIP de Zadarma>`
+     - Password: `<contraseña SIP de Zadarma>`
    - **SIP Registration (Inbound)**:
-     - SIP URI: `sip:381594@sip.zadarma.com`
-     - Username: `381594`
-     - Password: `c6Hq1Dpt9m`
+     - SIP URI: `sip:<usuario>@sip.zadarma.com`
+     - Username: `<usuario SIP de Zadarma>`
+     - Password: `<contraseña SIP de Zadarma>`
 4. Guardar y obtener el `VAPI_PHONE_NUMBER_ID`
 
 #### 2. Actualizar Variables de Entorno
 
 Añadir en Vercel:
 ```
-VAPI_API_KEY=f9d7b50c-23d7-4e1a-9f18-3026dbbaf3f0
-VAPI_ASSISTANT_ID=ba294f7a-f44a-476f-ad37-6d31d9204797
+VAPI_API_KEY=<tu API key de Vapi>
+VAPI_ASSISTANT_ID=<ID del asistente Sara>
 VAPI_PHONE_NUMBER_ID=<el ID obtenido en el paso anterior>
 ```
 
