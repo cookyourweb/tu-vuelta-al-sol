@@ -514,6 +514,31 @@ export const AgendaLibro = ({
     txtContent += '\n\n';
 
     // ═══════════════════════════════════════════════════════════
+    // CARTA DE BIENVENIDA
+    // ═══════════════════════════════════════════════════════════
+    txtContent += '═══════════════════════════════════════════════════════════\n';
+    txtContent += '                    CARTA DE BIENVENIDA\n';
+    txtContent += '═══════════════════════════════════════════════════════════\n\n';
+    txtContent += `Querida ${userName},\n\n`;
+    txtContent += 'Hoy empieza un nuevo ciclo.\n';
+    txtContent += 'No es un año más: es TU año.\n\n';
+    txtContent += 'Cumples años, y el Sol vuelve al mismo lugar donde estaba cuando llegaste al mundo.\n';
+    txtContent += 'Ese instante no es solo simbólico: es un portal.\n\n';
+    txtContent += 'Este año no viene a exigirte más.\n';
+    txtContent += 'Viene a reordenarte por dentro.\n\n';
+    txtContent += 'Tu carta natal habla de una persona intuitiva, sensible y profundamente perceptiva.\n';
+    txtContent += 'Tu Retorno Solar confirma que este ciclo es menos visible, pero mucho más verdadero.\n\n';
+    txtContent += 'Esta agenda no te dirá qué hacer.\n';
+    txtContent += 'Te ayudará a escucharte.\n';
+    txtContent += 'A bajar el ruido.\n';
+    txtContent += 'A confiar en tu ritmo.\n\n';
+    txtContent += 'Estoy contigo durante este año.\n';
+    txtContent += 'No te empujo.\n';
+    txtContent += 'Te acompaño.\n\n';
+    txtContent += 'Bienvenida a tu vuelta al Sol.\n\n';
+    txtContent += '                                        Con amor cósmico ✧\n\n';
+
+    // ═══════════════════════════════════════════════════════════
     // GUÍA DE LA AGENDA (Natal primero, SR segundo)
     // ═══════════════════════════════════════════════════════════
     txtContent += '═══════════════════════════════════════════════════════════\n';
@@ -949,8 +974,24 @@ export const AgendaLibro = ({
 
           txtContent += `▸ ${dia} de ${mesKey.split(' ')[0].toLowerCase()} - ${tipoEvento}`;
 
+          // Evitar redundancia: no repetir el título si es igual al tipo de evento
           if (event.title) {
-            txtContent += `: ${event.title}`;
+            const titleLower = event.title.toLowerCase();
+            const tipoLower = tipoEvento.toLowerCase();
+
+            // Solo agregar título si contiene información adicional (como el signo)
+            if (!titleLower.includes(tipoLower) && titleLower !== tipoLower) {
+              txtContent += `: ${event.title}`;
+            } else if (event.sign || event.signo) {
+              // Si el título es redundante pero hay signo, mostrar el signo
+              txtContent += ` en ${event.sign || event.signo}`;
+            } else {
+              // Extraer signo del título si existe (ej: "Luna Nueva en Acuario")
+              const signMatch = event.title.match(/en\s+(\w+)/i);
+              if (signMatch) {
+                txtContent += ` en ${signMatch[1]}`;
+              }
+            }
           }
 
           txtContent += `\n`;
