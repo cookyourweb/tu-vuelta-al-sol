@@ -363,11 +363,14 @@ export function formatEventForBook(event: any, natalHouses?: NatalHouse[]) {
     interpretacion = getGenericInterpretation(tipo, event.sign, event.title, casaNatal);
   }
 
+  // Obtener signo del evento (puede estar en sign o en metadata.zodiacSign)
+  const signo = event.sign || event.metadata?.zodiacSign || undefined;
+
   return {
     dia: new Date(event.date).getDate(),
     tipo,
     titulo: event.title,
-    signo: event.sign || undefined,
+    signo,
     interpretacion,
     casaNatal // Incluir la casa natal en el objeto retornado
   };

@@ -92,7 +92,7 @@ export const PrimerDiaCiclo: React.FC<{
         </div>
       </div>
 
-      <FooterLibro pagina={28} />
+      <FooterLibro pagina={29} />
     </div>
   );
 };

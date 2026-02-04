@@ -227,8 +227,22 @@ export const MarteRetorno = ({ comparacion }: { comparacion?: any }) => {
   return <ComparacionPlanetaria planetName="Marte" planetSymbol="♂" pageNumber={16} comparacion={comparacion} />;
 };
 
-export const EjesDelAnio = () => {
+interface EjesDelAnioProps {
+  ascSign?: { sign: string; degree?: number } | null;
+  mcSign?: { sign: string; degree?: number } | null;
+}
+
+export const EjesDelAnio = ({ ascSign, mcSign }: EjesDelAnioProps) => {
   const { config } = useStyle();
+
+  // Formatear signo con grado si está disponible
+  const formatSigno = (data: { sign: string; degree?: number } | null | undefined) => {
+    if (!data) return null;
+    if (data.degree !== undefined) {
+      return `${data.sign} ${Math.floor(data.degree)}°`;
+    }
+    return data.sign;
+  };
 
   return (
     <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
@@ -256,6 +270,9 @@ export const EjesDelAnio = () => {
             <span className={`${config.iconSecondary} text-2xl`}>↑</span>
             <div>
               <span className={`${config.fontDisplay} ${config.iconPrimary} font-medium`}>Ascendente del Retorno</span>
+              {ascSign && (
+                <span className={`${config.iconSecondary} text-sm ml-2 font-medium`}>en {formatSigno(ascSign)}</span>
+              )}
               <span className="text-gray-400 text-sm ml-2">— Casa 1</span>
             </div>
           </div>
@@ -286,6 +303,10 @@ export const EjesDelAnio = () => {
             <span className={`${config.iconSecondary} text-2xl`}>⬆</span>
             <div>
               <span className={`${config.fontDisplay} ${config.iconPrimary} font-medium`}>Medio Cielo (MC) del Retorno</span>
+              {mcSign && (
+                <span className={`${config.iconSecondary} text-sm ml-2 font-medium`}>en {formatSigno(mcSign)}</span>
+              )}
+              <span className="text-gray-400 text-sm ml-2">— Casa 10</span>
             </div>
           </div>
           <p className="text-gray-500 text-xs italic mb-3">Vocación, dirección, propósito visible</p>
@@ -314,7 +335,12 @@ export const EjesDelAnio = () => {
   );
 };
 
-export const EjesDelAnio2 = () => {
+interface EjesDelAnio2Props {
+  dscSign?: { sign: string } | null;
+  icSign?: { sign: string } | null;
+}
+
+export const EjesDelAnio2 = ({ dscSign, icSign }: EjesDelAnio2Props) => {
   const { config } = useStyle();
 
   return (
@@ -331,6 +357,10 @@ export const EjesDelAnio2 = () => {
             <span className={`${config.iconSecondary} text-2xl`}>↓</span>
             <div>
               <span className={`${config.fontDisplay} ${config.iconPrimary} font-medium`}>Descendente (DSC) del Retorno</span>
+              {dscSign && (
+                <span className={`${config.iconSecondary} text-sm ml-2 font-medium`}>en {dscSign.sign}</span>
+              )}
+              <span className="text-gray-400 text-sm ml-2">— Casa 7</span>
             </div>
           </div>
           <p className="text-gray-500 text-xs italic mb-3">Relaciones, vínculos, espejo emocional</p>
@@ -362,6 +392,10 @@ export const EjesDelAnio2 = () => {
             <span className={`${config.iconSecondary} text-2xl`}>⬇</span>
             <div>
               <span className={`${config.fontDisplay} ${config.iconPrimary} font-medium`}>Fondo del Cielo (IC) del Retorno</span>
+              {icSign && (
+                <span className={`${config.iconSecondary} text-sm ml-2 font-medium`}>en {icSign.sign}</span>
+              )}
+              <span className="text-gray-400 text-sm ml-2">— Casa 4</span>
             </div>
           </div>
           <p className="text-gray-500 text-xs italic mb-3">Hogar interno, raíces, seguridad emocional</p>
@@ -518,7 +552,7 @@ export const RitualCumpleanos = () => {
         </div>
       </div>
 
-      <FooterLibro pagina={27} />
+      <FooterLibro pagina={30} />
     </div>
   );
 };

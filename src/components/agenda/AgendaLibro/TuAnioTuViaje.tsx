@@ -498,7 +498,7 @@ export const PaginaIntencionAnual = () => {
         Página de escritura libre
       </div>
 
-      <FooterLibro pagina={29} />
+      <FooterLibro pagina={28} />
     </div>
   );
 };

@@ -176,8 +176,9 @@ export async function POST(request: NextRequest) {
         transformedEvents.push({
           id: `lunar-${eventDate.toISOString()}`,
           date: eventDate,
-          title: phaseName,
+          title: `${phaseName} en ${phase.sign}`,
           type: phase.type,
+          sign: phase.sign, // Añadir signo directamente para el calendario
           description: `${phaseName} en ${phase.sign}`,
           importance: 'medium',
           metadata: {
@@ -198,6 +199,8 @@ export async function POST(request: NextRequest) {
           date: startDate,
           title: `${retro.planet} Retrógrado`,
           type: 'retrograde',
+          sign: retro.startSign, // Añadir signo directamente
+          planet: retro.planet,
           description: `${retro.planet} inicia retrogradación en ${retro.startSign}`,
           importance: 'high',
           metadata: {
@@ -217,8 +220,9 @@ export async function POST(request: NextRequest) {
         transformedEvents.push({
           id: `eclipse-${eventDate.toISOString()}`,
           date: eventDate,
-          title: eclipse.type,
+          title: `${eclipse.type} en ${eclipse.sign}`,
           type: 'eclipse',
+          sign: eclipse.sign, // Añadir signo directamente
           description: `${eclipse.type} en ${eclipse.sign}`,
           importance: 'high',
           metadata: {
@@ -240,6 +244,8 @@ export async function POST(request: NextRequest) {
           date: eventDate,
           title: `${ingress.planet} → ${ingress.toSign}`,
           type: 'planetary_transit',
+          sign: ingress.toSign, // Signo destino
+          planet: ingress.planet,
           description: `${ingress.planet} entra en ${ingress.toSign}`,
           importance: 'medium',
           metadata: {

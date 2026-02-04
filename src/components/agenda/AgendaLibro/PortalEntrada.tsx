@@ -284,7 +284,7 @@ export const PaginaIntencionAnualSR = ({
         ✧
       </div>
 
-      <FooterLibro pagina={30} />
+      <FooterLibro pagina={27} />
     </div>
   );
 };

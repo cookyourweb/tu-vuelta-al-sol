@@ -73,6 +73,9 @@ export const AgendaLibro = ({
   // Estado para almacenar la carta natal (con casas para personalizar lunares)
   const [natalChart, setNatalChart] = useState<any>(null);
 
+  // Estado para almacenar la carta del Solar Return (con ejes)
+  const [solarReturnChart, setSolarReturnChart] = useState<any>(null);
+
   // Estado para mostrar instrucciones de PDF
   const [showPdfInstructions, setShowPdfInstructions] = useState(false);
 
@@ -190,6 +193,35 @@ export const AgendaLibro = ({
     };
 
     fetchNatalChart();
+  }, [userId]);
+
+  // Efecto para cargar la carta del Solar Return (con ejes)
+  useEffect(() => {
+    const fetchSolarReturnChart = async () => {
+      if (!userId) return;
+
+      try {
+        console.log('☀️ [SR_CHART] Cargando carta Solar Return para ejes...');
+        const response = await fetch(`/api/charts/solar-return?userId=${userId}`);
+        const data = await response.json();
+
+        const chart = data.data?.solarReturnChart || data.solarReturnChart || data.chart;
+        if (chart) {
+          console.log('✅ [SR_CHART] Carta SR cargada:', {
+            ascendant: chart.ascendant?.sign,
+            midheaven: chart.midheaven?.sign,
+            houses: chart.houses?.length
+          });
+          setSolarReturnChart(chart);
+        } else {
+          console.log('⚠️ [SR_CHART] No se encontró carta Solar Return');
+        }
+      } catch (error) {
+        console.error('❌ [SR_CHART] Error al cargar carta SR:', error);
+      }
+    };
+
+    fetchSolarReturnChart();
   }, [userId]);
 
   // ==========================================
@@ -1205,6 +1237,28 @@ export const AgendaLibro = ({
     };
   };
 
+  // Helper: Obtener los SIGNOS de los ejes desde la carta del SR
+  const getEjesSignos = () => {
+    if (!solarReturnChart) return null;
+
+    // Obtener signos directamente de ascendant/midheaven o de las casas
+    const ascSign = solarReturnChart.ascendant?.sign || solarReturnChart.houses?.[0]?.sign;
+    const mcSign = solarReturnChart.midheaven?.sign || solarReturnChart.houses?.[9]?.sign;
+    const dscSign = solarReturnChart.houses?.[6]?.sign; // Casa 7 (índice 6)
+    const icSign = solarReturnChart.houses?.[3]?.sign;  // Casa 4 (índice 3)
+
+    // Obtener grados si están disponibles
+    const ascDegree = solarReturnChart.ascendant?.degree || solarReturnChart.houses?.[0]?.degree;
+    const mcDegree = solarReturnChart.midheaven?.degree || solarReturnChart.houses?.[9]?.degree;
+
+    return {
+      asc: ascSign ? { sign: ascSign, degree: ascDegree } : null,
+      mc: mcSign ? { sign: mcSign, degree: mcDegree } : null,
+      dsc: dscSign ? { sign: dscSign } : null,
+      ic: icSign ? { sign: icSign } : null
+    };
+  };
+
   // Helper: Obtener datos mensuales personalizados (ejercicio, mantra, etc.)
   const getMonthlyThemeData = (monthIndex: number) => {
     const interpretation = getSRInterpretation();
@@ -1674,8 +1728,14 @@ export const AgendaLibro = ({
             <MarteRetorno comparacion={getComparacionesPlanetarias()?.marte} />
           </div>
           <div id="ejes-anio">
-            <EjesDelAnio />
-            <EjesDelAnio2 />
+            <EjesDelAnio
+              ascSign={getEjesSignos()?.asc}
+              mcSign={getEjesSignos()?.mc}
+            />
+            <EjesDelAnio2
+              dscSign={getEjesSignos()?.dsc}
+              icSign={getEjesSignos()?.ic}
+            />
             <IntegracionEjes
               asc={getIntegracionEjes()?.asc}
               mc={getIntegracionEjes()?.mc}
@@ -1720,14 +1780,25 @@ export const AgendaLibro = ({
         </div>
 
         {/* ═══════════════════════════════════════════════════════════════
-            SECCIÓN 6: RITUAL DE CUMPLEAÑOS Y REFLEXIÓN
-            (DESPUÉS de todas las interpretaciones)
+            SECCIÓN 6: INTENCIÓN DEL AÑO + RITUAL DE APERTURA
+            Orden: 1) Predicción, 2) Escribir, 3) Antes de Empezar, 4) Ritual
             ═══════════════════════════════════════════════════════════════ */}
-        <div id="ritual-cumpleanos">
-          <RitualCumpleanos />
+
+        {/* 1. INTENCIÓN DEL AÑO - Predicción con tema central */}
+        <div id="intencion-anual">
+          <PaginaIntencionAnualSR
+            temaCentral={getInterpretacionRetornoSolar()}
+            ejeDelAno={getSRInterpretation()?.apertura_anual?.eje_del_ano}
+            userName={userName}
+          />
         </div>
 
-        {/* PRIMER DÍA DEL CICLO - Ahora el usuario ya leyó todo */}
+        {/* 2. MI INTENCIÓN - Espacio para escribir */}
+        <div id="mi-intencion">
+          <PaginaIntencionAnual />
+        </div>
+
+        {/* 3. ANTES DE EMPEZAR - Ritual de apertura personalizado */}
         <div id="primer-dia-ciclo">
           <PrimerDiaCiclo
             nombre={userName}
@@ -1737,14 +1808,9 @@ export const AgendaLibro = ({
           />
         </div>
 
-        {/* PÁGINA DE INTENCIÓN - Para escribir después de reflexionar */}
-        <div id="intencion-anual">
-          <PaginaIntencionAnual />
-          <PaginaIntencionAnualSR
-            temaCentral={getInterpretacionRetornoSolar()}
-            ejeDelAno={getSRInterpretation()?.apertura_anual?.eje_del_ano}
-            userName={userName}
-          />
+        {/* 4. RITUAL DE CUMPLEAÑOS */}
+        <div id="ritual-cumpleanos">
+          <RitualCumpleanos />
         </div>
 
         {/* ═══════════════════════════════════════════════════════════════
