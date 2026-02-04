@@ -4,7 +4,21 @@ import * as admin from 'firebase-admin';
 import connectDB from '@/lib/db';
 import Interpretation from '@/models/Interpretation';
 
-const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+// Duración del cache según el tipo de interpretación
+const CACHE_DURATION_NATAL = 365 * 24 * 60 * 60 * 1000; // 365 días - carta natal no cambia
+const CACHE_DURATION_SOLAR_RETURN = 365 * 24 * 60 * 60 * 1000; // 365 días - solar return es anual
+const CACHE_DURATION_DEFAULT = 24 * 60 * 60 * 1000; // 24 horas para otros
+
+function getCacheDuration(chartType: string): number {
+  switch (chartType) {
+    case 'natal':
+      return CACHE_DURATION_NATAL;
+    case 'solar-return':
+      return CACHE_DURATION_SOLAR_RETURN;
+    default:
+      return CACHE_DURATION_DEFAULT;
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -66,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     await connectDB();
 
-    const expirationDate = new Date(Date.now() + CACHE_DURATION);
+    const expirationDate = new Date(Date.now() + getCacheDuration('solar-return'));
 
     // ✅ UPSERT: Update if exists, create if not
     const result = await Interpretation.findOneAndUpdate(
@@ -155,7 +169,7 @@ async function handleNatalInterpretationSave(body: any) {
 
     await connectDB();
 
-    const expirationDate = new Date(Date.now() + CACHE_DURATION);
+    const expirationDate = new Date(Date.now() + getCacheDuration(chartType));
 
     // ✅ UPSERT
     const result = await Interpretation.findOneAndUpdate(
@@ -322,7 +336,7 @@ export async function PUT(request: NextRequest) {
 
     await connectDB();
 
-    const expirationDate = new Date(Date.now() + CACHE_DURATION);
+    const expirationDate = new Date(Date.now() + getCacheDuration(chartType));
 
     // ✅ UPSERT: Reemplaza existente o crea nuevo
     const result = await Interpretation.findOneAndUpdate(

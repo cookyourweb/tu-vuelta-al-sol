@@ -26,7 +26,7 @@ function getOpenAI() {
   return openai;
 }
 
-const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+const CACHE_DURATION = 365 * 24 * 60 * 60 * 1000; // 365 días - Solar Return es anual, no debe expirar antes
 
 // ==========================================
 // 📊 SOLAR RETURN 3 CAPAS INTERFACE
