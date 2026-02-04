@@ -1129,31 +1129,48 @@ export const AgendaLibro = ({
   };
 
   // Helper: Obtener esencia natal
+  // ✅ FIX: Mapear correctamente desde la estructura del prompt (campos anidados)
   const getEsenciaNatal = () => {
     const interpretation = getNatalInterpretation();
     if (!interpretation) return null;
 
+    // Buscar en ambas estructuras posibles (nueva estructura anidada vs estructura plana antigua)
     return {
-      proposito_vida: interpretation.proposito_vida,
-      emociones: interpretation.emociones,
-      personalidad: interpretation.personalidad,
-      pensamiento: interpretation.como_piensas_y_hablas,
-      amor: interpretation.como_amas,
-      accion: interpretation.como_enfrentas_la_vida
+      // Propósito de vida: sol.interpretacion o proposito_vida (fallback)
+      proposito_vida: interpretation.sol?.interpretacion || interpretation.proposito_vida,
+      // Emociones: luna.interpretacion o emociones (fallback)
+      emociones: interpretation.luna?.interpretacion || interpretation.emociones,
+      // Personalidad: ascendente.interpretacion o personalidad (fallback)
+      personalidad: interpretation.ascendente?.interpretacion || interpretation.personalidad,
+      // Pensamiento: mercurio.interpretacion o como_piensas_y_hablas (fallback)
+      pensamiento: interpretation.mercurio?.interpretacion || interpretation.como_piensas_y_hablas,
+      // Amor: venus.interpretacion o como_amas (fallback)
+      amor: interpretation.venus?.interpretacion || interpretation.como_amas,
+      // Acción: marte.interpretacion o como_enfrentas_la_vida (fallback)
+      accion: interpretation.marte?.interpretacion || interpretation.como_enfrentas_la_vida
     };
   };
 
   // Helper: Obtener nodos lunares
+  // ✅ FIX: Buscar en estructura nueva (nodo_sur/nodo_norte directos) o antigua (nodos_lunares.nodo_sur/nodo_norte)
   const getNodosLunares = () => {
     const interpretation = getNatalInterpretation();
-    if (!interpretation?.nodos_lunares) return null;
+    if (!interpretation) return null;
 
     // Función para convertir nodo objeto a string
     const formatNodo = (nodo: any): string | undefined => {
       if (!nodo) return undefined;
       if (typeof nodo === 'string') return nodo;
 
-      // Si es objeto con {signo_casa, direccion_evolutiva, desafio}
+      // Si tiene interpretacion directa (estructura nueva del prompt)
+      if (nodo.interpretacion) {
+        const parts: string[] = [nodo.interpretacion];
+        if (nodo.zona_comoda) parts.push(`\n\nZona de confort: ${nodo.zona_comoda}`);
+        if (nodo.direccion_evolutiva) parts.push(`\n\nDirección evolutiva: ${nodo.direccion_evolutiva}`);
+        return parts.join('');
+      }
+
+      // Si es objeto con estructura antigua {signo_casa, direccion_evolutiva, desafio}
       const parts: string[] = [];
       if (nodo.signo_casa) parts.push(nodo.signo_casa);
       if (nodo.direccion_evolutiva) parts.push(`Dirección evolutiva: ${nodo.direccion_evolutiva}`);
@@ -1164,23 +1181,35 @@ export const AgendaLibro = ({
       return parts.length > 0 ? parts.join('\n\n') : undefined;
     };
 
+    // Buscar en estructura nueva (directa) o antigua (bajo nodos_lunares)
+    const nodoSur = interpretation.nodo_sur || interpretation.nodos_lunares?.nodo_sur;
+    const nodoNorte = interpretation.nodo_norte || interpretation.nodos_lunares?.nodo_norte;
+
+    if (!nodoSur && !nodoNorte) return null;
+
     return {
-      nodo_sur: formatNodo(interpretation.nodos_lunares.nodo_sur),
-      nodo_norte: formatNodo(interpretation.nodos_lunares.nodo_norte)
+      nodo_sur: formatNodo(nodoSur),
+      nodo_norte: formatNodo(nodoNorte)
     };
   };
 
   // Helper: Obtener planetas dominantes
+  // ✅ FIX: Mapear correctamente desde la estructura del prompt (campos anidados)
   const getPlanetasDominantes = () => {
     const interpretation = getNatalInterpretation();
     if (!interpretation) return null;
 
     return {
-      como_piensas: interpretation.como_piensas_y_hablas,
-      proposito_vida: interpretation.proposito_vida,
-      emociones: interpretation.emociones,
-      como_amas: interpretation.como_amas,
-      como_actuas: interpretation.como_enfrentas_la_vida
+      // Mercurio: mercurio.interpretacion o como_piensas_y_hablas (fallback)
+      como_piensas: interpretation.mercurio?.interpretacion || interpretation.como_piensas_y_hablas,
+      // Sol: sol.interpretacion o proposito_vida (fallback)
+      proposito_vida: interpretation.sol?.interpretacion || interpretation.proposito_vida,
+      // Luna: luna.interpretacion o emociones (fallback)
+      emociones: interpretation.luna?.interpretacion || interpretation.emociones,
+      // Venus: venus.interpretacion o como_amas (fallback)
+      como_amas: interpretation.venus?.interpretacion || interpretation.como_amas,
+      // Marte: marte.interpretacion o como_enfrentas_la_vida (fallback)
+      como_actuas: interpretation.marte?.interpretacion || interpretation.como_enfrentas_la_vida
     };
   };
 
