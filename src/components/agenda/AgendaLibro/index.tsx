@@ -21,7 +21,7 @@ import { CalendarioYMapaMes, LunasYEjercicios, SemanaConInterpretacion, CierreMe
 import { TransitosDelMes } from './TransitosDelMes';
 import { CalendarioMensualTabla } from './CalendarioMensualTabla';
 import { EscrituraTerapeutica, Visualizacion, RitualSimbolico, TrabajoEmocional } from './TerapiaCreativa';
-import { PrimerDiaCiclo, UltimoDiaCiclo, QuienEraQuienSoy, PreparacionProximaVuelta, CartaCierre, PaginaFinalBlanca, Contraportada } from './PaginasEspeciales';
+import { PrimerDiaCiclo, UltimoDiaCiclo, QuienEraQuienSoy, PreparacionProximaVuelta, CartaCierre, PaginaFinalBlanca, Contraportada, PaginaBlanca } from './PaginasEspeciales';
 import '@/styles/print-libro.css';
 
 interface AgendaLibroProps {
@@ -1523,7 +1523,7 @@ export const AgendaLibro = ({
       <div ref={printRef} className="container mx-auto py-8 space-y-0 print:p-0">
 
         {/* ═══════════════════════════════════════════════════════════════
-            SECCIÓN 1: BIENVENIDA Y PRESENTACIÓN
+            SECCIÓN 1: PORTADA + ÍNDICE (para impresión de libro)
             ═══════════════════════════════════════════════════════════════ */}
         <div id="portal-entrada">
           <div id="portada">
@@ -1538,17 +1538,23 @@ export const AgendaLibro = ({
           </div>
         </div>
 
+        {/* Página en blanco (reverso de la portada para impresión a doble cara) */}
+        <PaginaBlanca />
+
+        {/* Índice va justo después de la portada */}
+        <IndiceNavegable />
+
+        {/* ═══════════════════════════════════════════════════════════════
+            SECCIÓN 2: BIENVENIDA Y GUÍA
+            ═══════════════════════════════════════════════════════════════ */}
         <div id="bienvenida">
           <CartaBienvenida name={userName} />
           <GuiaAgenda />
         </div>
 
-        <IndiceNavegable />
-
         {/* ═══════════════════════════════════════════════════════════════
-            SECCIÓN 2: CARTA NATAL (Soul Chart) - PRIMERO
+            SECCIÓN 3: CARTA NATAL (Soul Chart)
             ═══════════════════════════════════════════════════════════════ */}
-        {/* 2. SOUL CHART */}
         <div id="soul-chart">
           <div id="esencia-natal">
             <EsenciaNatal
@@ -1588,7 +1594,7 @@ export const AgendaLibro = ({
         </div>
 
         {/* ═══════════════════════════════════════════════════════════════
-            SECCIÓN 3: RETORNO SOLAR - DESPUÉS DE CARTA NATAL
+            SECCIÓN 4: RETORNO SOLAR
             ═══════════════════════════════════════════════════════════════ */}
         <div id="retorno-solar">
           <div id="que-es-retorno">
@@ -1627,7 +1633,7 @@ export const AgendaLibro = ({
         </div>
 
         {/* ═══════════════════════════════════════════════════════════════
-            SECCIÓN 4: CICLOS Y OVERVIEW DEL AÑO
+            SECCIÓN 5: CICLOS Y OVERVIEW DEL AÑO
             ═══════════════════════════════════════════════════════════════ */}
         <div id="ciclos-anuales">
           <LineaTiempoEmocional
@@ -1659,7 +1665,7 @@ export const AgendaLibro = ({
         </div>
 
         {/* ═══════════════════════════════════════════════════════════════
-            SECCIÓN 5: RITUAL DE CUMPLEAÑOS Y REFLEXIÓN
+            SECCIÓN 6: RITUAL DE CUMPLEAÑOS Y REFLEXIÓN
             (DESPUÉS de todas las interpretaciones)
             ═══════════════════════════════════════════════════════════════ */}
         <div id="ritual-cumpleanos">
@@ -1687,7 +1693,7 @@ export const AgendaLibro = ({
         </div>
 
         {/* ═══════════════════════════════════════════════════════════════
-            SECCIÓN 6: CALENDARIO MENSUAL DINÁMICO
+            SECCIÓN 7: CALENDARIO MENSUAL DINÁMICO
             Empieza desde el mes del cumpleaños
             ═══════════════════════════════════════════════════════════════ */}
         <div id="calendario-mensual">
