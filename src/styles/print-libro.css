@@ -4,35 +4,29 @@
    ============================================ */
 
 @media print {
-  /* Configuración global de página A5 con márgenes para encuadernación */
+  /* Configuración global de página A5 */
   @page {
-    size: A5 portrait;
-    /* Margen para encuadernación: izq mayor, der menor */
-    margin: 10mm 12mm 10mm 15mm;
+    size: 148mm 210mm; /* A5 explícito */
+    margin: 10mm;
   }
 
-  /* Páginas impares (derecha): margen encuadernación a la izquierda */
-  @page :right {
-    margin: 10mm 12mm 10mm 15mm;
-  }
-
-  /* Páginas pares (izquierda): margen encuadernación a la derecha */
+  /* Páginas pares (izquierda) - margen mayor en lomo */
   @page :left {
-    margin: 10mm 15mm 10mm 12mm;
+    margin-left: 15mm; /* Lomo */
+    margin-right: 10mm;
+    margin-top: 10mm;
+    margin-bottom: 10mm;
   }
 
-  /* Páginas pares e impares para encuadernación */
-  @page :left {
-    margin-left: 5mm;
-    margin-right: 3mm;
-  }
-
+  /* Páginas impares (derecha) - margen mayor en lomo */
   @page :right {
-    margin-left: 3mm;
-    margin-right: 5mm;
+    margin-left: 10mm;
+    margin-right: 15mm; /* Lomo */
+    margin-top: 10mm;
+    margin-bottom: 10mm;
   }
 
-  /* Primera página sin margen adicional */
+  /* Primera página (portada) - sin márgenes adicionales */
   @page :first {
     margin: 0;
   }
@@ -69,14 +63,15 @@
 
   /* Cada página debe ocupar exactamente una hoja A5 */
   .print-page {
-    width: 100% !important; /* Ocupar todo el ancho disponible (dentro de márgenes) */
-    min-height: 100vh !important; /* Altura completa de página */
-    height: auto !important;
+    width: 100% !important; /* Ajustado por @page */
+    min-height: 100% !important;
+    max-width: 148mm;
+    max-height: 210mm;
     page-break-after: always;
     page-break-inside: avoid;
-    margin: 0;
-    padding: 8mm !important; /* Padding interno adicional */
-    overflow: visible;
+    margin: 0 auto;
+    padding: 0;
+    overflow: hidden;
     position: relative;
     background: white;
     box-sizing: border-box;
@@ -292,10 +287,10 @@
    ESTILOS PARA VISTA DE PANTALLA
    ============================================ */
 @media screen {
-  /* Simular páginas A5 en pantalla */
+  /* Simular páginas A5 en pantalla (148mm x 210mm) */
   .print-page {
-    width: 210mm; /* A5 en pantalla - ajustado para mejor visualización */
-    min-height: 297mm;
+    width: 148mm; /* A5 ancho real */
+    min-height: 210mm; /* A5 alto real */
     margin: 20px auto;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     position: relative;

@@ -151,7 +151,7 @@ export const TuAnioOverview: React.FC<TuAnioProps> = ({ startDate, endDate, user
         </p>
       </div>
 
-      <FooterLibro pagina={10} />
+      <FooterLibro pagina={25} />
     </div>
   );
 };
@@ -300,7 +300,7 @@ export const TuAnioCiclos: React.FC<TuAnioProps> = ({ startDate, endDate, hasSol
         </div>
       </div>
 
-      <FooterLibro pagina={11} />
+      <FooterLibro pagina={26} />
     </div>
   );
 };

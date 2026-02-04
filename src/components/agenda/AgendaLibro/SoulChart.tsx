@@ -163,7 +163,7 @@ export const EsenciaNatal = ({
         )}
       </div>
 
-      <FooterLibro pagina={15} />
+      <FooterLibro pagina={5} />
     </div>
   );
 };
@@ -238,7 +238,7 @@ export const NodoNorte = ({ nodo_norte }: NodoNorteProps) => {
         )}
       </div>
 
-      <FooterLibro pagina={16} />
+      <FooterLibro pagina={6} />
     </div>
   );
 };
@@ -312,7 +312,7 @@ export const NodoSur = ({ nodo_sur }: NodoSurProps) => {
         )}
       </div>
 
-      <FooterLibro pagina={17} />
+      <FooterLibro pagina={7} />
     </div>
   );
 };
@@ -435,7 +435,7 @@ export const PlanetasDominantes = ({
         )}
       </div>
 
-      <FooterLibro pagina={19} />
+      <FooterLibro pagina={8} />
     </div>
   );
 };
@@ -514,7 +514,7 @@ export const PatronesEmocionales = ({ patrones, sombra }: PatronesEmocionalesPro
         </div>
       </div>
 
-      <FooterLibro pagina={20} />
+      <FooterLibro pagina={9} />
     </div>
   );
 };

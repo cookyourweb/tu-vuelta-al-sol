@@ -26,69 +26,68 @@ export const IndiceNavegable: React.FC = () => {
 
   const secciones: SeccionIndice[] = [
     {
-      titulo: 'Tu Año, Tu Viaje',
+      titulo: 'Bienvenida',
       pagina: 1,
-      id: 'tu-anio-tu-viaje',
+      id: 'portal-entrada',
       icono: <BookOpen className="w-4 h-4" />,
       subsecciones: [
-        { titulo: 'Portada Personalizada', pagina: 1, id: 'portada' },
-        { titulo: 'Cómo Usar Este Libro', pagina: 2, id: 'intencion-anio' },
-        { titulo: 'Carta de Bienvenida', pagina: 3, id: 'carta-bienvenida' },
-        { titulo: 'La Intención de Tu Año', pagina: 4, id: 'intencion-anual' },
-        { titulo: 'Tema Central del Año', pagina: 5, id: 'tema-central' },
-        { titulo: 'Lo Que Viene a Mover', pagina: 6, id: 'viene-mover' },
-        { titulo: 'Lo Que Pide Soltar', pagina: 7, id: 'pide-soltar' },
+        { titulo: 'Portada', pagina: 1, id: 'portada' },
+        { titulo: 'Carta de Bienvenida', pagina: 2, id: 'bienvenida' },
+        { titulo: 'Guía de la Agenda', pagina: 3, id: 'guia-agenda' },
       ]
     },
     {
-      titulo: 'Soul Chart',
-      pagina: 9,
+      titulo: 'Soul Chart - Tu Carta Natal',
+      pagina: 5,
       id: 'soul-chart',
       icono: <Star className="w-4 h-4" />,
       subsecciones: [
-        { titulo: 'Esencia Natal', pagina: 9, id: 'esencia-natal' },
-        { titulo: 'Nodo Norte', pagina: 10, id: 'nodo-norte' },
-        { titulo: 'Nodo Sur', pagina: 11, id: 'nodo-sur' },
-        { titulo: 'Planetas Dominantes', pagina: 12, id: 'planetas-dominantes' },
-        { titulo: 'Patrones Emocionales', pagina: 13, id: 'patrones-emocionales' },
+        { titulo: 'Esencia Natal', pagina: 5, id: 'esencia-natal' },
+        { titulo: 'Nodo Norte', pagina: 6, id: 'nodo-norte' },
+        { titulo: 'Nodo Sur', pagina: 7, id: 'nodo-sur' },
+        { titulo: 'Planetas Dominantes', pagina: 8, id: 'planetas-dominantes' },
+        { titulo: 'Patrones Emocionales', pagina: 9, id: 'patrones-emocionales' },
       ]
     },
     {
       titulo: 'Retorno Solar',
-      pagina: 20,
+      pagina: 10,
       id: 'retorno-solar',
       icono: <Sun className="w-4 h-4" />,
       subsecciones: [
-        { titulo: '¿Qué es el Retorno Solar?', pagina: 20, id: 'que-es-retorno' },
-        { titulo: 'Ascendente del Año', pagina: 21, id: 'ascendente-anio' },
-        { titulo: 'Sol en Retorno', pagina: 22, id: 'sol-retorno' },
-        { titulo: 'Luna en Retorno', pagina: 23, id: 'luna-retorno' },
-        { titulo: 'Mercurio en Retorno', pagina: 24, id: 'mercurio-retorno' },
-        { titulo: 'Venus en Retorno', pagina: 25, id: 'venus-retorno' },
-        { titulo: 'Marte en Retorno', pagina: 26, id: 'marte-retorno' },
-        { titulo: 'Ejes del Año', pagina: 27, id: 'ejes-anio' },
-        { titulo: 'Ritual de Cumpleaños', pagina: 29, id: 'ritual-cumpleanos' },
-      ]
-    },
-    {
-      titulo: 'Tu Año 2026-2027',
-      pagina: 14,
-      id: 'tu-anio-overview',
-      icono: <Star className="w-4 h-4" />,
-      subsecciones: [
-        { titulo: 'Overview del Año', pagina: 14, id: 'tu-anio-overview' },
-        { titulo: 'Ciclos del Año', pagina: 15, id: 'ciclos-del-anio' },
+        { titulo: '¿Qué es el Retorno Solar?', pagina: 10, id: 'que-es-retorno' },
+        { titulo: 'Ascendente del Año', pagina: 11, id: 'ascendente-anio' },
+        { titulo: 'Sol en Retorno', pagina: 12, id: 'sol-retorno' },
+        { titulo: 'Luna en Retorno', pagina: 13, id: 'luna-retorno' },
+        { titulo: 'Mercurio en Retorno', pagina: 14, id: 'mercurio-retorno' },
+        { titulo: 'Venus en Retorno', pagina: 15, id: 'venus-retorno' },
+        { titulo: 'Marte en Retorno', pagina: 16, id: 'marte-retorno' },
+        { titulo: 'Ejes del Año', pagina: 17, id: 'ejes-anio' },
+        { titulo: 'Mantra Anual', pagina: 21, id: 'mantra-anual' },
       ]
     },
     {
       titulo: 'Ciclos Anuales',
-      pagina: 16,
+      pagina: 22,
       id: 'ciclos-anuales',
       icono: <Calendar className="w-4 h-4" />,
       subsecciones: [
-        { titulo: 'Línea de Tiempo Emocional', pagina: 16, id: 'linea-tiempo' },
-        { titulo: 'Meses Clave y Puntos de Giro', pagina: 17, id: 'meses-clave' },
-        { titulo: 'Grandes Aprendizajes', pagina: 18, id: 'grandes-aprendizajes' },
+        { titulo: 'Línea de Tiempo Emocional', pagina: 22, id: 'linea-tiempo' },
+        { titulo: 'Meses Clave y Puntos de Giro', pagina: 23, id: 'meses-clave' },
+        { titulo: 'Grandes Aprendizajes', pagina: 24, id: 'grandes-aprendizajes' },
+      ]
+    },
+    {
+      titulo: 'Tu Año',
+      pagina: 25,
+      id: 'tu-anio-overview',
+      icono: <Star className="w-4 h-4" />,
+      subsecciones: [
+        { titulo: 'Overview del Año', pagina: 25, id: 'tu-anio-overview' },
+        { titulo: 'Ciclos del Año', pagina: 26, id: 'ciclos-del-anio' },
+        { titulo: 'Ritual de Cumpleaños', pagina: 27, id: 'ritual-cumpleanos' },
+        { titulo: 'Primer Día del Ciclo', pagina: 28, id: 'primer-dia-ciclo' },
+        { titulo: 'Intención Anual', pagina: 29, id: 'intencion-anual' },
       ]
     },
     {

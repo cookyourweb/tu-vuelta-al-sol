@@ -21,7 +21,7 @@ import { CalendarioYMapaMes, LunasYEjercicios, SemanaConInterpretacion, CierreMe
 import { TransitosDelMes } from './TransitosDelMes';
 import { CalendarioMensualTabla } from './CalendarioMensualTabla';
 import { EscrituraTerapeutica, Visualizacion, RitualSimbolico, TrabajoEmocional } from './TerapiaCreativa';
-import { PrimerDiaCiclo, UltimoDiaCiclo, QuienEraQuienSoy, PreparacionProximaVuelta, CartaCierre, PaginaFinalBlanca, Contraportada } from './PaginasEspeciales';
+import { PrimerDiaCiclo, UltimoDiaCiclo, QuienEraQuienSoy, PreparacionProximaVuelta, CartaCierre, PaginaFinalBlanca, Contraportada, PaginaBlanca } from './PaginasEspeciales';
 import '@/styles/print-libro.css';
 
 interface AgendaLibroProps {
@@ -64,10 +64,14 @@ export const AgendaLibro = ({
   const [solarReturnInterpretation, setSolarReturnInterpretation] = useState<any>(null);
   const [loadingSolarReturn, setLoadingSolarReturn] = useState(true);
   const [generatingSolarReturn, setGeneratingSolarReturn] = useState(false);
+  const [shouldAutoGenerateSR, setShouldAutoGenerateSR] = useState(false);
 
   // Estado para almacenar la interpretación Natal
   const [natalInterpretation, setNatalInterpretation] = useState<any>(null);
   const [loadingNatal, setLoadingNatal] = useState(true);
+
+  // Estado para almacenar la carta natal (con casas para personalizar lunares)
+  const [natalChart, setNatalChart] = useState<any>(null);
 
   // Estado para mostrar instrucciones de PDF
   const [showPdfInstructions, setShowPdfInstructions] = useState(false);
@@ -95,8 +99,10 @@ export const AgendaLibro = ({
 
           setSolarReturnInterpretation(data);
         } else {
-          console.log('⚠️ [SOLAR_RETURN] No se encontró interpretación de Retorno Solar');
+          console.log('⚠️ [SOLAR_RETURN] No se encontró interpretación - marcando para auto-regenerar...');
           setSolarReturnInterpretation(null);
+          // 🔄 AUTO-REGENERAR: Marcar para que el efecto siguiente lo genere
+          setShouldAutoGenerateSR(true);
         }
       } catch (error) {
         console.error('❌ [SOLAR_RETURN] Error al cargar interpretación:', error);
@@ -159,6 +165,31 @@ export const AgendaLibro = ({
     };
 
     fetchNatalInterpretation();
+  }, [userId]);
+
+  // Efecto para cargar la carta natal (con casas) desde la BD
+  useEffect(() => {
+    const fetchNatalChart = async () => {
+      if (!userId) return;
+
+      try {
+        console.log('🌟 [NATAL_CHART] Cargando carta natal para casas...');
+        const response = await fetch(`/api/charts/natal?userId=${userId}`);
+        const data = await response.json();
+
+        if (data.natalChart || data.chart || data.data?.chart) {
+          const chart = data.natalChart || data.chart || data.data?.chart;
+          console.log('✅ [NATAL_CHART] Carta natal cargada, casas disponibles:', chart.houses?.length || 0);
+          setNatalChart(chart);
+        } else {
+          console.log('⚠️ [NATAL_CHART] No se encontró carta natal');
+        }
+      } catch (error) {
+        console.error('❌ [NATAL_CHART] Error al cargar carta natal:', error);
+      }
+    };
+
+    fetchNatalChart();
   }, [userId]);
 
   // ==========================================
@@ -302,6 +333,17 @@ export const AgendaLibro = ({
       setGeneratingSolarReturn(false);
     }
   };
+
+  // ==========================================
+  // 🔄 AUTO-TRIGGER: Generar SR cuando no existe
+  // ==========================================
+  useEffect(() => {
+    if (shouldAutoGenerateSR && !generatingSolarReturn && userId) {
+      console.log('🚀 [AUTO_TRIGGER] shouldAutoGenerateSR es true, llamando a handleGenerateSolarReturn...');
+      setShouldAutoGenerateSR(false); // Reset el flag
+      handleGenerateSolarReturn();
+    }
+  }, [shouldAutoGenerateSR, generatingSolarReturn, userId]);
 
   // ==========================================
   // 🔄 REGENERAR SOLAR RETURN (FORZADO)
@@ -889,18 +931,6 @@ export const AgendaLibro = ({
           const eventDate = new Date(event.date);
           const dia = eventDate.getDate();
           let tipoEvento = event.type || 'Evento';
-          let signo = event.sign || '';
-
-          // Extraer signo del título si no está definido
-          if (!signo && event.title) {
-            const signos = ['Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'];
-            for (const s of signos) {
-              if (event.title.toLowerCase().includes(s.toLowerCase())) {
-                signo = s;
-                break;
-              }
-            }
-          }
 
           // Traducir tipos de eventos
           if (event.type === 'new_moon') {
@@ -917,26 +947,9 @@ export const AgendaLibro = ({
             tipoEvento = 'Tránsito planetario';
           }
 
-          // Formatear evento evitando redundancia
           txtContent += `▸ ${dia} de ${mesKey.split(' ')[0].toLowerCase()} - ${tipoEvento}`;
 
-          // Agregar información adicional del signo o título solo si aporta valor
-          if (tipoEvento === 'Luna Nueva' || tipoEvento === 'Luna Llena') {
-            // Para lunas, mostrar el signo si está disponible
-            if (signo) {
-              txtContent += ` en ${signo}`;
-            }
-          } else if (tipoEvento === 'Tránsito planetario' && event.title) {
-            // Para tránsitos, mostrar planeta y signo
-            txtContent += `: ${event.title}`;
-          } else if (tipoEvento === 'Retrogradación' && event.title) {
-            // Para retrógrados, mostrar el planeta
-            txtContent += `: ${event.title}`;
-          } else if (tipoEvento === 'Eclipse' && event.title) {
-            // Para eclipses, mostrar tipo (solar/lunar) y signo
-            txtContent += `: ${event.title}`;
-          } else if (event.title && !event.title.toLowerCase().includes(tipoEvento.toLowerCase())) {
-            // Solo agregar título si no es redundante
+          if (event.title) {
             txtContent += `: ${event.title}`;
           }
 
@@ -983,7 +996,9 @@ export const AgendaLibro = ({
   // Helper: Obtener eventos formateados para un mes específico
   const getFormattedEventosForMonth = (monthIndex: number) => {
     const eventos = getEventosForMonth(monthIndex);
-    return eventos.map(formatEventForBook);
+    // Pasar casas natales para personalizar interpretaciones lunares
+    const natalHouses = natalChart?.houses;
+    return eventos.map(event => formatEventForBook(event, natalHouses));
   };
 
   // Helper: Obtener la interpretación completa del SR
@@ -1522,7 +1537,7 @@ export const AgendaLibro = ({
       <div ref={printRef} className="container mx-auto py-8 space-y-0 print:p-0">
 
         {/* ═══════════════════════════════════════════════════════════════
-            SECCIÓN 1: BIENVENIDA Y PRESENTACIÓN
+            SECCIÓN 1: PORTADA + ÍNDICE (para impresión de libro)
             ═══════════════════════════════════════════════════════════════ */}
         <div id="portal-entrada">
           <div id="portada">
@@ -1537,100 +1552,23 @@ export const AgendaLibro = ({
           </div>
         </div>
 
+        {/* Página en blanco (reverso de la portada para impresión a doble cara) */}
+        <PaginaBlanca />
+
+        {/* Índice va justo después de la portada */}
+        <IndiceNavegable />
+
+        {/* ═══════════════════════════════════════════════════════════════
+            SECCIÓN 2: BIENVENIDA Y GUÍA
+            ═══════════════════════════════════════════════════════════════ */}
         <div id="bienvenida">
           <CartaBienvenida name={userName} />
           <GuiaAgenda />
         </div>
 
-        <IndiceNavegable />
-
-        {/* 2. ¡FELIZ CUMPLEAÑOS! - PRIMER DÍA DEL CICLO */}
-        <div id="primer-dia-ciclo-inicio">
-          <PrimerDiaCiclo
-            nombre={userName}
-            fecha={startDate}
-            temaCentral={getInterpretacionRetornoSolar()}
-            mandato={getSRInterpretation()?.comparaciones_planetarias?.sol?.mandato_del_ano}
-          />
-        </div>
-
-        {/* 3. CARTA DE BIENVENIDA Y GUÍA */}
-        <div id="tu-anio-tu-viaje">
-          <div id="carta-bienvenida">
-            <CartaBienvenida name={userName} />
-          </div>
-          <div id="guia-agenda">
-            <GuiaAgenda />
-          </div>
-          {/* PRIMERO: Interpretación del tema central */}
-          <div id="tema-central">
-            <TemaCentralAnio
-              interpretacion={getInterpretacionRetornoSolar()}
-              srInterpretation={getSRInterpretation()}
-              onGenerateSolarReturn={handleGenerateSolarReturn}
-              isGenerating={generatingSolarReturn}
-            />
-          </div>
-          {/* DESPUÉS: Espacio para escribir intención (tras leer interpretación) */}
-          <div id="intencion-anual-sr">
-            <PaginaIntencionAnualSR
-              temaCentral={getInterpretacionRetornoSolar()}
-              ejeDelAno={getSRInterpretation()?.apertura_anual?.eje_del_ano}
-              userName={userName}
-            />
-          </div>
-        </div>
-
-        {/* 3. LO QUE VIENE A MOVER Y SOLTAR */}
-        <div id="viaje-interno">
-          <div id="viene-mover">
-            <LoQueVieneAMover
-              facilidad={getComoSeViveSiendoTu()?.facilidad}
-              incomodidad={getComoSeViveSiendoTu()?.incomodidad}
-              medida_del_ano={getComoSeViveSiendoTu()?.medida_del_ano}
-              actitud_nueva={getComoSeViveSiendoTu()?.actitud_nueva}
-            />
-          </div>
-          <div id="pide-soltar">
-            <LoQuePideSoltar
-              reflejos_obsoletos={getComoSeViveSiendoTu()?.reflejos_obsoletos}
-              sombras={getSombrasDelAno()}
-            />
-          </div>
-        </div>
-
-        {/* 4. TU AÑO 2026-2027 - OVERVIEW */}
-        <div id="tu-anio-overview">
-          <TuAnioOverview
-            startDate={startDate}
-            endDate={endDate}
-            userName={userName}
-            hasSolarReturn={!!getInterpretacionRetornoSolar()}
-          />
-          <TuAnioCiclos
-            startDate={startDate}
-            endDate={endDate}
-            userName={userName}
-            hasSolarReturn={!!getInterpretacionRetornoSolar()}
-          />
-        </div>
-
-        {/* 5. CICLOS ANUALES */}
-        <div id="ciclos-anuales">
-          <LineaTiempoEmocional
-            startDate={startDate}
-            endDate={endDate}
-            lineaTiempoData={solarReturnInterpretation?.interpretation?.linea_tiempo_emocional}
-          />
-          <MesesClavePuntosGiro
-            lineaTiempo={solarReturnInterpretation?.interpretation?.meses_clave_puntos_giro || getLineaTiempoAnual()}
-          />
-          <GrandesAprendizajes
-            clavesIntegracion={getClavesIntegracion()}
-          />
-        </div>
-
-        {/* 6. SOUL CHART */}
+        {/* ═══════════════════════════════════════════════════════════════
+            SECCIÓN 3: CARTA NATAL (Soul Chart)
+            ═══════════════════════════════════════════════════════════════ */}
         <div id="soul-chart">
           <div id="esencia-natal">
             <EsenciaNatal
@@ -1670,7 +1608,7 @@ export const AgendaLibro = ({
         </div>
 
         {/* ═══════════════════════════════════════════════════════════════
-            SECCIÓN 3: RETORNO SOLAR - DESPUÉS DE CARTA NATAL
+            SECCIÓN 4: RETORNO SOLAR
             ═══════════════════════════════════════════════════════════════ */}
         <div id="retorno-solar">
           <div id="que-es-retorno">
@@ -1709,7 +1647,7 @@ export const AgendaLibro = ({
         </div>
 
         {/* ═══════════════════════════════════════════════════════════════
-            SECCIÓN 4: CICLOS Y OVERVIEW DEL AÑO
+            SECCIÓN 5: CICLOS Y OVERVIEW DEL AÑO
             ═══════════════════════════════════════════════════════════════ */}
         <div id="ciclos-anuales">
           <LineaTiempoEmocional
@@ -1741,7 +1679,7 @@ export const AgendaLibro = ({
         </div>
 
         {/* ═══════════════════════════════════════════════════════════════
-            SECCIÓN 5: RITUAL DE CUMPLEAÑOS Y REFLEXIÓN
+            SECCIÓN 6: RITUAL DE CUMPLEAÑOS Y REFLEXIÓN
             (DESPUÉS de todas las interpretaciones)
             ═══════════════════════════════════════════════════════════════ */}
         <div id="ritual-cumpleanos">
@@ -1769,7 +1707,7 @@ export const AgendaLibro = ({
         </div>
 
         {/* ═══════════════════════════════════════════════════════════════
-            SECCIÓN 6: CALENDARIO MENSUAL DINÁMICO
+            SECCIÓN 7: CALENDARIO MENSUAL DINÁMICO
             Empieza desde el mes del cumpleaños
             ═══════════════════════════════════════════════════════════════ */}
         <div id="calendario-mensual">
@@ -1819,7 +1757,10 @@ export const AgendaLibro = ({
         {/* CIERRE DEL CICLO */}
         <div id="cierre-ciclo">
           <QuienEraQuienSoy />
-          <PreparacionProximaVuelta />
+          <PreparacionProximaVuelta
+            clavesIntegracion={getClavesIntegracion()}
+            temaCentral={getInterpretacionRetornoSolar()}
+          />
           <CartaCierre name={userName} />
           <PaginaFinalBlanca />
         </div>
