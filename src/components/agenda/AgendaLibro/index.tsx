@@ -64,6 +64,7 @@ export const AgendaLibro = ({
   const [solarReturnInterpretation, setSolarReturnInterpretation] = useState<any>(null);
   const [loadingSolarReturn, setLoadingSolarReturn] = useState(true);
   const [generatingSolarReturn, setGeneratingSolarReturn] = useState(false);
+  const [shouldAutoGenerateSR, setShouldAutoGenerateSR] = useState(false);
 
   // Estado para almacenar la interpretación Natal
   const [natalInterpretation, setNatalInterpretation] = useState<any>(null);
@@ -98,8 +99,10 @@ export const AgendaLibro = ({
 
           setSolarReturnInterpretation(data);
         } else {
-          console.log('⚠️ [SOLAR_RETURN] No se encontró interpretación de Retorno Solar');
+          console.log('⚠️ [SOLAR_RETURN] No se encontró interpretación - marcando para auto-regenerar...');
           setSolarReturnInterpretation(null);
+          // 🔄 AUTO-REGENERAR: Marcar para que el efecto siguiente lo genere
+          setShouldAutoGenerateSR(true);
         }
       } catch (error) {
         console.error('❌ [SOLAR_RETURN] Error al cargar interpretación:', error);
@@ -330,6 +333,17 @@ export const AgendaLibro = ({
       setGeneratingSolarReturn(false);
     }
   };
+
+  // ==========================================
+  // 🔄 AUTO-TRIGGER: Generar SR cuando no existe
+  // ==========================================
+  useEffect(() => {
+    if (shouldAutoGenerateSR && !generatingSolarReturn && userId) {
+      console.log('🚀 [AUTO_TRIGGER] shouldAutoGenerateSR es true, llamando a handleGenerateSolarReturn...');
+      setShouldAutoGenerateSR(false); // Reset el flag
+      handleGenerateSolarReturn();
+    }
+  }, [shouldAutoGenerateSR, generatingSolarReturn, userId]);
 
   // ==========================================
   // 🔄 REGENERAR SOLAR RETURN (FORZADO)
