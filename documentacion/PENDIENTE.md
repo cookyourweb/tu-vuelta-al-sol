@@ -19,194 +19,124 @@ La agenda debe ser una **guía hiper-personalizada** que:
 
 ## PRIORIDAD 1 — CONTENIDO PERSONALIZADO DEL LIBRO
 
-### 1.1 Planetas Dominantes (P18) — Interpretaciones personalizadas
-**Estado:** PENDIENTE
-**Problema:** `PlanetasDominantes` muestra contenido hardcoded genérico
+### 1.1 Espacios para escribir DESPUÉS de interpretaciones
+**Estado:** PENDIENTE - CRÍTICO
+**Problema actual:** "Primer día de tu ciclo" con espacio para escribir intención aparece ANTES de las interpretaciones.
 **Solución:**
-- Pasar props con datos de BD: `proposito_vida`, `emociones`, `como_piensas`, `como_amas`, `como_actuas`
-- Mostrar: "☉ Sol en [SIGNO]: [interpretación personalizada de BD]"
-- Ya existe helper `getPlanetasDominantes()` en index.tsx
+- Mover "Primer día del ciclo" DESPUÉS de Carta Natal + Retorno Solar
+- Nuevo copy: "Ahora que ya has leído quién eres y qué se activa este año..."
+- "Mi intención para esta vuelta al sol" también va DESPUÉS de interpretaciones
 
-### 1.2 Integración de Cuatro Ejes (P25) — Interpretación clara
-**Estado:** PENDIENTE
-**Problema:** `IntegracionEjes` muestra descripción genérica de ASC/DSC/MC/IC
-**Solución:**
-- Extraer de BD: `angulos_vitales.ascendente`, `angulos_vitales.medio_cielo`
-- Mostrar signo específico: "Ascendente en [SIGNO]: [interpretación]"
-- Añadir: "MC en [SIGNO]: Tu dirección vocacional este año..."
+**Archivos a modificar:**
+- `src/components/agenda/AgendaLibro/index.tsx` (orden de secciones)
+- `src/components/agenda/AgendaLibro/PaginasEspeciales.tsx` (copy PrimerDiaCiclo)
 
-### 1.3 Interpretaciones de Lunas mensuales — Personalización
-**Estado:** PENDIENTE
-**Problema:** Las lunas en `LunasYEjercicios` no explican qué significan PARA EL USUARIO
-**Solución:**
-- Para cada Luna Nueva/Llena, añadir: "Cae en tu Casa [X]"
-- Explicar: "Con tu [planeta] en [signo], esta luna activa..."
-- Calcular casa donde cae la luna según ascendente natal
+### 1.2 Sincronizar TXT con libro visual
+**Estado:** PENDIENTE - CRÍTICO
+**Problema:** El TXT (`handleExportTXT`) tiene un orden diferente al libro renderizado:
+- TXT: Primer día → Guía → SR → Natal → Ejes → Calendario
+- Libro: Bienvenida → Natal → SR → Ritual → Calendario
 
-### 1.4 Tránsitos planetarios personalizados
-**Estado:** PENDIENTE
-**Problema:** Los ingresos planetarios son genéricos
 **Solución:**
-- Mostrar: "Mercurio entra en Piscis → afecta tu Casa [X]"
-- Si el planeta transita sobre un planeta natal importante, destacarlo
-- Requiere: cálculo de casas según ascendente del usuario
+- Reescribir `handleExportTXT()` para seguir el mismo orden que el libro visual
+- Incluir contenido de Carta Natal (actualmente vacío en TXT)
+
+### 1.3 Ejes del Año personalizados
+**Estado:** PENDIENTE
+**Problema:** El contenido de "LOS EJES DEL AÑO" es genérico.
+**Solución:** Mostrar el signo específico de cada eje del usuario:
+- "Ascendente en [SIGNO]: Tu nueva máscara es [descripción específica]"
+- Usar datos de `integracion_ejes` de la BD
+
+### 1.4 Planetas Dominantes personalizados
+**Estado:** PENDIENTE
+**Problema:** Página de Planetas Dominantes no muestra datos personalizados.
+**Solución:** Pasar props desde la interpretación natal a `PlanetasDominantes.tsx`
+
+### 1.5 Interpretaciones de Lunas personalizadas
+**Estado:** PENDIENTE
+**Descripción:** Cada luna debería decir en qué CASA del usuario cae.
+- "Luna Nueva en Acuario CAE EN TU CASA 5 - momento para [aplicación personal]"
 
 ---
 
-## PRIORIDAD 2 — SINCRONIZACIÓN TXT ↔ LIBRO VISUAL
+## PRIORIDAD 2 — PDF E IMPRESIÓN
 
-### 2.1 TXT tiene orden diferente al libro
-**Estado:** PENDIENTE
-**Problema:** El TXT pone "PRIMER DÍA DE TU CICLO" con espacio para escribir ANTES de interpretaciones
-**Solución:**
-- Reorganizar `handleExportTXT()` para que coincida con libro visual:
-  1. Portada
-  2. Qué vas a encontrar (Carta Natal primero, luego Retorno Solar)
-  3. Carta Natal completa (actualmente vacía!)
-  4. Retorno Solar completo
-  5. Ciclos y Overview
-  6. Ritual + Primer día + Intención (DESPUÉS de interpretaciones)
-  7. Calendario
-  8. Cierre
+### 2.1 Verificar estilos A5 en impresión
+**Estado:** CSS importado, VERIFICAR funcionamiento
+**Problema reportado:** Se perdieron ajustes de saltos de línea y A5.
+**Verificar:**
+- Cada `print-page` ocupa exactamente 1 hoja A5
+- No se cortan contenidos entre páginas
+- Gradientes y colores se imprimen correctamente
 
-### 2.2 Carta Natal vacía en TXT
+### 2.2 Mejorar formato TXT
 **Estado:** PENDIENTE
-**Problema:** El TXT no exporta contenido de Esencia Natal, Nodos, Planetas Dominantes
-**Solución:**
-- Añadir sección completa de Carta Natal en `handleExportTXT()`
-- Usar mismos datos que se pasan a componentes visuales
-
-### 2.3 Formato de eventos en TXT
-**Estado:** PENDIENTE
-**Problema:** Eventos muestran "Luna Nueva: Luna Nueva" (redundante)
-**Solución:**
-- Cambiar a: "Luna Nueva en [SIGNO]"
-- Añadir casa si está disponible
+**Mejoras:**
+- Evitar redundancia "Luna Nueva: Luna Nueva" → "Luna Nueva en Acuario ♒"
+- Incluir secciones de terapia creativa
+- Formatear eventos más legibles
 
 ---
 
-## PRIORIDAD 3 — VERIFICAR PDF/IMPRESIÓN A5
+## PRIORIDAD 3 — SISTEMA DE PAGOS
 
-### 3.1 Verificar page breaks en PDF
-**Estado:** PENDIENTE VERIFICACIÓN
-**Acción:**
-- [ ] Generar PDF y verificar cada página
-- [ ] Confirmar que `.print-page` ocupa exactamente 1 hoja A5
-- [ ] Verificar que no se corta contenido entre páginas
-- [ ] Ajustar padding si contenido desborda
-
----
-
-## PRIORIDAD 4 — SISTEMA DE PAGOS
-
-### 4.1 Completar flujo Stripe
-**Estado:** PARCIALMENTE IMPLEMENTADO
-**Falta:**
-- Webhook de confirmación de pago
-- Activar flag `hasPurchasedAgenda` tras pago exitoso
-- Página de éxito post-pago (`/compra/success`)
-- Página de cancelación (`/compra/cancel`)
-
-### 4.2 Límite de 2 meses para usuarios gratuitos
+### 3.1 Webhook Stripe
 **Estado:** PENDIENTE
-**Descripción:** Mostrar solo 2 meses del ciclo solar a usuarios gratuitos
-**Implementación:**
-```
-AGENDA CALENDARIO:
-- Si NO ha comprado: mostrar solo 2 meses
-- Deshabilitar navegación a meses futuros (blur + candado)
+**Descripción:** Activar `hasPurchasedAgenda` automáticamente tras pago exitoso.
+
+### 3.2 Límite 2 meses usuarios gratuitos
+**Estado:** PENDIENTE
+**Descripción:** Solo mostrar 2 meses del ciclo a usuarios gratuitos.
+- Blur/candado en meses bloqueados
 - CTA: "Desbloquea tu ciclo completo" → /compra/agenda
 
-LIBRO AGENDA:
-- Similar: solo generar/mostrar 2 meses si usuario gratuito
-- CTA: "Desbloquea tu libro completo"
-```
-**Prioridad:** ALTA — incentivo directo a la compra
+---
+
+## PRIORIDAD 4 — MEJORAS DE UX
+
+### 4.1 Exportar a Google Calendar/Outlook (iCal)
+**Estado:** PENDIENTE - DIFERENCIADOR
+**Descripción:** Generar archivo .ics con todos los eventos del año solar.
+
+### 4.2 Cambiar "Mandato" por "Invitación"
+**Estado:** PENDIENTE - COPY
+**Descripción:** La palabra "mandato" choca con el tono invitador.
 
 ---
 
-## PRIORIDAD 5 — NUEVAS FUNCIONALIDADES
+## PRIORIDAD 5 — FUTURO
 
-### 5.1 Exportar calendario a Google Calendar/Outlook (iCal)
-**Estado:** PENDIENTE — NUEVA FUNCIONALIDAD
-**Descripción:** Generar archivo .ics con todos los eventos del año
-**Implementación:**
-```
-POST /api/agenda/export-ics
-- Recibe: userId, yearLabel
-- Lee eventos del SolarCycle
-- Genera archivo .ics (RFC 5545)
-- Cada evento: SUMMARY, DTSTART, DESCRIPTION, VALARM (1 día antes)
-- Botón "Exportar a Calendario" con opciones:
-  - Descargar .ics
-  - Link Google Calendar
-  - Link Outlook
-```
-**Prioridad:** ALTA — diferenciador competitivo
-
-### 5.2 PDF mejorado del libro
+### 5.1 PDF server-side con Puppeteer
 **Estado:** PENDIENTE
-**Descripción:** Mejorar calidad de exportación PDF
-**Implementación:**
-- Verificar estilos de impresión
-- Optimizar para impresión física
-- Considerar Puppeteer para generación server-side (libro físico 80€)
+**Descripción:** Para libro físico (80€), generar PDF en servidor.
 
-### 5.3 Optimización de costes OpenAI
-**Estado:** PARCIALMENTE IMPLEMENTADO (commit affc0b0)
-**Descripción:** No regenerar datos que ya existen en BD
-**Objetivo:** De ~$0.15-0.25 por libro → ~$0.06-0.10 (reducción 60-80%)
+### 5.2 Objetos simbólicos y tienda
+**Estado:** DISEÑADO (ver `OBJETOS_SIMBOLICOS_Y_TIENDA.md`)
 
 ---
 
-## PRIORIDAD 6 — MEJORAS FUTURAS
+## BUGS CONOCIDOS
 
-### 6.1 Objetos simbólicos y tienda
-- Diseñado en `OBJETOS_SIMBOLICOS_Y_TIENDA.md`
-- Objetos personalizados basados en carta natal
+### Bug: Luna Nueva y Luna Llena mismo día
+**Estado:** ✅ CORREGIDO (commit `6fab685`)
+**Fix:** `SearchMoonPhase(2)` → `SearchMoonPhase(180)`
 
-### 6.2 Generación PDF server-side con Puppeteer
-- Para libro físico (80€) necesitamos PDF profesional
-- Puppeteer ya está en `package.json`
-
-### 6.3 Notificación email en cumpleaños
-- Detectar `isDayAfterBirthday`
-- Enviar email con link a nuevo ciclo
+### Bug: Calendario empieza en enero
+**Estado:** ✅ CORREGIDO
+**Fix:** Calendario dinámico desde mes de cumpleaños
 
 ---
 
-## BUGS CORREGIDOS (no reabrir)
+## ORDEN DE TRABAJO PROPUESTO
 
-| Bug | Estado | Commit |
-|-----|--------|--------|
-| Luna Llena SearchMoonPhase(180) | ✅ CORREGIDO | `6fab685` |
-| Calendario empieza en enero | ✅ CORREGIDO | `65ec163`, `f858d27` |
-| CSS A5 no importado | ✅ CORREGIDO | `6fab685` |
-| Índice con meses hardcoded | ✅ CORREGIDO | `6fab685` |
-| NodosLunares objeto→string | ✅ CORREGIDO | `a13159c` |
-| Modal z-index detrás header | ✅ CORREGIDO | `f57042f` |
-| Botón ASC/MC solo natal | ✅ CORREGIDO | `f57042f` |
-| Eventos calendario sin signo | ✅ CORREGIDO | `b484eff` |
+1. ✅ Unificar documentación (HECHO)
+2. ⏳ Corregir flujo libro (espacios después de interpretaciones)
+3. ⏳ Sincronizar TXT con libro visual
+4. ⏳ Personalizar contenido genérico (Ejes, Planetas)
+5. ⏳ Verificar PDF/A5
+6. ⏳ Sistema de pagos completo
 
 ---
 
-## ARCHIVOS CLAVE A MODIFICAR
-
-| Tarea | Archivo(s) |
-|-------|-----------|
-| Planetas personalizados | `SoulChart.tsx`, `index.tsx` (getPlanetasDominantes) |
-| Ejes personalizados | `RetornoSolar.tsx` (IntegracionEjes) |
-| Lunas personalizadas | `MesPage.tsx`, `LunasYEjercicios.tsx` |
-| TXT sincronizado | `index.tsx` (handleExportTXT) |
-| Límite 2 meses | `agenda/page.tsx`, `libro/page.tsx` |
-| Export iCal | Nueva API `/api/agenda/export-ics` |
-
----
-
-## ORDEN DE TRABAJO SUGERIDO
-
-1. **Personalizar contenido** (P1.1, P1.2, P1.3) — Valor para el usuario
-2. **Sincronizar TXT** (P2.1, P2.2) — Coherencia
-3. **Verificar PDF** (P3.1) — Calidad
-4. **Pagos** (P4.1, P4.2) — Monetización
-5. **iCal export** (P5.1) — Diferenciador
+**Mantenido por**: Claude Code Sessions

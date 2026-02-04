@@ -6,157 +6,114 @@
 
 ## CAPA 1: CARTA NATAL — 100% COMPLETA
 
-- Cálculo preciso con ProKerala (sistema tropical, `ayanamsa=0`)
-- Interpretaciones AI con OpenAI GPT-4o (tono "Poético Antifrágil")
-- Análisis completo: Sol, Luna, Ascendente, todos los planetas, casas, aspectos
-- Distribución elemental y modal
-- Rueda astrológica visual interactiva
-- Tooltips draggables con info de planetas
-- Guardado en MongoDB (`NatalChart` + `Interpretation` con `chartType: 'natal'`)
-- Coste: ~$0.50-0.80 por carta
+- ✅ Cálculo preciso con ProKerala (sistema tropical, `ayanamsa=0`)
+- ✅ Interpretaciones AI con OpenAI GPT-4o (tono "Poético Antifrágil")
+- ✅ Análisis completo: Sol, Luna, Ascendente, todos los planetas, casas, aspectos
+- ✅ Distribución elemental y modal
+- ✅ Rueda astrológica visual interactiva
+- ✅ Tooltips draggables con info de planetas
+- ✅ Guardado en MongoDB (`NatalChart` + `Interpretation` con `chartType: 'natal'`)
+- ✅ Coste: ~$0.50-0.80 por carta
 
 **Datos almacenados en BD (Interpretation natal):**
 - `esencia_revolucionaria`, `proposito_vida`, `poder_magnetico`
 - `patron_energetico`, `planeta_dominante`, `elemento_dominante`
-- `analisis_planetas`, `super_poderes[]`, `desafios_evolutivos[]`
-- `mision_vida`, `activacion_talentos`
-- `nodos_lunares`: nodo_norte (signo_casa, direccion_evolutiva, desafio), nodo_sur (similar)
-- `emociones`, `como_piensas_y_hablas`, `como_amas`, `como_enfrentas_la_vida`
+- `nodo_norte`, `nodo_sur` (propósito kármico)
+- Análisis de cada planeta: sol, luna, mercurio, venus, marte, jupiter, saturno
 
 ---
 
 ## CAPA 2: RETORNO SOLAR — 100% COMPLETA
 
-- Cálculo de carta de retorno solar (cumpleaños a cumpleaños)
-- Comparación natal vs solar return (planeta por planeta)
-- Interpretación por planeta individual (Sol, Luna, Mercurio, Venus, Marte, Júpiter, Saturno)
-- Identificación de casas activadas, cambios de signo, aspectos nuevos
-- Tono profesional diferenciado del natal
-- Guardado en MongoDB (`Interpretation` con `chartType: 'solar-return'`)
-- Botón interpretación ASC/MC habilitado para solar return
+- ✅ Cálculo SR con ProKerala
+- ✅ Comparación planeta a planeta: Natal vs Solar Return
+- ✅ Interpretación de 7 planetas (Sol, Luna, Mercurio, Venus, Marte, Júpiter, Saturno)
+- ✅ Visualización interactiva con tooltips
+- ✅ Guardado en MongoDB (`Interpretation` con `chartType: 'solar-return'`)
+- ✅ Coste: ~$0.30-0.50 por SR
 
 **Datos almacenados en BD (Interpretation solar-return):**
 - `apertura_anual`: tema_central, eje_del_ano, como_se_siente, conexion_natal
-- `como_se_vive_siendo_tu`: lo_que_fluye, lo_que_incomoda, medida_del_ano, actitud_nueva
-- `comparaciones_planetarias`: sol, luna, mercurio, venus, marte (natal vs SR + mandato)
-- `angulos_vitales`: ascendente, medio_cielo (interpretados)
-- `sombras_y_desafios[]`, `claves_integracion[]`
-- `linea_tiempo_emocional[]` (12 meses con intensidad 1-5)
-- `meses_clave_puntos_giro[]`
+- `como_se_vive_siendo_tu`: facilidad, incomodidad, medida_del_ano, actitud_nueva
+- `comparaciones_planetarias`: Para cada planeta: natal, solar_return, choque, que_hacer, mandato_del_ano
+- `linea_tiempo_emocional`: 12 meses con intensidad y palabra clave
+- `meses_clave_puntos_giro`: Eventos astrológicos destacados
+- `sombras_del_ano`, `claves_integracion`
+- `integracion_ejes`: asc, mc, dsc, ic, frase_guia
 
 ---
 
-## CAPA 3: AGENDA ASTROLÓGICA — ~80% COMPLETA
+## CAPA 3: AGENDA / CALENDARIO — 85% COMPLETA
 
-### Calendario interactivo (`/agenda`) — FUNCIONAL
-- Vista mensual con navegación mes a mes
-- Eventos mostrados por día (Lunas Nuevas/Llenas, eclipses, retrogrados, ingresos)
-- Click en día → sidebar con eventos del día
-- Click en evento → interpretación personalizada
-- Modal z-index corregido (z-9999+) para estar sobre header
-- Cálculo dinámico de eventos con `astronomy-engine`
-- Sistema de ciclos solares en BD (`SolarCycle` model)
-- Detección automática de ciclo actual (cumpleaños a cumpleaños)
+- ✅ Cálculo de eventos astronómicos (lunas, eclipses, retrogradaciones, ingresos)
+- ✅ Modelo `SolarCycle` con eventos por mes
+- ✅ Interpretaciones de eventos con contexto personalizado
+- ✅ TransitosDelMes con interpretaciones guardadas
+- ✅ Calendario dinámico que empieza en mes de cumpleaños
+- ✅ Hook `useInterpretaciones` para cargar datos
+- ✅ Luna Llena arreglada (180° no 2)
 
-### Cálculo de eventos — CORREGIDO
-- ✅ Luna Llena: `SearchMoonPhase(180)` (no 2)
-- ✅ Calendario empieza en mes del cumpleaños
-- ✅ Extracción de signo de múltiples fuentes (metadata, description)
-- ✅ Eventos mostrados con etiqueta + signo (ej: "L.Nueva Leo")
-
-### Libro/Agenda imprimible (`/agenda/libro`) — EN PROGRESO
-
-**Estructura reorganizada (commit f858d27):**
-1. **Bienvenida**: Portada, CartaBienvenida, GuiaAgenda, Índice
-2. **Carta Natal (Soul Chart)**: EsenciaNatal, NodoNorte, NodoSur, PlanetasDominantes, PatronesEmocionales
-3. **Retorno Solar**: QueEsRetornoSolar, AscendenteAnio, Planetas (Sol-Marte), EjesDelAnio, IntegracionEjes, MantraAnual
-4. **Ciclos Anuales**: LineaTiempoEmocional, MesesClavePuntosGiro, GrandesAprendizajes
-5. **Ritual + Intención**: RitualCumpleanos, PrimerDiaCiclo, PaginaIntencionAnual (DESPUÉS de interpretaciones)
-6. **Calendario**: 12 meses dinámicos desde cumpleaños (CalendarioMensualTabla, LunasYEjercicios, TransitosDelMes, CierreMes)
-7. **Terapia Creativa**: EscrituraTerapeutica, Visualizacion, RitualSimbolico, TrabajoEmocional
-8. **Cierre**: QuienEraQuienSoy, PreparacionProximaVuelta, CartaCierre
-
-**Funcionalidades completadas:**
-- ✅ Calendario dinámico empieza en mes de cumpleaños (no enero)
-- ✅ StyleProvider con 4 temas (elegante, creativo, minimalista, bohemio)
-- ✅ CSS impresión A5 (`print-libro.css`) importado
-- ✅ Exportación TXT funcional
-- ✅ TransitosDelMes con interpretaciones personalizadas
-- ✅ getNodosLunares() convierte objeto a string correctamente
-- ✅ MesPage muestra eventos legibles con signo (no solo iconos)
+**Pendiente:**
+- ⏳ Interpretaciones de lunas personalizadas (casa donde cae)
+- ⏳ Optimización de tokens en generación
 
 ---
 
-## AUTENTICACIÓN Y USUARIOS — COMPLETA
+## LIBRO / IMPRIMIBLE — 70% COMPLETO
 
-- Firebase Auth (email/password)
-- AuthContext con protección de rutas
-- Dashboard con rutas protegidas
-- Perfil de usuario, datos de nacimiento
-- Modelo User, BirthData en MongoDB
+- ✅ Estructura de secciones (Bienvenida → Natal → SR → Calendario → Cierre)
+- ✅ Calendario dinámico desde cumpleaños
+- ✅ TransitosDelMes con interpretaciones
+- ✅ CSS para impresión A5 (`print-libro.css`)
+- ✅ Exportación TXT
+- ✅ Exportación PDF (via print dialog)
+- ✅ GuiaAgenda con orden correcto (Carta Natal primero)
 
----
-
-## PAGOS (STRIPE) — CONFIGURADO PARCIALMENTE
-
-- Stripe SDK integrado
-- Productos definidos: Agenda Digital (29€), Libro Físico (80€)
-- Variables de entorno documentadas
-- Flujo de compra (`/compra/agenda`) — estructura creada
-- Falta: webhook de confirmación, activación `hasPurchasedAgenda`
+**Pendiente:**
+- ⏳ Sincronizar TXT con libro visual (orden diferente)
+- ⏳ Espacios para escribir DESPUÉS de interpretaciones
+- ⏳ Contenido personalizado en Ejes del Año
+- ⏳ Contenido personalizado en Planetas Dominantes
 
 ---
 
-## UI/UX — COMPLETA
+## PAGOS STRIPE — 50% COMPLETO
 
-- Diseño responsive mobile-first
-- Tema cósmico púrpura/dorado/naranja
-- PrimaryHeader (desktop + mobile logo)
-- MobileBottomNav (4 items, 5 para admin)
-- Iconos Lucide React + SVG personalizados (LogoSimple, LogoSimpleGold)
-- Framer Motion para animaciones
+- ✅ Integración con Stripe Checkout
+- ✅ Productos configurados (Agenda €19.99)
+- ✅ Página de success/cancel
 
----
-
-## INFRAESTRUCTURA — COMPLETA
-
-- Next.js con App Router
-- TypeScript strict mode
-- Tailwind CSS
-- MongoDB con Mongoose
-- Deploy en Vercel (auto-deploy desde `main`)
-- ProKerala API para cálculos astronómicos
-- astronomy-engine para eventos dinámicos
+**Pendiente:**
+- ⏳ Webhook para activar `hasPurchasedAgenda`
+- ⏳ Límite de meses para usuarios gratuitos
 
 ---
 
-## COMMITS RECIENTES (rama review-project-docs)
+## INFRAESTRUCTURA — 100% COMPLETA
 
-| Commit | Descripción |
-|--------|-------------|
-| `f858d27` | 📚 LIBRO: Reorganización completa estructura y calendario dinámico |
-| `affc0b0` | 💰 AI: Optimización de costos OpenAI (~60% reducción) |
-| `fd2432b` | 📄 LIBRO: Mejorar exportación PDF con instrucciones y estilos |
-| `c8ced23` | ✨ LIBRO: Añadir página TransitosDelMes con interpretaciones |
+- ✅ Next.js App Router con TypeScript
+- ✅ Firebase Auth (email/password)
+- ✅ MongoDB Atlas con Mongoose
+- ✅ Despliegue en Vercel
+- ✅ React 18.2.0 (pinned - NO actualizar)
+- ✅ Tailwind CSS 4.x
 
 ---
 
-## DOCUMENTACIÓN VIGENTE
+## OPTIMIZACIONES RECIENTES
 
-### Documentos clave (mantener actualizados):
-- `CLAUDE.md` — Guía principal del proyecto
-- `HECHO.md` — Este archivo (qué está hecho)
-- `PENDIENTE.md` — Qué falta por hacer
-- `GUIA_RAPIDA_DESARROLLO.md` — Cheatsheet diario
-- `INDICE_DOCUMENTACION.md` — Índice maestro
+- ✅ Reducción 60% costes OpenAI (GPT-4o-mini para tareas simples)
+- ✅ Sistema de caché de interpretaciones
+- ✅ Regeneración selectiva de campos faltantes
 
-### Documentos de referencia técnica:
-- `ARQUITECTURA_SEPARACION_NATAL_SR.md` — Reglas separación Natal/SR
-- `PROKERALA_TROPICAL_CONFIG.md` — Configuración astrológica
-- `SISTEMA_INTERPRETACIONES_AGENDA_COMPLETO.md` — Sistema completo
-- `PERSONALIZACION_AGENDA.md` — Visión de personalización
+---
 
-### Archivados (en `documentacion/archivo/`):
-- 8 archivos `COMPLETADO_*.md` — Histórico de sprints
-- 4 archivos `RESUMEN_*.md` — Tracking de sesiones antiguas
-- Índices duplicados y docs de merge obsoletos
+## DOCUMENTACIÓN
+
+- ✅ 45 documentos activos organizados
+- ✅ 19 documentos obsoletos archivados en `documentacion/archivo/`
+- ✅ INDICE_DOCUMENTACION.md actualizado
+
+---
+
+**Resumen:** El proyecto está ~80% completo. Falta principalmente personalización del libro y sistema de pagos.
