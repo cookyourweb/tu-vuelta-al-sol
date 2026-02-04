@@ -69,6 +69,9 @@ export const AgendaLibro = ({
   const [natalInterpretation, setNatalInterpretation] = useState<any>(null);
   const [loadingNatal, setLoadingNatal] = useState(true);
 
+  // Estado para almacenar la carta natal (con casas para personalizar lunares)
+  const [natalChart, setNatalChart] = useState<any>(null);
+
   // Estado para mostrar instrucciones de PDF
   const [showPdfInstructions, setShowPdfInstructions] = useState(false);
 
@@ -159,6 +162,31 @@ export const AgendaLibro = ({
     };
 
     fetchNatalInterpretation();
+  }, [userId]);
+
+  // Efecto para cargar la carta natal (con casas) desde la BD
+  useEffect(() => {
+    const fetchNatalChart = async () => {
+      if (!userId) return;
+
+      try {
+        console.log('🌟 [NATAL_CHART] Cargando carta natal para casas...');
+        const response = await fetch(`/api/charts/natal?userId=${userId}`);
+        const data = await response.json();
+
+        if (data.natalChart || data.chart || data.data?.chart) {
+          const chart = data.natalChart || data.chart || data.data?.chart;
+          console.log('✅ [NATAL_CHART] Carta natal cargada, casas disponibles:', chart.houses?.length || 0);
+          setNatalChart(chart);
+        } else {
+          console.log('⚠️ [NATAL_CHART] No se encontró carta natal');
+        }
+      } catch (error) {
+        console.error('❌ [NATAL_CHART] Error al cargar carta natal:', error);
+      }
+    };
+
+    fetchNatalChart();
   }, [userId]);
 
   // ==========================================
@@ -954,7 +982,9 @@ export const AgendaLibro = ({
   // Helper: Obtener eventos formateados para un mes específico
   const getFormattedEventosForMonth = (monthIndex: number) => {
     const eventos = getEventosForMonth(monthIndex);
-    return eventos.map(formatEventForBook);
+    // Pasar casas natales para personalizar interpretaciones lunares
+    const natalHouses = natalChart?.houses;
+    return eventos.map(event => formatEventForBook(event, natalHouses));
   };
 
   // Helper: Obtener la interpretación completa del SR

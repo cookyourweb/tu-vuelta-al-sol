@@ -12,6 +12,7 @@ interface EventoMes {
   signo?: string;
   interpretacion?: string;
   consejos?: string[];
+  casaNatal?: number; // Casa natal donde cae el evento (para personalización)
 }
 
 interface MesCompletoProps {
@@ -258,16 +259,21 @@ export const LunasYEjercicios: React.FC<{
         <div className="grid grid-cols-2 gap-4">
           {/* Luna Nueva */}
           <div className={`${config.highlightSecondary} p-4`}>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-1">
               <Moon className={`w-4 h-4 ${config.iconSecondary}`} />
               <span className={`text-xs font-bold uppercase ${config.iconSecondary}`}>Luna Nueva</span>
               {lunaNueva && <span className="text-xs text-gray-500">· Día {lunaNueva.dia}</span>}
             </div>
+            {lunaNueva?.casaNatal && (
+              <p className={`text-[10px] font-semibold ${config.iconAccent} mb-2`}>
+                ★ Activa tu Casa {lunaNueva.casaNatal} natal
+              </p>
+            )}
             {lunaNueva ? (
               <div className="space-y-2">
                 <p className={`text-sm font-medium ${config.iconPrimary}`}>{lunaNueva.titulo}</p>
                 {lunaNueva.interpretacion && (
-                  <p className="text-xs text-gray-600 leading-relaxed">{lunaNueva.interpretacion}</p>
+                  <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-line">{lunaNueva.interpretacion}</p>
                 )}
                 <LineasEscritura count={3} spacing={24} />
               </div>
@@ -278,16 +284,21 @@ export const LunasYEjercicios: React.FC<{
 
           {/* Luna Llena */}
           <div className={`${config.highlightPrimary} p-4`}>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-1">
               <Circle className={`w-4 h-4 ${config.iconPrimary}`} fill="currentColor" />
               <span className={`text-xs font-bold uppercase ${config.iconPrimary}`}>Luna Llena</span>
               {lunaLlena && <span className="text-xs text-gray-500">· Día {lunaLlena.dia}</span>}
             </div>
+            {lunaLlena?.casaNatal && (
+              <p className={`text-[10px] font-semibold ${config.iconAccent} mb-2`}>
+                ★ Ilumina tu Casa {lunaLlena.casaNatal} natal
+              </p>
+            )}
             {lunaLlena ? (
               <div className="space-y-2">
                 <p className={`text-sm font-medium ${config.iconSecondary}`}>{lunaLlena.titulo}</p>
                 {lunaLlena.interpretacion && (
-                  <p className="text-xs text-gray-600 leading-relaxed">{lunaLlena.interpretacion}</p>
+                  <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-line">{lunaLlena.interpretacion}</p>
                 )}
                 <LineasEscritura count={3} spacing={24} />
               </div>

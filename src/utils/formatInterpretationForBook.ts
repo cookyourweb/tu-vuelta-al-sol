@@ -2,6 +2,35 @@
  * Utilidades para formatear interpretaciones de eventos al formato del Agenda Libro
  */
 
+// Orden zodiacal para cálculos de casas
+const ZODIAC_ORDER = [
+  'Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo',
+  'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'
+];
+
+// Descripciones de cada casa para personalizar interpretaciones lunares
+const HOUSE_DESCRIPTIONS: Record<number, { area: string; tema: string }> = {
+  1: { area: 'tu identidad y presencia', tema: 'quién eres y cómo te presentas al mundo' },
+  2: { area: 'tus recursos y valores', tema: 'lo que valoras y tu seguridad material' },
+  3: { area: 'tu comunicación y entorno cercano', tema: 'cómo piensas, hablas y te relacionas con tu entorno' },
+  4: { area: 'tu hogar y raíces', tema: 'tu vida privada, familia y fundamentos emocionales' },
+  5: { area: 'tu creatividad y expresión', tema: 'lo que te da alegría, el amor y los proyectos personales' },
+  6: { area: 'tu rutina y salud', tema: 'el trabajo diario, el servicio y el cuidado del cuerpo' },
+  7: { area: 'tus relaciones significativas', tema: 'las asociaciones, el matrimonio y los acuerdos' },
+  8: { area: 'tus transformaciones profundas', tema: 'los recursos compartidos, la intimidad y los renacimientos' },
+  9: { area: 'tu búsqueda de sentido', tema: 'la filosofía, los viajes y la expansión de la mente' },
+  10: { area: 'tu carrera y vocación', tema: 'tu reputación pública y logros profesionales' },
+  11: { area: 'tus amistades y comunidad', tema: 'los grupos, proyectos colectivos y aspiraciones futuras' },
+  12: { area: 'tu mundo interior y espiritualidad', tema: 'lo oculto, la intuición y la conexión con lo trascendente' }
+};
+
+interface NatalHouse {
+  number: number;
+  sign: string;
+  degree?: number;
+  longitude?: number;
+}
+
 interface EventInterpretation {
   titulo_evento?: string;
   clima_del_dia?: string[];
@@ -165,9 +194,71 @@ export function detectLunarPhase(title: string, eventType: string): 'lunaNueva' 
 }
 
 /**
+ * Calcula en qué casa natal cae un signo dado, basándose en las cúspides de casas
+ * @param sign - El signo zodiacal (ej: "Aries")
+ * @param natalHouses - Array de casas natales con sus signos
+ * @returns Número de casa (1-12) o undefined si no se puede calcular
+ */
+export function calculateHouseForSign(sign: string, natalHouses?: NatalHouse[]): number | undefined {
+  if (!sign || !natalHouses || natalHouses.length < 12) {
+    return undefined;
+  }
+
+  // Normalizar el signo
+  const normalizedSign = sign.charAt(0).toUpperCase() + sign.slice(1).toLowerCase();
+  const signIndex = ZODIAC_ORDER.indexOf(normalizedSign);
+
+  if (signIndex === -1) {
+    return undefined;
+  }
+
+  // Encontrar la casa cuya cúspide está en ese signo o justo antes
+  // La lógica es: el signo está "en" la casa cuya cúspide es el signo,
+  // o la casa anterior si ninguna cúspide está en ese signo exacto
+
+  for (let i = 0; i < 12; i++) {
+    const house = natalHouses[i];
+    const houseSignIndex = ZODIAC_ORDER.indexOf(house.sign);
+    const nextHouse = natalHouses[(i + 1) % 12];
+    const nextHouseSignIndex = ZODIAC_ORDER.indexOf(nextHouse.sign);
+
+    // Manejar el wrap-around del zodíaco (Piscis -> Aries)
+    if (houseSignIndex <= nextHouseSignIndex) {
+      // Caso normal: cúspide actual <= siguiente
+      if (signIndex >= houseSignIndex && signIndex < nextHouseSignIndex) {
+        return house.number;
+      }
+    } else {
+      // Wrap-around: la siguiente casa está en un signo "antes" en el zodíaco
+      if (signIndex >= houseSignIndex || signIndex < nextHouseSignIndex) {
+        return house.number;
+      }
+    }
+  }
+
+  // Fallback: buscar casa con el mismo signo
+  const matchingHouse = natalHouses.find(h => h.sign === normalizedSign);
+  return matchingHouse?.number;
+}
+
+/**
+ * Genera descripción personalizada basada en la casa natal
+ */
+function getHouseDescription(houseNumber: number, tipo: 'lunaNueva' | 'lunaLlena'): string {
+  const house = HOUSE_DESCRIPTIONS[houseNumber];
+  if (!house) return '';
+
+  if (tipo === 'lunaNueva') {
+    return `Esta Luna Nueva activa tu Casa ${houseNumber} natal, el área de ${house.area}. Es momento ideal para sembrar intenciones relacionadas con ${house.tema}.`;
+  } else {
+    return `Esta Luna Llena ilumina tu Casa ${houseNumber} natal, el área de ${house.area}. Observa qué culmina o necesita liberarse en relación a ${house.tema}.`;
+  }
+}
+
+/**
  * Genera interpretación genérica para un evento cuando no hay personalizada
  */
-function getGenericInterpretation(tipo: string, signo?: string, titulo?: string): string {
+function getGenericInterpretation(tipo: string, signo?: string, titulo?: string, casaNatal?: number): string {
   const signDescriptions: Record<string, { energia: string; tema: string }> = {
     'Aries': { energia: 'acción, iniciativa y coraje', tema: 'empezar algo nuevo con valentía' },
     'Tauro': { energia: 'estabilidad, disfrute y seguridad', tema: 'conectar con lo que te da paz y placer' },
@@ -185,18 +276,37 @@ function getGenericInterpretation(tipo: string, signo?: string, titulo?: string)
 
   const signInfo = signo ? signDescriptions[signo] : null;
 
+  // Información de casa natal (si está disponible)
+  const houseInfo = casaNatal ? getHouseDescription(casaNatal, tipo as 'lunaNueva' | 'lunaLlena') : '';
+
   if (tipo === 'lunaNueva') {
+    let text = '';
     if (signInfo) {
-      return `Esta Luna Nueva en ${signo} te invita a sembrar intenciones relacionadas con ${signInfo.energia}. Es momento de ${signInfo.tema}. Las semillas que plantes hoy florecerán en los próximos 6 meses.`;
+      text = `Esta Luna Nueva en ${signo} te invita a sembrar intenciones relacionadas con ${signInfo.energia}. Es momento de ${signInfo.tema}.`;
+    } else {
+      text = 'La Luna Nueva es momento de nuevos comienzos.';
     }
-    return 'La Luna Nueva es momento de nuevos comienzos. Siembra una intención clara y déjala crecer durante este ciclo lunar.';
+    // Añadir información de casa natal si está disponible
+    if (houseInfo) {
+      text += `\n\n${houseInfo}`;
+    }
+    text += '\n\nLas semillas que plantes hoy florecerán en los próximos 6 meses.';
+    return text;
   }
 
   if (tipo === 'lunaLlena') {
+    let text = '';
     if (signInfo) {
-      return `Esta Luna Llena en ${signo} ilumina temas de ${signInfo.energia}. Lo sembrado hace 6 meses alcanza su punto máximo. Es momento de celebrar logros, soltar lo que ya no sirve y ${signInfo.tema}.`;
+      text = `Esta Luna Llena en ${signo} ilumina temas de ${signInfo.energia}. Es momento de celebrar logros, soltar lo que ya no sirve y ${signInfo.tema}.`;
+    } else {
+      text = 'La Luna Llena trae culminación e iluminación.';
     }
-    return 'La Luna Llena trae culminación e iluminación. Observa qué ha llegado a su punto máximo y qué necesitas soltar.';
+    // Añadir información de casa natal si está disponible
+    if (houseInfo) {
+      text += `\n\n${houseInfo}`;
+    }
+    text += '\n\nObserva qué ha llegado a su punto máximo y qué necesitas soltar.';
+    return text;
   }
 
   if (tipo === 'retrogrado') {
@@ -226,9 +336,10 @@ function getGenericInterpretation(tipo: string, signo?: string, titulo?: string)
  * Formatea un evento completo para el libro, mapeando todos los campos necesarios
  *
  * @param event - Evento astrológico desde el SolarCycle
+ * @param natalHouses - Opcional: Array de casas natales para personalizar lunares
  * @returns Objeto formateado para CalendarioMensualTabla
  */
-export function formatEventForBook(event: any) {
+export function formatEventForBook(event: any, natalHouses?: NatalHouse[]) {
   // Usar detectLunarPhase para eventos lunares, mapEventType para el resto
   let tipo: 'lunaNueva' | 'lunaLlena' | 'ingreso' | 'retrogrado' | 'eclipse' | 'cumpleanos' | 'especial';
 
@@ -238,12 +349,18 @@ export function formatEventForBook(event: any) {
     tipo = mapEventType(event.type);
   }
 
+  // Calcular casa natal para eventos lunares si tenemos datos
+  let casaNatal: number | undefined;
+  if (natalHouses && (tipo === 'lunaNueva' || tipo === 'lunaLlena') && event.sign) {
+    casaNatal = calculateHouseForSign(event.sign, natalHouses);
+  }
+
   // Obtener interpretación personalizada o genérica
   let interpretacion = formatInterpretationForBook(event.interpretation);
 
-  // Si no hay interpretación personalizada, usar genérica
+  // Si no hay interpretación personalizada, usar genérica (con casa natal si disponible)
   if (!interpretacion) {
-    interpretacion = getGenericInterpretation(tipo, event.sign, event.title);
+    interpretacion = getGenericInterpretation(tipo, event.sign, event.title, casaNatal);
   }
 
   return {
@@ -251,7 +368,8 @@ export function formatEventForBook(event: any) {
     tipo,
     titulo: event.title,
     signo: event.sign || undefined,
-    interpretacion
+    interpretacion,
+    casaNatal // Incluir la casa natal en el objeto retornado
   };
 }
 
