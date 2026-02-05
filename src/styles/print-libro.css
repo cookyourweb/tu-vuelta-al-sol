@@ -3,6 +3,51 @@
    Tu Vuelta al Sol - Agenda Astrológica Personalizada
    ============================================ */
 
+/* ============================================
+   PAGINACIÓN AUTOMÁTICA CON CSS COUNTERS
+   ============================================ */
+
+/* Inicializar contador de páginas */
+.libro-container,
+[class*="libro"],
+body {
+  counter-reset: page-counter;
+}
+
+/* Cada página incrementa el contador */
+.print-page {
+  counter-increment: page-counter;
+}
+
+/* La portada NO incrementa el contador (es página 0) */
+.print-page.no-page-number {
+  counter-increment: none;
+}
+
+/* Mostrar número de página automático en el footer */
+.page-number-auto::after {
+  content: counter(page-counter);
+  font-weight: 600;
+}
+
+/* Para páginas que no deben mostrar número */
+.no-page-number .page-number-auto::after {
+  content: "" !important;
+}
+
+/* En pantalla, mostrar preview del contador */
+@media screen {
+  .page-number-auto::before {
+    content: counter(page-counter);
+    font-weight: 600;
+  }
+
+  /* Ocultar el span con fallback en pantalla cuando hay contador */
+  .page-number-auto > span {
+    display: none;
+  }
+}
+
 @media print {
   /* Configuración global de página A5 */
   @page {

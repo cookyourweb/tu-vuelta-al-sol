@@ -432,9 +432,10 @@ export const Contraportada = () => {
 
 // ============ PÁGINA EN BLANCO PARA IMPRESIÓN ============
 // Se usa para mantener la numeración correcta en impresión a doble cara
+// ✅ no-page-number: No incrementa el contador de páginas
 export const PaginaBlanca = () => {
   return (
-    <div className="print-page bg-white" style={{ padding: '15mm' }}>
+    <div className="print-page no-page-number bg-white" style={{ padding: '15mm' }}>
       {/* Página intencionalmente en blanco para impresión */}
     </div>
   );

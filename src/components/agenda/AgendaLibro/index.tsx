@@ -1657,8 +1657,8 @@ export const AgendaLibro = ({
         </div>
       )}
 
-      {/* Contenido del libro */}
-      <div ref={printRef} className="container mx-auto py-8 space-y-0 print:p-0">
+      {/* Contenido del libro - ✅ libro-container inicializa el contador de páginas CSS */}
+      <div ref={printRef} className="libro-container container mx-auto py-8 space-y-0 print:p-0">
 
         {/* ═══════════════════════════════════════════════════════════════
             SECCIÓN 1: PORTADA + ÍNDICE (para impresión de libro)

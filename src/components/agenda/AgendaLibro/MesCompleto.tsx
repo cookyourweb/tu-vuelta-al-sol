@@ -69,7 +69,9 @@ const IconoEvento = ({ tipo, className = "w-4 h-4" }: { tipo: string; className?
 };
 
 // ============ FOOTER DEL LIBRO ============
-export const FooterLibro: React.FC<{ pagina?: number }> = ({ pagina }) => {
+// ✅ PAGINACIÓN AUTOMÁTICA: Usa CSS counter para numerar páginas correlativamente
+// El prop 'pagina' ahora es opcional y solo se usa como fallback visual
+export const FooterLibro: React.FC<{ pagina?: number; hideNumber?: boolean }> = ({ pagina, hideNumber }) => {
   const { config } = useStyle();
   return (
     <div className="absolute bottom-4 left-0 right-0 flex justify-between items-center px-8 text-xs">
@@ -82,9 +84,14 @@ export const FooterLibro: React.FC<{ pagina?: number }> = ({ pagina }) => {
         Tu Vuelta al Sol by Wunjo Creations
       </a>
 
-      <span className={`${config.iconSecondary} opacity-70 font-semibold text-sm`}>
-        {pagina || ''}
-      </span>
+      {/* Número de página automático con CSS counter */}
+      {!hideNumber && (
+        <span className={`${config.iconSecondary} opacity-70 font-semibold text-sm page-number-auto`}>
+          {/* El número se inserta automáticamente via CSS ::after con counter(page-counter) */}
+          {/* Fallback para preview: muestra pagina prop si existe */}
+          <span className="print:hidden">{pagina || ''}</span>
+        </span>
+      )}
 
       <span className={`${config.iconSecondary} opacity-50`}>
         {/* Espacio para simetría */}

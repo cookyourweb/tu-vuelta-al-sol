@@ -26,7 +26,8 @@ export const PortadaPersonalizada = ({
   const { config } = useStyle();
 
   return (
-    <div className={`print-page print-no-bg flex flex-col items-center justify-center text-center relative overflow-hidden ${config.headerBg}`} style={{ padding: '15mm' }}>
+    // ✅ no-page-number: La portada no incrementa el contador de páginas
+    <div className={`print-page print-no-bg no-page-number flex flex-col items-center justify-center text-center relative overflow-hidden ${config.headerBg}`} style={{ padding: '15mm' }}>
       {/* Decoración de fondo */}
       <div className={`absolute inset-0 ${config.pattern} opacity-30`} />
 
