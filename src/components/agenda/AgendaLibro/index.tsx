@@ -80,6 +80,10 @@ export const AgendaLibro = ({
   // Estado para mostrar instrucciones de PDF
   const [showPdfInstructions, setShowPdfInstructions] = useState(false);
 
+  // ✅ NUEVO: Estado para generación batch de interpretaciones
+  const [generatingBatch, setGeneratingBatch] = useState(false);
+  const [batchProgress, setBatchProgress] = useState(0);
+
   // Efecto para cargar la interpretación del Retorno Solar desde la BD
   useEffect(() => {
     const fetchSolarReturnInterpretation = async () => {
@@ -507,6 +511,48 @@ export const AgendaLibro = ({
       alert(`Error al regenerar la interpretación:\n\n${error.message}\n\nPor favor, verifica que tengas una carta de Solar Return generada primero.`);
     } finally {
       setGeneratingSolarReturn(false);
+    }
+  };
+
+  // ==========================================
+  // 🚀 GENERAR TODAS LAS INTERPRETACIONES FALTANTES (BATCH)
+  // ==========================================
+  const handleGenerateBatch = async () => {
+    if (generatingBatch || eventStats.sinInterpretacion === 0) return;
+
+    try {
+      setGeneratingBatch(true);
+      setBatchProgress(0);
+      console.log(`🚀 [BATCH] Generando ${eventStats.sinInterpretacion} interpretaciones faltantes...`);
+
+      const response = await fetch('/api/astrology/interpretations/generate-batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          yearLabel,
+          maxConcurrent: 3
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Error generando interpretaciones');
+      }
+
+      const data = await response.json();
+      console.log('✅ [BATCH] Resultado:', data);
+
+      if (data.success) {
+        setBatchProgress(100);
+        // Recargar la página para ver las nuevas interpretaciones
+        window.location.reload();
+      }
+    } catch (error: any) {
+      console.error('❌ [BATCH] Error:', error);
+      alert(`Error al generar interpretaciones: ${error.message}`);
+    } finally {
+      setGeneratingBatch(false);
     }
   };
 
@@ -1645,29 +1691,62 @@ export const AgendaLibro = ({
         </p>
 
         {/* ✅ NUEVO: Banner de alerta si faltan interpretaciones personalizadas */}
+        {/* ✅ Banner de interpretaciones pendientes con listado y botón de generación automática */}
         {eventStats.sinInterpretacion > 0 && (
           <div className="mt-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-400/50 rounded-lg p-3">
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center justify-between gap-4 mb-2">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-amber-400" />
-                <span className="text-sm">
-                  <strong>{eventStats.sinInterpretacion}</strong> de {eventStats.total} eventos sin personalizar
+                <span className="text-sm font-semibold">
+                  {eventStats.sinInterpretacion} eventos pendientes de personalizar:
                 </span>
               </div>
               <button
-                onClick={() => {
-                  // Ir a la agenda para personalizar
-                  onClose();
-                  window.location.href = `/agenda?personalizar=true`;
-                }}
-                className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold text-sm hover:from-amber-400 hover:to-orange-400 transition-all shadow-md"
+                onClick={handleGenerateBatch}
+                disabled={generatingBatch}
+                className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold text-sm hover:from-amber-400 hover:to-orange-400 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Sparkles className="w-4 h-4" />
-                Personalizar ahora
+                {generatingBatch ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    Generando...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4" />
+                    Generar todos
+                  </>
+                )}
               </button>
             </div>
-            <p className="text-xs text-amber-200/80 mt-1">
-              Ve a la Agenda y haz clic en cada evento para generar su interpretación personalizada con IA.
+
+            {/* Listado de eventos pendientes */}
+            <div className="max-h-32 overflow-y-auto bg-black/20 rounded p-2 mb-2">
+              <ul className="text-xs space-y-1">
+                {solarCycle?.events
+                  ?.filter((e: any) => !e.interpretation)
+                  ?.slice(0, 20)
+                  ?.map((evento: any, idx: number) => (
+                    <li key={idx} className="flex items-center gap-2 text-amber-100">
+                      <span className="opacity-50">•</span>
+                      <span>{evento.title}</span>
+                      <span className="opacity-50 text-[10px]">
+                        ({new Date(evento.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })})
+                      </span>
+                    </li>
+                  ))}
+                {(solarCycle?.events?.filter((e: any) => !e.interpretation)?.length || 0) > 20 && (
+                  <li className="text-amber-300 italic">
+                    ... y {(solarCycle?.events?.filter((e: any) => !e.interpretation)?.length || 0) - 20} más
+                  </li>
+                )}
+              </ul>
+            </div>
+
+            <p className="text-xs text-amber-200/80">
+              {generatingBatch
+                ? '⏳ Generando interpretaciones personalizadas con IA... Esto puede tardar varios minutos.'
+                : '💡 Haz clic en "Generar todos" para crear automáticamente todas las interpretaciones.'}
             </p>
           </div>
         )}
