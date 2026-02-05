@@ -1460,12 +1460,29 @@ export const AgendaLibro = ({
   // LOADING STATE: Cargando datos iniciales
   if (loading && !solarCycle) {
     return (
-      <div className="fixed inset-0 bg-gradient-to-br from-purple-900/95 to-pink-900/95 flex items-center justify-center z-50">
-        <div className="bg-white rounded-2xl p-8 max-w-md shadow-2xl">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto mb-4"></div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Cargando tu agenda...</h2>
-            <p className="text-gray-600">Preparando tu libro personalizado</p>
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-center justify-center p-4">
+        <div className="bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900 rounded-3xl max-w-md w-full p-8 shadow-2xl border-2 border-purple-400/50">
+          <div className="text-center space-y-6">
+            {/* Animated Icon */}
+            <div className="relative mx-auto w-24 h-24">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-spin" style={{ animationDuration: '3s' }}></div>
+              <div className="absolute inset-2 bg-purple-900 rounded-full flex items-center justify-center">
+                <span className="text-4xl animate-pulse">📅</span>
+              </div>
+            </div>
+
+            <h3 className="text-2xl font-bold text-white">
+              📚 Cargando tu Agenda
+            </h3>
+
+            <p className="text-purple-200">
+              Preparando tu libro personalizado...
+            </p>
+
+            {/* Loading Bar */}
+            <div className="w-full bg-purple-950/50 rounded-full h-3 overflow-hidden">
+              <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 h-full animate-loading-bar"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -1475,27 +1492,68 @@ export const AgendaLibro = ({
   // GENERATING STATE: Generando interpretaciones faltantes
   if (generatingMissing) {
     return (
-      <div className="fixed inset-0 bg-gradient-to-br from-purple-900/95 to-pink-900/95 flex items-center justify-center z-50">
-        <div className="bg-white rounded-2xl p-8 max-w-md shadow-2xl">
-          <div className="text-center">
-            <div className="mb-6">
-              <div className="text-6xl mb-4">✨</div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                Generando interpretaciones personalizadas
-              </h2>
-              <p className="text-gray-600 mb-4">
-                Esto puede tomar 1-2 minutos la primera vez.<br />
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] flex items-center justify-center p-4">
+        <div className="bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900 rounded-3xl max-w-md w-full p-8 shadow-2xl border-2 border-purple-400/50">
+          <div className="text-center space-y-6">
+
+            {/* Animated Icon */}
+            <div className="relative mx-auto w-24 h-24">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-spin" style={{ animationDuration: '3s' }}></div>
+              <div className="absolute inset-2 bg-purple-900 rounded-full flex items-center justify-center">
+                <span className="text-4xl animate-pulse">📅</span>
+              </div>
+            </div>
+
+            {/* Title */}
+            <h3 className="text-2xl font-bold text-white">
+              📚 Generando tu Agenda Personalizada
+            </h3>
+
+            {/* Progress Message */}
+            <div className="bg-purple-800/50 rounded-xl p-4 border border-purple-400/30">
+              <p className="text-purple-100 text-lg font-semibold animate-pulse">
+                Creando interpretaciones con IA...
+              </p>
+              {progress > 0 && (
+                <div className="mt-3">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-purple-200 text-xs">Progreso</span>
+                    <span className="text-purple-200 text-xs">{progress}%</span>
+                  </div>
+                  <div className="w-full bg-purple-950/50 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-purple-500 to-pink-500 h-full transition-all duration-500 ease-out"
+                      style={{ width: `${progress}%` }}
+                    ></div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Info Text */}
+            <div className="space-y-3 text-purple-200 text-sm">
+              <p className="flex items-center justify-center gap-2">
+                <span className="animate-bounce">⚡</span>
+                Esto puede tomar 1-2 minutos la primera vez
+              </p>
+              <p className="flex items-center justify-center gap-2">
+                <span className="animate-bounce" style={{ animationDelay: '0.1s' }}>🌟</span>
                 ¡Siguientes veces será instantáneo!
+              </p>
+              <p className="flex items-center justify-center gap-2">
+                <span className="animate-bounce" style={{ animationDelay: '0.2s' }}>🎯</span>
+                Generando contenido único para ti
               </p>
             </div>
 
-            <div className="w-full bg-gray-200 rounded-full h-4 mb-2">
-              <div
-                className="bg-gradient-to-r from-purple-500 to-pink-500 h-4 rounded-full transition-all duration-500"
-                style={{ width: `${progress}%` }}
-              />
+            {/* Loading Bar */}
+            <div className="w-full bg-purple-950/50 rounded-full h-3 overflow-hidden">
+              <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 h-full animate-loading-bar"></div>
             </div>
-            <p className="text-sm text-gray-500">{progress}%</p>
+
+            <p className="text-purple-300 text-xs italic">
+              💫 "La paciencia cósmica será recompensada con sabiduría estelar"
+            </p>
           </div>
         </div>
       </div>
