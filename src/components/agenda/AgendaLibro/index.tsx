@@ -1702,7 +1702,16 @@ export const AgendaLibro = ({
           Agenda de <span className="font-semibold">{userName}</span> · {format(startDate, "d MMM yyyy", { locale: es })} - {format(endDate, "d MMM yyyy", { locale: es })}
         </p>
 
-        {/* ✅ NUEVO: Banner de alerta si faltan interpretaciones personalizadas */}
+        {/* 🔍 DEBUG: Mostrar siempre el estado de interpretaciones */}
+        <div className="mt-2 text-center text-xs opacity-70">
+          📊 {eventStats.conInterpretacion}/{eventStats.total} eventos con interpretación
+          {eventStats.sinInterpretacion > 0 && (
+            <span className="text-amber-400 ml-2">
+              ⚠️ {eventStats.sinInterpretacion} pendientes
+            </span>
+          )}
+        </div>
+
         {/* ✅ Banner de interpretaciones pendientes con listado y botón de generación automática */}
         {eventStats.sinInterpretacion > 0 && (
           <div className="mt-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-400/50 rounded-lg p-3">
