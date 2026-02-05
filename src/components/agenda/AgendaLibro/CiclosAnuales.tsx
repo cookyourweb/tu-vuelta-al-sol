@@ -2,7 +2,7 @@ import React from 'react';
 import { format, addMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useStyle } from '@/context/StyleContext';
-import { Calendar, TrendingUp, Star } from 'lucide-react';
+import { Calendar, TrendingUp, Star, Sparkles } from 'lucide-react';
 import { FooterLibro } from './MesCompleto';
 
 // ============ LÍNEA DE TIEMPO EMOCIONAL - CON ESTILOS ============
@@ -258,8 +258,8 @@ export const MesesClavePuntosGiro: React.FC<MesesClavePuntosGiroProps> = ({ line
       </div>
 
       <div className={`${config.highlightPrimary} rounded-lg p-4`}>
-        <h4 className={`${config.iconPrimary} font-medium text-sm mb-3`}>
-          📅 ¿Cómo quieres prepararte para estos puntos de giro?
+        <h4 className={`${config.iconPrimary} font-medium text-sm mb-3 flex items-center gap-2`}>
+          <Calendar className="w-4 h-4" /> ¿Cómo quieres prepararte para estos puntos de giro?
         </h4>
         <div className="space-y-2">
           <div className={`h-10 border-b border-dashed ${config.iconPrimary} opacity-30`} />
@@ -351,8 +351,8 @@ export const GrandesAprendizajes: React.FC<GrandesAprendizajesProps> = ({ claves
       </div>
 
       <div className={`${config.highlightPrimary} rounded-lg p-4`}>
-        <h4 className={`${config.iconPrimary} font-medium text-sm mb-3`}>
-          ✨ ¿Qué acción concreta puedes hacer esta semana para integrar uno de estos aprendizajes?
+        <h4 className={`${config.iconPrimary} font-medium text-sm mb-3 flex items-center gap-2`}>
+          <Sparkles className="w-4 h-4" /> ¿Qué acción concreta puedes hacer esta semana para integrar uno de estos aprendizajes?
         </h4>
         <div className="space-y-2">
           <div className={`h-12 border-b border-dashed ${config.iconPrimary} opacity-30`} />

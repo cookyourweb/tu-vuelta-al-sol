@@ -1,6 +1,6 @@
 import React from 'react';
 import { useStyle } from '@/context/StyleContext';
-import { Star, Moon, Sun, Sparkles, TrendingUp, Circle } from 'lucide-react';
+import { Star, Moon, Sun, Sparkles, TrendingUp, Circle, AlertTriangle } from 'lucide-react';
 import { FooterLibro } from './MesCompleto';
 
 // ==========================================
@@ -32,7 +32,7 @@ export const TuAnioOverview: React.FC<TuAnioProps> = ({ startDate, endDate, user
         {/* Aviso si no hay Solar Return */}
         {!hasSolarReturn && (
           <div className="mt-4 inline-flex flex-col items-center gap-2 px-5 py-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200 no-print">
-            <span className="text-xs font-semibold text-amber-800">⚠️ Contenido Genérico</span>
+            <span className="text-xs font-semibold text-amber-800 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Contenido Genérico</span>
             <p className="text-xs text-amber-700">
               Esta información se personalizará cuando generes tu Retorno Solar
             </p>

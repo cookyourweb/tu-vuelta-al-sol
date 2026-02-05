@@ -2,6 +2,7 @@
 
 import { useStyle } from "@/context/StyleContext";
 import { FooterLibro } from './MesCompleto';
+import { Check } from 'lucide-react';
 
 export const QueEsRetornoSolar = () => {
   const { config } = useStyle();
@@ -176,7 +177,7 @@ const ComparacionPlanetaria = ({
 
             {/* Qué Hacer */}
             <div className={`${config.highlightPrimary} rounded-lg p-6`}>
-              <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3`}>✅ Qué hacer</h3>
+              <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3 flex items-center gap-2`}><Check className="w-5 h-5" /> Qué hacer</h3>
               <p className="text-gray-700 leading-relaxed whitespace-pre-line">
                 {comparacion.que_hacer}
               </p>

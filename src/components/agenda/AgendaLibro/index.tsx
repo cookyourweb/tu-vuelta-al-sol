@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useStyle } from '@/context/StyleContext';
 import { StyleSwitcher } from '@/components/agenda/StyleSwitcher';
-import { Printer, X, FileDown, RefreshCw, Download, Info, Sparkles } from 'lucide-react';
+import { Printer, X, FileDown, RefreshCw, Download, Info, Sparkles, BarChart3, AlertTriangle, Clock, Lightbulb, Calendar, BookOpen, Zap, Star, Target } from 'lucide-react';
 import { useInterpretaciones } from '@/hooks/useInterpretaciones';
 import { formatEventForBook, formatInterpretationCompact } from '@/utils/formatInterpretationForBook';
 
@@ -1526,12 +1526,13 @@ export const AgendaLibro = ({
             <div className="relative mx-auto w-24 h-24">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-spin" style={{ animationDuration: '3s' }}></div>
               <div className="absolute inset-2 bg-purple-900 rounded-full flex items-center justify-center">
-                <span className="text-4xl animate-pulse">📅</span>
+                <Calendar className="w-10 h-10 text-purple-200 animate-pulse" />
               </div>
             </div>
 
-            <h3 className="text-2xl font-bold text-white">
-              📚 Cargando tu Agenda
+            <h3 className="text-2xl font-bold text-white flex items-center justify-center gap-2">
+              <BookOpen className="w-6 h-6" />
+              Cargando tu Agenda
             </h3>
 
             <p className="text-purple-200">
@@ -1559,13 +1560,14 @@ export const AgendaLibro = ({
             <div className="relative mx-auto w-24 h-24">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-spin" style={{ animationDuration: '3s' }}></div>
               <div className="absolute inset-2 bg-purple-900 rounded-full flex items-center justify-center">
-                <span className="text-4xl animate-pulse">📅</span>
+                <Calendar className="w-10 h-10 text-purple-200 animate-pulse" />
               </div>
             </div>
 
             {/* Title */}
-            <h3 className="text-2xl font-bold text-white">
-              📚 Generando tu Agenda Personalizada
+            <h3 className="text-2xl font-bold text-white flex items-center justify-center gap-2">
+              <BookOpen className="w-6 h-6" />
+              Generando tu Agenda Personalizada
             </h3>
 
             {/* Progress Message */}
@@ -1592,15 +1594,15 @@ export const AgendaLibro = ({
             {/* Info Text */}
             <div className="space-y-3 text-purple-200 text-sm">
               <p className="flex items-center justify-center gap-2">
-                <span className="animate-bounce">⚡</span>
+                <Zap className="w-4 h-4 animate-bounce" />
                 Esto puede tomar 1-2 minutos la primera vez
               </p>
               <p className="flex items-center justify-center gap-2">
-                <span className="animate-bounce" style={{ animationDelay: '0.1s' }}>🌟</span>
+                <Star className="w-4 h-4 animate-bounce" style={{ animationDelay: '0.1s' }} />
                 ¡Siguientes veces será instantáneo!
               </p>
               <p className="flex items-center justify-center gap-2">
-                <span className="animate-bounce" style={{ animationDelay: '0.2s' }}>🎯</span>
+                <Target className="w-4 h-4 animate-bounce" style={{ animationDelay: '0.2s' }} />
                 Generando contenido único para ti
               </p>
             </div>
@@ -1610,8 +1612,9 @@ export const AgendaLibro = ({
               <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 h-full animate-loading-bar"></div>
             </div>
 
-            <p className="text-purple-300 text-xs italic">
-              💫 "La paciencia cósmica será recompensada con sabiduría estelar"
+            <p className="text-purple-300 text-xs italic flex items-center justify-center gap-2">
+              <Sparkles className="w-3 h-3" />
+              "La paciencia cósmica será recompensada con sabiduría estelar"
             </p>
           </div>
         </div>
@@ -1625,7 +1628,9 @@ export const AgendaLibro = ({
       <div className="fixed inset-0 bg-gradient-to-br from-purple-900/95 to-pink-900/95 flex items-center justify-center z-50">
         <div className="bg-white rounded-2xl p-8 max-w-md shadow-2xl">
           <div className="text-center">
-            <div className="text-6xl mb-4">⚠️</div>
+            <div className="mb-4 flex justify-center">
+              <AlertTriangle className="w-16 h-16 text-red-500" />
+            </div>
             <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
             <p className="text-gray-700 mb-6">{error}</p>
             <button
@@ -1702,12 +1707,14 @@ export const AgendaLibro = ({
           Agenda de <span className="font-semibold">{userName}</span> · {format(startDate, "d MMM yyyy", { locale: es })} - {format(endDate, "d MMM yyyy", { locale: es })}
         </p>
 
-        {/* 🔍 DEBUG: Mostrar siempre el estado de interpretaciones */}
-        <div className="mt-2 text-center text-xs opacity-70">
-          📊 {eventStats.conInterpretacion}/{eventStats.total} eventos con interpretación
+        {/* DEBUG: Mostrar siempre el estado de interpretaciones */}
+        <div className="mt-2 text-center text-xs opacity-70 flex items-center justify-center gap-1">
+          <BarChart3 className="w-3 h-3" />
+          <span>{eventStats.conInterpretacion}/{eventStats.total} eventos con interpretación</span>
           {eventStats.sinInterpretacion > 0 && (
-            <span className="text-amber-400 ml-2">
-              ⚠️ {eventStats.sinInterpretacion} pendientes
+            <span className="text-amber-400 ml-2 flex items-center gap-1">
+              <AlertTriangle className="w-3 h-3" />
+              {eventStats.sinInterpretacion} pendientes
             </span>
           )}
         </div>
@@ -1764,10 +1771,18 @@ export const AgendaLibro = ({
               </ul>
             </div>
 
-            <p className="text-xs text-amber-200/80">
-              {generatingBatch
-                ? '⏳ Generando interpretaciones personalizadas con IA... Esto puede tardar varios minutos.'
-                : '💡 Haz clic en "Generar todos" para crear automáticamente todas las interpretaciones.'}
+            <p className="text-xs text-amber-200/80 flex items-center gap-1">
+              {generatingBatch ? (
+                <>
+                  <Clock className="w-3 h-3 inline" />
+                  <span>Generando interpretaciones personalizadas con IA... Esto puede tardar varios minutos.</span>
+                </>
+              ) : (
+                <>
+                  <Lightbulb className="w-3 h-3 inline" />
+                  <span>Haz clic en "Generar todos" para crear automáticamente todas las interpretaciones.</span>
+                </>
+              )}
             </p>
           </div>
         )}

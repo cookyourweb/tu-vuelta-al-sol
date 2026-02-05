@@ -31,32 +31,37 @@ interface NatalHouse {
   longitude?: number;
 }
 
+// Estructura REAL que genera el prompt de OpenAI (eventInterpretationPrompt.ts)
 interface EventInterpretation {
   titulo_evento?: string;
   clima_del_dia?: string[];
   energias_activas?: string[];
   mensaje_sintesis?: string;
   como_te_afecta?: string;
-  interpretacion_practica?: string[];
-  acciones_concretas?: string[];
-  preguntas_reflexion?: string[];
-  perspectiva_evolutiva?: string;
-  para_ti_especificamente?: string;
-  tu_fortaleza_a_usar?: {
-    fortaleza: string;
-    como_usarla: string;
+  interpretacion_practica?: Array<{
+    planeta: string;
+    que_pide: string;
+  }>;
+  sintesis_practica?: string;
+  accion_concreta?: {
+    titulo: string;
+    pasos: string[];
   };
-  tu_bloqueo_a_trabajar?: {
-    bloqueo: string;
-    reframe: string;
-  };
-  mantra_personalizado?: string;
-  ejercicio_para_ti?: string;
-  consejo_especifico?: string;
-  timing_evolutivo?: {
-    que_sembrar: string;
-    cuando_actuar: string;
-    resultado_esperado: string;
+  sombra_a_evitar?: string[];
+  explicacion_sombra?: string;
+  frase_ancla?: string;
+  apoyo_energetico?: Array<{
+    tipo: string;
+    elemento: string;
+    proposito: string;
+  }>;
+  nota_apoyo?: string;
+  cierre_dia?: string;
+  analisis_tecnico?: {
+    evento_en_casa_natal?: number;
+    significado_casa?: string;
+    planetas_natales_activados?: string[];
+    aspectos_cruzados?: string[];
   };
 }
 
@@ -64,6 +69,7 @@ interface EventInterpretation {
  * Convierte el JSON de interpretación de evento a texto formateado para el libro
  *
  * El formato del libro es más narrativo y enfocado en la acción que el formato de la agenda online
+ * Usa los campos REALES que genera eventInterpretationPrompt.ts
  *
  * @param interpretation - JSON de interpretación desde la API
  * @returns Texto formateado para mostrar en el libro impreso
@@ -75,72 +81,54 @@ export function formatInterpretationForBook(interpretation: EventInterpretation 
 
   let texto = '';
 
-  // 1. TÍTULO DEL EVENTO (si existe)
-  if (interpretation.titulo_evento) {
-    texto += `${interpretation.titulo_evento}\n\n`;
+  // 1. MENSAJE SÍNTESIS (resumen potente del día)
+  if (interpretation.mensaje_sintesis) {
+    texto += `${interpretation.mensaje_sintesis}\n\n`;
   }
 
-  // 2. PARA TI ESPECÍFICAMENTE (mensaje personalizado principal)
-  if (interpretation.para_ti_especificamente) {
-    texto += `${interpretation.para_ti_especificamente}\n\n`;
-  } else if (interpretation.mensaje_sintesis) {
-    // Fallback si no existe para_ti_especificamente
-    texto += `🔥 PARA TI:\n${interpretation.mensaje_sintesis}\n\n`;
-  }
-
-  // 3. CÓMO TE AFECTA (conexión con carta natal)
+  // 2. CÓMO TE AFECTA (conexión con carta natal - 200-300 palabras)
   if (interpretation.como_te_afecta) {
-    texto += `Qué se activa en tu Natal:\n${interpretation.como_te_afecta}\n\n`;
+    texto += `${interpretation.como_te_afecta}\n\n`;
   }
 
-  // 4. TU FORTALEZA A USAR (muy importante para el libro)
-  if (interpretation.tu_fortaleza_a_usar) {
-    texto += `✨ Tu fortaleza para este momento:\n`;
-    texto += `${interpretation.tu_fortaleza_a_usar.fortaleza}\n`;
-    texto += `${interpretation.tu_fortaleza_a_usar.como_usarla}\n\n`;
+  // 3. SÍNTESIS PRÁCTICA (resumen de la interpretación)
+  if (interpretation.sintesis_practica) {
+    texto += `${interpretation.sintesis_practica}\n\n`;
   }
 
-  // 5. ACCIONES CONCRETAS (práctico y accionable)
-  if (interpretation.acciones_concretas && interpretation.acciones_concretas.length > 0) {
-    texto += `Qué hacer con esta energía:\n`;
-    interpretation.acciones_concretas.forEach((accion) => {
-      texto += `• ${accion}\n`;
+  // 4. ACCIÓN CONCRETA (ejercicio con pasos)
+  if (interpretation.accion_concreta) {
+    if (interpretation.accion_concreta.titulo) {
+      texto += `Ejercicio: ${interpretation.accion_concreta.titulo}\n`;
+    }
+    if (interpretation.accion_concreta.pasos && interpretation.accion_concreta.pasos.length > 0) {
+      interpretation.accion_concreta.pasos.forEach((paso, idx) => {
+        texto += `${idx + 1}. ${paso}\n`;
+      });
+    }
+    texto += '\n';
+  }
+
+  // 5. SOMBRAS A EVITAR (advertencias)
+  if (interpretation.sombra_a_evitar && interpretation.sombra_a_evitar.length > 0) {
+    texto += `Ten en cuenta:\n`;
+    interpretation.sombra_a_evitar.forEach((sombra) => {
+      texto += `• ${sombra}\n`;
     });
-    texto += '\n';
-  }
-
-  // 6. TU BLOQUEO A TRABAJAR (transformación)
-  if (interpretation.tu_bloqueo_a_trabajar) {
-    texto += `⚠️ Ten en cuenta:\n`;
-    texto += `${interpretation.tu_bloqueo_a_trabajar.bloqueo}\n`;
-    if (interpretation.tu_bloqueo_a_trabajar.reframe) {
-      texto += `\nPero recuerda: ${interpretation.tu_bloqueo_a_trabajar.reframe}\n\n`;
-    }
-  }
-
-  // 7. EJERCICIO PARA TI (muy valioso para el libro)
-  if (interpretation.ejercicio_para_ti) {
-    texto += `📝 Ejercicio sugerido:\n${interpretation.ejercicio_para_ti}\n\n`;
-  }
-
-  // 8. TIMING EVOLUTIVO (para Lunas Nuevas principalmente)
-  if (interpretation.timing_evolutivo) {
-    if (interpretation.timing_evolutivo.que_sembrar) {
-      texto += `🌱 Qué sembrar: ${interpretation.timing_evolutivo.que_sembrar}\n`;
-    }
-    if (interpretation.timing_evolutivo.cuando_actuar) {
-      texto += `⏰ Cuándo actuar: ${interpretation.timing_evolutivo.cuando_actuar}\n`;
-    }
-    if (interpretation.timing_evolutivo.resultado_esperado) {
-      texto += `🎯 Resultado esperado: ${interpretation.timing_evolutivo.resultado_esperado}\n`;
+    if (interpretation.explicacion_sombra) {
+      texto += `${interpretation.explicacion_sombra}\n`;
     }
     texto += '\n';
   }
 
-  // 9. PREGUNTA DE REFLEXIÓN (cierre contemplativo)
-  if (interpretation.preguntas_reflexion && interpretation.preguntas_reflexion.length > 0) {
-    texto += `Pregunta para reflexionar:\n`;
-    texto += `${interpretation.preguntas_reflexion[0]}\n`;
+  // 6. FRASE ANCLA (mantra del día)
+  if (interpretation.frase_ancla) {
+    texto += `"${interpretation.frase_ancla}"\n\n`;
+  }
+
+  // 7. CIERRE DEL DÍA (mensaje empoderador)
+  if (interpretation.cierre_dia) {
+    texto += `${interpretation.cierre_dia}\n`;
   }
 
   return texto.trim();
@@ -296,9 +284,9 @@ export function formatEventForBook(event: any, natalHouses?: NatalHouse[]) {
     casaNatal = calculateHouseForSign(signo, natalHouses);
   }
 
-  // ✅ SOLO interpretación personalizada - NO genérica
-  // Si no hay interpretación, se devuelve null para indicar que falta por generar
-  const interpretacion = formatInterpretationForBook(event.interpretation) || null;
+  // SOLO interpretación personalizada - NO genérica
+  // Si no hay interpretación, se devuelve undefined para indicar que falta por generar
+  const interpretacion = formatInterpretationForBook(event.interpretation) || undefined;
 
   return {
     dia: new Date(event.date).getDate(),
@@ -327,13 +315,17 @@ export function formatInterpretationCompact(interpretation: EventInterpretation 
     return interpretation.mensaje_sintesis;
   }
 
-  // Fallback a para_ti_especificamente (primeras 200 caracteres)
-  if (interpretation.para_ti_especificamente) {
-    const text = interpretation.para_ti_especificamente;
-    return text.length > 200 ? text.substring(0, 200) + '...' : text;
+  // Fallback a sintesis_practica
+  if (interpretation.sintesis_practica) {
+    return interpretation.sintesis_practica;
   }
 
-  // Fallback a como_te_afecta
+  // Fallback a frase_ancla (mantra del día)
+  if (interpretation.frase_ancla) {
+    return interpretation.frase_ancla;
+  }
+
+  // Fallback a como_te_afecta (primeras 200 caracteres)
   if (interpretation.como_te_afecta) {
     const text = interpretation.como_te_afecta;
     return text.length > 200 ? text.substring(0, 200) + '...' : text;

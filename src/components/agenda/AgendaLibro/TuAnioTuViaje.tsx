@@ -2,6 +2,7 @@
 
 import { useStyle } from "@/context/StyleContext";
 import { FooterLibro } from './MesCompleto';
+import { Sun, Calendar, Sparkles, AlertTriangle, Check, RefreshCw, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface TuAnioTuViajeProps {
   name: string;
@@ -87,7 +88,7 @@ export const GuiaAgenda = () => {
         </div>
 
         <div className={`${config.highlightPrimary} rounded-lg p-6`}>
-          <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3 text-lg`}>🌟 Tu Retorno Solar</h3>
+          <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3 text-lg flex items-center gap-2`}><Sun className="w-5 h-5" /> Tu Retorno Solar</h3>
           <p className="text-gray-700 leading-relaxed">
             El tema central de tu año, cómo se siente este ciclo y qué vino a moverte.
             Una interpretación profunda de tu carta astrológica anual.
@@ -95,7 +96,7 @@ export const GuiaAgenda = () => {
         </div>
 
         <div className={`${config.highlightAccent} rounded-lg p-6`}>
-          <h3 className={`${config.fontDisplay} ${config.iconAccent} font-medium mb-3 text-lg`}>📅 Calendario Astrológico</h3>
+          <h3 className={`${config.fontDisplay} ${config.iconAccent} font-medium mb-3 text-lg flex items-center gap-2`}><Calendar className="w-5 h-5" /> Calendario Astrológico</h3>
           <p className="text-gray-700 leading-relaxed">
             12 meses con Lunas Nuevas, Lunas Llenas, eclipses, retrogradaciones y tránsitos importantes.
             Cada mes tiene espacio para escribir y reflexionar.
@@ -103,7 +104,7 @@ export const GuiaAgenda = () => {
         </div>
 
         <div className={`${config.highlightPrimary} rounded-lg p-6`}>
-          <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3 text-lg`}>✨ Ejercicios y Rituales</h3>
+          <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3 text-lg flex items-center gap-2`}><Sparkles className="w-5 h-5" /> Ejercicios y Rituales</h3>
           <p className="text-gray-700 leading-relaxed">
             Prácticas creativas, visualizaciones, rituales simbólicos y espacios para escribir.
             Herramientas para integrar la astrología en tu vida diaria.
@@ -154,21 +155,21 @@ export const TemaCentralAnio = ({
         {/* Indicador de interpretación personalizada */}
         {tieneSolarReturn ? (
           <div className="mt-3 inline-flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full">
-            <span className="text-xs font-semibold text-purple-700">✨ Interpretación Personalizada</span>
+            <span className="text-xs font-semibold text-purple-700 flex items-center gap-1"><Sparkles className="w-3 h-3" /> Interpretación Personalizada</span>
           </div>
         ) : (
           <div className="mt-3 inline-flex flex-col items-center gap-3 px-6 py-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border-2 border-amber-200 no-print">
             {isGenerating ? (
               <>
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
-                <span className="text-sm font-semibold text-amber-800">✨ Generando tu Retorno Solar...</span>
+                <span className="text-sm font-semibold text-amber-800 flex items-center gap-1"><Sparkles className="w-4 h-4" /> Generando tu Retorno Solar...</span>
                 <p className="text-xs text-amber-700 text-center max-w-md">
                   Esto puede tomar 1-2 minutos. Estamos interpretando tu carta astrológica anual.
                 </p>
               </>
             ) : (
               <>
-                <span className="text-sm font-semibold text-amber-800">⚠️ Interpretación No Disponible</span>
+                <span className="text-sm font-semibold text-amber-800 flex items-center gap-1"><AlertTriangle className="w-4 h-4" /> Interpretación No Disponible</span>
                 <p className="text-xs text-amber-700 text-center max-w-md">
                   Para ver el tema central de tu año personalizado, necesitas generar tu <strong>Retorno Solar (Revolución Solar)</strong>.
                 </p>
@@ -178,7 +179,7 @@ export const TemaCentralAnio = ({
                       onClick={onGenerateSolarReturn}
                       className="mt-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-semibold rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all shadow-md"
                     >
-                      ✨ Generar Ahora (1-2 min)
+                      <Sparkles className="w-4 h-4 inline mr-1" /> Generar Ahora (1-2 min)
                     </button>
                     <p className="text-xs text-amber-600 italic">
                       O visita <a href="/solar-return" className="underline hover:text-amber-800">la página de Solar Return</a>
@@ -295,7 +296,7 @@ export const LoQueVieneAMover = ({
 
         {!tieneContenidoPersonalizado && (
           <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-lg no-print">
-            <span className="text-xs text-amber-700">⚠️ Genera tu Retorno Solar para ver contenido personalizado</span>
+            <span className="text-xs text-amber-700 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Genera tu Retorno Solar para ver contenido personalizado</span>
           </div>
         )}
       </div>
@@ -306,7 +307,7 @@ export const LoQueVieneAMover = ({
             {/* Medida del Año */}
             {medida_del_ano && (
               <div className={`${config.highlightAccent} rounded-lg p-6`}>
-                <h3 className={`${config.fontDisplay} ${config.iconAccent} font-medium mb-3`}>📏 La medida del año</h3>
+                <h3 className={`${config.fontDisplay} ${config.iconAccent} font-medium mb-3`}>La medida del año</h3>
                 <div className="text-gray-700 leading-relaxed whitespace-pre-line">
                   {medida_del_ano}
                 </div>
@@ -316,7 +317,7 @@ export const LoQueVieneAMover = ({
             {/* Lo que fluye naturalmente */}
             {facilidad && (
               <div className={`${config.highlightPrimary} rounded-lg p-6`}>
-                <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3`}>✅ Lo que fluye naturalmente</h3>
+                <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3 flex items-center gap-2`}><Check className="w-5 h-5" /> Lo que fluye naturalmente</h3>
                 <div className="text-gray-700 leading-relaxed whitespace-pre-line">
                   {facilidad}
                 </div>
@@ -326,7 +327,7 @@ export const LoQueVieneAMover = ({
             {/* Lo que te incomoda */}
             {incomodidad && (
               <div className={`${config.highlightSecondary} rounded-lg p-6`}>
-                <h3 className={`${config.fontDisplay} ${config.iconSecondary} font-medium mb-3`}>⚠️ Lo que te incomoda</h3>
+                <h3 className={`${config.fontDisplay} ${config.iconSecondary} font-medium mb-3 flex items-center gap-2`}><AlertTriangle className="w-5 h-5" /> Lo que te incomoda</h3>
                 <div className="text-gray-700 leading-relaxed whitespace-pre-line">
                   {incomodidad}
                 </div>
@@ -336,7 +337,7 @@ export const LoQueVieneAMover = ({
             {/* Actitud Nueva */}
             {actitud_nueva && (
               <div className={`${config.highlightPrimary} rounded-lg p-6`}>
-                <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3`}>✨ La actitud nueva que te pide el año</h3>
+                <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3 flex items-center gap-2`}><Sparkles className="w-5 h-5" /> La actitud nueva que te pide el año</h3>
                 <div className="text-gray-700 leading-relaxed whitespace-pre-line">
                   {actitud_nueva}
                 </div>
@@ -399,7 +400,7 @@ export const LoQuePideSoltar = ({ reflejos_obsoletos, sombras }: LoQuePideSoltar
 
         {!tieneContenidoPersonalizado && (
           <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-lg no-print">
-            <span className="text-xs text-amber-700">⚠️ Genera tu Retorno Solar para ver contenido personalizado</span>
+            <span className="text-xs text-amber-700 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Genera tu Retorno Solar para ver contenido personalizado</span>
           </div>
         )}
       </div>
@@ -416,7 +417,7 @@ export const LoQuePideSoltar = ({ reflejos_obsoletos, sombras }: LoQuePideSoltar
               {/* Reflejos obsoletos personalizados */}
               {reflejos_obsoletos && (
                 <div className={`${config.highlightPrimary} rounded-lg p-6`}>
-                  <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3`}>🔄 Reflejos obsoletos</h3>
+                  <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3 flex items-center gap-2`}><RefreshCw className="w-5 h-5" /> Reflejos obsoletos</h3>
                   <div className="text-gray-700 leading-relaxed whitespace-pre-line">
                     {reflejos_obsoletos}
                   </div>
@@ -426,7 +427,7 @@ export const LoQuePideSoltar = ({ reflejos_obsoletos, sombras }: LoQuePideSoltar
               {/* Sombras del año */}
               {sombras && sombras.length > 0 && (
                 <div className="space-y-4">
-                  <h3 className={`${config.fontDisplay} text-lg ${config.iconSecondary} font-medium text-center`}>⚠️ Sombras del año</h3>
+                  <h3 className={`${config.fontDisplay} text-lg ${config.iconSecondary} font-medium text-center flex items-center justify-center gap-2`}><AlertTriangle className="w-5 h-5" /> Sombras del año</h3>
                   {sombras.map((sombra, idx) => (
                     <div key={idx} className={`flex items-start gap-4 ${config.highlightSecondary} rounded-lg p-4`}>
                       <span className={`${config.iconSecondary} text-2xl`}>☽</span>

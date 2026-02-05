@@ -4,7 +4,7 @@ import React from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useStyle } from '@/context/StyleContext';
-import { Sun, Moon, Star, Heart, Sparkles } from 'lucide-react';
+import { Sun, Moon, Star, Heart, Sparkles, Flame, Coffee, Wind } from 'lucide-react';
 import { FooterLibro } from './MesCompleto';
 
 // ============ HELPER: Normalizar fecha para evitar problemas de timezone ============
@@ -63,10 +63,10 @@ export const PrimerDiaCiclo: React.FC<{
             Antes de empezar con tu agenda:
           </p>
           <ul className="text-gray-600 text-sm space-y-2 ml-4">
-            <li>🕯️ Busca un lugar tranquilo</li>
-            <li>☕ Prepárate una infusión o tu bebida favorita</li>
-            <li>✨ Enciende una vela si te apetece</li>
-            <li>🌬️ Respira profundo tres veces</li>
+            <li className="flex items-center gap-2"><Flame className="w-4 h-4 text-orange-500" /> Busca un lugar tranquilo</li>
+            <li className="flex items-center gap-2"><Coffee className="w-4 h-4 text-amber-700" /> Prepárate una infusión o tu bebida favorita</li>
+            <li className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-yellow-500" /> Enciende una vela si te apetece</li>
+            <li className="flex items-center gap-2"><Wind className="w-4 h-4 text-blue-400" /> Respira profundo tres veces</li>
           </ul>
           <p className="text-gray-600 text-sm italic mt-4">
             Este es tu momento. Sin prisas, sin presión. Solo tú y tu nuevo ciclo.
