@@ -36,6 +36,18 @@ interface AgendaLibroProps {
   yearLabel: string;       // NUEVO: Etiqueta del año (ej: "2025-2026")
 }
 
+// ✅ Helper para verificar si un evento tiene interpretación REAL (no vacía)
+const eventoSinInterpretacion = (e: any): boolean => {
+  const interp = e?.interpretation;
+  if (!interp) return true;
+  if (typeof interp === 'string') return interp.trim().length === 0;
+  if (typeof interp === 'object') {
+    return Object.keys(interp).length === 0 ||
+      !Object.values(interp).some((v: any) => v !== null && v !== undefined && v !== '');
+  }
+  return false;
+};
+
 export const AgendaLibro = ({
   onClose,
   userName,
@@ -1724,7 +1736,7 @@ export const AgendaLibro = ({
             <div className="max-h-32 overflow-y-auto bg-black/20 rounded p-2 mb-2">
               <ul className="text-xs space-y-1">
                 {solarCycle?.events
-                  ?.filter((e: any) => !e.interpretation)
+                  ?.filter(eventoSinInterpretacion)
                   ?.slice(0, 20)
                   ?.map((evento: any, idx: number) => (
                     <li key={idx} className="flex items-center gap-2 text-amber-100">
@@ -1735,9 +1747,9 @@ export const AgendaLibro = ({
                       </span>
                     </li>
                   ))}
-                {(solarCycle?.events?.filter((e: any) => !e.interpretation)?.length || 0) > 20 && (
+                {(solarCycle?.events?.filter(eventoSinInterpretacion)?.length || 0) > 20 && (
                   <li className="text-amber-300 italic">
-                    ... y {(solarCycle?.events?.filter((e: any) => !e.interpretation)?.length || 0) - 20} más
+                    ... y {(solarCycle?.events?.filter(eventoSinInterpretacion)?.length || 0) - 20} más
                   </li>
                 )}
               </ul>

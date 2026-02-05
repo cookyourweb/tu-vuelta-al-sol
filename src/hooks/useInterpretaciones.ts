@@ -163,14 +163,28 @@ export function useInterpretaciones({
       }
 
       // ✅ NUEVO: Calcular estadísticas
+      // Helper para verificar si una interpretación está realmente llena (no vacía)
+      const tieneInterpretacionReal = (interp: any): boolean => {
+        if (!interp) return false;
+        if (typeof interp === 'string') return interp.trim().length > 0;
+        if (typeof interp === 'object') {
+          // Verificar si tiene al menos un campo con contenido
+          return Object.keys(interp).length > 0 &&
+            Object.values(interp).some(v => v !== null && v !== undefined && v !== '');
+        }
+        return false;
+      };
+
       const total = cycle?.events?.length || 0;
-      const conInterpretacion = cycle?.events?.filter((e: AstrologicalEvent) => !!e.interpretation)?.length || 0;
+      const conInterpretacion = cycle?.events?.filter((e: AstrologicalEvent) =>
+        tieneInterpretacionReal(e.interpretation)
+      )?.length || 0;
       setEventStats({
         total,
         conInterpretacion,
         sinInterpretacion: total - conInterpretacion
       });
-      console.log(`📊 Stats: ${conInterpretacion}/${total} eventos con interpretación`);
+      console.log(`📊 Stats: ${conInterpretacion}/${total} eventos con interpretación REAL`);
 
       setSolarCycle(cycle);
 
