@@ -63,25 +63,10 @@ export default function RegisterForm() {
             fullName: data.fullName
           })
         });
-
-        // 3. Registra birth data automáticamente (con lo que tengas disponible)
-        await fetch('/api/birth-data', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId: uid,
-            fullName: data.fullName,
-            birthDate: '',
-            birthTime: '',
-            birthPlace: '',
-            latitude: 0,
-            longitude: 0,
-            timezone: 'UTC'
-          })
-        });
       }
 
-      router.push('/dashboard');
+      // 3. Redirigir a birth-data para completar el perfil
+      router.push('/birth-data');
     } catch (err: unknown) {
       const errorCode = (err as { code?: string })?.code;
 
