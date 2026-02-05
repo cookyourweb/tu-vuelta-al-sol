@@ -349,22 +349,22 @@ export function formatEventForBook(event: any, natalHouses?: NatalHouse[]) {
     tipo = mapEventType(event.type);
   }
 
+  // ✅ FIX: Obtener signo primero (puede estar en sign o en metadata.zodiacSign)
+  const signo = event.sign || event.metadata?.zodiacSign || undefined;
+
   // Calcular casa natal para eventos lunares si tenemos datos
   let casaNatal: number | undefined;
-  if (natalHouses && (tipo === 'lunaNueva' || tipo === 'lunaLlena') && event.sign) {
-    casaNatal = calculateHouseForSign(event.sign, natalHouses);
+  if (natalHouses && (tipo === 'lunaNueva' || tipo === 'lunaLlena') && signo) {
+    casaNatal = calculateHouseForSign(signo, natalHouses);
   }
 
   // Obtener interpretación personalizada o genérica
   let interpretacion = formatInterpretationForBook(event.interpretation);
 
-  // Si no hay interpretación personalizada, usar genérica (con casa natal si disponible)
+  // Si no hay interpretación personalizada, usar genérica (con signo y casa natal)
   if (!interpretacion) {
-    interpretacion = getGenericInterpretation(tipo, event.sign, event.title, casaNatal);
+    interpretacion = getGenericInterpretation(tipo, signo, event.title, casaNatal);
   }
-
-  // Obtener signo del evento (puede estar en sign o en metadata.zodiacSign)
-  const signo = event.sign || event.metadata?.zodiacSign || undefined;
 
   return {
     dia: new Date(event.date).getDate(),

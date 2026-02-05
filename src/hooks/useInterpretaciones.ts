@@ -188,10 +188,12 @@ export function useInterpretaciones({
   }
 
   /**
-   * Obtiene los eventos de un mes específico que tienen interpretación
+   * Obtiene los eventos de un mes específico
+   * ✅ FIX: Devolver TODOS los eventos del mes, no solo los que tienen interpretación
+   * El código de display manejará mostrar contenido genérico cuando no hay interpretación
    *
    * @param monthIndex - Índice del mes (0 = Enero, 1 = Febrero, etc.)
-   * @returns Array de eventos del mes con interpretación
+   * @returns Array de eventos del mes
    */
   function getEventosForMonth(monthIndex: number): AstrologicalEvent[] {
     if (!solarCycle || !solarCycle.events || !Array.isArray(solarCycle.events)) {
@@ -200,10 +202,9 @@ export function useInterpretaciones({
 
     return solarCycle.events.filter(event => {
       const eventDate = new Date(event.date);
-      const hasInterpretation = !!event.interpretation;
-
-      // Filtrar por mes Y que tenga interpretación
-      return eventDate.getMonth() === monthIndex && hasInterpretation;
+      // ✅ FIX: Solo filtrar por mes, NO por si tiene interpretación
+      // formatEventForBook generará contenido genérico si no hay interpretación personalizada
+      return eventDate.getMonth() === monthIndex;
     });
   }
 
