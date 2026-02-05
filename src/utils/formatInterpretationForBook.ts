@@ -256,81 +256,9 @@ function getHouseDescription(houseNumber: number, tipo: 'lunaNueva' | 'lunaLlena
 }
 
 /**
- * Genera interpretación genérica para un evento cuando no hay personalizada
+ * REMOVIDO: Ya no generamos interpretaciones genéricas
+ * Si no hay interpretación personalizada, retornamos null para indicar que falta
  */
-function getGenericInterpretation(tipo: string, signo?: string, titulo?: string, casaNatal?: number): string {
-  const signDescriptions: Record<string, { energia: string; tema: string }> = {
-    'Aries': { energia: 'acción, iniciativa y coraje', tema: 'empezar algo nuevo con valentía' },
-    'Tauro': { energia: 'estabilidad, disfrute y seguridad', tema: 'conectar con lo que te da paz y placer' },
-    'Géminis': { energia: 'comunicación, curiosidad y adaptabilidad', tema: 'aprender, conversar y explorar nuevas ideas' },
-    'Cáncer': { energia: 'emociones, hogar y nutrición', tema: 'cuidar tu mundo interior y tu familia' },
-    'Leo': { energia: 'creatividad, expresión y brillo', tema: 'brillar con autenticidad y generosidad' },
-    'Virgo': { energia: 'análisis, servicio y perfeccionamiento', tema: 'organizar, sanar y mejorar lo cotidiano' },
-    'Libra': { energia: 'armonía, relaciones y equilibrio', tema: 'buscar balance y belleza en los vínculos' },
-    'Escorpio': { energia: 'transformación, intensidad y profundidad', tema: 'soltar lo viejo para renacer' },
-    'Sagitario': { energia: 'expansión, optimismo y búsqueda de sentido', tema: 'explorar nuevos horizontes y creencias' },
-    'Capricornio': { energia: 'estructura, disciplina y logros', tema: 'construir con paciencia y responsabilidad' },
-    'Acuario': { energia: 'innovación, libertad y comunidad', tema: 'ser auténtico y conectar con tu tribu' },
-    'Piscis': { energia: 'intuición, espiritualidad y compasión', tema: 'fluir, soñar y conectar con lo trascendente' }
-  };
-
-  const signInfo = signo ? signDescriptions[signo] : null;
-
-  // Información de casa natal (si está disponible)
-  const houseInfo = casaNatal ? getHouseDescription(casaNatal, tipo as 'lunaNueva' | 'lunaLlena') : '';
-
-  if (tipo === 'lunaNueva') {
-    let text = '';
-    if (signInfo) {
-      text = `Esta Luna Nueva en ${signo} te invita a sembrar intenciones relacionadas con ${signInfo.energia}. Es momento de ${signInfo.tema}.`;
-    } else {
-      text = 'La Luna Nueva es momento de nuevos comienzos.';
-    }
-    // Añadir información de casa natal si está disponible
-    if (houseInfo) {
-      text += `\n\n${houseInfo}`;
-    }
-    text += '\n\nLas semillas que plantes hoy florecerán en los próximos 6 meses.';
-    return text;
-  }
-
-  if (tipo === 'lunaLlena') {
-    let text = '';
-    if (signInfo) {
-      text = `Esta Luna Llena en ${signo} ilumina temas de ${signInfo.energia}. Es momento de celebrar logros, soltar lo que ya no sirve y ${signInfo.tema}.`;
-    } else {
-      text = 'La Luna Llena trae culminación e iluminación.';
-    }
-    // Añadir información de casa natal si está disponible
-    if (houseInfo) {
-      text += `\n\n${houseInfo}`;
-    }
-    text += '\n\nObserva qué ha llegado a su punto máximo y qué necesitas soltar.';
-    return text;
-  }
-
-  if (tipo === 'retrogrado') {
-    const planeta = titulo?.split(' ')[0] || 'El planeta';
-    return `${planeta} inicia su fase retrógrada. Es momento de revisar, reflexionar y reconectar con temas del pasado. Evita iniciar proyectos nuevos importantes y usa esta energía para completar lo pendiente.`;
-  }
-
-  if (tipo === 'ingreso') {
-    if (signInfo && titulo) {
-      const planeta = titulo.split(' ')[0] || 'El planeta';
-      return `${planeta} entra en ${signo}, activando energías de ${signInfo.energia}. Los próximos meses te invitan a ${signInfo.tema}.`;
-    }
-    return 'Este tránsito marca un cambio de energía significativo. Presta atención a los nuevos temas que surgen.';
-  }
-
-  if (tipo === 'eclipse') {
-    if (signInfo) {
-      return `Este eclipse en ${signo} marca un punto de inflexión potente. Los temas de ${signInfo.energia} están siendo activados a nivel profundo. Los eclipses traen cambios que se despliegan durante los próximos 6 meses.`;
-    }
-    return 'Los eclipses son portales de transformación. Algo termina para que algo nuevo pueda comenzar.';
-  }
-
-  return 'Evento astrológico significativo. Presta atención a los temas que surgen en tu vida.';
-}
 
 /**
  * Formatea un evento completo para el libro, mapeando todos los campos necesarios
@@ -358,13 +286,9 @@ export function formatEventForBook(event: any, natalHouses?: NatalHouse[]) {
     casaNatal = calculateHouseForSign(signo, natalHouses);
   }
 
-  // Obtener interpretación personalizada o genérica
-  let interpretacion = formatInterpretationForBook(event.interpretation);
-
-  // Si no hay interpretación personalizada, usar genérica (con signo y casa natal)
-  if (!interpretacion) {
-    interpretacion = getGenericInterpretation(tipo, signo, event.title, casaNatal);
-  }
+  // ✅ SOLO interpretación personalizada - NO genérica
+  // Si no hay interpretación, se devuelve null para indicar que falta por generar
+  const interpretacion = formatInterpretationForBook(event.interpretation) || null;
 
   return {
     dia: new Date(event.date).getDate(),
@@ -372,7 +296,10 @@ export function formatEventForBook(event: any, natalHouses?: NatalHouse[]) {
     titulo: event.title,
     signo,
     interpretacion,
-    casaNatal // Incluir la casa natal en el objeto retornado
+    casaNatal,
+    // ✅ NUEVO: Flag para saber si tiene interpretación personalizada
+    tieneInterpretacion: !!interpretacion,
+    eventId: event._id || event.id // Para poder generar la interpretación después
   };
 }
 

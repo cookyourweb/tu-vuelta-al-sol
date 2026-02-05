@@ -279,8 +279,12 @@ export const LunasYEjercicios: React.FC<{
             {lunaNueva ? (
               <div className="space-y-2">
                 <p className={`text-sm font-medium ${config.iconPrimary}`}>{lunaNueva.titulo}</p>
-                {lunaNueva.interpretacion && (
+                {lunaNueva.interpretacion ? (
                   <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-line">{lunaNueva.interpretacion}</p>
+                ) : (
+                  <p className="text-xs text-amber-600 italic bg-amber-50 p-2 rounded border border-amber-200">
+                    ⚠️ Pendiente de personalizar. Ve a la Agenda y haz clic en este evento.
+                  </p>
                 )}
                 <LineasEscritura count={3} spacing={24} />
               </div>
@@ -304,8 +308,12 @@ export const LunasYEjercicios: React.FC<{
             {lunaLlena ? (
               <div className="space-y-2">
                 <p className={`text-sm font-medium ${config.iconSecondary}`}>{lunaLlena.titulo}</p>
-                {lunaLlena.interpretacion && (
+                {lunaLlena.interpretacion ? (
                   <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-line">{lunaLlena.interpretacion}</p>
+                ) : (
+                  <p className="text-xs text-amber-600 italic bg-amber-50 p-2 rounded border border-amber-200">
+                    ⚠️ Pendiente de personalizar. Ve a la Agenda y haz clic en este evento.
+                  </p>
                 )}
                 <LineasEscritura count={3} spacing={24} />
               </div>

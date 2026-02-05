@@ -35,6 +35,14 @@ interface UseInterpretacionesReturn {
   error: string | null;
   getEventosForMonth: (monthIndex: number) => AstrologicalEvent[];
   refetchCycle: () => Promise<void>;
+  // ✅ NUEVO: Estadísticas de interpretaciones
+  eventStats: {
+    total: number;
+    conInterpretacion: number;
+    sinInterpretacion: number;
+  };
+  // ✅ NUEVO: Mapa de interpretaciones personalizadas cargadas
+  storedInterpretations: Map<string, any>;
 }
 
 /**
@@ -56,6 +64,10 @@ export function useInterpretaciones({
   const [generatingMissing, setGeneratingMissing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  // ✅ NUEVO: Mapa de interpretaciones personalizadas cargadas desde la colección separada
+  const [storedInterpretations, setStoredInterpretations] = useState<Map<string, any>>(new Map());
+  // ✅ NUEVO: Stats de eventos
+  const [eventStats, setEventStats] = useState({ total: 0, conInterpretacion: 0, sinInterpretacion: 0 });
 
   useEffect(() => {
     if (userId && yearLabel) {
@@ -96,6 +108,50 @@ export function useInterpretaciones({
       console.log('🔍 Ciclo cargado:', cycle);
       console.log('📊 Tiene events?', !!cycle?.events);
       console.log('📈 Número de events:', cycle?.events?.length || 0);
+
+      // ✅ NUEVO: Cargar interpretaciones personalizadas almacenadas
+      const interpretationsMap = new Map<string, any>();
+      try {
+        const storedResponse = await fetch(
+          `/api/interpretations/event?userId=${userId}`
+        );
+        if (storedResponse.ok) {
+          const storedData = await storedResponse.json();
+          if (storedData.interpretations && Array.isArray(storedData.interpretations)) {
+            storedData.interpretations.forEach((interp: any) => {
+              // Usar eventId como clave
+              if (interp.eventId) {
+                interpretationsMap.set(interp.eventId, interp.interpretation);
+              }
+            });
+            console.log(`✅ Cargadas ${interpretationsMap.size} interpretaciones personalizadas`);
+          }
+        }
+      } catch (err) {
+        console.log('⚠️ No se pudieron cargar interpretaciones almacenadas:', err);
+      }
+      setStoredInterpretations(interpretationsMap);
+
+      // ✅ NUEVO: Merge interpretaciones almacenadas con eventos del ciclo
+      if (cycle?.events && interpretationsMap.size > 0) {
+        cycle.events = cycle.events.map((event: AstrologicalEvent) => {
+          const storedInterp = interpretationsMap.get(event.id);
+          if (storedInterp && !event.interpretation) {
+            return { ...event, interpretation: storedInterp };
+          }
+          return event;
+        });
+      }
+
+      // ✅ NUEVO: Calcular estadísticas
+      const total = cycle?.events?.length || 0;
+      const conInterpretacion = cycle?.events?.filter((e: AstrologicalEvent) => !!e.interpretation)?.length || 0;
+      setEventStats({
+        total,
+        conInterpretacion,
+        sinInterpretacion: total - conInterpretacion
+      });
+      console.log(`📊 Stats: ${conInterpretacion}/${total} eventos con interpretación`);
 
       setSolarCycle(cycle);
 
@@ -215,6 +271,9 @@ export function useInterpretaciones({
     progress,
     error,
     getEventosForMonth,
-    refetchCycle
+    refetchCycle,
+    // ✅ NUEVO: Exponer estadísticas e interpretaciones
+    eventStats,
+    storedInterpretations
   };
 }

@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useStyle } from '@/context/StyleContext';
 import { StyleSwitcher } from '@/components/agenda/StyleSwitcher';
-import { Printer, X, FileDown, RefreshCw, Download, Info } from 'lucide-react';
+import { Printer, X, FileDown, RefreshCw, Download, Info, Sparkles } from 'lucide-react';
 import { useInterpretaciones } from '@/hooks/useInterpretaciones';
 import { formatEventForBook, formatInterpretationCompact } from '@/utils/formatInterpretationForBook';
 
@@ -57,7 +57,8 @@ export const AgendaLibro = ({
     generatingMissing,
     progress,
     error,
-    getEventosForMonth
+    getEventosForMonth,
+    eventStats  // ✅ NUEVO: Estadísticas de eventos
   } = useInterpretaciones({ userId, yearLabel });
 
   // Estado para almacenar la interpretación del Retorno Solar
@@ -1584,6 +1585,34 @@ export const AgendaLibro = ({
         <p className="text-center text-sm mt-2 opacity-90">
           Agenda de <span className="font-semibold">{userName}</span> · {format(startDate, "d MMM yyyy", { locale: es })} - {format(endDate, "d MMM yyyy", { locale: es })}
         </p>
+
+        {/* ✅ NUEVO: Banner de alerta si faltan interpretaciones personalizadas */}
+        {eventStats.sinInterpretacion > 0 && (
+          <div className="mt-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-400/50 rounded-lg p-3">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-amber-400" />
+                <span className="text-sm">
+                  <strong>{eventStats.sinInterpretacion}</strong> de {eventStats.total} eventos sin personalizar
+                </span>
+              </div>
+              <button
+                onClick={() => {
+                  // Ir a la agenda para personalizar
+                  onClose();
+                  window.location.href = `/agenda?personalizar=true`;
+                }}
+                className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold text-sm hover:from-amber-400 hover:to-orange-400 transition-all shadow-md"
+              >
+                <Sparkles className="w-4 h-4" />
+                Personalizar ahora
+              </button>
+            </div>
+            <p className="text-xs text-amber-200/80 mt-1">
+              Ve a la Agenda y haz clic en cada evento para generar su interpretación personalizada con IA.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Modal de instrucciones para PDF */}
