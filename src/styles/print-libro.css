@@ -35,14 +35,8 @@ body {
   content: "" !important;
 }
 
-/* En pantalla, mostrar preview del contador */
+/* En pantalla, ocultar el span con fallback cuando hay contador */
 @media screen {
-  .page-number-auto::before {
-    content: counter(page-counter);
-    font-weight: 600;
-  }
-
-  /* Ocultar el span con fallback en pantalla cuando hay contador */
   .page-number-auto > span {
     display: none;
   }
