@@ -11,6 +11,13 @@ interface AstrologicalEvent {
   interpretation?: any;
   description?: string;
   priority?: string;
+  // ✅ Campos adicionales para casas y metadata
+  metadata?: {
+    house?: number;
+    zodiacSign?: string;
+    degree?: number;
+    [key: string]: any;
+  };
 }
 
 interface SolarCycle {
@@ -110,21 +117,27 @@ export function useInterpretaciones({
       console.log('📈 Número de events:', cycle?.events?.length || 0);
 
       // ✅ NUEVO: Cargar interpretaciones personalizadas almacenadas
+      // Usar el rango de fechas del ciclo solar para cargar TODO el año
       const interpretationsMap = new Map<string, any>();
       try {
+        const startDate = cycle.cycleStart;
+        const endDate = cycle.cycleEnd;
         const storedResponse = await fetch(
-          `/api/interpretations/event?userId=${userId}`
+          `/api/interpretations/event?userId=${userId}&startDate=${startDate}&endDate=${endDate}`
         );
         if (storedResponse.ok) {
           const storedData = await storedResponse.json();
           if (storedData.interpretations && Array.isArray(storedData.interpretations)) {
             storedData.interpretations.forEach((interp: any) => {
-              // Usar eventId como clave
+              // Usar eventId como clave - guardar objeto completo (interpretation + eventDetails)
               if (interp.eventId) {
-                interpretationsMap.set(interp.eventId, interp.interpretation);
+                interpretationsMap.set(interp.eventId, {
+                  interpretation: interp.interpretation,
+                  eventDetails: interp.eventDetails
+                });
               }
             });
-            console.log(`✅ Cargadas ${interpretationsMap.size} interpretaciones personalizadas`);
+            console.log(`✅ Cargadas ${interpretationsMap.size} interpretaciones personalizadas del ciclo`);
           }
         }
       } catch (err) {
@@ -133,11 +146,17 @@ export function useInterpretaciones({
       setStoredInterpretations(interpretationsMap);
 
       // ✅ NUEVO: Merge interpretaciones almacenadas con eventos del ciclo
+      // Incluir tanto interpretation como eventDetails (que contiene la casa correcta)
       if (cycle?.events && interpretationsMap.size > 0) {
         cycle.events = cycle.events.map((event: AstrologicalEvent) => {
-          const storedInterp = interpretationsMap.get(event.id);
-          if (storedInterp && !event.interpretation) {
-            return { ...event, interpretation: storedInterp };
+          const stored = interpretationsMap.get(event.id);
+          if (stored && !event.interpretation) {
+            return {
+              ...event,
+              interpretation: stored.interpretation,
+              // Merge eventDetails si tiene la casa
+              house: stored.eventDetails?.house || event.house
+            };
           }
           return event;
         });
