@@ -6,6 +6,7 @@ import NatalChart from '@/models/NatalChart';
 import Interpretation from '@/models/Interpretation';
 import User from '@/models/User';
 import { calculateSolarYearEvents } from '@/utils/astrology/solarYearEvents';
+import { calculateHouseForEvent } from '@/utils/eventMapping';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import OpenAI from 'openai';
@@ -117,13 +118,16 @@ export async function POST(request: NextRequest) {
     // calculateSolarYearEvents solo necesita la fecha de inicio (cumpleaños)
     const solarEvents = await calculateSolarYearEvents(startDate);
 
+    // Datos de carta natal para calcular casas
+    const natalChartData = natalChart.natalChart || natalChart;
+
     // Convertir eventos a formato plano para facilitar el procesamiento
     const yearEvents = [
       ...solarEvents.lunarPhases.map(phase => ({
         type: phase.type === 'new_moon' ? 'luna-nueva' : 'luna-llena',
         date: phase.date,
         sign: phase.sign,
-        house: 1, // TODO: calcular casa real
+        house: calculateHouseForEvent(phase.sign, phase.degree || 0, natalChartData),
         description: phase.description,
         degree: phase.degree
       })),
@@ -131,7 +135,7 @@ export async function POST(request: NextRequest) {
         type: eclipse.type === 'solar' ? 'eclipse-solar' : 'eclipse-lunar',
         date: eclipse.date,
         sign: eclipse.sign,
-        house: 1, // TODO: calcular casa real
+        house: calculateHouseForEvent(eclipse.sign, eclipse.degree || 0, natalChartData),
         description: eclipse.description,
         degree: eclipse.degree
       })),
@@ -140,7 +144,7 @@ export async function POST(request: NextRequest) {
         date: ingress.date,
         sign: ingress.toSign,
         planet: ingress.planet,
-        house: 1, // TODO: calcular casa real
+        house: calculateHouseForEvent(ingress.toSign, (ingress as any).toDegree || 0, natalChartData),
         description: ingress.description
       })),
       ...solarEvents.retrogrades.map(retro => ({
@@ -148,7 +152,7 @@ export async function POST(request: NextRequest) {
         date: retro.startDate,
         sign: retro.startSign,
         planet: retro.planet,
-        house: 1, // TODO: calcular casa real
+        house: calculateHouseForEvent(retro.startSign, (retro as any).startDegree || 0, natalChartData),
         description: retro.description
       }))
     ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());

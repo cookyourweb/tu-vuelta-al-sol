@@ -317,11 +317,22 @@ export default function LibroAgendaPage() {
                 ...monthData.ingresos_destacados.map(e => ({ date: e.fecha, type: 'ingreso', sign: e.signo, description: e.descripcion, house: 1 })) // ingresos no tienen casa
               ];
 
+              // Transformar monthData para MesPage (Spanish → English field names)
+              const transformedMonthData = {
+                nombre: monthData.nombre,
+                nombreCorto: monthData.nombreCorto,
+                lunas_nuevas: monthData.lunas_nuevas.map(e => ({ date: e.fecha, type: 'luna-nueva', sign: e.signo, signo: e.signo, description: e.descripcion, house: e.casa })),
+                lunas_llenas: monthData.lunas_llenas.map(e => ({ date: e.fecha, type: 'luna-llena', sign: e.signo, signo: e.signo, description: e.descripcion, house: e.casa })),
+                eclipses: monthData.eclipses.map(e => ({ date: e.fecha, type: e.tipo, sign: e.signo, signo: e.signo, description: e.descripcion, house: e.casa })),
+                ingresos_destacados: monthData.ingresos_destacados.map(e => ({ date: e.fecha, type: 'ingreso', sign: e.signo, signo: e.signo, description: e.descripcion })),
+                total_eventos: monthData.total_eventos,
+              };
+
               return (
                 <MesPage
                   key={index}
                   monthDate={monthDate}
-                
+                  monthData={transformedMonthData}
                   interpretation={monthInterp}
                   allEvents={allMonthEvents}
                   userName={bookContent.userName}
