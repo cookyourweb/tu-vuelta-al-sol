@@ -143,7 +143,7 @@ export default function MesPage({
                   return (
                     <div
                       key={`empty-${idx}`}
-                      className="aspect-square border-r border-b border-gray-200 bg-gray-50"
+                      className="min-h-[80px] border-r border-b border-gray-200 bg-gray-50"
                     />
                   );
                 }
@@ -155,7 +155,7 @@ export default function MesPage({
                   <div
                     key={idx}
                     className={`
-                      aspect-square border-r border-b border-gray-200 p-2
+                      min-h-[80px] border-r border-b border-gray-200 p-1.5
                       ${hasEvents ? 'bg-cosmic-gold/5' : 'bg-white'}
                       ${idx % 7 === 6 ? 'border-r-0' : ''}
                     `}
@@ -169,17 +169,25 @@ export default function MesPage({
                         {format(day, 'd')}
                       </div>
 
-                      {/* Indicadores de eventos */}
+                      {/* Eventos del día - mostrar texto completo */}
                       {hasEvents && (
-                        <div className="flex flex-wrap gap-1">
+                        <div className="flex flex-col gap-0.5 overflow-hidden">
                           {dayEvents.map((event, eventIdx) => (
-                            <span
+                            <div
                               key={eventIdx}
-                              className="text-xs"
+                              className="text-[9px] leading-tight text-gray-700 truncate"
                               title={event.description || event.type}
                             >
-                              {getEventIcon(event.type, event)}
-                            </span>
+                              <span className="mr-0.5">{getEventIcon(event.type, event)}</span>
+                              <span className="font-medium">
+                                {getEventLabel(event.type)}
+                              </span>
+                              {(event.sign || event.signo) && (
+                                <span className="text-cosmic-gold ml-0.5">
+                                  {event.sign || event.signo}
+                                </span>
+                              )}
+                            </div>
                           ))}
                         </div>
                       )}
@@ -545,4 +553,19 @@ function getEventIcon(type: string, event?: any): string {
   }
 
   return icons[type] || '•';
+}
+
+// Helper: Obtener etiqueta corta del evento
+function getEventLabel(type: string): string {
+  const labels: { [key: string]: string } = {
+    'luna-nueva': 'L.Nueva',
+    'luna-llena': 'L.Llena',
+    'eclipse-solar': 'Ecl.Sol',
+    'eclipse-lunar': 'Ecl.Lun',
+    'retrogrado-inicio': 'Retro',
+    'retrogrado-fin': 'Directo',
+    'ingreso': 'Ingreso',
+    'ingreso-planetario': 'Ingreso',
+  };
+  return labels[type] || type;
 }

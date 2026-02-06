@@ -2,6 +2,7 @@
 
 import { useStyle } from "@/context/StyleContext";
 import { FooterLibro } from './MesCompleto';
+import { Sun, Calendar, Sparkles, AlertTriangle, Check, RefreshCw, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface TuAnioTuViajeProps {
   name: string;
@@ -60,13 +61,89 @@ export const CartaBienvenida = ({ name }: TuAnioTuViajeProps) => {
         Con amor cósmico ✧
       </div>
 
+      <FooterLibro pagina={2} />
+    </div>
+  );
+};
+
+// NUEVO COMPONENTE: Guía de navegación de la agenda
+export const GuiaAgenda = () => {
+  const { config } = useStyle();
+
+  return (
+    <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
+      <div className="text-center mb-8">
+        <span className={`${config.iconSecondary} opacity-60 text-sm tracking-[0.3em] uppercase ${config.fontBody}`}>Guía de Navegación</span>
+        <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient} mt-2`}>Qué vas a encontrar en esta agenda</h2>
+        <div className={`${config.divider} w-16 mx-auto mt-4`} />
+      </div>
+
+      <div className={`flex-1 space-y-6 max-w-2xl mx-auto w-full ${config.fontBody}`}>
+        <div className={`${config.highlightSecondary} rounded-lg p-6`}>
+          <h3 className={`${config.fontDisplay} ${config.iconSecondary} font-medium mb-3 text-lg`}>💫 Tu Carta Natal</h3>
+          <p className="text-gray-700 leading-relaxed">
+            Tu esencia, tus dones, tu propósito vital.
+            El mapa del cielo en el momento exacto de tu nacimiento.
+          </p>
+        </div>
+
+        <div className={`${config.highlightPrimary} rounded-lg p-6`}>
+          <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3 text-lg flex items-center gap-2`}><Sun className="w-5 h-5" /> Tu Retorno Solar</h3>
+          <p className="text-gray-700 leading-relaxed">
+            El tema central de tu año, cómo se siente este ciclo y qué vino a moverte.
+            Una interpretación profunda de tu carta astrológica anual.
+          </p>
+        </div>
+
+        <div className={`${config.highlightAccent} rounded-lg p-6`}>
+          <h3 className={`${config.fontDisplay} ${config.iconAccent} font-medium mb-3 text-lg flex items-center gap-2`}><Calendar className="w-5 h-5" /> Calendario Astrológico</h3>
+          <p className="text-gray-700 leading-relaxed">
+            12 meses con Lunas Nuevas, Lunas Llenas, eclipses, retrogradaciones y tránsitos importantes.
+            Cada mes tiene espacio para escribir y reflexionar.
+          </p>
+        </div>
+
+        <div className={`${config.highlightPrimary} rounded-lg p-6`}>
+          <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3 text-lg flex items-center gap-2`}><Sparkles className="w-5 h-5" /> Ejercicios y Rituales</h3>
+          <p className="text-gray-700 leading-relaxed">
+            Prácticas creativas, visualizaciones, rituales simbólicos y espacios para escribir.
+            Herramientas para integrar la astrología en tu vida diaria.
+          </p>
+        </div>
+
+        <div className="text-center mt-8 p-6 border-2 border-dashed border-gray-200 rounded-lg">
+          <p className={`${config.iconSecondary} text-sm italic`}>
+            Esta agenda es tu compañera de viaje.<br />
+            No la uses de forma lineal si no quieres.<br />
+            Abre donde te llame la intuición.
+          </p>
+        </div>
+      </div>
+
       <FooterLibro pagina={3} />
     </div>
   );
 };
 
-export const TemaCentralAnio = () => {
+interface TemaCentralAnioProps {
+  interpretacion?: string;
+  srInterpretation?: any; // Interpretación completa del SR
+  onGenerateSolarReturn?: () => void;
+  isGenerating?: boolean;
+}
+
+export const TemaCentralAnio = ({
+  interpretacion,
+  srInterpretation,
+  onGenerateSolarReturn,
+  isGenerating = false
+}: TemaCentralAnioProps) => {
   const { config } = useStyle();
+
+  // Verificar si hay SR completo, no solo tema central
+  const tieneSolarReturn = !!srInterpretation;
+  const esInterpretacionPersonalizada = !!interpretacion;
+  const aperturaAnual = srInterpretation?.apertura_anual;
 
   return (
     <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
@@ -74,89 +151,258 @@ export const TemaCentralAnio = () => {
         <span className={`${config.iconSecondary} opacity-60 text-sm tracking-[0.3em] uppercase ${config.fontBody}`}>Tu Año, Tu Viaje</span>
         <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient} mt-2`}>El tema central de tu año</h2>
         <div className={`${config.divider} w-16 mx-auto mt-4`} />
+
+        {/* Indicador de interpretación personalizada */}
+        {tieneSolarReturn ? (
+          <div className="mt-3 inline-flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full">
+            <span className="text-xs font-semibold text-purple-700 flex items-center gap-1"><Sparkles className="w-3 h-3" /> Interpretación Personalizada</span>
+          </div>
+        ) : (
+          <div className="mt-3 inline-flex flex-col items-center gap-3 px-6 py-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border-2 border-amber-200 no-print">
+            {isGenerating ? (
+              <>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+                <span className="text-sm font-semibold text-amber-800 flex items-center gap-1"><Sparkles className="w-4 h-4" /> Generando tu Retorno Solar...</span>
+                <p className="text-xs text-amber-700 text-center max-w-md">
+                  Esto puede tomar 1-2 minutos. Estamos interpretando tu carta astrológica anual.
+                </p>
+              </>
+            ) : (
+              <>
+                <span className="text-sm font-semibold text-amber-800 flex items-center gap-1"><AlertTriangle className="w-4 h-4" /> Interpretación No Disponible</span>
+                <p className="text-xs text-amber-700 text-center max-w-md">
+                  Para ver el tema central de tu año personalizado, necesitas generar tu <strong>Retorno Solar (Revolución Solar)</strong>.
+                </p>
+                {onGenerateSolarReturn ? (
+                  <>
+                    <button
+                      onClick={onGenerateSolarReturn}
+                      className="mt-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-semibold rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all shadow-md"
+                    >
+                      <Sparkles className="w-4 h-4 inline mr-1" /> Generar Ahora (1-2 min)
+                    </button>
+                    <p className="text-xs text-amber-600 italic">
+                      O visita <a href="/solar-return" className="underline hover:text-amber-800">la página de Solar Return</a>
+                    </p>
+                  </>
+                ) : (
+                  <a
+                    href="/solar-return"
+                    className="mt-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-semibold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all no-underline"
+                  >
+                    Generar Retorno Solar →
+                  </a>
+                )}
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       <div className={`flex-1 flex flex-col justify-center max-w-2xl mx-auto w-full ${config.fontBody}`}>
-        <div className={`${config.highlightSecondary} rounded-lg p-8 mb-8 text-center`}>
-          <p className={`text-xl italic ${config.iconPrimary} leading-relaxed`}>
-            "Un año de introspección consciente para redefinir tu identidad desde dentro."
-          </p>
-        </div>
+        {tieneSolarReturn ? (
+          <>
+            {/* Tema Central */}
+            {interpretacion && (
+              <div className={`${config.highlightPrimary} rounded-lg p-8 mb-6`}>
+                <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-4 text-lg`}>El tema central</h3>
+                <div className="text-gray-700 text-base leading-relaxed whitespace-pre-line">
+                  {interpretacion}
+                </div>
+              </div>
+            )}
 
-        <div className="space-y-6 text-gray-700 text-lg leading-relaxed">
-          <p>
-            Este ciclo no se mide por logros externos.<br />
-            Se mide por claridad interna.
-          </p>
+            {/* Eje del Año */}
+            {aperturaAnual?.eje_del_ano && (
+              <div className={`${config.highlightSecondary} rounded-lg p-6 mb-4`}>
+                <h3 className={`${config.fontDisplay} ${config.iconSecondary} font-medium mb-3`}>El eje del año</h3>
+                <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                  {aperturaAnual.eje_del_ano}
+                </div>
+              </div>
+            )}
 
-          <p>
-            Este es el año en el que te retiras un poco…<br />
-            para volver mucho más alineada contigo.
-          </p>
-        </div>
+            {/* Cómo se Siente */}
+            {aperturaAnual?.como_se_siente && (
+              <div className={`${config.highlightAccent} rounded-lg p-6 mb-4`}>
+                <h3 className={`${config.fontDisplay} ${config.iconAccent} font-medium mb-3`}>Cómo se siente este año</h3>
+                <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                  {aperturaAnual.como_se_siente}
+                </div>
+              </div>
+            )}
+
+            {/* Conexión Natal */}
+            {aperturaAnual?.conexion_natal && (
+              <div className={`${config.highlightPrimary} rounded-lg p-6`}>
+                <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3`}>Conexión con tu carta natal</h3>
+                <div className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
+                  {aperturaAnual.conexion_natal}
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className={`${config.highlightSecondary} rounded-lg p-8 mb-8 opacity-50`}>
+            <div className="space-y-6 text-gray-500 text-lg leading-relaxed italic text-center">
+              <p>
+                Esta página mostrará el tema central de tu año solar<br />
+                una vez que generes tu Retorno Solar.
+              </p>
+              <p className="text-sm">
+                El Retorno Solar es tu carta astrológica anual,<br />
+                calculada para el momento exacto en que el Sol regresa<br />
+                a la posición que tenía cuando naciste.
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="text-center mt-12">
           <span className={`${config.iconSecondary} opacity-40 text-2xl`}>☉</span>
         </div>
       </div>
 
-      <FooterLibro pagina={4} />
+      <FooterLibro pagina={6} />
     </div>
   );
 };
 
-export const LoQueVieneAMover = () => {
+interface LoQueVieneMoverProps {
+  facilidad?: string;
+  incomodidad?: string;
+  medida_del_ano?: string;
+  actitud_nueva?: string;
+}
+
+export const LoQueVieneAMover = ({
+  facilidad,
+  incomodidad,
+  medida_del_ano,
+  actitud_nueva
+}: LoQueVieneMoverProps) => {
   const { config } = useStyle();
+
+  const tieneContenidoPersonalizado = !!(facilidad || incomodidad || medida_del_ano || actitud_nueva);
 
   return (
     <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
       <div className="text-center mb-8">
-        <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient}`}>Lo que este año viene a mover</h2>
+        <span className={`${config.iconSecondary} opacity-60 text-sm tracking-[0.3em] uppercase ${config.fontBody}`}>Tu Año, Tu Viaje</span>
+        <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient} mt-2`}>
+          Cómo se vive siendo tú este año
+        </h2>
         <div className={`${config.divider} w-16 mx-auto mt-4`} />
+
+        {!tieneContenidoPersonalizado && (
+          <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-lg no-print">
+            <span className="text-xs text-amber-700 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Genera tu Retorno Solar para ver contenido personalizado</span>
+          </div>
+        )}
       </div>
 
-      <div className={`flex-1 grid grid-cols-1 gap-6 max-w-2xl mx-auto w-full ${config.fontBody}`}>
-        <div className={`${config.highlightPrimary} rounded-lg p-6`}>
-          <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3`}>En tu interior</h3>
-          <ul className="space-y-2 text-gray-700">
-            <li>• Silencios necesarios.</li>
-            <li>• Procesos inconscientes que por fin salen a la luz.</li>
-            <li>• Una redefinición profunda de quién eres cuando no te están mirando.</li>
-          </ul>
-        </div>
+      <div className={`flex-1 space-y-6 max-w-2xl mx-auto w-full ${config.fontBody}`}>
+        {tieneContenidoPersonalizado ? (
+          <>
+            {/* Medida del Año */}
+            {medida_del_ano && (
+              <div className={`${config.highlightAccent} rounded-lg p-6`}>
+                <h3 className={`${config.fontDisplay} ${config.iconAccent} font-medium mb-3`}>La medida del año</h3>
+                <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                  {medida_del_ano}
+                </div>
+              </div>
+            )}
 
-        <div className={`${config.highlightSecondary} rounded-lg p-6`}>
-          <h3 className={`${config.fontDisplay} ${config.iconSecondary} font-medium mb-3`}>En tus relaciones</h3>
-          <ul className="space-y-2 text-gray-700">
-            <li>• Menos personajes.</li>
-            <li>• Más verdad.</li>
-            <li>• Vínculos que respeten tu espacio interno.</li>
-          </ul>
-        </div>
+            {/* Lo que fluye naturalmente */}
+            {facilidad && (
+              <div className={`${config.highlightPrimary} rounded-lg p-6`}>
+                <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3 flex items-center gap-2`}><Check className="w-5 h-5" /> Lo que fluye naturalmente</h3>
+                <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                  {facilidad}
+                </div>
+              </div>
+            )}
 
-        <div className={`${config.highlightAccent} rounded-lg p-6`}>
-          <h3 className={`${config.fontDisplay} ${config.iconAccent} font-medium mb-3`}>En tu vida práctica</h3>
-          <ul className="space-y-2 text-gray-700">
-            <li>• Pausas estratégicas.</li>
-            <li>• Decisiones que se gestan antes de ejecutarse.</li>
-            <li>• Cerrar ciclos antes de abrir otros.</li>
-          </ul>
-        </div>
+            {/* Lo que te incomoda */}
+            {incomodidad && (
+              <div className={`${config.highlightSecondary} rounded-lg p-6`}>
+                <h3 className={`${config.fontDisplay} ${config.iconSecondary} font-medium mb-3 flex items-center gap-2`}><AlertTriangle className="w-5 h-5" /> Lo que te incomoda</h3>
+                <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                  {incomodidad}
+                </div>
+              </div>
+            )}
+
+            {/* Actitud Nueva */}
+            {actitud_nueva && (
+              <div className={`${config.highlightPrimary} rounded-lg p-6`}>
+                <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3 flex items-center gap-2`}><Sparkles className="w-5 h-5" /> La actitud nueva que te pide el año</h3>
+                <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                  {actitud_nueva}
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            {/* Contenido genérico (fallback) */}
+            <div className={`${config.highlightPrimary} rounded-lg p-6 opacity-50`}>
+              <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3`}>En tu interior</h3>
+              <ul className="space-y-2 text-gray-700">
+                <li>• Silencios necesarios.</li>
+                <li>• Procesos inconscientes que por fin salen a la luz.</li>
+                <li>• Una redefinición profunda de quién eres cuando no te están mirando.</li>
+              </ul>
+            </div>
+
+            <div className={`${config.highlightSecondary} rounded-lg p-6 opacity-50`}>
+              <h3 className={`${config.fontDisplay} ${config.iconSecondary} font-medium mb-3`}>En tus relaciones</h3>
+              <ul className="space-y-2 text-gray-700">
+                <li>• Menos personajes.</li>
+                <li>• Más verdad.</li>
+                <li>• Vínculos que respeten tu espacio interno.</li>
+              </ul>
+            </div>
+
+            <div className={`${config.highlightAccent} rounded-lg p-6 opacity-50`}>
+              <h3 className={`${config.fontDisplay} ${config.iconAccent} font-medium mb-3`}>En tu vida práctica</h3>
+              <ul className="space-y-2 text-gray-700">
+                <li>• Pausas estratégicas.</li>
+                <li>• Decisiones que se gestan antes de ejecutarse.</li>
+                <li>• Cerrar ciclos antes de abrir otros.</li>
+              </ul>
+            </div>
+          </>
+        )}
       </div>
 
-      <FooterLibro pagina={5} />
+      <FooterLibro pagina={8} />
     </div>
   );
 };
 
-export const LoQuePideSoltar = () => {
+interface LoQuePideSoltarProps {
+  reflejos_obsoletos?: string;
+  sombras?: string[];
+}
+
+export const LoQuePideSoltar = ({ reflejos_obsoletos, sombras }: LoQuePideSoltarProps) => {
   const { config } = useStyle();
+
+  const tieneContenidoPersonalizado = !!(reflejos_obsoletos || (sombras && sombras.length > 0));
 
   return (
     <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
       <div className="text-center mb-8">
         <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient}`}>Lo que este año te pide soltar</h2>
         <div className={`${config.divider} w-16 mx-auto mt-4`} />
+
+        {!tieneContenidoPersonalizado && (
+          <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-lg no-print">
+            <span className="text-xs text-amber-700 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Genera tu Retorno Solar para ver contenido personalizado</span>
+          </div>
+        )}
       </div>
 
       <div className={`flex-1 flex flex-col justify-center max-w-2xl mx-auto w-full ${config.fontBody}`}>
@@ -166,18 +412,48 @@ export const LoQuePideSoltar = () => {
         </p>
 
         <div className="space-y-6">
-          <div className={`flex items-start gap-4 ${config.highlightPrimary} rounded-lg p-4`}>
-            <span className={`${config.iconSecondary} text-2xl`}>☽</span>
-            <span className="text-gray-700">La necesidad de validación externa</span>
-          </div>
-          <div className={`flex items-start gap-4 ${config.highlightSecondary} rounded-lg p-4`}>
-            <span className={`${config.iconSecondary} text-2xl`}>☽</span>
-            <span className="text-gray-700">La urgencia por demostrar</span>
-          </div>
-          <div className={`flex items-start gap-4 ${config.highlightAccent} rounded-lg p-4`}>
-            <span className={`${config.iconSecondary} text-2xl`}>☽</span>
-            <span className="text-gray-700">El miedo a "no estar haciendo suficiente"</span>
-          </div>
+          {tieneContenidoPersonalizado ? (
+            <>
+              {/* Reflejos obsoletos personalizados */}
+              {reflejos_obsoletos && (
+                <div className={`${config.highlightPrimary} rounded-lg p-6`}>
+                  <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3 flex items-center gap-2`}><RefreshCw className="w-5 h-5" /> Reflejos obsoletos</h3>
+                  <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                    {reflejos_obsoletos}
+                  </div>
+                </div>
+              )}
+
+              {/* Sombras del año */}
+              {sombras && sombras.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className={`${config.fontDisplay} text-lg ${config.iconSecondary} font-medium text-center flex items-center justify-center gap-2`}><AlertTriangle className="w-5 h-5" /> Sombras del año</h3>
+                  {sombras.map((sombra, idx) => (
+                    <div key={idx} className={`flex items-start gap-4 ${config.highlightSecondary} rounded-lg p-4`}>
+                      <span className={`${config.iconSecondary} text-2xl`}>☽</span>
+                      <span className="text-gray-700">{sombra}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              {/* Contenido genérico (fallback) */}
+              <div className={`flex items-start gap-4 ${config.highlightPrimary} rounded-lg p-4 opacity-50`}>
+                <span className={`${config.iconSecondary} text-2xl`}>☽</span>
+                <span className="text-gray-700">La necesidad de validación externa</span>
+              </div>
+              <div className={`flex items-start gap-4 ${config.highlightSecondary} rounded-lg p-4 opacity-50`}>
+                <span className={`${config.iconSecondary} text-2xl`}>☽</span>
+                <span className="text-gray-700">La urgencia por demostrar</span>
+              </div>
+              <div className={`flex items-start gap-4 ${config.highlightAccent} rounded-lg p-4 opacity-50`}>
+                <span className={`${config.iconSecondary} text-2xl`}>☽</span>
+                <span className="text-gray-700">El miedo a "no estar haciendo suficiente"</span>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="mt-12 text-center">
@@ -187,7 +463,7 @@ export const LoQuePideSoltar = () => {
         </div>
       </div>
 
-      <FooterLibro pagina={6} />
+      <FooterLibro pagina={9} />
     </div>
   );
 };
@@ -223,7 +499,7 @@ export const PaginaIntencionAnual = () => {
         Página de escritura libre
       </div>
 
-      <FooterLibro />
+      <FooterLibro pagina={28} />
     </div>
   );
 };

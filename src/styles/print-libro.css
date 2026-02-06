@@ -1,16 +1,85 @@
 /* ============================================
    ESTILOS DE IMPRESIÓN PARA LIBRO A5
+   Tu Vuelta al Sol - Agenda Astrológica Personalizada
    ============================================ */
+
+/* ============================================
+   PAGINACIÓN AUTOMÁTICA CON CSS COUNTERS
+   ============================================ */
+
+/* Inicializar contador de páginas */
+.libro-container,
+[class*="libro"],
+body {
+  counter-reset: page-counter;
+}
+
+/* Cada página incrementa el contador */
+.print-page {
+  counter-increment: page-counter;
+}
+
+/* La portada NO incrementa el contador (es página 0) */
+.print-page.no-page-number {
+  counter-increment: none;
+}
+
+/* Mostrar número de página automático en el footer */
+.page-number-auto::after {
+  content: counter(page-counter);
+  font-weight: 600;
+}
+
+/* Para páginas que no deben mostrar número */
+.no-page-number .page-number-auto::after {
+  content: "" !important;
+}
+
+/* En pantalla, ocultar el span con fallback cuando hay contador */
+@media screen {
+  .page-number-auto > span {
+    display: none;
+  }
+}
 
 @media print {
   /* Configuración global de página A5 */
   @page {
-    size: A5 portrait;
+    size: 148mm 210mm; /* A5 explícito */
+    margin: 10mm;
+  }
+
+  /* Páginas pares (izquierda) - margen mayor en lomo */
+  @page :left {
+    margin-left: 15mm; /* Lomo */
+    margin-right: 10mm;
+    margin-top: 10mm;
+    margin-bottom: 10mm;
+  }
+
+  /* Páginas impares (derecha) - margen mayor en lomo */
+  @page :right {
+    margin-left: 10mm;
+    margin-right: 15mm; /* Lomo */
+    margin-top: 10mm;
+    margin-bottom: 10mm;
+  }
+
+  /* Primera página (portada) - sin márgenes adicionales */
+  @page :first {
     margin: 0;
   }
 
   /* Ocultar elementos que no se deben imprimir */
   .no-print {
+    display: none !important;
+  }
+
+  /* Ocultar overlay de generación y modales */
+  [role="dialog"],
+  [class*="modal"],
+  [class*="overlay"],
+  [class*="loading"] {
     display: none !important;
   }
 
@@ -33,15 +102,18 @@
 
   /* Cada página debe ocupar exactamente una hoja A5 */
   .print-page {
-    width: 148mm !important; /* A5 ancho */
-    height: 297mm !important; /* A5 alto */
+    width: 100% !important; /* Ajustado por @page */
+    min-height: 100% !important;
+    max-width: 148mm;
+    max-height: 210mm;
     page-break-after: always;
     page-break-inside: avoid;
-    margin: 0;
+    margin: 0 auto;
     padding: 0;
     overflow: hidden;
     position: relative;
     background: white;
+    box-sizing: border-box;
   }
 
   /* La última página no debe tener page-break */
@@ -183,16 +255,81 @@
   .print-no-bg [class*="pattern"] {
     opacity: 0.05 !important;
   }
+
+  /* ============================================
+     MEJORAS PARA CALIDAD PDF
+     ============================================ */
+
+  /* Asegurar nitidez de texto */
+  .print-page * {
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Colores consistentes para tránsitos */
+  .print-page [class*="bg-rose-50"] {
+    background-color: #fff1f2 !important;
+  }
+  .print-page [class*="bg-teal-50"] {
+    background-color: #f0fdfa !important;
+  }
+  .print-page [class*="bg-violet-50"] {
+    background-color: #f5f3ff !important;
+  }
+  .print-page [class*="bg-amber-50"] {
+    background-color: #fffbeb !important;
+  }
+  .print-page [class*="bg-indigo-50"] {
+    background-color: #eef2ff !important;
+  }
+
+  /* Bordes de tarjetas visibles */
+  .print-page [class*="rounded-lg"] {
+    border-radius: 8px !important;
+  }
+
+  /* Espaciado consistente en secciones */
+  .print-page [class*="space-y-"] > * + * {
+    margin-top: 8px;
+  }
+
+  /* Asegurar que los iconos Lucide se vean */
+  .print-page svg[class*="lucide"] {
+    stroke-width: 2px;
+  }
+
+  /* Líneas de escritura más visibles para impresión */
+  .print-page .border-b.border-gray-200,
+  .print-page .border-b.border-gray-100 {
+    border-bottom-width: 1px !important;
+    border-bottom-color: #d1d5db !important;
+  }
+
+  /* Evitar cortes en tarjetas de eventos */
+  .print-page [class*="border-2"][class*="rounded-lg"] {
+    page-break-inside: avoid;
+  }
+
+  /* Marca de agua sutil en cada página (opcional) */
+  .print-page::after {
+    content: "";
+    position: absolute;
+    bottom: 5mm;
+    right: 5mm;
+    width: 10mm;
+    height: 10mm;
+    opacity: 0.03;
+    pointer-events: none;
+  }
 }
 
 /* ============================================
    ESTILOS PARA VISTA DE PANTALLA
    ============================================ */
 @media screen {
-  /* Simular páginas A5 en pantalla */
+  /* Simular páginas A5 en pantalla (148mm x 210mm) */
   .print-page {
-    width: 210mm; /* A5 en pantalla - ajustado para mejor visualización */
-    min-height: 297mm;
+    width: 148mm; /* A5 ancho real */
+    min-height: 210mm; /* A5 alto real */
     margin: 20px auto;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     position: relative;

@@ -12,6 +12,7 @@ interface EventoMes {
   signo?: string;
   interpretacion?: string;
   consejos?: string[];
+  casaNatal?: number; // Casa natal donde cae el evento (para personalización)
 }
 
 interface MesCompletoProps {
@@ -68,10 +69,12 @@ const IconoEvento = ({ tipo, className = "w-4 h-4" }: { tipo: string; className?
 };
 
 // ============ FOOTER DEL LIBRO ============
-export const FooterLibro: React.FC<{ pagina?: number }> = ({ pagina }) => {
+// ✅ PAGINACIÓN AUTOMÁTICA: Usa CSS counter para numerar páginas correlativamente
+// El prop 'pagina' ahora es opcional y solo se usa como fallback visual
+export const FooterLibro: React.FC<{ pagina?: number; hideNumber?: boolean }> = ({ pagina, hideNumber }) => {
   const { config } = useStyle();
   return (
-    <div className="absolute bottom-4 left-0 right-0 flex justify-between items-center px-8 text-[10px]">
+    <div className="absolute bottom-4 left-0 right-0 flex justify-between items-center px-8 text-xs">
       <a
         href="https://wunjocreations.es"
         target="_blank"
@@ -80,8 +83,19 @@ export const FooterLibro: React.FC<{ pagina?: number }> = ({ pagina }) => {
       >
         Tu Vuelta al Sol by Wunjo Creations
       </a>
-      {pagina && <span className={`${config.iconSecondary} opacity-50 font-medium`}>{pagina}</span>}
-      <span className={`${config.iconSecondary} opacity-50`}>☉</span>
+
+      {/* Número de página automático con CSS counter */}
+      {!hideNumber && (
+        <span className={`${config.iconSecondary} opacity-70 font-semibold text-sm page-number-auto`}>
+          {/* El número se inserta automáticamente via CSS ::after con counter(page-counter) */}
+          {/* Fallback para preview: muestra pagina prop si existe */}
+          <span className="print:hidden">{pagina || ''}</span>
+        </span>
+      )}
+
+      <span className={`${config.iconSecondary} opacity-50`}>
+        {/* Espacio para simetría */}
+      </span>
     </div>
   );
 };
@@ -252,18 +266,23 @@ export const LunasYEjercicios: React.FC<{
         <div className="grid grid-cols-2 gap-4">
           {/* Luna Nueva */}
           <div className={`${config.highlightSecondary} p-4`}>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-1">
               <Moon className={`w-4 h-4 ${config.iconSecondary}`} />
               <span className={`text-xs font-bold uppercase ${config.iconSecondary}`}>Luna Nueva</span>
               {lunaNueva && <span className="text-xs text-gray-500">· Día {lunaNueva.dia}</span>}
             </div>
+            {lunaNueva?.casaNatal && (
+              <p className={`text-[10px] font-semibold ${config.iconAccent} mb-2`}>
+                ★ Activa tu Casa {lunaNueva.casaNatal} natal
+              </p>
+            )}
             {lunaNueva ? (
               <div className="space-y-2">
                 <p className={`text-sm font-medium ${config.iconPrimary}`}>{lunaNueva.titulo}</p>
                 {lunaNueva.interpretacion && (
-                  <p className="text-xs text-gray-600 leading-relaxed">{lunaNueva.interpretacion}</p>
+                  <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-line">{lunaNueva.interpretacion}</p>
                 )}
-                <LineasEscritura count={3} spacing={24} />
+                <LineasEscritura count={lunaNueva.interpretacion ? 3 : 5} spacing={24} />
               </div>
             ) : (
               <LineasEscritura count={5} spacing={24} />
@@ -272,18 +291,23 @@ export const LunasYEjercicios: React.FC<{
 
           {/* Luna Llena */}
           <div className={`${config.highlightPrimary} p-4`}>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-1">
               <Circle className={`w-4 h-4 ${config.iconPrimary}`} fill="currentColor" />
               <span className={`text-xs font-bold uppercase ${config.iconPrimary}`}>Luna Llena</span>
               {lunaLlena && <span className="text-xs text-gray-500">· Día {lunaLlena.dia}</span>}
             </div>
+            {lunaLlena?.casaNatal && (
+              <p className={`text-[10px] font-semibold ${config.iconAccent} mb-2`}>
+                ★ Ilumina tu Casa {lunaLlena.casaNatal} natal
+              </p>
+            )}
             {lunaLlena ? (
               <div className="space-y-2">
                 <p className={`text-sm font-medium ${config.iconSecondary}`}>{lunaLlena.titulo}</p>
                 {lunaLlena.interpretacion && (
-                  <p className="text-xs text-gray-600 leading-relaxed">{lunaLlena.interpretacion}</p>
+                  <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-line">{lunaLlena.interpretacion}</p>
                 )}
-                <LineasEscritura count={3} spacing={24} />
+                <LineasEscritura count={lunaLlena.interpretacion ? 3 : 5} spacing={24} />
               </div>
             ) : (
               <LineasEscritura count={5} spacing={24} />
@@ -527,7 +551,7 @@ export const PrimerDiaCiclo: React.FC<{
         </div>
       </div>
 
-      <FooterLibro />
+      <FooterLibro pagina={5} />
     </div>
   );
 };

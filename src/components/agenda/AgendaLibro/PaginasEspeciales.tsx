@@ -4,8 +4,17 @@ import React from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useStyle } from '@/context/StyleContext';
-import { Sun, Moon, Star, Heart, Sparkles } from 'lucide-react';
+import { Sun, Moon, Star, Heart, Sparkles, Flame, Coffee, Wind } from 'lucide-react';
 import { FooterLibro } from './MesCompleto';
+
+// ============ HELPER: Normalizar fecha para evitar problemas de timezone ============
+// Cuando una fecha UTC se convierte a local, puede cambiar el día
+// Esta función crea una fecha local con los mismos valores de año/mes/día
+const normalizeDateForDisplay = (date: Date): Date => {
+  // Si la fecha viene de UTC, crear nueva fecha local con los mismos valores
+  const normalized = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  return normalized;
+};
 
 // ============ LÍNEAS DE ESCRITURA ============
 const LineasEscritura = ({ count = 6, spacing = 28 }: { count?: number; spacing?: number }) => (
@@ -17,45 +26,73 @@ const LineasEscritura = ({ count = 6, spacing = 28 }: { count?: number; spacing?
 );
 
 // ============ PRIMER DÍA DEL CICLO ============
+// Esta página va DESPUÉS de todas las interpretaciones (Natal + Solar Return)
+// Para que el usuario reflexione con toda la información que acaba de leer
 export const PrimerDiaCiclo: React.FC<{
   fecha: Date;
   nombre: string;
-}> = ({ fecha, nombre }) => {
+  temaCentral?: string;
+  mandato?: string;
+}> = ({ fecha, nombre, temaCentral, mandato }) => {
   const { config } = useStyle();
+
+  // Normalizar fecha para evitar problemas de timezone
+  const fechaNormalizada = normalizeDateForDisplay(fecha);
 
   return (
     <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '20mm' }}>
-      <div className="flex-1 flex flex-col items-center justify-center text-center">
-        <Sun className={`w-16 h-16 ${config.iconAccent} mb-6`} />
+      <div className="flex-1 flex flex-col items-center text-center">
+        <Sun className={`w-14 h-14 ${config.iconAccent} mb-4`} />
         <span className={`text-xs uppercase tracking-[0.3em] ${config.iconSecondary}`}>
-          {format(fecha, "d 'de' MMMM, yyyy", { locale: es })}
+          {format(fechaNormalizada, "d 'de' MMMM, yyyy", { locale: es })}
         </span>
-        <h1 className={`text-4xl font-display ${config.titleGradient} mt-4 mb-2`}>
-          Primer Día de Tu Ciclo
+        <h1 className={`text-3xl font-display ${config.titleGradient} mt-3 mb-2`}>
+          Antes de Empezar
         </h1>
-        <p className={`text-lg ${config.iconSecondary} mb-8`}>¡Feliz cumpleaños, {nombre}!</p>
+        <p className={`text-base ${config.iconSecondary} mb-4`}>Ritual de apertura para {nombre}</p>
 
-        <div className={`${config.divider} w-32 my-8`} />
+        <div className={`${config.divider} w-24 my-4`} />
 
-        <div className="max-w-md space-y-6 text-left w-full">
-          <div className={`${config.highlightSecondary} p-5`}>
-            <h3 className={`text-sm font-bold uppercase ${config.iconSecondary} mb-3`}>Intención para este nuevo ciclo</h3>
-            <LineasEscritura count={4} spacing={28} />
+        {/* Introducción al ritual */}
+        <div className={`max-w-lg text-left mb-6 ${config.highlightSecondary} p-5 rounded-lg`}>
+          <p className="text-gray-700 text-sm leading-relaxed mb-4">
+            <strong>Ahora que ya has leído quién eres y qué se activa este año</strong>,
+            es momento de hacer una pausa consciente.
+          </p>
+          <p className="text-gray-700 text-sm leading-relaxed mb-4">
+            Antes de empezar con tu agenda:
+          </p>
+          <ul className="text-gray-600 text-sm space-y-2 ml-4">
+            <li className="flex items-center gap-2"><Flame className="w-4 h-4 text-orange-500" /> Busca un lugar tranquilo</li>
+            <li className="flex items-center gap-2"><Coffee className="w-4 h-4 text-amber-700" /> Prepárate una infusión o tu bebida favorita</li>
+            <li className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-yellow-500" /> Enciende una vela si te apetece</li>
+            <li className="flex items-center gap-2"><Wind className="w-4 h-4 text-blue-400" /> Respira profundo tres veces</li>
+          </ul>
+          <p className="text-gray-600 text-sm italic mt-4">
+            Este es tu momento. Sin prisas, sin presión. Solo tú y tu nuevo ciclo.
+          </p>
+        </div>
+
+        {/* Secciones para escribir */}
+        <div className="max-w-md space-y-4 text-left w-full">
+          <div className={`${config.highlightPrimary} p-4`}>
+            <h3 className={`text-xs font-bold uppercase ${config.iconPrimary} mb-2`}>¿Qué sensaciones te ha dejado esta lectura?</h3>
+            <LineasEscritura count={3} spacing={24} />
           </div>
 
-          <div className={`${config.highlightAccent} p-5`}>
-            <h3 className={`text-sm font-bold uppercase ${config.iconAccent} mb-3`}>¿Qué quiero cultivar este año?</h3>
-            <LineasEscritura count={4} spacing={28} />
+          <div className={`${config.highlightAccent} p-4`}>
+            <h3 className={`text-xs font-bold uppercase ${config.iconAccent} mb-2`}>¿Qué palabra resume lo que quieres para este año?</h3>
+            <LineasEscritura count={2} spacing={24} />
           </div>
 
-          <div className={`${config.highlightPrimary} p-5`}>
-            <h3 className={`text-sm font-bold uppercase ${config.iconPrimary} mb-3`}>¿Qué decido soltar?</h3>
-            <LineasEscritura count={4} spacing={28} />
+          <div className={`${config.highlightSecondary} p-4`}>
+            <h3 className={`text-xs font-bold uppercase ${config.iconSecondary} mb-2`}>¿Qué te inspira empezar hoy?</h3>
+            <LineasEscritura count={3} spacing={24} />
           </div>
         </div>
       </div>
 
-      <FooterLibro />
+      <FooterLibro pagina={29} />
     </div>
   );
 };
@@ -67,12 +104,15 @@ export const UltimoDiaCiclo: React.FC<{
 }> = ({ fecha, nombre }) => {
   const { config } = useStyle();
 
+  // Normalizar fecha para evitar problemas de timezone
+  const fechaNormalizada = normalizeDateForDisplay(fecha);
+
   return (
     <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '20mm' }}>
       <div className="flex-1 flex flex-col items-center justify-center text-center">
         <Moon className={`w-16 h-16 ${config.iconPrimary} mb-6`} />
         <span className={`text-xs uppercase tracking-[0.3em] ${config.iconSecondary}`}>
-          {format(fecha, "d 'de' MMMM, yyyy", { locale: es })}
+          {format(fechaNormalizada, "d 'de' MMMM, yyyy", { locale: es })}
         </span>
         <h1 className={`text-4xl font-display ${config.titleGradient} mt-4 mb-2`}>
           Último Día del Ciclo
@@ -194,46 +234,81 @@ export const QuienEraQuienSoy = () => {
   );
 };
 
-export const PreparacionProximaVuelta = () => {
+interface PreparacionProximaVueltaProps {
+  clavesIntegracion?: string[];
+  aprendizajesAnio?: string;
+  temaCentral?: string;
+}
+
+export const PreparacionProximaVuelta = ({
+  clavesIntegracion,
+  aprendizajesAnio,
+  temaCentral
+}: PreparacionProximaVueltaProps) => {
   const { config } = useStyle();
 
   return (
     <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
       {/* Header */}
-      <div className="text-center mb-6 pb-4 border-b-2 border-gray-200">
-        <Sun className={`w-8 h-8 mx-auto ${config.iconPrimary}`} />
-        <h2 className={`text-2xl font-display mt-3 ${config.titleGradient}`}>Preparación para la próxima vuelta al Sol</h2>
-        <p className={`text-sm italic mt-2 ${config.iconSecondary}`}>
+      <div className="text-center mb-5 pb-3 border-b-2 border-gray-200">
+        <Sun className={`w-7 h-7 mx-auto ${config.iconPrimary}`} />
+        <h2 className={`text-xl font-display mt-2 ${config.titleGradient}`}>Preparación para la próxima vuelta al Sol</h2>
+        <p className={`text-xs italic mt-1 ${config.iconSecondary}`}>
           El ciclo termina, pero tú continúas.
         </p>
       </div>
 
-      <div className="flex-1 max-w-2xl mx-auto w-full space-y-5">
-        {/* Lo que llevo */}
-        <div className={`${config.highlightPrimary} p-5`}>
-          <div className="flex items-center gap-2 mb-3">
-            <Heart className={`w-4 h-4 ${config.iconPrimary}`} />
-            <h4 className={`text-sm font-bold uppercase ${config.iconPrimary}`}>Lo que llevo conmigo al próximo año</h4>
+      <div className="flex-1 max-w-2xl mx-auto w-full space-y-4">
+        {/* Recordatorio del tema del año */}
+        {temaCentral && (
+          <div className={`${config.highlightSecondary} p-4 rounded-lg mb-4`}>
+            <p className={`text-xs uppercase tracking-wider ${config.iconSecondary} mb-2`}>Este año trabajaste en:</p>
+            <p className="text-sm text-gray-700 italic leading-relaxed line-clamp-3">
+              {temaCentral.length > 150 ? temaCentral.substring(0, 150) + '...' : temaCentral}
+            </p>
           </div>
-          <LineasEscritura count={5} spacing={28} />
+        )}
+
+        {/* Claves de integración del año */}
+        {clavesIntegracion && clavesIntegracion.length > 0 && (
+          <div className={`${config.highlightPrimary} p-4 rounded-lg`}>
+            <p className={`text-xs uppercase tracking-wider ${config.iconPrimary} mb-2`}>Tus claves de integración fueron:</p>
+            <ul className="space-y-1">
+              {clavesIntegracion.slice(0, 3).map((clave, idx) => (
+                <li key={idx} className="text-sm text-gray-700 flex items-start gap-2">
+                  <span className={config.iconSecondary}>✧</span>
+                  <span>{clave}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Lo que llevo */}
+        <div className={`${config.highlightPrimary} p-4`}>
+          <div className="flex items-center gap-2 mb-2">
+            <Heart className={`w-4 h-4 ${config.iconPrimary}`} />
+            <h4 className={`text-xs font-bold uppercase ${config.iconPrimary}`}>Lo que llevo conmigo</h4>
+          </div>
+          <LineasEscritura count={4} spacing={24} />
         </div>
 
         {/* Lo que dejo */}
-        <div className={`${config.highlightSecondary} p-5`}>
-          <div className="flex items-center gap-2 mb-3">
+        <div className={`${config.highlightSecondary} p-4`}>
+          <div className="flex items-center gap-2 mb-2">
             <Star className={`w-4 h-4 ${config.iconSecondary}`} />
-            <h4 className={`text-sm font-bold uppercase ${config.iconSecondary}`}>Lo que dejo aquí</h4>
+            <h4 className={`text-xs font-bold uppercase ${config.iconSecondary}`}>Lo que dejo aquí</h4>
           </div>
-          <LineasEscritura count={5} spacing={28} />
+          <LineasEscritura count={4} spacing={24} />
         </div>
 
         {/* Deseo */}
-        <div className={`${config.highlightAccent} p-5`}>
-          <div className="flex items-center gap-2 mb-3">
+        <div className={`${config.highlightAccent} p-4`}>
+          <div className="flex items-center gap-2 mb-2">
             <Sparkles className={`w-4 h-4 ${config.iconAccent}`} />
-            <h4 className={`text-sm font-bold uppercase ${config.iconAccent}`}>Mi deseo para el próximo ciclo</h4>
+            <h4 className={`text-xs font-bold uppercase ${config.iconAccent}`}>Mi deseo para el próximo ciclo</h4>
           </div>
-          <LineasEscritura count={4} spacing={28} />
+          <LineasEscritura count={3} spacing={24} />
         </div>
       </div>
 
@@ -351,6 +426,17 @@ export const Contraportada = () => {
       <div className={`absolute bottom-8 ${config.headerText} opacity-40 text-sm`}>
         tuvueltaalsol.es
       </div>
+    </div>
+  );
+};
+
+// ============ PÁGINA EN BLANCO PARA IMPRESIÓN ============
+// Se usa para mantener la numeración correcta en impresión a doble cara
+// ✅ no-page-number: No incrementa el contador de páginas
+export const PaginaBlanca = () => {
+  return (
+    <div className="print-page no-page-number bg-white" style={{ padding: '15mm' }}>
+      {/* Página intencionalmente en blanco para impresión */}
     </div>
   );
 };

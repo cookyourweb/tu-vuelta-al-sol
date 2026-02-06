@@ -8,14 +8,18 @@ import { addMonths } from 'date-fns';
 
 // Importar componentes del libro
 import PortalEntrada from '@/components/agenda/libro/PortalEntrada';
+import Indice from '@/components/agenda/libro/Indice';
+import TemaCentral from '@/components/agenda/libro/TemaCentral';
 import TuAnioTuViaje from '@/components/agenda/libro/TuAnioTuViaje';
 import SoulChart from '@/components/agenda/libro/SoulChart';
 import RetornoSolar from '@/components/agenda/libro/RetornoSolar';
 import CalendarioAnual from '@/components/agenda/libro/CalendarioAnual';
 import MesPage from '@/components/agenda/libro/MesPage';
 import CierreCiclo from '@/components/agenda/libro/CierreCiclo';
-import { EscrituraTerapeutica, Visualizacion, RitualSimbolico, TrabajoEmocional } from '@/components/agenda/libro/TerapiaCreativa';
-import { PrimerDiaCiclo, UltimoDiaCiclo, QuienEraQuienSoy, PreparacionProximaVuelta, CartaCierre, PaginaFinalBlanca, Contraportada } from '@/components/agenda/libro/PaginasEspeciales';
+import { TuZonaConocida, EscrituraTerapeutica, Visualizacion, RitualSimbolico, TrabajoEmocional } from '@/components/agenda/libro/TerapiaCreativa';
+import { CartaBienvenida, PrimerDiaCiclo, UltimoDiaCiclo, QuienEraQuienSoy, PreparacionProximaVuelta, CartaCierre, PaginaFinalBlanca, Contraportada } from '@/components/agenda/libro/PaginasEspeciales';
+import { StyleProvider } from '@/context/StyleContext';
+import '@/styles/print-libro.css';
 
 interface MonthEvent {
   date: string | Date;
@@ -138,7 +142,6 @@ interface BookContent {
     integrar_lo_vivido?: string;
     carta_de_cierre?: string;
     preparacion_proximo_ciclo?: string;
-    preparar_proxima_vuelta?: string;
   };
   frase_final?: string;
 }
@@ -228,9 +231,10 @@ export default function LibroAgendaPage() {
   const endDate = bookContent.endDate ? new Date(bookContent.endDate) : addMonths(startDate, 12);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900">
-      {/* BARRA SUPERIOR (solo en pantalla) */}
-      <div className="sticky top-0 z-50 bg-purple-900 border-b border-purple-700 shadow-lg print:hidden">
+    <StyleProvider>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900">
+        {/* BARRA SUPERIOR (solo en pantalla) */}
+        <div className="sticky top-0 z-50 bg-purple-900 border-b border-purple-700 shadow-lg print:hidden">
         <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
           <button
             onClick={() => router.push('/agenda')}
@@ -255,7 +259,7 @@ export default function LibroAgendaPage() {
       {/* CONTENIDO DEL LIBRO */}
       <div className="book-content bg-white print:bg-white">
 
-        {/* PORTAL DE ENTRADA */}
+        {/* PORTAL DE ENTRADA - Portada + Antes de Empezar */}
         <PortalEntrada
           userName={bookContent.userName}
           startDate={startDate}
@@ -264,10 +268,27 @@ export default function LibroAgendaPage() {
           apertura={bookContent.apertura_del_viaje}
         />
 
-        {/* PRIMER DÍA DEL CICLO */}
-        <PrimerDiaCiclo
-          fecha={startDate}
+        {/* ÍNDICE */}
+        <Indice
+          startYear={startDate.getFullYear()}
+          endYear={endDate.getFullYear()}
+          startDate={startDate}
+        />
+
+        {/* CARTA DE BIENVENIDA */}
+        <CartaBienvenida
           nombre={bookContent.userName}
+          cartaBienvenida={bookContent.apertura_del_viaje?.carta_de_bienvenida}
+          pageNumber={3}
+        />
+
+        {/* TEMA CENTRAL DEL AÑO */}
+        <TemaCentral
+          userName={bookContent.userName}
+          temaCentral={bookContent.apertura_del_viaje?.tema_central_del_año}
+          queSoltar={bookContent.apertura_del_viaje?.que_soltar}
+          ritualInicio={bookContent.apertura_del_viaje?.ritual_de_inicio}
+          pageNumber={4}
         />
 
         {/* TU AÑO TU VIAJE */}
@@ -275,6 +296,7 @@ export default function LibroAgendaPage() {
           userName={bookContent.userName}
           apertura={bookContent.apertura_del_viaje}
           solarReturn={bookContent.solarReturn}
+          pageNumber={6}
         />
 
         {/* SOUL CHART */}
@@ -288,6 +310,13 @@ export default function LibroAgendaPage() {
           solarReturn={bookContent.solarReturn}
           tuAñoAstrologico={bookContent.tu_año_astrologico}
           startDate={startDate}
+        />
+
+        {/* PRIMER DÍA DEL CICLO - Antes del calendario */}
+        <PrimerDiaCiclo
+          fecha={startDate}
+          nombre={bookContent.userName}
+          pageNumber={5}
         />
 
         {/* CALENDARIO ANUAL */}
@@ -310,11 +339,12 @@ export default function LibroAgendaPage() {
               const monthDate = addMonths(startDate, index);
 
               // Combinar todos los eventos del mes para MesPage
+              // ✅ Propiedades actualizadas: date, signo, description, house (no fecha/descripcion/casa)
               const allMonthEvents: MonthEvent[] = [
                 ...monthData.lunas_nuevas.map(e => ({ date: e.fecha, type: 'luna-nueva', sign: e.signo, description: e.descripcion, house: e.casa })),
                 ...monthData.lunas_llenas.map(e => ({ date: e.fecha, type: 'luna-llena', sign: e.signo, description: e.descripcion, house: e.casa })),
                 ...monthData.eclipses.map(e => ({ date: e.fecha, type: e.tipo, sign: e.signo, description: e.descripcion, house: e.casa })),
-                ...monthData.ingresos_destacados.map(e => ({ date: e.fecha, type: 'ingreso', sign: e.signo, description: e.descripcion, house: 1 })) // ingresos no tienen casa
+                ...monthData.ingresos_destacados.map(e => ({ date: e.fecha, type: 'ingreso', sign: e.signo, description: e.descripcion, house: 1 }))
               ];
 
               // Transformar monthData para MesPage (Spanish → English field names)
@@ -344,6 +374,15 @@ export default function LibroAgendaPage() {
         )}
 
         {/* TERAPIA ASTROLÓGICA CREATIVA */}
+        <TuZonaConocida
+          patronesInconscientes={bookContent.tu_mapa_interior?.soul_chart?.patrones_inconscientes}
+          desafiosEvolutivos={
+            typeof bookContent.tu_mapa_interior?.soul_chart?.patrones_inconscientes === 'string'
+              ? bookContent.tu_mapa_interior?.soul_chart?.patrones_inconscientes.split('. ').filter(Boolean)
+              : []
+          }
+          nodoSur={bookContent.tu_mapa_interior?.soul_chart?.nodo_sur}
+        />
         <EscrituraTerapeutica />
         <Visualizacion />
         <RitualSimbolico />
@@ -375,6 +414,7 @@ export default function LibroAgendaPage() {
       </div>
 
       {/* Print styles are configured in globals.css */}
-    </div>
+      </div>
+    </StyleProvider>
   );
 }

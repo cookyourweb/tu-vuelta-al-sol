@@ -1,6 +1,6 @@
 import React from 'react';
 import { useStyle } from '@/context/StyleContext';
-import { Star, Moon, Sun, Sparkles, TrendingUp, Circle } from 'lucide-react';
+import { Star, Moon, Sun, Sparkles, TrendingUp, Circle, AlertTriangle } from 'lucide-react';
 import { FooterLibro } from './MesCompleto';
 
 // ==========================================
@@ -12,9 +12,10 @@ interface TuAnioProps {
   startDate: Date;
   endDate: Date;
   userName: string;
+  hasSolarReturn?: boolean; // Nuevo prop para indicar si tiene Solar Return
 }
 
-export const TuAnioOverview: React.FC<TuAnioProps> = ({ startDate, endDate, userName }) => {
+export const TuAnioOverview: React.FC<TuAnioProps> = ({ startDate, endDate, userName, hasSolarReturn = false }) => {
   const { config } = useStyle();
   const yearStart = startDate.getFullYear();
   const yearEnd = endDate.getFullYear();
@@ -27,8 +28,19 @@ export const TuAnioOverview: React.FC<TuAnioProps> = ({ startDate, endDate, user
         <h1 className={`text-4xl mb-2 ${config.titleGradient}`}>
           Tu Año {yearStart}–{yearEnd}
         </h1>
-        <p className={`${config.iconSecondary} text-xl italic`}>
-          Consolidación y Expansión
+
+        {/* Aviso si no hay Solar Return */}
+        {!hasSolarReturn && (
+          <div className="mt-4 inline-flex flex-col items-center gap-2 px-5 py-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200 no-print">
+            <span className="text-xs font-semibold text-amber-800 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Contenido Genérico</span>
+            <p className="text-xs text-amber-700">
+              Esta información se personalizará cuando generes tu Retorno Solar
+            </p>
+          </div>
+        )}
+
+        <p className={`${config.iconSecondary} text-xl italic mt-2`}>
+          {hasSolarReturn ? 'Tu Camino Personalizado' : 'Consolidación y Expansión'}
         </p>
         <div className="flex items-center justify-center gap-4 mt-4">
           <span className={`${config.badgeSecondary} px-3 py-1 rounded-full text-sm`}>
@@ -139,12 +151,12 @@ export const TuAnioOverview: React.FC<TuAnioProps> = ({ startDate, endDate, user
         </p>
       </div>
 
-      <FooterLibro />
+      <FooterLibro pagina={25} />
     </div>
   );
 };
 
-export const TuAnioCiclos: React.FC<TuAnioProps> = ({ startDate, endDate }) => {
+export const TuAnioCiclos: React.FC<TuAnioProps> = ({ startDate, endDate, hasSolarReturn = false }) => {
   const { config } = useStyle();
   const yearStart = startDate.getFullYear();
   const yearEnd = endDate.getFullYear();
@@ -155,6 +167,16 @@ export const TuAnioCiclos: React.FC<TuAnioProps> = ({ startDate, endDate }) => {
       <h2 className={`text-2xl mb-6 ${config.titleGradient} text-center`}>
         Ciclos del Año
       </h2>
+
+      {/* Aviso si no hay Solar Return */}
+      {!hasSolarReturn && (
+        <div className="mb-4 mx-auto inline-flex flex-col items-center gap-2 px-5 py-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200 no-print">
+          <span className="text-xs font-semibold text-amber-800">⚠️ Contenido Genérico</span>
+          <p className="text-xs text-amber-700 text-center">
+            Esta información se personalizará cuando generes tu Retorno Solar
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-4 gap-3 mb-8">
         <div className={`${config.highlightPrimary} rounded-lg p-4`}>
@@ -278,7 +300,7 @@ export const TuAnioCiclos: React.FC<TuAnioProps> = ({ startDate, endDate }) => {
         </div>
       </div>
 
-      <FooterLibro />
+      <FooterLibro pagina={26} />
     </div>
   );
 };

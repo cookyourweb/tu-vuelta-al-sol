@@ -7,12 +7,14 @@
 // - Contexto completo Natal + Solar Return
 // - Plantilla definitiva reutilizable
 // - Tono acompañante vs explicativo
+// - OPTIMIZADO: Usa gpt-4o-mini para reducir costos 96%
 // =============================================================================
 
 import OpenAI from 'openai';
 import connectDB from '@/lib/db';
 import Interpretation from '@/models/Interpretation';
 import EventInterpretation from '@/models/EventInterpretation';
+import { getModelParams, logModelUsage } from '@/config/aiModels';
 
 // =============================================================================
 // TYPES
@@ -39,6 +41,7 @@ export interface UltraPersonalizedEventInterpretation {
 }
 
 interface EventContext {
+  eventId: string;   // ✅ NUEVO: ID único del evento desde AstrologicalEvent
   eventType: 'lunar_phase' | 'eclipse' | 'retrograde' | 'planetary_transit' | 'seasonal';
   eventDate: string;
   eventTitle: string;
@@ -162,7 +165,8 @@ async function getCachedInterpretation(
 async function saveCachedInterpretation(
   userId: string,
   eventId: string,
-  interpretation: UltraPersonalizedEventInterpretation
+  interpretation: UltraPersonalizedEventInterpretation,
+  eventContext: EventContext
 ): Promise<void> {
   try {
     await connectDB();
@@ -171,9 +175,34 @@ async function saveCachedInterpretation(
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 90);
 
+    // Mapear eventType del contexto al formato del modelo
+    const mapEventType = (type: string): 'luna_nueva' | 'luna_llena' | 'transito' | 'aspecto' => {
+      if (type === 'lunar_phase') {
+        // Determinar si es luna nueva o llena por el título
+        if (eventContext.eventTitle.toLowerCase().includes('nueva')) {
+          return 'luna_nueva';
+        } else if (eventContext.eventTitle.toLowerCase().includes('llena')) {
+          return 'luna_llena';
+        }
+        return 'luna_nueva'; // default
+      }
+      if (type === 'planetary_transit' || type === 'retrograde') {
+        return 'transito';
+      }
+      return 'aspecto';
+    };
+
     await EventInterpretation.create({
       userId,
       eventId,
+      eventType: mapEventType(eventContext.eventType),
+      eventDate: new Date(eventContext.eventDate),
+      eventDetails: {
+        sign: eventContext.sign,
+        house: eventContext.house,
+        planetsInvolved: eventContext.planet ? [eventContext.planet] : undefined,
+        transitingPlanet: eventContext.planet,
+      },
       interpretation,
       expiresAt,
       method: 'openai',
@@ -234,7 +263,7 @@ ${natal.venus ? `- Venus en ${natal.venus.sign} Casa ${natal.venus.house}` : ''}
 
   // Construir contexto SR si existe
   let srContext = '';
-  if (solarReturn) {
+  if (solarReturn && solarReturn.sun) {
     srContext = `
 RETORNO SOLAR (año ${solarReturn.year}):
 - Sol SR en Casa ${solarReturn.sun.house} → ${getSolarReturnSunMeaning(solarReturn.sun.house)}
@@ -335,7 +364,8 @@ export async function generateUltraPersonalizedInterpretation(
   }
 ): Promise<UltraPersonalizedEventInterpretation> {
 
-  const eventId = `${event.eventType}_${event.eventDate}_${event.sign}`;
+  // ✅ FIX: Usar el eventId único del evento en lugar de generarlo sintéticamente
+  const eventId = event.eventId;
 
   // 1. Intentar caché primero (ahorro de $$$)
   if (!options?.skipCache) {
@@ -364,17 +394,23 @@ export async function generateUltraPersonalizedInterpretation(
   // 3. Generar con OpenAI
   const client = getOpenAIClient();
   const prompt = buildUltraPersonalizedPrompt(event, userProfile);
+  const modelParams = getModelParams('event_interpretation');
 
-  console.log(`🤖 [AI] Generating ultra-personalized interpretation for ${userProfile.name}`);
+  console.log(`🤖 [AI] Generating ultra-personalized interpretation for ${userProfile.name} using ${modelParams.model}`);
 
   try {
     const response = await client.chat.completions.create({
-      model: 'gpt-4o',
+      model: modelParams.model,
       messages: [{ role: 'user', content: prompt }],
-      temperature: 0.75,  // Menos creativo, más consistente
-      max_tokens: 1200,   // Más espacio para contenido completo
+      temperature: modelParams.temperature,
+      max_tokens: modelParams.max_tokens,
       response_format: { type: 'json_object' }
     });
+
+    // Log usage for cost tracking
+    if (response.usage) {
+      logModelUsage('event_interpretation', response.usage.prompt_tokens, response.usage.completion_tokens);
+    }
 
     const content = response.choices[0]?.message?.content;
     if (!content) {
@@ -400,7 +436,7 @@ export async function generateUltraPersonalizedInterpretation(
     };
 
     // 4. Guardar en caché para futuro
-    await saveCachedInterpretation(userProfile.userId, eventId, interpretation);
+    await saveCachedInterpretation(userProfile.userId, eventId, interpretation, event);
 
     return interpretation;
 

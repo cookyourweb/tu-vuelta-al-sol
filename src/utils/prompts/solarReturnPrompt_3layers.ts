@@ -244,6 +244,39 @@ Responde SOLO con JSON válido (sin markdown, sin backticks):
     "Frase práctica 3."
   ],
 
+  "linea_tiempo_emocional": [
+    {
+      "mes": "febrero",
+      "intensidad": 3,
+      "palabra_clave": "Transformación"
+    }
+    // GENERA LOS 12 MESES empezando desde el mes de cumpleaños del usuario.
+    // intensidad: 1-5 donde:
+    //   - 5 = mes con eclipse o eventos muy intensos
+    //   - 4 = mes con retrogradación importante o aspecto tenso
+    //   - 3 = mes con tránsitos relevantes
+    //   - 2 = mes tranquilo con pequeños eventos
+    //   - 1 = mes muy calmado
+    // palabra_clave: UNA SOLA PALABRA que capture la energía del mes (ej: "Liberación", "Introspección", "Acción", "Espera")
+  ],
+
+  "meses_clave_puntos_giro": [
+    {
+      "mes": "Marzo",
+      "evento_astrologico": "Eclipse Solar en Aries",
+      "significado_para_ti": "Este eclipse activa tu Casa X natal, marcando un punto de inflexión en tu carrera. Es el momento de soltar identidades profesionales que ya no te representan y dar paso a una nueva versión de tu liderazgo."
+    }
+    // GENERA 3 MESES CRÍTICOS del año basándote en:
+    //   - Eclipses que caen en casas angulares (1, 4, 7, 10) de la carta natal
+    //   - Retrogradaciones de planetas personales (Mercurio, Venus, Marte)
+    //   - Aspectos tensos entre planetas SR y planetas natales
+    //   - Ingresos planetarios importantes
+    // Cada mes debe tener:
+    //   - mes: nombre del mes
+    //   - evento_astrologico: descripción breve del evento astronómico
+    //   - significado_para_ti: 60-80 palabras explicando POR QUÉ este mes es crítico para ESTE usuario específico
+  ],
+
   "uso_calendario_lunar": {
     "marco_general": "80-100 palabras. CÓMO USAR las lunas este año específico. Ejemplo: 'Este no es un año para iniciar grandes proyectos en luna nueva, sino para observar qué emerge. 🌑 Lunas Nuevas → intención interna, siembra silenciosa. 🌕 Lunas Llenas → cierre emocional, comprensión, liberación. Las lunas funcionan como marcadores de ritmo interno, no de acción externa.'",
     "lunas_clave": [

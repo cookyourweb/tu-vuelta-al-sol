@@ -1,5 +1,25 @@
 @import "tailwindcss";
 
+/* ========================================
+   ANIMACIONES PERSONALIZADAS
+   ======================================== */
+
+@keyframes loading-bar {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-loading-bar {
+  animation: loading-bar 2s ease-in-out infinite;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
