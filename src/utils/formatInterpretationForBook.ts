@@ -272,16 +272,27 @@ export function formatEventForBook(event: any, natalHouses?: NatalHouse[]) {
   // Orden de prioridad:
   // 1. Casa de la interpretación personalizada (calculada con grados por OpenAI)
   // 2. Casa del metadata del evento (calculada con grados al generar SolarCycle)
-  // 3. Solo como fallback: recalcular (menos preciso, solo usa signo)
+  // 3. Casa del evento mismo (de generate-book)
+  // 4. Solo como ÚLTIMO fallback: recalcular (menos preciso, solo usa signo)
   let casaNatal: number | undefined =
     event.interpretation?.analisis_tecnico?.evento_en_casa_natal ||
     event.metadata?.house ||
     event.house;
 
-  // Solo recalcular si no tenemos casa y es evento lunar
+  // ✅ LOG para debugging
+  console.log(`🏠 [formatEventForBook] ${event.title}: casaNatal=${casaNatal}, metadata.house=${event.metadata?.house}, event.house=${event.house}`);
+
+  // Solo recalcular si NO tenemos casa y es evento lunar con signo válido
   if (!casaNatal && natalHouses && (tipo === 'lunaNueva' || tipo === 'lunaLlena') && signo) {
-    console.warn(`⚠️ [formatEventForBook] Recalculando casa para ${event.title} - debería venir del evento`);
+    console.warn(`⚠️ [formatEventForBook] FALTA casa para ${event.title} - recalculando como fallback`);
     casaNatal = calculateHouseForSign(signo, natalHouses);
+    console.log(`🔄 [formatEventForBook] Casa recalculada para ${event.title}: ${casaNatal}`);
+  }
+
+  // ✅ VALIDACIÓN: Asegurar que la casa es válida
+  if (!casaNatal || casaNatal < 1 || casaNatal > 12) {
+    console.error(`❌ [formatEventForBook] Casa inválida para ${event.title}: ${casaNatal} - usando Casa 1`);
+    casaNatal = 1;
   }
 
   // SOLO interpretación personalizada - NO genérica

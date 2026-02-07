@@ -1,91 +1,83 @@
-# 👋 ¡Bienvenido al Proyecto!
+# Tu Vuelta al Sol — Punto de Entrada
 
-## 🚀 ¿Nuevo Desarrollador?
-
-Si vas a continuar trabajando en el **Sistema de Interpretaciones de Eventos**, lee esto primero:
-
-### 📋 Lee la Guía de Onboarding
-
-**👉 [ONBOARDING_INTERPRETACIONES.md](./ONBOARDING_INTERPRETACIONES.md)**
-
-Esta guía contiene:
-- ✅ Setup completo paso a paso
-- ✅ Qué se ha completado (Sprint 1)
-- ✅ Arquitectura del sistema de 3 capas
-- ✅ Próximos pasos detallados (Sprint 2-7)
-- ✅ Ejemplos de código para implementar
-- ✅ Testing y troubleshooting
-- ✅ Referencias a documentación técnica
+**Ultima actualizacion:** 7 febrero 2026
 
 ---
 
-## 📦 Branch Actual
+## Documentos principales
+
+Lee estos en orden:
+
+1. **[CLAUDE.md](../CLAUDE.md)** — Guia del proyecto, tech stack, convenciones
+2. **[HECHO.md](HECHO.md)** — Que esta completo y funcionando (~80%)
+3. **[PENDIENTE.md](PENDIENTE.md)** — Que falta por hacer (priorizado)
+4. **[GUIA_RAPIDA_DESARROLLO.md](GUIA_RAPIDA_DESARROLLO.md)** — Cheatsheet para desarrollo
+
+---
+
+## Estado actual del proyecto
+
+| Capa | Completado | Notas |
+|------|-----------|-------|
+| Carta Natal | 100% | ProKerala tropical + OpenAI GPT-4o |
+| Retorno Solar | 100% | Comparaciones planetarias completas |
+| Agenda/Calendario | 85% | Faltan lunas personalizadas por casa |
+| Libro imprimible | 70% | Falta contenido personalizado + sync TXT |
+| Stripe pagos | 50% | Falta webhook + limite freemium |
+| Google Calendar | 0% | Pendiente — sera gratis primero, premium despues |
+| VAPI/Zadarma | 40% | Numero activo, falta completar flujo |
+
+---
+
+## Setup rapido
 
 ```bash
-git checkout claude/update-event-interpretation-gr9VI
+git checkout main
+npm install
+# Configurar .env (pedir variables al propietario)
+npm run dev
 ```
 
 ---
 
-## 📚 Documentación Técnica
+## Arquitectura de 3 capas
 
-### 1. Sistema de Interpretaciones (NUEVO)
+```
+CAPA 1: CARTA NATAL (permanente — quien eres)
+   ↓
+CAPA 2: RETORNO SOLAR (anual — que se activa este año)
+   ↓
+CAPA 3: AGENDA (diario — como lo vives dia a dia)
+```
 
-- **[ONBOARDING_INTERPRETACIONES.md](./ONBOARDING_INTERPRETACIONES.md)** ← **EMPIEZA AQUÍ**
-- **[documentacion/SISTEMA_INTERPRETACIONES_AGENDA_COMPLETO.md](./documentacion/SISTEMA_INTERPRETACIONES_AGENDA_COMPLETO.md)** - Arquitectura completa (1,381 líneas)
-- **[documentacion/API_INTERPRETACIONES_EVENTOS.md](./documentacion/API_INTERPRETACIONES_EVENTOS.md)** - Quick reference de APIs (356 líneas)
-
-### 2. Otras Guías del Proyecto
-
-- **[README.md](./README.md)** - Documentación general del proyecto
-- **[CLAUDE.md](./CLAUDE.md)** - Instrucciones para Claude Code
-- **[documentacion/](./documentacion/)** - Carpeta con documentación adicional
+**Documentacion detallada:** [ARQUITECTURA_3_CAPAS.md](ARQUITECTURA_3_CAPAS.md)
 
 ---
 
-## ✅ Checklist Rápido
+## Prioridades actuales (febrero 2026)
 
-- [ ] `git checkout claude/update-event-interpretation-gr9VI`
-- [ ] `npm install`
-- [ ] Configurar variables de entorno (`.env`)
-- [ ] `npm run dev`
-- [ ] Leer **[ONBOARDING_INTERPRETACIONES.md](./ONBOARDING_INTERPRETACIONES.md)**
-- [ ] Testear endpoints con Postman
-- [ ] Empezar con Sprint 2
+1. **Sincronizar interpretaciones libro** — que los 12 meses funcionen
+2. **Google Calendar export** — gratis ahora, premium despues
+3. **VAPI/Zadarma** — terminar con el numero activo
+4. **Freemium 2 meses** — bloquear meses 3-12 para gratuitos
+5. **Webhook Stripe** — activar acceso tras pago
 
----
-
-## 🎯 Estado Actual
-
-**Sprint 1**: ✅ **COMPLETADO**
-- 3 endpoints de interpretaciones funcionando
-- Helper de generación creado
-- Documentación completa
-- TypeScript sin errores
-- Todo pusheado y listo
-
-**Sprint 2**: ⏳ **SIGUIENTE PASO**
-- Generación automática en background
-- Ver [ONBOARDING_INTERPRETACIONES.md](./ONBOARDING_INTERPRETACIONES.md) para detalles
+**Ver [PENDIENTE.md](PENDIENTE.md) para detalles completos.**
 
 ---
 
-## 💡 Próximos Pasos
+## Documentacion tecnica
 
-1. Lee **[ONBOARDING_INTERPRETACIONES.md](./ONBOARDING_INTERPRETACIONES.md)**
-2. Testea los endpoints creados
-3. Implementa Sprint 2 (Background Generation)
-4. Continúa con Sprint 3-7 según roadmap
-
----
-
-## 📞 ¿Dudas?
-
-1. Lee primero: **[ONBOARDING_INTERPRETACIONES.md](./ONBOARDING_INTERPRETACIONES.md)**
-2. Revisa: **[documentacion/SISTEMA_INTERPRETACIONES_AGENDA_COMPLETO.md](./documentacion/SISTEMA_INTERPRETACIONES_AGENDA_COMPLETO.md)**
-3. Chequea los logs de Next.js (busca emojis)
-4. Revisa el historial de commits
+| Tema | Documento |
+|------|-----------|
+| Arquitectura completa | [ARQUITECTURA_3_CAPAS.md](ARQUITECTURA_3_CAPAS.md) |
+| Sistema interpretaciones | [SISTEMA_INTERPRETACIONES_AGENDA_COMPLETO.md](SISTEMA_INTERPRETACIONES_AGENDA_COMPLETO.md) |
+| API de eventos | [API_INTERPRETACIONES_EVENTOS.md](API_INTERPRETACIONES_EVENTOS.md) |
+| Config ProKerala | [PROKERALA_TROPICAL_CONFIG.md](PROKERALA_TROPICAL_CONFIG.md) |
+| Stripe | [STRIPE_SETUP.md](STRIPE_SETUP.md) |
+| Errores pasados | [LECCIONES_APRENDIDAS.md](LECCIONES_APRENDIDAS.md) |
+| Indice completo | [INDICE_DOCUMENTACION.md](INDICE_DOCUMENTACION.md) |
 
 ---
 
-**¡Buena suerte! 🚀**
+**Mantenido por**: Claude Code Sessions

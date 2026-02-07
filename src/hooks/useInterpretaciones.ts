@@ -120,8 +120,12 @@ export function useInterpretaciones({
       // Usar el rango de fechas del ciclo solar para cargar TODO el año
       const interpretationsMap = new Map<string, any>();
       try {
-        const startDate = cycle.cycleStart;
-        const endDate = cycle.cycleEnd;
+        const startDate = cycle.start || cycle.cycleStart;
+        const endDate = cycle.end || cycle.cycleEnd;
+        if (!startDate || !endDate) {
+          console.warn('⚠️ No se encontraron fechas del ciclo solar, saltando carga de interpretaciones');
+          throw new Error('Fechas del ciclo no disponibles');
+        }
         const storedResponse = await fetch(
           `/api/interpretations/event?userId=${userId}&startDate=${startDate}&endDate=${endDate}`
         );

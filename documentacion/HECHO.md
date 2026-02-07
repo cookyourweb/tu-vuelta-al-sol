@@ -1,6 +1,6 @@
 # Tu Vuelta al Sol — LO QUE ESTÁ HECHO
 
-**Última actualización:** 3 febrero 2026
+**Ultima actualizacion:** 7 febrero 2026
 
 ---
 
@@ -102,9 +102,12 @@
 
 ## OPTIMIZACIONES RECIENTES
 
-- ✅ Reducción 60% costes OpenAI (GPT-4o-mini para tareas simples)
-- ✅ Sistema de caché de interpretaciones
-- ✅ Regeneración selectiva de campos faltantes
+- ✅ Reduccion 60% costes OpenAI (GPT-4o-mini para tareas simples)
+- ✅ Sistema de cache de interpretaciones
+- ✅ Regeneracion selectiva de campos faltantes
+- ✅ Fix useInterpretaciones.ts — campo startDate/endDate undefined (7 feb 2026)
+- ✅ Fix consistencia casas entre agenda y libro (27 ene 2026)
+- ✅ Documentacion unificada y archivada (7 feb 2026)
 
 ---
 

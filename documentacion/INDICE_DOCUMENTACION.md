@@ -1,6 +1,6 @@
 # 📚 Índice de Documentación - Tu Vuelta al Sol
 
-**Última actualización**: 3 febrero 2026
+**Ultima actualizacion**: 7 febrero 2026
 
 ---
 
@@ -23,7 +23,6 @@
 | [ARQUITECTURA_3_CAPAS.md](ARQUITECTURA_3_CAPAS.md) | Las 3 capas: Natal → Solar → Agenda |
 | [ARQUITECTURA_SEPARACION_NATAL_SR.md](ARQUITECTURA_SEPARACION_NATAL_SR.md) | Separación Natal vs Solar Return |
 | [SISTEMA_INTERPRETACIONES_AGENDA_COMPLETO.md](SISTEMA_INTERPRETACIONES_AGENDA_COMPLETO.md) | Sistema completo de interpretaciones |
-| [SISTEMA_INTERPRETACIONES.md](SISTEMA_INTERPRETACIONES.md) | Overview del sistema |
 | [PERSONALIZACION_AGENDA.md](PERSONALIZACION_AGENDA.md) | Visión de personalización |
 
 ---
@@ -33,9 +32,11 @@
 | Documento | Descripción |
 |-----------|-------------|
 | [PROKERALA_TROPICAL_CONFIG.md](PROKERALA_TROPICAL_CONFIG.md) | Config astrológica (tropical, ayanamsa=0) |
+| [LIMPIAR_CACHE_VEDICO.md](LIMPIAR_CACHE_VEDICO.md) | Guia limpieza cache vedico |
 | [STRIPE_SETUP.md](STRIPE_SETUP.md) | Configuración de Stripe |
 | [STRIPE_PRODUCTOS.md](STRIPE_PRODUCTOS.md) | Productos en Stripe |
 | [STRIPE_ENV_SETUP.md](STRIPE_ENV_SETUP.md) | Variables de entorno |
+| [SISTEMA_COMPRA_AGENDA.md](SISTEMA_COMPRA_AGENDA.md) | Flujo de compra de agenda |
 
 ---
 
@@ -44,7 +45,6 @@
 | Documento | Descripción |
 |-----------|-------------|
 | [MIGRACION_AGENDA_LIBRO.md](MIGRACION_AGENDA_LIBRO.md) | Migración calendario → libro |
-| [PLAN_ACCION_INTERPRETACION.md](PLAN_ACCION_INTERPRETACION.md) | Plan sistema interpretaciones |
 | [PROMPT_POETICO_ANTIFRAGIL.md](PROMPT_POETICO_ANTIFRAGIL.md) | Tono y estilo de IA |
 | [LECCIONES_APRENDIDAS.md](LECCIONES_APRENDIDAS.md) | Errores a no repetir |
 | [Guialogos.md](Guialogos.md) | Logos y branding |
@@ -61,28 +61,43 @@
 
 ---
 
+## 🤖 AUTOMATIZACION
+
+| Documento | Descripcion |
+|-----------|-------------|
+| [VAPI_ZADARMA_SETUP.md](VAPI_ZADARMA_SETUP.md) | Llamadas automatizadas para astrologos (numero activo) |
+
+---
+
 ## 🔧 OTROS DOCUMENTOS ACTIVOS
 
-| Documento | Descripción |
+| Documento | Descripcion |
 |-----------|-------------|
-| [ANALISIS_AGENDA_COMPLETO.md](ANALISIS_AGENDA_COMPLETO.md) | Análisis detallado de agenda |
-| [ANALISIS_CARTA_NATAL_COMPLETA.md](ANALISIS_CARTA_NATAL_COMPLETA.md) | Análisis carta natal |
+| [ANALISIS_AGENDA_COMPLETO.md](ANALISIS_AGENDA_COMPLETO.md) | Analisis detallado de agenda |
+| [ANALISIS_CARTA_NATAL_COMPLETA.md](ANALISIS_CARTA_NATAL_COMPLETA.md) | Analisis carta natal |
 | [API_INTERPRETACIONES_EVENTOS.md](API_INTERPRETACIONES_EVENTOS.md) | API de eventos |
 | [COMPARACIONES_PLANETARIAS_3_CAPAS.md](COMPARACIONES_PLANETARIAS_3_CAPAS.md) | Comparaciones Natal/SR |
-| [GUIA_INTERPRETACIONES_COMPLETA.md](GUIA_INTERPRETACIONES_COMPLETA.md) | Guía interpretaciones |
+| [GUIA_INTERPRETACIONES_COMPLETA.md](GUIA_INTERPRETACIONES_COMPLETA.md) | Guia interpretaciones |
+| [SISTEMA_INTERPRETACIONES_LLM.md](SISTEMA_INTERPRETACIONES_LLM.md) | Integracion LLM (OpenAI) |
 | [INTERPRETACIONES_EVENTOS_AGENDA.md](INTERPRETACIONES_EVENTOS_AGENDA.md) | Eventos en agenda |
+| [FIX_HOUSE_CONSISTENCY_TRANSITS_INTERPRETATIONS.md](FIX_HOUSE_CONSISTENCY_TRANSITS_INTERPRETATIONS.md) | Fix casas + transitos libro |
 | [TODO.md](TODO.md) | Lista de tareas |
 
 ---
 
 ## 📁 ARCHIVADOS (documentacion/archivo/)
 
-Documentos históricos movidos a `archivo/`:
-- 8 archivos `COMPLETADO_*.md` — Histórico de sprints
+Documentos historicos movidos a `archivo/`:
+- 8 archivos `COMPLETADO_*.md` — Historico de sprints
 - 4 archivos `RESUMEN_*.md` — Tracking de sesiones
 - `PROGRESO_SESION.md` — Tracking obsoleto
-- Índices duplicados
+- Indices duplicados
 - Instrucciones de merge obsoletas
+- `SISTEMA_INTERPRETACIONES.md` — Superseded por SISTEMA_INTERPRETACIONES_AGENDA_COMPLETO
+- `ANALISIS_PROBLEMAS_DETECTADOS.md` — Problemas dic 2025 resueltos
+- `TRABAJO_EN_PROGRESO_CARGA_LAZY.md` — Trabajo pausado/completado
+- `PLAN_ACCION_INTERPRETACION.md` — Superseded por docs mas nuevos
+- `estructura e archios.md` — Superseded por CLAUDE.md
 
 ---
 
@@ -100,8 +115,8 @@ Documentos históricos movidos a `archivo/`:
 ## 📊 CONTEO
 
 - **Documentos activos:** ~45 archivos
-- **Documentos archivados:** 19 archivos
-- **Total:** 64 archivos
+- **Documentos archivados:** 24 archivos
+- **Total:** ~65 archivos
 
 ---
 

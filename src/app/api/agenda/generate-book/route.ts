@@ -129,16 +129,27 @@ export async function POST(request: NextRequest) {
           || extractSignFromDescription(e.description || e.title || '')
           || '';
 
+        // ✅ FIX: Usar la casa calculada correctamente del SolarCycle, NO fallback a 1
+        const house = e.metadata?.house;
+        if (!house || house < 1 || house > 12) {
+          console.warn(`⚠️ [SOLAR_CYCLE] Event ${e.title} has invalid house: ${house}, using fallback calculation`);
+          // Solo como último recurso, intentar calcular
+          const calculatedHouse = natalChart ? calculateHouseForEvent(sign, e.metadata?.degree || 0, natalChart) : 1;
+          console.log(`🔄 [SOLAR_CYCLE] Calculated house for ${e.title}: ${calculatedHouse}`);
+        }
+
         return {
           type: mapEventType(e.type),
           date: new Date(e.date),
           sign,
           planet: e.metadata?.planet || '',
-          house: e.metadata?.house || 1,
-          description: e.description || e.title || ''
+          house: house || 1, // Mantener fallback solo si no hay metadata
+          description: e.description || e.title || '',
+          // ✅ AGREGAR: metadata completa para debugging
+          metadata: e.metadata
         };
       }).sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    } else {
+    }
       // Calcular eventos con astronomy-engine (fallback)
       console.log('⚡ Calculating events with astronomy-engine...');
       const solarEvents = await calculateSolarYearEvents(startDate);

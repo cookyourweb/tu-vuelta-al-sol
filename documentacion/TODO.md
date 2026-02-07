@@ -1,56 +1,95 @@
-# Project Analysis and Fixes - TODO List
+# Tu Vuelta al Sol — TODO
 
-## Issues Identified and Fixed
+**Ultima actualizacion:** 7 febrero 2026
 
-### 1. Build Error: console.log in JSX (ChartDisplay.tsx)
-- **Issue**: console.log statements were at the top level of the component, causing build errors
-- **Fix**: Moved console.log statements to useEffect hook to ensure they only run during component lifecycle
-- **Status**: ✅ COMPLETED
+---
 
-### 2. Tooltip vs Drawer House Mismatch
-- **Issue**: Tooltips showed one house number while drawer showed different house for the same planet
-- **Fix**: Recalculated planet houses based on position relative to ascendant instead of using API-provided house values
-- **Formula**: `Math.floor(((realPosition - ascendantDegree + 360) % 360) / 30) + 1`
-- **Status**: ✅ COMPLETED
+## EN CURSO
 
-### 3. TypeScript Errors
-- **Issue**: Implicit 'any' types for planet and index parameters in normalizedPlanets map
-- **Fix**: Added proper type annotations (though the function uses any[] for flexibility)
-- **Status**: ✅ COMPLETED
+### Sincronizacion interpretaciones libro (todos los meses)
+- [x] Fix `useInterpretaciones.ts` — campo `startDate`/`endDate` undefined (7 feb)
+- [x] Unificar sistema de interpretaciones (SolarCycle como fuente unica)
+- [ ] Verificar que los 12 meses generan interpretaciones correctas
+- [ ] Verificar que TransitosDelMes muestra interpretaciones personalizadas en todos los meses
+- [ ] Probar generacion batch completa para un usuario real
 
-## Remaining Tasks
+---
 
-### 4. Reemplazar iconos de eventos con Lucide React
-- **Tarea**: Refactorizar getEventIcon() para retornar componentes JSX en lugar de emojis
-- **Archivos**: src/app/(dashboard)/agenda/page.tsx
-- **Emojis a reemplazar**: 🪐 🌙 ⏪ 🔥 y otros emojis de planetas/signos
-- **Requerimientos**:
-  - Crear iconos personalizados para cada planeta (Mercurio, Venus, Marte, etc.)
-  - Crear iconos para signos zodiacales (Aries, Tauro, etc.)
-  - Actualizar getEventIcon() para retornar JSX en lugar de string
-- **Status**: ⏳ PENDING (Para revisar en el futuro)
+## PENDIENTE — PRIORIDAD ALTA
 
-### 5. Limpiar emojis de console.log
-- **Tarea**: Quitar todos los emojis de los console.log del proyecto
-- **Status**: 🔄 EN PROGRESO
+### Google Calendar + iCal export
+- [ ] Crear `src/utils/generateICS.ts` (generador .ics)
+- [ ] Crear endpoint `src/app/api/agenda/export-calendar/route.ts`
+- [ ] Crear componente `ExportCalendarButton.tsx`
+- [ ] Probar importacion en Google Calendar
+- [ ] Probar importacion en Apple Calendar / Outlook
+- **Fase 1:** Gratis para todos (atrae usuarios)
+- **Fase 2:** Premium (cuando todo este listo)
 
-### 6. Full Project Analysis
-- **Task**: Perform comprehensive analysis of all files for potential issues
-- **Status**: ⏳ PENDING
+### VAPI + Zadarma — Automatizacion astrologos
+- [x] Numero de telefono activo
+- [x] Cuenta VAPI configurada
+- [x] Cuenta Zadarma con SIP trunk
+- [ ] Verificar flujo completo llamada entrante
+- [ ] Configurar asistente VAPI con script de captacion
+- [ ] Conectar webhook → guardar lead en MongoDB
+- [ ] Probar end-to-end con llamadas reales
+- [ ] Dashboard admin para ver leads
 
-### 7. Test Build Process
-- **Task**: Run build command to ensure all errors are resolved
-- **Status**: ⏳ PENDING
+### Modelo freemium — 2 meses gratis
+- [ ] Logica de bloqueo en `AgendaLibro/index.tsx`
+- [ ] Blur/candado visual en meses 3-12
+- [ ] CTA "Desbloquea tu ciclo completo"
+- [ ] Verificacion de compra en `agenda/page.tsx`
 
-### 8. Verify Tooltip Consistency
-- **Task**: Test that tooltips and drawers now show consistent house information
-- **Status**: ⏳ PENDING
+---
 
-## Files Modified
-- `src/components/astrology/ChartDisplay.tsx` - Fixed console.log placement and house calculation
+## PENDIENTE — PRIORIDAD MEDIA
 
-## Next Steps
-1. Run build command to verify fixes
-2. Test tooltip/drawer functionality
-3. Analyze remaining project files for issues
-4. Update this TODO as progress is made
+### Webhook Stripe
+- [ ] Endpoint webhook para `checkout.session.completed`
+- [ ] Activar `hasPurchasedAgenda` automaticamente
+- [ ] Flujo completo: pago → webhook → acceso 12 meses
+
+### Contenido personalizado libro
+- [ ] Espacios para escribir DESPUES de interpretaciones
+- [ ] Ejes del Año con signo especifico del usuario
+- [ ] Planetas Dominantes con datos personalizados
+- [ ] Lunas con casa donde cae para el usuario
+- [ ] Sincronizar TXT con orden del libro visual
+
+### PDF e impresion
+- [ ] Verificar estilos A5 en impresion real
+- [ ] Verificar saltos de pagina correctos
+- [ ] Mejorar formato TXT (evitar redundancias)
+
+---
+
+## PENDIENTE — PRIORIDAD BAJA
+
+### Mejoras de UI
+- [ ] Reemplazar emojis de eventos con iconos Lucide React
+- [ ] Limpiar console.log con emojis del codigo
+- [ ] Cambiar "Mandato" por "Invitacion" en copy
+
+### Futuro
+- [ ] PDF server-side con Puppeteer (libro fisico 80€)
+- [ ] Objetos simbolicos y tienda (ver `OBJETOS_SIMBOLICOS_Y_TIENDA.md`)
+- [ ] Feature "Explorar Mas" (ver `IDEAS_EXPLORAR_MAS.md`)
+
+---
+
+## COMPLETADO RECIENTEMENTE
+
+- [x] Fix `useInterpretaciones.ts` — startDate/endDate undefined (7 feb 2026)
+- [x] Unificar documentacion — INDICE, HECHO, PENDIENTE (3 feb 2026)
+- [x] Fix consistencia casas libro vs agenda (27 ene 2026)
+- [x] Sprint 4 calendario automatizado 12 meses (ene 2026)
+- [x] Fix Luna Llena (SearchMoonPhase 180)
+- [x] Fix calendario dinamico desde cumpleaños
+- [x] Correccion tropical ProKerala (ayanamsa=0)
+- [x] Fix Prokerala getSignFromLongitude (sin || fallback)
+
+---
+
+**Mantenido por**: Claude Code Sessions
