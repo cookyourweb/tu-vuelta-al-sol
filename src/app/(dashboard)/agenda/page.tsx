@@ -1318,15 +1318,12 @@ const AgendaPersonalizada = () => {
       if (lastDayOfCycle.getTime() === dayOnly.getTime()) {
         const lastDayEvent: AstrologicalEvent = {
           id: 'last-day-of-cycle',
-          date: day,
+          date: day instanceof Date ? day.toISOString() : String(day),
           title: '🌅 Tu ciclo ha llegado al fin',
           type: 'seasonal',
           description: 'Hoy es el último día de tu ciclo solar actual. Mañana comienza un nuevo ciclo con tu cumpleaños.',
           importance: 'high',
-          metadata: {
-            isSpecialEvent: true,
-            eventType: 'cycle_end'
-          }
+          priority: 'high',
         };
         enhancedEvents = [lastDayEvent, ...enhancedEvents];
       }
@@ -1343,16 +1340,12 @@ const AgendaPersonalizada = () => {
       if (birthdayThisYear.getTime() === dayOnly.getTime()) {
         const birthdayEvent: AstrologicalEvent = {
           id: 'birthday-special',
-          date: day,
+          date: day instanceof Date ? day.toISOString() : String(day),
           title: '🎂 ¡Felicidades por tu nueva vuelta al Sol!',
           type: 'seasonal',
           description: 'Hoy comienza tu nuevo ciclo solar. Es el momento perfecto para revisar tu Retorno Solar y establecer intenciones para los próximos 12 meses.',
           importance: 'high',
-          metadata: {
-            isSpecialEvent: true,
-            eventType: 'birthday',
-            canGenerateNewCycle: canGenerateNext
-          }
+          priority: 'high',
         };
         enhancedEvents = [birthdayEvent, ...enhancedEvents];
       }
@@ -2397,7 +2390,7 @@ const AgendaPersonalizada = () => {
                 {/* Contenido del modal con scroll */}
                 <div className="p-6 max-h-[60vh] overflow-y-auto">
                   {/* 📅 RESUMEN DIARIO: Lista de eventos del día */}
-                  {modalEvent.type === 'daily_summary' && (modalEvent as any).events && (
+                  {(modalEvent as any).type === 'daily_summary' && (modalEvent as any).events && (
                     <div>
                       <p className="text-purple-200 text-sm mb-6 text-center">
                         Click en cualquier evento para ver su interpretación completa

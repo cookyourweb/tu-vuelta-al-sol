@@ -31,30 +31,24 @@ interface NatalHouse {
   longitude?: number;
 }
 
-// Estructura REAL que genera el prompt de OpenAI (eventInterpretationPrompt.ts)
+// Soporta TODOS los formatos de interpretación:
+// V1 (eventInterpretationPrompt.ts): mensaje_sintesis, como_te_afecta, sintesis_practica, etc.
+// V2 (eventInterpretationServiceV2.ts): que_se_activa, como_se_siente, consejo, ritual_breve, etc.
+// Simple (eventInterpretationService.ts): personalMeaning, actionSteps, mantra, etc.
 interface EventInterpretation {
+  // V1 fields
   titulo_evento?: string;
   clima_del_dia?: string[];
   energias_activas?: string[];
   mensaje_sintesis?: string;
   como_te_afecta?: string;
-  interpretacion_practica?: Array<{
-    planeta: string;
-    que_pide: string;
-  }>;
+  interpretacion_practica?: Array<{ planeta: string; que_pide: string }>;
   sintesis_practica?: string;
-  accion_concreta?: {
-    titulo: string;
-    pasos: string[];
-  };
+  accion_concreta?: { titulo: string; pasos: string[] };
   sombra_a_evitar?: string[];
   explicacion_sombra?: string;
   frase_ancla?: string;
-  apoyo_energetico?: Array<{
-    tipo: string;
-    elemento: string;
-    proposito: string;
-  }>;
+  apoyo_energetico?: Array<{ tipo: string; elemento: string; proposito: string }>;
   nota_apoyo?: string;
   cierre_dia?: string;
   analisis_tecnico?: {
@@ -63,72 +57,168 @@ interface EventInterpretation {
     planetas_natales_activados?: string[];
     aspectos_cruzados?: string[];
   };
+  // V2 fields (eventInterpretationServiceV2)
+  que_se_activa?: string;
+  como_se_siente?: string[];
+  consejo?: string[];
+  ritual_breve?: string;
+  advertencias?: string[];
+  oportunidades?: string[];
+  mantra?: string;
+  pregunta_clave?: string;
+  // Simple format (eventInterpretationService)
+  personalMeaning?: string;
+  affectedAreas?: string[];
+  actionSteps?: string[];
+  warnings?: string[];
+  opportunities?: string[];
 }
 
 /**
  * Convierte el JSON de interpretación de evento a texto formateado para el libro
- *
- * El formato del libro es más narrativo y enfocado en la acción que el formato de la agenda online
- * Usa los campos REALES que genera eventInterpretationPrompt.ts
- *
- * @param interpretation - JSON de interpretación desde la API
- * @returns Texto formateado para mostrar en el libro impreso
+ * Soporta V1 (prompt antiguo), V2 (serviceV2 actual) y formato simple
  */
 export function formatInterpretationForBook(interpretation: EventInterpretation | null | undefined): string {
   if (!interpretation) {
     return '';
   }
 
+  const interp = interpretation as any;
+
+  // Detectar formato V2 (el que usa generate-batch actualmente)
+  if (interp.que_se_activa || interp.como_se_siente || interp.consejo) {
+    return formatV2(interp);
+  }
+
+  // Detectar formato simple (eventInterpretationService)
+  if (interp.personalMeaning || interp.actionSteps) {
+    return formatSimple(interp);
+  }
+
+  // Formato V1 (eventInterpretationPrompt)
+  return formatV1(interp);
+}
+
+/** Formato V2 - eventInterpretationServiceV2 (producción actual) */
+function formatV2(interp: any): string {
   let texto = '';
 
-  // 1. MENSAJE SÍNTESIS (resumen potente del día)
-  if (interpretation.mensaje_sintesis) {
-    texto += `${interpretation.mensaje_sintesis}\n\n`;
+  if (interp.que_se_activa) {
+    texto += `${interp.que_se_activa}\n\n`;
   }
 
-  // 2. CÓMO TE AFECTA (conexión con carta natal - 200-300 palabras)
-  if (interpretation.como_te_afecta) {
-    texto += `${interpretation.como_te_afecta}\n\n`;
+  if (interp.como_se_siente && Array.isArray(interp.como_se_siente) && interp.como_se_siente.length > 0) {
+    interp.como_se_siente.forEach((s: string) => {
+      texto += `• ${s}\n`;
+    });
+    texto += '\n';
   }
 
-  // 3. SÍNTESIS PRÁCTICA (resumen de la interpretación)
-  if (interpretation.sintesis_practica) {
-    texto += `${interpretation.sintesis_practica}\n\n`;
+  if (interp.consejo && Array.isArray(interp.consejo) && interp.consejo.length > 0) {
+    interp.consejo.forEach((c: string) => {
+      texto += `• ${c}\n`;
+    });
+    texto += '\n';
   }
 
-  // 4. ACCIÓN CONCRETA (ejercicio con pasos)
-  if (interpretation.accion_concreta) {
-    if (interpretation.accion_concreta.titulo) {
-      texto += `Ejercicio: ${interpretation.accion_concreta.titulo}\n`;
+  if (interp.ritual_breve) {
+    texto += `Ritual: ${interp.ritual_breve}\n\n`;
+  }
+
+  if (interp.advertencias && Array.isArray(interp.advertencias) && interp.advertencias.length > 0) {
+    texto += `Ten en cuenta:\n`;
+    interp.advertencias.forEach((a: string) => {
+      texto += `• ${a}\n`;
+    });
+    texto += '\n';
+  }
+
+  if (interp.mantra) {
+    texto += `"${interp.mantra}"\n\n`;
+  }
+
+  if (interp.pregunta_clave) {
+    texto += `${interp.pregunta_clave}\n`;
+  }
+
+  return texto.trim();
+}
+
+/** Formato V1 - eventInterpretationPrompt (formato antiguo) */
+function formatV1(interp: any): string {
+  let texto = '';
+
+  if (interp.mensaje_sintesis) {
+    texto += `${interp.mensaje_sintesis}\n\n`;
+  }
+
+  if (interp.como_te_afecta) {
+    texto += `${interp.como_te_afecta}\n\n`;
+  }
+
+  if (interp.sintesis_practica) {
+    texto += `${interp.sintesis_practica}\n\n`;
+  }
+
+  if (interp.accion_concreta) {
+    if (interp.accion_concreta.titulo) {
+      texto += `Ejercicio: ${interp.accion_concreta.titulo}\n`;
     }
-    if (interpretation.accion_concreta.pasos && interpretation.accion_concreta.pasos.length > 0) {
-      interpretation.accion_concreta.pasos.forEach((paso, idx) => {
+    if (interp.accion_concreta.pasos?.length > 0) {
+      interp.accion_concreta.pasos.forEach((paso: string, idx: number) => {
         texto += `${idx + 1}. ${paso}\n`;
       });
     }
     texto += '\n';
   }
 
-  // 5. SOMBRAS A EVITAR (advertencias)
-  if (interpretation.sombra_a_evitar && interpretation.sombra_a_evitar.length > 0) {
+  if (interp.sombra_a_evitar?.length > 0) {
     texto += `Ten en cuenta:\n`;
-    interpretation.sombra_a_evitar.forEach((sombra) => {
+    interp.sombra_a_evitar.forEach((sombra: string) => {
       texto += `• ${sombra}\n`;
     });
-    if (interpretation.explicacion_sombra) {
-      texto += `${interpretation.explicacion_sombra}\n`;
+    if (interp.explicacion_sombra) {
+      texto += `${interp.explicacion_sombra}\n`;
     }
     texto += '\n';
   }
 
-  // 6. FRASE ANCLA (mantra del día)
-  if (interpretation.frase_ancla) {
-    texto += `"${interpretation.frase_ancla}"\n\n`;
+  if (interp.frase_ancla) {
+    texto += `"${interp.frase_ancla}"\n\n`;
   }
 
-  // 7. CIERRE DEL DÍA (mensaje empoderador)
-  if (interpretation.cierre_dia) {
-    texto += `${interpretation.cierre_dia}\n`;
+  if (interp.cierre_dia) {
+    texto += `${interp.cierre_dia}\n`;
+  }
+
+  return texto.trim();
+}
+
+/** Formato simple - eventInterpretationService */
+function formatSimple(interp: any): string {
+  let texto = '';
+
+  if (interp.personalMeaning) {
+    texto += `${interp.personalMeaning}\n\n`;
+  }
+
+  if (interp.actionSteps?.length > 0) {
+    interp.actionSteps.forEach((step: string, idx: number) => {
+      texto += `${idx + 1}. ${step}\n`;
+    });
+    texto += '\n';
+  }
+
+  if (interp.warnings?.length > 0) {
+    texto += `Ten en cuenta:\n`;
+    interp.warnings.forEach((w: string) => {
+      texto += `• ${w}\n`;
+    });
+    texto += '\n';
+  }
+
+  if (interp.mantra) {
+    texto += `"${interp.mantra}"\n`;
   }
 
   return texto.trim();
@@ -321,26 +411,45 @@ export function formatEventForBook(event: any, natalHouses?: NatalHouse[]) {
 export function formatInterpretationCompact(interpretation: EventInterpretation | null | undefined): string {
   if (!interpretation) return '';
 
-  // Priorizar mensaje_sintesis para versión compacta
-  if (interpretation.mensaje_sintesis) {
-    return interpretation.mensaje_sintesis;
-  }
+  const interp = interpretation as any;
 
-  // Fallback a sintesis_practica
-  if (interpretation.sintesis_practica) {
-    return interpretation.sintesis_practica;
-  }
-
-  // Fallback a frase_ancla (mantra del día)
-  if (interpretation.frase_ancla) {
-    return interpretation.frase_ancla;
-  }
-
-  // Fallback a como_te_afecta (primeras 200 caracteres)
-  if (interpretation.como_te_afecta) {
-    const text = interpretation.como_te_afecta;
+  // V2: que_se_activa es el resumen principal
+  if (interp.que_se_activa) {
+    const text = interp.que_se_activa;
     return text.length > 200 ? text.substring(0, 200) + '...' : text;
   }
 
-  return 'Ver interpretación completa en el calendario mensual.';
+  // V2: mantra como fallback compacto
+  if (interp.mantra) {
+    return interp.mantra;
+  }
+
+  // V1: mensaje_sintesis
+  if (interp.mensaje_sintesis) {
+    return interp.mensaje_sintesis;
+  }
+
+  // V1: sintesis_practica
+  if (interp.sintesis_practica) {
+    return interp.sintesis_practica;
+  }
+
+  // V1: frase_ancla
+  if (interp.frase_ancla) {
+    return interp.frase_ancla;
+  }
+
+  // V1: como_te_afecta (primeras 200 caracteres)
+  if (interp.como_te_afecta) {
+    const text = interp.como_te_afecta;
+    return text.length > 200 ? text.substring(0, 200) + '...' : text;
+  }
+
+  // Simple: personalMeaning
+  if (interp.personalMeaning) {
+    const text = interp.personalMeaning;
+    return text.length > 200 ? text.substring(0, 200) + '...' : text;
+  }
+
+  return '';
 }

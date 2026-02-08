@@ -796,8 +796,8 @@ export async function POST(request: NextRequest) {
     // Preparar datos
     const birthDate = birthData.birthDate.toISOString().split('T')[0];
     const birthTime = birthData.birthTime || '12:00:00';
-    const latitude = parseFloat(birthData.latitude);
-    const longitude = parseFloat(birthData.longitude);
+    const latitude = parseFloat(String(birthData.latitude));
+    const longitude = parseFloat(String(birthData.longitude));
     const timezone = birthData.timezone || 'Europe/Madrid';
     
     console.log('🔧 Datos procesados:', {

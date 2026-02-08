@@ -116,9 +116,10 @@ export function useInterpretaciones({
       console.log('📊 Tiene events?', !!cycle?.events);
       console.log('📈 Número de events:', cycle?.events?.length || 0);
 
-      // ✅ NUEVO: Cargar interpretaciones personalizadas almacenadas
-      // Usar el rango de fechas del ciclo solar para cargar TODO el año
+      // Cargar interpretaciones personalizadas de la colección EventInterpretation
+      // Estas son las más detalladas (generadas on-demand desde la página de agenda)
       const interpretationsMap = new Map<string, any>();
+      const interpretationsByDate = new Map<string, any>(); // Mapa alternativo por fecha
       try {
         const startDate = cycle.start || cycle.cycleStart;
         const endDate = cycle.end || cycle.cycleEnd;
@@ -133,15 +134,22 @@ export function useInterpretaciones({
           const storedData = await storedResponse.json();
           if (storedData.interpretations && Array.isArray(storedData.interpretations)) {
             storedData.interpretations.forEach((interp: any) => {
-              // Usar eventId como clave - guardar objeto completo (interpretation + eventDetails)
+              const data = {
+                interpretation: interp.interpretation,
+                eventDetails: interp.eventDetails
+              };
+              // Mapa por eventId
               if (interp.eventId) {
-                interpretationsMap.set(interp.eventId, {
-                  interpretation: interp.interpretation,
-                  eventDetails: interp.eventDetails
-                });
+                interpretationsMap.set(interp.eventId, data);
+              }
+              // Mapa por fecha (YYYY-MM-DD) para matching alternativo
+              // Los IDs del SolarCycle y EventInterpretation tienen formatos diferentes
+              if (interp.eventDate) {
+                const dateKey = new Date(interp.eventDate).toISOString().split('T')[0];
+                interpretationsByDate.set(dateKey, data);
               }
             });
-            console.log(`✅ Cargadas ${interpretationsMap.size} interpretaciones personalizadas del ciclo`);
+            console.log(`✅ Cargadas ${interpretationsMap.size} interpretaciones personalizadas (${interpretationsByDate.size} por fecha)`);
           }
         }
       } catch (err) {
@@ -149,16 +157,23 @@ export function useInterpretaciones({
       }
       setStoredInterpretations(interpretationsMap);
 
-      // ✅ NUEVO: Merge interpretaciones almacenadas con eventos del ciclo
-      // Incluir tanto interpretation como eventDetails (que contiene la casa correcta)
-      if (cycle?.events && interpretationsMap.size > 0) {
+      // Merge: preferir interpretaciones personalizadas de EventInterpretation sobre las inline de generate-batch
+      // Matching por eventId o por fecha (los IDs tienen formatos diferentes entre colecciones)
+      if (cycle?.events && (interpretationsMap.size > 0 || interpretationsByDate.size > 0)) {
         cycle.events = cycle.events.map((event: AstrologicalEvent) => {
-          const stored = interpretationsMap.get(event.id);
-          if (stored && !event.interpretation) {
+          // 1. Buscar por eventId exacto
+          let stored = interpretationsMap.get(event.id);
+          // 2. Fallback: buscar por fecha
+          if (!stored && event.date) {
+            const dateKey = new Date(event.date).toISOString().split('T')[0];
+            stored = interpretationsByDate.get(dateKey);
+          }
+          // Si encontramos interpretación personalizada, SIEMPRE preferirla
+          // (es más detallada que la inline de generate-batch)
+          if (stored?.interpretation) {
             return {
               ...event,
               interpretation: stored.interpretation,
-              // Merge eventDetails si tiene la casa
               house: stored.eventDetails?.house || event.house
             };
           }

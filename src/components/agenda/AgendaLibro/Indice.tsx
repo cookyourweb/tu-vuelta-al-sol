@@ -2,19 +2,28 @@ import React from 'react';
 import { useStyle } from '@/context/StyleContext';
 import {
   BookOpen, Sun, Moon, Star, Calendar,
-  PenLine, Heart, Sparkles
+  PenLine, Sparkles
 } from 'lucide-react';
 import { FooterLibro } from './MesCompleto';
+
+const MESES_ES = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+];
 
 interface SeccionIndice {
   titulo: string;
   pagina: number;
   icono: React.ReactNode;
-  id: string; // ID para navegación
+  id: string;
   subsecciones?: { titulo: string; pagina: number; id: string }[];
 }
 
-export const IndiceNavegable: React.FC = () => {
+interface IndiceNavegableProps {
+  startDate?: Date;
+}
+
+export const IndiceNavegable: React.FC<IndiceNavegableProps> = ({ startDate }) => {
   const { config } = useStyle();
 
   const handleNavigation = (id: string) => {
@@ -23,6 +32,43 @@ export const IndiceNavegable: React.FC = () => {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
+
+  // Generar subsecciones dinámicas para los 12 meses del ciclo solar
+  // El ciclo empieza y termina en el mes del cumpleaños
+  const generateMonthSubsections = (): { titulo: string; pagina: number; id: string }[] => {
+    if (!startDate) return [];
+    const birthdayMonth = startDate.getMonth(); // 0-11
+    const birthdayYear = startDate.getFullYear();
+    const subsecciones: { titulo: string; pagina: number; id: string }[] = [];
+
+    // 12 meses del ciclo solar
+    for (let i = 0; i < 12; i++) {
+      const monthIndex = (birthdayMonth + i) % 12;
+      const yearOffset = birthdayMonth + i >= 12 ? 1 : 0;
+      const year = birthdayYear + yearOffset;
+      const mesNumero = i + 1;
+      const nombreMes = `${MESES_ES[monthIndex]} ${year}`;
+      const titulo = i === 0 ? `${nombreMes} (Inicio del ciclo)` : nombreMes;
+
+      subsecciones.push({
+        titulo,
+        pagina: 30 + (i * 4),
+        id: `mes-${mesNumero}`
+      });
+    }
+
+    // Mes 13: el cumpleaños del año siguiente cierra el ciclo
+    const nextYear = birthdayYear + 1;
+    subsecciones.push({
+      titulo: `${MESES_ES[birthdayMonth]} ${nextYear} (Cumpleaños - Fin del ciclo)`,
+      pagina: 30 + (12 * 4),
+      id: 'mes-13'
+    });
+
+    return subsecciones;
+  };
+
+  const monthSubsections = generateMonthSubsections();
 
   const secciones: SeccionIndice[] = [
     {
@@ -95,33 +141,20 @@ export const IndiceNavegable: React.FC = () => {
       pagina: 30,
       id: 'calendario-mensual',
       icono: <Moon className="w-4 h-4" />,
-      subsecciones: [
-        { titulo: 'Enero 2026', pagina: 30, id: 'mes-enero' },
-        { titulo: 'Febrero 2026 (Cumpleaños)', pagina: 32, id: 'mes-febrero' },
-      ]
-    },
-    {
-      titulo: 'Terapia Astrológica Creativa',
-      pagina: 141,
-      id: 'terapia-creativa',
-      icono: <Heart className="w-4 h-4" />,
-      subsecciones: [
-        { titulo: 'Escritura Terapéutica', pagina: 141, id: 'escritura-terapeutica' },
-        { titulo: 'Visualización Guiada', pagina: 142, id: 'visualizacion' },
-        { titulo: 'Ritual Simbólico', pagina: 143, id: 'ritual-simbolico' },
-        { titulo: 'Trabajo Emocional', pagina: 144, id: 'trabajo-emocional' },
+      subsecciones: monthSubsections.length > 0 ? monthSubsections : [
+        { titulo: 'Mes 1', pagina: 30, id: 'mes-1' },
       ]
     },
     {
       titulo: 'Cierre del Ciclo',
-      pagina: 146,
+      pagina: 142,
       id: 'cierre-ciclo',
       icono: <Sparkles className="w-4 h-4" />,
       subsecciones: [
-        { titulo: 'El Viaje Completado', pagina: 146, id: 'quien-era-quien-soy' },
-        { titulo: 'Preparación Próxima Vuelta', pagina: 147, id: 'preparacion-proxima' },
-        { titulo: 'Carta de Cierre', pagina: 148, id: 'carta-cierre' },
-        { titulo: 'Página Final', pagina: 149, id: 'pagina-final' },
+        { titulo: 'El Viaje Completado', pagina: 142, id: 'quien-era-quien-soy' },
+        { titulo: 'Preparación Próxima Vuelta', pagina: 143, id: 'preparacion-proxima' },
+        { titulo: 'Carta de Cierre', pagina: 144, id: 'carta-cierre' },
+        { titulo: 'Página Final', pagina: 145, id: 'pagina-final' },
       ]
     },
   ];

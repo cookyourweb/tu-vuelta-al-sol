@@ -22,9 +22,9 @@ export async function POST(request: NextRequest) {
     console.log(`🤖 Interpretando ${events.length} eventos para usuario: ${userId}`);
 
     await connectDB();
-    const birthData = await BirthData.findOne({ userId });
-    
-    if (!birthData) {
+    const birthDataDoc = await BirthData.findOne({ userId });
+
+    if (!birthDataDoc) {
       return NextResponse.json(
         { success: false, error: 'Datos de nacimiento no encontrados' },
         { status: 404 }
@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Crear perfil del usuario para la IA
+    const birthData = birthDataDoc as any;
     const currentDate = new Date();
     const birthDate = new Date(birthData.birthDate);
     const currentAge = currentDate.getFullYear() - birthDate.getFullYear();
@@ -39,11 +40,11 @@ export async function POST(request: NextRequest) {
     const userProfile: UserProfile = {
       userId: userId,
       name: birthData.fullName || 'Usuario',
-      birthDate: birthData.birthDate,
+      birthDate: birthData.birthDate instanceof Date ? birthData.birthDate.toISOString() : String(birthData.birthDate),
       currentAge: currentAge,
       nextAge: currentAge + 1,
-      latitude: parseFloat(birthData.latitude),
-      longitude: parseFloat(birthData.longitude),
+      latitude: parseFloat(String(birthData.latitude)),
+      longitude: parseFloat(String(birthData.longitude)),
       timezone: birthData.timezone || 'Europe/Madrid',
       place: birthData.birthPlace || 'Madrid, España',
       astrological: {

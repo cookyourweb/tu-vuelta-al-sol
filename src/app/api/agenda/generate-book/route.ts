@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
           metadata: e.metadata
         };
       }).sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    }
+    } else {
       // Calcular eventos con astronomy-engine (fallback)
       console.log('⚡ Calculating events with astronomy-engine...');
       const solarEvents = await calculateSolarYearEvents(startDate);

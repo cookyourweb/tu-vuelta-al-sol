@@ -265,8 +265,8 @@ export const SolarCycleHelpers = {
       end: cycle.cycleEnd.toISOString().split('T')[0],
       eventCount: cycle.events.length,
       status: cycle.status,
-      isCurrent: cycle.isCurrent(),
-      isFuture: cycle.isFuture()
+      isCurrent: (cycle as any).isCurrent(),
+      isFuture: (cycle as any).isFuture()
     };
   }
 };

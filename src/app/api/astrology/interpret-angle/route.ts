@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
             [`interpretation.angulos_vitales.${srAngleKey}`]: {
               signo: sign,
               grado: degree,
-              significado: interpretation?.core || interpretation?.significado || 'Interpretación generada',
+              significado: (interpretation as any)?.core || (interpretation as any)?.significado || 'Interpretación generada',
               ...interpretation
             },
             updatedAt: new Date(),

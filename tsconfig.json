@@ -36,6 +36,7 @@
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
+    "temp_header.ts",
     "node_modules"
   ]
 }

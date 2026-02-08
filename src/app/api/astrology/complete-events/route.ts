@@ -98,15 +98,15 @@ export async function POST(request: NextRequest) {
       enrichedProfile = extractAstroProfile({
         natal: chart.natalChart,
         progressed: chart.progressedChart,
-        nombre: birthData.fullName || birthData.nombre,
-        birthDate: birthData.birthDate,
+        nombre: birthData.fullName || (birthData as any).nombre,
+        birthDate: birthData.birthDate instanceof Date ? birthData.birthDate.toISOString() : String(birthData.birthDate),
         place: birthData.birthPlace
       });
       
       // Completar datos que el extractor no puede obtener
       enrichedProfile.userId = userId;
-      enrichedProfile.latitude = parseFloat(birthData.latitude);
-      enrichedProfile.longitude = parseFloat(birthData.longitude);
+      enrichedProfile.latitude = parseFloat(String(birthData.latitude));
+      enrichedProfile.longitude = parseFloat(String(birthData.longitude));
       enrichedProfile.timezone = birthData.timezone || 'Europe/Madrid';
       
     } catch (error) {

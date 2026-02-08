@@ -395,6 +395,25 @@ export const AgendaLibro = ({
   }, [shouldAutoGenerateSR, generatingSolarReturn, userId]);
 
   // ==========================================
+  // 🚀 AUTO-TRIGGER: Generar interpretaciones batch cuando faltan
+  // El libro SIEMPRE debe generar las interpretaciones si no existen
+  // ==========================================
+  useEffect(() => {
+    if (
+      !loading &&
+      !generatingBatch &&
+      !generatingMissing &&
+      eventStats.total > 0 &&
+      eventStats.sinInterpretacion > 0 &&
+      userId &&
+      yearLabel
+    ) {
+      console.log(`🚀 [AUTO_BATCH] Detectadas ${eventStats.sinInterpretacion} interpretaciones faltantes. Generando automáticamente...`);
+      handleGenerateBatch();
+    }
+  }, [loading, eventStats.total, eventStats.sinInterpretacion, generatingBatch, generatingMissing, userId, yearLabel]);
+
+  // ==========================================
   // 🔄 REGENERAR SOLAR RETURN (FORZADO)
   // ==========================================
   const handleRegenerateSolarReturn = async () => {
@@ -588,533 +607,351 @@ export const AgendaLibro = ({
   };
 
   const handleExportTXT = () => {
-    // Construir contenido del libro en formato texto plano
-    let txtContent = '';
+    let t = '';
+    const sep = '═══════════════════════════════════════════════════════════';
+    const sub = '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
+    const section = (title: string) => `\n${sep}\n  ${title}\n${sep}\n\n`;
+    const heading = (title: string) => `━━━ ${title} ━━━\n`;
 
-    // ═══════════════════════════════════════════════════════════
     // PORTADA
-    // ═══════════════════════════════════════════════════════════
-    txtContent += '═══════════════════════════════════════════════════════════\n';
-    txtContent += '           TU VUELTA AL SOL - AGENDA ASTROLÓGICA\n';
-    txtContent += '═══════════════════════════════════════════════════════════\n\n';
-    txtContent += `Agenda de: ${userName}\n`;
-    txtContent += `Período: ${format(startDate, "d 'de' MMMM 'de' yyyy", { locale: es })} - ${format(endDate, "d 'de' MMMM 'de' yyyy", { locale: es })}\n`;
-    if (sunSign) txtContent += `Sol en: ${sunSign}\n`;
-    if (moonSign) txtContent += `Luna en: ${moonSign}\n`;
-    if (ascendant) txtContent += `Ascendente: ${ascendant}\n`;
-    txtContent += '\n\n';
+    t += section('TU VUELTA AL SOL - AGENDA ASTROLÓGICA');
+    t += `Agenda de: ${userName}\n`;
+    t += `Período: ${format(startDate, "d 'de' MMMM 'de' yyyy", { locale: es })} - ${format(endDate, "d 'de' MMMM 'de' yyyy", { locale: es })}\n`;
+    if (sunSign) t += `Sol en: ${sunSign}\n`;
+    if (moonSign) t += `Luna en: ${moonSign}\n`;
+    if (ascendant) t += `Ascendente: ${ascendant}\n`;
+    t += '\n';
 
-    // ═══════════════════════════════════════════════════════════
     // CARTA DE BIENVENIDA
-    // ═══════════════════════════════════════════════════════════
-    txtContent += '═══════════════════════════════════════════════════════════\n';
-    txtContent += '                    CARTA DE BIENVENIDA\n';
-    txtContent += '═══════════════════════════════════════════════════════════\n\n';
-    txtContent += `Querida ${userName},\n\n`;
-    txtContent += 'Hoy empieza un nuevo ciclo.\n';
-    txtContent += 'No es un año más: es TU año.\n\n';
-    txtContent += 'Cumples años, y el Sol vuelve al mismo lugar donde estaba cuando llegaste al mundo.\n';
-    txtContent += 'Ese instante no es solo simbólico: es un portal.\n\n';
-    txtContent += 'Este año no viene a exigirte más.\n';
-    txtContent += 'Viene a reordenarte por dentro.\n\n';
-    txtContent += 'Tu carta natal habla de una persona intuitiva, sensible y profundamente perceptiva.\n';
-    txtContent += 'Tu Retorno Solar confirma que este ciclo es menos visible, pero mucho más verdadero.\n\n';
-    txtContent += 'Esta agenda no te dirá qué hacer.\n';
-    txtContent += 'Te ayudará a escucharte.\n';
-    txtContent += 'A bajar el ruido.\n';
-    txtContent += 'A confiar en tu ritmo.\n\n';
-    txtContent += 'Estoy contigo durante este año.\n';
-    txtContent += 'No te empujo.\n';
-    txtContent += 'Te acompaño.\n\n';
-    txtContent += 'Bienvenida a tu vuelta al Sol.\n\n';
-    txtContent += '                                        Con amor cósmico ✧\n\n';
+    t += section('CARTA DE BIENVENIDA');
+    t += `Querida ${userName},\n\n`;
+    t += 'Hoy empieza un nuevo ciclo. No es un año más: es TU año.\n';
+    t += 'Cumples años, y el Sol vuelve al mismo lugar donde estaba cuando llegaste al mundo.\n';
+    t += 'Ese instante no es solo simbólico: es un portal.\n\n';
+    t += 'Esta agenda no te dirá qué hacer. Te ayudará a escucharte.\n';
+    t += 'A bajar el ruido. A confiar en tu ritmo.\n\n';
+    t += 'Bienvenida a tu vuelta al Sol.\n\n';
+
+    // GUÍA DE LA AGENDA
+    t += section('QUÉ VAS A ENCONTRAR EN ESTA AGENDA');
+    t += 'Tu Carta Natal: Tu esencia, tus dones, tu propósito vital.\n';
+    t += 'Tu Retorno Solar: El tema central de tu año y qué vino a moverte.\n';
+    t += 'Calendario Astrológico: 13 meses con Lunas, eclipses, retrogradaciones y tránsitos.\n';
+    t += 'Ejercicios y Rituales: Prácticas, mantras y espacios para escribir.\n\n';
 
     // ═══════════════════════════════════════════════════════════
-    // GUÍA DE LA AGENDA (Natal primero, SR segundo)
-    // ═══════════════════════════════════════════════════════════
-    txtContent += '═══════════════════════════════════════════════════════════\n';
-    txtContent += '          QUÉ VAS A ENCONTRAR EN ESTA AGENDA\n';
-    txtContent += '═══════════════════════════════════════════════════════════\n\n';
-    txtContent += '💫 Tu Carta Natal:\n';
-    txtContent += '   Tu esencia, tus dones, tu propósito vital.\n';
-    txtContent += '   El mapa del cielo en el momento exacto de tu nacimiento.\n\n';
-    txtContent += '🌟 Tu Retorno Solar:\n';
-    txtContent += '   El tema central de tu año, cómo se siente este ciclo y qué vino a moverte.\n';
-    txtContent += '   Una interpretación profunda de tu carta astrológica anual.\n\n';
-    txtContent += '📅 Calendario Astrológico:\n';
-    txtContent += '   12 meses con Lunas Nuevas, Lunas Llenas, eclipses, retrogradaciones\n';
-    txtContent += '   y tránsitos importantes. Cada mes tiene espacio para escribir y reflexionar.\n\n';
-    txtContent += '✨ Ejercicios y Rituales:\n';
-    txtContent += '   Prácticas creativas, visualizaciones, rituales simbólicos y espacios para escribir.\n';
-    txtContent += '   Herramientas para integrar la astrología en tu vida diaria.\n\n';
-    txtContent += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-    txtContent += 'Esta agenda es tu compañera de viaje.\n';
-    txtContent += 'No la uses de forma lineal si no quieres.\n';
-    txtContent += 'Abre donde te llame la intuición.\n';
-    txtContent += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
-
-    // ═══════════════════════════════════════════════════════════
-    // CARTA NATAL - TU ESENCIA (PRIMERO)
+    // CARTA NATAL
     // ═══════════════════════════════════════════════════════════
     const natalData = getNatalInterpretation();
-    txtContent += '═══════════════════════════════════════════════════════════\n';
-    txtContent += '                  CARTA NATAL - TU ESENCIA\n';
-    txtContent += '═══════════════════════════════════════════════════════════\n\n';
+    t += section('CARTA NATAL - TU ESENCIA');
 
     if (natalData) {
-      // ESENCIA NATAL
       const esencia = getEsenciaNatal();
       if (esencia) {
-        if (esencia.proposito_vida) {
-          txtContent += '━━━ TU PROPÓSITO VITAL ━━━\n';
-          txtContent += esencia.proposito_vida + '\n\n';
-        }
-
-        if (esencia.emociones) {
-          txtContent += '━━━ TU MUNDO EMOCIONAL ━━━\n';
-          txtContent += esencia.emociones + '\n\n';
-        }
-
-        if (esencia.pensamiento) {
-          txtContent += '━━━ CÓMO PIENSAS Y TE COMUNICAS ━━━\n';
-          txtContent += esencia.pensamiento + '\n\n';
-        }
-
-        if (esencia.amor) {
-          txtContent += '━━━ CÓMO AMAS ━━━\n';
-          txtContent += esencia.amor + '\n\n';
-        }
-
-        if (esencia.accion) {
-          txtContent += '━━━ CÓMO ACTÚAS ━━━\n';
-          txtContent += esencia.accion + '\n\n';
-        }
+        if (esencia.proposito_vida) { t += heading('TU PROPÓSITO VITAL'); t += esencia.proposito_vida + '\n\n'; }
+        if (esencia.emociones) { t += heading('TU MUNDO EMOCIONAL'); t += esencia.emociones + '\n\n'; }
+        if (esencia.personalidad) { t += heading('TU PERSONALIDAD'); t += esencia.personalidad + '\n\n'; }
+        if (esencia.pensamiento) { t += heading('CÓMO PIENSAS Y TE COMUNICAS'); t += esencia.pensamiento + '\n\n'; }
+        if (esencia.amor) { t += heading('CÓMO AMAS'); t += esencia.amor + '\n\n'; }
+        if (esencia.accion) { t += heading('CÓMO ACTÚAS'); t += esencia.accion + '\n\n'; }
       }
 
       // NODOS LUNARES
       const nodos = getNodosLunares();
       if (nodos) {
-        if (nodos.nodo_sur) {
-          txtContent += '━━━ NODO SUR (De dónde vienes) ━━━\n';
-          txtContent += nodos.nodo_sur + '\n\n';
-        }
+        if (nodos.nodo_sur) { t += heading('NODO SUR (De dónde vienes)'); t += nodos.nodo_sur + '\n\n'; }
+        if (nodos.nodo_norte) { t += heading('NODO NORTE (Hacia dónde vas)'); t += nodos.nodo_norte + '\n\n'; }
+      }
 
-        if (nodos.nodo_norte) {
-          txtContent += '━━━ NODO NORTE (Hacia dónde vas) ━━━\n';
-          txtContent += nodos.nodo_norte + '\n\n';
+      // PLANETAS DOMINANTES
+      const planetas = getPlanetasDominantes();
+      if (planetas) {
+        t += heading('PLANETAS DOMINANTES');
+        if (planetas.como_piensas) t += `Mercurio (Pensamiento): ${planetas.como_piensas}\n\n`;
+        if (planetas.proposito_vida) t += `Sol (Propósito): ${planetas.proposito_vida}\n\n`;
+        if (planetas.emociones) t += `Luna (Emociones): ${planetas.emociones}\n\n`;
+        if (planetas.como_amas) t += `Venus (Amor): ${planetas.como_amas}\n\n`;
+        if (planetas.como_actuas) t += `Marte (Acción): ${planetas.como_actuas}\n\n`;
+      }
+
+      // PATRONES EMOCIONALES
+      const patrones = getPatronesEmocionales();
+      if (patrones) {
+        t += heading('PATRONES EMOCIONALES');
+        if (patrones.patrones && Array.isArray(patrones.patrones)) {
+          patrones.patrones.forEach((p: any, i: number) => {
+            const txt = typeof p === 'string' ? p : p.descripcion || p.nombre || JSON.stringify(p);
+            t += `${i + 1}. ${txt}\n`;
+          });
+          t += '\n';
         }
+        if (patrones.sombra) { t += `Sombra: ${patrones.sombra}\n\n`; }
       }
     } else {
-      // Fallback si no hay interpretación completa
-      txtContent += 'Tu carta natal es el mapa del cielo en el momento exacto de tu nacimiento.\n';
-      txtContent += 'Refleja tu potencial, tus dones, tus desafíos y el camino de tu alma.\n\n';
-
-      if (sunSign) {
-        txtContent += `SOL EN ${sunSign.toUpperCase()}:\n`;
-        txtContent += 'Tu esencia, tu identidad, tu propósito vital.\n\n';
-      }
-
-      if (moonSign) {
-        txtContent += `LUNA EN ${moonSign.toUpperCase()}:\n`;
-        txtContent += 'Tus necesidades emocionales, tu mundo interior.\n\n';
-      }
-
-      if (ascendant) {
-        txtContent += `ASCENDENTE EN ${ascendant.toUpperCase()}:\n`;
-        txtContent += 'Tu máscara social, cómo te perciben los demás.\n\n';
-      }
+      if (sunSign) t += `Sol en ${sunSign}: Tu esencia y propósito vital.\n`;
+      if (moonSign) t += `Luna en ${moonSign}: Tus necesidades emocionales.\n`;
+      if (ascendant) t += `Ascendente en ${ascendant}: Cómo te perciben los demás.\n`;
+      t += '\n';
     }
 
     // ═══════════════════════════════════════════════════════════
-    // RETORNO SOLAR - INTERPRETACIÓN COMPLETA (DESPUÉS DE NATAL)
+    // RETORNO SOLAR
     // ═══════════════════════════════════════════════════════════
     const srData = getSRInterpretation();
     if (srData) {
-      txtContent += '═══════════════════════════════════════════════════════════\n';
-      txtContent += '                 TU RETORNO SOLAR DEL AÑO\n';
-      txtContent += '═══════════════════════════════════════════════════════════\n\n';
+      t += section('TU RETORNO SOLAR DEL AÑO');
 
-      // APERTURA ANUAL - COMPLETA
+      // APERTURA ANUAL
       if (srData.apertura_anual) {
-        if (srData.apertura_anual.tema_central) {
-          txtContent += '━━━ TEMA CENTRAL DEL AÑO ━━━\n';
-          txtContent += srData.apertura_anual.tema_central + '\n\n';
-        }
-
-        if (srData.apertura_anual.eje_del_ano) {
-          txtContent += '━━━ EJE DEL AÑO ━━━\n';
-          txtContent += srData.apertura_anual.eje_del_ano + '\n\n';
-        }
-
-        if (srData.apertura_anual.como_se_siente) {
-          txtContent += '━━━ CÓMO SE SIENTE ━━━\n';
-          txtContent += srData.apertura_anual.como_se_siente + '\n\n';
-        }
-
-        if (srData.apertura_anual.conexion_natal) {
-          txtContent += '━━━ CONEXIÓN CON TU CARTA NATAL ━━━\n';
-          txtContent += srData.apertura_anual.conexion_natal + '\n\n';
-        }
+        if (srData.apertura_anual.tema_central) { t += heading('TEMA CENTRAL DEL AÑO'); t += srData.apertura_anual.tema_central + '\n\n'; }
+        if (srData.apertura_anual.eje_del_ano) { t += heading('EJE DEL AÑO'); t += srData.apertura_anual.eje_del_ano + '\n\n'; }
+        if (srData.apertura_anual.como_se_siente) { t += heading('CÓMO SE SIENTE'); t += srData.apertura_anual.como_se_siente + '\n\n'; }
+        if (srData.apertura_anual.conexion_natal) { t += heading('CONEXIÓN CON TU CARTA NATAL'); t += srData.apertura_anual.conexion_natal + '\n\n'; }
       }
 
       // CÓMO SE VIVE SIENDO TÚ
       if (srData.como_se_vive_siendo_tu) {
-        txtContent += '\n━━━ CÓMO SE VIVE SIENDO TÚ ESTE AÑO ━━━\n\n';
-
-        if (srData.como_se_vive_siendo_tu.facilidad) {
-          txtContent += '▸ LO QUE FLUYE:\n';
-          txtContent += '  ' + srData.como_se_vive_siendo_tu.facilidad + '\n\n';
-        }
-
-        if (srData.como_se_vive_siendo_tu.incomodidad) {
-          txtContent += '▸ LO QUE INCOMODA:\n';
-          txtContent += '  ' + srData.como_se_vive_siendo_tu.incomodidad + '\n\n';
-        }
-
-        if (srData.como_se_vive_siendo_tu.medida_del_ano) {
-          txtContent += '▸ LA MEDIDA DEL AÑO:\n';
-          txtContent += '  ' + srData.como_se_vive_siendo_tu.medida_del_ano + '\n\n';
-        }
-
-        if (srData.como_se_vive_siendo_tu.actitud_nueva) {
-          txtContent += '▸ ACTITUD NUEVA:\n';
-          txtContent += '  ' + srData.como_se_vive_siendo_tu.actitud_nueva + '\n\n';
-        }
+        t += heading('CÓMO SE VIVE SIENDO TÚ ESTE AÑO');
+        const csv = srData.como_se_vive_siendo_tu;
+        if (csv.facilidad) t += `Lo que fluye: ${csv.facilidad}\n\n`;
+        if (csv.incomodidad) t += `Lo que incomoda: ${csv.incomodidad}\n\n`;
+        if (csv.medida_del_ano) t += `La medida del año: ${csv.medida_del_ano}\n\n`;
+        if (csv.reflejos_obsoletos) t += `Reflejos obsoletos: ${csv.reflejos_obsoletos}\n\n`;
+        if (csv.actitud_nueva) t += `Actitud nueva: ${csv.actitud_nueva}\n\n`;
       }
 
-      // COMPARACIONES PLANETARIAS COMPLETAS
-      if (srData.comparaciones_planetarias && Object.keys(srData.comparaciones_planetarias).length > 0) {
-        txtContent += '\n━━━ COMPARACIONES NATAL vs SOLAR RETURN ━━━\n\n';
-
-        const comparaciones = srData.comparaciones_planetarias;
+      // COMPARACIONES PLANETARIAS DETALLADAS
+      if (srData.comparaciones_planetarias) {
+        t += heading('COMPARACIONES NATAL vs SOLAR RETURN');
         const planetas = ['sol', 'luna', 'mercurio', 'venus', 'marte', 'jupiter', 'saturno'];
-        const simbolos: Record<string, string> = {
-          'sol': '▸ SOL',
-          'luna': '▸ LUNA',
-          'mercurio': '▸ MERCURIO',
-          'venus': '▸ VENUS',
-          'marte': '▸ MARTE',
-          'jupiter': '▸ JUPITER',
-          'saturno': '▸ SATURNO'
-        };
-
         planetas.forEach((planeta) => {
-          const comp = comparaciones[planeta];
+          const comp = srData.comparaciones_planetarias[planeta];
           if (comp) {
-            txtContent += `${simbolos[planeta]}\n`;
-
-            if (comp.natal) {
-              if (typeof comp.natal === 'string') {
-                txtContent += `  Natal: ${comp.natal}\n`;
-              } else if (comp.natal.descripcion) {
-                txtContent += `  Natal: ${comp.natal.descripcion}\n`;
-              }
-            }
-
-            if (comp.solar_return) {
-              if (typeof comp.solar_return === 'string') {
-                txtContent += `  Solar Return: ${comp.solar_return}\n`;
-              } else if (comp.solar_return.descripcion) {
-                txtContent += `  Solar Return: ${comp.solar_return.descripcion}\n`;
-              }
-            }
-
-            if (comp.choque) {
-              txtContent += `  Choque/Tensión: ${comp.choque}\n`;
-            }
-
-            if (comp.que_hacer) {
-              txtContent += `  Qué hacer: ${comp.que_hacer}\n`;
-            }
-
-            if (comp.mandato_del_ano) {
-              txtContent += `  Mandato del año: ${comp.mandato_del_ano}\n`;
-            }
-
-            txtContent += '\n';
+            t += `\n▸ ${planeta.toUpperCase()}\n`;
+            if (comp.natal) t += `  Natal: ${typeof comp.natal === 'string' ? comp.natal : comp.natal.descripcion || ''}\n`;
+            if (comp.solar_return) t += `  Solar Return: ${typeof comp.solar_return === 'string' ? comp.solar_return : comp.solar_return.descripcion || ''}\n`;
+            if (comp.choque) t += `  Tensión: ${comp.choque}\n`;
+            if (comp.que_hacer) t += `  Qué hacer: ${comp.que_hacer}\n`;
+            if (comp.mandato_del_ano) t += `  Mandato del año: ${comp.mandato_del_ano}\n`;
           }
         });
+        t += '\n';
       }
 
-      // LÍNEA DE TIEMPO DEL AÑO
-      if (srData.linea_tiempo_anual && Array.isArray(srData.linea_tiempo_anual) && srData.linea_tiempo_anual.length > 0) {
-        txtContent += '\n━━━ LÍNEA DE TIEMPO DEL AÑO ━━━\n\n';
-        srData.linea_tiempo_anual.forEach((fase: any, idx: number) => {
-          txtContent += `▸ ${fase.periodo || fase.mes || `Fase ${idx + 1}`}\n`;
-          if (fase.descripcion) txtContent += `  ${fase.descripcion}\n`;
-          if (fase.accion_clave) txtContent += `  Acción clave: ${fase.accion_clave}\n`;
-          txtContent += '\n';
+      // EJES DEL AÑO (datos reales)
+      const ejes = getIntegracionEjes();
+      const ejesSignos = getEjesSignos();
+      if (ejes) {
+        t += heading('LOS EJES DEL AÑO');
+        if (ejes.asc) t += `Ascendente (Casa 1)${ejesSignos?.asc ? ` en ${ejesSignos.asc.sign}` : ''}: ${typeof ejes.asc === 'string' ? ejes.asc : ''}\n\n`;
+        if (ejes.ic) t += `Fondo del Cielo IC (Casa 4)${ejesSignos?.ic ? ` en ${ejesSignos.ic.sign}` : ''}: ${typeof ejes.ic === 'string' ? ejes.ic : ''}\n\n`;
+        if (ejes.mc) t += `Medio Cielo MC (Casa 10)${ejesSignos?.mc ? ` en ${ejesSignos.mc.sign}` : ''}: ${typeof ejes.mc === 'string' ? ejes.mc : ''}\n\n`;
+        if (ejes.dsc) t += `Descendente (Casa 7)${ejesSignos?.dsc ? ` en ${ejesSignos.dsc.sign}` : ''}: ${typeof ejes.dsc === 'string' ? ejes.dsc : ''}\n\n`;
+        if (ejes.frase_guia) t += `Frase guía: "${ejes.frase_guia}"\n\n`;
+      }
+
+      // MANTRA ANUAL
+      const mantraAnual = srData.frase_guia || srData.mantra_anual || ejes?.frase_guia;
+      if (mantraAnual) {
+        t += heading('MANTRA ANUAL');
+        t += `"${mantraAnual}"\n\n`;
+      }
+
+      // LÍNEA DE TIEMPO
+      if (srData.linea_tiempo_anual?.length > 0) {
+        t += heading('LÍNEA DE TIEMPO DEL AÑO');
+        srData.linea_tiempo_anual.forEach((fase: any, i: number) => {
+          t += `▸ ${fase.periodo || fase.mes || `Fase ${i + 1}`}`;
+          if (fase.descripcion) t += `: ${fase.descripcion}`;
+          if (fase.accion_clave) t += ` | Acción: ${fase.accion_clave}`;
+          t += '\n';
         });
+        t += '\n';
       }
 
-      // SOMBRAS Y DESAFÍOS DEL AÑO
-      if (srData.sombras_del_ano && Array.isArray(srData.sombras_del_ano) && srData.sombras_del_ano.length > 0) {
-        txtContent += '\n━━━ SOMBRAS Y DESAFÍOS DEL AÑO ━━━\n\n';
-        srData.sombras_del_ano.forEach((sombra: string, idx: number) => {
-          txtContent += `${idx + 1}. ${sombra}\n`;
-        });
-        txtContent += '\n';
-      }
-
-      // CLAVES DE INTEGRACIÓN
-      if (srData.claves_integracion && srData.claves_integracion.length > 0) {
-        txtContent += '\n━━━ CLAVES DE INTEGRACIÓN ━━━\n\n';
-        srData.claves_integracion.forEach((clave: string, idx: number) => {
-          txtContent += `${idx + 1}. ${clave}\n`;
-        });
-        txtContent += '\n';
-      }
-    }
-
-    // ═══════════════════════════════════════════════════════════
-    // CICLOS ANUALES Y MESES CLAVE
-    // ═══════════════════════════════════════════════════════════
-    if (srData) {
       // LÍNEA DE TIEMPO EMOCIONAL
-      if (solarReturnInterpretation?.interpretation?.linea_tiempo_emocional) {
-        txtContent += '\n═══════════════════════════════════════════════════════════\n';
-        txtContent += '              LÍNEA DE TIEMPO EMOCIONAL\n';
-        txtContent += '═══════════════════════════════════════════════════════════\n\n';
-
-        solarReturnInterpretation.interpretation.linea_tiempo_emocional.forEach((mes: any) => {
-          txtContent += `▸ ${mes.mes}: Intensidad ${mes.intensidad}/10\n`;
-          if (mes.palabra_clave) txtContent += `  Palabra clave: ${mes.palabra_clave}\n`;
-          txtContent += '\n';
+      if (srData.linea_tiempo_emocional?.length > 0) {
+        t += heading('LÍNEA DE TIEMPO EMOCIONAL');
+        srData.linea_tiempo_emocional.forEach((mes: any) => {
+          t += `▸ ${mes.mes}: Intensidad ${mes.intensidad}/10`;
+          if (mes.palabra_clave) t += ` · ${mes.palabra_clave}`;
+          t += '\n';
         });
+        t += '\n';
       }
 
       // MESES CLAVE Y PUNTOS DE GIRO
-      if (solarReturnInterpretation?.interpretation?.meses_clave_puntos_giro) {
-        txtContent += '\n═══════════════════════════════════════════════════════════\n';
-        txtContent += '           MESES CLAVE Y PUNTOS DE GIRO\n';
-        txtContent += '═══════════════════════════════════════════════════════════\n\n';
-
-        solarReturnInterpretation.interpretation.meses_clave_puntos_giro.forEach((punto: any, idx: number) => {
-          txtContent += `${idx + 1}. ${punto.mes || punto.periodo}\n`;
-          if (punto.evento_astrologico) txtContent += `   Evento: ${punto.evento_astrologico}\n`;
-          if (punto.significado) txtContent += `   Significado: ${punto.significado}\n`;
-          txtContent += '\n';
+      if (srData.meses_clave_puntos_giro?.length > 0) {
+        t += heading('MESES CLAVE Y PUNTOS DE GIRO');
+        srData.meses_clave_puntos_giro.forEach((punto: any, i: number) => {
+          t += `${i + 1}. ${punto.mes || punto.periodo}`;
+          if (punto.evento_astrologico) t += ` — ${punto.evento_astrologico}`;
+          if (punto.significado) t += `\n   ${punto.significado}`;
+          t += '\n';
         });
+        t += '\n';
       }
 
-      // GRANDES APRENDIZAJES (ya incluido arriba como "claves de integración")
+      // SOMBRAS Y DESAFÍOS
+      if (srData.sombras_del_ano?.length > 0) {
+        t += heading('SOMBRAS Y DESAFÍOS DEL AÑO');
+        srData.sombras_del_ano.forEach((s: string, i: number) => { t += `${i + 1}. ${s}\n`; });
+        t += '\n';
+      }
+
+      // CLAVES DE INTEGRACIÓN
+      if (srData.claves_integracion?.length > 0) {
+        t += heading('CLAVES DE INTEGRACIÓN');
+        srData.claves_integracion.forEach((c: string, i: number) => { t += `${i + 1}. ${c}\n`; });
+        t += '\n';
+      }
     }
 
-    // ═══════════════════════════════════════════════════════════
-    // EJES DEL AÑO
-    // ═══════════════════════════════════════════════════════════
-    txtContent += '\n═══════════════════════════════════════════════════════════\n';
-    txtContent += '                    LOS EJES DEL AÑO\n';
-    txtContent += '═══════════════════════════════════════════════════════════\n\n';
-    txtContent += 'Este año no se sostiene por eventos aislados, sino por cuatro puntos clave\n';
-    txtContent += 'que marcan cómo vives, decides y te posicionas en el mundo.\n\n';
-    txtContent += 'No son exigencias externas. Son ajustes internos.\n\n';
-
-    txtContent += '━━━ ASCENDENTE DEL RETORNO (Casa 1) ━━━\n';
-    txtContent += 'Tu nueva máscara. La actitud con la que inicias este ciclo.\n';
-    txtContent += 'Este año no eres exactamente quien eras hace 12 meses.\n\n';
-
-    txtContent += '━━━ FONDO DEL CIELO (IC) - Casa 4 ━━━\n';
-    txtContent += 'Tu base emocional, tu hogar interior.\n';
-    txtContent += 'Todo lo que construyes este año se sostiene desde aquí.\n\n';
-
-    txtContent += '━━━ MEDIO CIELO (MC) - Casa 10 ━━━\n';
-    txtContent += 'Vocación, dirección, propósito visible.\n';
-    txtContent += 'Este año no busca logros espectaculares ni reconocimiento inmediato. Busca sentido.\n\n';
-
-    txtContent += '━━━ DESCENDENTE (DSC) - Casa 7 ━━━\n';
-    txtContent += 'Relaciones, vínculos, espejo emocional.\n';
-    txtContent += 'Este año las relaciones funcionan como espejo directo.\n';
-    txtContent += 'Lo que no está equilibrado se nota más. Lo que es verdadero, se profundiza.\n\n';
-
-    txtContent += '▸ Frase guía del eje del año:\n';
-    txtContent += '"Me permito ser honesta conmigo antes de intentar encajar en el mundo."\n\n';
-
-    // ═══════════════════════════════════════════════════════════
     // RITUAL DE CUMPLEAÑOS
-    // ═══════════════════════════════════════════════════════════
-    txtContent += '\n═══════════════════════════════════════════════════════════\n';
-    txtContent += '                  RITUAL DE CUMPLEAÑOS\n';
-    txtContent += '═══════════════════════════════════════════════════════════\n\n';
-    txtContent += 'Un pequeño ritual para honrar tu nuevo ciclo solar.\n\n';
+    t += section('RITUAL DE CUMPLEAÑOS');
+    t += 'Necesitas: Una vela, papel, bolígrafo y un momento de soledad.\n\n';
+    t += '1. Enciende la vela y respira profundo tres veces.\n';
+    t += '2. Escribe una carta a la versión de ti que cumple años el próximo año.\n';
+    t += '3. Cuéntale qué esperas haber aprendido, sentido, soltado.\n';
+    t += '4. Guarda la carta sin leerla hasta tu próximo cumpleaños.\n';
+    t += '5. Apaga la vela con gratitud.\n\n';
 
-    txtContent += '━━━ NECESITAS ━━━\n';
-    txtContent += '• Una vela (preferiblemente dorada o blanca)\n';
-    txtContent += '• Papel y bolígrafo\n';
-    txtContent += '• Un momento de soledad\n\n';
-
-    txtContent += '━━━ EL RITUAL ━━━\n';
-    txtContent += '1. Enciende la vela y respira profundo tres veces.\n';
-    txtContent += '2. Escribe una carta a la versión de ti que cumple años el próximo año.\n';
-    txtContent += '3. Cuéntale qué esperas haber aprendido, sentido, soltado.\n';
-    txtContent += '4. Guarda la carta sin leerla hasta tu próximo cumpleaños.\n';
-    txtContent += '5. Apaga la vela con gratitud.\n\n';
-
-    txtContent += 'Si resuena contigo, pruébalo.\n\n';
-
-    // ═══════════════════════════════════════════════════════════
-    // PRIMER DÍA DE TU CICLO (después de leer todas las interpretaciones)
-    // ═══════════════════════════════════════════════════════════
-    txtContent += '═══════════════════════════════════════════════════════════\n';
-    txtContent += '               PRIMER DÍA DE TU CICLO\n';
-    txtContent += '═══════════════════════════════════════════════════════════\n\n';
-    txtContent += `${format(startDate, "d 'de' MMMM 'de' yyyy", { locale: es })}\n`;
-    txtContent += `¡Feliz cumpleaños, ${userName}!\n\n`;
-
-    txtContent += 'Ahora que ya has leído quién eres y qué se activa este año,\n';
-    txtContent += 'es momento de hacer una pausa antes de comenzar.\n\n';
-
-    txtContent += '━━━ RITUAL DE APERTURA ━━━\n';
-    txtContent += '🕯️ Busca un lugar tranquilo\n';
-    txtContent += '☕ Prepárate una infusión\n';
-    txtContent += '✨ Enciende una vela si lo deseas\n\n';
+    // PRIMER DÍA DEL CICLO
+    t += section('PRIMER DÍA DE TU CICLO');
+    t += `${format(startDate, "d 'de' MMMM 'de' yyyy", { locale: es })}\n`;
+    t += `¡Feliz cumpleaños, ${userName}!\n\n`;
 
     const temaCentral = getInterpretacionRetornoSolar();
     const mandato = getSRInterpretation()?.comparaciones_planetarias?.sol?.mandato_del_ano;
+    if (temaCentral) { t += heading('TU TEMA PARA ESTE CICLO'); t += temaCentral + '\n\n'; }
+    if (mandato) { t += heading('LA INVITACIÓN DEL AÑO'); t += `"${mandato}"\n\n`; }
 
-    if (temaCentral) {
-      txtContent += '━━━ TU TEMA PARA ESTE CICLO ━━━\n';
-      txtContent += (temaCentral.length > 200 ? temaCentral.substring(0, 200) + '...' : temaCentral) + '\n\n';
-    }
-
-    if (mandato) {
-      txtContent += '━━━ LA INVITACIÓN DEL AÑO ━━━\n';
-      txtContent += `"${mandato}"\n\n`;
-    }
-
-    txtContent += '━━━ PREGUNTAS PARA REFLEXIONAR ━━━\n';
-    txtContent += '• ¿Qué sensaciones te ha dejado esta lectura?\n';
-    txtContent += '• ¿Qué palabras o frases resuenan más contigo?\n';
-    txtContent += '• ¿Hay algo que ya sabías pero necesitabas confirmar?\n\n';
-
-    txtContent += '━━━ MI INTENCIÓN PARA ESTA VUELTA AL SOL ━━━\n';
-    txtContent += '(Espacio para escribir tu intención personal)\n\n';
-    txtContent += '________________________________________________________________\n\n';
-    txtContent += '________________________________________________________________\n\n';
-    txtContent += '________________________________________________________________\n\n';
+    t += 'Preguntas para reflexionar:\n';
+    t += '• ¿Qué sensaciones te ha dejado esta lectura?\n';
+    t += '• ¿Qué palabras o frases resuenan más contigo?\n';
+    t += '• ¿Hay algo que ya sabías pero necesitabas confirmar?\n\n';
 
     // ═══════════════════════════════════════════════════════════
-    // CALENDARIO DE TU AÑO SOLAR (ORDENADO CRONOLÓGICAMENTE)
+    // CALENDARIO MENSUAL COMPLETO (13 meses con interpretaciones)
     // ═══════════════════════════════════════════════════════════
-    if (solarCycle && solarCycle.events) {
-      txtContent += '\n═══════════════════════════════════════════════════════════\n';
-      txtContent += '                CALENDARIO DE TU AÑO SOLAR\n';
-      txtContent += '═══════════════════════════════════════════════════════════\n\n';
+    t += section('CALENDARIO DE TU AÑO SOLAR');
+    const mesesNombres = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
 
-      // Agrupar eventos por mes
-      const eventosPorMes: { [key: string]: { eventos: any[], monthDate: Date } } = {};
-      const meses = [
-        'ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO',
-        'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'
-      ];
+    const therapyExercises: Record<number, string> = {
+      3: 'ESCRITURA TERAPÉUTICA\nEjercicio: Escribe durante 10 minutos sin parar. No corrijas, no juzgues.\nPregunta guía: "Si mi cuerpo pudiera hablar, ¿qué me diría que estoy ignorando?"\n',
+      6: 'VISUALIZACIÓN GUIADA\nCierra los ojos. Imagina que caminas por un sendero hasta encontrar a tu yo del futuro.\nAnota: ¿Qué vi? ¿Qué escuché? ¿Qué sentí?\n',
+      9: 'RITUAL SIMBÓLICO\nEscribe en un papel lo que necesitas soltar. Léelo en voz alta.\nQuémalo, entiérralo o sumérgelo en agua.\nAnota: ¿Qué solté hoy? ¿Qué siento ahora?\n',
+      12: 'TRABAJO EMOCIONAL\nEscaneo corporal: Cierra los ojos y recorre tu cuerpo de pies a cabeza.\nAnota: ¿Dónde siento tensión? ¿Dónde siento ligereza?\n¿Qué me está diciendo mi cuerpo?\n'
+    };
 
-      solarCycle.events.forEach((event: any) => {
-        const eventDate = new Date(event.date);
-        const mesNombre = meses[eventDate.getMonth()];
-        const year = eventDate.getFullYear();
-        const mesKey = `${mesNombre} ${year}`;
+    calendarMonths.forEach((month) => {
+      const mesNombre = mesesNombres[month.monthIndex];
+      const year = month.monthDate.getFullYear();
+      const mesLabel = month.isBirthdayMonth ? `${mesNombre} ${year} (Inicio del ciclo)` :
+        month.isClosingMonth ? `${mesNombre} ${year} (Fin del ciclo)` :
+        `${mesNombre} ${year}`;
 
-        if (!eventosPorMes[mesKey]) {
-          eventosPorMes[mesKey] = { eventos: [], monthDate: eventDate };
-        }
-        eventosPorMes[mesKey].eventos.push(event);
-      });
+      t += `\n${sub}\n  MES ${month.mesNumero}: ${mesLabel.toUpperCase()}\n`;
+      if (month.nombre) t += `  ${month.nombre} · ${month.tema || ''}\n`;
+      t += `${sub}\n\n`;
 
-      // Ordenar meses cronológicamente desde el mes de cumpleaños
-      const birthdayMonth = startDate.getMonth();
-      const birthdayYear = startDate.getFullYear();
-
-      const sortedKeys = Object.keys(eventosPorMes).sort((a, b) => {
-        const dateA = eventosPorMes[a].monthDate;
-        const dateB = eventosPorMes[b].monthDate;
-
-        // Calcular posición relativa al cumpleaños
-        let monthsFromBirthdayA = (dateA.getFullYear() - birthdayYear) * 12 + dateA.getMonth() - birthdayMonth;
-        let monthsFromBirthdayB = (dateB.getFullYear() - birthdayYear) * 12 + dateB.getMonth() - birthdayMonth;
-
-        // Ajustar para que los meses después del cumpleaños este año y antes del próximo estén en orden
-        if (monthsFromBirthdayA < 0) monthsFromBirthdayA += 12;
-        if (monthsFromBirthdayB < 0) monthsFromBirthdayB += 12;
-
-        return monthsFromBirthdayA - monthsFromBirthdayB;
-      });
-
-      // Imprimir eventos por mes en orden cronológico
-      sortedKeys.forEach((mesKey) => {
-        txtContent += `\n━━━ ${mesKey} ━━━\n\n`;
-
-        eventosPorMes[mesKey].eventos.forEach((event: any) => {
-          const eventDate = new Date(event.date);
-          const dia = eventDate.getDate();
-          let tipoEvento = event.type || 'Evento';
-
-          // Traducir tipos de eventos
-          if (event.type === 'new_moon') {
-            tipoEvento = 'Luna Nueva';
-          } else if (event.type === 'full_moon') {
-            tipoEvento = 'Luna Llena';
-          } else if (event.type === 'lunar_phase') {
-            tipoEvento = event.title?.includes('Nueva') ? 'Luna Nueva' : 'Luna Llena';
-          } else if (event.type === 'retrograde') {
-            tipoEvento = 'Retrogradación';
-          } else if (event.type === 'eclipse') {
-            tipoEvento = 'Eclipse';
-          } else if (event.type === 'planetary_transit') {
-            tipoEvento = 'Tránsito planetario';
+      // EVENTOS LUNARES con interpretaciones
+      const lunarEvents = getLunarEventsForMonth(month.monthIndex);
+      if (lunarEvents.length > 0) {
+        lunarEvents.forEach((evento: any) => {
+          const tipoLabel = evento.tipo === 'lunaNueva' ? 'LUNA NUEVA' : 'LUNA LLENA';
+          t += `▸ ${evento.dia} - ${tipoLabel}${evento.signo ? ` en ${evento.signo}` : ''}`;
+          if (evento.casaNatal) t += ` · Casa ${evento.casaNatal}`;
+          t += '\n';
+          if (evento.interpretacion) {
+            t += `  ${evento.interpretacion}\n`;
           }
-
-          txtContent += `▸ ${dia} de ${mesKey.split(' ')[0].toLowerCase()} - ${tipoEvento}`;
-
-          // Evitar redundancia: no repetir el título si es igual al tipo de evento
-          if (event.title) {
-            const titleLower = event.title.toLowerCase();
-            const tipoLower = tipoEvento.toLowerCase();
-
-            // Solo agregar título si contiene información adicional (como el signo)
-            if (!titleLower.includes(tipoLower) && titleLower !== tipoLower) {
-              txtContent += `: ${event.title}`;
-            } else if (event.sign || event.signo) {
-              // Si el título es redundante pero hay signo, mostrar el signo
-              txtContent += ` en ${event.sign || event.signo}`;
-            } else {
-              // Extraer signo del título si existe (ej: "Luna Nueva en Acuario")
-              const signMatch = event.title.match(/en\s+(\w+)/i);
-              if (signMatch) {
-                txtContent += ` en ${signMatch[1]}`;
-              }
-            }
-          }
-
-          txtContent += `\n`;
+          t += '\n';
         });
-      });
-    }
+      }
+
+      // TRÁNSITOS con interpretaciones
+      const transitos = getTransitEventsForMonth(month.monthIndex);
+      if (transitos.length > 0) {
+        t += '--- Tránsitos del mes ---\n';
+        transitos.forEach((tr: any) => {
+          const tipoLabel = tr.tipo === 'retrogrado' ? 'Retrogradación' : tr.tipo === 'ingreso' ? 'Ingreso' : 'Evento';
+          t += `▸ ${tr.dia} - ${tipoLabel}: ${tr.titulo}`;
+          if (tr.signo) t += ` en ${tr.signo}`;
+          t += '\n';
+          if (tr.interpretacion) {
+            t += `  ${tr.interpretacion}\n`;
+          }
+          t += '\n';
+        });
+      }
+
+      // REFLEXIÓN MENSUAL
+      const reflexion = getMonthlyTransitReflection(month.monthIndex);
+      if (reflexion) {
+        t += `Reflexión del mes: ${reflexion}\n\n`;
+      }
+
+      // EJERCICIO Y MANTRA DEL MES
+      const themeData = getMonthlyThemeData(month.monthIndex);
+      if (themeData.ejercicioCentral) {
+        t += `Ejercicio: ${themeData.ejercicioCentral.titulo}\n`;
+        t += `${themeData.ejercicioCentral.descripcion}\n\n`;
+      }
+      if (themeData.mantra) {
+        t += `Mantra del mes: "${themeData.mantra}"\n\n`;
+      }
+
+      // CIERRE DEL MES
+      t += '--- Cierre del mes ---\n';
+      t += '¿Qué cambió en mí este mes?\n';
+      t += '¿Qué solté sin darme cuenta?\n';
+      t += '¿Qué descubrí sobre mí?\n';
+      t += 'Una palabra que resume este mes: _______________\n\n';
+
+      // TERAPIA CREATIVA (para meses 3, 6, 9, 12)
+      if (therapyExercises[month.mesNumero]) {
+        t += `--- ${therapyExercises[month.mesNumero]}\n\n`;
+      }
+    });
 
     // ═══════════════════════════════════════════════════════════
     // CIERRE DEL CICLO
     // ═══════════════════════════════════════════════════════════
-    txtContent += '\n\n═══════════════════════════════════════════════════════════\n';
-    txtContent += '                  CIERRE DEL CICLO\n';
-    txtContent += '═══════════════════════════════════════════════════════════\n\n';
-    txtContent += `${format(endDate, "d 'de' MMMM 'de' yyyy", { locale: es })}\n`;
-    txtContent += `Cierre y preparación, ${userName}\n\n`;
+    t += section('CIERRE DEL CICLO');
 
-    txtContent += '━━━ LO MÁS IMPORTANTE QUE APRENDÍ ━━━\n';
-    txtContent += '(Espacio para reflexión personal)\n\n';
+    t += heading('¿QUIÉN ERA? ¿QUIÉN SOY?');
+    t += '¿Quién era cuando empecé este año?\n\n';
+    t += '¿Quién soy ahora?\n\n';
+    t += '¿Qué versión de mí nació este año?\n\n';
 
-    txtContent += '━━━ ¿QUIÉN ERA HACE UN AÑO? ¿QUIÉN SOY HOY? ━━━\n';
-    txtContent += '(Espacio para reflexión personal)\n\n';
+    t += heading('PREPARACIÓN PARA LA PRÓXIMA VUELTA');
+    const clavesI = getClavesIntegracion();
+    if (clavesI?.length) {
+      t += 'Claves de integración de este año:\n';
+      clavesI.forEach((c: string, i: number) => { t += `${i + 1}. ${c}\n`; });
+      t += '\n';
+    }
+    t += '¿Qué me llevo conmigo?\n\n';
+    t += '¿Qué dejo aquí?\n\n';
+    t += '¿Cuál es mi deseo para el próximo ciclo?\n\n';
 
-    txtContent += '━━━ CARTA DE GRATITUD A MÍ MISMO/A ━━━\n';
-    txtContent += '(Espacio para reflexión personal)\n\n';
+    t += heading('CARTA DE CIERRE');
+    t += `Querida ${userName},\n\n`;
+    t += 'Has llegado al final de este ciclo.\n';
+    t += 'Nada fue casual. Todo fue parte del proceso.\n';
+    t += 'Lo que dolió te enseñó. Lo que fluyó te confirmó.\n\n';
+    t += 'No importa si seguiste cada página o si saltaste donde te llamó la intuición.\n';
+    t += 'Este libro fue tuyo desde el primer momento.\n\n';
+    t += 'Nos vemos en la próxima vuelta al Sol.\n\n';
 
-    // Cerrar con mensaje
-    txtContent += '\n\n═══════════════════════════════════════════════════════════\n';
-    txtContent += '        Este es tu año. Confía en el proceso.\n';
-    txtContent += '═══════════════════════════════════════════════════════════\n';
+    t += `\n${sep}\n  No todo fue fácil. Pero todo tuvo sentido.\n  tuvueltaalsol.es\n${sep}\n`;
 
-    // Crear y descargar archivo
-    const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
+    // Descargar archivo
+    const blob = new Blob([t], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -1495,18 +1332,22 @@ export const AgendaLibro = ({
       { nombre: 'Sagitario → Capricornio', simbolo: '♐', tema: 'Expansión y sabiduría' }
     ];
 
-    for (let i = 0; i < 12; i++) {
+    // 13 meses: desde el mes del cumpleaños hasta el mismo mes del año siguiente
+    // El ciclo solar empieza y termina el día del cumpleaños
+    for (let i = 0; i <= 12; i++) {
       const monthIndex = (birthdayMonth + i) % 12;
       const yearOffset = birthdayMonth + i >= 12 ? 1 : 0;
       const year = birthdayYear + yearOffset;
       const monthDate = new Date(year, monthIndex, 1);
       const isBirthdayMonth = i === 0; // Primer mes es el del cumpleaños
+      const isClosingMonth = i === 12; // Último mes: cierre del ciclo
 
       months.push({
         monthDate,
         mesNumero: i + 1,
         monthIndex,
         isBirthdayMonth,
+        isClosingMonth,
         ...zodiacData[monthIndex]
       });
     }
@@ -1719,70 +1560,31 @@ export const AgendaLibro = ({
           )}
         </div>
 
-        {/* ✅ Banner de interpretaciones pendientes con listado y botón de generación automática */}
-        {eventStats.sinInterpretacion > 0 && (
+        {/* ✅ Banner de generación automática de interpretaciones */}
+        {(eventStats.sinInterpretacion > 0 || generatingBatch) && (
           <div className="mt-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-400/50 rounded-lg p-3">
-            <div className="flex items-center justify-between gap-4 mb-2">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mb-2">
+              {generatingBatch ? (
+                <RefreshCw className="w-5 h-5 text-amber-400 animate-spin" />
+              ) : (
                 <Sparkles className="w-5 h-5 text-amber-400" />
-                <span className="text-sm font-semibold">
-                  {eventStats.sinInterpretacion} eventos pendientes de personalizar:
-                </span>
-              </div>
-              <button
-                onClick={handleGenerateBatch}
-                disabled={generatingBatch}
-                className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold text-sm hover:from-amber-400 hover:to-orange-400 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {generatingBatch ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    Generando...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4" />
-                    Generar todos
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* Listado de eventos pendientes */}
-            <div className="max-h-32 overflow-y-auto bg-black/20 rounded p-2 mb-2">
-              <ul className="text-xs space-y-1">
-                {solarCycle?.events
-                  ?.filter(eventoSinInterpretacion)
-                  ?.slice(0, 20)
-                  ?.map((evento: any, idx: number) => (
-                    <li key={idx} className="flex items-center gap-2 text-amber-100">
-                      <span className="opacity-50">•</span>
-                      <span>{evento.title}</span>
-                      <span className="opacity-50 text-[10px]">
-                        ({new Date(evento.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })})
-                      </span>
-                    </li>
-                  ))}
-                {(solarCycle?.events?.filter(eventoSinInterpretacion)?.length || 0) > 20 && (
-                  <li className="text-amber-300 italic">
-                    ... y {(solarCycle?.events?.filter(eventoSinInterpretacion)?.length || 0) - 20} más
-                  </li>
-                )}
-              </ul>
+              )}
+              <span className="text-sm font-semibold">
+                {generatingBatch
+                  ? `Generando ${eventStats.sinInterpretacion} interpretaciones personalizadas...`
+                  : `${eventStats.sinInterpretacion} eventos pendientes de personalizar`
+                }
+              </span>
             </div>
 
             <p className="text-xs text-amber-200/80 flex items-center gap-1">
-              {generatingBatch ? (
-                <>
-                  <Clock className="w-3 h-3 inline" />
-                  <span>Generando interpretaciones personalizadas con IA... Esto puede tardar varios minutos.</span>
-                </>
-              ) : (
-                <>
-                  <Lightbulb className="w-3 h-3 inline" />
-                  <span>Haz clic en "Generar todos" para crear automáticamente todas las interpretaciones.</span>
-                </>
-              )}
+              <Clock className="w-3 h-3 inline" />
+              <span>
+                {generatingBatch
+                  ? 'Creando interpretaciones personalizadas con IA. La página se recargará automáticamente al terminar.'
+                  : 'La generación automática se iniciará en un momento...'
+                }
+              </span>
             </p>
           </div>
         )}
@@ -1882,7 +1684,7 @@ export const AgendaLibro = ({
         <PaginaBlanca />
 
         {/* Índice va justo después de la portada */}
-        <IndiceNavegable />
+        <IndiceNavegable startDate={startDate} />
 
         {/* ═══════════════════════════════════════════════════════════════
             SECCIÓN 2: BIENVENIDA Y GUÍA
@@ -2080,16 +1882,13 @@ export const AgendaLibro = ({
                 reflexionMensual={getMonthlyTransitReflection(month.monthIndex)}
               />
               <CierreMes monthDate={month.monthDate} />
+              {/* Terapia creativa integrada en meses especificos */}
+              {month.mesNumero === 3 && <EscrituraTerapeutica />}
+              {month.mesNumero === 6 && <Visualizacion />}
+              {month.mesNumero === 9 && <RitualSimbolico />}
+              {month.mesNumero === 12 && <TrabajoEmocional />}
             </div>
           ))}
-        </div>
-
-        {/* TERAPIA ASTROLÓGICA CREATIVA */}
-        <div id="terapia-creativa">
-          <EscrituraTerapeutica />
-          <Visualizacion />
-          <RitualSimbolico />
-          <TrabajoEmocional />
         </div>
 
         {/* CIERRE DEL CICLO */}
