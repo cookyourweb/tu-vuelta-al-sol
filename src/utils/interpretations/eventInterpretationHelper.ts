@@ -18,6 +18,7 @@ import NatalChart from '@/models/NatalChart';
  */
 export function shouldGenerateInterpretation(event: AstrologicalEvent): boolean {
   const importantTypes = [
+    // Tipos en español (generados por el sistema)
     'luna_nueva',
     'luna_llena',
     'eclipse_solar',
@@ -27,17 +28,38 @@ export function shouldGenerateInterpretation(event: AstrologicalEvent): boolean 
     'venus_retrogrado_inicio',
     'marte_retrogrado_inicio',
     'saturno_retrogrado_inicio',
+    'jupiter_retrogrado_inicio',
     'ingreso_sol',
     'ingreso_marte',
     'ingreso_venus',
+    'ingreso_jupiter',
+    'ingreso_saturno',
     'equinoccio',
     'solsticio',
     'cumpleanos',
-    'ultimo_dia_ciclo'
+    'ultimo_dia_ciclo',
+    // Tipos en inglés (del API/SolarCycle)
+    'new_moon',
+    'full_moon',
+    'eclipse',
+    'retrograde',
+    'planetary_transit',
+    'ingress',
+    'station',
+    'lunar_phase'
   ];
 
   // Eventos importantes por tipo
   if (importantTypes.includes(event.type)) {
+    return true;
+  }
+
+  // Eventos que contienen palabras clave de tránsitos
+  const typeLower = event.type?.toLowerCase() || '';
+  if (typeLower.includes('retrogrado') || typeLower.includes('retrograde') ||
+      typeLower.includes('ingreso') || typeLower.includes('ingress') ||
+      typeLower.includes('eclipse') || typeLower.includes('luna') ||
+      typeLower.includes('moon') || typeLower.includes('station')) {
     return true;
   }
 

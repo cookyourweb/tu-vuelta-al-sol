@@ -41,29 +41,23 @@ export const IndiceNavegable: React.FC<IndiceNavegableProps> = ({ startDate }) =
     const birthdayYear = startDate.getFullYear();
     const subsecciones: { titulo: string; pagina: number; id: string }[] = [];
 
-    // 12 meses del ciclo solar
-    for (let i = 0; i < 12; i++) {
+    // 13 meses del ciclo solar (cada mes = ~5 pags: calendario + lunas + tránsitos + cierre + diario)
+    const paginasPorMes = 5;
+    for (let i = 0; i <= 12; i++) {
       const monthIndex = (birthdayMonth + i) % 12;
       const yearOffset = birthdayMonth + i >= 12 ? 1 : 0;
       const year = birthdayYear + yearOffset;
       const mesNumero = i + 1;
       const nombreMes = `${MESES_ES[monthIndex]} ${year}`;
-      const titulo = i === 0 ? `${nombreMes} (Inicio del ciclo)` : nombreMes;
+      const titulo = i === 0 ? `${nombreMes} (Inicio)` :
+        i === 12 ? `${nombreMes} (Cierre)` : nombreMes;
 
       subsecciones.push({
         titulo,
-        pagina: 30 + (i * 4),
+        pagina: 30 + (i * paginasPorMes),
         id: `mes-${mesNumero}`
       });
     }
-
-    // Mes 13: el cumpleaños del año siguiente cierra el ciclo
-    const nextYear = birthdayYear + 1;
-    subsecciones.push({
-      titulo: `${MESES_ES[birthdayMonth]} ${nextYear} (Cumpleaños - Fin del ciclo)`,
-      pagina: 30 + (12 * 4),
-      id: 'mes-13'
-    });
 
     return subsecciones;
   };
@@ -131,9 +125,9 @@ export const IndiceNavegable: React.FC<IndiceNavegableProps> = ({ startDate }) =
       subsecciones: [
         { titulo: 'Overview del Año', pagina: 25, id: 'tu-anio-overview' },
         { titulo: 'Ciclos del Año', pagina: 26, id: 'ciclos-del-anio' },
-        { titulo: 'Ritual de Cumpleaños', pagina: 27, id: 'ritual-cumpleanos' },
+        { titulo: 'La Intención de Tu Año', pagina: 27, id: 'intencion-anual' },
         { titulo: 'Primer Día del Ciclo', pagina: 28, id: 'primer-dia-ciclo' },
-        { titulo: 'Intención Anual', pagina: 29, id: 'intencion-anual' },
+        { titulo: 'Ritual de Cumpleaños', pagina: 29, id: 'ritual-cumpleanos' },
       ]
     },
     {
@@ -147,14 +141,14 @@ export const IndiceNavegable: React.FC<IndiceNavegableProps> = ({ startDate }) =
     },
     {
       titulo: 'Cierre del Ciclo',
-      pagina: 142,
+      pagina: 96,
       id: 'cierre-ciclo',
       icono: <Sparkles className="w-4 h-4" />,
       subsecciones: [
-        { titulo: 'El Viaje Completado', pagina: 142, id: 'quien-era-quien-soy' },
-        { titulo: 'Preparación Próxima Vuelta', pagina: 143, id: 'preparacion-proxima' },
-        { titulo: 'Carta de Cierre', pagina: 144, id: 'carta-cierre' },
-        { titulo: 'Página Final', pagina: 145, id: 'pagina-final' },
+        { titulo: '¿Quién Era? ¿Quién Soy?', pagina: 96, id: 'quien-era-quien-soy' },
+        { titulo: 'Preparación Próxima Vuelta', pagina: 97, id: 'preparacion-proxima' },
+        { titulo: 'Carta de Cierre', pagina: 98, id: 'carta-cierre' },
+        { titulo: 'Notas en Blanco', pagina: 99, id: 'notas' },
       ]
     },
   ];

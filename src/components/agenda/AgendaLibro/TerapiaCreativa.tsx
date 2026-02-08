@@ -206,4 +206,81 @@ export const TrabajoEmocional = () => {
   );
 };
 
+// ============ ESCRITURA MENSUAL (para CADA mes) ============
+// Página de diario/escritura terapéutica con directrices adaptadas al mes
+const DIRECTRICES_MENSUALES: Record<number, { pregunta: string; guia: string }> = {
+  1: { pregunta: '¿Cómo quiero empezar este ciclo? ¿Qué necesito para sentirme en mi centro?', guia: 'Inicio del ciclo: conecta con tu intención' },
+  2: { pregunta: '¿Qué necesito soltar del mes anterior para avanzar más ligera?', guia: 'Segundo mes: ajustar el paso' },
+  3: { pregunta: '¿Qué patrón estoy repitiendo sin darme cuenta? ¿Qué quiero cambiar?', guia: 'Tercer mes: observar patrones' },
+  4: { pregunta: '¿Qué me está enseñando la incomodidad que siento? ¿Dónde me resisto?', guia: 'Cuarto mes: abrazar la incomodidad' },
+  5: { pregunta: '¿Qué está creciendo dentro de mí que aún no tiene nombre?', guia: 'Quinto mes: nombrar lo invisible' },
+  6: { pregunta: '¿Estoy donde quiero estar? ¿Qué necesito ajustar para la segunda mitad del año?', guia: 'Mitad del ciclo: punto de revisión' },
+  7: { pregunta: '¿A quién necesito perdonar (incluyéndome a mí misma)?', guia: 'Séptimo mes: soltar cargas' },
+  8: { pregunta: '¿Qué logro quiero celebrar, por pequeño que sea?', guia: 'Octavo mes: reconocer avances' },
+  9: { pregunta: '¿Qué versión de mí está emergiendo? ¿Qué necesita esa versión?', guia: 'Noveno mes: la nueva yo' },
+  10: { pregunta: '¿Qué me da miedo perder? ¿Qué pasaría si lo suelto?', guia: 'Décimo mes: profundizar' },
+  11: { pregunta: '¿Qué aprendí este año que no esperaba? ¿Cómo me transformó?', guia: 'Undécimo mes: integrar' },
+  12: { pregunta: '¿Qué me llevo de este ciclo? ¿Qué dejo atrás?', guia: 'Cierre del ciclo: preparar el siguiente' },
+  13: { pregunta: '¿Quién era cuando empecé y quién soy ahora?', guia: 'Tu nueva vuelta al Sol comienza' },
+};
+
+interface EscrituraMensualProps {
+  mesNumero: number;
+  mantra?: string;
+}
+
+export const EscrituraMensual: React.FC<EscrituraMensualProps> = ({ mesNumero, mantra }) => {
+  const { config } = useStyle();
+  const directriz = DIRECTRICES_MENSUALES[mesNumero] || DIRECTRICES_MENSUALES[1];
+
+  return (
+    <div className={`print-page bg-white p-12 flex flex-col relative ${config.pattern}`}>
+      <div className="text-center mb-6">
+        <span className={`text-xs uppercase tracking-[0.3em] ${config.iconSecondary}`}>{directriz.guia}</span>
+        <h2 className={`text-2xl font-display mt-2 ${config.titleGradient}`}>Mi Diario del Mes</h2>
+        <div className={`${config.divider} w-16 mx-auto mt-3`} />
+      </div>
+
+      <div className="flex-1 max-w-2xl mx-auto w-full flex flex-col">
+        {/* Pregunta disparadora */}
+        <div className={`${config.highlightSecondary} border ${config.cardBorder} rounded-lg p-5 mb-4`}>
+          <p className={`${config.iconPrimary} italic text-base leading-relaxed text-center`}>
+            "{directriz.pregunta}"
+          </p>
+        </div>
+
+        {/* Instrucción breve */}
+        <p className="text-xs text-gray-500 italic text-center mb-4">
+          Escribe sin filtro. No juzgues. Nadie más leerá esto.
+        </p>
+
+        {/* Espacio de escritura amplio */}
+        <div className={`${config.highlightPrimary} rounded-lg p-6 flex-1`}>
+          <div className="space-y-5">
+            <div className="h-12 border-b border-dashed border-gray-300" />
+            <div className="h-12 border-b border-dashed border-gray-300" />
+            <div className="h-12 border-b border-dashed border-gray-300" />
+            <div className="h-12 border-b border-dashed border-gray-300" />
+            <div className="h-12 border-b border-dashed border-gray-300" />
+            <div className="h-12 border-b border-dashed border-gray-300" />
+            <div className="h-12 border-b border-dashed border-gray-300" />
+            <div className="h-12 border-b border-dashed border-gray-300" />
+          </div>
+        </div>
+
+        {/* Mantra del mes si existe */}
+        {mantra && (
+          <div className="mt-4 text-center">
+            <p className={`${config.iconSecondary} italic text-sm`}>
+              Mantra del mes: "{mantra}"
+            </p>
+          </div>
+        )}
+      </div>
+
+      <FooterLibro />
+    </div>
+  );
+};
+
 export default EscrituraTerapeutica;

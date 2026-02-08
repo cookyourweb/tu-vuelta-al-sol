@@ -20,7 +20,7 @@ import { IndiceNavegable } from './Indice';
 import { CalendarioYMapaMes, LunasYEjercicios, SemanaConInterpretacion, CierreMes, PrimerDiaCiclo as PrimerDiaCicloMes } from './MesCompleto';
 import { TransitosDelMes } from './TransitosDelMes';
 import { CalendarioMensualTabla } from './CalendarioMensualTabla';
-import { EscrituraTerapeutica, Visualizacion, RitualSimbolico, TrabajoEmocional } from './TerapiaCreativa';
+import { EscrituraTerapeutica, Visualizacion, RitualSimbolico, TrabajoEmocional, EscrituraMensual } from './TerapiaCreativa';
 import { PrimerDiaCiclo, UltimoDiaCiclo, QuienEraQuienSoy, PreparacionProximaVuelta, CartaCierre, PaginaFinalBlanca, Contraportada, PaginaBlanca } from './PaginasEspeciales';
 import '@/styles/print-libro.css';
 
@@ -912,7 +912,30 @@ export const AgendaLibro = ({
       t += '¿Qué descubrí sobre mí?\n';
       t += 'Una palabra que resume este mes: _______________\n\n';
 
-      // TERAPIA CREATIVA (para meses 3, 6, 9, 12)
+      // DIARIO DEL MES (escritura terapéutica mensual)
+      const directrices: Record<number, string> = {
+        1: '¿Cómo quiero empezar este ciclo? ¿Qué necesito para sentirme en mi centro?',
+        2: '¿Qué necesito soltar del mes anterior para avanzar más ligera?',
+        3: '¿Qué patrón estoy repitiendo sin darme cuenta? ¿Qué quiero cambiar?',
+        4: '¿Qué me está enseñando la incomodidad que siento? ¿Dónde me resisto?',
+        5: '¿Qué está creciendo dentro de mí que aún no tiene nombre?',
+        6: '¿Estoy donde quiero estar? ¿Qué necesito ajustar para la segunda mitad del año?',
+        7: '¿A quién necesito perdonar (incluyéndome a mí misma)?',
+        8: '¿Qué logro quiero celebrar, por pequeño que sea?',
+        9: '¿Qué versión de mí está emergiendo? ¿Qué necesita esa versión?',
+        10: '¿Qué me da miedo perder? ¿Qué pasaría si lo suelto?',
+        11: '¿Qué aprendí este año que no esperaba? ¿Cómo me transformó?',
+        12: '¿Qué me llevo de este ciclo? ¿Qué dejo atrás?',
+        13: '¿Quién era cuando empecé y quién soy ahora?',
+      };
+      t += '--- Mi Diario del Mes ---\n';
+      t += `Pregunta: "${directrices[month.mesNumero] || directrices[1]}"\n`;
+      t += '(Escribe sin filtro. No juzgues. Nadie más leerá esto.)\n\n';
+      if (themeData.mantra) {
+        t += `Mantra del mes: "${themeData.mantra}"\n\n`;
+      }
+
+      // TERAPIA CREATIVA ESPECIAL (para meses 3, 6, 9, 12)
       if (therapyExercises[month.mesNumero]) {
         t += `--- ${therapyExercises[month.mesNumero]}\n\n`;
       }
@@ -1788,12 +1811,16 @@ export const AgendaLibro = ({
             startDate={startDate}
             endDate={endDate}
             lineaTiempoData={solarReturnInterpretation?.interpretation?.linea_tiempo_emocional}
+            lineaTiempoAnual={getLineaTiempoAnual()}
           />
           <MesesClavePuntosGiro
             lineaTiempo={solarReturnInterpretation?.interpretation?.meses_clave_puntos_giro || getLineaTiempoAnual()}
+            sombrasDelAno={solarReturnInterpretation?.interpretation?.sombras_del_ano}
           />
           <GrandesAprendizajes
             clavesIntegracion={getClavesIntegracion()}
+            sombrasDelAno={solarReturnInterpretation?.interpretation?.sombras_del_ano}
+            fraseGuia={solarReturnInterpretation?.interpretation?.frase_guia || solarReturnInterpretation?.interpretation?.mantra_anual}
           />
         </div>
 
@@ -1817,7 +1844,7 @@ export const AgendaLibro = ({
             Orden: 1) Predicción, 2) Escribir, 3) Antes de Empezar, 4) Ritual
             ═══════════════════════════════════════════════════════════════ */}
 
-        {/* 1. INTENCIÓN DEL AÑO - Predicción con tema central */}
+        {/* INTENCIÓN DEL AÑO - Interpretación + Espacio para escribir (unificado) */}
         <div id="intencion-anual">
           <PaginaIntencionAnualSR
             temaCentral={getInterpretacionRetornoSolar()}
@@ -1826,12 +1853,7 @@ export const AgendaLibro = ({
           />
         </div>
 
-        {/* 2. MI INTENCIÓN - Espacio para escribir */}
-        <div id="mi-intencion">
-          <PaginaIntencionAnual />
-        </div>
-
-        {/* 3. ANTES DE EMPEZAR - Ritual de apertura personalizado */}
+        {/* ANTES DE EMPEZAR - Ritual de apertura personalizado */}
         <div id="primer-dia-ciclo">
           <PrimerDiaCiclo
             nombre={userName}
@@ -1882,7 +1904,12 @@ export const AgendaLibro = ({
                 reflexionMensual={getMonthlyTransitReflection(month.monthIndex)}
               />
               <CierreMes monthDate={month.monthDate} />
-              {/* Terapia creativa integrada en meses especificos */}
+              {/* Escritura terapéutica mensual - en CADA mes */}
+              <EscrituraMensual
+                mesNumero={month.mesNumero}
+                mantra={getMonthlyThemeData(month.monthIndex).mantra}
+              />
+              {/* Terapia creativa especial en meses 3, 6, 9, 12 */}
               {month.mesNumero === 3 && <EscrituraTerapeutica />}
               {month.mesNumero === 6 && <Visualizacion />}
               {month.mesNumero === 9 && <RitualSimbolico />}
@@ -1899,8 +1926,14 @@ export const AgendaLibro = ({
             temaCentral={getInterpretacionRetornoSolar()}
           />
           <CartaCierre name={userName} />
-          <PaginaFinalBlanca />
         </div>
+
+        {/* PÁGINAS EN BLANCO PARA NOTAS */}
+        <PaginaBlanca />
+        <PaginaBlanca />
+        <PaginaBlanca />
+        <PaginaBlanca />
+        <PaginaFinalBlanca />
 
         {/* CONTRAPORTADA */}
         <Contraportada />

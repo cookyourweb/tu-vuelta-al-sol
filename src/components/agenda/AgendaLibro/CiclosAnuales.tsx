@@ -8,25 +8,21 @@ import { FooterLibro } from './MesCompleto';
 // ============ LÍNEA DE TIEMPO EMOCIONAL - CON ESTILOS ============
 interface LineaTiempoData {
   mes: string;
-  intensidad: number; // 1-5
+  intensidad: number; // 1-5 o 1-10
   palabra_clave: string;
+  descripcion?: string;
+  accion_clave?: string;
 }
 
 export const LineaTiempoEmocional: React.FC<{
   startDate: Date;
   endDate: Date;
   lineaTiempoData?: LineaTiempoData[];
-}> = ({ startDate, endDate, lineaTiempoData }) => {
+  lineaTiempoAnual?: any[]; // Fallback: linea_tiempo_anual del SR
+}> = ({ startDate, endDate, lineaTiempoData, lineaTiempoAnual }) => {
   const { config } = useStyle();
 
-  // 🔍 DEBUG: Verificar datos recibidos
-  console.log('🔍 [LineaTiempoEmocional] Props recibidas:', {
-    lineaTiempoData,
-    length: lineaTiempoData?.length,
-    sample: lineaTiempoData?.[0]
-  });
-
-  const months = [];
+  const months: Date[] = [];
   let currentMonth = new Date(startDate);
 
   while (currentMonth <= endDate && months.length < 12) {
@@ -34,11 +30,45 @@ export const LineaTiempoEmocional: React.FC<{
     currentMonth = addMonths(currentMonth, 1);
   }
 
-  // Si hay datos personalizados, usarlos
+  const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+  // Buscar datos por mes (acepta lineaTiempoData directo o lineaTiempoAnual como fallback)
   const getMonthData = (monthIndex: number): LineaTiempoData | undefined => {
-    if (!lineaTiempoData || lineaTiempoData.length === 0) return undefined;
-    return lineaTiempoData[monthIndex];
+    // Primero intentar lineaTiempoData (formato {mes, intensidad, palabra_clave})
+    if (lineaTiempoData && lineaTiempoData.length > 0) {
+      // Buscar por nombre del mes
+      const mesName = monthNames[months[monthIndex]?.getMonth() || 0];
+      const found = lineaTiempoData.find((m: any) =>
+        m.mes?.toLowerCase().includes(mesName)
+      );
+      if (found) return found;
+      // Fallback por índice
+      if (lineaTiempoData[monthIndex]) return lineaTiempoData[monthIndex];
+    }
+
+    // Fallback: lineaTiempoAnual (formato {periodo, descripcion, accion_clave})
+    if (lineaTiempoAnual && lineaTiempoAnual.length > 0) {
+      const mesName = monthNames[months[monthIndex]?.getMonth() || 0];
+      const found = lineaTiempoAnual.find((m: any) =>
+        m.periodo?.toLowerCase().includes(mesName) ||
+        m.mes?.toLowerCase()?.includes(mesName)
+      );
+      if (found) {
+        return {
+          mes: found.periodo || found.mes || '',
+          intensidad: found.intensidad || 5,
+          palabra_clave: found.palabra_clave || found.accion_clave || found.descripcion?.substring(0, 30) || '',
+          descripcion: found.descripcion,
+          accion_clave: found.accion_clave
+        };
+      }
+    }
+
+    return undefined;
   };
+
+  const tieneAlgunDato = (lineaTiempoData && lineaTiempoData.length > 0) || (lineaTiempoAnual && lineaTiempoAnual.length > 0);
 
   return (
     <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
@@ -58,8 +88,10 @@ export const LineaTiempoEmocional: React.FC<{
           Tu año tiene ritmo, altibajos, momentos de calma y momentos de intensidad.
         </p>
         <p className="text-gray-700 leading-relaxed text-sm">
-          <strong>Instrucciones:</strong> Marca en cada mes la intensidad emocional/energética que sientes
-          (rellena las casillas) y escribe una palabra clave en el espacio de notas.
+          {tieneAlgunDato
+            ? 'A continuación, la línea emocional que tu Retorno Solar anticipa para cada mes. Observa los patrones y toma nota de lo que resuene.'
+            : <><strong>Instrucciones:</strong> Marca en cada mes la intensidad emocional/energética que sientes (rellena las casillas) y escribe una palabra clave en el espacio de notas.</>
+          }
         </p>
       </div>
 
@@ -97,13 +129,18 @@ export const LineaTiempoEmocional: React.FC<{
                 })}
               </div>
               {/* Espacio para notas - Mostrar palabra clave si existe */}
-              <div className="flex-1 min-h-[30px] flex items-center justify-center">
+              <div className="flex-1 min-h-[30px] flex flex-col items-center justify-center">
                 {palabraClave ? (
-                  <span className={`text-[10px] ${config.iconPrimary} font-medium italic`}>
-                    {palabraClave}
+                  <span className={`text-[10px] ${config.iconPrimary} font-medium italic text-center leading-tight`}>
+                    {palabraClave.length > 40 ? palabraClave.substring(0, 40) + '...' : palabraClave}
                   </span>
                 ) : (
                   <div className="w-full border-b border-dashed border-gray-300" />
+                )}
+                {monthData?.accion_clave && (
+                  <span className="text-[9px] text-gray-500 mt-0.5 text-center leading-tight">
+                    {monthData.accion_clave.length > 30 ? monthData.accion_clave.substring(0, 30) + '...' : monthData.accion_clave}
+                  </span>
                 )}
               </div>
             </div>
@@ -149,17 +186,11 @@ export const LineaTiempoEmocional: React.FC<{
 // ============ MESES CLAVE Y PUNTOS DE GIRO - CON ESTILOS ============
 interface MesesClavePuntosGiroProps {
   lineaTiempo?: any[];
+  sombrasDelAno?: string[];
 }
 
-export const MesesClavePuntosGiro: React.FC<MesesClavePuntosGiroProps> = ({ lineaTiempo }) => {
+export const MesesClavePuntosGiro: React.FC<MesesClavePuntosGiroProps> = ({ lineaTiempo, sombrasDelAno }) => {
   const { config } = useStyle();
-
-  // 🔍 DEBUG: Verificar datos recibidos
-  console.log('🔍 [MesesClavePuntosGiro] Props recibidas:', {
-    lineaTiempo,
-    length: lineaTiempo?.length,
-    sample: lineaTiempo?.[0]
-  });
 
   const tieneContenidoPersonalizado = !!(lineaTiempo && lineaTiempo.length > 0);
 
@@ -193,7 +224,7 @@ export const MesesClavePuntosGiro: React.FC<MesesClavePuntosGiroProps> = ({ line
       {/* Grid de puntos de giro */}
       <div className="space-y-3 mb-5">
         {tieneContenidoPersonalizado ? (
-          lineaTiempo.slice(0, 4).map((evento, idx) => (
+          lineaTiempo.slice(0, 6).map((evento, idx) => (
             <div key={idx} className={`${config.highlightSecondary} rounded-lg p-3`}>
               <div className="flex items-center gap-3 mb-2">
                 <span className={`${config.iconPrimary} text-lg font-bold`}>{idx + 1}.</span>
@@ -246,10 +277,27 @@ export const MesesClavePuntosGiro: React.FC<MesesClavePuntosGiroProps> = ({ line
         )}
       </div>
 
+      {/* Sombras y desafíos si existen */}
+      {sombrasDelAno && sombrasDelAno.length > 0 && (
+        <div className={`${config.highlightAccent} rounded-lg p-4 mb-3`}>
+          <h4 className={`${config.iconAccent} font-medium text-sm mb-2`}>
+            Sombras y desafíos del año
+          </h4>
+          <div className="space-y-1">
+            {sombrasDelAno.slice(0, 4).map((sombra, idx) => (
+              <p key={idx} className="text-xs text-gray-700 flex items-start gap-2">
+                <span className={config.iconSecondary}>☽</span>
+                <span>{sombra}</span>
+              </p>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Espacio para reflexión personal */}
       <div className={`${config.highlightSecondary} rounded-lg p-4 mb-3`}>
         <h4 className={`${config.iconSecondary} font-medium text-sm mb-3`}>
-          ✍️ ¿Qué mes del año sientes que será especialmente importante para ti?
+          ¿Qué mes del año sientes que será especialmente importante para ti?
         </h4>
         <div className="space-y-2">
           <div className={`h-10 border-b border-dashed ${config.iconSecondary} opacity-30`} />
@@ -275,9 +323,11 @@ export const MesesClavePuntosGiro: React.FC<MesesClavePuntosGiroProps> = ({ line
 // ============ GRANDES APRENDIZAJES - CON ESTILOS ============
 interface GrandesAprendizajesProps {
   clavesIntegracion?: string[];
+  sombrasDelAno?: string[];
+  fraseGuia?: string;
 }
 
-export const GrandesAprendizajes: React.FC<GrandesAprendizajesProps> = ({ clavesIntegracion }) => {
+export const GrandesAprendizajes: React.FC<GrandesAprendizajesProps> = ({ clavesIntegracion, sombrasDelAno, fraseGuia }) => {
   const { config } = useStyle();
   const tieneContenidoPersonalizado = !!(clavesIntegracion && clavesIntegracion.length > 0);
 
@@ -309,12 +359,12 @@ export const GrandesAprendizajes: React.FC<GrandesAprendizajesProps> = ({ claves
       )}
 
       {/* Aprendizajes del SR */}
-      <div className="space-y-3 mb-6">
+      <div className="space-y-2 mb-4">
         {tieneContenidoPersonalizado ? (
-          clavesIntegracion.slice(0, 4).map((clave, idx) => (
-            <div key={idx} className={`${idx % 3 === 0 ? config.highlightPrimary : idx % 3 === 1 ? config.highlightSecondary : config.highlightAccent} rounded-lg p-4`}>
+          clavesIntegracion.slice(0, 6).map((clave, idx) => (
+            <div key={idx} className={`${idx % 3 === 0 ? config.highlightPrimary : idx % 3 === 1 ? config.highlightSecondary : config.highlightAccent} rounded-lg p-3`}>
               <div className="flex items-start gap-3">
-                <span className={`${config.iconPrimary} text-lg font-bold mt-1`}>✧</span>
+                <span className={`${config.iconPrimary} text-base font-bold`}>{idx + 1}.</span>
                 <p className="text-gray-700 leading-relaxed flex-1 text-sm">{clave}</p>
               </div>
             </div>
@@ -338,6 +388,21 @@ export const GrandesAprendizajes: React.FC<GrandesAprendizajesProps> = ({ claves
         )}
       </div>
 
+      {/* Sombras como aprendizajes si existen */}
+      {sombrasDelAno && sombrasDelAno.length > 0 && (
+        <div className={`${config.highlightAccent} rounded-lg p-3 mb-4`}>
+          <h4 className={`${config.iconAccent} font-medium text-sm mb-2`}>Lo que este año viene a desafiar:</h4>
+          <div className="space-y-1">
+            {sombrasDelAno.slice(0, 3).map((sombra, idx) => (
+              <p key={idx} className="text-xs text-gray-700 flex items-start gap-2">
+                <span className={config.iconSecondary}>☽</span>
+                <span>{sombra}</span>
+              </p>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Espacio para reflexión personal */}
       <div className={`${config.highlightSecondary} rounded-lg p-4 mb-4`}>
         <h4 className={`${config.iconSecondary} font-medium text-sm mb-3`}>
@@ -360,10 +425,10 @@ export const GrandesAprendizajes: React.FC<GrandesAprendizajesProps> = ({ claves
         </div>
       </div>
 
-      {/* Cita */}
+      {/* Cita o frase guía personalizada */}
       <div className={`${config.headerBg} rounded-lg p-3 text-center mt-4`}>
         <p className={`${config.headerText} text-xs italic`}>
-          "No viniste a sobrevivir el año. Viniste a transformarte."
+          "{fraseGuia || 'No viniste a sobrevivir el año. Viniste a transformarte.'}"
         </p>
       </div>
 
