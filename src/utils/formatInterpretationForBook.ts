@@ -352,9 +352,17 @@ export function formatEventForBook(event: any, natalHouses?: NatalHouse[]) {
   // ✅ FIX: Obtener signo primero (puede estar en sign o en metadata.zodiacSign)
   const signo = event.sign || event.metadata?.zodiacSign || undefined;
 
-  // Calcular casa natal para eventos lunares si tenemos datos
+  // ✅ FIX: Usar la casa del evento directamente si existe, NO calcular desde el signo
+  // La API ya proporciona la casa natal correcta en event.house
   let casaNatal: number | undefined;
-  if (natalHouses && (tipo === 'lunaNueva' || tipo === 'lunaLlena') && signo) {
+
+  // Priorizar la casa que viene del evento (ya calculada correctamente por la API)
+  if (event.house && typeof event.house === 'number') {
+    casaNatal = event.house;
+  } else if (event.metadata?.house) {
+    casaNatal = event.metadata.house;
+  } else if (natalHouses && (tipo === 'lunaNueva' || tipo === 'lunaLlena') && signo) {
+    // Fallback: calcular solo si no hay casa en el evento
     casaNatal = calculateHouseForSign(signo, natalHouses);
   }
 
