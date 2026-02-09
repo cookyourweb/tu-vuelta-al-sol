@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-**Tu Vuelta al Sol** is an astrology web application that provides personalized astrological services including natal charts, solar return charts, and an astrological agenda. The platform integrates with Stripe for payments and uses Firebase for authentication.
+**Tu Vuelta al Sol** is a Spanish-language astrology web application that provides personalized astrological services: natal charts, solar return charts, progressed charts, and a printable astrological agenda book. The platform integrates Stripe for payments, Firebase for authentication, MongoDB for persistence, and OpenAI for AI-generated interpretations.
 
 **Live URL**: https://www.tuvueltaalsol.es/
 
@@ -10,326 +10,422 @@
 
 ### Core Technologies
 - **Framework**: Next.js (latest) with App Router
-- **React**: 18.2.0 (pinned for stability)
-- **TypeScript**: 5.0.4
-- **Styling**: Tailwind CSS 4.1.11
+- **React**: 18.2.0 (pinned for stability -- do NOT upgrade without extensive testing)
+- **TypeScript**: 5.0.4 (strict mode enabled)
+- **Styling**: Tailwind CSS 4.1.11 (via `@tailwindcss/postcss`)
 - **Database**: MongoDB (via Mongoose 8.16.2)
 - **Authentication**: Firebase 11.10.0 + Firebase Admin 13.4.0
-- **Payments**: Stripe 20.0.0
+- **Payments**: Stripe 20.0.0 + @stripe/stripe-js 8.5.3
 
 ### Key Libraries
-- **Astrology**: astronomy-engine 2.1.19
-- **UI**: lucide-react 0.525.0, framer-motion 12.23.12
+- **Astrology Calculations**: astronomy-engine 2.1.19
+- **External Astrology API**: ProKerala (via custom client in `src/lib/prokerala/`)
+- **AI Interpretations**: openai 5.12.2
+- **UI**: lucide-react 0.525.0, framer-motion 12.23.12, react-draggable 4.5.0
 - **Forms**: react-hook-form 7.60.0, @hookform/resolvers 5.1.1, zod 3.25.76
-- **AI**: openai 5.12.2
 - **PDF Generation**: puppeteer 24.16.2, pdf-parse 1.1.1
-- **Utilities**: date-fns 4.1.0, axios 1.4.0, clsx 2.1.1
+- **Utilities**: date-fns 4.1.0, axios 1.4.0, clsx 2.1.1, tailwind-merge 3.3.1
+- **Geocoding**: node-geocoder 4.4.1
 
 ### Dev Tools
-- Jest for testing
-- ESLint for linting
-- TypeScript strict mode enabled
+- **Testing**: Jest 29 + ts-jest (jsdom environment)
+- **Linting**: ESLint (next/core-web-vitals + next/typescript)
+- **TypeScript**: strict mode, bundler module resolution
+
+## Commands
+
+```bash
+npm run dev       # Start development server
+npm run build     # Build for production
+npm start         # Start production server
+npm run lint      # Run ESLint
+npm test          # Run Jest tests
+```
 
 ## Project Structure
 
 ```
 src/
-├── app/                      # Next.js App Router pages
-│   ├── (dashboard)/         # Protected dashboard routes
-│   │   ├── agenda/
-│   │   ├── birth-data/
-│   │   ├── dashboard/
-│   │   ├── natal-chart/
-│   │   ├── profile/
-│   │   └── solar-return/
-│   ├── admin/               # Admin panel
-│   ├── api/                 # API routes
-│   │   └── astrology/      # Astrology calculations
-│   └── compra/             # Purchase flow pages
-│       ├── agenda/
-│       ├── pricing/
-│       ├── success/
-│       └── cancel/
-├── components/              # React components
-│   ├── admin/              # Admin components
-│   ├── astrology/          # Astrology-specific components
-│   │   └── tooltips/
-│   ├── auth/               # Authentication components
-│   ├── dashboard/          # Dashboard components
-│   ├── debug/              # Debug utilities
-│   ├── icons/              # Custom SVG icons (LogoSimple, LogoSimpleGold)
-│   ├── layout/             # Layout components (PrimaryHeader, MobileBottomNav)
-│   ├── modals/             # Modal dialogs
-│   ├── solar-return/       # Solar return specific components
-│   ├── stripe/             # Stripe integration components
-│   ├── test/               # Test components
-│   └── ui/                 # Generic UI components
-├── constants/              # Constants and configuration
-│   └── astrology/
-├── context/                # React Context providers (AuthContext)
-├── data/                   # Static data
-│   └── interpretations/   # Astrological interpretations
-├── hooks/                  # Custom React hooks
-│   ├── astrology/
+├── app/                          # Next.js App Router
+│   ├── layout.tsx                # Root layout
+│   ├── page.tsx                  # Landing/home page
+│   ├── (auth)/                   # Auth routes (login, register)
+│   ├── (dashboard)/              # Protected dashboard routes
+│   │   ├── layout.tsx            # Dashboard layout with auth guard
+│   │   ├── agenda/               # Astrological agenda page
+│   │   ├── birth-data/           # Birth data entry
+│   │   ├── dashboard/            # Main dashboard
+│   │   ├── natal-chart/          # Natal chart page
+│   │   ├── profile/              # User profile
+│   │   └── solar-return/         # Solar return chart
+│   ├── admin/                    # Admin panel
+│   ├── compra/                   # Purchase flow
+│   │   ├── agenda/               # Agenda purchase
+│   │   ├── pricing/              # Pricing page
+│   │   ├── success/              # Payment success
+│   │   └── cancel/               # Payment cancel
+│   ├── shop/                     # Shop page
+│   ├── api/                      # API routes (see API section below)
+│   └── tests/                    # Test/debug pages
+├── components/                   # React components
+│   ├── admin/                    # Admin panel components
+│   ├── agenda/                   # Agenda & book generation
+│   │   ├── AgendaLibro/          # PDF book components (calendario, indices, etc.)
+│   │   └── Libro/                # Alternative book implementation
+│   ├── astrology/                # Chart wheels, aspects, planets, interpretations
+│   │   └── tooltips/             # Chart tooltips
+│   ├── auth/                     # Login/register forms
+│   ├── dashboard/                # Dashboard widgets
+│   ├── debug/                    # Debug utilities
+│   ├── icons/                    # Custom SVG icons (Logo, LogoSimple, LogoSimpleGold)
+│   ├── layout/                   # PrimaryHeader, MobileBottomNav, Footer
+│   ├── modals/                   # Modal dialogs (WelcomeModal)
+│   ├── solar-return/             # Solar return components & drawers
+│   ├── stripe/                   # PaymentButton, SubscriptionManager
+│   ├── test/                     # Test components (MongoDB, ProKerala, etc.)
+│   └── ui/                       # Button, Input, Alert, FloatingActionPanel
+├── constants/                    # Constants and configuration
+│   ├── astrology.ts              # Core astrology constants
+│   └── astrology/                # Chart, progressed, psychological constants
+├── context/                      # React Context providers
+│   ├── AuthContext.tsx            # Firebase auth state
+│   ├── NotificationContext.tsx    # Toast notifications
+│   └── StyleContext.tsx           # Theme/style state
+├── data/                         # Static data
+│   ├── astrology.ts              # Astrology reference data
+│   └── interpretations/          # Pre-built interpretation templates
+├── hooks/                        # Custom React hooks
+│   ├── useChart.ts, useAspects.ts, usePlanets.ts, etc.
+│   ├── astrology/                # Chart display hooks
 │   └── lib/
-│       └── prokerala/
-├── lib/                    # Library integrations
-│   ├── firebase/          # Firebase configuration
-│   └── prokerala/         # ProKerala API integration
-├── models/                 # MongoDB/Mongoose models
-├── services/               # Business logic services
-├── types/                  # TypeScript type definitions
-│   └── astrology/
-├── utils/                  # Utility functions
-│   ├── astrology/
-│   └── prompts/
-└── constants/              # App-wide constants
+│       ├── db.ts, firebase.ts    # Library hooks
+│       └── prokerala/             # ProKerala API hooks
+├── lib/                          # Library integrations
+│   ├── db.ts                     # MongoDB connection
+│   ├── stripe.ts                 # Stripe configuration
+│   ├── apiClient.ts              # API client
+│   ├── firebase-client.ts        # Firebase client-side
+│   ├── firebaseAdmin.ts          # Firebase admin SDK
+│   ├── firebase/                 # Firebase config, client, admin
+│   └── prokerala/                # ProKerala client, endpoints, types
+├── models/                       # MongoDB/Mongoose models
+│   ├── User.ts                   # User (uid, email, role, subscriptionStatus)
+│   ├── BirthData.ts              # Birth data (date, time, location, coordinates)
+│   ├── Chart.ts                  # Generic chart data
+│   ├── NatalChart.ts             # Natal chart specific
+│   ├── Interpretation.ts         # Stored interpretations
+│   ├── EventInterpretation.ts    # Event-specific interpretations
+│   ├── Subscription.ts           # Stripe subscription records
+│   └── AIUsage.ts                # AI API usage tracking
+├── services/                     # Business logic (23 services)
+│   ├── userDataService.ts        # User CRUD operations
+│   ├── chartCalculationsService.ts
+│   ├── chartInterpretationsService.ts
+│   ├── chartRenderingService.tsx
+│   ├── astrologyService.ts
+│   ├── astrologicalEventsService.ts
+│   ├── agendaGenerator.ts
+│   ├── prokeralaService.ts       # ProKerala API integration
+│   ├── progressedChartService.tsx
+│   ├── solarReturnInterpretationService.ts
+│   ├── eventInterpretationService.ts / V2
+│   ├── natalBatchInterpretationService.ts
+│   ├── cleanNatalInterpretationService.ts
+│   ├── completeNatalInterpretationService.ts
+│   ├── educationalInterpretationService.ts
+│   ├── tripleFusedInterpretationService.ts  # 3-layer interpretation fusion
+│   ├── trainedAssistantService.ts  # OpenAI trained assistant
+│   ├── cacheService.ts
+│   └── kitGenerator.ts
+├── types/                        # TypeScript type definitions
+│   ├── interpretations.ts
+│   └── astrology/                # basic, chart, aspects, events, interpretation, etc.
+├── utils/                        # Utility functions
+│   ├── dateTimeUtils.ts, planetNameUtils.ts, agendaAccessControl.ts, etc.
+│   ├── astrology/                # Calculations, coordinate utils, event generators
+│   └── prompts/                  # OpenAI prompt templates for all interpretation types
+└── styles/
+    └── print-libro.css           # Print styles for agenda book
 ```
 
-## Key Configuration Files
+## API Routes
 
-### package.json
-- Scripts: `dev`, `build`, `start`, `lint`, `test`
-- React pinned to 18.2.0 for production stability
-- Next.js using latest version
+### User & Auth
+- `POST/GET /api/birth-data` - Birth data CRUD
+- `GET /api/birth-data/all` - All birth data
+- `GET/POST /api/users` - User management
+- `GET /api/debug-auth` - Auth debugging
 
-### tsconfig.json
-- Path alias: `@/*` → `./src/*`
-- Target: ES2017
-- Strict mode enabled
-- Module resolution: bundler
+### Chart Calculation
+- `POST /api/charts/natal` - Natal chart
+- `POST /api/charts/progressed` - Progressed chart
+- `POST /api/charts/solar-return` - Solar return chart
+- `POST /api/astrology/natal-chart` - Alternative natal endpoint
+- `POST /api/astrology/progressed-chart-accurate` - Accurate progressed chart
+- `POST /api/astrology/planetary-cards` - Planetary cards data
 
-### next.config.ts
-- Minimal configuration (default Next.js setup)
+### AI Interpretations
+- `POST /api/astrology/interpret-natal` - Natal interpretation
+- `POST /api/astrology/interpret-natal-clean` - Clean natal interpretation
+- `POST /api/astrology/interpret-natal-complete` - Complete natal interpretation
+- `POST /api/astrology/interpret-planet` - Individual planet
+- `POST /api/astrology/interpret-aspect` - Aspect interpretation
+- `POST /api/astrology/interpret-angle` - Angle interpretation
+- `POST /api/astrology/interpret-chunk` - Chunk-based interpretation
+- `POST /api/astrology/interpret-events` - Event interpretation
+- `POST /api/astrology/interpret-solar` - Solar return interpretation
+- `POST /api/astrology/interpret-solar-return` - Full SR interpretation
+- `POST /api/astrology/interpret-aspect-sr` - SR aspect interpretation
+- `POST /api/astrology/interpret-planet-sr` - SR planet interpretation
+- `POST /api/astrology/progressed-interpretation` - Progressed chart interpretation
+- `POST /api/astrology/synthesis-annual` - Annual synthesis
+
+### Agenda & Events
+- `POST /api/astrology/solar-year-events` - Solar year events
+- `POST /api/astrology/monthly-events` - Monthly events
+- `POST /api/astrology/complete-events` - Complete event generation
+- `GET /api/astrology/simple-agenda` - Simple agenda
+- `GET /api/astrology/get-agenda` - Get agenda
+- `POST /api/astrology/generate-week-model` - Weekly model
+- `POST /api/astrology/generate-agenda-ai` - AI-generated agenda
+- `POST /api/agenda/generate-book` - Generate agenda book PDF
+
+### Events
+- `GET /api/events/astrological` - Astrological events
+
+### Payments (Stripe)
+- `POST /api/checkout` - Create checkout session
+- `GET /api/checkout/products` - Available products
+- `GET /api/subscription/status` - Subscription status
+- `POST /api/subscription/cancel` - Cancel subscription
+- `POST /api/webhook` - Stripe webhook handler
+
+### Cache & Interpretations Storage
+- `POST /api/cache/save` - Save to cache
+- `GET /api/cache/check` - Check cache
+- `GET /api/cache/stats` - Cache statistics
+- `POST /api/interpretations/save` - Save interpretation
+- `GET /api/interpretations` - Get interpretations
+- `POST /api/interpretations/clear-cache` - Clear interpretation cache
+
+### ProKerala (External Astrology API)
+- `POST /api/prokerala/token` - Get API token
+- `POST /api/prokerala/natal-chart` - Natal chart
+- `POST /api/prokerala/progressed-chart` - Progressed chart
+- `GET /api/prokerala/location-search` - Location search
+
+### Admin
+- `GET /api/admin/users` - List users
+- `POST /api/admin/update-role` - Update user role
+- `POST /api/admin/delete-user` - Delete user
+- `POST /api/admin/clear-cache` - Clear cache
+- `POST /api/admin/clear-database` - Clear database
+- `POST /api/admin/reset-interpretations` - Reset interpretations
+
+### PDF & Geocoding
+- `POST /api/pdf/generate` - Generate PDF report
+- `GET /api/geocode` - Forward geocoding
+- `GET /api/reverse-geocode` - Reverse geocoding
+
+## Database Models (Mongoose)
+
+| Model | Collection | Key Fields |
+|-------|-----------|------------|
+| `User` | users | uid, email, fullName, role (`user`/`admin`), subscriptionStatus (`free`/`premium`/`none`) |
+| `BirthData` | birthdatas | userId, fullName, birthDate, birthTime, birthPlace, latitude, longitude, timezone, currentPlace fields for SR |
+| `Chart` | charts | Generic chart storage |
+| `NatalChart` | natalcharts | Natal chart calculations |
+| `Interpretation` | interpretations | Stored AI interpretations |
+| `EventInterpretation` | eventinterpretations | Event-specific interpretations |
+| `Subscription` | subscriptions | userId, stripeCustomerId, stripeSubscriptionId, status, currentPeriodStart/End |
+| `AIUsage` | aiusages | userId, annualAICalls (year-based limits), callHistory, optimization metrics |
 
 ## Important Conventions
 
 ### Import Paths
-Always use `@/` alias for imports:
+Always use the `@/` alias for imports:
 ```typescript
 import { AuthContext } from '@/context/AuthContext';
 import PrimaryHeader from '@/components/layout/PrimaryHeader';
 ```
 
-### Component Structure
+### Component Patterns
 - Server Components by default
 - Client Components marked with `'use client'` directive
-- Props interfaces defined inline or exported
+- Props interfaces defined inline or exported from the component file
 
 ### Styling
-- Tailwind utility classes
-- Custom color palette: purple, yellow, orange gradients
-- Responsive design with mobile-first approach
-- Dark theme with purple/cosmic aesthetic
+- Tailwind utility classes throughout
+- Custom color palette: purple, yellow, orange gradients (cosmic aesthetic)
+- Dark theme with purple/cosmic tones
+- Mobile-first responsive design
+- Print styles in `src/styles/print-libro.css` for agenda book PDF output
 
 ### Icons
 - Primary icon library: **Lucide React**
-- Custom SVG components in `src/components/icons/`
-- Logo variants:
-  - `LogoSimple`: Standard yellow/orange gradient sun (for mobile)
-  - `LogoSimpleGold`: Gold gradient sun variant (#FFD700 → #FFA500)
-  - `Logo`: Full logo (for desktop)
+- Custom SVG components in `src/components/icons/`:
+  - `Logo`: Full logo (desktop)
+  - `LogoSimple`: Standard yellow/orange gradient sun (mobile)
+  - `LogoSimpleGold`: Gold gradient sun (#FFD700 -> #FFA500)
 
-## Authentication & User Flow
+### ESLint Configuration
+- `@typescript-eslint/no-unused-vars`: warn (not error)
+- `@typescript-eslint/no-explicit-any`: warn
+- `react/no-unescaped-entities`: error only for `< > { }` (quotes allowed for Spanish text)
+- `react-hooks/exhaustive-deps`: warn
+- `no-console`: warn in production, off in development
 
-### Firebase Auth
-- Email/password authentication
-- User context via `AuthContext` (`src/context/AuthContext.tsx`)
-- Protected routes in `(dashboard)` group
+### Middleware
+The root `middleware.ts` is currently **disabled** -- it passes all requests through. Individual API routes handle their own authentication.
 
-### User Data Service
-- Service: `src/services/userDataService.ts`
-- Functions:
-  - `getUserBirthData(userId)`: Fetch birth data
-  - `getUserProfile(userId)`: Complete user profile
-  - `saveUserBirthData(userId, birthData)`: Save/update birth data
-  - `checkUserDataCompleteness(userId)`: Validate required data
+## Authentication
 
-## Git Workflow
+- **Firebase Auth** with email/password
+- Auth state managed via `AuthContext` (`src/context/AuthContext.tsx`)
+- `useAuth()` hook provides: `user`, `isAuthenticated`, `isLoading`, `login`, `logout`, `register`, `resetPassword`, `refreshUser`
+- Protected routes live under the `(dashboard)` route group
+- API routes authenticate via Firebase Admin SDK (server-side token verification)
 
-### Branch Naming Convention
-**CRITICAL**: All branches MUST follow this pattern:
-```
-claude/[description]-[sessionID]
-```
+## Key Services
 
-Example: `claude/visual-improvements-018yVirvPCdaUMFpETP4HATz`
+### User Data (`src/services/userDataService.ts`)
+- `getUserBirthData(userId)` - Fetch birth data
+- `getUserProfile(userId)` - Complete user profile
+- `saveUserBirthData(userId, birthData)` - Save/update birth data
+- `checkUserDataCompleteness(userId)` - Validate required data
 
-### Main Branch
-- `main` is the primary branch
-- Production deploys from `main` via Vercel
+### Interpretation Pipeline
+The project uses a multi-layer interpretation system:
+1. **Layer 1**: Raw astronomical data from astronomy-engine or ProKerala
+2. **Layer 2**: Pre-built interpretation templates from `src/data/interpretations/`
+3. **Layer 3**: AI-generated interpretations via OpenAI (gpt-4o-mini)
 
-### Push Protocol
-Always use:
-```bash
-git push -u origin <branch-name>
-```
+Interpretation services include: clean natal, complete natal, educational, triple-fused, event-based, solar return, and progressed chart interpretations. Prompts are stored in `src/utils/prompts/`.
 
-If push fails with network errors, retry up to 4 times with exponential backoff (2s, 4s, 8s, 16s).
-
-**NEVER** push directly to `main` without explicit user permission.
-
-### Current Branch
-As of last session: `claude/visual-improvements-018yVirvPCdaUMFpETP4HATz`
+### AI Usage Tracking
+The `AIUsage` model tracks per-user annual AI call limits to control costs. Users get a limited number of AI interpretation calls per year.
 
 ## Deployment
 
 ### Platform
-- **Vercel** for hosting and deployment
+- **Vercel** for hosting
 - Auto-deploys from `main` branch
 - Preview deployments for feature branches
+- `vercel.json` uses `--legacy-peer-deps` for install
 
 ### Build
 ```bash
 npm run build
 ```
 
-### Production Issues History
-- React 18.2.0 pinned due to Next.js compatibility issues
-- Previous middleware authentication problems resolved by reverting to commit `0135c0c`
-- Vercel deployment sometimes requires manual trigger
+### Known Production Considerations
+- React 18.2.0 is pinned due to Next.js compatibility -- do not upgrade
+- `vercel.json` specifies `npm install --legacy-peer-deps` to resolve dependency conflicts
+- Vercel deployment may sometimes require manual trigger
 
 ## Environment Variables
 
-The project uses environment variables for:
-- Firebase configuration
-- MongoDB connection
-- Stripe API keys
-- OpenAI API key
-- NextAuth URL
+Required environment variables (no `.env.example` exists -- check with project owner):
+- **Firebase**: `NEXT_PUBLIC_FIREBASE_*` config keys, `FIREBASE_ADMIN_*` credentials
+- **MongoDB**: `MONGODB_URI` connection string
+- **Stripe**: `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`
+- **OpenAI**: `OPENAI_API_KEY`
+- **ProKerala**: `PROKERALA_CLIENT_ID`, `PROKERALA_CLIENT_SECRET`
+- **Geocoding**: geocoder API keys
+- **Next.js**: `NEXTAUTH_URL`, `NEXTAUTH_SECRET`
 
-**Note**: No `.env.example` file exists. Check with project owner for required variables.
+## Git Workflow
 
-## Common Tasks
+### Branch Naming Convention
+**CRITICAL**: All Claude Code branches MUST follow this pattern:
+```
+claude/[description]-[sessionID]
+```
 
-### Start Development Server
+### Main Branch
+- `main` is the primary branch
+- Production deploys from `main` via Vercel
+
+### Push Protocol
 ```bash
-npm run dev
+git push -u origin <branch-name>
 ```
+If push fails with network errors, retry up to 4 times with exponential backoff (2s, 4s, 8s, 16s).
 
-### Run Tests
-```bash
-npm test
-```
+**NEVER** push directly to `main` without explicit user permission.
 
-### Build for Production
-```bash
-npm run build
-npm start
-```
+## Mobile Navigation
 
-### Lint Code
-```bash
-npm run lint
-```
-
-## Recent Changes & Known Issues
-
-### Visual Improvements (Latest)
-- Desktop header logo reduced: 52px → 44px
-- Mobile header logo increased: 40px → 48px
-- Badge text shortened: "Agenda Astrológica Personalizada" → "Agenda Astrológica"
-- Badge spacing improved with `mt-1`
-- Mobile nav sun icon: Changed from `Sunrise` to `Sun`, size increased to 28px
-- Created `LogoSimpleGold.tsx` as alternative gold gradient logo
-
-### Stable Commit Reference
-- Commit `0135c0c`: Last known stable version before middleware auth issues
-- This is a safe revert point if authentication problems arise
-
-### Git Issues
-- Direct pushes to `main` often fail with HTTP 403
-- Solution: Use feature branches with proper naming convention
-
-## API Endpoints Structure
-
-```
-/api/
-├── birth-data          # User birth data CRUD
-├── charts/
-│   ├── natal          # Natal chart generation
-│   └── progressed     # Progressed chart generation
-├── astrology/         # Astrological calculations
-├── users              # User profile management
-└── stripe/            # Payment processing
-```
+The `MobileBottomNav` component renders bottom navigation with:
+- Nacimiento (Birth Data) -- Sparkles icon
+- Natal (Natal Chart) -- Star icon
+- R.Solar (Solar Return) -- Sun icon
+- Agenda -- Calendar icon
+- Admin (admin users only) -- Settings icon
 
 ## Astrological Features
 
 ### Natal Chart
-- Birth data collection (date, time, location, coordinates)
-- Chart calculation using astronomy-engine
-- Interpretations using OpenAI
+- Birth data collection (date, time, location with geocoding)
+- Chart calculation via astronomy-engine and ProKerala
+- Interactive chart wheel with aspects, houses, tooltips
+- AI-generated interpretations (planets, aspects, angles)
 
 ### Solar Return
 - Annual solar return calculations
-- Custom location support
+- Custom current-location support for relocated charts
+- Planet-by-planet interpretation drawers
 - PDF report generation
 
-### Agenda
-- Personalized astrological events
-- Transit tracking
-- Daily/weekly/monthly views
+### Progressed Chart
+- Secondary progression calculations
+- Visual comparison with natal chart
 
-## Database Models (Mongoose)
+### Astrological Agenda
+- Personalized event generation (transits, aspects, lunar phases)
+- Monthly and annual calendar views
+- AI-interpreted events
+- Printable agenda book (A5 format) with:
+  - Cover/back cover pages
+  - Table of contents
+  - Monthly calendars with event annotations
+  - Soul chart, creative therapy, annual cycles sections
+  - Special pages for birthdays and cycle transitions
 
-Located in `src/models/`:
-- User profiles
-- Birth data
-- Chart data
-- Subscription/payment records
+## Documentation
 
-## UI Components
+The `documentacion/` directory contains 34+ markdown files covering:
+- Architecture decisions (`ARQUITECTURA_3_CAPAS.md`)
+- Stripe integration guides (`STRIPE_SETUP.md`, `STRIPE_PRODUCTOS.md`, `STRIPE_ENV_SETUP.md`)
+- Interpretation system design (`SISTEMA_INTERPRETACIONES.md`, `SISTEMA_INTERPRETACIONES_LLM.md`)
+- Session summaries and progress notes
+- Bug analysis (`documentacion/BUGDEAPIS/`)
 
-### Layout Components
-- `PrimaryHeader`: Main navigation header (desktop + mobile logo)
-- `MobileBottomNav`: Mobile bottom navigation bar (5 items for admin, 4 for regular users)
-
-### Mobile Navigation Items
-- Nacimiento (Birth Data) - Sparkles icon
-- Natal (Natal Chart) - Star icon
-- R.Solar (Solar Return) - Sun icon
-- Agenda - Calendar icon
-- Admin (admin only) - Settings icon
-
-## Documentation Files
-
-Additional documentation in repo:
-- `PLAN_ACCION_INTERPRETACION.md`: Interpretation system plan
-- `STRIPE_SETUP.md`, `STRIPE_PRODUCTOS.md`, `STRIPE_ENV_SETUP.md`: Stripe integration
-- `TODO.md`: Project tasks
-- `Guialogos.md`: Logo guidelines
-- `estructura e archios.md`: File structure documentation
-- `documentacion/`: Extended documentation directory
+Root-level docs include `TODO.md`, `GUIA_RAPIDA_DESARROLLO.md`, and various feature-specific markdown files.
 
 ## Tips for Working with This Project
 
-1. **Always read files before modifying them** - The codebase has evolved significantly
-2. **Use the `@/` path alias** - Never use relative imports like `../../../`
-3. **Test locally before pushing** - Run `npm run dev` to verify changes
-4. **Check mobile responsiveness** - This app has significant mobile optimization
-5. **Respect the color scheme** - Purple/yellow/orange cosmic theme is intentional
-6. **Firebase Auth is critical** - Don't modify auth flow without understanding impact
-7. **Stripe integration is active** - Be careful with payment-related changes
-8. **MongoDB queries may be slow** - Consider performance implications
-9. **React 18.2.0 is pinned** - Don't upgrade React without extensive testing
-10. **Git branch naming is enforced** - Always use `claude/[description]-[sessionID]` format
+1. **Always read files before modifying them** -- the codebase has evolved through many sessions
+2. **Use the `@/` path alias** -- never use relative imports like `../../../`
+3. **Test locally before pushing** -- run `npm run dev` to verify changes
+4. **Check mobile responsiveness** -- significant mobile optimization throughout
+5. **Respect the color scheme** -- purple/yellow/orange cosmic theme is intentional
+6. **Firebase Auth is critical** -- don't modify auth flow without understanding the full impact
+7. **Stripe integration is active** -- be careful with payment-related changes
+8. **React 18.2.0 is pinned** -- don't upgrade React without extensive testing
+9. **Middleware is disabled** -- API routes handle their own auth; don't re-enable middleware without understanding the history (caused production issues before)
+10. **AI usage is metered** -- the `AIUsage` model enforces annual call limits per user
+11. **ProKerala API** -- external astrology API with its own token management; check `src/lib/prokerala/` and `src/hooks/lib/prokerala/`
+12. **Print/PDF output** -- agenda book components use specific A5 formatting and print CSS; test print layout carefully
+13. **Spanish-language UI** -- all user-facing text is in Spanish; maintain language consistency
 
-## Contact & Support
+## Stable References
 
-For questions about:
-- Authentication issues → Check Firebase console
-- Payment issues → Check Stripe dashboard
-- Deployment issues → Check Vercel dashboard
-- Database issues → Check MongoDB Atlas
-
-## Version History
-
-- **1.0.0**: Initial production release
-- Latest stable commit: `7a0ce8e` (header badge spacing and mobile logo improvements)
+- Commit `0135c0c`: Safe revert point if authentication/middleware issues arise
+- The middleware was intentionally disabled after production auth failures
 
 ---
 
-**Last Updated**: 2025-12-08
+**Last Updated**: 2026-02-09
 **Maintained By**: Claude Code Sessions
 **Project Owner**: cookyourweb
