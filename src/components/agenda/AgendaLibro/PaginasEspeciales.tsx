@@ -367,16 +367,19 @@ export const CartaCierre: React.FC<{ name: string }> = ({ name }) => {
   );
 };
 
-export const PaginaFinalBlanca = () => {
+export const PaginaFinalBlanca: React.FC<{
+  titulo?: string;
+  subtitulo?: string;
+}> = ({ titulo = 'Lo que todavía no sé', subtitulo = 'Una página en blanco para lo que aún está por descubrir.' }) => {
   const { config } = useStyle();
 
   return (
     <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
       {/* Header */}
       <div className="text-center mb-6 pb-4 border-b-2 border-gray-200">
-        <h2 className={`text-xl font-display ${config.titleGradient}`}>Lo que todavía no sé</h2>
+        <h2 className={`text-xl font-display ${config.titleGradient}`}>{titulo}</h2>
         <p className={`text-xs italic mt-2 ${config.iconSecondary}`}>
-          Una página en blanco para lo que aún está por descubrir.
+          {subtitulo}
         </p>
       </div>
 
@@ -386,7 +389,7 @@ export const PaginaFinalBlanca = () => {
         </div>
       </div>
 
-      <FooterLibro pagina={148} />
+      <FooterLibro />
     </div>
   );
 };

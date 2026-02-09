@@ -2,7 +2,7 @@ import React from 'react';
 import { format, addMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useStyle } from '@/context/StyleContext';
-import { Calendar, TrendingUp, Star, Sparkles } from 'lucide-react';
+import { Calendar, TrendingUp, Star, Sparkles, PenLine } from 'lucide-react';
 import { FooterLibro } from './MesCompleto';
 
 // ============ LÍNEA DE TIEMPO EMOCIONAL - CON ESTILOS ============
@@ -433,6 +433,223 @@ export const GrandesAprendizajes: React.FC<GrandesAprendizajesProps> = ({ claves
       </div>
 
       <FooterLibro pagina={24} />
+    </div>
+  );
+};
+
+// ============ EJERCICIO EMOCIONAL MENSUAL ============
+// Basado en la energía del mes (ajuste o activación)
+
+interface EjercicioMensual {
+  tipo: 'ajuste' | 'activacion';
+  ejercicio: string;
+  instruccion: string;
+}
+
+const EJERCICIOS_AJUSTE: EjercicioMensual[] = [
+  { tipo: 'ajuste', ejercicio: 'Escaneo corporal', instruccion: 'Cierra los ojos. Recorre tu cuerpo de pies a cabeza. ¿Dónde hay tensión? Respira hacia ese lugar.' },
+  { tipo: 'ajuste', ejercicio: 'Escritura libre', instruccion: 'Escribe sin parar durante 5 minutos. No juzgues. Solo deja salir lo que necesita salir.' },
+  { tipo: 'ajuste', ejercicio: 'Respiración 4-7-8', instruccion: 'Inhala 4 segundos, retén 7, exhala 8. Repite 4 veces. Siente cómo se calma tu sistema nervioso.' },
+  { tipo: 'ajuste', ejercicio: 'Grounding', instruccion: 'Pon los pies descalzos en el suelo. Nombra 5 cosas que ves, 4 que tocas, 3 que escuchas, 2 que hueles, 1 que saboreas.' },
+  { tipo: 'ajuste', ejercicio: 'Diálogo interno', instruccion: '¿Qué me estoy diciendo que no es verdad? Escribe el pensamiento negativo y escribe una respuesta compasiva.' },
+  { tipo: 'ajuste', ejercicio: 'Silencio activo', instruccion: '10 minutos sin estímulos. Sin móvil, sin música. Solo tú y tu respiración. Observa qué surge.' },
+];
+
+const EJERCICIOS_ACTIVACION: EjercicioMensual[] = [
+  { tipo: 'activacion', ejercicio: 'Carta al futuro', instruccion: 'Escribe una carta a tu yo de dentro de 6 meses. ¿Qué quieres contarle? ¿Qué quieres que sepa?' },
+  { tipo: 'activacion', ejercicio: 'Lista de poder', instruccion: 'Escribe 10 cosas que ya has logrado en tu vida. Grandes o pequeñas. Léelas en voz alta.' },
+  { tipo: 'activacion', ejercicio: 'Visualización activa', instruccion: 'Cierra los ojos y visualiza tu mejor versión. ¿Cómo camina? ¿Cómo habla? ¿Qué decisiones toma?' },
+  { tipo: 'activacion', ejercicio: 'Mapa de deseos', instruccion: 'Dibuja o escribe 5 cosas que deseas crear este mes. No te limites. Sueña en grande.' },
+  { tipo: 'activacion', ejercicio: 'Acción valiente', instruccion: 'Escribe una cosa que llevas posponiendo. ¿Cuál es el primer paso más pequeño? Hazlo hoy.' },
+  { tipo: 'activacion', ejercicio: 'Gratitud expansiva', instruccion: 'Escribe 3 cosas que agradeces HOY. Luego escribe 3 cosas que agradecerás el próximo mes.' },
+];
+
+const getEjercicioForMonth = (mesNumero: number, intensidad: number): EjercicioMensual => {
+  const esActivacion = intensidad >= 6;
+  const lista = esActivacion ? EJERCICIOS_ACTIVACION : EJERCICIOS_AJUSTE;
+  return lista[(mesNumero - 1) % lista.length];
+};
+
+interface EjercicioEmocionalMensualProps {
+  startDate: Date;
+  endDate: Date;
+  lineaTiempoData?: LineaTiempoData[];
+  lineaTiempoAnual?: any[];
+}
+
+export const EjercicioEmocionalMensual: React.FC<EjercicioEmocionalMensualProps> = ({
+  startDate,
+  endDate,
+  lineaTiempoData,
+  lineaTiempoAnual
+}) => {
+  const { config } = useStyle();
+
+  const months: Date[] = [];
+  let currentMonth = new Date(startDate);
+  while (currentMonth <= endDate && months.length < 12) {
+    months.push(new Date(currentMonth));
+    currentMonth = addMonths(currentMonth, 1);
+  }
+
+  const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+  const getMonthIntensity = (monthIndex: number): number => {
+    const mesName = monthNames[months[monthIndex]?.getMonth() || 0];
+
+    if (lineaTiempoData && lineaTiempoData.length > 0) {
+      const found = lineaTiempoData.find((m: any) => m.mes?.toLowerCase().includes(mesName));
+      if (found) return found.intensidad || 5;
+      if (lineaTiempoData[monthIndex]) return lineaTiempoData[monthIndex].intensidad || 5;
+    }
+
+    if (lineaTiempoAnual && lineaTiempoAnual.length > 0) {
+      const found = lineaTiempoAnual.find((m: any) =>
+        m.periodo?.toLowerCase().includes(mesName) || m.mes?.toLowerCase()?.includes(mesName)
+      );
+      if (found) return found.intensidad || 5;
+    }
+
+    return 5;
+  };
+
+  return (
+    <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
+      <div className="text-center mb-4">
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <PenLine className={`w-5 h-5 ${config.iconSecondary}`} />
+          <span className={`text-xs uppercase tracking-[0.3em] ${config.iconSecondary}`}>Trabajo Emocional</span>
+        </div>
+        <h2 className={`text-2xl font-display ${config.titleGradient}`}>
+          Ejercicios para cada mes
+        </h2>
+        <div className={`${config.divider} w-16 mx-auto mt-3`} />
+        <p className={`text-xs italic ${config.iconSecondary} mt-2`}>
+          Según la energía de cada mes, un ejercicio de ajuste (calma) o activación (expansión)
+        </p>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 flex-1">
+        {months.map((month, index) => {
+          const intensidad = getMonthIntensity(index);
+          const ejercicio = getEjercicioForMonth(index + 1, intensidad);
+          const esActivacion = ejercicio.tipo === 'activacion';
+          const mesNombre = format(month, 'MMM', { locale: es });
+
+          return (
+            <div
+              key={index}
+              className={`${esActivacion ? config.highlightPrimary : config.highlightSecondary} rounded-lg p-2`}
+            >
+              <div className="flex items-center gap-1 mb-1">
+                <span className={`text-[10px] font-bold uppercase ${esActivacion ? config.iconPrimary : config.iconSecondary}`}>
+                  {mesNombre}
+                </span>
+                <span className={`text-[9px] px-1 rounded ${esActivacion ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'}`}>
+                  {esActivacion ? 'Activación' : 'Ajuste'}
+                </span>
+              </div>
+              <p className={`text-[10px] font-medium ${esActivacion ? config.iconPrimary : config.iconSecondary} mb-1`}>
+                {ejercicio.ejercicio}
+              </p>
+              <p className="text-[9px] text-gray-600 leading-tight">
+                {ejercicio.instruccion.length > 80 ? ejercicio.instruccion.substring(0, 80) + '...' : ejercicio.instruccion}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className={`${config.highlightAccent} rounded-lg p-3 mt-3`}>
+        <div className="flex items-center gap-2 mb-1">
+          <PenLine className={`w-3 h-3 ${config.iconAccent}`} />
+          <span className={`text-xs font-bold ${config.iconAccent}`}>¿Cuál de estos ejercicios te llama más?</span>
+        </div>
+        <div className="space-y-3">
+          <div className="h-8 border-b border-dashed border-gray-300" />
+          <div className="h-8 border-b border-dashed border-gray-300" />
+        </div>
+      </div>
+
+      <FooterLibro />
+    </div>
+  );
+};
+
+// ============ EJERCICIO INLINE PARA CADA MES ============
+// Se incluye en cada mes del libro con el ejercicio específico
+
+interface EjercicioDelMesProps {
+  mesNumero: number;
+  monthDate: Date;
+  intensidad?: number;
+}
+
+export const EjercicioDelMes: React.FC<EjercicioDelMesProps> = ({
+  mesNumero,
+  monthDate,
+  intensidad = 5
+}) => {
+  const { config } = useStyle();
+  const ejercicio = getEjercicioForMonth(mesNumero, intensidad);
+  const esActivacion = ejercicio.tipo === 'activacion';
+
+  return (
+    <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '20mm' }}>
+      <div className="text-center mb-6">
+        <span className={`text-xs uppercase tracking-[0.3em] ${config.iconSecondary}`}>
+          {format(monthDate, 'MMMM yyyy', { locale: es })}
+        </span>
+        <h2 className={`text-2xl font-display ${config.titleGradient} mt-2`}>
+          Ejercicio del Mes
+        </h2>
+        <div className={`${config.divider} w-16 mx-auto mt-3`} />
+        <span className={`inline-block mt-2 text-[10px] px-3 py-1 rounded-full ${esActivacion ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}`}>
+          {esActivacion ? 'Mes de Activación' : 'Mes de Ajuste'}
+        </span>
+      </div>
+
+      <div className="flex-1 flex flex-col">
+        <div className={`${esActivacion ? config.highlightPrimary : config.highlightSecondary} rounded-lg p-6 mb-6`}>
+          <div className="flex items-center gap-3 mb-4">
+            <PenLine className={`w-5 h-5 ${esActivacion ? config.iconPrimary : config.iconSecondary}`} />
+            <h3 className={`text-lg font-display ${esActivacion ? config.iconPrimary : config.iconSecondary}`}>
+              {ejercicio.ejercicio}
+            </h3>
+          </div>
+          <p className="text-gray-700 text-sm leading-relaxed">
+            {ejercicio.instruccion}
+          </p>
+        </div>
+
+        <div className={`${config.highlightAccent} rounded-lg p-5 mb-4`}>
+          <h4 className={`text-sm font-bold uppercase ${config.iconAccent} mb-3 flex items-center gap-2`}>
+            <PenLine className="w-4 h-4" />
+            Mi experiencia con este ejercicio
+          </h4>
+          <div className="space-y-3">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="h-7 border-b border-dashed border-gray-300" />
+            ))}
+          </div>
+        </div>
+
+        <div className={`${esActivacion ? config.highlightPrimary : config.highlightSecondary} rounded-lg p-4`}>
+          <h4 className={`text-sm font-medium ${esActivacion ? config.iconPrimary : config.iconSecondary} mb-2`}>
+            {esActivacion
+              ? '¿Qué se activó en mí? ¿Qué estoy lista para crear?'
+              : '¿Qué necesito soltar? ¿Dónde puedo bajar el ritmo?'}
+          </h4>
+          <div className="space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-7 border-b border-dashed border-gray-300" />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <FooterLibro />
     </div>
   );
 };

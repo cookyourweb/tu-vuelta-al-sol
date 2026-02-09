@@ -2,7 +2,7 @@ import React from 'react';
 import { useStyle } from '@/context/StyleContext';
 import {
   BookOpen, Sun, Moon, Star, Calendar,
-  PenLine, Sparkles
+  PenLine
 } from 'lucide-react';
 import { FooterLibro } from './MesCompleto';
 
@@ -113,8 +113,10 @@ export const IndiceNavegable: React.FC<IndiceNavegableProps> = ({ startDate }) =
       icono: <Calendar className="w-4 h-4" />,
       subsecciones: [
         { titulo: 'Línea de Tiempo Emocional', pagina: 22, id: 'linea-tiempo' },
-        { titulo: 'Meses Clave y Puntos de Giro', pagina: 23, id: 'meses-clave' },
-        { titulo: 'Grandes Aprendizajes', pagina: 24, id: 'grandes-aprendizajes' },
+        { titulo: 'Ejercicios Emocionales por Mes', pagina: 23, id: 'ejercicios-emocionales' },
+        { titulo: 'Meses Clave y Puntos de Giro', pagina: 24, id: 'meses-clave' },
+        { titulo: 'Grandes Aprendizajes', pagina: 25, id: 'grandes-aprendizajes' },
+        { titulo: 'Plutón en Acuario (2024–2044)', pagina: 26, id: 'pluton-acuario' },
       ]
     },
     {
@@ -140,15 +142,15 @@ export const IndiceNavegable: React.FC<IndiceNavegableProps> = ({ startDate }) =
       ]
     },
     {
-      titulo: 'Cierre del Ciclo',
+      titulo: 'Notas y Reflexiones',
       pagina: 96,
-      id: 'cierre-ciclo',
-      icono: <Sparkles className="w-4 h-4" />,
+      id: 'notas',
+      icono: <PenLine className="w-4 h-4" />,
       subsecciones: [
-        { titulo: '¿Quién Era? ¿Quién Soy?', pagina: 96, id: 'quien-era-quien-soy' },
-        { titulo: 'Preparación Próxima Vuelta', pagina: 97, id: 'preparacion-proxima' },
-        { titulo: 'Carta de Cierre', pagina: 98, id: 'carta-cierre' },
-        { titulo: 'Notas en Blanco', pagina: 99, id: 'notas' },
+        { titulo: 'Lo que todavía no sé', pagina: 96, id: 'notas-1' },
+        { titulo: 'Mis notas', pagina: 97, id: 'notas-2' },
+        { titulo: 'Ideas y sueños', pagina: 98, id: 'notas-3' },
+        { titulo: 'Notas libres', pagina: 99, id: 'notas-4' },
       ]
     },
   ];

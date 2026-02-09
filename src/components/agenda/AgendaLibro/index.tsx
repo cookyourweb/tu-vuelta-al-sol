@@ -13,15 +13,15 @@ import { formatEventForBook, formatInterpretationCompact } from '@/utils/formatI
 import { PortadaPersonalizada, PaginaIntencion, PaginaIntencionAnualSR } from './PortalEntrada';
 import { CartaBienvenida, GuiaAgenda, TemaCentralAnio, LoQueVieneAMover, LoQuePideSoltar, PaginaIntencionAnual } from './TuAnioTuViaje';
 import { TuAnioOverview, TuAnioCiclos, PaginaCumpleanos } from './TuAnio';
-import { LineaTiempoEmocional, MesesClavePuntosGiro, GrandesAprendizajes } from './CiclosAnuales';
+import { LineaTiempoEmocional, MesesClavePuntosGiro, GrandesAprendizajes, EjercicioEmocionalMensual, EjercicioDelMes } from './CiclosAnuales';
 import { EsenciaNatal, NodoNorte, NodoSur, PlanetasDominantes, PatronesEmocionales } from './SoulChart';
-import { QueEsRetornoSolar, AscendenteAnio, SolRetorno, LunaRetorno, MercurioRetorno, VenusRetorno, MarteRetorno, EjesDelAnio, EjesDelAnio2, IntegracionEjes, RitualCumpleanos, MantraAnual } from './RetornoSolar';
+import { QueEsRetornoSolar, AscendenteAnio, SolRetorno, LunaRetorno, MercurioRetorno, VenusRetorno, MarteRetorno, EjesDelAnio, EjesDelAnio2, IntegracionEjes, RitualCumpleanos, MantraAnual, PlutonEnAcuario } from './RetornoSolar';
 import { IndiceNavegable } from './Indice';
 import { CalendarioYMapaMes, LunasYEjercicios, SemanaConInterpretacion, CierreMes, PrimerDiaCiclo as PrimerDiaCicloMes } from './MesCompleto';
 import { TransitosDelMes } from './TransitosDelMes';
 import { CalendarioMensualTabla } from './CalendarioMensualTabla';
-import { EscrituraTerapeutica, Visualizacion, RitualSimbolico, TrabajoEmocional, EscrituraMensual } from './TerapiaCreativa';
-import { PrimerDiaCiclo, UltimoDiaCiclo, QuienEraQuienSoy, PreparacionProximaVuelta, CartaCierre, PaginaFinalBlanca, Contraportada, PaginaBlanca } from './PaginasEspeciales';
+import { EscrituraTerapeutica, Visualizacion, RitualSimbolico, EscrituraMensual } from './TerapiaCreativa';
+import { PrimerDiaCiclo, UltimoDiaCiclo, PaginaFinalBlanca, Contraportada, PaginaBlanca } from './PaginasEspeciales';
 import '@/styles/print-libro.css';
 
 interface AgendaLibroProps {
@@ -859,7 +859,7 @@ export const AgendaLibro = ({
       t += `${sub}\n\n`;
 
       // EVENTOS LUNARES con interpretaciones
-      const lunarEvents = getLunarEventsForMonth(month.monthIndex);
+      const lunarEvents = getLunarEventsForMonth(month.monthIndex, month.monthDate.getFullYear());
       if (lunarEvents.length > 0) {
         lunarEvents.forEach((evento: any) => {
           const tipoLabel = evento.tipo === 'lunaNueva' ? 'LUNA NUEVA' : 'LUNA LLENA';
@@ -874,7 +874,7 @@ export const AgendaLibro = ({
       }
 
       // TRÁNSITOS con interpretaciones
-      const transitos = getTransitEventsForMonth(month.monthIndex);
+      const transitos = getTransitEventsForMonth(month.monthIndex, month.monthDate.getFullYear());
       if (transitos.length > 0) {
         t += '--- Tránsitos del mes ---\n';
         transitos.forEach((tr: any) => {
@@ -986,11 +986,19 @@ export const AgendaLibro = ({
   };
 
   // Helper: Obtener eventos formateados para un mes específico
-  const getFormattedEventosForMonth = (monthIndex: number) => {
-    const eventos = getEventosForMonth(monthIndex);
+  // year: filtra por año para evitar duplicados en mes 1 y 13 del ciclo (mismo monthIndex)
+  const getFormattedEventosForMonth = (monthIndex: number, year?: number) => {
+    let eventos = getEventosForMonth(monthIndex);
+    // Filtrar por año si se proporciona (evita duplicados en primer/último mes del ciclo de 13 meses)
+    if (year !== undefined) {
+      eventos = eventos.filter(event => new Date(event.date).getFullYear() === year);
+    }
     // Pasar casas natales para personalizar interpretaciones lunares
     const natalHouses = natalChart?.houses;
-    return eventos.map(event => formatEventForBook(event, natalHouses));
+    const formatted = eventos.map(event => formatEventForBook(event, natalHouses));
+    // Ordenar por día del mes
+    formatted.sort((a, b) => a.dia - b.dia);
+    return formatted;
   };
 
   // Helper: Obtener la interpretación completa del SR
@@ -1297,14 +1305,14 @@ export const AgendaLibro = ({
   };
 
   // Helper: Filtrar eventos lunares para LunasYEjercicios
-  const getLunarEventsForMonth = (monthIndex: number) => {
-    const eventos = getFormattedEventosForMonth(monthIndex);
+  const getLunarEventsForMonth = (monthIndex: number, year?: number) => {
+    const eventos = getFormattedEventosForMonth(monthIndex, year);
     return eventos.filter(e => e.tipo === 'lunaNueva' || e.tipo === 'lunaLlena');
   };
 
   // Helper: Filtrar eventos de tránsitos (retrogradaciones e ingresos) para TransitosDelMes
-  const getTransitEventsForMonth = (monthIndex: number) => {
-    const eventos = getFormattedEventosForMonth(monthIndex);
+  const getTransitEventsForMonth = (monthIndex: number, year?: number) => {
+    const eventos = getFormattedEventosForMonth(monthIndex, year);
     return eventos
       .filter(e => e.tipo === 'retrogrado' || e.tipo === 'ingreso' || e.tipo === 'especial')
       .map(e => ({
@@ -1312,7 +1320,8 @@ export const AgendaLibro = ({
         tipo: e.tipo as 'retrogrado' | 'ingreso' | 'especial',
         titulo: e.titulo,
         signo: e.signo,
-        interpretacion: e.interpretacion
+        interpretacion: e.interpretacion,
+        interpretacionRaw: e.interpretacionRaw
       }));
   };
 
@@ -1714,7 +1723,9 @@ export const AgendaLibro = ({
             ═══════════════════════════════════════════════════════════════ */}
         <div id="bienvenida">
           <CartaBienvenida name={userName} />
-          <GuiaAgenda />
+          <div id="guia-agenda">
+            <GuiaAgenda />
+          </div>
         </div>
 
         {/* ═══════════════════════════════════════════════════════════════
@@ -1766,7 +1777,10 @@ export const AgendaLibro = ({
             <QueEsRetornoSolar />
           </div>
           <div id="ascendente-anio">
-            <AscendenteAnio />
+            <AscendenteAnio
+              ascSign={getEjesSignos()?.asc}
+              interpretacion={getIntegracionEjes()?.asc}
+            />
           </div>
           <div id="sol-retorno">
             <SolRetorno comparacion={getComparacionesPlanetarias()?.sol} />
@@ -1798,30 +1812,53 @@ export const AgendaLibro = ({
               dsc={getIntegracionEjes()?.dsc}
               ic={getIntegracionEjes()?.ic}
               frase_guia={getIntegracionEjes()?.frase_guia}
+              ascSign={getEjesSignos()?.asc?.sign}
+              mcSign={getEjesSignos()?.mc?.sign}
+              dscSign={getEjesSignos()?.dsc?.sign}
+              icSign={getEjesSignos()?.ic?.sign}
             />
           </div>
-          <MantraAnual />
+          <div id="mantra-anual">
+            <MantraAnual />
+          </div>
         </div>
 
         {/* ═══════════════════════════════════════════════════════════════
             SECCIÓN 5: CICLOS Y OVERVIEW DEL AÑO
             ═══════════════════════════════════════════════════════════════ */}
         <div id="ciclos-anuales">
-          <LineaTiempoEmocional
-            startDate={startDate}
-            endDate={endDate}
-            lineaTiempoData={solarReturnInterpretation?.interpretation?.linea_tiempo_emocional}
-            lineaTiempoAnual={getLineaTiempoAnual()}
-          />
-          <MesesClavePuntosGiro
-            lineaTiempo={solarReturnInterpretation?.interpretation?.meses_clave_puntos_giro || getLineaTiempoAnual()}
-            sombrasDelAno={solarReturnInterpretation?.interpretation?.sombras_del_ano}
-          />
-          <GrandesAprendizajes
-            clavesIntegracion={getClavesIntegracion()}
-            sombrasDelAno={solarReturnInterpretation?.interpretation?.sombras_del_ano}
-            fraseGuia={solarReturnInterpretation?.interpretation?.frase_guia || solarReturnInterpretation?.interpretation?.mantra_anual}
-          />
+          <div id="linea-tiempo">
+            <LineaTiempoEmocional
+              startDate={startDate}
+              endDate={endDate}
+              lineaTiempoData={solarReturnInterpretation?.interpretation?.linea_tiempo_emocional}
+              lineaTiempoAnual={getLineaTiempoAnual()}
+            />
+            <div id="ejercicios-emocionales">
+              <EjercicioEmocionalMensual
+                startDate={startDate}
+                endDate={endDate}
+                lineaTiempoData={solarReturnInterpretation?.interpretation?.linea_tiempo_emocional}
+                lineaTiempoAnual={getLineaTiempoAnual()}
+              />
+            </div>
+          </div>
+          <div id="meses-clave">
+            <MesesClavePuntosGiro
+              lineaTiempo={solarReturnInterpretation?.interpretation?.meses_clave_puntos_giro || getLineaTiempoAnual()}
+              sombrasDelAno={solarReturnInterpretation?.interpretation?.sombras_del_ano}
+            />
+          </div>
+          <div id="grandes-aprendizajes">
+            <GrandesAprendizajes
+              clavesIntegracion={getClavesIntegracion()}
+              sombrasDelAno={solarReturnInterpretation?.interpretation?.sombras_del_ano}
+              fraseGuia={solarReturnInterpretation?.interpretation?.frase_guia || solarReturnInterpretation?.interpretation?.mantra_anual}
+            />
+          </div>
+          <div id="pluton-acuario">
+            <PlutonEnAcuario />
+          </div>
         </div>
 
         <div id="tu-anio-overview">
@@ -1831,12 +1868,14 @@ export const AgendaLibro = ({
             userName={userName}
             hasSolarReturn={!!getInterpretacionRetornoSolar()}
           />
-          <TuAnioCiclos
-            startDate={startDate}
-            endDate={endDate}
-            userName={userName}
-            hasSolarReturn={!!getInterpretacionRetornoSolar()}
-          />
+          <div id="ciclos-del-anio">
+            <TuAnioCiclos
+              startDate={startDate}
+              endDate={endDate}
+              userName={userName}
+              hasSolarReturn={!!getInterpretacionRetornoSolar()}
+            />
+          </div>
         </div>
 
         {/* ═══════════════════════════════════════════════════════════════
@@ -1890,50 +1929,55 @@ export const AgendaLibro = ({
                 simboloZodiaco={month.simbolo}
                 temaDelMes={month.tema}
                 birthday={month.isBirthdayMonth ? startDate : undefined}
-                eventos={getFormattedEventosForMonth(month.monthIndex)}
+                eventos={getFormattedEventosForMonth(month.monthIndex, month.monthDate.getFullYear())}
               />
               <LunasYEjercicios
                 monthDate={month.monthDate}
-                eventos={getLunarEventsForMonth(month.monthIndex)}
+                eventos={getLunarEventsForMonth(month.monthIndex, month.monthDate.getFullYear())}
                 ejercicioCentral={getMonthlyThemeData(month.monthIndex).ejercicioCentral}
                 mantra={getMonthlyThemeData(month.monthIndex).mantra}
               />
               <TransitosDelMes
                 monthDate={month.monthDate}
-                transitos={getTransitEventsForMonth(month.monthIndex)}
+                transitos={getTransitEventsForMonth(month.monthIndex, month.monthDate.getFullYear())}
                 reflexionMensual={getMonthlyTransitReflection(month.monthIndex)}
               />
-              <CierreMes monthDate={month.monthDate} />
+              {/* Ejercicio emocional del mes */}
+              <EjercicioDelMes
+                mesNumero={month.mesNumero}
+                monthDate={month.monthDate}
+                intensidad={getMonthlyThemeData(month.monthIndex).intensidad}
+              />
+              {/* CierreMes: no en el mes de cierre (mes 13), que ya tiene EscrituraMensual con pregunta final */}
+              {!month.isClosingMonth && <CierreMes monthDate={month.monthDate} />}
               {/* Escritura terapéutica mensual - en CADA mes */}
               <EscrituraMensual
                 mesNumero={month.mesNumero}
                 mantra={getMonthlyThemeData(month.monthIndex).mantra}
               />
-              {/* Terapia creativa especial en meses 3, 6, 9, 12 */}
+              {/* Terapia creativa especial en meses 3, 6, 9 */}
               {month.mesNumero === 3 && <EscrituraTerapeutica />}
               {month.mesNumero === 6 && <Visualizacion />}
               {month.mesNumero === 9 && <RitualSimbolico />}
-              {month.mesNumero === 12 && <TrabajoEmocional />}
             </div>
           ))}
         </div>
 
-        {/* CIERRE DEL CICLO */}
-        <div id="cierre-ciclo">
-          <QuienEraQuienSoy />
-          <PreparacionProximaVuelta
-            clavesIntegracion={getClavesIntegracion()}
-            temaCentral={getInterpretacionRetornoSolar()}
-          />
-          <CartaCierre name={userName} />
+        {/* PÁGINAS PARA NOTAS (con líneas para escribir) */}
+        <div id="notas">
+          <div id="notas-1">
+            <PaginaFinalBlanca titulo="Lo que todavía no sé" subtitulo="Una página en blanco para lo que aún está por descubrir." />
+          </div>
+          <div id="notas-2">
+            <PaginaFinalBlanca titulo="Mis notas" subtitulo="Escribe lo que necesites. Este espacio es tuyo." />
+          </div>
+          <div id="notas-3">
+            <PaginaFinalBlanca titulo="Ideas y sueños" subtitulo="Lo que quiero crear, explorar o manifestar." />
+          </div>
+          <div id="notas-4">
+            <PaginaFinalBlanca titulo="Notas libres" subtitulo="Sin reglas, sin estructura. Solo tú y tus palabras." />
+          </div>
         </div>
-
-        {/* PÁGINAS EN BLANCO PARA NOTAS */}
-        <PaginaBlanca />
-        <PaginaBlanca />
-        <PaginaBlanca />
-        <PaginaBlanca />
-        <PaginaFinalBlanca />
 
         {/* CONTRAPORTADA */}
         <Contraportada />

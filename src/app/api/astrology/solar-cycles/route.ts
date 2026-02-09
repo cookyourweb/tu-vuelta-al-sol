@@ -92,12 +92,45 @@ export async function GET(request: NextRequest) {
     // 5. Determinar si se puede generar el siguiente ciclo
     const canGenerateNext = !nextCycleExists && currentCycleYear <= currentYear;
 
-    // 6. Filtrar solo los ciclos relevantes (máximo 2 más recientes)
+    // 6. Determinar visibilidad de ciclos según reglas:
+    //    - Si el nuevo ciclo existe Y el cumpleaños ya pasó → solo mostrar el nuevo
+    //    - Desde 3 meses antes del próximo cumpleaños → permitir ver 2 ciclos consecutivos
+    //    - El ciclo anterior desaparece una vez que existe el nuevo y pasó el cumpleaños
+    const previousCycleLabel = `${currentCycleYear - 1}-${currentCycleYear}`;
+    const previousCycleExists = cycles.some(c => c.yearLabel === previousCycleLabel);
+
+    // Calcular si estamos dentro de los 3 meses antes del próximo cumpleaños
+    const nextBirthday = new Date(currentYear, birthDate.getMonth(), birthDate.getDate());
+    if (nextBirthday <= now) {
+      nextBirthday.setFullYear(nextBirthday.getFullYear() + 1);
+    }
+    const threeMonthsBefore = new Date(nextBirthday);
+    threeMonthsBefore.setMonth(threeMonthsBefore.getMonth() - 3);
+    const isNearNextBirthday = now >= threeMonthsBefore;
+
+    // Filtrar ciclos relevantes
     const relevantCycles = cycles
       .filter(c => {
         const year = parseInt(c.yearLabel.split('-')[0]);
-        // Solo mostrar ciclos que no sean más antiguos que el año anterior
-        return year >= currentCycleYear - 1;
+
+        // Siempre mostrar el ciclo actual
+        if (c.yearLabel === currentCycleLabel) return true;
+
+        // Si estamos cerca del próximo cumpleaños (3 meses), mostrar el siguiente también
+        if (isNearNextBirthday && c.yearLabel === nextCycleLabel) return true;
+
+        // Solo mostrar el ciclo anterior si NO existe el ciclo actual
+        // (usuario aún no ha generado el nuevo ciclo)
+        if (c.yearLabel === previousCycleLabel) {
+          if (!currentCycleExists) return true;
+          // Si existe el actual pero estamos en el primer mes del ciclo, permitir ver el anterior temporalmente
+          return false;
+        }
+
+        // No mostrar ciclos más antiguos que el anterior
+        if (year < currentCycleYear - 1) return false;
+
+        return false;
       })
       .slice(0, 2)
       .map(cycle => SolarCycleHelpers.formatForDisplay(cycle));

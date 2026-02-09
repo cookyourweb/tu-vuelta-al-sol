@@ -1068,19 +1068,22 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
         }}
         onMouseLeave={(e) => {
           console.log('🎯 MOUSE LEFT TOOLTIP - ASCENDANT');
-          // ⭐ NUEVO: Si está locked, NO cerrar
-          if (tooltipLocked) {
+          // Si está locked o generando, NO cerrar
+          if (tooltipLocked || isGenerating) {
             return;
           }
-          // Add a small delay to allow drawer state to update
+          // Delay amplio para permitir que el usuario alcance el botón
           setTimeout(() => {
-            // Don't close tooltip immediately if mouse is over a button
+            // Re-check locked state (button may have set it during delay)
+            if (tooltipLocked || isGenerating || drawerOpen) {
+              return;
+            }
             const target = e.relatedTarget as HTMLElement;
             const isButton = target && typeof target.closest === 'function' ? target.closest('button') : null;
-            if (!isButton && !drawerOpen) {
+            if (!isButton) {
               setHoveredPlanet(null);
             }
-          }, 100); // 100ms delay to allow drawer state update
+          }, 400);
         }}
         onClick={(e) => {
           console.log('🎯 TOOLTIP CLICKED (parent) - ASCENDANT');
@@ -1309,19 +1312,21 @@ const ChartTooltipsComponent = (props: ChartTooltipsProps) => {
         }}
         onMouseLeave={(e) => {
           console.log('🎯 MOUSE LEFT TOOLTIP - MIDHEAVEN');
-          // ⭐ NUEVO: Si está locked, NO cerrar
-          if (tooltipLocked) {
+          // Si está locked o generando, NO cerrar
+          if (tooltipLocked || isGenerating) {
             return;
           }
-          // Don't close tooltip if drawer is open - tooltip should stay visible with drawer
-          if (!drawerOpen) {
-            // Don't close tooltip immediately if mouse is over a button
+          // Delay para permitir que el usuario alcance el botón
+          setTimeout(() => {
+            if (tooltipLocked || isGenerating || drawerOpen) {
+              return;
+            }
             const target = e.relatedTarget as HTMLElement;
             const isButton = target && typeof target.closest === 'function' ? target.closest('button') : null;
             if (!isButton) {
               setHoveredPlanet(null);
             }
-          }
+          }, 400);
         }}
         onClick={(e) => {
           console.log('🎯 TOOLTIP CLICKED (parent) - MIDHEAVEN');

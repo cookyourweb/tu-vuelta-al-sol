@@ -2,7 +2,7 @@ import React from 'react';
 import { format, startOfMonth, endOfMonth, startOfWeek, addDays, isSameMonth, isSameDay, getWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useStyle } from '@/context/StyleContext';
-import { Moon, Sun, Circle, Sparkles, Star } from 'lucide-react';
+import { Moon, Sun, Circle, Sparkles, Star, Flame, Brain, Wrench, PenLine, Bookmark, AlertTriangle } from 'lucide-react';
 import { FooterLibro } from './MesCompleto';
 
 // ============ CALENDARIO TABLA LIMPIA ============
@@ -12,12 +12,34 @@ import { FooterLibro } from './MesCompleto';
 // - Estilo minimalista con bordes limpios
 // ==================================================
 
+interface InterpretacionRaw {
+  // V2 fields
+  que_se_activa?: string;
+  como_se_siente?: string[];
+  consejo?: string[];
+  ritual_breve?: string;
+  advertencias?: string[];
+  mantra?: string;
+  pregunta_clave?: string;
+  // V1 fields
+  mensaje_sintesis?: string;
+  como_te_afecta?: string;
+  sintesis_practica?: string;
+  accion_concreta?: { titulo: string; pasos: string[] };
+  frase_ancla?: string;
+  cierre_dia?: string;
+  // Simple fields
+  personalMeaning?: string;
+  actionSteps?: string[];
+}
+
 interface EventoMes {
   dia: number;
   tipo: 'lunaNueva' | 'lunaLlena' | 'eclipse' | 'retrogrado' | 'ingreso' | 'especial' | 'cumpleanos';
   titulo: string;
   signo?: string;
   interpretacion?: string;
+  interpretacionRaw?: InterpretacionRaw;
 }
 
 interface CalendarioTablaProps {
@@ -78,6 +100,140 @@ const getEventoColor = (tipo: string) => {
   }
 };
 
+// ============ INTERPRETACIÓN ESTRUCTURADA CON ICONOS ============
+const InterpretacionEstructurada: React.FC<{ raw: InterpretacionRaw; colors: ReturnType<typeof getEventoColor> }> = ({ raw, colors }) => {
+  // Detectar formato y renderizar con iconos
+  const isV2 = !!(raw.que_se_activa || raw.como_se_siente || raw.consejo);
+  const isV1 = !!(raw.mensaje_sintesis || raw.como_te_afecta || raw.frase_ancla);
+
+  if (isV2) {
+    return (
+      <div className="space-y-2">
+        {raw.que_se_activa && (
+          <div className="flex items-start gap-2">
+            <Flame className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${colors.icon}`} />
+            <p className={`text-xs ${colors.text} leading-relaxed`}>{raw.que_se_activa}</p>
+          </div>
+        )}
+        {raw.como_se_siente && raw.como_se_siente.length > 0 && (
+          <div className="flex items-start gap-2">
+            <Brain className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${colors.icon}`} />
+            <div>
+              {raw.como_se_siente.map((s, i) => (
+                <p key={i} className={`text-xs ${colors.text} opacity-85 leading-relaxed`}>- {s}</p>
+              ))}
+            </div>
+          </div>
+        )}
+        {raw.consejo && raw.consejo.length > 0 && (
+          <div className="flex items-start gap-2">
+            <Wrench className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${colors.icon}`} />
+            <div>
+              {raw.consejo.slice(0, 3).map((c, i) => (
+                <p key={i} className={`text-xs ${colors.text} opacity-85 leading-relaxed`}>- {c}</p>
+              ))}
+            </div>
+          </div>
+        )}
+        {raw.advertencias && raw.advertencias.length > 0 && (
+          <div className="flex items-start gap-2">
+            <AlertTriangle className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-amber-500`} />
+            <div>
+              {raw.advertencias.map((a, i) => (
+                <p key={i} className="text-xs text-amber-700 leading-relaxed">- {a}</p>
+              ))}
+            </div>
+          </div>
+        )}
+        {raw.mantra && (
+          <div className="flex items-start gap-2">
+            <Sparkles className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${colors.icon}`} />
+            <p className={`text-xs ${colors.text} italic`}>&ldquo;{raw.mantra}&rdquo;</p>
+          </div>
+        )}
+        {raw.pregunta_clave && (
+          <div className="flex items-start gap-2">
+            <Bookmark className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${colors.icon}`} />
+            <p className={`text-xs ${colors.text} italic`}>{raw.pregunta_clave}</p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (isV1) {
+    return (
+      <div className="space-y-2">
+        {raw.mensaje_sintesis && (
+          <div className="flex items-start gap-2">
+            <Flame className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${colors.icon}`} />
+            <p className={`text-xs ${colors.text} leading-relaxed`}>{raw.mensaje_sintesis}</p>
+          </div>
+        )}
+        {raw.como_te_afecta && (
+          <div className="flex items-start gap-2">
+            <Brain className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${colors.icon}`} />
+            <p className={`text-xs ${colors.text} opacity-85 leading-relaxed`}>{raw.como_te_afecta}</p>
+          </div>
+        )}
+        {raw.sintesis_practica && (
+          <div className="flex items-start gap-2">
+            <Wrench className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${colors.icon}`} />
+            <p className={`text-xs ${colors.text} opacity-85 leading-relaxed`}>{raw.sintesis_practica}</p>
+          </div>
+        )}
+        {raw.accion_concreta && (
+          <div className="flex items-start gap-2">
+            <PenLine className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${colors.icon}`} />
+            <div>
+              {raw.accion_concreta.titulo && (
+                <p className={`text-xs font-medium ${colors.text}`}>{raw.accion_concreta.titulo}</p>
+              )}
+              {raw.accion_concreta.pasos?.map((p, i) => (
+                <p key={i} className={`text-xs ${colors.text} opacity-85`}>{i + 1}. {p}</p>
+              ))}
+            </div>
+          </div>
+        )}
+        {raw.frase_ancla && (
+          <div className="flex items-start gap-2">
+            <Sparkles className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${colors.icon}`} />
+            <p className={`text-xs ${colors.text} italic`}>&ldquo;{raw.frase_ancla}&rdquo;</p>
+          </div>
+        )}
+        {raw.cierre_dia && (
+          <div className="flex items-start gap-2">
+            <Bookmark className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${colors.icon}`} />
+            <p className={`text-xs ${colors.text} italic`}>{raw.cierre_dia}</p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Simple format fallback
+  return (
+    <div className="space-y-2">
+      {raw.personalMeaning && (
+        <div className="flex items-start gap-2">
+          <Flame className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${colors.icon}`} />
+          <p className={`text-xs ${colors.text} leading-relaxed`}>{raw.personalMeaning}</p>
+        </div>
+      )}
+      {raw.actionSteps && raw.actionSteps.length > 0 && (
+        <div className="flex items-start gap-2">
+          <PenLine className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${colors.icon}`} />
+          <div>
+            {raw.actionSteps.map((s, i) => (
+              <p key={i} className={`text-xs ${colors.text} opacity-85`}>{i + 1}. {s}</p>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const CalendarioMensualTabla: React.FC<CalendarioTablaProps> = ({
   monthDate,
   mesNumero,
@@ -90,8 +246,8 @@ export const CalendarioMensualTabla: React.FC<CalendarioTablaProps> = ({
   const { config } = useStyle();
   const weeks = generateCalendarWeeks(monthDate);
 
-  // Filtrar eventos que tienen interpretación
-  const eventosConInterpretacion = eventos.filter(e => e.interpretacion);
+  // Filtrar eventos que tienen interpretación (raw o texto)
+  const eventosConInterpretacion = eventos.filter(e => e.interpretacion || e.interpretacionRaw);
 
   return (
     <>
@@ -261,12 +417,16 @@ export const CalendarioMensualTabla: React.FC<CalendarioTablaProps> = ({
                     )}
                   </div>
 
-                  {/* Interpretación */}
-                  {evento.interpretacion && (
+                  {/* Interpretación con iconos o texto plano */}
+                  {(evento.interpretacionRaw || evento.interpretacion) && (
                     <div>
-                      <p className={`text-xs ${colors.text} leading-relaxed mb-3`}>
-                        {evento.interpretacion}
-                      </p>
+                      {evento.interpretacionRaw ? (
+                        <InterpretacionEstructurada raw={evento.interpretacionRaw} colors={colors} />
+                      ) : (
+                        <p className={`text-xs ${colors.text} leading-relaxed mb-3 whitespace-pre-line`}>
+                          {evento.interpretacion}
+                        </p>
+                      )}
 
                       {/* Espacio para notas personales */}
                       <div className="mt-3 pt-3 border-t border-gray-300">

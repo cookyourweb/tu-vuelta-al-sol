@@ -186,6 +186,14 @@ const AgendaPersonalizada = () => {
             natalHouse: 1,
             duration: `${formatDate(yearStart)} – ${formatDate(yearEnd)}`,
             isSlowPlanet: false
+          },
+          {
+            name: 'Plutón',
+            symbol: getPlanetSymbol('Plutón'),
+            natalSign: 'Acuario',
+            natalHouse: 1,
+            duration: '2024 – 2044',
+            isSlowPlanet: true
           }
         ];
 
@@ -211,6 +219,7 @@ const AgendaPersonalizada = () => {
       'Marte': '♂',
       'Júpiter': '♃',
       'Saturno': '♄',
+      'Plutón': '♇',
     };
     return symbols[planet] || '●';
   };
@@ -1830,7 +1839,9 @@ const AgendaPersonalizada = () => {
                 <p className="text-green-100 mb-4 leading-relaxed">
                   ¡Hoy es tu cumpleaños y comienza un nuevo ciclo solar!
                   <br />
-                  <span className="text-white">Genera tu <strong>Agenda Astrológica {yearRange.end.getFullYear() + 1}-{yearRange.end.getFullYear() + 2}</strong> para planificar este nuevo año lleno de oportunidades.</span>
+                  <span className="text-white">Genera tu <strong>Agenda Astrológica {yearRange.end.getFullYear()}-{yearRange.end.getFullYear() + 1}</strong> para planificar este nuevo año lleno de oportunidades.</span>
+                  <br />
+                  <span className="text-yellow-200 text-sm mt-1 inline-block">Importante: Una vez que generes el nuevo ciclo, tu agenda anterior ya no estará disponible. Si quieres conservarla, descárgala primero desde el botón &quot;Ver Agenda Libro&quot;.</span>
                 </p>
                 {canGenerateNext && (
                   <button
@@ -1871,7 +1882,7 @@ const AgendaPersonalizada = () => {
                   <br />
                   <span className="text-yellow-200">El {yearRange.end.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })} fue el <strong>último día de tu Retorno Solar anterior</strong>.</span>
                   <br />
-                  <span className="text-orange-200 text-sm mt-2 inline-block">💡 Usa los botones superiores para cambiar entre ciclos disponibles.</span>
+                  <span className="text-orange-200 text-sm mt-2 inline-block">Cuando generes tu nuevo ciclo, este ciclo anterior dejará de estar disponible. Descarga tu Agenda Libro si quieres conservarla.</span>
                 </p>
               </div>
             </div>
@@ -2233,20 +2244,7 @@ const AgendaPersonalizada = () => {
               {/* SECCIÓN UNIFICADA DE PLANETAS */}
               <PlanetarySection activePlanets={activePlanets} />
 
-              {/* CTA inspirado en Dididaze */}
-              <div className="mt-6 bg-gradient-to-r from-purple-600/40 to-pink-600/40 backdrop-blur-sm rounded-2xl p-6 border border-purple-400/30 text-center">
-                <div className="text-2xl mb-3">🔮</div>
-                <h4 className="text-white font-bold mb-2">¿Quieres más magia?</h4>
-                <p className="text-purple-200 text-sm mb-4">
-                  Descubre interpretaciones aún más profundas de tu carta natal
-                </p>
-                <Link
-                  href="/natal-chart"
-                  className="block w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-full font-semibold hover:from-purple-400 hover:to-pink-400 transition-all duration-200 shadow-lg hover:shadow-xl"
-                >
-                  Explorar más ✨
-                </Link>
-              </div>
+              {/* Banner CTA removido */}
 
               {/* CTA para Astrólogos */}
               <div className="mt-4 bg-gradient-to-r from-indigo-900/60 to-purple-900/60 backdrop-blur-sm rounded-2xl p-6 border border-indigo-400/30 text-center">

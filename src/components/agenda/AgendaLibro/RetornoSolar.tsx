@@ -2,7 +2,7 @@
 
 import { useStyle } from "@/context/StyleContext";
 import { FooterLibro } from './MesCompleto';
-import { Check } from 'lucide-react';
+import { Check, PenLine } from 'lucide-react';
 
 export const QueEsRetornoSolar = () => {
   const { config } = useStyle();
@@ -62,37 +62,47 @@ export const QueEsRetornoSolar = () => {
   );
 };
 
-export const AscendenteAnio = () => {
+interface AscendenteAnioProps {
+  ascSign?: { sign: string; degree?: number } | null;
+  interpretacion?: string;
+}
+
+export const AscendenteAnio: React.FC<AscendenteAnioProps> = ({ ascSign, interpretacion }) => {
   const { config } = useStyle();
+
+  const signo = ascSign?.sign || 'Tu signo ascendente';
+  const grado = ascSign?.degree !== undefined ? ` ${Math.floor(ascSign.degree)}°` : '';
 
   return (
     <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
       <div className="text-center mb-8">
         <span className={`${config.iconSecondary} text-4xl`}>↑</span>
         <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient} mt-4`}>Ascendente del Retorno</h2>
-        <p className={`text-gray-500 mt-2 ${config.fontBody}`}>Acuario – Casa 1 (identidad, enfoque vital)</p>
+        <p className={`text-gray-500 mt-2 ${config.fontBody}`}>{signo}{grado} – Casa 1 (identidad, enfoque vital)</p>
         <div className={`${config.divider} w-16 mx-auto mt-4`} />
       </div>
 
       <div className={`flex-1 max-w-2xl mx-auto w-full space-y-6 ${config.fontBody}`}>
         <div className={`${config.highlightPrimary} rounded-lg p-6`}>
-          <p className="text-gray-700 text-lg leading-relaxed mb-6">
-            Este año encaras la vida desde la honestidad radical contigo misma.
-          </p>
-          <div className="space-y-4">
-            <div>
-              <span className={`${config.iconSecondary} text-sm font-medium`}>Activa:</span>
-              <p className="text-gray-700 mt-1">autenticidad · libertad interna · desapego sano</p>
-            </div>
-            <div>
-              <span className={`${config.iconSecondary} text-sm font-medium`}>Reta:</span>
-              <p className="text-gray-700 mt-1">tolerar no tener respuestas inmediatas</p>
-            </div>
-            <div>
-              <span className={`${config.iconSecondary} text-sm font-medium`}>Cómo trabajarlo:</span>
-              <p className="text-gray-700 mt-1">respetando tus tiempos y honrando el silencio</p>
-            </div>
-          </div>
+          {interpretacion ? (
+            <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
+              {interpretacion}
+            </p>
+          ) : (
+            <>
+              <p className="text-gray-700 text-lg leading-relaxed mb-6">
+                El Ascendente del Retorno Solar marca cómo te presentas al mundo este año
+                y qué energía proyectas en tu día a día.
+              </p>
+              <div className={`${config.highlightSecondary} rounded-lg p-4`}>
+                <p className={`${config.iconSecondary} text-sm italic`}>
+                  Con el Ascendente en {signo}, este año tu forma de enfrentar la vida
+                  se tiñe de la energía de este signo. Observa cómo cambia tu manera
+                  de presentarte y relacionarte.
+                </p>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -432,11 +442,57 @@ interface IntegracionEjesProps {
   dsc?: string;
   ic?: string;
   frase_guia?: string;
+  ascSign?: string;
+  mcSign?: string;
+  dscSign?: string;
+  icSign?: string;
 }
 
-export const IntegracionEjes = ({ asc, mc, dsc, ic, frase_guia }: IntegracionEjesProps) => {
+export const IntegracionEjes = ({ asc, mc, dsc, ic, frase_guia, ascSign, mcSign, dscSign, icSign }: IntegracionEjesProps) => {
   const { config } = useStyle();
-  const tieneContenidoPersonalizado = !!(asc || mc || dsc || ic);
+
+  const ejes = [
+    {
+      symbol: '↑',
+      name: 'Ascendente (ASC)',
+      sign: ascSign,
+      area: 'Identidad',
+      subDesc: 'Cómo te presentas al mundo este año',
+      text: asc,
+      fallback: 'Ser sin definirte del todo. Permitirte evolucionar sin forzar una versión fija de ti.',
+      highlight: config.highlightPrimary,
+    },
+    {
+      symbol: '⬆',
+      name: 'Medio Cielo (MC)',
+      sign: mcSign,
+      area: 'Propósito',
+      subDesc: 'Tu vocación y dirección visible',
+      text: mc,
+      fallback: 'Replantear tu rumbo sin exigirte resultados. Encontrar sentido antes que logros.',
+      highlight: config.highlightSecondary,
+    },
+    {
+      symbol: '↓',
+      name: 'Descendente (DSC)',
+      sign: dscSign,
+      area: 'Relaciones',
+      subDesc: 'Tus vínculos y espejo emocional',
+      text: dsc,
+      fallback: 'Relacionarte sin traicionarte. Mantener tu esencia en el vínculo con otros.',
+      highlight: config.highlightAccent,
+    },
+    {
+      symbol: '⬇',
+      name: 'Fondo de Cielo (IC)',
+      sign: icSign,
+      area: 'Raíces',
+      subDesc: 'Tu hogar interno y seguridad emocional',
+      text: ic,
+      fallback: 'Cuidar tu base emocional como prioridad. Nutrir tus raíces internas.',
+      highlight: config.highlightPrimary,
+    },
+  ];
 
   return (
     <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
@@ -452,45 +508,22 @@ export const IntegracionEjes = ({ asc, mc, dsc, ic, frase_guia }: IntegracionEje
         </p>
 
         <div className="space-y-3">
-          <div className={`${config.highlightPrimary} rounded-lg p-4`}>
-            <div className="flex items-center gap-3 mb-2">
-              <span className={`${config.iconSecondary} text-xl`}>↑</span>
-              <span className={`${config.iconPrimary} font-medium text-sm`}>Ascendente (ASC) - Identidad</span>
+          {ejes.map((eje, idx) => (
+            <div key={idx} className={`${eje.highlight} rounded-lg p-4`}>
+              <div className="flex items-center gap-3 mb-1">
+                <span className={`${config.iconSecondary} text-xl`}>{eje.symbol}</span>
+                <div>
+                  <span className={`${config.iconPrimary} font-medium text-sm`}>
+                    {eje.name}{eje.sign ? ` en ${eje.sign}` : ''} — {eje.area}
+                  </span>
+                </div>
+              </div>
+              <p className={`text-xs ${config.iconSecondary} italic mb-2 ml-8`}>{eje.subDesc}</p>
+              <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
+                {eje.text || eje.fallback}
+              </p>
             </div>
-            <p className="text-gray-700 text-sm leading-relaxed">
-              {asc || 'Ser sin definirte del todo. Permitirte evolucionar sin forzar una versión fija de ti.'}
-            </p>
-          </div>
-
-          <div className={`${config.highlightSecondary} rounded-lg p-4`}>
-            <div className="flex items-center gap-3 mb-2">
-              <span className={`${config.iconSecondary} text-xl`}>⬆</span>
-              <span className={`${config.iconPrimary} font-medium text-sm`}>Medio Cielo (MC) - Propósito</span>
-            </div>
-            <p className="text-gray-700 text-sm leading-relaxed">
-              {mc || 'Replantear tu rumbo sin exigirte resultados. Encontrar sentido antes que logros.'}
-            </p>
-          </div>
-
-          <div className={`${config.highlightAccent} rounded-lg p-4`}>
-            <div className="flex items-center gap-3 mb-2">
-              <span className={`${config.iconSecondary} text-xl`}>↓</span>
-              <span className={`${config.iconPrimary} font-medium text-sm`}>Descendente (DSC) - Relaciones</span>
-            </div>
-            <p className="text-gray-700 text-sm leading-relaxed">
-              {dsc || 'Relacionarte sin traicionarte. Mantener tu esencia en el vínculo con otros.'}
-            </p>
-          </div>
-
-          <div className={`${config.highlightPrimary} rounded-lg p-4`}>
-            <div className="flex items-center gap-3 mb-2">
-              <span className={`${config.iconSecondary} text-xl`}>⬇</span>
-              <span className={`${config.iconPrimary} font-medium text-sm`}>Fondo de Cielo (IC) - Raíces</span>
-            </div>
-            <p className="text-gray-700 text-sm leading-relaxed">
-              {ic || 'Cuidar tu base emocional como prioridad. Nutrir tus raíces internas.'}
-            </p>
-          </div>
+          ))}
         </div>
 
         <p className="text-gray-500 text-center italic text-sm mt-4">
@@ -582,6 +615,98 @@ export const MantraAnual = () => {
       </div>
 
       <FooterLibro pagina={21} />
+    </div>
+  );
+};
+
+// ============ PLUTÓN EN ACUARIO - TRÁNSITO GENERACIONAL ============
+export const PlutonEnAcuario: React.FC = () => {
+  const { config } = useStyle();
+
+  return (
+    <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
+      <div className="text-center mb-6">
+        <span className={`${config.iconSecondary} opacity-60 text-sm tracking-[0.3em] uppercase ${config.fontBody}`}>
+          Tránsito Generacional
+        </span>
+        <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient} mt-2`}>
+          Plutón en Acuario
+        </h2>
+        <p className={`text-sm ${config.iconSecondary} mt-1`}>2024 – 2044</p>
+        <div className={`${config.divider} w-16 mx-auto mt-3`} />
+      </div>
+
+      <div className={`flex-1 max-w-2xl mx-auto w-full space-y-4 ${config.fontBody}`}>
+        <div className={`text-center ${config.iconSecondary} text-5xl mb-4`}>♇</div>
+
+        <p className="text-gray-700 leading-relaxed">
+          En noviembre de 2024, Plutón entró definitivamente en Acuario, donde permanecerá
+          durante los próximos 20 años. Este es el tránsito más transformador de nuestra era:
+          la última vez que Plutón estuvo en Acuario fue durante la Revolución Francesa (1778–1798).
+        </p>
+
+        <div className={`${config.highlightSecondary} rounded-lg p-4`}>
+          <h3 className={`text-sm font-bold ${config.iconSecondary} mb-2`}>
+            Lo que Plutón en Acuario trae al mundo
+          </h3>
+          <div className="space-y-1 text-xs text-gray-700">
+            <p>- Revolución tecnológica y de inteligencia artificial</p>
+            <p>- Transformación de estructuras sociales y colectivas</p>
+            <p>- Poder del individuo dentro del grupo</p>
+            <p>- Desmoronamiento de lo que ya no sirve al colectivo</p>
+            <p>- Nuevas formas de comunidad y humanitarismo</p>
+          </div>
+        </div>
+
+        <div className={`${config.highlightPrimary} rounded-lg p-4`}>
+          <h3 className={`text-sm font-bold ${config.iconPrimary} mb-2`}>
+            Lo que significa para ti personalmente
+          </h3>
+          <p className="text-xs text-gray-700 leading-relaxed mb-2">
+            Plutón transforma desde la raíz todo lo que toca. En Acuario, te pide
+            que te atrevas a ser auténticamente tú, sin máscaras. Vas a descubrir un poder
+            que no sabías que tenías. La persona que eres ahora no será la misma que serás
+            dentro de unos años.
+          </p>
+          <p className="text-xs text-gray-600 italic">
+            Recuerda quién eres ahora, porque no te vas a reconocer en un tiempo.
+            Y eso es exactamente lo que tiene que pasar.
+          </p>
+        </div>
+
+        <div className={`${config.highlightAccent} rounded-lg p-4`}>
+          <h3 className={`text-sm font-bold ${config.iconAccent} mb-2`}>
+            Fechas clave de Plutón en Acuario
+          </h3>
+          <div className="space-y-1 text-xs text-gray-700">
+            <p><strong>Marzo 2023:</strong> Primera entrada (prueba de energía)</p>
+            <p><strong>Enero 2024:</strong> Segunda entrada (semillas del cambio)</p>
+            <p><strong>Noviembre 2024:</strong> Entrada definitiva para 20 años</p>
+            <p><strong>2024–2044:</strong> Transformación profunda y colectiva</p>
+          </div>
+        </div>
+
+        {/* Espacio para reflexión */}
+        <div className={`${config.highlightSecondary} rounded-lg p-4`}>
+          <div className="flex items-center gap-2 mb-2">
+            <PenLine className={`w-4 h-4 ${config.iconSecondary}`} />
+            <h3 className={`text-sm font-bold ${config.iconSecondary}`}>
+              Tu reflexión personal
+            </h3>
+          </div>
+          <p className="text-xs text-gray-500 mb-3">
+            ¿En qué área de tu vida sientes que algo profundo está cambiando?
+            ¿Qué parte de ti necesita morir para que nazca algo nuevo?
+          </p>
+          <div className="space-y-4">
+            <div className="h-10 border-b border-dashed border-gray-300" />
+            <div className="h-10 border-b border-dashed border-gray-300" />
+            <div className="h-10 border-b border-dashed border-gray-300" />
+          </div>
+        </div>
+      </div>
+
+      <FooterLibro />
     </div>
   );
 };

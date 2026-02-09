@@ -395,6 +395,7 @@ export function formatEventForBook(event: any, natalHouses?: NatalHouse[]) {
     titulo: event.title,
     signo,
     interpretacion,
+    interpretacionRaw: event.interpretation || undefined,
     casaNatal,
     // ✅ NUEVO: Flag para saber si tiene interpretación personalizada
     tieneInterpretacion: !!interpretacion,

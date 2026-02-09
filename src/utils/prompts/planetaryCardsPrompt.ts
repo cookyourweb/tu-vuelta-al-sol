@@ -682,5 +682,8 @@ export function determineActivePlanets(solarReturn: any): string[] {
     activePlanets.push('Saturno');
   }
 
+  // Siempre incluir Plutón (tránsito generacional 2024-2044 en Acuario)
+  activePlanets.push('Plutón');
+
   return activePlanets;
 }

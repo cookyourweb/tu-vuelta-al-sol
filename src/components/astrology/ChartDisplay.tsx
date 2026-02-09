@@ -700,12 +700,16 @@ const ChartDisplay = ({
             }}
             onMouseMove={handleMouseMove}
             onMouseLeave={() => {
-              // ✅ IMMEDIATE: Clear timer and hide tooltip immediately on mouse leave
+              // ⭐ DELAY 2000ms: Give user time to move mouse to tooltip (same as planets)
               if (cardHoverTimer) {
                 clearTimeout(cardHoverTimer);
                 setCardHoverTimer(null);
               }
-              setHoveredPlanet(null);
+              if (planetCircleHoverTimer) clearTimeout(planetCircleHoverTimer);
+              const timer = setTimeout(() => {
+                setHoveredPlanet(null);
+              }, 2000);
+              setPlanetCircleHoverTimer(timer);
             }}
             onMouseDown={() => {
               setHoveredPlanet('Ascendente');
@@ -782,12 +786,16 @@ const ChartDisplay = ({
             }}
             onMouseMove={handleMouseMove}
             onMouseLeave={() => {
-              // ✅ IMMEDIATE: Clear timer and hide tooltip immediately on mouse leave
+              // ⭐ DELAY 2000ms: Give user time to move mouse to tooltip (same as planets)
               if (cardHoverTimer) {
                 clearTimeout(cardHoverTimer);
                 setCardHoverTimer(null);
               }
-              setHoveredPlanet(null);
+              if (planetCircleHoverTimer) clearTimeout(planetCircleHoverTimer);
+              const timer = setTimeout(() => {
+                setHoveredPlanet(null);
+              }, 2000);
+              setPlanetCircleHoverTimer(timer);
             }}
             onMouseDown={() => {
               setHoveredPlanet('Medio Cielo');
