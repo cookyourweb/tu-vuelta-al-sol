@@ -25,7 +25,8 @@ export const LineaTiempoEmocional: React.FC<{
   const months: Date[] = [];
   let currentMonth = new Date(startDate);
 
-  while (currentMonth <= endDate && months.length < 12) {
+  // Generar 13 meses (ciclo solar completo: del cumpleaños al siguiente cumpleaños)
+  while (months.length < 13) {
     months.push(new Date(currentMonth));
     currentMonth = addMonths(currentMonth, 1);
   }
@@ -86,16 +87,20 @@ export const LineaTiempoEmocional: React.FC<{
       <div className={`${config.highlightPrimary} rounded-lg p-4 mb-4`}>
         <p className="text-gray-700 leading-relaxed text-sm mb-2">
           Tu año tiene ritmo, altibajos, momentos de calma y momentos de intensidad.
+          No todos los meses piden lo mismo: algunos son de <strong>ajuste</strong> (bajar el ritmo,
+          reorganizarse), otros son de <strong>activación</strong> (movimiento, decisiones, expansión).
         </p>
         <p className="text-gray-700 leading-relaxed text-sm">
           {tieneAlgunDato
-            ? 'A continuación, la línea emocional que tu Retorno Solar anticipa para cada mes. Observa los patrones y toma nota de lo que resuene.'
+            ? <>A continuación, la línea emocional que tu Retorno Solar anticipa para cada mes.
+               Cuando dice <em>"se activa la coherencia"</em> o <em>"movimiento"</em>, significa que ese mes
+               la energía te empuja a actuar desde esa cualidad. <strong>Observa los patrones y toma nota.</strong></>
             : <><strong>Instrucciones:</strong> Marca en cada mes la intensidad emocional/energética que sientes (rellena las casillas) y escribe una palabra clave en el espacio de notas.</>
           }
         </p>
       </div>
 
-      {/* Grid de meses */}
+      {/* Grid de meses - 13 meses del ciclo solar */}
       <div className="grid grid-cols-4 gap-2 mb-4">
         {months.map((month, index) => {
           const monthData = getMonthData(index);
@@ -128,7 +133,7 @@ export const LineaTiempoEmocional: React.FC<{
                   );
                 })}
               </div>
-              {/* Espacio para notas - Mostrar palabra clave si existe */}
+              {/* Espacio para notas - Mostrar palabra clave y descripción si existen */}
               <div className="flex-1 min-h-[30px] flex flex-col items-center justify-center">
                 {palabraClave ? (
                   <span className={`text-[10px] ${config.iconPrimary} font-medium italic text-center leading-tight`}>
@@ -137,8 +142,13 @@ export const LineaTiempoEmocional: React.FC<{
                 ) : (
                   <div className="w-full border-b border-dashed border-gray-300" />
                 )}
+                {monthData?.descripcion && (
+                  <span className="text-[8px] text-gray-600 mt-0.5 text-center leading-tight">
+                    {monthData.descripcion.length > 50 ? monthData.descripcion.substring(0, 50) + '...' : monthData.descripcion}
+                  </span>
+                )}
                 {monthData?.accion_clave && (
-                  <span className="text-[9px] text-gray-500 mt-0.5 text-center leading-tight">
+                  <span className="text-[9px] text-gray-500 mt-0.5 text-center leading-tight font-medium">
                     {monthData.accion_clave.length > 30 ? monthData.accion_clave.substring(0, 30) + '...' : monthData.accion_clave}
                   </span>
                 )}

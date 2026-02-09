@@ -2,7 +2,7 @@
 
 import { useStyle } from "@/context/StyleContext";
 import { FooterLibro } from './MesCompleto';
-import { Check, PenLine } from 'lucide-react';
+import { Check, PenLine, Sunrise } from 'lucide-react';
 
 export const QueEsRetornoSolar = () => {
   const { config } = useStyle();
@@ -64,46 +64,124 @@ export const QueEsRetornoSolar = () => {
 
 interface AscendenteAnioProps {
   ascSign?: { sign: string; degree?: number } | null;
+  natalAscSign?: string;
   interpretacion?: string;
+  comparacion?: {
+    natal: {
+      posicion: string;
+      descripcion: string;
+    };
+    solar_return: {
+      posicion: string;
+      descripcion: string;
+    };
+    choque: string;
+    que_hacer: string;
+    mandato_del_ano: string;
+  };
 }
 
-export const AscendenteAnio: React.FC<AscendenteAnioProps> = ({ ascSign, interpretacion }) => {
+export const AscendenteAnio: React.FC<AscendenteAnioProps> = ({ ascSign, natalAscSign, interpretacion, comparacion }) => {
   const { config } = useStyle();
 
   const signo = ascSign?.sign || 'Tu signo ascendente';
   const grado = ascSign?.degree !== undefined ? ` ${Math.floor(ascSign.degree)}°` : '';
+  const tieneComparacion = !!comparacion;
 
   return (
     <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
       <div className="text-center mb-8">
-        <span className={`${config.iconSecondary} text-4xl`}>↑</span>
+        <Sunrise className={`${config.iconSecondary} w-10 h-10 mx-auto`} />
         <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient} mt-4`}>Ascendente del Retorno</h2>
         <p className={`text-gray-500 mt-2 ${config.fontBody}`}>{signo}{grado} – Casa 1 (identidad, enfoque vital)</p>
         <div className={`${config.divider} w-16 mx-auto mt-4`} />
       </div>
 
       <div className={`flex-1 max-w-2xl mx-auto w-full space-y-6 ${config.fontBody}`}>
-        <div className={`${config.highlightPrimary} rounded-lg p-6`}>
-          {interpretacion ? (
+        {tieneComparacion ? (
+          <>
+            {/* Ascendente Natal */}
+            <div className={`${config.highlightPrimary} rounded-lg p-6`}>
+              <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3 flex items-center gap-2`}>
+                <Sunrise className="w-5 h-5" />
+                Tu Ascendente Natal
+              </h3>
+              <p className={`text-xs ${config.iconSecondary} mb-2`}>{comparacion.natal.posicion}</p>
+              <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                {comparacion.natal.descripcion}
+              </p>
+            </div>
+
+            {/* Ascendente Solar Return */}
+            <div className={`${config.highlightSecondary} rounded-lg p-6`}>
+              <h3 className={`${config.fontDisplay} ${config.iconSecondary} font-medium mb-3 flex items-center gap-2`}>
+                <span className="text-xl">☉</span>
+                Tu Ascendente en Solar Return
+              </h3>
+              <p className={`text-xs ${config.iconSecondary} mb-2`}>{comparacion.solar_return.posicion}</p>
+              <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                {comparacion.solar_return.descripcion}
+              </p>
+            </div>
+
+            {/* El Choque / Evolución */}
+            <div className={`${config.highlightAccent} rounded-lg p-6`}>
+              <h3 className={`${config.fontDisplay} ${config.iconAccent} font-medium mb-3`}>⚡ La evolución</h3>
+              <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                {comparacion.choque}
+              </p>
+            </div>
+
+            {/* Qué Hacer */}
+            <div className={`${config.highlightPrimary} rounded-lg p-6`}>
+              <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3 flex items-center gap-2`}><Check className="w-5 h-5" /> Qué hacer</h3>
+              <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                {comparacion.que_hacer}
+              </p>
+            </div>
+
+            {/* Mandato del Año */}
+            {comparacion.mandato_del_ano && (
+              <div className={`border-l-4 ${config.cardBorder} pl-6`}>
+                <p className={`${config.iconSecondary} text-sm font-medium mb-2`}>Mandato del año:</p>
+                <p className="text-gray-700 text-lg italic leading-relaxed">
+                  "{comparacion.mandato_del_ano}"
+                </p>
+              </div>
+            )}
+          </>
+        ) : interpretacion ? (
+          <div className={`${config.highlightPrimary} rounded-lg p-6`}>
             <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
               {interpretacion}
             </p>
-          ) : (
-            <>
-              <p className="text-gray-700 text-lg leading-relaxed mb-6">
-                El Ascendente del Retorno Solar marca cómo te presentas al mundo este año
-                y qué energía proyectas en tu día a día.
-              </p>
-              <div className={`${config.highlightSecondary} rounded-lg p-4`}>
-                <p className={`${config.iconSecondary} text-sm italic`}>
-                  Con el Ascendente en {signo}, este año tu forma de enfrentar la vida
-                  se tiñe de la energía de este signo. Observa cómo cambia tu manera
-                  de presentarte y relacionarte.
+          </div>
+        ) : (
+          <div className={`${config.highlightPrimary} rounded-lg p-6`}>
+            <p className="text-gray-700 text-lg leading-relaxed mb-6">
+              El Ascendente del Retorno Solar marca cómo te presentas al mundo este año
+              y qué energía proyectas en tu día a día.
+            </p>
+            {natalAscSign && natalAscSign !== signo && (
+              <div className={`${config.highlightAccent} rounded-lg p-4 mb-4`}>
+                <p className={`${config.iconAccent} text-sm font-medium mb-2`}>Evolución natal → retorno:</p>
+                <p className="text-gray-700 text-sm leading-relaxed">
+                  Tu Ascendente natal está en <strong>{natalAscSign}</strong>, pero este año
+                  tu Ascendente del Retorno Solar está en <strong>{signo}</strong>. Esto significa
+                  que la forma en que te presentas al mundo cambia: pasas de la energía de {natalAscSign} a
+                  la de {signo}. Observa cómo adaptas tu manera de enfrentar nuevas situaciones.
                 </p>
               </div>
-            </>
-          )}
-        </div>
+            )}
+            <div className={`${config.highlightSecondary} rounded-lg p-4`}>
+              <p className={`${config.iconSecondary} text-sm italic`}>
+                Con el Ascendente en {signo}, este año tu forma de enfrentar la vida
+                se tiñe de la energía de este signo. Observa cómo cambia tu manera
+                de presentarte y relacionarte.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       <FooterLibro pagina={11} />
@@ -278,7 +356,7 @@ export const EjesDelAnio = ({ ascSign, mcSign }: EjesDelAnioProps) => {
         {/* ASC */}
         <div className={`${config.highlightPrimary} rounded-lg p-6`}>
           <div className="flex items-center gap-3 mb-3">
-            <span className={`${config.iconSecondary} text-2xl`}>↑</span>
+            <Sunrise className={`${config.iconSecondary} w-6 h-6`} />
             <div>
               <span className={`${config.fontDisplay} ${config.iconPrimary} font-medium`}>Ascendente del Retorno</span>
               {ascSign && (
@@ -451,9 +529,12 @@ interface IntegracionEjesProps {
 export const IntegracionEjes = ({ asc, mc, dsc, ic, frase_guia, ascSign, mcSign, dscSign, icSign }: IntegracionEjesProps) => {
   const { config } = useStyle();
 
+  // En las páginas anteriores ("Ejes del Año") se exploraron en detalle cada eje por separado.
+  // Esta página muestra cómo los 4 ejes trabajan JUNTOS como un sistema integrado.
+
   const ejes = [
     {
-      symbol: '↑',
+      symbol: '☼',
       name: 'Ascendente (ASC)',
       sign: ascSign,
       area: 'Identidad',
@@ -503,6 +584,15 @@ export const IntegracionEjes = ({ asc, mc, dsc, ic, frase_guia, ascSign, mcSign,
       </div>
 
       <div className={`flex-1 max-w-2xl mx-auto w-full space-y-5 ${config.fontBody}`}>
+        <div className={`${config.highlightSecondary} rounded-lg p-4`}>
+          <p className="text-gray-600 text-sm leading-relaxed">
+            En las páginas anteriores exploraste cada eje por separado.
+            Aquí ves <strong>cómo trabajan juntos como un sistema</strong>: tu identidad (ASC),
+            tu propósito (MC), tus relaciones (DSC) y tus raíces (IC) se complementan
+            y se necesitan entre sí. Ninguno funciona aislado.
+          </p>
+        </div>
+
         <p className="text-gray-700 text-base leading-relaxed text-center">
           Este año te enseña a:
         </p>

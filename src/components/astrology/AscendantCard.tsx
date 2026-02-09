@@ -25,9 +25,17 @@ const AscendantCard: React.FC<AscendantCardProps> = ({ ascendant }) => {
       <div className="absolute -bottom-10 -left-10 w-20 h-20 bg-green-400/10 rounded-full"></div>
       
       <div className="bg-gradient-to-r from-green-400/20 to-emerald-500/20 border border-green-400/30 rounded-full p-6 backdrop-blur-sm mb-6 w-fit group-hover:scale-110 transition-transform">
-        <svg className="w-8 h-8 text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <line x1="12" y1="19" x2="12" y2="5"/>
-          <polyline points="5,12 12,5 19,12"/>
+        {/* Icono de horizonte con sol naciente - representa el Ascendente (punto del horizonte Este) */}
+        <svg className="w-8 h-8 text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          {/* Línea del horizonte */}
+          <line x1="2" y1="16" x2="22" y2="16"/>
+          {/* Semicírculo del sol naciendo */}
+          <path d="M12 16a5 5 0 0 1 5-5" fill="none" />
+          <path d="M12 16a5 5 0 0 0-5-5" fill="none" />
+          {/* Rayos del sol */}
+          <line x1="12" y1="4" x2="12" y2="7"/>
+          <line x1="5.6" y1="7.6" x2="7.8" y2="9.8"/>
+          <line x1="18.4" y1="7.6" x2="16.2" y2="9.8"/>
         </svg>
       </div>
       

@@ -2,7 +2,7 @@ import React from 'react';
 import { format, startOfMonth, endOfMonth, startOfWeek, addDays, isSameMonth, isSameDay, getWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useStyle } from '@/context/StyleContext';
-import { Moon, Sun, Circle, Sparkles, Star, Flame, Brain, Wrench, PenLine, Bookmark, AlertTriangle } from 'lucide-react';
+import { Moon, Sun, Circle, Sparkles, Star, Flame, Brain, Wrench, PenLine, Bookmark, AlertTriangle, Calendar } from 'lucide-react';
 import { FooterLibro } from './MesCompleto';
 
 // ============ CALENDARIO TABLA LIMPIA ============
@@ -42,6 +42,22 @@ interface EventoMes {
   interpretacionRaw?: InterpretacionRaw;
 }
 
+interface LineaTiempoMes {
+  palabra_clave?: string;
+  intensidad?: number;
+  descripcion?: string;
+  accion_clave?: string;
+}
+
+interface MesClavePuntoGiro {
+  mes?: string;
+  periodo?: string;
+  evento_astrologico?: string;
+  significado_para_ti?: string;
+  significado?: string;
+  descripcion?: string;
+}
+
 interface CalendarioTablaProps {
   monthDate: Date;
   mesNumero: number;
@@ -50,6 +66,9 @@ interface CalendarioTablaProps {
   temaDelMes: string;
   eventos: EventoMes[];
   birthday?: Date;
+  lineaTiempoMes?: LineaTiempoMes;
+  mesClave?: MesClavePuntoGiro;
+  ejercicioTipo?: 'ajuste' | 'activacion';
 }
 
 const diasSemanaFull = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
@@ -241,7 +260,10 @@ export const CalendarioMensualTabla: React.FC<CalendarioTablaProps> = ({
   simboloZodiaco,
   temaDelMes,
   eventos,
-  birthday
+  birthday,
+  lineaTiempoMes,
+  mesClave,
+  ejercicioTipo
 }) => {
   const { config } = useStyle();
   const weeks = generateCalendarWeeks(monthDate);
@@ -254,7 +276,7 @@ export const CalendarioMensualTabla: React.FC<CalendarioTablaProps> = ({
       {/* PÁGINA 1: Calendario Tabla */}
       <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
       {/* Header */}
-      <div className="text-center mb-4 pb-3 border-b-2 border-gray-300">
+      <div className="text-center mb-2 pb-2 border-b-2 border-gray-300">
         <div className="flex items-center justify-center gap-2 mb-1">
           <span className={`text-2xl ${config.iconPrimary}`}>{simboloZodiaco}</span>
           <h1 className={`text-2xl font-display capitalize ${config.titleGradient}`}>
@@ -268,6 +290,35 @@ export const CalendarioMensualTabla: React.FC<CalendarioTablaProps> = ({
           "{temaDelMes}"
         </p>
       </div>
+
+      {/* Contexto del mes: línea del tiempo + mes clave + tipo de ejercicio */}
+      {(lineaTiempoMes?.palabra_clave || mesClave || ejercicioTipo) && (
+        <div className="flex flex-wrap gap-2 mb-2 justify-center">
+          {lineaTiempoMes?.palabra_clave && (
+            <span className={`text-[9px] px-2 py-0.5 rounded-full ${config.badgeSecondary} flex items-center gap-1`}>
+              <Calendar className="w-2.5 h-2.5" />
+              {lineaTiempoMes.palabra_clave}
+              {lineaTiempoMes.intensidad && ` · ${lineaTiempoMes.intensidad}/10`}
+            </span>
+          )}
+          {mesClave && (
+            <span className={`text-[9px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 flex items-center gap-1`}>
+              <Star className="w-2.5 h-2.5" />
+              Punto de giro
+            </span>
+          )}
+          {ejercicioTipo && (
+            <span className={`text-[9px] px-2 py-0.5 rounded-full ${ejercicioTipo === 'activacion' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}`}>
+              {ejercicioTipo === 'activacion' ? 'Mes de activación' : 'Mes de ajuste'}
+            </span>
+          )}
+        </div>
+      )}
+      {lineaTiempoMes?.descripcion && (
+        <p className={`text-[9px] text-gray-500 text-center italic mb-2`}>
+          {lineaTiempoMes.descripcion.length > 120 ? lineaTiempoMes.descripcion.substring(0, 120) + '...' : lineaTiempoMes.descripcion}
+        </p>
+      )}
 
       {/* Tabla de semanas */}
       <div className="flex-1 flex flex-col">
@@ -447,6 +498,52 @@ export const CalendarioMensualTabla: React.FC<CalendarioTablaProps> = ({
           </div>
 
           <FooterLibro pagina={mesNumero * 10 + 1} />
+        </div>
+      )}
+
+      {/* PÁGINA EXTRA: Mes clave / punto de giro (si aplica) */}
+      {mesClave && (mesClave.significado_para_ti || mesClave.significado || mesClave.descripcion) && (
+        <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
+          <div className="text-center mb-6 pb-4 border-b-2 border-amber-300">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Star className="w-6 h-6 text-amber-500" fill="currentColor" />
+              <h2 className={`text-xl font-display ${config.titleGradient}`}>
+                Punto de Giro: {format(monthDate, 'MMMM', { locale: es })}
+              </h2>
+            </div>
+            {mesClave.evento_astrologico && (
+              <p className="text-xs text-amber-700 italic">{mesClave.evento_astrologico}</p>
+            )}
+          </div>
+
+          <div className="flex-1 space-y-4">
+            <div className="bg-amber-50 border-2 border-amber-200 rounded-lg p-5">
+              <h3 className="text-sm font-bold text-amber-800 mb-2">Por qué este mes es importante:</h3>
+              <p className="text-sm text-amber-900 leading-relaxed whitespace-pre-line">
+                {mesClave.significado_para_ti || mesClave.significado || mesClave.descripcion}
+              </p>
+            </div>
+
+            {lineaTiempoMes?.accion_clave && (
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <h3 className="text-sm font-bold text-orange-700 mb-2 flex items-center gap-2">
+                  <Flame className="w-4 h-4" />
+                  Acción clave:
+                </h3>
+                <p className="text-sm text-orange-800">{lineaTiempoMes.accion_clave}</p>
+              </div>
+            )}
+
+            {/* Espacio para reflexionar */}
+            <div className="border border-gray-200 rounded-lg p-4">
+              <p className="text-[10px] text-gray-500 mb-3 uppercase tracking-wider">Mis reflexiones sobre este punto de giro:</p>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="border-b border-gray-200" style={{ height: '24px' }} />
+              ))}
+            </div>
+          </div>
+
+          <FooterLibro pagina={mesNumero * 10 + 2} />
         </div>
       )}
     </>

@@ -11,6 +11,7 @@ import { formatEventForBook, formatInterpretationCompact } from '@/utils/formatI
 
 // Secciones del libro
 import { PortadaPersonalizada, PaginaIntencion, PaginaIntencionAnualSR } from './PortalEntrada';
+import { ChartPlaceholderPage } from './ChartPage';
 import { CartaBienvenida, GuiaAgenda, TemaCentralAnio, LoQueVieneAMover, LoQuePideSoltar, PaginaIntencionAnual } from './TuAnioTuViaje';
 import { TuAnioOverview, TuAnioCiclos, PaginaCumpleanos } from './TuAnio';
 import { LineaTiempoEmocional, MesesClavePuntosGiro, GrandesAprendizajes, EjercicioEmocionalMensual, EjercicioDelMes } from './CiclosAnuales';
@@ -1325,6 +1326,50 @@ export const AgendaLibro = ({
       }));
   };
 
+  // Helper: Obtener datos de la línea del tiempo emocional para un mes específico
+  const getLineaTiempoMes = (monthIndex: number) => {
+    const interpretation = getSRInterpretation();
+    if (!interpretation?.linea_tiempo_emocional) return undefined;
+
+    const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+                       'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const mesName = monthNames[monthIndex];
+    const found = interpretation.linea_tiempo_emocional.find((m: any) =>
+      m.mes?.toLowerCase().includes(mesName)
+    );
+
+    if (found) {
+      return {
+        palabra_clave: found.palabra_clave,
+        intensidad: found.intensidad,
+        descripcion: found.descripcion,
+        accion_clave: found.accion_clave
+      };
+    }
+    return undefined;
+  };
+
+  // Helper: Obtener si un mes es un mes clave / punto de giro
+  const getMesClave = (monthIndex: number) => {
+    const interpretation = getSRInterpretation();
+    if (!interpretation?.meses_clave_puntos_giro) return undefined;
+
+    const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+                       'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const mesName = monthNames[monthIndex];
+    return interpretation.meses_clave_puntos_giro.find((m: any) =>
+      m.mes?.toLowerCase().includes(mesName) ||
+      m.periodo?.toLowerCase().includes(mesName)
+    );
+  };
+
+  // Helper: Obtener tipo de ejercicio para un mes (ajuste o activación)
+  const getEjercicioTipo = (monthIndex: number): 'ajuste' | 'activacion' | undefined => {
+    const lineaTiempo = getLineaTiempoMes(monthIndex);
+    if (!lineaTiempo?.intensidad) return undefined;
+    return lineaTiempo.intensidad >= 6 ? 'activacion' : 'ajuste';
+  };
+
   // Helper: Obtener reflexión mensual sobre tránsitos desde SR
   const getMonthlyTransitReflection = (monthIndex: number): string | undefined => {
     const interpretation = getSRInterpretation();
@@ -1767,6 +1812,11 @@ export const AgendaLibro = ({
               sombra={getPatronesEmocionales()?.sombra}
             />
           </div>
+
+          {/* Página de la carta natal para consulta/descarga */}
+          <div id="chart-natal">
+            <ChartPlaceholderPage chartType="natal" pagina={9} />
+          </div>
         </div>
 
         {/* ═══════════════════════════════════════════════════════════════
@@ -1779,7 +1829,9 @@ export const AgendaLibro = ({
           <div id="ascendente-anio">
             <AscendenteAnio
               ascSign={getEjesSignos()?.asc}
+              natalAscSign={ascendant}
               interpretacion={getIntegracionEjes()?.asc}
+              comparacion={getComparacionesPlanetarias()?.ascendente}
             />
           </div>
           <div id="sol-retorno">
@@ -1823,6 +1875,15 @@ export const AgendaLibro = ({
           </div>
         </div>
 
+        {/* Página de la carta de Retorno Solar para consulta/descarga */}
+        <div id="chart-solar-return">
+          <ChartPlaceholderPage chartType="solar-return" pagina={22} />
+        </div>
+
+        {/* Páginas de escritura después del Retorno Solar */}
+        <PaginaFinalBlanca titulo="Mis reflexiones sobre el Retorno Solar" subtitulo="¿Qué te ha resonado de todo lo que acabas de leer? Escribe sin filtro." />
+        <PaginaFinalBlanca titulo="Preguntas que me surgen" subtitulo="¿Qué dudas, inquietudes o curiosidades te despierta esta información?" />
+
         {/* ═══════════════════════════════════════════════════════════════
             SECCIÓN 5: CICLOS Y OVERVIEW DEL AÑO
             ═══════════════════════════════════════════════════════════════ */}
@@ -1860,6 +1921,9 @@ export const AgendaLibro = ({
             <PlutonEnAcuario />
           </div>
         </div>
+
+        {/* Páginas de escritura después de los ciclos y aprendizajes */}
+        <PaginaFinalBlanca titulo="Lo que resuena en mí" subtitulo="Después de leer sobre tus ciclos, energías y aprendizajes del año, ¿qué sientes?" />
 
         <div id="tu-anio-overview">
           <TuAnioOverview
@@ -1930,6 +1994,9 @@ export const AgendaLibro = ({
                 temaDelMes={month.tema}
                 birthday={month.isBirthdayMonth ? startDate : undefined}
                 eventos={getFormattedEventosForMonth(month.monthIndex, month.monthDate.getFullYear())}
+                lineaTiempoMes={getLineaTiempoMes(month.monthIndex)}
+                mesClave={getMesClave(month.monthIndex)}
+                ejercicioTipo={getEjercicioTipo(month.monthIndex)}
               />
               <LunasYEjercicios
                 monthDate={month.monthDate}

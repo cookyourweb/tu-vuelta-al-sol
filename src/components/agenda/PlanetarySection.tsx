@@ -87,41 +87,64 @@ export default function PlanetarySection({ activePlanets }: PlanetarySectionProp
     setSelectedPlanet(null);
   };
 
-  const getPlanetExplanation = (planetName: string): { description: string; keywords: string[] } => {
-    const explanations: Record<string, { description: string; keywords: string[] }> = {
+  const getPlanetExplanation = (planetName: string): { description: string; keywords: string[]; duration: string } => {
+    const explanations: Record<string, { description: string; keywords: string[]; duration: string }> = {
       'Sol': {
         description: 'Tu identidad, propósito vital y expresión del yo. Representa tu esencia y cómo brillas en el mundo.',
-        keywords: ['Identidad', 'Propósito', 'Autoexpresión', 'Vitalidad']
+        keywords: ['Identidad', 'Propósito', 'Autoexpresión', 'Vitalidad'],
+        duration: '1 año (ciclo solar completo)'
       },
       'Luna': {
         description: 'Tus emociones, necesidades y mundo interior. Representa cómo te cuidas y te sientes seguro.',
-        keywords: ['Emociones', 'Intuición', 'Hogar', 'Seguridad emocional']
+        keywords: ['Emociones', 'Intuición', 'Hogar', 'Seguridad emocional'],
+        duration: '~28 días por signo (ciclo mensual)'
       },
       'Mercurio': {
         description: 'Tu mente, comunicación y forma de procesar información. Representa cómo piensas y te expresas.',
-        keywords: ['Comunicación', 'Aprendizaje', 'Lógica', 'Expresión verbal']
+        keywords: ['Comunicación', 'Aprendizaje', 'Lógica', 'Expresión verbal'],
+        duration: '~3 semanas por signo'
       },
       'Venus': {
         description: 'Tus valores, relaciones y forma de amar. Representa lo que aprecias y cómo te relacionas.',
-        keywords: ['Amor', 'Valores', 'Belleza', 'Relaciones']
+        keywords: ['Amor', 'Valores', 'Belleza', 'Relaciones'],
+        duration: '~4 semanas por signo'
       },
       'Marte': {
         description: 'Tu energía, acción y forma de perseguir lo que deseas. Representa tu impulso y valentía.',
-        keywords: ['Acción', 'Deseo', 'Energía', 'Coraje']
+        keywords: ['Acción', 'Deseo', 'Energía', 'Coraje'],
+        duration: '~6 semanas por signo'
       },
       'Júpiter': {
         description: 'Tu expansión, optimismo y búsqueda de significado. Representa tus oportunidades de crecimiento.',
-        keywords: ['Expansión', 'Sabiduría', 'Optimismo', 'Abundancia']
+        keywords: ['Expansión', 'Sabiduría', 'Optimismo', 'Abundancia'],
+        duration: '~12 meses por signo (ciclo de 12 años)'
       },
       'Saturno': {
         description: 'Tu estructura, responsabilidad y maestría. Representa tus límites y lecciones de vida.',
-        keywords: ['Disciplina', 'Responsabilidad', 'Límites', 'Maestría']
+        keywords: ['Disciplina', 'Responsabilidad', 'Límites', 'Maestría'],
+        duration: '~2,5 años por signo (ciclo de 29 años)'
+      },
+      'Urano': {
+        description: 'Tu libertad, originalidad y capacidad de cambio. Representa las rupturas necesarias y la innovación.',
+        keywords: ['Libertad', 'Cambio', 'Originalidad', 'Revolución'],
+        duration: '~7 años por signo (ciclo de 84 años)'
+      },
+      'Neptuno': {
+        description: 'Tu espiritualidad, imaginación y conexión con lo invisible. Representa los sueños y la trascendencia.',
+        keywords: ['Espiritualidad', 'Imaginación', 'Intuición', 'Trascendencia'],
+        duration: '~14 años por signo (ciclo de 165 años)'
+      },
+      'Plutón': {
+        description: 'Tu poder de transformación profunda. Representa la muerte simbólica y el renacimiento interior.',
+        keywords: ['Transformación', 'Poder', 'Renacimiento', 'Profundidad'],
+        duration: '~12-30 años por signo (ciclo de 248 años)'
       }
     };
 
     return explanations[planetName] || {
       description: 'Planeta activo en tu año solar.',
-      keywords: []
+      keywords: [],
+      duration: 'Variable'
     };
   };
 
@@ -186,7 +209,7 @@ export default function PlanetarySection({ activePlanets }: PlanetarySectionProp
                                 ? 'bg-blue-500/20 text-blue-300'
                                 : 'bg-orange-500/20 text-orange-300'
                             }`}>
-                              Todo el año
+                              {planet.isSlowPlanet ? getPlanetExplanation(planet.name).duration : 'Activo todo el año solar'}
                             </span>
                           </div>
                         </div>
@@ -239,7 +262,7 @@ export default function PlanetarySection({ activePlanets }: PlanetarySectionProp
                           ? 'bg-blue-500/20 text-blue-300'
                           : 'bg-orange-500/20 text-orange-300'
                       }`}>
-                        Activo todo el año solar
+                        {getPlanetExplanation(selectedPlanet.name).duration}
                       </span>
                     </div>
                   </div>
@@ -289,7 +312,12 @@ export default function PlanetarySection({ activePlanets }: PlanetarySectionProp
                       </p>
                     )}
                     <p>
-                      <strong className="text-blue-200">Duración:</strong> Todo el año (desde tu cumpleaños hasta el siguiente)
+                      <strong className="text-blue-200">Duración en este signo:</strong> {getPlanetExplanation(selectedPlanet.name).duration}
+                    </p>
+                    <p className="mt-1 text-xs text-blue-300/70">
+                      {selectedPlanet.isSlowPlanet
+                        ? 'Planeta lento: su influencia se extiende más allá de este año solar. La posición en tu Retorno Solar marca el tono de este ciclo.'
+                        : 'Planeta rápido: modula la energía dentro de tu año solar actual.'}
                     </p>
                   </div>
                 </div>
