@@ -97,7 +97,7 @@ export const InterpretationDrawer: React.FC<InterpretationDrawerProps> = ({
       <div className="absolute right-0 top-0 h-full w-full md:w-[45%] lg:w-[40%] bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-900 shadow-2xl overflow-y-auto animate-slide-in-right">
         {/* Header fijo con efecto glassmorphism */}
         <div className="sticky top-0 bg-purple-900/90 backdrop-blur-md p-4 md:p-6 border-b border-purple-700/50 flex justify-between items-center z-10 shadow-lg">
-          <h2 className="text-xl md:text-2xl font-bold text-white">{content.titulo}</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-white">{content.titulo || 'Interpretación Astrológica'}</h2>
           <button
             onClick={() => {
               onClose();
@@ -217,18 +217,20 @@ export const InterpretationDrawer: React.FC<InterpretationDrawerProps> = ({
           <div className="h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent" />
 
           {/* SÍNTESIS */}
-          <section className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-4 md:p-6 shadow-xl">
-            <h3 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2 text-white">
-              <span className="text-2xl">✨</span> SÍNTESIS
-            </h3>
-            <blockquote className="text-xl md:text-2xl font-bold mb-4 italic text-white leading-tight">
-              "{content.sintesis.frase}"
-            </blockquote>
-            <div className="h-px bg-white/30 my-4" />
-            <p className="text-base md:text-lg leading-relaxed text-white/95 font-medium whitespace-pre-wrap">
-              {content.sintesis.declaracion}
-            </p>
-          </section>
+          {content.sintesis && (
+            <section className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-4 md:p-6 shadow-xl">
+              <h3 className="text-lg md:text-xl font-bold mb-4 flex items-center gap-2 text-white">
+                <span className="text-2xl">✨</span> SÍNTESIS
+              </h3>
+              <blockquote className="text-xl md:text-2xl font-bold mb-4 italic text-white leading-tight">
+                "{content.sintesis.frase}"
+              </blockquote>
+              <div className="h-px bg-white/30 my-4" />
+              <p className="text-base md:text-lg leading-relaxed text-white/95 font-medium whitespace-pre-wrap">
+                {content.sintesis.declaracion}
+              </p>
+            </section>
+          )}
 
           {/* Espacio al final para scroll cómodo */}
           <div className="h-16" />
