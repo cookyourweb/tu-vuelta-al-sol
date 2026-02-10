@@ -89,8 +89,38 @@ export async function GET(request: NextRequest) {
     const currentCycleExists = cycles.some(c => c.yearLabel === currentCycleLabel);
     const nextCycleExists = cycles.some(c => c.yearLabel === nextCycleLabel);
 
-    // 5. Determinar si se puede generar el siguiente ciclo
-    const canGenerateNext = !nextCycleExists && currentCycleYear <= currentYear;
+    // 5. Determinar si se puede generar un ciclo y CUÁL sería
+    // Reglas:
+    //   - Si el ciclo ACTUAL no existe → permitir generarlo
+    //   - Si el ciclo actual existe Y estamos a 2 meses del cumpleaños → permitir generar el siguiente
+    //   - Si el ciclo actual existe Y es el día del cumpleaños → permitir generar el siguiente
+    //   - En cualquier otro caso → no permitir generar
+
+    // Calcular próximo cumpleaños
+    const nextBirthday = new Date(currentYear, birthDate.getMonth(), birthDate.getDate());
+    if (nextBirthday <= now) {
+      nextBirthday.setFullYear(nextBirthday.getFullYear() + 1);
+    }
+    const twoMonthsBefore = new Date(nextBirthday);
+    twoMonthsBefore.setMonth(twoMonthsBefore.getMonth() - 2);
+    const isNearNextBirthday = now >= twoMonthsBefore;
+
+    // Detectar si hoy es el cumpleaños
+    const isBirthdayToday = now.getMonth() === birthDate.getMonth() && now.getDate() === birthDate.getDate();
+
+    let canGenerateNext = false;
+    let nextCycleToGenerate = '';
+
+    if (!currentCycleExists) {
+      // El ciclo actual no existe → hay que generarlo
+      canGenerateNext = true;
+      nextCycleToGenerate = currentCycleLabel;
+    } else if (!nextCycleExists && isNearNextBirthday) {
+      // El ciclo actual existe Y estamos a 2 meses del próximo cumpleaños → permitir generar el siguiente
+      // Nota: isBirthdayToday NO activa generar el ciclo SIGUIENTE, solo el actual
+      canGenerateNext = true;
+      nextCycleToGenerate = nextCycleLabel;
+    }
 
     // 6. Determinar visibilidad de ciclos según reglas:
     //    - Si el nuevo ciclo existe Y el cumpleaños ya pasó → solo mostrar el nuevo
@@ -99,14 +129,10 @@ export async function GET(request: NextRequest) {
     const previousCycleLabel = `${currentCycleYear - 1}-${currentCycleYear}`;
     const previousCycleExists = cycles.some(c => c.yearLabel === previousCycleLabel);
 
-    // Calcular si estamos dentro de los 3 meses antes del próximo cumpleaños
-    const nextBirthday = new Date(currentYear, birthDate.getMonth(), birthDate.getDate());
-    if (nextBirthday <= now) {
-      nextBirthday.setFullYear(nextBirthday.getFullYear() + 1);
-    }
+    // Calcular si estamos dentro de los 3 meses antes del próximo cumpleaños (para visibilidad de ciclos)
     const threeMonthsBefore = new Date(nextBirthday);
     threeMonthsBefore.setMonth(threeMonthsBefore.getMonth() - 3);
-    const isNearNextBirthday = now >= threeMonthsBefore;
+    const isNear3Months = now >= threeMonthsBefore;
 
     // Filtrar ciclos relevantes
     const relevantCycles = cycles
@@ -117,7 +143,7 @@ export async function GET(request: NextRequest) {
         if (c.yearLabel === currentCycleLabel) return true;
 
         // Si estamos cerca del próximo cumpleaños (3 meses), mostrar el siguiente también
-        if (isNearNextBirthday && c.yearLabel === nextCycleLabel) return true;
+        if (isNear3Months && c.yearLabel === nextCycleLabel) return true;
 
         // Solo mostrar el ciclo anterior si NO existe el ciclo actual
         // (usuario aún no ha generado el nuevo ciclo)
@@ -153,6 +179,7 @@ export async function GET(request: NextRequest) {
         cycles: relevantCycles,
         currentCycleLabel,
         nextCycleLabel,
+        nextCycleToGenerate,
         defaultCycle,
         canGenerateNext,
         hasCycles: relevantCycles.length > 0

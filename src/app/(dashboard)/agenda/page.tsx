@@ -64,6 +64,7 @@ const AgendaPersonalizada = () => {
   const [currentCycleLabel, setCurrentCycleLabel] = useState<string>('');
   const [selectedCycleLabel, setSelectedCycleLabel] = useState<string>('');
   const [canGenerateNext, setCanGenerateNext] = useState<boolean>(false);
+  const [nextCycleToGenerate, setNextCycleToGenerate] = useState<string>('');
   const [loadingCycles, setLoadingCycles] = useState<boolean>(false);
   const [generatingCycle, setGeneratingCycle] = useState<boolean>(false);
 
@@ -286,6 +287,7 @@ const AgendaPersonalizada = () => {
         setAvailableCycles(data.data.cycles);
         setCurrentCycleLabel(data.data.currentCycleLabel);
         setCanGenerateNext(data.data.canGenerateNext);
+        setNextCycleToGenerate(data.data.nextCycleToGenerate || '');
 
         // 🆕 Si NO hay ciclos, auto-generar el primero
         if (!data.data.cycles || data.data.cycles.length === 0) {
@@ -344,6 +346,7 @@ const AgendaPersonalizada = () => {
           setAvailableCycles(reloadData.data.cycles);
           setCurrentCycleLabel(reloadData.data.currentCycleLabel);
           setCanGenerateNext(reloadData.data.canGenerateNext);
+          setNextCycleToGenerate(reloadData.data.nextCycleToGenerate || '');
           setSelectedCycleLabel(reloadData.data.defaultCycle);
         }
         setLoadingCycles(false);
@@ -359,6 +362,7 @@ const AgendaPersonalizada = () => {
           setAvailableCycles(reloadData.data.cycles);
           setCurrentCycleLabel(reloadData.data.currentCycleLabel);
           setCanGenerateNext(reloadData.data.canGenerateNext);
+          setNextCycleToGenerate(reloadData.data.nextCycleToGenerate || '');
           setSelectedCycleLabel(reloadData.data.defaultCycle);
           console.log('✅ [CYCLES] Ciclos recargados:', reloadData.data.cycles);
         }
@@ -1460,7 +1464,7 @@ const AgendaPersonalizada = () => {
       const specialMessage = isFirstDay
         ? {
             title: '🎂 ¡FELIZ CUMPLEAÑOS! PRIMER DÍA DE TU NUEVO RETORNO SOLAR',
-            subtitle: `Inicio de tu ciclo ${yearRange.start.getFullYear()}-${yearRange.end.getFullYear() + 1}`,
+            subtitle: `Inicio de tu ciclo ${yearRange.start.getFullYear()}-${yearRange.start.getFullYear() + 1}`,
             description: `¡Hoy es tu cumpleaños y comienza un nuevo año astrológico para ti! Este es el día en que el Sol regresa a la posición exacta que tenía cuando naciste.`,
             guidance: [
               '✨ Este es el momento perfecto para establecer tus intenciones para el año',
@@ -1758,7 +1762,7 @@ const AgendaPersonalizada = () => {
                         ) : (
                           <>
                             <span>+</span>
-                            <span>Generar {currentCycleLabel ? parseInt(currentCycleLabel.split('-')[1]) : new Date().getFullYear()}-{currentCycleLabel ? parseInt(currentCycleLabel.split('-')[1]) + 1 : new Date().getFullYear() + 1}</span>
+                            <span>Generar {nextCycleToGenerate || currentCycleLabel}</span>
                           </>
                         )}
                       </button>
@@ -1839,7 +1843,7 @@ const AgendaPersonalizada = () => {
                 <p className="text-green-100 mb-4 leading-relaxed">
                   ¡Hoy es tu cumpleaños y comienza un nuevo ciclo solar!
                   <br />
-                  <span className="text-white">Genera tu <strong>Agenda Astrológica {yearRange.end.getFullYear()}-{yearRange.end.getFullYear() + 1}</strong> para planificar este nuevo año lleno de oportunidades.</span>
+                  <span className="text-white">Genera tu <strong>Agenda Astrológica {nextCycleToGenerate || currentCycleLabel}</strong> para planificar este nuevo año lleno de oportunidades.</span>
                   <br />
                   <span className="text-yellow-200 text-sm mt-1 inline-block">Importante: Una vez que generes el nuevo ciclo, tu agenda anterior ya no estará disponible. Si quieres conservarla, descárgala primero desde el botón &quot;Ver Agenda Libro&quot;.</span>
                 </p>
@@ -1857,7 +1861,7 @@ const AgendaPersonalizada = () => {
                     ) : (
                       <>
                         <span className="text-xl">🔄</span>
-                        <span>Generar Nuevo Ciclo {yearRange.end.getFullYear() + 1}-{yearRange.end.getFullYear() + 2}</span>
+                        <span>Generar Nuevo Ciclo {nextCycleToGenerate || currentCycleLabel}</span>
                       </>
                     )}
                   </button>
@@ -2500,7 +2504,7 @@ const AgendaPersonalizada = () => {
                             🌅 ¿Listo para tu Nuevo Año Astrológico?
                           </h3>
                           <p className="text-white/90 text-sm mb-4 leading-relaxed">
-                            Genera los eventos del próximo ciclo solar ({yearRange?.end ? yearRange.end.getFullYear() + 1 : new Date().getFullYear() + 1}-{yearRange?.end ? yearRange.end.getFullYear() + 2 : new Date().getFullYear() + 2}) para empezar a planificar tu nuevo año.
+                            Genera los eventos del próximo ciclo solar ({nextCycleToGenerate || currentCycleLabel}) para empezar a planificar tu nuevo año.
                           </p>
                           <button
                             onClick={async () => {
