@@ -401,16 +401,26 @@ const AgendaPersonalizada = () => {
       const data = await response.json();
 
       if (data.success) {
-        console.log('✅ [CYCLES] Ciclo generado:', data.data.cycle.yearLabel);
+        const newYearLabel = data.data.cycle.yearLabel;
+        console.log('✅ [CYCLES] Ciclo generado:', newYearLabel);
+
+        // Force recalculate SR chart for the new year
+        console.log('☀️ [CYCLES] Recalculando carta Solar Return para nuevo ciclo...');
+        try {
+          await fetch(`/api/charts/solar-return?userId=${user.uid}&force=true`);
+          console.log('✅ [CYCLES] Carta Solar Return recalculada');
+        } catch (srError) {
+          console.warn('⚠️ [CYCLES] No se pudo recalcular la carta SR:', srError);
+        }
 
         // Recargar ciclos disponibles
         await fetchAvailableCycles();
 
         // Cambiar al nuevo ciclo
-        setSelectedCycleLabel(data.data.cycle.yearLabel);
+        setSelectedCycleLabel(newYearLabel);
 
         // Cargar eventos del nuevo ciclo
-        await loadCycleEvents(data.data.cycle.yearLabel);
+        await loadCycleEvents(newYearLabel);
       } else {
         console.error('❌ [CYCLES] Error generando ciclo:', data.error);
         setError(data.error);

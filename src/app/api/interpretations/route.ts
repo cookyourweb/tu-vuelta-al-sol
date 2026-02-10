@@ -35,14 +35,40 @@ export async function GET(request: NextRequest) {
 
     await connectDB();
 
-    // Buscar la interpretación más reciente que NO haya expirado
-    const interpretation = await Interpretation.findOne({
+    // Build filter - support yearLabel for solar-return interpretations
+    const yearLabel = searchParams.get('yearLabel');
+    const filter: any = {
       userId,
       chartType,
       expiresAt: { $gt: new Date() }
-    })
+    };
+
+    // If yearLabel is provided for solar-return, filter by cycleYear
+    if (yearLabel && chartType === 'solar-return') {
+      const cycleYear = parseInt(yearLabel.split('-')[0]);
+      if (!isNaN(cycleYear)) {
+        filter.cycleYear = cycleYear;
+      }
+    }
+
+    // Buscar la interpretación más reciente que NO haya expirado
+    let interpretation = await Interpretation.findOne(filter)
       .sort({ generatedAt: -1 })
       .lean();
+
+    // Backwards compat: if yearLabel was specified but nothing found,
+    // try finding old interpretations without cycleYear field
+    if (!interpretation && yearLabel && chartType === 'solar-return') {
+      console.log(`⚠️ [GET-INTERPRETATION] No interpretation with cycleYear found for ${yearLabel}, trying legacy...`);
+      interpretation = await Interpretation.findOne({
+        userId,
+        chartType,
+        cycleYear: { $exists: false },
+        expiresAt: { $gt: new Date() }
+      })
+      .sort({ generatedAt: -1 })
+      .lean();
+    }
 
     if (!interpretation) {
       return NextResponse.json(
@@ -51,7 +77,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log(`✅ [GET-INTERPRETATION] Found ${chartType} for user ${userId}`);
+    console.log(`✅ [GET-INTERPRETATION] Found ${chartType} for user ${userId}${yearLabel ? ` (yearLabel: ${yearLabel})` : ''}`);
 
     return NextResponse.json({
       exists: true,

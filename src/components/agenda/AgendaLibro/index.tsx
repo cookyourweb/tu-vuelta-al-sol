@@ -106,8 +106,8 @@ export const AgendaLibro = ({
       }
 
       try {
-        console.log('🔍 [SOLAR_RETURN] Buscando interpretación de Retorno Solar...');
-        const response = await fetch(`/api/interpretations?userId=${userId}&chartType=solar-return`);
+        console.log(`🔍 [SOLAR_RETURN] Buscando interpretación de Retorno Solar para ciclo ${yearLabel}...`);
+        const response = await fetch(`/api/interpretations?userId=${userId}&chartType=solar-return${yearLabel ? `&yearLabel=${yearLabel}` : ''}`);
         const data = await response.json();
 
         if (data.exists && data.interpretation) {
@@ -156,7 +156,7 @@ export const AgendaLibro = ({
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
     };
-  }, [userId]);
+  }, [userId, yearLabel]);
 
   // Efecto para cargar la interpretación Natal desde la BD
   useEffect(() => {
@@ -252,9 +252,9 @@ export const AgendaLibro = ({
       setGeneratingSolarReturn(true);
       console.log('🌅 [AUTO_GEN] Iniciando generación automática de Solar Return...');
 
-      // 0. Verificar si ya existe SR
-      console.log('🔍 [AUTO_GEN] Verificando si ya existe SR...');
-      const checkResponse = await fetch(`/api/interpretations?userId=${userId}&chartType=solar-return`);
+      // 0. Verificar si ya existe SR para este ciclo
+      console.log(`🔍 [AUTO_GEN] Verificando si ya existe SR para ciclo ${yearLabel}...`);
+      const checkResponse = await fetch(`/api/interpretations?userId=${userId}&chartType=solar-return${yearLabel ? `&yearLabel=${yearLabel}` : ''}`);
       const checkData = await checkResponse.json();
 
       if (checkData.exists && checkData.interpretation) {
@@ -367,8 +367,8 @@ export const AgendaLibro = ({
       const interpretData = await interpretResponse.json();
       console.log('✅ [AUTO_GEN] Solar Return generado exitosamente:', interpretData);
 
-      // 6. Recargar la interpretación
-      const reloadResponse = await fetch(`/api/interpretations?userId=${userId}&chartType=solar-return`);
+      // 6. Recargar la interpretación para este ciclo
+      const reloadResponse = await fetch(`/api/interpretations?userId=${userId}&chartType=solar-return${yearLabel ? `&yearLabel=${yearLabel}` : ''}`);
       const reloadData = await reloadResponse.json();
 
       if (reloadData.exists && reloadData.interpretation) {

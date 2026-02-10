@@ -638,13 +638,18 @@ export async function POST(request: NextRequest) {
 
     await connectDB();
 
-    // Check cache (if not forcing regeneration)
+    // Determine the cycle year from the SR chart
+    const returnYear = solarReturnChart?.solarReturnInfo?.year || new Date().getFullYear();
+    const yearLabel = `${returnYear}-${returnYear + 1}`;
+
+    // Check cache (if not forcing regeneration) - FILTER BY CYCLE YEAR
     if (!regenerate) {
-      console.log('🔍 Checking cache...');
-      
+      console.log(`🔍 Checking cache for cycle ${yearLabel}...`);
+
       const cached = await Interpretation.findOne({
         userId,
         chartType: 'solar-return',
+        cycleYear: returnYear,
         expiresAt: { $gt: new Date() }
       })
       .sort({ generatedAt: -1 })
@@ -652,7 +657,7 @@ export async function POST(request: NextRequest) {
       .exec();
 
       if (cached) {
-        console.log('✅ Cached interpretation found');
+        console.log(`✅ Cached interpretation found for cycle ${yearLabel}`);
         const cachedObj = Array.isArray(cached) ? cached[0] : cached;
         return NextResponse.json({
           success: true,
@@ -662,12 +667,27 @@ export async function POST(request: NextRequest) {
           method: 'mongodb_cache'
         });
       }
+
+      // Also check old interpretations without cycleYear (backwards compat)
+      const oldCached = await Interpretation.findOne({
+        userId,
+        chartType: 'solar-return',
+        cycleYear: { $exists: false },
+        expiresAt: { $gt: new Date() }
+      })
+      .sort({ generatedAt: -1 })
+      .lean()
+      .exec();
+
+      if (oldCached) {
+        console.log('⚠️ Found old cached interpretation without cycleYear - will regenerate for proper year tracking');
+        // Don't return it - let it regenerate so it gets saved with cycleYear
+      }
     }
 
     // Generate new interpretation
-    console.log('🤖 Generating new complete interpretation...');
+    console.log(`🤖 Generating new complete interpretation for cycle ${yearLabel}...`);
 
-    const returnYear = solarReturnChart?.solarReturnInfo?.year || new Date().getFullYear();
     let interpretation: CompleteSolarReturnInterpretation;
 
     // ✅ PREPARE LOCATION DATA FOR INTERPRETATION
@@ -777,6 +797,8 @@ export async function POST(request: NextRequest) {
     const savedInterpretation = await Interpretation.create({
       userId,
       chartType: 'solar-return',
+      cycleYear: returnYear,
+      yearLabel,
       natalChart,
       solarReturnChart,
       userProfile: {
@@ -865,14 +887,27 @@ export async function GET(request: NextRequest) {
 
     await connectDB();
 
-    // ✅ SIMPLE FILTER: Just get the most recent non-expired Solar Return
+    // Support year filtering
+    const year = searchParams.get('year');
+    const yearLabelParam = searchParams.get('yearLabel');
+
     const filter: any = {
       userId,
       chartType: 'solar-return',
       expiresAt: { $gt: new Date() }
     };
 
-    console.log(`🔍 [GET SR] Finding Solar Return for user: ${userId}`);
+    // Filter by cycle year if provided
+    if (yearLabelParam) {
+      const cycleYear = parseInt(yearLabelParam.split('-')[0]);
+      if (!isNaN(cycleYear)) {
+        filter.cycleYear = cycleYear;
+      }
+    } else if (year) {
+      filter.cycleYear = parseInt(year);
+    }
+
+    console.log(`🔍 [GET SR] Finding Solar Return for user: ${userId}${yearLabelParam ? ` (cycle: ${yearLabelParam})` : ''}`);
 
     const interpretationDoc = await Interpretation.findOne(filter)
     .sort({ generatedAt: -1 })
@@ -950,12 +985,23 @@ export async function DELETE(request: NextRequest) {
 
     await connectDB();
 
-    const result = await Interpretation.deleteOne({
+    const yearLabel = searchParams.get('yearLabel');
+    const deleteFilter: any = {
       userId,
       chartType: 'solar-return',
-    });
+    };
 
-    console.log(`🗑️ Deleted ${result.deletedCount} Solar Return interpretation(s) for user ${userId}`);
+    // If yearLabel specified, only delete that specific cycle's interpretation
+    if (yearLabel) {
+      const cycleYear = parseInt(yearLabel.split('-')[0]);
+      if (!isNaN(cycleYear)) {
+        deleteFilter.cycleYear = cycleYear;
+      }
+    }
+
+    const result = await Interpretation.deleteMany(deleteFilter);
+
+    console.log(`🗑️ Deleted ${result.deletedCount} Solar Return interpretation(s) for user ${userId}${yearLabel ? ` (cycle: ${yearLabel})` : ''}`);
 
     return NextResponse.json({
       success: true,

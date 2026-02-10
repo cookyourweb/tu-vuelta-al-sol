@@ -7,6 +7,8 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IInterpretation extends Document {
   userId: string;
   chartType: 'natal' | 'solar-return' | 'progressed';
+  cycleYear?: number;       // Year the SR cycle starts (e.g., 2026)
+  yearLabel?: string;        // "2026-2027" for display
 
   // ✅ REMOVED: natalChart, solarReturnChart, progressedChart fields
   // These should NOT be in the interpretations collection!
@@ -75,7 +77,18 @@ const InterpretationSchema = new Schema<IInterpretation>({
     required: true,
     index: true
   },
-  
+
+  cycleYear: {
+    type: Number,
+    required: false,
+    index: true
+  },
+
+  yearLabel: {
+    type: String,
+    required: false
+  },
+
   // ✅ REMOVED: natalChart, solarReturnChart, progressedChart fields
   // These should NOT be in the interpretations collection!
 
@@ -121,6 +134,7 @@ const InterpretationSchema = new Schema<IInterpretation>({
 
 // 🔍 ÍNDICES COMPUESTOS
 InterpretationSchema.index({ userId: 1, chartType: 1, generatedAt: -1 });
+InterpretationSchema.index({ userId: 1, chartType: 1, cycleYear: 1 });
 InterpretationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 }); // ✅ TTL automático
 
 // 🚀 MÉTODOS ESTÁTICOS
