@@ -132,7 +132,7 @@ export default function EventInterpretationButton({
 
     // Crear contenido de texto para descarga
     let content = `🌙 ${interpretation.titulo_evento || 'Evento Astrológico'}\n`;
-    content += `\n📅 ${new Date(event.date).toLocaleDateString('es-ES', {
+    content += `\n☉ ${new Date(event.date).toLocaleDateString('es-ES', {
       weekday: 'long',
       day: 'numeric',
       month: 'long',

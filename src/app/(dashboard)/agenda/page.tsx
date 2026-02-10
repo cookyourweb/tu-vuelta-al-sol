@@ -1875,7 +1875,7 @@ const AgendaPersonalizada = () => {
         {isPreviousYear && yearRange && (
           <div className="mb-8 bg-gradient-to-r from-orange-900/70 to-red-900/70 border-2 border-orange-500/60 rounded-2xl p-6 backdrop-blur-sm shadow-2xl">
             <div className="flex items-start gap-4">
-              <div className="text-4xl">📅</div>
+              <div className="text-4xl">⏳</div>
               <div className="flex-1">
                 <h3 className="text-2xl font-bold text-orange-200 mb-2 flex items-center gap-2">
                   <span>⏰</span>
@@ -2696,7 +2696,7 @@ const AgendaPersonalizada = () => {
                 <div className="bg-gradient-to-r from-purple-600/80 to-pink-600/80 p-6 border-b border-white/20">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <span className="text-4xl">📅</span>
+                      <span className="text-4xl">✧</span>
                       <div>
                         <h2 className="text-3xl font-bold text-white">
                           {selectedDate.getDate()} de {format(selectedDate, 'MMMM', { locale: es })}

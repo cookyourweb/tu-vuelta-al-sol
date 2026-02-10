@@ -308,40 +308,86 @@ export const TuAnioCiclos: React.FC<TuAnioProps> = ({ startDate, endDate, hasSol
 // ==========================================
 // PÁGINA ESPECIAL CUMPLEAÑOS
 // ==========================================
-export const PaginaCumpleanos: React.FC<{ birthDate: Date; userName: string }> = ({ birthDate, userName }) => {
+interface PaginaCumpleanosProps {
+  birthDate: Date;
+  userName: string;
+  sunSign?: string;
+  ascendant?: string;
+  moonSign?: string;
+  srAscSign?: string;
+  apertura?: {
+    tema_central?: string;
+    eje_del_ano?: string;
+    como_se_siente?: string;
+  };
+}
+
+export const PaginaCumpleanos: React.FC<PaginaCumpleanosProps> = ({
+  birthDate, userName, sunSign, ascendant, moonSign, srAscSign, apertura
+}) => {
   const { config } = useStyle();
   const birthDay = birthDate.getDate();
   const birthMonth = birthDate.toLocaleDateString('es-ES', { month: 'long' });
 
   return (
-    <div className={`print-page bg-white p-12 flex flex-col items-center justify-center ${config.pattern}`}>
-      <div className="text-center max-w-md">
+    <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
+      <div className="text-center max-w-2xl mx-auto w-full">
         <Sparkles className={`w-8 h-8 mx-auto ${config.iconSecondary} mb-4`} />
 
         <h2 className={`text-3xl mb-2 ${config.titleGradient}`}>
           {birthDay} de {birthMonth}
         </h2>
-        <p className={`${config.iconSecondary} text-xl italic mb-6`}>
+        <p className={`${config.iconSecondary} text-xl italic mb-4`}>
           Tu Nueva Vuelta al Sol
         </p>
 
         {/* Sun Circle */}
-        <div className={`w-32 h-32 mx-auto rounded-full ${config.highlightAccent} flex items-center justify-center mb-6 border-4 ${config.cardBorder}`}>
-          <Sun className={`w-16 h-16 ${config.iconPrimary}`} />
+        <div className={`w-24 h-24 mx-auto rounded-full ${config.highlightAccent} flex items-center justify-center mb-4 border-4 ${config.cardBorder}`}>
+          <Sun className={`w-12 h-12 ${config.iconPrimary}`} />
         </div>
 
-        <p className="text-gray-600 italic mb-8">
-          "Cuando el Sol regresa a la posición que ocupaba en tu nacimiento, se completa un ciclo y comienza uno nuevo."
-        </p>
+        {/* Energías activas */}
+        {(sunSign || ascendant || moonSign) && (
+          <div className={`${config.highlightSecondary} rounded-lg p-4 mb-4`}>
+            <p className={`text-xs ${config.iconSecondary} font-medium mb-2`}>Energías activas en tu cumpleaños</p>
+            <div className="flex justify-center gap-4 text-sm text-gray-700">
+              {sunSign && <span>☉ Sol en {sunSign}</span>}
+              {moonSign && <span>☽ Luna en {moonSign}</span>}
+              {ascendant && <span>ASC {ascendant}</span>}
+            </div>
+            {srAscSign && srAscSign !== ascendant && (
+              <p className={`text-xs ${config.iconSecondary} mt-2 italic`}>
+                ASC Retorno Solar: {srAscSign} — tu nuevo enfoque vital
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Tema del año (de apertura_anual) */}
+        {apertura?.tema_central && (
+          <div className={`${config.highlightPrimary} rounded-lg p-4 mb-4 text-left`}>
+            <h4 className={`${config.fontDisplay} ${config.iconPrimary} font-medium text-sm mb-2`}>Tema central de este año</h4>
+            <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
+              {apertura.tema_central}
+            </p>
+          </div>
+        )}
+
+        {apertura?.eje_del_ano && (
+          <div className={`border-l-4 ${config.cardBorder} pl-4 mb-4 text-left`}>
+            <p className={`${config.iconSecondary} text-xs font-medium mb-1`}>Eje del año:</p>
+            <p className="text-gray-700 text-sm italic leading-relaxed">
+              {apertura.eje_del_ano}
+            </p>
+          </div>
+        )}
 
         {/* Pasado - Presente - Futuro */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-3 gap-3 mb-4">
           <div className={`${config.highlightPrimary} rounded-lg p-3`}>
             <span className="text-lg">☽</span>
-            <h4 className={`font-medium ${config.iconSecondary} text-sm mt-1`}>
-              Ciclo Pasado
-            </h4>
-            <ul className="text-gray-600 text-xs mt-2 space-y-1 text-left">
+            <h4 className={`font-medium ${config.iconSecondary} text-xs mt-1`}>Ciclo Pasado</h4>
+            <ul className="text-gray-600 text-[10px] mt-1 space-y-0.5 text-left">
               <li>✧ Reflexiona sobre tus logros</li>
               <li>✧ Agradece las lecciones</li>
               <li>✧ Reconoce tu evolución</li>
@@ -349,10 +395,8 @@ export const PaginaCumpleanos: React.FC<{ birthDate: Date; userName: string }> =
           </div>
           <div className={`${config.highlightSecondary} rounded-lg p-3`}>
             <span className="text-lg">♡</span>
-            <h4 className={`font-medium ${config.iconSecondary} text-sm mt-1`}>
-              Presente
-            </h4>
-            <ul className="text-gray-600 text-xs mt-2 space-y-1 text-left">
+            <h4 className={`font-medium ${config.iconSecondary} text-xs mt-1`}>Presente</h4>
+            <ul className="text-gray-600 text-[10px] mt-1 space-y-0.5 text-left">
               <li>✧ Siente gratitud por ser</li>
               <li>✧ Conéctate con seres queridos</li>
               <li>✧ Haz algo que te traiga alegría</li>
@@ -360,10 +404,8 @@ export const PaginaCumpleanos: React.FC<{ birthDate: Date; userName: string }> =
           </div>
           <div className={`${config.highlightPrimary} rounded-lg p-3`}>
             <span className="text-lg">☉</span>
-            <h4 className={`font-medium ${config.iconSecondary} text-sm mt-1`}>
-              Futuro
-            </h4>
-            <ul className="text-gray-600 text-xs mt-2 space-y-1 text-left">
+            <h4 className={`font-medium ${config.iconSecondary} text-xs mt-1`}>Futuro</h4>
+            <ul className="text-gray-600 text-[10px] mt-1 space-y-0.5 text-left">
               <li>✧ Visualiza tu próximo año</li>
               <li>✧ Establece intenciones</li>
               <li>✧ Conecta con tu propósito</li>
@@ -371,38 +413,12 @@ export const PaginaCumpleanos: React.FC<{ birthDate: Date; userName: string }> =
           </div>
         </div>
 
-        {/* Ritual */}
-        <div className={`${config.cardBg} ${config.cardBorder} rounded-lg p-4`}>
-          <h4 className={`font-medium ${config.iconSecondary} text-sm mb-2 flex items-center justify-center gap-2`}>
-            <Moon className="w-4 h-4" /> Ritual para tu Retorno Solar
-          </h4>
-          <div className="grid grid-cols-2 gap-4 text-left">
-            <div>
-              <p className="text-gray-700 text-xs font-medium mb-1">Preparación:</p>
-              <ul className="text-gray-600 text-xs space-y-0.5">
-                <li>• Vela dorada o amarilla</li>
-                <li>• Papel y bolígrafo</li>
-                <li>• Objeto de tu año pasado</li>
-                <li>• Objeto para el nuevo ciclo</li>
-              </ul>
-            </div>
-            <div>
-              <p className="text-gray-700 text-xs font-medium mb-1">Pasos:</p>
-              <ol className="text-gray-600 text-xs space-y-0.5">
-                <li>1. Crea un espacio sagrado</li>
-                <li>2. Enciende la vela</li>
-                <li>3. Escribe lo que liberas</li>
-                <li>4. Escribe tus intenciones</li>
-                <li>5. Afirma positivamente</li>
-              </ol>
-            </div>
-          </div>
-        </div>
-
-        <p className={`${config.iconSecondary} italic text-sm mt-6`}>
-          "Eres un ser en constante evolución."
+        <p className="text-gray-600 italic text-sm mb-4">
+          "Cuando el Sol regresa a la posición que ocupaba en tu nacimiento,<br />
+          se completa un ciclo y comienza uno nuevo."
         </p>
-        <p className="text-gray-500 text-xs mt-4">¡Feliz cumpleaños y feliz nuevo ciclo solar, {userName}!</p>
+
+        <p className="text-gray-500 text-xs">¡Feliz cumpleaños y feliz nuevo ciclo solar, {userName}!</p>
       </div>
 
       <FooterLibro />

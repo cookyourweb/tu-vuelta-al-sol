@@ -1987,6 +1987,11 @@ export const AgendaLibro = ({
                 <PaginaCumpleanos
                   birthDate={startDate}
                   userName={userName}
+                  sunSign={sunSign}
+                  ascendant={ascendant}
+                  moonSign={moonSign}
+                  srAscSign={getEjesSignos()?.asc?.sign}
+                  apertura={getSRInterpretation()?.apertura_anual}
                 />
               )}
 

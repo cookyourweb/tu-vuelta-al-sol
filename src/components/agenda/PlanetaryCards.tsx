@@ -275,7 +275,7 @@ export default function PlanetaryCards({
                   {card.quien_eres_natal.posicion_completa} → {card.que_se_activa_este_anio.posicion_completa}
                 </p>
                 <p className="text-yellow-300 text-xs mt-1">
-                  📅 {card.que_se_activa_este_anio.periodo}
+                  ☉ {card.que_se_activa_este_anio.periodo}
                 </p>
                 <p className="text-blue-300 text-xs mt-1 italic">
                   {card.que_se_activa_este_anio.duracion_texto}
@@ -306,7 +306,7 @@ export default function PlanetaryCards({
                         {selectedCard.quien_eres_natal.posicion_completa} → {selectedCard.que_se_activa_este_anio.posicion_completa}
                       </p>
                       <p className="text-yellow-300 text-sm">
-                        📅 {selectedCard.que_se_activa_este_anio.periodo}
+                        ☉ {selectedCard.que_se_activa_este_anio.periodo}
                       </p>
                       <p className="text-blue-300 text-sm mt-1 italic">
                         {selectedCard.que_se_activa_este_anio.duracion_texto}
@@ -520,7 +520,7 @@ export default function PlanetaryCards({
                   {/* Ritmos semanales */}
                   {selectedCard.ritmo_de_trabajo.ritmos_semanales && (
                     <div className="mb-4 bg-emerald-800/20 rounded-lg p-3 border-l-4 border-emerald-400">
-                      <p className="font-semibold text-emerald-200 mb-2">📅 Ritmos semanales:</p>
+                      <p className="font-semibold text-emerald-200 mb-2">☉ Ritmos semanales:</p>
                       <p className="text-gray-200 text-sm leading-relaxed">{selectedCard.ritmo_de_trabajo.ritmos_semanales}</p>
                     </div>
                   )}
