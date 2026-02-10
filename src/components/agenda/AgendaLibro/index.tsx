@@ -1853,10 +1853,14 @@ export const AgendaLibro = ({
             <EjesDelAnio
               ascSign={getEjesSignos()?.asc}
               mcSign={getEjesSignos()?.mc}
+              ascInterpretacion={getIntegracionEjes()?.asc}
+              mcInterpretacion={getIntegracionEjes()?.mc}
             />
             <EjesDelAnio2
               dscSign={getEjesSignos()?.dsc}
               icSign={getEjesSignos()?.ic}
+              dscInterpretacion={getIntegracionEjes()?.dsc}
+              icInterpretacion={getIntegracionEjes()?.ic}
             />
             <IntegracionEjes
               asc={getIntegracionEjes()?.asc}

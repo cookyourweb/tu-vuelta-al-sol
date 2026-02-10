@@ -319,9 +319,11 @@ export const MarteRetorno = ({ comparacion }: { comparacion?: any }) => {
 interface EjesDelAnioProps {
   ascSign?: { sign: string; degree?: number } | null;
   mcSign?: { sign: string; degree?: number } | null;
+  ascInterpretacion?: string;
+  mcInterpretacion?: string;
 }
 
-export const EjesDelAnio = ({ ascSign, mcSign }: EjesDelAnioProps) => {
+export const EjesDelAnio = ({ ascSign, mcSign, ascInterpretacion, mcInterpretacion }: EjesDelAnioProps) => {
   const { config } = useStyle();
 
   // Formatear signo con grado si está disponible
@@ -366,18 +368,22 @@ export const EjesDelAnio = ({ ascSign, mcSign }: EjesDelAnioProps) => {
             </div>
           </div>
           <p className="text-gray-500 text-xs italic mb-3">Identidad, presencia, forma de iniciar</p>
-          <p className="text-gray-700 text-sm leading-relaxed mb-3">
-            Este año te presentas al mundo desde un lugar más honesto y menos defensivo.
-            No vienes a gustar: vienes a ser coherente contigo.
-          </p>
-          <p className="text-gray-600 text-sm mb-3">
-            La pregunta que se repite es:<br />
-            <span className={`${config.iconSecondary} italic`}>¿Esto que hago me representa de verdad?</span>
-          </p>
-          <p className="text-gray-600 text-sm mb-3">
-            Puede que no tengas una imagen clara de quién estás siendo ahora, y eso está bien.
-            Este ascendente te pide permitirte redefinirte sin prisa, incluso sin explicación.
-          </p>
+          {ascInterpretacion ? (
+            <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
+              {ascInterpretacion}
+            </p>
+          ) : (
+            <>
+              <p className="text-gray-700 text-sm leading-relaxed mb-3">
+                Este año te presentas al mundo desde un lugar más honesto y menos defensivo.
+                No vienes a gustar: vienes a ser coherente contigo.
+              </p>
+              <p className="text-gray-600 text-sm mb-3">
+                La pregunta que se repite es:<br />
+                <span className={`${config.iconSecondary} italic`}>¿Esto que hago me representa de verdad?</span>
+              </p>
+            </>
+          )}
           <div className={`border-l-2 ${config.cardBorder} pl-4 mt-4`}>
             <p className={`${config.iconSecondary} text-sm font-medium`}>Aprendizaje:</p>
             <p className="text-gray-700 text-sm italic">
@@ -399,17 +405,25 @@ export const EjesDelAnio = ({ ascSign, mcSign }: EjesDelAnioProps) => {
             </div>
           </div>
           <p className="text-gray-500 text-xs italic mb-3">Vocación, dirección, propósito visible</p>
-          <p className="text-gray-700 text-sm leading-relaxed mb-3">
-            Este año no busca logros espectaculares ni reconocimiento inmediato.
-            Busca sentido.
-          </p>
-          <p className="text-gray-600 text-sm mb-3">
-            Puede haber dudas sobre el rumbo profesional, el propósito o la utilidad de lo que haces.
-            No es un retroceso: es una recalibración.
-          </p>
-          <p className="text-gray-600 text-sm mb-3">
-            El MC te pide revisar <span className="italic">para qué</span> haces lo que haces, no solo cómo ni cuánto.
-          </p>
+          {mcInterpretacion ? (
+            <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
+              {mcInterpretacion}
+            </p>
+          ) : (
+            <>
+              <p className="text-gray-700 text-sm leading-relaxed mb-3">
+                Este año no busca logros espectaculares ni reconocimiento inmediato.
+                Busca sentido.
+              </p>
+              <p className="text-gray-600 text-sm mb-3">
+                Puede haber dudas sobre el rumbo profesional, el propósito o la utilidad de lo que haces.
+                No es un retroceso: es una recalibración.
+              </p>
+              <p className="text-gray-600 text-sm mb-3">
+                El MC te pide revisar <span className="italic">para qué</span> haces lo que haces, no solo cómo ni cuánto.
+              </p>
+            </>
+          )}
           <div className={`border-l-2 ${config.cardBorder} pl-4 mt-4`}>
             <p className={`${config.iconSecondary} text-sm font-medium`}>Aprendizaje:</p>
             <p className="text-gray-700 text-sm italic">
@@ -427,9 +441,11 @@ export const EjesDelAnio = ({ ascSign, mcSign }: EjesDelAnioProps) => {
 interface EjesDelAnio2Props {
   dscSign?: { sign: string } | null;
   icSign?: { sign: string } | null;
+  dscInterpretacion?: string;
+  icInterpretacion?: string;
 }
 
-export const EjesDelAnio2 = ({ dscSign, icSign }: EjesDelAnio2Props) => {
+export const EjesDelAnio2 = ({ dscSign, icSign, dscInterpretacion, icInterpretacion }: EjesDelAnio2Props) => {
   const { config } = useStyle();
 
   return (
@@ -453,20 +469,23 @@ export const EjesDelAnio2 = ({ dscSign, icSign }: EjesDelAnio2Props) => {
             </div>
           </div>
           <p className="text-gray-500 text-xs italic mb-3">Relaciones, vínculos, espejo emocional</p>
-          <p className="text-gray-700 text-sm leading-relaxed mb-3">
-            Este año las relaciones funcionan como espejo directo.
-            Lo que no está equilibrado se nota más.
-            Lo que es verdadero, se profundiza.
-          </p>
-          <p className="text-gray-600 text-sm mb-3">
-            No hay espacio para personajes ni acuerdos silenciosos.
-            Necesitas vínculos donde puedas ser tú sin editarte.
-          </p>
-          <p className="text-gray-600 text-sm mb-3">
-            Algunas relaciones se ajustan.
-            Otras se caen.
-            Otras se vuelven más reales.
-          </p>
+          {dscInterpretacion ? (
+            <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
+              {dscInterpretacion}
+            </p>
+          ) : (
+            <>
+              <p className="text-gray-700 text-sm leading-relaxed mb-3">
+                Este año las relaciones funcionan como espejo directo.
+                Lo que no está equilibrado se nota más.
+                Lo que es verdadero, se profundiza.
+              </p>
+              <p className="text-gray-600 text-sm mb-3">
+                No hay espacio para personajes ni acuerdos silenciosos.
+                Necesitas vínculos donde puedas ser tú sin editarte.
+              </p>
+            </>
+          )}
           <div className={`border-l-2 ${config.cardBorder} pl-4 mt-4`}>
             <p className={`${config.iconSecondary} text-sm font-medium`}>Aprendizaje:</p>
             <p className="text-gray-700 text-sm italic">
@@ -488,18 +507,22 @@ export const EjesDelAnio2 = ({ dscSign, icSign }: EjesDelAnio2Props) => {
             </div>
           </div>
           <p className="text-gray-500 text-xs italic mb-3">Hogar interno, raíces, seguridad emocional</p>
-          <p className="text-gray-700 text-sm leading-relaxed mb-3">
-            Este es el punto más sensible del año.
-            Tu sistema emocional pide descanso, refugio y contención.
-          </p>
-          <p className="text-gray-600 text-sm mb-3">
-            Necesitas espacios donde no tengas que explicar nada.
-            Donde puedas bajar la guardia.
-          </p>
-          <p className="text-gray-600 text-sm mb-3">
-            Puede aparecer una necesidad fuerte de silencio, de intimidad,
-            de reconectar contigo lejos del ruido externo.
-          </p>
+          {icInterpretacion ? (
+            <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
+              {icInterpretacion}
+            </p>
+          ) : (
+            <>
+              <p className="text-gray-700 text-sm leading-relaxed mb-3">
+                Este es el punto más sensible del año.
+                Tu sistema emocional pide descanso, refugio y contención.
+              </p>
+              <p className="text-gray-600 text-sm mb-3">
+                Necesitas espacios donde no tengas que explicar nada.
+                Donde puedas bajar la guardia.
+              </p>
+            </>
+          )}
           <div className={`border-l-2 ${config.cardBorder} pl-4 mt-4`}>
             <p className={`${config.iconSecondary} text-sm font-medium`}>Aprendizaje:</p>
             <p className="text-gray-700 text-sm italic">

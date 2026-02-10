@@ -105,6 +105,20 @@ Responde SOLO con JSON válido (sin markdown, sin backticks):
   },
 
   "comparaciones_planetarias": {
+    "ascendente": {
+      "natal": {
+        "posicion": "${natalAsc?.sign} (Ascendente natal)",
+        "descripcion": "60-80 palabras. ¿CÓMO TE PRESENTAS AL MUNDO normalmente? Tu máscara social, primera impresión, forma natural de enfrentar la vida. ${natalInterpretations?.ascendente ? 'Usa la interpretación natal guardada.' : 'Genera descripción de identidad externa permanente.'}"
+      },
+      "solar_return": {
+        "posicion": "${srAsc?.sign} en Casa ${ascSRenCasaNatal} natal (Ascendente SR)",
+        "descripcion": "60-80 palabras. ¿CÓMO TE PRESENTARÁS AL MUNDO este año? Qué energía proyectas, qué primera impresión causas. El Ascendente SR marca el ENFOQUE VITAL del año."
+      },
+      "choque": "100-120 palabras. ¿CÓMO CAMBIA TU PRESENCIA? Compara cómo te presentas normalmente (natal) vs cómo te presentarás este año (SR). Sé ESPECÍFICO: si tu ASC natal es en Libra (diplomacia, armonía) y el SR es en Escorpio (intensidad, profundidad), describe el contraste concreto.",
+      "que_hacer": "80-100 palabras. ¿CÓMO ADAPTARTE al cambio de presencia? Acción concreta basada en el contraste. NO consejos genéricos.",
+      "mandato_del_ano": "UNA FRASE DIRECTIVA (15-25 palabras). Formato: 'Este año, tu Ascendente te pide X. Si te mueves hacia Y, fluye. Si fuerzas Z, aparece tensión.'"
+    },
+
     "sol": {
       "natal": {
         "posicion": "${natalSol?.sign} en Casa ${natalSol?.house}",
@@ -248,7 +262,8 @@ Responde SOLO con JSON válido (sin markdown, sin backticks):
     {
       "mes": "febrero",
       "intensidad": 3,
-      "palabra_clave": "Transformación"
+      "palabra_clave": "Transformación",
+      "descripcion": "15-25 palabras explicando por qué este mes tiene esta energía para ESTE usuario. Conecta con sus posiciones natales y los tránsitos del mes."
     }
     // GENERA LOS 12 MESES empezando desde el mes de cumpleaños del usuario.
     // intensidad: 1-5 donde:
@@ -258,13 +273,14 @@ Responde SOLO con JSON válido (sin markdown, sin backticks):
     //   - 2 = mes tranquilo con pequeños eventos
     //   - 1 = mes muy calmado
     // palabra_clave: UNA SOLA PALABRA que capture la energía del mes (ej: "Liberación", "Introspección", "Acción", "Espera")
+    // descripcion: 15-25 PALABRAS conectando la energía del mes con las posiciones natales del usuario
   ],
 
   "meses_clave_puntos_giro": [
     {
       "mes": "Marzo",
       "evento_astrologico": "Eclipse Solar en Aries",
-      "significado_para_ti": "Este eclipse activa tu Casa X natal, marcando un punto de inflexión en tu carrera. Es el momento de soltar identidades profesionales que ya no te representan y dar paso a una nueva versión de tu liderazgo."
+      "significado_para_ti": "Este eclipse activa tu Casa X natal (donde tienes a Saturno en Capricornio), marcando un punto de inflexión en tu carrera. Con tu Sol natal en Acuario Casa 1, este tránsito te empuja a redefinir cómo te posicionas profesionalmente, soltando estructuras que ya no te representan."
     }
     // GENERA 3 MESES CRÍTICOS del año basándote en:
     //   - Eclipses que caen en casas angulares (1, 4, 7, 10) de la carta natal
@@ -274,7 +290,13 @@ Responde SOLO con JSON válido (sin markdown, sin backticks):
     // Cada mes debe tener:
     //   - mes: nombre del mes
     //   - evento_astrologico: descripción breve del evento astronómico
-    //   - significado_para_ti: 60-80 palabras explicando POR QUÉ este mes es crítico para ESTE usuario específico
+    //   - significado_para_ti: 60-80 palabras explicando POR QUÉ este mes es crítico para ESTE usuario específico.
+    //     IMPORTANTE: PERSONALIZA referenciando posiciones CONCRETAS de la carta natal del usuario:
+    //     - Menciona EN QUÉ CASA NATAL cae el evento (ej: "activa tu Casa 7 natal donde tienes a Venus")
+    //     - Conecta con los planetas natales del usuario en esa casa o signo
+    //     - Describe el IMPACTO CONCRETO en su vida basándote en la casa natal afectada
+    //     - NO uses descripciones genéricas como "será un momento de transformación"
+    //     - SÍ usa: "Este tránsito activa tu Casa [X] natal ([área de vida]), donde tienes [planeta] en [signo]"
   ],
 
   "uso_calendario_lunar": {
@@ -300,6 +322,15 @@ Responde SOLO con JSON válido (sin markdown, sin backticks):
       }
     ]
   },
+
+  "ejes": {
+    "ascendente": "40-60 palabras. Interpretación PERSONALIZADA del Ascendente SR en ${srAsc?.sign}. ¿Cómo se presenta al mundo este año? ¿Qué energía proyecta? Conecta con el ASC natal (${natalAsc?.sign}) para dar contexto de evolución.",
+    "medio_cielo": "40-60 palabras. Interpretación PERSONALIZADA del MC SR en ${srMC?.sign}. ¿Cuál es la dirección vocacional/profesional este año? ¿Qué propósito se activa? Conecta con la carta natal.",
+    "descendente": "40-60 palabras. Interpretación PERSONALIZADA del DSC (opuesto al ASC SR). ¿Cómo funcionan las relaciones este año? ¿Qué tipo de vínculos se activan?",
+    "fondo_cielo": "40-60 palabras. Interpretación PERSONALIZADA del IC (opuesto al MC SR). ¿Cómo es el hogar interno, las raíces, la seguridad emocional este año?"
+  },
+
+  "frase_guia": "Una frase guía de 15-25 palabras que integre el mensaje central de los 4 ejes. Tono observador. Ejemplo: 'Este año funciona mejor cuando cuidas tu base interna antes de proyectarte hacia fuera.'",
 
   "sintesis_final": {
     "frase_cierre_potente": "3-4 frases CORTAS Y POTENTES (60-80 palabras MÁXIMO). Tono directo, sin metáforas. Ejemplo: 'Este no es un año para demostrar quién eres. Es un año para recordarlo en silencio. Lo que no sanes ahora, te perseguirá después. Lo que integres, será tu base futura.'",

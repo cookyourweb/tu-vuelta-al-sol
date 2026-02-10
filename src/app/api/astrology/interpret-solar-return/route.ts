@@ -53,6 +53,7 @@ interface CompleteSolarReturnInterpretation {
 
   // COMPARACIONES PLANETARIAS (3 CAPAS: Natal → Solar → Acción)
   comparaciones_planetarias: {
+    ascendente: PlanetComparison;
     sol: PlanetComparison;
     luna: PlanetComparison;
     mercurio: PlanetComparison;
@@ -101,6 +102,17 @@ interface CompleteSolarReturnInterpretation {
       por_que_es_clave: string;
     }>;
   };
+
+  // EJES DEL AÑO (ASC, MC, DSC, IC interpretaciones personalizadas)
+  ejes: {
+    ascendente: string;
+    medio_cielo: string;
+    descendente: string;
+    fondo_cielo: string;
+  };
+
+  // FRASE GUÍA DEL EJE DEL AÑO
+  frase_guia: string;
 
   // SÍNTESIS FINAL
   sintesis_final: {
