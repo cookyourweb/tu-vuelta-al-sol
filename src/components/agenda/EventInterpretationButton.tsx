@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Sparkles, X, Loader2, AlertCircle, RefreshCw, Download } from 'lucide-react';
+import { Sparkles, X, Loader2, AlertCircle, RefreshCw, Download, Moon, Flame, Lightbulb, Settings, PenLine, AlertTriangle, Star, Eye, Pin, Search, ArrowRight, Leaf } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 interface EventData {
@@ -131,8 +131,9 @@ export default function EventInterpretationButton({
     if (!interpretation) return;
 
     // Crear contenido de texto para descarga
-    let content = `🌙 ${interpretation.titulo_evento || 'Evento Astrológico'}\n`;
-    content += `\n☉ ${new Date(event.date).toLocaleDateString('es-ES', {
+    const eventTitle = interpretation.titulo_evento || 'Evento Astrológico';
+    let content = `${eventTitle}\n`;
+    content += `\n${new Date(event.date).toLocaleDateString('es-ES', {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
@@ -149,20 +150,20 @@ export default function EventInterpretationButton({
     }
 
     if (interpretation.mensaje_sintesis) {
-      content += `🔥 PRIORIDAD CRÍTICA\n`;
+      content += `PRIORIDAD CRITICA\n`;
       content += `${interpretation.mensaje_sintesis}\n\n`;
       content += `${'='.repeat(60)}\n\n`;
     }
 
     if (interpretation.como_te_afecta) {
-      content += `🧠 ¿CÓMO TE AFECTA A TI?\n`;
+      content += `COMO TE AFECTA A TI\n`;
       content += `(personalizado a tu carta y a tu año)\n\n`;
       content += `${interpretation.como_te_afecta}\n\n`;
       content += `${'='.repeat(60)}\n\n`;
     }
 
     if (interpretation.interpretacion_practica && interpretation.interpretacion_practica.length > 0) {
-      content += `⚙️ INTERPRETACIÓN PRÁCTICA DEL MOMENTO\n`;
+      content += `INTERPRETACION PRACTICA DEL MOMENTO\n`;
       content += `(cruce real de energías, como lo haría un astrólogo)\n\n`;
       interpretation.interpretacion_practica.forEach((item: any) => {
         content += `${item.planeta} activo: ${item.que_pide}\n`;
@@ -174,7 +175,7 @@ export default function EventInterpretationButton({
     }
 
     if (interpretation.acciones_concretas && interpretation.acciones_concretas.length > 0) {
-      content += `✅ ACCIONES CONCRETAS PARA HOY\n\n`;
+      content += `ACCIONES CONCRETAS PARA HOY\n\n`;
       interpretation.acciones_concretas.forEach((accion: string, i: number) => {
         content += `${i + 1}. ${accion}\n`;
       });
@@ -182,7 +183,7 @@ export default function EventInterpretationButton({
     }
 
     if (interpretation.preguntas_reflexion && interpretation.preguntas_reflexion.length > 0) {
-      content += `🤔 PREGUNTAS PARA REFLEXIONAR\n\n`;
+      content += `PREGUNTAS PARA REFLEXIONAR\n\n`;
       interpretation.preguntas_reflexion.forEach((pregunta: string, i: number) => {
         content += `${i + 1}. ${pregunta}\n`;
       });
@@ -190,7 +191,7 @@ export default function EventInterpretationButton({
     }
 
     if (interpretation.perspectiva_evolutiva) {
-      content += `🌱 PERSPECTIVA EVOLUTIVA\n\n`;
+      content += `PERSPECTIVA EVOLUTIVA\n\n`;
       content += `${interpretation.perspectiva_evolutiva}\n\n`;
     }
 
@@ -201,7 +202,13 @@ export default function EventInterpretationButton({
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `interpretacion-${new Date(event.date).toISOString().split('T')[0]}.txt`;
+    // Build filename from event title
+    const safeTitle = eventTitle
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .substring(0, 60);
+    link.download = `${safeTitle}-${new Date(event.date).toISOString().split('T')[0]}.txt`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -267,7 +274,7 @@ export default function EventInterpretationButton({
 
       {/* MODAL FULLSCREEN - FORMATO AGENDA FÍSICA */}
       {showModal && interpretation && (
-        <div className="fixed inset-0 z-[250] bg-black/90 backdrop-blur-sm overflow-y-auto">
+        <div className="fixed inset-0 z-[999999] bg-black/90 backdrop-blur-sm overflow-y-auto">
           <div className="min-h-screen px-4 py-8">
             <div className="max-w-4xl mx-auto bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 rounded-2xl shadow-2xl border border-purple-500/20 mb-8">
 
@@ -275,8 +282,9 @@ export default function EventInterpretationButton({
               <div className="bg-gradient-to-r from-purple-900/90 to-pink-900/90 px-6 py-6 rounded-t-2xl border-b border-purple-400/30">
                 <div className="flex justify-between items-start gap-4">
                   <div className="flex-1">
-                    <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">
-                      🌙 {interpretation.titulo_evento || 'Evento Astrológico'}
+                    <h1 className="text-3xl md:text-4xl font-bold text-white mb-3 flex items-center gap-3">
+                      <Moon className="w-8 h-8 text-purple-300 flex-shrink-0" />
+                      {interpretation.titulo_evento || 'Evento Astrológico'}
                     </h1>
                     <p className="text-purple-200 text-sm mb-3">
                       {new Date(event.date).toLocaleDateString('es-ES', {
@@ -340,7 +348,7 @@ export default function EventInterpretationButton({
                 {interpretation.mensaje_sintesis && (
                   <div className="bg-gradient-to-r from-red-500/10 to-orange-500/10 border-l-4 border-red-400 rounded-r-xl p-6">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-2xl">🔥</span>
+                      <Flame className="w-6 h-6 text-red-300" />
                       <h2 className="text-lg font-bold text-red-200">PRIORIDAD CRÍTICA</h2>
                     </div>
                     <p className="text-white text-lg leading-relaxed whitespace-pre-line">
@@ -353,7 +361,7 @@ export default function EventInterpretationButton({
                 {interpretation.como_te_afecta && (
                   <div className="bg-gradient-to-br from-purple-900/40 to-indigo-900/40 rounded-2xl p-6 border border-purple-400/20">
                     <div className="flex items-center gap-2 mb-4">
-                      <span className="text-2xl">🧠</span>
+                      <Lightbulb className="w-6 h-6 text-purple-300" />
                       <h2 className="text-xl font-bold text-purple-100">¿CÓMO TE AFECTA A TI?</h2>
                     </div>
                     <p className="text-gray-100 text-sm text-purple-300 mb-3">(personalizado a tu carta y a tu año)</p>
@@ -367,7 +375,7 @@ export default function EventInterpretationButton({
                 {interpretation.interpretacion_practica && interpretation.interpretacion_practica.length > 0 && (
                   <div className="bg-gradient-to-br from-blue-900/30 to-cyan-900/30 rounded-2xl p-6 border border-blue-400/20">
                     <div className="flex items-center gap-2 mb-4">
-                      <span className="text-2xl">⚙️</span>
+                      <Settings className="w-6 h-6 text-blue-300" />
                       <h2 className="text-xl font-bold text-blue-100">INTERPRETACIÓN PRÁCTICA DEL MOMENTO</h2>
                     </div>
                     <p className="text-gray-100 text-sm text-blue-300 mb-4">(cruce real de energías, como lo haría un astrólogo)</p>
@@ -391,7 +399,7 @@ export default function EventInterpretationButton({
                 {interpretation.accion_concreta && (
                   <div className="bg-gradient-to-br from-green-900/30 to-emerald-900/30 rounded-2xl p-6 border border-green-400/20">
                     <div className="flex items-center gap-2 mb-4">
-                      <span className="text-2xl">✍️</span>
+                      <PenLine className="w-6 h-6 text-green-300" />
                       <h2 className="text-xl font-bold text-green-100">ACCIÓN CONCRETA PARA HOY</h2>
                     </div>
                     <p className="text-gray-100 text-sm text-green-300 mb-4">(esto es lo que la agenda te pide hacer)</p>
@@ -414,7 +422,7 @@ export default function EventInterpretationButton({
                 {interpretation.sombra_a_evitar && interpretation.sombra_a_evitar.length > 0 && (
                   <div className="bg-gradient-to-br from-orange-900/30 to-red-900/30 rounded-2xl p-6 border border-orange-400/20">
                     <div className="flex items-center gap-2 mb-4">
-                      <span className="text-2xl">⚠️</span>
+                      <AlertTriangle className="w-6 h-6 text-orange-300" />
                       <h2 className="text-xl font-bold text-orange-100">SOMBRA A EVITAR HOY</h2>
                     </div>
                     <ul className="space-y-2 text-white mb-4">
@@ -427,8 +435,8 @@ export default function EventInterpretationButton({
                     </ul>
                     {interpretation.explicacion_sombra && (
                       <div className="border-t border-orange-400/30 pt-4">
-                        <p className="text-orange-100">
-                          <span className="text-orange-200 font-semibold">👉</span> {interpretation.explicacion_sombra}
+                        <p className="text-orange-100 flex items-start gap-2">
+                          <ArrowRight className="w-4 h-4 text-orange-200 mt-1 flex-shrink-0" /> {interpretation.explicacion_sombra}
                         </p>
                       </div>
                     )}
@@ -439,7 +447,7 @@ export default function EventInterpretationButton({
                 {interpretation.frase_ancla && (
                   <div className="bg-gradient-to-r from-yellow-900/30 to-amber-900/30 rounded-2xl p-8 border border-yellow-400/20 text-center">
                     <div className="flex items-center justify-center gap-2 mb-4">
-                      <span className="text-3xl">🌟</span>
+                      <Star className="w-8 h-8 text-yellow-300" />
                       <h2 className="text-xl font-bold text-yellow-100">FRASE ANCLA DEL DÍA</h2>
                     </div>
                     <p className="text-white text-2xl font-bold italic">
@@ -452,7 +460,7 @@ export default function EventInterpretationButton({
                 {interpretation.apoyo_energetico && interpretation.apoyo_energetico.length > 0 && (
                   <div className="bg-gradient-to-br from-violet-900/30 to-purple-900/30 rounded-2xl p-6 border border-violet-400/20">
                     <div className="flex items-center gap-2 mb-4">
-                      <span className="text-2xl">🔮</span>
+                      <Eye className="w-6 h-6 text-violet-300" />
                       <h2 className="text-xl font-bold text-violet-100">APOYO ENERGÉTICO (OPCIONAL)</h2>
                     </div>
                     <p className="text-gray-100 text-sm text-violet-300 mb-4">(herramientas que amplifican la intención)</p>
@@ -479,7 +487,7 @@ export default function EventInterpretationButton({
                 {interpretation.cierre_dia && (
                   <div className="bg-gradient-to-r from-pink-900/30 to-rose-900/30 rounded-2xl p-6 border border-pink-400/20">
                     <div className="flex items-center gap-2 mb-4">
-                      <span className="text-2xl">📌</span>
+                      <Pin className="w-6 h-6 text-pink-300" />
                       <h2 className="text-xl font-bold text-pink-100">CIERRE DEL DÍA</h2>
                     </div>
                     <p className="text-white text-lg leading-relaxed whitespace-pre-line">
@@ -492,7 +500,7 @@ export default function EventInterpretationButton({
                 {interpretation.analisis_tecnico && (
                   <details className="bg-slate-800/50 rounded-xl p-4 border border-slate-600/30">
                     <summary className="text-slate-300 font-semibold cursor-pointer hover:text-white flex items-center gap-2">
-                      <span className="text-lg">🔍</span>
+                      <Search className="w-5 h-5" />
                       Análisis Técnico (Detalles)
                     </summary>
                     <div className="mt-4 space-y-2 text-slate-400 text-sm">
@@ -518,7 +526,7 @@ export default function EventInterpretationButton({
               <div className="px-6 py-4 border-t border-purple-400/30 bg-slate-900/50 rounded-b-2xl">
                 <div className="flex justify-between items-center">
                   <p className="text-slate-400 text-sm">
-                    💫 Interpretación personalizada generada con IA
+                    <Sparkles className="w-4 h-4 inline mr-1" /> Interpretación personalizada generada con IA
                   </p>
                   <button
                     onClick={handleClose}

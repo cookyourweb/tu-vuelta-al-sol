@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar } from 'lucide-react';
+import { Calendar, Target, Zap, Star, Flame, AlertTriangle, Gift, Moon, Lightbulb } from 'lucide-react';
 import SectionNavigation from './SectionNavigation';
 import { getMonthWithYear, formatDate } from './helpers';
 
@@ -43,7 +43,7 @@ export default function SolarReturnTimelineSection({
               </div>
               <div className="flex-1 bg-gradient-to-br from-rose-900/60 to-rose-800/60 backdrop-blur-sm rounded-2xl p-5 md:p-6 border border-rose-400/30 shadow-lg hover:shadow-rose-500/20 transition-all duration-300 hover:scale-105">
                 <h4 className="text-rose-100 font-bold text-lg md:text-xl mb-3 flex items-center gap-2">
-                  <span className="text-2xl">🎯</span>
+                  <Target className="w-6 h-6 text-rose-200" />
                   Activación del Ciclo Anual
                 </h4>
                 <p className="text-rose-200 text-sm md:text-base mb-3 font-medium flex items-center gap-2">
@@ -65,7 +65,7 @@ export default function SolarReturnTimelineSection({
               </div>
               <div className="flex-1 bg-gradient-to-br from-orange-900/60 to-orange-800/60 backdrop-blur-sm rounded-2xl p-5 md:p-6 border border-orange-400/30 shadow-lg hover:shadow-orange-500/20 transition-all duration-300 hover:scale-105">
                 <h4 className="text-orange-100 font-bold text-lg md:text-xl mb-3 flex items-center gap-2">
-                  <span className="text-2xl">⚡</span>
+                  <Zap className="w-6 h-6 text-orange-200" />
                   Primera Cuadratura Solar
                 </h4>
                 <p className="text-orange-200 text-sm md:text-base mb-3 font-medium">
@@ -87,7 +87,7 @@ export default function SolarReturnTimelineSection({
               </div>
               <div className="flex-1 bg-gradient-to-br from-green-900/60 to-green-800/60 backdrop-blur-sm rounded-2xl p-5 md:p-6 border border-green-400/30 shadow-lg hover:shadow-green-500/20 transition-all duration-300 hover:scale-105">
                 <h4 className="text-green-100 font-bold text-lg md:text-xl mb-3 flex items-center gap-2">
-                  <span className="text-2xl">🌟</span>
+                  <Star className="w-6 h-6 text-green-200" />
                   Trígono Solar - Flujo Cósmico
                 </h4>
                 <p className="text-green-200 text-sm md:text-base mb-3 font-medium">
@@ -109,12 +109,12 @@ export default function SolarReturnTimelineSection({
               </div>
               <div className="flex-1 bg-gradient-to-br from-red-900/70 to-red-800/70 backdrop-blur-sm rounded-2xl p-5 md:p-6 border-2 border-red-400/50 shadow-2xl hover:shadow-red-500/30 transition-all duration-300 hover:scale-105">
                 <h4 className="text-red-100 font-black text-lg md:text-xl mb-3 flex items-center gap-2">
-                  <span className="text-2xl">🔥</span>
+                  <Flame className="w-6 h-6 text-red-200" />
                   OPOSICIÓN SOLAR - Momento de Verdad Definitivo
                 </h4>
                 <div className="inline-block bg-red-600/30 border border-red-400/40 rounded-full px-3 py-1 mb-3">
                   <p className="text-red-200 text-xs md:text-sm font-bold">
-                    ⚠️ CRÍTICO - Revelación Total
+<AlertTriangle className="w-3 h-3 inline mr-1" /> CRÍTICO - Revelación Total
                   </p>
                 </div>
                 <p className="text-red-50 text-sm md:text-base leading-relaxed">
@@ -133,7 +133,7 @@ export default function SolarReturnTimelineSection({
               </div>
               <div className="flex-1 bg-gradient-to-br from-yellow-900/60 to-yellow-800/60 backdrop-blur-sm rounded-2xl p-5 md:p-6 border border-yellow-400/30 shadow-lg hover:shadow-yellow-500/20 transition-all duration-300 hover:scale-105">
                 <h4 className="text-yellow-100 font-bold text-lg md:text-xl mb-3 flex items-center gap-2">
-                  <span className="text-2xl">🎁</span>
+                  <Gift className="w-6 h-6 text-yellow-200" />
                   Cosecha Visible
                 </h4>
                 <p className="text-yellow-200 text-sm md:text-base mb-3 font-medium">
@@ -155,7 +155,7 @@ export default function SolarReturnTimelineSection({
               </div>
               <div className="flex-1 bg-gradient-to-br from-purple-900/60 to-purple-800/60 backdrop-blur-sm rounded-2xl p-5 md:p-6 border border-purple-400/30 shadow-lg hover:shadow-purple-500/20 transition-all duration-300 hover:scale-105">
                 <h4 className="text-purple-100 font-bold text-lg md:text-xl mb-3 flex items-center gap-2">
-                  <span className="text-2xl">🌙</span>
+                  <Moon className="w-6 h-6 text-purple-200" />
                   Cierre e Integración
                 </h4>
                 <p className="text-purple-200 text-sm md:text-base mb-3 font-medium flex items-center gap-2">
@@ -173,7 +173,7 @@ export default function SolarReturnTimelineSection({
         <div className="mt-10 bg-gradient-to-r from-purple-900/50 to-pink-900/50 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-purple-400/30">
           <div className="flex items-start gap-4">
             <div className="bg-purple-600/30 rounded-full p-3 flex-shrink-0">
-              <span className="text-3xl">💡</span>
+              <Lightbulb className="w-8 h-8 text-purple-200" />
             </div>
             <div>
               <h4 className="text-purple-100 font-bold text-lg mb-2">

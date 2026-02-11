@@ -1,4 +1,5 @@
 import React from 'react';
+import { Star, Target, Sparkles, MessageCircle } from 'lucide-react';
 import SectionNavigation from './SectionNavigation';
 import { formatDate } from './helpers';
 
@@ -17,7 +18,7 @@ export default function SolarReturnIntegrationSection({
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-block bg-gradient-to-r from-emerald-600/30 to-teal-600/30 backdrop-blur-sm rounded-2xl px-6 py-3 mb-4 border border-emerald-400/30">
-            <span className="text-4xl">🌟</span>
+            <Star className="w-10 h-10 text-emerald-300" />
           </div>
           <h3 className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-300 mb-3">
             Integración Final
@@ -31,7 +32,7 @@ export default function SolarReturnIntegrationSection({
         <div className="space-y-6">
           <div className="bg-gradient-to-r from-emerald-800/40 to-teal-800/40 backdrop-blur-sm rounded-2xl p-6 border border-emerald-400/20">
             <h4 className="text-emerald-100 font-bold text-xl mb-4 flex items-center gap-2">
-              <span className="text-2xl">💭</span>
+              <MessageCircle className="w-6 h-6 text-emerald-200" />
               Síntesis del Año
             </h4>
             <p className="text-emerald-50 text-base leading-relaxed">
@@ -43,7 +44,7 @@ export default function SolarReturnIntegrationSection({
 
           <div className="bg-gradient-to-r from-teal-800/40 to-emerald-800/40 backdrop-blur-sm rounded-2xl p-6 border border-teal-400/20">
             <h4 className="text-teal-100 font-bold text-xl mb-4 flex items-center gap-2">
-              <span className="text-2xl">🎯</span>
+              <Target className="w-6 h-6 text-teal-200" />
               Tu Poder de Elección
             </h4>
             <p className="text-teal-50 text-base leading-relaxed">
@@ -56,7 +57,7 @@ export default function SolarReturnIntegrationSection({
 
           <div className="bg-gradient-to-br from-emerald-900/60 to-teal-900/60 backdrop-blur-sm rounded-2xl p-8 border-2 border-emerald-400/40">
             <h4 className="text-emerald-100 font-bold text-xl mb-4 flex items-center gap-2 justify-center">
-              <span className="text-2xl">💫</span>
+              <Sparkles className="w-6 h-6 text-emerald-200" />
               Pregunta para Reflexionar
             </h4>
             <p className="text-emerald-50 text-lg md:text-xl font-semibold text-center italic leading-relaxed">
@@ -68,7 +69,7 @@ export default function SolarReturnIntegrationSection({
 
           <div className="text-center mt-8">
             <p className="text-emerald-200 text-sm">
-              ✨ Tu revolución personal ya comenzó ✨
+Tu revolución personal ya comenzó
             </p>
           </div>
         </div>

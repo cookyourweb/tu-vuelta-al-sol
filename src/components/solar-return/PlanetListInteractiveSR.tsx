@@ -46,8 +46,8 @@ export const PlanetListInteractiveSR: React.FC<PlanetListInteractiveSRProps> = (
 
   // Mapeo de símbolos de planetas
   const planetSymbols: Record<string, string> = {
-    sol: '☀️',
-    luna: '🌙',
+    sol: '☉',
+    luna: '☽',
     mercurio: '☿',
     venus: '♀',
     marte: '♂',
@@ -61,7 +61,7 @@ export const PlanetListInteractiveSR: React.FC<PlanetListInteractiveSRProps> = (
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold text-white mb-4">
-        🪐 Planetas del Retorno Solar {returnYear}
+        Planetas del Retorno Solar {returnYear}
       </h2>
       <p className="text-gray-300 text-sm mb-6">
         Haz clic en cualquier planeta para ver su interpretación profesional personalizada (8 secciones)

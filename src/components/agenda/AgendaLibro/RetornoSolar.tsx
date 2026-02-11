@@ -2,7 +2,7 @@
 
 import { useStyle } from "@/context/StyleContext";
 import { FooterLibro } from './MesCompleto';
-import { Check, PenLine, Sunrise } from 'lucide-react';
+import { Check, PenLine } from 'lucide-react';
 
 export const QueEsRetornoSolar = () => {
   const { config } = useStyle();
@@ -91,7 +91,7 @@ export const AscendenteAnio: React.FC<AscendenteAnioProps> = ({ ascSign, natalAs
   return (
     <div className={`print-page bg-white p-12 flex flex-col ${config.pattern}`}>
       <div className="text-center mb-8">
-        <Sunrise className={`${config.iconSecondary} w-10 h-10 mx-auto`} />
+        <span className={`${config.iconSecondary} text-2xl font-black tracking-wider`}>ASC</span>
         <h2 className={`${config.fontDisplay} text-3xl ${config.titleGradient} mt-4`}>Ascendente del Retorno</h2>
         <p className={`text-gray-500 mt-2 ${config.fontBody}`}>{signo}{grado} – Casa 1 (identidad, enfoque vital)</p>
         <div className={`${config.divider} w-16 mx-auto mt-4`} />
@@ -103,7 +103,7 @@ export const AscendenteAnio: React.FC<AscendenteAnioProps> = ({ ascSign, natalAs
             {/* Ascendente Natal */}
             <div className={`${config.highlightPrimary} rounded-lg p-6`}>
               <h3 className={`${config.fontDisplay} ${config.iconPrimary} font-medium mb-3 flex items-center gap-2`}>
-                <Sunrise className="w-5 h-5" />
+                <span className="text-xs font-black">ASC</span>
                 Tu Ascendente Natal
               </h3>
               <p className={`text-xs ${config.iconSecondary} mb-2`}>{comparacion.natal.posicion}</p>
@@ -358,7 +358,7 @@ export const EjesDelAnio = ({ ascSign, mcSign, ascInterpretacion, mcInterpretaci
         {/* ASC */}
         <div className={`${config.highlightPrimary} rounded-lg p-6`}>
           <div className="flex items-center gap-3 mb-3">
-            <Sunrise className={`${config.iconSecondary} w-6 h-6`} />
+            <span className={`${config.iconSecondary} text-sm font-black`}>ASC</span>
             <div>
               <span className={`${config.fontDisplay} ${config.iconPrimary} font-medium`}>Ascendente del Retorno</span>
               {ascSign && (

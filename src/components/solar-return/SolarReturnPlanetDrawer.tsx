@@ -10,6 +10,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import { Sun, Moon, MessageSquare, Heart, Swords, Target, Mountain, Zap, Diamond, ArrowLeftRight, CheckCircle, AlertTriangle, Calendar, Circle, RotateCcw, Star } from 'lucide-react';
 import type { ComparacionPlanetaria } from '@/types/astrology/interpretation';
 
 // =============================================================================
@@ -68,17 +69,17 @@ export const SolarReturnPlanetDrawer: React.FC<SolarReturnPlanetDrawerProps> = (
   // =========================================================================
   // 🎨 ICONOS POR PLANETA
   // =========================================================================
-  const planetIcons: Record<string, string> = {
-    sol: '☀️',
-    luna: '🌙',
-    mercurio: '🗣️',
-    venus: '💚',
-    marte: '⚔️',
-    jupiter: '🎯',
-    saturno: '🏔️'
+  const planetIconComponents: Record<string, React.ReactNode> = {
+    sol: <Sun className="w-7 h-7 text-yellow-300" />,
+    luna: <Moon className="w-7 h-7 text-blue-200" />,
+    mercurio: <MessageSquare className="w-7 h-7 text-cyan-300" />,
+    venus: <Heart className="w-7 h-7 text-green-300" />,
+    marte: <Swords className="w-7 h-7 text-red-300" />,
+    jupiter: <Target className="w-7 h-7 text-orange-300" />,
+    saturno: <Mountain className="w-7 h-7 text-gray-300" />
   };
 
-  const planetIcon = planetIcons[planetName.toLowerCase()] || '⭐';
+  const planetIcon = planetIconComponents[planetName.toLowerCase()] || <Star className="w-7 h-7 text-purple-300" />;
   const planetTitle = planetName.charAt(0).toUpperCase() + planetName.slice(1);
 
   // =========================================================================
@@ -98,7 +99,7 @@ export const SolarReturnPlanetDrawer: React.FC<SolarReturnPlanetDrawerProps> = (
         {/* Header fijo */}
         <div className="sticky top-0 bg-purple-900/95 backdrop-blur-md p-4 md:p-6 border-b border-purple-700/50 flex justify-between items-center z-10 shadow-lg">
           <div className="flex items-center gap-3">
-            <span className="text-3xl">{planetIcon}</span>
+            {planetIcon}
             <h2 className="text-xl md:text-2xl font-bold text-white">{planetTitle}</h2>
           </div>
           <button
@@ -116,7 +117,7 @@ export const SolarReturnPlanetDrawer: React.FC<SolarReturnPlanetDrawerProps> = (
           {/* FRASE CLAVE DEL AÑO - Destacada al inicio */}
           <section className="bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg p-4 md:p-5 shadow-xl">
             <h3 className="text-sm font-bold mb-2 flex items-center gap-2 text-black/80 uppercase tracking-wide">
-              <span>⚡</span> FRASE CLAVE DEL AÑO
+              <Zap className="w-5 h-5" /> FRASE CLAVE DEL AÑO
             </h3>
             <blockquote className="text-lg md:text-xl font-bold italic text-white leading-tight">
               "{comparacion.frase_clave}"
@@ -128,7 +129,7 @@ export const SolarReturnPlanetDrawer: React.FC<SolarReturnPlanetDrawerProps> = (
           {/* 1️⃣ CÓMO ERES NORMALMENTE (Natal) */}
           <section>
             <h3 className="text-lg md:text-xl font-bold mb-3 flex items-center gap-2 text-purple-200">
-              <span className="text-2xl">🔹</span> CÓMO ERES NORMALMENTE
+              <Diamond className="w-6 h-6 text-purple-300" /> CÓMO ERES NORMALMENTE
             </h3>
             <div className="bg-purple-800/20 rounded-lg p-4 border border-purple-700/30">
               <p className="text-sm font-mono text-purple-300 mb-2">{comparacion.natal.posicion}</p>
@@ -143,7 +144,7 @@ export const SolarReturnPlanetDrawer: React.FC<SolarReturnPlanetDrawerProps> = (
           {/* 2️⃣ QUÉ SE ACTIVA ESTE AÑO (Solar Return) */}
           <section>
             <h3 className="text-lg md:text-xl font-bold mb-3 flex items-center gap-2 text-orange-200">
-              <span className="text-2xl">🔸</span> QUÉ SE ACTIVA ESTE AÑO
+              <Diamond className="w-6 h-6 text-orange-300" /> QUÉ SE ACTIVA ESTE AÑO
             </h3>
             <div className="bg-orange-900/20 rounded-lg p-4 border border-orange-700/30">
               <p className="text-sm font-mono text-orange-300 mb-2">{comparacion.solar_return.posicion}</p>
@@ -158,7 +159,7 @@ export const SolarReturnPlanetDrawer: React.FC<SolarReturnPlanetDrawerProps> = (
           {/* 3️⃣ DÓNDE CHOCA O POTENCIA */}
           <section>
             <h3 className="text-lg md:text-xl font-bold mb-3 flex items-center gap-2 text-yellow-200">
-              <span className="text-2xl">🔁</span> DÓNDE CHOCA O POTENCIA
+              <ArrowLeftRight className="w-6 h-6 text-yellow-300" /> DÓNDE CHOCA O POTENCIA
             </h3>
             <div className="bg-yellow-900/20 rounded-lg p-4 border border-yellow-700/30">
               <p className="text-sm md:text-base text-gray-200 leading-relaxed">
@@ -172,7 +173,7 @@ export const SolarReturnPlanetDrawer: React.FC<SolarReturnPlanetDrawerProps> = (
           {/* 4️⃣ QUÉ HACER (Acción Concreta) */}
           <section>
             <h3 className="text-lg md:text-xl font-bold mb-3 flex items-center gap-2 text-green-200">
-              <span className="text-2xl">✅</span> QUÉ CONVIENE HACER AHORA
+              <CheckCircle className="w-6 h-6 text-green-300" /> QUÉ CONVIENE HACER AHORA
             </h3>
             <div className="bg-green-900/20 rounded-lg p-4 border border-green-700/30">
               <p className="text-sm md:text-base text-gray-200 leading-relaxed">
@@ -186,7 +187,7 @@ export const SolarReturnPlanetDrawer: React.FC<SolarReturnPlanetDrawerProps> = (
           {/* ERROR AUTOMÁTICO */}
           <section className="bg-red-900/20 rounded-lg p-4 border border-red-700/50">
             <h3 className="text-base font-bold mb-2 flex items-center gap-2 text-red-200">
-              <span className="text-xl">⚠️</span> ERROR AUTOMÁTICO DEL AÑO
+              <AlertTriangle className="w-5 h-5 text-red-300" /> ERROR AUTOMÁTICO DEL AÑO
             </h3>
             <p className="text-sm md:text-base text-red-100 italic">
               {comparacion.error_automatico}
@@ -198,13 +199,13 @@ export const SolarReturnPlanetDrawer: React.FC<SolarReturnPlanetDrawerProps> = (
           {/* 5️⃣ CÓMO USAR EN AGENDA (Layer 3) */}
           <section>
             <h3 className="text-lg md:text-xl font-bold mb-3 flex items-center gap-2 text-white">
-              <span className="text-2xl">📅</span> CÓMO USAR EN TU AGENDA
+              <Calendar className="w-6 h-6 text-white" /> CÓMO USAR EN TU AGENDA
             </h3>
 
             {/* Luna Nueva */}
             <div className="mb-4 bg-indigo-900/30 rounded-lg p-4 border border-indigo-700/30">
               <h4 className="font-bold text-base mb-2 text-indigo-200 flex items-center gap-2">
-                <span>🌑</span> Luna Nueva (Inicio de ciclos)
+                <Circle className="w-4 h-4 fill-current" /> Luna Nueva (Inicio de ciclos)
               </h4>
               <p className="text-sm text-gray-300 leading-relaxed">
                 {comparacion.uso_agenda.luna_nueva}
@@ -214,7 +215,7 @@ export const SolarReturnPlanetDrawer: React.FC<SolarReturnPlanetDrawerProps> = (
             {/* Luna Llena */}
             <div className="mb-4 bg-indigo-900/30 rounded-lg p-4 border border-indigo-700/30">
               <h4 className="font-bold text-base mb-2 text-indigo-200 flex items-center gap-2">
-                <span>🌕</span> Luna Llena (Revisión y liberación)
+                <Circle className="w-4 h-4" /> Luna Llena (Revisión y liberación)
               </h4>
               <p className="text-sm text-gray-300 leading-relaxed">
                 {comparacion.uso_agenda.luna_llena}
@@ -224,7 +225,7 @@ export const SolarReturnPlanetDrawer: React.FC<SolarReturnPlanetDrawerProps> = (
             {/* Retrogradaciones */}
             <div className="bg-indigo-900/30 rounded-lg p-4 border border-indigo-700/30">
               <h4 className="font-bold text-base mb-2 text-indigo-200 flex items-center gap-2">
-                <span>↩️</span> Retrogradaciones
+                <RotateCcw className="w-4 h-4" /> Retrogradaciones
               </h4>
               <p className="text-sm text-gray-300 leading-relaxed">
                 {comparacion.uso_agenda.retrogradaciones}
