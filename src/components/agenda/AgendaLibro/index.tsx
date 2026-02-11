@@ -263,60 +263,56 @@ export const AgendaLibro = ({
         return;
       }
 
-      // 1. Obtener birth data (con reintento si falla)
+      // 1. Obtener birth data (SIEMPRE existe - prerequisito del dashboard)
       console.log('📍 [AUTO_GEN] Obteniendo birth data...');
-      let birthDataResponse = await fetch(`/api/birth-data?userId=${userId}`);
+      const birthDataResponse = await fetch(`/api/birth-data?userId=${userId}`);
       if (!birthDataResponse.ok) {
-        // Reintentar una vez después de 1 segundo (puede ser error transitorio de BD)
-        console.warn('⚠️ [AUTO_GEN] Primer intento de birth data falló, reintentando...');
-        await new Promise(r => setTimeout(r, 1000));
-        birthDataResponse = await fetch(`/api/birth-data?userId=${userId}`);
-        if (!birthDataResponse.ok) {
-          throw new Error('No se encontraron datos de nacimiento. Ve a la página de Nacimiento para completarlos.');
-        }
+        throw new Error('Error temporal al cargar datos de nacimiento. Inténtalo de nuevo.');
       }
       const birthDataResult = await birthDataResponse.json();
       const birthData = birthDataResult.data || birthDataResult.birthData;
-
       if (!birthData) {
-        console.error('❌ [AUTO_GEN] Birth data no encontrada en respuesta:', birthDataResult);
-        throw new Error('Birth data no encontrada en la respuesta del servidor');
+        throw new Error('Error temporal al cargar datos de nacimiento. Inténtalo de nuevo.');
       }
       console.log('✅ [AUTO_GEN] Birth data obtenida:', { fullName: birthData.fullName, birthPlace: birthData.birthPlace });
 
-      // 2. Obtener carta natal
+      // 2. Obtener carta natal (SIEMPRE existe - prerequisito del dashboard)
       console.log('🌟 [AUTO_GEN] Obteniendo carta natal...');
       const natalResponse = await fetch(`/api/charts/natal?userId=${userId}`);
       if (!natalResponse.ok) {
-        throw new Error('No se encontró la carta natal');
+        throw new Error('Error temporal al cargar carta natal. Inténtalo de nuevo.');
       }
       const natalData = await natalResponse.json();
-      // ✅ FIX: Buscar en el campo correcto
       const natalChart = natalData.natalChart || natalData.chart || natalData.data?.chart;
-
       if (!natalChart) {
-        console.error('❌ [AUTO_GEN] Carta natal no encontrada en respuesta:', natalData);
-        throw new Error('Carta natal no encontrada en la respuesta del servidor');
+        throw new Error('Error temporal al cargar carta natal. Inténtalo de nuevo.');
       }
       console.log('✅ [AUTO_GEN] Carta natal obtenida correctamente');
 
-      // 3. Generar carta de Solar Return
-      console.log('☀️ [AUTO_GEN] Generando carta de Solar Return...');
-      const srChartResponse = await fetch(`/api/charts/solar-return?userId=${userId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId })
-      });
-      if (!srChartResponse.ok) {
-        throw new Error('Error al generar carta de Solar Return');
+      // 3. Obtener carta de Solar Return (SIEMPRE existe - prerequisito del dashboard)
+      console.log('☀️ [AUTO_GEN] Obteniendo carta de Solar Return...');
+      let solarReturnChart = null;
+      const srChartResponse = await fetch(`/api/charts/solar-return?userId=${userId}`);
+      if (srChartResponse.ok) {
+        const srChartData = await srChartResponse.json();
+        solarReturnChart = srChartData.data?.solarReturnChart || srChartData.solarReturnChart || srChartData.chart;
       }
-      const srChartData = await srChartResponse.json();
-      // ✅ FIX: Buscar en el campo correcto
-      const solarReturnChart = srChartData.data?.solarReturnChart || srChartData.solarReturnChart || srChartData.chart;
-
       if (!solarReturnChart) {
-        console.error('❌ [AUTO_GEN] Carta SR no encontrada en respuesta:', srChartData);
-        throw new Error('Carta Solar Return no encontrada en la respuesta del servidor');
+        // SR chart puede no existir para un nuevo ciclo - regenerar
+        console.log('🔄 [AUTO_GEN] SR chart no encontrada para este ciclo, regenerando...');
+        const regenResponse = await fetch(`/api/charts/solar-return?userId=${userId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        });
+        if (!regenResponse.ok) {
+          throw new Error('Error al obtener carta de Solar Return. Inténtalo de nuevo.');
+        }
+        const regenData = await regenResponse.json();
+        solarReturnChart = regenData.data?.solarReturnChart || regenData.solarReturnChart || regenData.chart;
+      }
+      if (!solarReturnChart) {
+        throw new Error('Error al obtener carta de Solar Return. Inténtalo de nuevo.');
       }
       console.log('✅ [AUTO_GEN] Carta Solar Return obtenida correctamente');
 
@@ -384,7 +380,8 @@ export const AgendaLibro = ({
 
     } catch (error: any) {
       console.error('❌ [AUTO_GEN] Error al generar Solar Return:', error);
-      alert(`Error al generar Solar Return: ${error.message}\n\nPor favor, intenta generar manualmente desde la página de Solar Return.`);
+      // No mostrar alert - los datos de nacimiento y carta natal siempre existen
+      // Solo loguear el error, el usuario puede recargar la página
     } finally {
       setGeneratingSolarReturn(false);
     }

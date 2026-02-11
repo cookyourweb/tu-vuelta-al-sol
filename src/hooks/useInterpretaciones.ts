@@ -96,19 +96,18 @@ export function useInterpretaciones({
       );
 
       if (!cycleResponse.ok) {
-        const errorData = await cycleResponse.json().catch(() => ({}));
-        if (errorData.error?.includes('datos de nacimiento')) {
-          throw new Error('Necesitas completar tus datos de nacimiento primero.');
-        }
         // Si el ciclo específico no existe (404), no es un error fatal
-        // El ciclo puede no haberse generado aún
+        // El ciclo puede no haberse generado aún para este yearLabel
         if (cycleResponse.status === 404) {
           console.warn(`⚠️ Ciclo ${yearLabel} no encontrado. Puede que aún no se haya generado.`);
           setSolarCycle(null);
           setLoading(false);
           return;
         }
-        throw new Error(errorData.error || 'No se encontró el ciclo solar. Asegúrate de haberlo generado primero.');
+        // Error del servidor (500, etc.) - error temporal
+        const errorData = await cycleResponse.json().catch(() => ({}));
+        console.error('Error al cargar ciclo solar:', errorData);
+        throw new Error('Error temporal al cargar el ciclo solar. Inténtalo de nuevo.');
       }
 
       const cycleData = await cycleResponse.json();
