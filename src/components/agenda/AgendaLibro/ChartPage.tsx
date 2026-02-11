@@ -43,6 +43,10 @@ export const ChartPage: React.FC<ChartPageProps> = ({
   const noopStr = (_s: string | null) => {};
   const noopNum = (_n: number | null) => {};
 
+  // Filtrar aspectos: solo pasar los que tienen config (formato ChartWheel)
+  // Los aspectos de la BD no tienen config → se muestran planetas/casas sin líneas
+  const safeAspects = aspects.filter(a => a.config && a.config.color && a.config.difficulty);
+
   return (
     <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '12mm' }}>
       {/* Header */}
@@ -68,8 +72,8 @@ export const ChartPage: React.FC<ChartPageProps> = ({
           <ChartWheel
             planets={planets}
             houses={houses}
-            calculatedAspects={aspects}
-            showAspects={true}
+            calculatedAspects={safeAspects}
+            showAspects={safeAspects.length > 0}
             selectedAspectTypes={{ major: true, minor: false, hard: true, easy: true }}
             hoveredAspect={null}
             setHoveredAspect={noopStr}
