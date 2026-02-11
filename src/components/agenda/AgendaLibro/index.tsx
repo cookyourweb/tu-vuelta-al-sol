@@ -224,12 +224,19 @@ export const AgendaLibro = ({
         const data = await response.json();
 
         const chart = data.data?.solarReturnChart || data.solarReturnChart || data.chart;
+        const srInfo = data.data?.solarReturnInfo || data.solarReturnInfo;
         if (chart) {
-          console.log('✅ [SR_CHART] Carta SR cargada:', {
-            ascendant: chart.ascendant?.sign,
-            midheaven: chart.midheaven?.sign,
-            houses: chart.houses?.length
-          });
+          const source = data.data?.source || 'unknown';
+          const isFallback = chart.isFallback === true;
+          const srYear = chart.solarReturnInfo?.year || srInfo?.year;
+          const srType = chart.solarReturnInfo?.type || 'unknown';
+
+          if (isFallback) {
+            console.warn(`⚠️ [SR_CHART] FALLBACK detectado - ProKerala falló. Datos NO son reales. ASC=${chart.ascendant?.sign} ${chart.ascendant?.degree}° (hardcoded)`);
+          } else {
+            console.log(`✅ [SR_CHART] Carta SR REAL cargada: ASC=${chart.ascendant?.sign} ${chart.ascendant?.degree}°, MC=${chart.midheaven?.sign}, año=${srYear}, source=${source}`);
+          }
+
           setSolarReturnChart(chart);
         } else {
           console.log('⚠️ [SR_CHART] No se encontró carta Solar Return');
@@ -1899,6 +1906,7 @@ export const AgendaLibro = ({
               planets={solarReturnChart.planets}
               houses={solarReturnChart.houses}
               pagina={22}
+              isFallback={solarReturnChart.isFallback === true}
             />
           ) : (
             <ChartPlaceholderPage chartType="solar-return" pagina={22} />

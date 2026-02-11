@@ -3,7 +3,7 @@
 import React, { useMemo } from 'react';
 import { useStyle } from '@/context/StyleContext';
 import { FooterLibro } from './MesCompleto';
-import { Star, Sun } from 'lucide-react';
+import { Star, Sun, AlertTriangle } from 'lucide-react';
 import ChartWheel from '@/components/astrology/ChartWheel';
 import { Planet, House } from '@/types/astrology/chartDisplay';
 import { calculateAspects, convertAstrologicalDegreeToPosition } from '@/services/chartCalculationsService';
@@ -15,6 +15,7 @@ interface ChartPageProps {
   title?: string;
   subtitle?: string;
   pagina?: number;
+  isFallback?: boolean;
 }
 
 /**
@@ -27,7 +28,8 @@ export const ChartPage: React.FC<ChartPageProps> = ({
   houses,
   title,
   subtitle,
-  pagina = 0
+  pagina = 0,
+  isFallback = false
 }) => {
   const { config } = useStyle();
 
@@ -73,6 +75,16 @@ export const ChartPage: React.FC<ChartPageProps> = ({
           {subtitle || defaultSubtitle}
         </p>
       </div>
+
+      {/* Aviso fallback */}
+      {isFallback && (
+        <div className="bg-amber-50 border border-amber-300 rounded-lg px-3 py-2 mb-2 flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" />
+          <p className="text-[9px] text-amber-700">
+            Carta provisional — el servicio de cálculo no estaba disponible. Regenera tu Retorno Solar desde la web para obtener datos reales.
+          </p>
+        </div>
+      )}
 
       {/* Chart */}
       <div className="flex-1 flex items-center justify-center">

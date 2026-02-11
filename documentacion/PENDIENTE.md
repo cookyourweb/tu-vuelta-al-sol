@@ -170,6 +170,19 @@ El GET devolvia el chart cached sin verificar si era del año correcto.
 Si no coincide, regenera con ProKerala para el año correcto.
 **Archivo:** `src/app/api/charts/solar-return/route.ts`
 
+### Bug: Fallback SR se cacheaba envenenando la DB
+**Estado:** CORREGIDO (11 feb 2026)
+**Causa:** Cuando ProKerala fallaba, el fallback (Libra 27° hardcoded) se guardaba en
+`Chart.solarReturnChart` igual que datos reales. La proxima peticion encontraba este fallback
+en cache con el año correcto y lo devolvia sin reintentar ProKerala.
+**Resultado:** El SR siempre mostraba los mismos datos (Libra 27° ASC) porque el fallback
+estaba cached permanentemente.
+**Fix:**
+1. Los fallback NO se guardan en DB (solo datos reales de ProKerala)
+2. Si el cache contiene un fallback (isFallback=true), se elimina y se reintenta ProKerala
+3. Logging detallado para distinguir source: prokerala/fallback/existing
+**Archivo:** `src/app/api/charts/solar-return/route.ts`
+
 ### Bug: SR Interpretacion se reutilizaba entre ciclos
 **Estado:** CORREGIDO (11 feb 2026)
 **Causa:** Modelo `Interpretation` no tenia campo `cycleYear`/`yearLabel`. Todas las queries

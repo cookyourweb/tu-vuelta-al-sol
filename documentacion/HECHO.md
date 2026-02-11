@@ -137,6 +137,14 @@ El Solar Return va de cumpleaños a cumpleaños (NO año calendario):
 - ✅ ProKerala recibe `solar_return_year` correcto → cada año tiene ascendente diferente
 - **Causa**: `Chart.solarReturnChart` es un solo campo por usuario, sin control de año
 
+**BUG CRITICO: Fallback SR se cacheaba en DB (datos siempre iguales):**
+- ✅ Los fallback (cuando ProKerala falla) YA NO se guardan en MongoDB
+- ✅ Si el cache contiene un fallback, se elimina y se reintenta ProKerala
+- ✅ Solo se cachean datos REALES de ProKerala
+- ✅ Logging detallado: source=prokerala/fallback/existing, isFallback, ASC/MC
+- ✅ Indicador visual en ChartPage del libro cuando el chart es fallback
+- **Causa**: `generateSolarReturnFallback()` se guardaba en `Chart.solarReturnChart` igual que datos reales
+
 **Emojis → Lucide Icons (8 archivos):**
 - ✅ SolarReturnTimelineSection: Target, Zap, Star, Flame, AlertTriangle, Gift, Moon, Lightbulb
 - ✅ SectionNavigation: Star, Sparkles, CircleDot, Calendar, Orbit

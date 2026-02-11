@@ -373,10 +373,13 @@ export async function GET(request: NextRequest) {
       });
 
       if (existingChart?.solarReturnChart) {
-        // ✅ VERIFICAR que el SR cached sea del año correcto
         const cachedYear = existingChart.solarReturnChart?.solarReturnInfo?.year;
-        if (cachedYear === solarReturnInfo.year) {
-          console.log(`✅ SR cache válido: año ${cachedYear} coincide con ${solarReturnInfo.year}`);
+        const cachedIsFallback = existingChart.solarReturnChart?.isFallback === true;
+        const cachedType = existingChart.solarReturnChart?.solarReturnInfo?.type;
+
+        // ✅ Solo usar cache si: año correcto Y NO es fallback
+        if (cachedYear === solarReturnInfo.year && !cachedIsFallback) {
+          console.log(`✅ SR cache válido: año=${cachedYear}, type=${cachedType}, asc=${existingChart.solarReturnChart?.ascendant?.sign} ${existingChart.solarReturnChart?.ascendant?.degree}°`);
           return NextResponse.json({
             success: true,
             data: {
@@ -386,40 +389,59 @@ export async function GET(request: NextRequest) {
             }
           });
         } else {
-          console.log(`🔄 SR cache obsoleto: cached=${cachedYear}, esperado=${solarReturnInfo.year}. Regenerando...`);
+          console.log(`🔄 SR cache inválido: cached_year=${cachedYear}, expected=${solarReturnInfo.year}, isFallback=${cachedIsFallback}, type=${cachedType}. Regenerando...`);
+          // Limpiar fallback de DB para que no contamine futuras peticiones
+          if (cachedIsFallback) {
+            existingChart.solarReturnChart = null;
+            await existingChart.save();
+            console.log(`🧹 [SR_API] Fallback eliminado de DB`);
+          }
         }
       }
     }
 
-    // Generar nuevo Solar Return
+    // Generar nuevo Solar Return via ProKerala
+    console.log(`🌐 [SR_API] Llamando ProKerala para SR año ${solarReturnInfo.year}...`);
     const prokeralaResult = await callProkeralaSolarReturn(birthData, solarReturnInfo.year);
 
     let solarReturnData;
+    let source: string;
     if (prokeralaResult.success) {
       solarReturnData = processSolarReturnResponse(prokeralaResult.data, solarReturnInfo);
+      source = 'prokerala';
+      console.log(`✅ [SR_API] ProKerala OK: ASC=${solarReturnData.ascendant?.sign} ${solarReturnData.ascendant?.degree}°, MC=${solarReturnData.midheaven?.sign}, planets=${solarReturnData.planets?.length}`);
     } else {
       solarReturnData = generateSolarReturnFallback(solarReturnInfo);
+      source = 'fallback';
+      console.warn(`⚠️ [SR_API] ProKerala FALLÓ: ${prokeralaResult.error}. Usando fallback (NO se guardará en cache)`);
     }
 
-    // Guardar
-    const existingChart = await Chart.findOne({
-      $or: [{ userId: uid }, { uid }]
-    });
-
-    if (existingChart) {
-      existingChart.solarReturnChart = solarReturnData;
-      existingChart.lastUpdated = new Date();
-      await existingChart.save();
-    } else {
-      const newChart = new Chart({
-        userId: uid,
-        uid,
-        birthDataId: birthData._id,
-        chartType: 'solar-return',
-        solarReturnChart: solarReturnData,
-        lastUpdated: new Date()
+    // ✅ Solo guardar en DB si es dato REAL (no fallback)
+    // Los fallback NO se cachean para que se reintente ProKerala la próxima vez
+    if (!solarReturnData.isFallback) {
+      const existingChart = await Chart.findOne({
+        $or: [{ userId: uid }, { uid }]
       });
-      await newChart.save();
+
+      if (existingChart) {
+        existingChart.solarReturnChart = solarReturnData;
+        existingChart.lastUpdated = new Date();
+        await existingChart.save();
+        console.log(`💾 [SR_API] SR guardado en DB para año ${solarReturnInfo.year}`);
+      } else {
+        const newChart = new Chart({
+          userId: uid,
+          uid,
+          birthDataId: birthData._id,
+          chartType: 'solar-return',
+          solarReturnChart: solarReturnData,
+          lastUpdated: new Date()
+        });
+        await newChart.save();
+        console.log(`💾 [SR_API] Nuevo Chart creado con SR para año ${solarReturnInfo.year}`);
+      }
+    } else {
+      console.log(`⏭️ [SR_API] Fallback NO guardado en DB - se reintentará ProKerala la próxima vez`);
     }
 
     return NextResponse.json({
@@ -427,7 +449,7 @@ export async function GET(request: NextRequest) {
       data: {
         solarReturnChart: solarReturnData,
         solarReturnInfo,
-        source: 'generated'
+        source
       }
     });
 

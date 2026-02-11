@@ -311,8 +311,15 @@ if (cachedYear === solarReturnInfo.year) {
 Un campo `solarReturnChart: Mixed` sin año es una bomba de relojeria.
 Ideal: cambiar a array `solarReturnCharts: [{ year, chart }]` (como `progressedCharts`).
 
+**NUNCA cachear datos de fallback como si fueran reales.**
+Cuando un servicio externo falla (ProKerala, OpenAI, etc.), el fallback solo debe servir
+para la peticion actual, NO guardarse en base de datos. Si se cachea el fallback,
+las siguientes peticiones nunca reintentan el servicio real.
+
+**Regla: Solo `Chart.save()` si `isFallback === false`.**
+
 ### 📝 Archivos modificados
-- `src/app/api/charts/solar-return/route.ts` (cache con verificacion año)
+- `src/app/api/charts/solar-return/route.ts` (cache con verificacion año + no cachear fallback)
 - `src/models/Interpretation.ts` (campos cycleYear, yearLabel)
 - `src/app/api/astrology/interpret-solar-return/route.ts` (filtro por año)
 - `src/app/api/interpretations/route.ts` (filtro por yearLabel)
