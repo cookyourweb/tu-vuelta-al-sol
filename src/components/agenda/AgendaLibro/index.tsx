@@ -1823,7 +1823,6 @@ export const AgendaLibro = ({
                 chartType="natal"
                 planets={natalChart.planets}
                 houses={natalChart.houses}
-                aspects={natalChart.aspects || []}
                 pagina={9}
               />
             ) : (
@@ -1899,7 +1898,6 @@ export const AgendaLibro = ({
               chartType="solar-return"
               planets={solarReturnChart.planets}
               houses={solarReturnChart.houses}
-              aspects={solarReturnChart.aspects || []}
               pagina={22}
             />
           ) : (

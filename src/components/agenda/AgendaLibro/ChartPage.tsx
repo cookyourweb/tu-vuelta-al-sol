@@ -1,31 +1,30 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useStyle } from '@/context/StyleContext';
 import { FooterLibro } from './MesCompleto';
 import { Star, Sun } from 'lucide-react';
 import ChartWheel from '@/components/astrology/ChartWheel';
-import { Planet, House, Aspect } from '@/types/astrology/chartDisplay';
+import { Planet, House } from '@/types/astrology/chartDisplay';
+import { calculateAspects, convertAstrologicalDegreeToPosition } from '@/services/chartCalculationsService';
 
 interface ChartPageProps {
   chartType: 'natal' | 'solar-return';
   planets: Planet[];
   houses: House[];
-  aspects: (Aspect & { config: { color: string; difficulty: string }; exact: boolean })[];
   title?: string;
   subtitle?: string;
   pagina?: number;
 }
 
 /**
- * Página del libro que muestra una carta astral (natal o solar return)
- * en formato estático optimizado para impresión.
+ * Página del libro que muestra una carta astral completa (natal o solar return)
+ * con planetas, casas y aspectos calculados, optimizado para impresión.
  */
 export const ChartPage: React.FC<ChartPageProps> = ({
   chartType,
   planets,
   houses,
-  aspects,
   title,
   subtitle,
   pagina = 0
@@ -43,9 +42,18 @@ export const ChartPage: React.FC<ChartPageProps> = ({
   const noopStr = (_s: string | null) => {};
   const noopNum = (_n: number | null) => {};
 
-  // Filtrar aspectos: solo pasar los que tienen config (formato ChartWheel)
-  // Los aspectos de la BD no tienen config → se muestran planetas/casas sin líneas
-  const safeAspects = aspects.filter(a => a.config && a.config.color && a.config.difficulty);
+  // Preparar planetas con position (grados absolutos 0-360) para ChartWheel
+  const planetsWithPosition = useMemo(() => {
+    return planets.map(p => ({
+      ...p,
+      position: p.position ?? (p.longitude != null ? p.longitude : convertAstrologicalDegreeToPosition(p.degree, p.sign))
+    }));
+  }, [planets]);
+
+  // Calcular aspectos completos con config (color, difficulty) desde las posiciones
+  const calculatedAspects = useMemo(() => {
+    return calculateAspects(planetsWithPosition);
+  }, [planetsWithPosition]);
 
   return (
     <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '12mm' }}>
@@ -70,10 +78,10 @@ export const ChartPage: React.FC<ChartPageProps> = ({
       <div className="flex-1 flex items-center justify-center">
         <div className="w-full max-w-[380px] mx-auto">
           <ChartWheel
-            planets={planets}
+            planets={planetsWithPosition}
             houses={houses}
-            calculatedAspects={safeAspects}
-            showAspects={safeAspects.length > 0}
+            calculatedAspects={calculatedAspects}
+            showAspects={true}
             selectedAspectTypes={{ major: true, minor: false, hard: true, easy: true }}
             hoveredAspect={null}
             setHoveredAspect={noopStr}
