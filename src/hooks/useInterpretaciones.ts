@@ -100,6 +100,14 @@ export function useInterpretaciones({
         if (errorData.error?.includes('datos de nacimiento')) {
           throw new Error('Necesitas completar tus datos de nacimiento primero.');
         }
+        // Si el ciclo específico no existe (404), no es un error fatal
+        // El ciclo puede no haberse generado aún
+        if (cycleResponse.status === 404) {
+          console.warn(`⚠️ Ciclo ${yearLabel} no encontrado. Puede que aún no se haya generado.`);
+          setSolarCycle(null);
+          setLoading(false);
+          return;
+        }
         throw new Error(errorData.error || 'No se encontró el ciclo solar. Asegúrate de haberlo generado primero.');
       }
 

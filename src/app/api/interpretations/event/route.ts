@@ -170,10 +170,13 @@ export async function POST(request: NextRequest) {
     .exec() as any;
 
     if (!natalInterpretation) {
-      console.warn('⚠️ No natal interpretation found, proceeding without it (natal chart is permanent)');
-    } else {
-      console.log('✅ Found natal interpretation with fortalezas/bloqueos');
+      console.error('❌ No natal interpretation found - user needs to generate it from Carta Natal page');
+      return NextResponse.json({
+        success: false,
+        error: 'No se encontró la interpretación natal. Ve a la página de Carta Natal y pulsa "Regenerar" para generarla.'
+      }, { status: 404 });
     }
+    console.log('✅ Found natal interpretation with fortalezas/bloqueos');
 
     // 5. Buscar datos del usuario
     const user = await User.findOne({ userId }).lean().exec() as any;

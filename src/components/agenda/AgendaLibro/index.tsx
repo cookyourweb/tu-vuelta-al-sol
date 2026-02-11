@@ -263,11 +263,17 @@ export const AgendaLibro = ({
         return;
       }
 
-      // 1. Obtener birth data
+      // 1. Obtener birth data (con reintento si falla)
       console.log('📍 [AUTO_GEN] Obteniendo birth data...');
-      const birthDataResponse = await fetch(`/api/birth-data?userId=${userId}`);
+      let birthDataResponse = await fetch(`/api/birth-data?userId=${userId}`);
       if (!birthDataResponse.ok) {
-        throw new Error('No se encontraron datos de nacimiento');
+        // Reintentar una vez después de 1 segundo (puede ser error transitorio de BD)
+        console.warn('⚠️ [AUTO_GEN] Primer intento de birth data falló, reintentando...');
+        await new Promise(r => setTimeout(r, 1000));
+        birthDataResponse = await fetch(`/api/birth-data?userId=${userId}`);
+        if (!birthDataResponse.ok) {
+          throw new Error('No se encontraron datos de nacimiento. Ve a la página de Nacimiento para completarlos.');
+        }
       }
       const birthDataResult = await birthDataResponse.json();
       const birthData = birthDataResult.data || birthDataResult.birthData;
