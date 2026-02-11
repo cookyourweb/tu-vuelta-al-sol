@@ -325,6 +325,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const uid = searchParams.get('uid') || searchParams.get('userId');
     const force = searchParams.get('force') === 'true';
+    const requestedYear = searchParams.get('year') ? parseInt(searchParams.get('year')!) : null;
 
     if (!uid) {
       return NextResponse.json({ error: 'UID requerido' }, { status: 400 });
@@ -344,7 +345,26 @@ export async function GET(request: NextRequest) {
       ? birthData.birthDate
       : new Date(birthData.birthDate);
 
-    const solarReturnInfo = calculateSolarReturnPeriod(birthDateObj);
+    // Si se solicita un año específico, usarlo; sino calcular automáticamente
+    let solarReturnInfo;
+    if (requestedYear && !isNaN(requestedYear)) {
+      const birthMonth = birthDateObj.getMonth();
+      const birthDay = birthDateObj.getDate();
+      const startDate = new Date(requestedYear, birthMonth, birthDay);
+      const endDate = new Date(requestedYear + 1, birthMonth, birthDay);
+      const age = requestedYear - birthDateObj.getFullYear();
+      solarReturnInfo = {
+        year: requestedYear,
+        startDate,
+        endDate,
+        ageAtStart: age,
+        isCurrentYear: requestedYear === new Date().getFullYear(),
+        description: `Solar Return ${requestedYear}-${requestedYear + 1}`,
+        period: `${startDate.toLocaleDateString('es-ES')} → ${endDate.toLocaleDateString('es-ES')}`
+      };
+    } else {
+      solarReturnInfo = calculateSolarReturnPeriod(birthDateObj);
+    }
 
     // Buscar Solar Return existente
     if (!force) {
@@ -353,14 +373,21 @@ export async function GET(request: NextRequest) {
       });
 
       if (existingChart?.solarReturnChart) {
-        return NextResponse.json({
-          success: true,
-          data: {
-            solarReturnChart: existingChart.solarReturnChart,
-            solarReturnInfo,
-            source: 'existing'
-          }
-        });
+        // ✅ VERIFICAR que el SR cached sea del año correcto
+        const cachedYear = existingChart.solarReturnChart?.solarReturnInfo?.year;
+        if (cachedYear === solarReturnInfo.year) {
+          console.log(`✅ SR cache válido: año ${cachedYear} coincide con ${solarReturnInfo.year}`);
+          return NextResponse.json({
+            success: true,
+            data: {
+              solarReturnChart: existingChart.solarReturnChart,
+              solarReturnInfo,
+              source: 'existing'
+            }
+          });
+        } else {
+          console.log(`🔄 SR cache obsoleto: cached=${cachedYear}, esperado=${solarReturnInfo.year}. Regenerando...`);
+        }
       }
     }
 

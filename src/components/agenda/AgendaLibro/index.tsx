@@ -11,7 +11,7 @@ import { formatEventForBook, formatInterpretationCompact } from '@/utils/formatI
 
 // Secciones del libro
 import { PortadaPersonalizada, PaginaIntencion, PaginaIntencionAnualSR } from './PortalEntrada';
-import { ChartPlaceholderPage } from './ChartPage';
+import { ChartPage, ChartPlaceholderPage } from './ChartPage';
 import { CartaBienvenida, GuiaAgenda, TemaCentralAnio, LoQueVieneAMover, LoQuePideSoltar, PaginaIntencionAnual } from './TuAnioTuViaje';
 import { TuAnioOverview, TuAnioCiclos, PaginaCumpleanos } from './TuAnio';
 import { LineaTiempoEmocional, MesesClavePuntosGiro, GrandesAprendizajes, EjercicioEmocionalMensual, EjercicioDelMes } from './CiclosAnuales';
@@ -1818,7 +1818,17 @@ export const AgendaLibro = ({
 
           {/* Página de la carta natal para consulta/descarga */}
           <div id="chart-natal">
-            <ChartPlaceholderPage chartType="natal" pagina={9} />
+            {natalChart?.planets && natalChart?.houses ? (
+              <ChartPage
+                chartType="natal"
+                planets={natalChart.planets}
+                houses={natalChart.houses}
+                aspects={natalChart.aspects || []}
+                pagina={9}
+              />
+            ) : (
+              <ChartPlaceholderPage chartType="natal" pagina={9} />
+            )}
           </div>
         </div>
 
@@ -1884,7 +1894,17 @@ export const AgendaLibro = ({
 
         {/* Página de la carta de Retorno Solar para consulta/descarga */}
         <div id="chart-solar-return">
-          <ChartPlaceholderPage chartType="solar-return" pagina={22} />
+          {solarReturnChart?.planets && solarReturnChart?.houses ? (
+            <ChartPage
+              chartType="solar-return"
+              planets={solarReturnChart.planets}
+              houses={solarReturnChart.houses}
+              aspects={solarReturnChart.aspects || []}
+              pagina={22}
+            />
+          ) : (
+            <ChartPlaceholderPage chartType="solar-return" pagina={22} />
+          )}
         </div>
 
         {/* Páginas de escritura después del Retorno Solar */}
