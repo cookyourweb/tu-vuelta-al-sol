@@ -260,5 +260,64 @@ git checkout -b feature/nueva-feature
 
 ---
 
-**Última actualización:** Diciembre 10, 2025
+---
+
+## 🚨 INCIDENTE 3: SR Chart devolviendo datos de año anterior (11 feb 2026)
+
+### 📅 Fecha
+Febrero 11, 2026
+
+### ❌ Qué pasaba
+El Retorno Solar del ciclo 2026-2027 mostraba el mismo ascendente y planetas que el ciclo 2025-2026.
+La interpretacion SR tambien era identica entre ciclos.
+
+### 🔍 Causa raiz
+
+**Bug 1 - Cache SR sin año:**
+El modelo `Chart` tiene UN solo campo `solarReturnChart` (tipo Mixed). Al buscar el SR existente:
+```typescript
+// ❌ ANTES: devuelve el chart cached SIN verificar el año
+if (existingChart?.solarReturnChart) {
+  return existingChart.solarReturnChart; // Siempre el mismo!
+}
+```
+
+**Bug 2 - Interpretacion SR sin ciclo:**
+El modelo `Interpretation` no tenia campo `cycleYear`. Todas las queries devolvian la SR mas reciente:
+```typescript
+// ❌ ANTES: devuelve la interpretacion mas reciente sin filtrar año
+Interpretation.findOne({ userId, chartType: 'solar-return' }).sort({ generatedAt: -1 })
+```
+
+### ✅ Solución aplicada
+
+**Fix 1 - Cache SR con verificacion de año:**
+```typescript
+// ✅ DESPUES: verificar año antes de devolver cache
+const cachedYear = existingChart.solarReturnChart?.solarReturnInfo?.year;
+if (cachedYear === solarReturnInfo.year) {
+  return existingChart.solarReturnChart; // Solo si mismo año
+}
+// Si no coincide → regenerar con ProKerala
+```
+
+**Fix 2 - Interpretacion SR con cycleYear:**
+- Añadido `cycleYear` (number) y `yearLabel` (string) al modelo Interpretation
+- Todos los endpoints filtran por `cycleYear`
+- Backwards compat: fallback para documentos antiguos sin campo
+
+### 💡 Lección Aprendida
+**SIEMPRE incluir identificador temporal en datos que cambian anualmente.**
+Un campo `solarReturnChart: Mixed` sin año es una bomba de relojeria.
+Ideal: cambiar a array `solarReturnCharts: [{ year, chart }]` (como `progressedCharts`).
+
+### 📝 Archivos modificados
+- `src/app/api/charts/solar-return/route.ts` (cache con verificacion año)
+- `src/models/Interpretation.ts` (campos cycleYear, yearLabel)
+- `src/app/api/astrology/interpret-solar-return/route.ts` (filtro por año)
+- `src/app/api/interpretations/route.ts` (filtro por yearLabel)
+
+---
+
+**Última actualización:** Febrero 11, 2026
 **Mantenido por:** Claude Code Sessions

@@ -1,6 +1,6 @@
 # Tu Vuelta al Sol — LO QUE FALTA
 
-**Ultima actualizacion:** 7 febrero 2026
+**Ultima actualizacion:** 11 febrero 2026
 
 ---
 
@@ -162,20 +162,60 @@ La agenda debe ser una **guia hiper-personalizada** que:
 **Estado:** CORREGIDO
 **Fix:** Calendario dinamico desde mes de cumpleaños
 
+### Bug: SR Chart cache devuelve chart de año anterior
+**Estado:** CORREGIDO (11 feb 2026)
+**Causa:** `Chart.solarReturnChart` almacena UN solo chart por usuario, sin campo de año.
+El GET devolvia el chart cached sin verificar si era del año correcto.
+**Fix:** Verificar `solarReturnChart.solarReturnInfo.year === solarReturnInfo.year` antes de devolver cache.
+Si no coincide, regenera con ProKerala para el año correcto.
+**Archivo:** `src/app/api/charts/solar-return/route.ts`
+
+### Bug: SR Interpretacion se reutilizaba entre ciclos
+**Estado:** CORREGIDO (11 feb 2026)
+**Causa:** Modelo `Interpretation` no tenia campo `cycleYear`/`yearLabel`. Todas las queries
+devolvian la SR mas reciente sin importar el ciclo.
+**Fix:** Añadido `cycleYear` y `yearLabel` al modelo + filtrado en todos los endpoints.
+**Archivos:** `Interpretation.ts`, `interpret-solar-return/route.ts`, `interpretations/route.ts`, `AgendaLibro/index.tsx`
+
+---
+
+## PENDIENTE DESPUES DE SESION 11 FEB 2026
+
+### Timeline vacia/generica en libro y pagina SR
+**Estado:** PENDIENTE
+**Problema:** `SolarReturnTimelineSection.tsx` muestra texto hardcoded/estatico, no datos personalizados de `linea_tiempo_emocional`. El campo puede estar vacio en la interpretacion.
+**Archivos:** `SolarReturnTimelineSection.tsx`, prompt de `interpret-solar-return`
+
+### Primera generacion del libro lenta y no abre
+**Estado:** PENDIENTE
+**Problema:** La primera vez que se genera el libro, tarda mucho y no se abre automaticamente.
+Solo funciona al segundo intento.
+
+### Chart model: almacenar multiples SR por año
+**Estado:** PENDIENTE (mejora futura)
+**Problema actual:** `Chart.solarReturnChart` es un solo campo Mixed. Se sobreescribe cada año.
+**Mejora:** Cambiar a array `solarReturnCharts: [{ year, chart }]` (similar a `progressedCharts`).
+Esto permitiria consultar SR de años anteriores sin regenerar.
+
 ---
 
 ## ORDEN DE TRABAJO PROPUESTO
 
 1. ✅ Unificar documentacion (HECHO)
 2. ✅ Fix useInterpretaciones startDate/endDate (HECHO - 7 feb)
-3. **EN CURSO** → Sincronizar interpretaciones libro (todos los meses)
-4. ⏳ Google Calendar export (fase gratis)
-5. ⏳ VAPI/Zadarma — terminar pruebas con numero activo
-6. ⏳ Implementar limite 2 meses gratis
-7. ⏳ Webhook Stripe + flujo de pago
-8. ⏳ Personalizar contenido generico (Ejes, Planetas, Lunas)
-9. ⏳ Verificar PDF/A5
-10. ⏳ Google Calendar pasa a premium
+3. ✅ Fix SR cache por año + SR interpretacion por ciclo (HECHO - 11 feb)
+4. ✅ Emojis → Lucide icons en 8 componentes (HECHO - 11 feb)
+5. ✅ Cartas reales en libro para imprimir (HECHO - 11 feb)
+6. **EN CURSO** → Sincronizar interpretaciones libro (todos los meses)
+7. ⏳ Fix timeline vacia/generica
+8. ⏳ Fix primera generacion libro lenta
+9. ⏳ Google Calendar export (fase gratis)
+10. ⏳ VAPI/Zadarma — terminar pruebas con numero activo
+11. ⏳ Implementar limite 2 meses gratis
+12. ⏳ Webhook Stripe + flujo de pago
+13. ⏳ Personalizar contenido generico (Ejes, Planetas, Lunas)
+14. ⏳ Verificar PDF/A5
+15. ⏳ Google Calendar pasa a premium
 
 ---
 
