@@ -88,7 +88,7 @@ export const ChartPage: React.FC<ChartPageProps> = ({
 
       {/* Chart */}
       <div className="flex-1 flex items-center justify-center">
-        <div className="w-full max-w-[380px] mx-auto">
+        <div className="w-full max-w-[280px] mx-auto">
           <ChartWheel
             planets={planetsWithPosition}
             houses={houses}

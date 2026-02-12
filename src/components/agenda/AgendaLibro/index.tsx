@@ -1177,10 +1177,53 @@ export const AgendaLibro = ({
     return interpretation?.claves_integracion;
   };
 
-  // Helper: Obtener línea de tiempo anual del SR
+  // Helper: Obtener línea de tiempo anual del SR (convertida a array compatible)
+  // linea_tiempo_anual es un OBJETO {mes_1_2: {...}, mes_3_4: {...}, ...}
+  // Los componentes esperan un ARRAY [{mes, intensidad, palabra_clave, ...}]
   const getLineaTiempoAnual = (): any[] | undefined => {
     const interpretation = getSRInterpretation();
-    return interpretation?.linea_tiempo_anual;
+    const lta = interpretation?.linea_tiempo_anual;
+    if (!lta) return undefined;
+
+    // Si ya es un array, devolver directamente
+    if (Array.isArray(lta)) return lta;
+
+    // Convertir objeto {mes_1_2, mes_3_4, ...} a array compatible
+    const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const startMonth = startDate.getMonth();
+    const result: any[] = [];
+
+    // Mapear periodos a meses con intensidades estimadas
+    const periodos = [
+      { key: 'mes_1_2', meses: [0, 1], intensidad: 4 },
+      { key: 'mes_3_4', meses: [2, 3], intensidad: 3 },
+      { key: 'mes_6_7', meses: [5, 6], intensidad: 5 },
+      { key: 'mes_9_10', meses: [8, 9], intensidad: 3 },
+      { key: 'mes_12', meses: [11], intensidad: 4 },
+    ];
+
+    for (let i = 0; i < 12; i++) {
+      const mesIdx = (startMonth + i) % 12;
+      const mesName = monthNames[mesIdx];
+      // Buscar qué periodo corresponde a este mes del ciclo
+      const periodo = periodos.find(p => p.meses.includes(i));
+      const data = periodo ? lta[periodo.key] : null;
+
+      result.push({
+        mes: mesName,
+        intensidad: data ? periodo!.intensidad : 2,
+        palabra_clave: data?.accion_clave || data?.titulo?.split('|')[1]?.trim() || '',
+        descripcion: data?.descripcion || '',
+        accion_clave: data?.accion_clave || '',
+        // Campos compatibles con MesesClavePuntosGiro
+        periodo: mesName,
+        evento_astrologico: data?.titulo || '',
+        significado_para_ti: data?.descripcion || ''
+      });
+    }
+
+    return result;
   };
 
   // Helper: Obtener comparaciones planetarias del SR
@@ -1295,13 +1338,8 @@ export const AgendaLibro = ({
       }
     ];
 
-    // Intentar obtener datos personalizados del SR si existen
-    const lineaTiempo = interpretation?.linea_tiempo_emocional;
-    let monthData = lineaTiempo?.find((m: any) => {
-      const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-                         'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-      return m.mes?.toLowerCase().includes(monthNames[monthIndex]);
-    });
+    // Intentar obtener datos personalizados del SR si existen (con fallback a linea_tiempo_anual)
+    const monthData = getLineaTiempoMes(monthIndex);
 
     const defaultTheme = monthlyThemes[monthIndex] || monthlyThemes[0];
 
@@ -1339,38 +1377,69 @@ export const AgendaLibro = ({
   // Helper: Obtener datos de la línea del tiempo emocional para un mes específico
   const getLineaTiempoMes = (monthIndex: number) => {
     const interpretation = getSRInterpretation();
-    if (!interpretation?.linea_tiempo_emocional) return undefined;
-
     const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
                        'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
     const mesName = monthNames[monthIndex];
-    const found = interpretation.linea_tiempo_emocional.find((m: any) =>
-      m.mes?.toLowerCase().includes(mesName)
-    );
 
-    if (found) {
-      return {
-        palabra_clave: found.palabra_clave,
-        intensidad: found.intensidad,
-        descripcion: found.descripcion,
-        accion_clave: found.accion_clave
-      };
+    // Primero buscar en linea_tiempo_emocional
+    if (interpretation?.linea_tiempo_emocional) {
+      const found = interpretation.linea_tiempo_emocional.find((m: any) =>
+        m.mes?.toLowerCase().includes(mesName)
+      );
+      if (found) {
+        return {
+          palabra_clave: found.palabra_clave,
+          intensidad: found.intensidad,
+          descripcion: found.descripcion,
+          accion_clave: found.accion_clave
+        };
+      }
     }
+
+    // Fallback: buscar en linea_tiempo_anual convertida
+    const ltaArray = getLineaTiempoAnual();
+    if (ltaArray) {
+      const found = ltaArray.find((m: any) => m.mes?.toLowerCase().includes(mesName));
+      if (found) {
+        return {
+          palabra_clave: found.palabra_clave,
+          intensidad: found.intensidad,
+          descripcion: found.descripcion,
+          accion_clave: found.accion_clave
+        };
+      }
+    }
+
     return undefined;
   };
 
   // Helper: Obtener si un mes es un mes clave / punto de giro
   const getMesClave = (monthIndex: number) => {
     const interpretation = getSRInterpretation();
-    if (!interpretation?.meses_clave_puntos_giro) return undefined;
-
     const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
                        'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
     const mesName = monthNames[monthIndex];
-    return interpretation.meses_clave_puntos_giro.find((m: any) =>
-      m.mes?.toLowerCase().includes(mesName) ||
-      m.periodo?.toLowerCase().includes(mesName)
-    );
+
+    // Primero buscar en meses_clave_puntos_giro
+    if (interpretation?.meses_clave_puntos_giro) {
+      const found = interpretation.meses_clave_puntos_giro.find((m: any) =>
+        m.mes?.toLowerCase().includes(mesName) ||
+        m.periodo?.toLowerCase().includes(mesName)
+      );
+      if (found) return found;
+    }
+
+    // Fallback: buscar en linea_tiempo_anual convertida (solo meses con datos reales)
+    const ltaArray = getLineaTiempoAnual();
+    if (ltaArray) {
+      const found = ltaArray.find((m: any) =>
+        (m.mes?.toLowerCase().includes(mesName) || m.periodo?.toLowerCase().includes(mesName)) &&
+        (m.evento_astrologico || m.significado_para_ti)
+      );
+      if (found) return found;
+    }
+
+    return undefined;
   };
 
   // Helper: Obtener tipo de ejercicio para un mes (ajuste o activación)
@@ -1382,14 +1451,8 @@ export const AgendaLibro = ({
 
   // Helper: Obtener reflexión mensual sobre tránsitos desde SR
   const getMonthlyTransitReflection = (monthIndex: number): string | undefined => {
-    const interpretation = getSRInterpretation();
-    if (!interpretation?.linea_tiempo_emocional) return undefined;
-
-    const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-                       'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-    const monthData = interpretation.linea_tiempo_emocional.find((m: any) =>
-      m.mes?.toLowerCase().includes(monthNames[monthIndex])
-    );
+    // Usar getLineaTiempoMes que ya tiene fallback a linea_tiempo_anual
+    const monthData = getLineaTiempoMes(monthIndex);
 
     if (monthData?.palabra_clave) {
       return `Este mes la palabra clave es "${monthData.palabra_clave}" con intensidad ${monthData.intensidad || 5}/10.`;
@@ -1939,7 +2002,7 @@ export const AgendaLibro = ({
           </div>
           <div id="meses-clave">
             <MesesClavePuntosGiro
-              lineaTiempo={solarReturnInterpretation?.interpretation?.meses_clave_puntos_giro || getLineaTiempoAnual()}
+              lineaTiempo={solarReturnInterpretation?.interpretation?.meses_clave_puntos_giro || getLineaTiempoAnual()?.filter((m: any) => m.evento_astrologico || m.significado_para_ti)}
               sombrasDelAno={solarReturnInterpretation?.interpretation?.sombras_del_ano}
             />
           </div>
