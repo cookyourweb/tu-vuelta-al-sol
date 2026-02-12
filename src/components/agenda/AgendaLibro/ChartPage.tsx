@@ -102,6 +102,7 @@ export const ChartPage: React.FC<ChartPageProps> = ({
             hoveredHouse={null}
             setHoveredHouse={noopNum}
             handleMouseMove={noop as any}
+            isPrint={true}
           />
         </div>
       </div>

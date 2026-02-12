@@ -8,9 +8,51 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import BirthData, { castBirthData } from '@/models/BirthData';
 import Chart from '@/models/Chart';
+import axios from 'axios';
+import * as Astronomy from 'astronomy-engine';
 
 // ⏱️ Configurar timeout para Vercel (60 segundos en plan Pro)
 export const maxDuration = 60;
+
+// Configuración ProKerala (mismo patrón que natal/route.ts)
+const API_BASE_URL = 'https://api.prokerala.com/v2';
+const TOKEN_URL = 'https://api.prokerala.com/token';
+
+// Cache de token compartido
+let tokenCache: { token: string; expires: number } | null = null;
+
+async function getProkeralaToken(): Promise<string> {
+  const now = Math.floor(Date.now() / 1000);
+  if (tokenCache && tokenCache.expires > now + 300) {
+    return tokenCache.token;
+  }
+
+  const CLIENT_ID = process.env.PROKERALA_CLIENT_ID;
+  const CLIENT_SECRET = process.env.PROKERALA_CLIENT_SECRET;
+  if (!CLIENT_ID || !CLIENT_SECRET) {
+    throw new Error('Credenciales Prokerala faltantes');
+  }
+
+  const response = await axios.post(
+    TOKEN_URL,
+    new URLSearchParams({
+      grant_type: 'client_credentials',
+      client_id: CLIENT_ID,
+      client_secret: CLIENT_SECRET,
+    }),
+    { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, timeout: 10000 }
+  );
+
+  if (!response.data?.access_token) {
+    throw new Error('Respuesta de token inválida');
+  }
+
+  tokenCache = {
+    token: response.data.access_token,
+    expires: now + (response.data.expires_in || 3600)
+  };
+  return tokenCache.token;
+}
 
 /**
  * Calcular timezone offset
@@ -28,7 +70,7 @@ function calculateTimezoneOffset(date: string, timezone: string): string {
       return lastSunday;
     };
 
-    if (timezone === 'Europe/Madrid' || timezone === 'Europe/Berlin' || 
+    if (timezone === 'Europe/Madrid' || timezone === 'Europe/Berlin' ||
         timezone === 'Europe/Paris' || timezone === 'Europe/Rome') {
       const dstStart = getLastSunday(year, 2);
       const dstEnd = getLastSunday(year, 9);
@@ -92,78 +134,78 @@ function calculateSolarReturnPeriod(birthDate: Date) {
 }
 
 /**
- * Llamar a Prokerala para Solar Return
+ * Calcular el momento EXACTO del Solar Return usando astronomy-engine
+ * = momento en que el Sol transita vuelve a la misma longitud eclíptica natal
+ */
+function calculateExactSolarReturnMoment(birthDate: Date, returnYear: number): Date {
+  // 1. Obtener longitud eclíptica del Sol natal
+  const sunVec = Astronomy.GeoVector(Astronomy.Body.Sun, birthDate, false);
+  const sunEcliptic = Astronomy.Ecliptic(sunVec);
+  const natalSunLon = sunEcliptic.elon; // 0-360
+
+  console.log(`🌞 [SR_CALC] Sol natal: ${natalSunLon.toFixed(4)}° eclíptica`);
+
+  // 2. Buscar cuándo el Sol alcanza esa longitud en el año target
+  // Empezar a buscar desde 10 días antes del cumpleaños aprox
+  const birthMonth = birthDate.getMonth();
+  const birthDay = birthDate.getDate();
+  const searchStart = new Date(returnYear, birthMonth, birthDay - 10);
+
+  const result = Astronomy.SearchSunLongitude(natalSunLon, searchStart, 30);
+
+  if (!result) {
+    throw new Error(`No se pudo calcular el momento exacto del Solar Return para ${returnYear}`);
+  }
+
+  const srMoment = result.date;
+  console.log(`✅ [SR_CALC] Solar Return exacto: ${srMoment.toISOString()} (Sol a ${natalSunLon.toFixed(4)}°)`);
+
+  return srMoment;
+}
+
+/**
+ * Llamar a ProKerala para Solar Return
+ * Usa el endpoint natal-planet-position (que FUNCIONA) con la fecha exacta del SR
  */
 async function callProkeralaSolarReturn(birthData: any, returnYear: number) {
   try {
-    const CLIENT_ID = process.env.PROKERALA_CLIENT_ID;
-    const CLIENT_SECRET = process.env.PROKERALA_CLIENT_SECRET;
+    // 1. Obtener token (con cache)
+    const token = await getProkeralaToken();
 
-    if (!CLIENT_ID || !CLIENT_SECRET) {
-      throw new Error('Credenciales Prokerala faltantes');
-    }
-
-    // 1. Obtener token
-    const tokenResponse = await fetch('https://api.prokerala.com/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        grant_type: 'client_credentials',
-        client_id: CLIENT_ID,
-        client_secret: CLIENT_SECRET,
-      })
-    });
-
-    if (!tokenResponse.ok) {
-      throw new Error(`Token error: ${tokenResponse.status}`);
-    }
-
-    const { access_token } = await tokenResponse.json();
-
-    // 2. Preparar fecha de Solar Return
+    // 2. Calcular momento exacto del SR con astronomy-engine
     const birthDate = new Date(birthData.birthDate);
-    const solarReturnDate = new Date(returnYear, birthDate.getMonth(), birthDate.getDate());
-    const solarReturnDateStr = solarReturnDate.toISOString().split('T')[0];
+    const srMoment = calculateExactSolarReturnMoment(birthDate, returnYear);
 
-    let formattedBirthTime = birthData.birthTime || '12:00:00';
-    if (formattedBirthTime.length === 5) {
-      formattedBirthTime += ':00';
-    }
+    // 3. Formatear datetime del SR para ProKerala
+    const srDateStr = srMoment.toISOString().split('T')[0];
+    const srTimeStr = srMoment.toISOString().split('T')[1].split('.')[0]; // HH:MM:SS
 
-    const offset = calculateTimezoneOffset(solarReturnDateStr, birthData.timezone || 'Europe/Madrid');
-    const solarReturnDatetime = `${solarReturnDateStr}T${formattedBirthTime}${offset}`;
+    const timezone = birthData.timezone || 'Europe/Madrid';
+    const offset = calculateTimezoneOffset(srDateStr, timezone);
+    const srDatetime = `${srDateStr}T${srTimeStr}${offset}`;
 
-    // ✅ FIX: Usar ubicación ACTUAL si vive en lugar DIFERENTE, sino usar natal
-    // Si livesInSamePlace es false (vive en otro lugar) Y tiene coordenadas actuales → usar actuales
-    // Si livesInSamePlace es true o undefined (vive en mismo lugar) → usar natales
-    const coordinates = birthData.livesInSamePlace === false && birthData.currentLatitude && birthData.currentLongitude
-      ? `${birthData.currentLatitude},${birthData.currentLongitude}`
-      : `${birthData.latitude},${birthData.longitude}`;
+    // 4. Ubicación: actual si vive en otro lugar, sino natal
+    const lat = birthData.livesInSamePlace === false && birthData.currentLatitude
+      ? birthData.currentLatitude : birthData.latitude;
+    const lng = birthData.livesInSamePlace === false && birthData.currentLongitude
+      ? birthData.currentLongitude : birthData.longitude;
+    const latFixed = Math.round(lat * 10000) / 10000;
+    const lngFixed = Math.round(lng * 10000) / 10000;
+    const coordinates = `${latFixed},${lngFixed}`;
 
-    console.log('☀️ Solar Return params:', {
-      datetime: solarReturnDatetime,
+    console.log('☀️ [SR_API] Solar Return params:', {
+      srDatetime,
+      srMomentUTC: srMoment.toISOString(),
       coordinates,
-      coordinatesType: birthData.livesInSamePlace === false ? 'CURRENT (different location)' : 'NATAL (same location)',
-      livesInSamePlace: birthData.livesInSamePlace,
-      hasCurrentCoords: !!(birthData.currentLatitude && birthData.currentLongitude),
+      coordinatesType: birthData.livesInSamePlace === false ? 'CURRENT' : 'NATAL',
       year: returnYear
     });
 
-    // 3. Llamar API Solar Return correcta
-    // ✅ CORRECCIÓN: Usar endpoint específico de Solar Return según documentación de Prokerala
-    // Endpoint: GET /v2/astrology/solar-return
-    // Requiere: profile (con datetime de nacimiento original), solar_return_year, current_coordinates
-
-    // Preparar datos de perfil natal (fecha de nacimiento ORIGINAL)
-    const birthDateStr = new Date(birthData.birthDate).toISOString().split('T')[0];
-    const birthOffset = calculateTimezoneOffset(birthDateStr, birthData.timezone || 'Europe/Madrid');
-    const birthDatetime = `${birthDateStr}T${formattedBirthTime}${birthOffset}`;
-
-    const url = new URL('https://api.prokerala.com/v2/astrology/solar-return');
-    url.searchParams.append('profile[datetime]', birthDatetime); // ✅ Fecha de nacimiento ORIGINAL
-    url.searchParams.append('profile[coordinates]', `${birthData.latitude},${birthData.longitude}`); // ✅ Coordenadas natales
-    url.searchParams.append('solar_return_year', returnYear.toString()); // ✅ Año del Solar Return
-    url.searchParams.append('current_coordinates', coordinates); // ✅ Ubicación actual
+    // 5. Llamar al MISMO endpoint que la carta natal (este SÍ funciona)
+    const url = new URL(`${API_BASE_URL}/astrology/natal-planet-position`);
+    url.searchParams.append('profile[datetime]', srDatetime);
+    url.searchParams.append('profile[coordinates]', coordinates);
+    url.searchParams.append('birth_time_unknown', 'false');
     url.searchParams.append('house_system', 'placidus');
     url.searchParams.append('orb', 'default');
     url.searchParams.append('birth_time_rectification', 'flat-chart');
@@ -171,62 +213,31 @@ async function callProkeralaSolarReturn(birthData: any, returnYear: number) {
     url.searchParams.append('la', 'es');
     url.searchParams.append('ayanamsa', '0');
 
-    console.log('🔗 URL completa:', url.toString());
-    console.log('📋 Parámetros URL:', {
-      profile_datetime: birthDatetime, // ✅ Fecha natal original
-      profile_coordinates: `${birthData.latitude},${birthData.longitude}`, // ✅ Coordenadas natales
-      solar_return_year: returnYear,
-      current_coordinates: coordinates, // ✅ Ubicación actual
-      house_system: 'placidus',
-      orb: 'default',
-      aspect_filter: 'major',
-      la: 'es',
-      ayanamsa: '0'
-    });
+    console.log('🔗 [SR_API] URL:', url.toString());
 
-    const response = await fetch(url.toString(), {
+    const response = await axios.get(url.toString(), {
       headers: {
-        'Authorization': `Bearer ${access_token}`,
+        'Authorization': `Bearer ${token}`,
         'Accept': 'application/json'
-      }
+      },
+      timeout: 15000
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ Prokerala error:', response.status, errorText.substring(0, 200));
-      throw new Error(`API error: ${response.status}`);
+    const actualData = response.data?.data || response.data;
+
+    if (!actualData?.planet_positions && !actualData?.planets) {
+      console.error('❌ [SR_API] No hay datos de planetas en la respuesta');
+      throw new Error('Respuesta inválida de ProKerala - no hay datos de planetas');
     }
 
-    // ✅ VALIDAR QUE SEA JSON ANTES DE PARSEAR
-    const contentType = response.headers.get('content-type');
-    const responseText = await response.text();
+    console.log('✅ [SR_API] ProKerala OK: planetas recibidos:', (actualData.planet_positions || actualData.planets)?.length);
 
-    console.log('📦 Response Content-Type:', contentType);
-    console.log('📝 Response preview:', responseText.substring(0, 100));
-
-    if (responseText.trim().startsWith('<?xml') || responseText.trim().startsWith('<')) {
-      console.error('❌ API devolvió XML/HTML, no JSON:', responseText.substring(0, 200));
-      throw new Error('API devolvió formato incorrecto - usando fallback');
-    }
-
-    try {
-      const data = JSON.parse(responseText);
-      console.log('✅ Solar Return calculado correctamente por Prokerala');
-
-      // Validar estructura mínima
-      if (!data.data || !data.data.planets) {
-        console.warn('⚠️ Respuesta válida pero estructura inesperada');
-      }
-
-      return { success: true, data };
-    } catch (parseError) {
-      console.error('❌ Error parseando respuesta:', parseError);
-      console.error('Contenido recibido:', responseText.substring(0, 500));
-      throw new Error('Respuesta inválida de API');
-    }
-
+    return { success: true, data: { data: actualData } };
   } catch (error) {
-    console.error('Error Prokerala Solar Return:', error);
+    console.error('❌ [SR_API] Error ProKerala Solar Return:', error instanceof Error ? error.message : error);
+    if (axios.isAxiosError(error)) {
+      console.error('❌ [SR_API] Status:', error.response?.status, 'Data:', JSON.stringify(error.response?.data)?.substring(0, 200));
+    }
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Error desconocido'

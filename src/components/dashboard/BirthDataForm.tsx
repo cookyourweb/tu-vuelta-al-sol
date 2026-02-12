@@ -480,7 +480,7 @@ export default function BirthDataForm({ recipientId, onBirthDataChange, initialD
       const birthData = {
         uid: user.uid,
         userId: user.uid,
-        fullName: data.fullName || user.displayName || 'Usuario',
+        fullName: data.fullName || user.displayName || user.email?.split('@')[0] || 'Sin nombre',
         birthDate: data.birthDate,
         birthTime: birthTimeKnown ? (data.birthTime || '12:00:00') : '12:00:00',
         birthTimeKnown: birthTimeKnown,

@@ -125,7 +125,7 @@ export default function BirthDataForm() {
       
       const birthData: any = {
   userId: user.uid,
-  fullName: data.fullName || user.displayName || 'Usuario',
+  fullName: data.fullName || user.displayName || user.email?.split('@')[0] || 'Sin nombre',
   birthDate: data.birthDate,
   birthPlace: data.birthPlace,
   latitude: parseFloat(geoData[0].lat),

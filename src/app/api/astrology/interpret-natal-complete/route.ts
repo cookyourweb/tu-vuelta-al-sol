@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
 
     // Prepare user profile
     const preparedUserProfile: UserProfile = {
-      name: userProfile.name || 'Usuario',
+      name: userProfile.name || 'Sin nombre',
       age: userProfile.age || 30,
       birthDate: userProfile.birthDate || '',
       birthTime: userProfile.birthTime || '',

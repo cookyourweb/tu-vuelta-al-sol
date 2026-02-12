@@ -336,7 +336,7 @@ export const AgendaLibro = ({
       if (!hasHadBirthdayThisYear) age -= 1;
 
       const userProfile = {
-        name: birthData.fullName || 'Usuario',
+        name: birthData.fullName || birthData.name || 'Sin nombre',
         birthDate: birthDateStr,
         birthPlace: birthData.location || birthData.birthPlace,
         age: age
@@ -513,7 +513,7 @@ export const AgendaLibro = ({
       if (!hasHadBirthdayThisYear) age -= 1;
 
       const userProfile = {
-        name: birthData.fullName || 'Usuario',
+        name: birthData.fullName || birthData.name || 'Sin nombre',
         birthDate: birthDateStr,
         birthPlace: birthData.location || birthData.birthPlace,
         age: age
