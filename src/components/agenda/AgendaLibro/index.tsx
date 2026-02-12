@@ -16,7 +16,7 @@ import { CartaBienvenida, GuiaAgenda, TemaCentralAnio, LoQueVieneAMover, LoQuePi
 import { TuAnioOverview, TuAnioCiclos, PaginaCumpleanos } from './TuAnio';
 import { LineaTiempoEmocional, MesesClavePuntosGiro, GrandesAprendizajes, EjercicioEmocionalMensual, EjercicioDelMes } from './CiclosAnuales';
 import { EsenciaNatal, NodoNorte, NodoSur, PlanetasDominantes, PatronesEmocionales } from './SoulChart';
-import { QueEsRetornoSolar, AscendenteAnio, SolRetorno, LunaRetorno, MercurioRetorno, VenusRetorno, MarteRetorno, EjesDelAnio, EjesDelAnio2, IntegracionEjes, RitualCumpleanos, MantraAnual, PlutonEnAcuario } from './RetornoSolar';
+import { QueEsRetornoSolar, AscendenteAnio, SolRetorno, LunaRetorno, MercurioRetorno, VenusRetorno, MarteRetorno, JupiterRetorno, SaturnoRetorno, EjesDelAnio, EjesDelAnio2, IntegracionEjes, RitualCumpleanos, MantraAnual, PlutonEnAcuario } from './RetornoSolar';
 import { IndiceNavegable } from './Indice';
 import { CalendarioYMapaMes, LunasYEjercicios, SemanaConInterpretacion, CierreMes, PrimerDiaCiclo as PrimerDiaCicloMes } from './MesCompleto';
 import { TransitosDelMes } from './TransitosDelMes';
@@ -1194,7 +1194,7 @@ export const AgendaLibro = ({
     const startMonth = startDate.getMonth();
     const result: any[] = [];
 
-    // Mapear periodos a meses con intensidades estimadas
+    // Mapear periodos a meses — solo el PRIMER mes del periodo hereda los datos completos
     const periodos = [
       { key: 'mes_1_2', meses: [0, 1], intensidad: 4 },
       { key: 'mes_3_4', meses: [2, 3], intensidad: 3 },
@@ -1206,24 +1206,60 @@ export const AgendaLibro = ({
     for (let i = 0; i < 12; i++) {
       const mesIdx = (startMonth + i) % 12;
       const mesName = monthNames[mesIdx];
-      // Buscar qué periodo corresponde a este mes del ciclo
       const periodo = periodos.find(p => p.meses.includes(i));
       const data = periodo ? lta[periodo.key] : null;
+      // Solo el primer mes del periodo hereda la descripción completa
+      const isPrimaryMonth = periodo ? periodo.meses[0] === i : false;
 
       result.push({
         mes: mesName,
         intensidad: data ? periodo!.intensidad : 2,
         palabra_clave: data?.accion_clave || data?.titulo?.split('|')[1]?.trim() || '',
-        descripcion: data?.descripcion || '',
-        accion_clave: data?.accion_clave || '',
-        // Campos compatibles con MesesClavePuntosGiro
-        periodo: mesName,
-        evento_astrologico: data?.titulo || '',
-        significado_para_ti: data?.descripcion || ''
+        descripcion: isPrimaryMonth ? (data?.descripcion || '') : '',
+        accion_clave: isPrimaryMonth ? (data?.accion_clave || '') : '',
       });
     }
 
     return result;
+  };
+
+  // Helper: Obtener puntos de giro del año desde linea_tiempo_anual (fallback para MesesClavePuntosGiro)
+  // Devuelve solo los 5 periodos distintos con datos reales
+  const getMesesClaveFallback = (): any[] | undefined => {
+    const interpretation = getSRInterpretation();
+    const lta = interpretation?.linea_tiempo_anual;
+    if (!lta || Array.isArray(lta)) return undefined;
+
+    const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const startMonth = startDate.getMonth();
+
+    const periodos = [
+      { key: 'mes_1_2', offset: 0, label: 'Mes 1–2' },
+      { key: 'mes_3_4', offset: 2, label: 'Mes 3–4' },
+      { key: 'mes_6_7', offset: 5, label: 'Mes 6–7' },
+      { key: 'mes_9_10', offset: 8, label: 'Mes 9–10' },
+      { key: 'mes_12', offset: 11, label: 'Mes 12' },
+    ];
+
+    const result: any[] = [];
+    for (const p of periodos) {
+      const data = lta[p.key];
+      if (!data) continue;
+      const mesIdx = (startMonth + p.offset) % 12;
+      const mesName = monthNames[mesIdx];
+      const titulo = data.titulo || '';
+      // Extraer la parte descriptiva del título (después de "|")
+      const tituloDescriptivo = titulo.includes('|') ? titulo.split('|')[1]?.trim() : titulo;
+
+      result.push({
+        mes: `${mesName.charAt(0).toUpperCase() + mesName.slice(1)} — ${tituloDescriptivo || p.label}`,
+        evento_astrologico: data.accion_clave || tituloDescriptivo || '',
+        significado_para_ti: data.descripcion || ''
+      });
+    }
+
+    return result.length > 0 ? result : undefined;
   };
 
   // Helper: Obtener comparaciones planetarias del SR
@@ -1931,6 +1967,12 @@ export const AgendaLibro = ({
           <div id="marte-retorno">
             <MarteRetorno comparacion={getComparacionesPlanetarias()?.marte} />
           </div>
+          <div id="jupiter-retorno">
+            <JupiterRetorno comparacion={getComparacionesPlanetarias()?.jupiter} />
+          </div>
+          <div id="saturno-retorno">
+            <SaturnoRetorno comparacion={getComparacionesPlanetarias()?.saturno} />
+          </div>
           <div id="ejes-anio">
             <EjesDelAnio
               ascSign={getEjesSignos()?.asc}
@@ -2002,7 +2044,7 @@ export const AgendaLibro = ({
           </div>
           <div id="meses-clave">
             <MesesClavePuntosGiro
-              lineaTiempo={solarReturnInterpretation?.interpretation?.meses_clave_puntos_giro || getLineaTiempoAnual()?.filter((m: any) => m.evento_astrologico || m.significado_para_ti)}
+              lineaTiempo={solarReturnInterpretation?.interpretation?.meses_clave_puntos_giro || getMesesClaveFallback()}
               sombrasDelAno={solarReturnInterpretation?.interpretation?.sombras_del_ano}
             />
           </div>

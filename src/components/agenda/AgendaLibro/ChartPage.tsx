@@ -58,37 +58,37 @@ export const ChartPage: React.FC<ChartPageProps> = ({
   }, [planetsWithPosition]);
 
   return (
-    <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '12mm' }}>
+    <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '8mm 6mm' }}>
       {/* Header */}
-      <div className="text-center mb-4 pb-3 border-b-2 border-gray-200">
-        <div className="flex items-center justify-center gap-2 mb-2">
+      <div className="text-center mb-3 pb-2 border-b-2 border-gray-200">
+        <div className="flex items-center justify-center gap-2 mb-1">
           {isNatal ? (
-            <Star className={`w-6 h-6 ${config.iconPrimary}`} />
+            <Star className={`w-5 h-5 ${config.iconPrimary}`} />
           ) : (
-            <Sun className={`w-6 h-6 ${config.iconAccent}`} />
+            <Sun className={`w-5 h-5 ${config.iconAccent}`} />
           )}
-          <h2 className={`text-2xl font-display ${config.titleGradient}`}>
+          <h2 className={`text-xl font-display ${config.titleGradient}`}>
             {title || defaultTitle}
           </h2>
         </div>
-        <p className={`text-xs italic ${config.iconSecondary}`}>
+        <p className={`text-[10px] italic ${config.iconSecondary}`}>
           {subtitle || defaultSubtitle}
         </p>
       </div>
 
       {/* Aviso fallback */}
       {isFallback && (
-        <div className="bg-amber-50 border border-amber-300 rounded-lg px-3 py-2 mb-2 flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" />
-          <p className="text-[9px] text-amber-700">
-            Carta provisional — el servicio de cálculo no estaba disponible. Regenera tu Retorno Solar desde la web para obtener datos reales.
+        <div className="bg-amber-50 border border-amber-300 rounded-lg px-3 py-1.5 mb-2 flex items-center gap-2">
+          <AlertTriangle className="w-3 h-3 text-amber-500 flex-shrink-0" />
+          <p className="text-[8px] text-amber-700">
+            Carta provisional — regenera tu Retorno Solar desde la web para obtener datos reales.
           </p>
         </div>
       )}
 
       {/* Chart */}
       <div className="flex-1 flex items-center justify-center">
-        <div className="w-full max-w-[280px] mx-auto">
+        <div className="w-full max-w-[300px] mx-auto">
           <ChartWheel
             planets={planetsWithPosition}
             houses={houses}

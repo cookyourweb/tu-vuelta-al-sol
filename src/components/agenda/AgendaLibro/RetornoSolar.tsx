@@ -316,6 +316,14 @@ export const MarteRetorno = ({ comparacion }: { comparacion?: any }) => {
   return <ComparacionPlanetaria planetName="Marte" planetSymbol="♂" pageNumber={16} comparacion={comparacion} />;
 };
 
+export const JupiterRetorno = ({ comparacion }: { comparacion?: any }) => {
+  return <ComparacionPlanetaria planetName="Júpiter" planetSymbol="♃" pageNumber={17} comparacion={comparacion} />;
+};
+
+export const SaturnoRetorno = ({ comparacion }: { comparacion?: any }) => {
+  return <ComparacionPlanetaria planetName="Saturno" planetSymbol="♄" pageNumber={18} comparacion={comparacion} />;
+};
+
 interface EjesDelAnioProps {
   ascSign?: { sign: string; degree?: number } | null;
   mcSign?: { sign: string; degree?: number } | null;
@@ -433,7 +441,7 @@ export const EjesDelAnio = ({ ascSign, mcSign, ascInterpretacion, mcInterpretaci
         </div>
       </div>
 
-      <FooterLibro pagina={17} />
+      <FooterLibro pagina={19} />
     </div>
   );
 };
@@ -532,7 +540,7 @@ export const EjesDelAnio2 = ({ dscSign, icSign, dscInterpretacion, icInterpretac
         </div>
       </div>
 
-      <FooterLibro pagina={18} />
+      <FooterLibro pagina={20} />
     </div>
   );
 };
@@ -651,7 +659,7 @@ export const IntegracionEjes = ({ asc, mc, dsc, ic, frase_guia, ascSign, mcSign,
         </div>
       </div>
 
-      <FooterLibro pagina={19} />
+      <FooterLibro pagina={21} />
     </div>
   );
 };
@@ -727,7 +735,7 @@ export const MantraAnual = () => {
         </p>
       </div>
 
-      <FooterLibro pagina={21} />
+      <FooterLibro pagina={23} />
     </div>
   );
 };
