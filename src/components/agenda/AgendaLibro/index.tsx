@@ -22,7 +22,7 @@ import { CalendarioYMapaMes, LunasYEjercicios, SemanaConInterpretacion, CierreMe
 import { TransitosDelMes } from './TransitosDelMes';
 import { CalendarioMensualTabla } from './CalendarioMensualTabla';
 import { EscrituraTerapeutica, Visualizacion, RitualSimbolico, EscrituraMensual } from './TerapiaCreativa';
-import { PrimerDiaCiclo, UltimoDiaCiclo, PaginaFinalBlanca, Contraportada, PaginaBlanca } from './PaginasEspeciales';
+import { PrimerDiaCiclo, UltimoDiaCiclo, PaginaFinalBlanca, Contraportada, PaginaBlanca, QuienEraQuienSoy, PreparacionProximaVuelta, CartaCierre } from './PaginasEspeciales';
 import '@/styles/print-libro.css';
 
 interface AgendaLibroProps {
@@ -1183,7 +1183,6 @@ export const AgendaLibro = ({
   const getLineaTiempoAnual = (): any[] | undefined => {
     const interpretation = getSRInterpretation();
     const lta = interpretation?.linea_tiempo_anual;
-    if (!lta) return undefined;
 
     // Si ya es un array, devolver directamente
     if (Array.isArray(lta)) return lta;
@@ -1194,29 +1193,36 @@ export const AgendaLibro = ({
     const startMonth = startDate.getMonth();
     const result: any[] = [];
 
-    // Mapear periodos a meses — solo el PRIMER mes del periodo hereda los datos completos
+    // Mapear periodos a meses — TODOS los meses del periodo heredan datos
     const periodos = [
-      { key: 'mes_1_2', meses: [0, 1], intensidad: 4 },
-      { key: 'mes_3_4', meses: [2, 3], intensidad: 3 },
-      { key: 'mes_6_7', meses: [5, 6], intensidad: 5 },
-      { key: 'mes_9_10', meses: [8, 9], intensidad: 3 },
-      { key: 'mes_12', meses: [11], intensidad: 4 },
+      { key: 'mes_1_2', meses: [0, 1], intensidad: 4, fallbackDesc: 'Inicio del ciclo - adaptación y nuevos comienzos' },
+      { key: 'mes_3_4', meses: [2, 3], intensidad: 3, fallbackDesc: 'Consolidación de nuevas energías' },
+      { key: 'mes_5', meses: [4], intensidad: 4, fallback: true, fallbackDesc: 'Mes de consolidación y transición' }, // Mes intermedio
+      { key: 'mes_6_7', meses: [5, 6], intensidad: 5, fallbackDesc: 'Punto medio del ciclo - evaluación y ajustes' },
+      { key: 'mes_8', meses: [7], intensidad: 3, fallback: true, fallbackDesc: 'Mes de consolidación y transición' }, // Mes intermedio
+      { key: 'mes_9_10', meses: [8, 9], intensidad: 3, fallbackDesc: 'Preparación para el cierre del ciclo' },
+      { key: 'mes_11', meses: [10], intensidad: 4, fallback: true, fallbackDesc: 'Mes de consolidación y transición' }, // Mes intermedio
+      { key: 'mes_12', meses: [11], intensidad: 4, fallbackDesc: 'Cierre del ciclo - integración de aprendizajes' },
+      { key: 'mes_13', meses: [12], intensidad: 5, fallback: true, fallbackDesc: 'Último mes - preparación para la renovación' }, // Cierre
     ];
 
-    for (let i = 0; i < 12; i++) {
+    // Generar 13 meses (ciclo completo desde cumpleaños a cumpleaños)
+    for (let i = 0; i <= 12; i++) {
       const mesIdx = (startMonth + i) % 12;
       const mesName = monthNames[mesIdx];
       const periodo = periodos.find(p => p.meses.includes(i));
-      const data = periodo ? lta[periodo.key] : null;
-      // Solo el primer mes del periodo hereda la descripción completa
-      const isPrimaryMonth = periodo ? periodo.meses[0] === i : false;
+      const data = periodo && lta ? lta[periodo.key] : null;
+
+      // ✅ Siempre usar fallback si no hay datos reales
+      const useFallback = !data;
+      const fallbackDesc = periodo?.fallbackDesc || 'Observa y registra tus emociones este mes';
 
       result.push({
         mes: mesName,
-        intensidad: data ? periodo!.intensidad : 2,
-        palabra_clave: data?.accion_clave || data?.titulo?.split('|')[1]?.trim() || '',
-        descripcion: isPrimaryMonth ? (data?.descripcion || '') : '',
-        accion_clave: isPrimaryMonth ? (data?.accion_clave || '') : '',
+        intensidad: periodo?.intensidad || 3,
+        palabra_clave: data?.accion_clave || data?.titulo?.split('|')[1]?.trim() || fallbackDesc.substring(0, 40),
+        descripcion: data?.descripcion || fallbackDesc,
+        accion_clave: data?.accion_clave || 'Observa tus patrones emocionales',
       });
     }
 
@@ -1226,36 +1232,134 @@ export const AgendaLibro = ({
   // Helper: Obtener puntos de giro del año desde linea_tiempo_anual (fallback para MesesClavePuntosGiro)
   // Devuelve solo los 5 periodos distintos con datos reales
   const getMesesClaveFallback = (): any[] | undefined => {
+    // ✅ NUEVO: Extraer eventos reales del ciclo en lugar de genéricos
     const interpretation = getSRInterpretation();
     const lta = interpretation?.linea_tiempo_anual;
-    if (!lta || Array.isArray(lta)) return undefined;
 
     const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
       'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-    const startMonth = startDate.getMonth();
+
+    // Recolectar todos los eventos significativos del año
+    // ✅ NOTA: getEventosForMonth devuelve AstrologicalEvent[] con campos: type, title, description, interpretation
+    const allSignificantEvents: any[] = [];
+
+    for (let monthIndex = 0; monthIndex < 13; monthIndex++) {
+      const monthEvents = getEventosForMonth(monthIndex);
+      if (!monthEvents || monthEvents.length === 0) continue;
+
+      monthEvents.forEach((evento: any) => {
+        // ✅ FIX: Usar campos CORRECTOS del AstrologicalEvent (type, title)
+        const eventType = (evento.type || '').toLowerCase();
+        const eventTitle = (evento.title || '').toLowerCase();
+
+        const isSignificant =
+          eventType.includes('retrograde') ||
+          eventType.includes('ingress') ||
+          eventType.includes('station') ||
+          eventType.includes('eclipse') ||
+          eventTitle.includes('júpiter') || eventTitle.includes('jupiter') ||
+          eventTitle.includes('saturno') || eventTitle.includes('saturn') ||
+          eventTitle.includes('urano') || eventTitle.includes('uranus') ||
+          eventTitle.includes('neptuno') || eventTitle.includes('neptune') ||
+          eventTitle.includes('plutón') || eventTitle.includes('pluto');
+
+        if (isSignificant) {
+          allSignificantEvents.push({
+            ...evento,
+            monthIndex,
+            priority: eventType.includes('eclipse') ? 3 :
+                     eventType.includes('retrograde') ? 2 :
+                     eventType.includes('station') ? 2 : 1
+          });
+        }
+      });
+    }
+
+    if (allSignificantEvents.length > 0) {
+      allSignificantEvents.sort((a, b) => {
+        if (b.priority !== a.priority) return b.priority - a.priority;
+        return (a.date || '') > (b.date || '') ? 1 : -1;
+      });
+
+      const topEvents = allSignificantEvents.slice(0, 6);
+
+      return topEvents.map((evento) => {
+        const mesIdx = (startDate.getMonth() + evento.monthIndex) % 12;
+        const mesName = monthNames[mesIdx];
+        const titulo = evento.title || 'Evento astrológico';
+
+        // ✅ FIX: Extraer interpretación desde event.interpretation (inline V2 del SolarCycle)
+        let significadoText = '';
+        const interp = evento.interpretation;
+
+        if (interp && typeof interp === 'object') {
+          const parts = [];
+
+          // V2 fields (from generate-batch)
+          if (interp.que_se_activa) parts.push(interp.que_se_activa);
+          if (interp.como_se_siente) {
+            const siente = Array.isArray(interp.como_se_siente)
+              ? interp.como_se_siente.slice(0, 2).join(' ')
+              : interp.como_se_siente;
+            parts.push(siente);
+          }
+          if (interp.consejo) {
+            const consejo = Array.isArray(interp.consejo)
+              ? interp.consejo.slice(0, 2).join(' ')
+              : interp.consejo;
+            parts.push(consejo);
+          }
+
+          // V1 fields fallback
+          if (parts.length === 0) {
+            if (interp.mensaje_sintesis) parts.push(interp.mensaje_sintesis);
+            if (interp.como_te_afecta) parts.push(interp.como_te_afecta);
+            if (interp.sintesis_practica) parts.push(interp.sintesis_practica);
+          }
+
+          // Simple format fallback
+          if (parts.length === 0 && interp.personalMeaning) {
+            parts.push(interp.personalMeaning);
+          }
+
+          significadoText = parts.join(' ');
+        } else if (evento.description) {
+          significadoText = evento.description;
+        }
+
+        return {
+          mes: `${mesName.charAt(0).toUpperCase() + mesName.slice(1)}`,
+          titulo: titulo,
+          evento_astrologico: titulo,
+          significado_para_ti: significadoText || `Este evento representa un momento de transición importante. Observa cómo se manifiesta en tu vida y qué cambios internos trae consigo.`
+        };
+      });
+    }
+
+    // Fallback: usar linea_tiempo_anual si no hay eventos
+    if (!lta || Array.isArray(lta)) return undefined;
 
     const periodos = [
-      { key: 'mes_1_2', offset: 0, label: 'Mes 1–2' },
-      { key: 'mes_3_4', offset: 2, label: 'Mes 3–4' },
-      { key: 'mes_6_7', offset: 5, label: 'Mes 6–7' },
-      { key: 'mes_9_10', offset: 8, label: 'Mes 9–10' },
-      { key: 'mes_12', offset: 11, label: 'Mes 12' },
+      { key: 'mes_1_2', offset: 0, label: 'Mes 1–2', descripcionEvento: 'Inicio del ciclo solar' },
+      { key: 'mes_3_4', offset: 2, label: 'Mes 3–4', descripcionEvento: 'Primer punto de ajuste' },
+      { key: 'mes_6_7', offset: 5, label: 'Mes 6–7', descripcionEvento: 'Punto medio del ciclo' },
+      { key: 'mes_9_10', offset: 8, label: 'Mes 9–10', descripcionEvento: 'Segundo punto de ajuste' },
+      { key: 'mes_12', offset: 11, label: 'Mes 12', descripcionEvento: 'Cierre del ciclo' },
     ];
 
     const result: any[] = [];
     for (const p of periodos) {
       const data = lta[p.key];
       if (!data) continue;
-      const mesIdx = (startMonth + p.offset) % 12;
+      const mesIdx = (startDate.getMonth() + p.offset) % 12;
       const mesName = monthNames[mesIdx];
       const titulo = data.titulo || '';
-      // Extraer la parte descriptiva del título (después de "|")
       const tituloDescriptivo = titulo.includes('|') ? titulo.split('|')[1]?.trim() : titulo;
 
       result.push({
         mes: `${mesName.charAt(0).toUpperCase() + mesName.slice(1)} — ${tituloDescriptivo || p.label}`,
-        evento_astrologico: data.accion_clave || tituloDescriptivo || '',
-        significado_para_ti: data.descripcion || ''
+        evento_astrologico: data.accion_clave || p.descripcionEvento,
+        significado_para_ti: data.descripcion || `Este periodo marca un momento clave en tu ciclo solar. ${p.descripcionEvento.toLowerCase()}.`
       });
     }
 
@@ -2171,6 +2275,34 @@ export const AgendaLibro = ({
               {month.mesNumero === 9 && <RitualSimbolico />}
             </div>
           ))}
+        </div>
+
+        {/* ═══════════════════════════════════════════════════════════════
+            SECCIÓN 8: CIERRE DEL CICLO
+            ═══════════════════════════════════════════════════════════════ */}
+        <div id="cierre-ciclo">
+          <QuienEraQuienSoy />
+          <PreparacionProximaVuelta
+            clavesIntegracion={getClavesIntegracion()}
+            aprendizajesAnio={getSRInterpretation()?.apertura_anual?.tema_central}
+            temaCentral={getInterpretacionRetornoSolar()}
+          />
+          <CartaCierre name={userName} />
+          <UltimoDiaCiclo
+            fecha={endDate}
+            nombre={userName}
+            eventoDelDia={(() => {
+              // Obtener eventos del último mes (mes 12, índice 12)
+              const ultimoMesEventos = getFormattedEventosForMonth(12, endDate.getFullYear());
+              // Buscar evento que coincida con el endDate
+              const eventoDelUltimoDia = ultimoMesEventos?.find((e: any) => {
+                const eventDate = new Date(e.fecha || e.date);
+                return eventDate.getDate() === endDate.getDate() &&
+                       eventDate.getMonth() === endDate.getMonth();
+              });
+              return eventoDelUltimoDia;
+            })()}
+          />
         </div>
 
         {/* PÁGINAS PARA NOTAS (con líneas para escribir) */}

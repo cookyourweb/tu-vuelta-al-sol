@@ -72,21 +72,13 @@ export const TuAnioOverview: React.FC<TuAnioProps> = ({ startDate, endDate, user
         </p>
       </div>
 
-      {/* Influencias Planetarias */}
+      {/* Influencias Planetarias y Tránsitos Generacionales */}
       <div className={`${config.highlightSecondary} rounded-xl p-6 mb-6`}>
         <h3 className={`font-medium ${config.iconSecondary} text-lg mb-4`}>
-          Influencias Planetarias
+          Influencias Planetarias y Tránsitos Generacionales
         </h3>
-        <div className="grid grid-cols-3 gap-4">
-          <div className="text-center">
-            <Sparkles className={`w-5 h-5 mx-auto ${config.iconPrimary} mb-2`} />
-            <h4 className={`font-medium ${config.iconPrimary} text-sm`}>
-              Saturno en Piscis
-            </h4>
-            <p className="text-gray-600 text-xs mt-1">
-              Estructura tu intuición. Manifestación concreta de visión espiritual.
-            </p>
-          </div>
+        {/* Primera fila: Júpiter y Saturno (personales del año) */}
+        <div className="grid grid-cols-2 gap-4 mb-4">
           <div className="text-center">
             <Moon className={`w-5 h-5 mx-auto ${config.iconSecondary} mb-2`} />
             <h4 className={`font-medium ${config.iconSecondary} text-sm`}>
@@ -97,13 +89,50 @@ export const TuAnioOverview: React.FC<TuAnioProps> = ({ startDate, endDate, user
             </p>
           </div>
           <div className="text-center">
-            <Star className={`w-5 h-5 mx-auto ${config.iconAccent} mb-2`} />
-            <h4 className={`font-medium ${config.iconAccent} text-sm`}>
-              Plutón en Acuario
+            <Sparkles className={`w-5 h-5 mx-auto ${config.iconPrimary} mb-2`} />
+            <h4 className={`font-medium ${config.iconPrimary} text-sm`}>
+              Saturno en Piscis
             </h4>
             <p className="text-gray-600 text-xs mt-1">
-              Transformación de relaciones y estructuras colectivas.
+              Estructura tu intuición. Manifestación concreta de visión espiritual.
             </p>
+          </div>
+        </div>
+
+        {/* Segunda fila: Tránsitos generacionales (Urano, Neptuno, Plutón) */}
+        <div className="border-t border-gray-200 pt-4">
+          <p className="text-center text-xs text-gray-500 mb-3 italic">Tránsitos Generacionales Activos</p>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="text-center">
+              <Circle className={`w-4 h-4 mx-auto ${config.iconSecondary} mb-1`} />
+              <h4 className={`font-medium ${config.iconSecondary} text-xs`}>
+                Urano en Tauro
+              </h4>
+              <p className="text-gray-600 text-[10px] mt-1">
+                Revolución de valores y recursos. Innovación material.
+              </p>
+              <span className="text-[9px] text-gray-400 block mt-0.5">2018–2026</span>
+            </div>
+            <div className="text-center">
+              <Circle className={`w-4 h-4 mx-auto ${config.iconPrimary} mb-1`} />
+              <h4 className={`font-medium ${config.iconPrimary} text-xs`}>
+                Neptuno en Piscis
+              </h4>
+              <p className="text-gray-600 text-[10px] mt-1">
+                Disolución de fronteras. Espiritualidad colectiva.
+              </p>
+              <span className="text-[9px] text-gray-400 block mt-0.5">2011–2026</span>
+            </div>
+            <div className="text-center">
+              <Star className={`w-4 h-4 mx-auto ${config.iconAccent} mb-1`} />
+              <h4 className={`font-medium ${config.iconAccent} text-xs`}>
+                Plutón en Acuario
+              </h4>
+              <p className="text-gray-600 text-[10px] mt-1">
+                Transformación de relaciones y estructuras colectivas.
+              </p>
+              <span className="text-[9px] text-gray-400 block mt-0.5">2024–2044</span>
+            </div>
           </div>
         </div>
       </div>

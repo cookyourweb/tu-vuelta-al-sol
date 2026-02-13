@@ -34,19 +34,20 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
   handleMouseMove,
   isPrint = false
 }) => {
-  // Colores adaptados según modo (print=fondo blanco, web=fondo oscuro)
+  // Colores adaptados según modo (print=fondo morado igual que web, web=fondo oscuro)
   const colors = isPrint ? {
-    circleStroke: 'rgba(100,100,120,0.3)',
-    circleStrokeBold: 'rgba(80,80,100,0.5)',
-    houseLine: 'rgba(100,100,120,0.3)',
-    houseBg: 'rgba(230,230,240,0.8)',
-    houseStroke: 'rgba(100,100,120,0.5)',
-    houseText: 'rgba(60,60,80,0.9)',
-    signColor: '#6b21a8',
-    signSubColor: 'rgba(107,33,168,0.7)',
+    circleStroke: 'rgba(255,255,255,0.2)',
+    circleStrokeBold: 'rgba(255,255,255,0.3)',
+    houseLine: 'rgba(255,255,255,0.3)',
+    houseBg: 'rgba(0,0,0,0.3)',
+    houseStroke: 'rgba(255,255,255,0.4)',
+    houseText: 'rgba(255,255,255,0.9)',
+    signColor: '#fbbf24',
+    signSubColor: 'rgba(251,191,36,0.9)',
     planetBg: '#fff',
-    planetStroke: 'rgba(100,100,120,0.4)',
+    planetStroke: 'rgba(255,255,255,0.3)',
     centerFill: '#fbbf24',
+    labelColor: 'rgba(255,255,255,0.85)',
   } : {
     circleStroke: 'rgba(255,255,255,0.2)',
     circleStrokeBold: 'rgba(255,255,255,0.3)',
@@ -59,6 +60,7 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
     planetBg: '#fff',
     planetStroke: 'rgba(255,255,255,0.3)',
     centerFill: '#fbbf24',
+    labelColor: 'rgba(255,255,255,0.85)',
   };
 
   // Render aspect lines
@@ -126,14 +128,17 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
       const planetColor = PLANET_COLORS[planet.name] || '#888';
       const isHovered = hoveredPlanet === planet.name;
 
+      // Calcular posición de la etiqueta (fuera del círculo del planeta)
+      const labelPos = getCirclePosition(planet.position!, 155);
+
       return (
         <g key={index}>
           <circle
             cx={position.x}
             cy={position.y}
             r={isHovered ? 15 : 12}
-            fill={isPrint ? planetColor : colors.planetBg}
-            stroke={isPrint ? 'rgba(60,60,80,0.6)' : (isHovered ? "rgba(255,255,255,0.8)" : colors.planetStroke)}
+            fill={planetColor}
+            stroke={isHovered ? "rgba(255,255,255,0.8)" : colors.planetStroke}
             strokeWidth={isHovered ? 2 : 1}
             className={isPrint ? '' : 'cursor-pointer transition-all duration-200'}
             onMouseEnter={isPrint ? undefined : (e) => {
@@ -148,13 +153,52 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
             y={position.y + 1}
             textAnchor="middle"
             dominantBaseline="middle"
-            fill={isPrint ? '#fff' : 'black'}
+            fill="#fff"
             fontSize="13"
             fontWeight="bold"
             className="pointer-events-none"
           >
             {symbol}
           </text>
+
+          {/* Etiqueta con nombre, grado y signo */}
+          {isPrint && planet.sign && (
+            <g className="pointer-events-none">
+              <text
+                x={labelPos.x}
+                y={labelPos.y - 6}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fill={colors.labelColor}
+                fontSize="7"
+                fontWeight="bold"
+              >
+                {planet.name}
+              </text>
+              <text
+                x={labelPos.x}
+                y={labelPos.y + 3}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fill={colors.labelColor}
+                fontSize="6"
+              >
+                {planet.degree !== undefined ? `${Math.round(planet.degree * 100) / 100}°` : ''} {planet.sign}
+              </text>
+              {planet.retrograde && (
+                <text
+                  x={position.x + 14}
+                  y={position.y - 10}
+                  textAnchor="middle"
+                  fill="#ef4444"
+                  fontSize="8"
+                  fontWeight="bold"
+                >
+                  R
+                </text>
+              )}
+            </g>
+          )}
         </g>
       );
     });
@@ -246,18 +290,85 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
           >
             {symbol}
           </text>
-          {!isPrint && (
-            <text
-              x={textPosition.x}
-              y={textPosition.y}
-              textAnchor="middle"
-              fill={colors.signSubColor}
-              fontSize="10"
-              style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.9)' }}
-            >
-              {sign}
-            </text>
-          )}
+          <text
+            x={textPosition.x}
+            y={textPosition.y}
+            textAnchor="middle"
+            fill={colors.signSubColor}
+            fontSize={isPrint ? "8" : "10"}
+            style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.9)' }}
+          >
+            {sign}
+          </text>
+        </g>
+      );
+    });
+  };
+
+  // Render ángulos (ASC, MC, DSC, IC) - solo en modo print
+  const renderAngles = () => {
+    if (!isPrint || houses.length < 10) return null;
+
+    const angles = [
+      { name: 'ASC', fullName: 'Ascendente', houseIdx: 0, color: '#22c55e' },
+      { name: 'IC', fullName: 'Fondo Cielo', houseIdx: 3, color: '#f59e0b' },
+      { name: 'DSC', fullName: 'Descendente', houseIdx: 6, color: '#ef4444' },
+      { name: 'MC', fullName: 'Medio Cielo', houseIdx: 9, color: '#3b82f6' },
+    ];
+
+    return angles.map((angle) => {
+      const house = houses[angle.houseIdx];
+      if (!house) return null;
+
+      // Posición del ángulo en el borde exterior del chart
+      const houseAngle = angle.houseIdx * 30;
+      const pos = getCirclePosition(houseAngle, 230);
+      const labelPos = getCirclePosition(houseAngle, 205);
+
+      return (
+        <g key={angle.name}>
+          {/* Círculo del ángulo */}
+          <circle
+            cx={pos.x}
+            cy={pos.y}
+            r="10"
+            fill={angle.color}
+            stroke="rgba(255,255,255,0.5)"
+            strokeWidth="1.5"
+          />
+          <text
+            x={pos.x}
+            y={pos.y + 1}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fill="white"
+            fontSize="7"
+            fontWeight="bold"
+            className="pointer-events-none"
+          >
+            {angle.name}
+          </text>
+
+          {/* Etiqueta con nombre completo y signo */}
+          <text
+            x={labelPos.x}
+            y={labelPos.y - 5}
+            textAnchor="middle"
+            fill={angle.color}
+            fontSize="6"
+            fontWeight="bold"
+          >
+            {angle.fullName}
+          </text>
+          <text
+            x={labelPos.x}
+            y={labelPos.y + 3}
+            textAnchor="middle"
+            fill={colors.labelColor}
+            fontSize="5.5"
+          >
+            {house.degree ? `${Math.round(house.degree)}°` : ''} {house.sign}
+          </text>
         </g>
       );
     });
@@ -269,11 +380,11 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
 
   return (
     <svg
-      width="600"
-      height="600"
+      width={isPrint ? "100%" : "600"}
+      height={isPrint ? "100%" : "600"}
       viewBox="0 0 500 500"
       className={svgClassName}
-      style={isPrint ? { background: 'radial-gradient(circle, #f0f0f8 0%, #e8e8f0 50%, #d8d8e8 100%)' } : undefined}
+      style={isPrint ? { background: 'radial-gradient(circle, #2e1065 0%, #1e1b4b 50%, #0f0a2a 100%)' } : undefined}
     >
       <circle cx="250" cy="250" r="130" fill="none" stroke={colors.circleStroke} strokeWidth="1" />
       <circle cx="250" cy="250" r="170" fill="none" stroke={colors.circleStrokeBold} strokeWidth="2" />
@@ -285,6 +396,7 @@ const ChartWheel: React.FC<ChartWheelProps> = ({
       {renderHouses()}
       {renderSigns()}
       {renderPlanets()}
+      {renderAngles()}
 
       <circle cx="250" cy="250" r="8" fill={colors.centerFill} className={isPrint ? '' : 'animate-pulse'} />
       <text x="250" y="255" textAnchor="middle" dominantBaseline="middle" fill="black" fontSize="10" fontWeight="bold">

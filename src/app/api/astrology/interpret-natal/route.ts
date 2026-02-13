@@ -634,7 +634,18 @@ RESPONDE SOLO CON JSON VÁLIDO.`;
       throw new Error('Invalid drawer structure');
     }
 
-    console.log(`✅ Generated ${angleName} interpretation`);
+    // Validate required fields (especially drawer.titulo for InterpretationDrawer)
+    if (!parsed.tooltip.titulo || !parsed.tooltip.significado) {
+      console.error(`❌ Missing required tooltip fields for ${angleName}`);
+      throw new Error('Missing required tooltip fields');
+    }
+    if (!parsed.drawer.titulo || !parsed.drawer.educativo || !parsed.drawer.poderoso) {
+      console.error(`❌ Missing required drawer fields for ${angleName}`);
+      console.error(`❌ Drawer object:`, parsed.drawer);
+      throw new Error('Missing required drawer fields');
+    }
+
+    console.log(`✅ Generated ${angleName} interpretation with titulo: "${parsed.drawer.titulo}"`);
     return parsed as PlanetInterpretation;
     
   } catch (error) {

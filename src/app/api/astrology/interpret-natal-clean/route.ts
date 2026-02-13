@@ -42,7 +42,7 @@ async function generateCleanInterpretation(
 
   const prompt = generateCleanNatalChartPrompt(chartData, userProfile);
 
-  console.log('🌟 Generando interpretación natal limpia con prompt:', prompt.substring(0, 200) + '...');
+  console.log('🌟 Generando interpretación natal limpia con prompt:', 'generateCleanNatalChartPrompt');
 
   try {
     const completion = await openai.chat.completions.create({

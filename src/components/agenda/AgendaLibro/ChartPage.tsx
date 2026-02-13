@@ -58,9 +58,9 @@ export const ChartPage: React.FC<ChartPageProps> = ({
   }, [planetsWithPosition]);
 
   return (
-    <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '8mm 6mm' }}>
+    <div className={`print-page flex flex-col relative ${config.pattern}`} style={{ padding: '6mm 4mm' }}>
       {/* Header */}
-      <div className="text-center mb-3 pb-2 border-b-2 border-gray-200">
+      <div className="text-center mb-2 pb-1.5 border-b-2 border-gray-200">
         <div className="flex items-center justify-center gap-2 mb-1">
           {isNatal ? (
             <Star className={`w-5 h-5 ${config.iconPrimary}`} />
@@ -86,9 +86,9 @@ export const ChartPage: React.FC<ChartPageProps> = ({
         </div>
       )}
 
-      {/* Chart */}
+      {/* Chart - Más grande para mejor legibilidad */}
       <div className="flex-1 flex items-center justify-center">
-        <div className="w-full max-w-[300px] mx-auto">
+        <div className="w-full max-w-full mx-auto px-2">
           <ChartWheel
             planets={planetsWithPosition}
             houses={houses}
@@ -139,7 +139,7 @@ export const ChartPlaceholderPage: React.FC<{
   const isNatal = chartType === 'natal';
 
   return (
-    <div className={`print-page bg-white flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
+    <div className={`print-page flex flex-col relative ${config.pattern}`} style={{ padding: '15mm' }}>
       <div className="text-center mb-8">
         {isNatal ? (
           <Star className={`w-10 h-10 mx-auto ${config.iconPrimary} mb-4`} />

@@ -189,6 +189,22 @@ const AgendaPersonalizada = () => {
             isSlowPlanet: false
           },
           {
+            name: 'Urano',
+            symbol: getPlanetSymbol('Urano'),
+            natalSign: 'Tauro',
+            natalHouse: 1,
+            duration: '2018 – 2026',
+            isSlowPlanet: true
+          },
+          {
+            name: 'Neptuno',
+            symbol: getPlanetSymbol('Neptuno'),
+            natalSign: 'Piscis',
+            natalHouse: 1,
+            duration: '2011 – 2026',
+            isSlowPlanet: true
+          },
+          {
             name: 'Plutón',
             symbol: getPlanetSymbol('Plutón'),
             natalSign: 'Acuario',
@@ -220,6 +236,8 @@ const AgendaPersonalizada = () => {
       'Marte': '♂',
       'Júpiter': '♃',
       'Saturno': '♄',
+      'Urano': '♅',
+      'Neptuno': '♆',
       'Plutón': '♇',
     };
     return symbols[planet] || '●';

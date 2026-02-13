@@ -1,5 +1,6 @@
 // src/app/page.tsx
 import Link from 'next/link';
+import Footer from '@/components/layout/Footer';
 import {
   Star,
   Sparkles,
@@ -583,6 +584,9 @@ en una   <strong className="text-white">agenda real para tu día a día.</strong
           </div>
         </div>
       </section>
+
+      {/* Footer con textos legales */}
+      <Footer />
     </div>
   );
 }

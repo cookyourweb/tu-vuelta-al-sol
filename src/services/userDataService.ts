@@ -1,11 +1,8 @@
 // src/services/userDataService.ts
-// 🧑‍💼 SERVICIO PARA OBTENER DATOS DEL USUARIO - COMPATIBLE CON TU SISTEMA
+// 🧑‍💼 SERVICIO PARA OBTENER DATOS DEL USUARIO
 
-// ✅ IMPORTAR TU CONEXIÓN MONGODB EXISTENTE
-// Ajusta esta importación según tu estructura actual
-// import { connectToDatabase } from '@/lib/mongodb';
-// O si usas mongoose:
-// import mongoose from 'mongoose';
+import connectDB from '@/lib/db';
+import BirthData from '@/models/BirthData';
 
 export interface UserBirthData {
   date: string;
@@ -19,28 +16,10 @@ export interface UserBirthData {
 export interface UserProfile {
   name?: string;
   email?: string;
-  birthData?: UserBirthData | null; // ✅ PERMITIR TANTO undefined COMO null
+  birthData?: UserBirthData | null;
   hasNatalChart?: boolean;
   hasProgressedChart?: boolean;
   lastUpdated?: string;
-}
-
-// 🔧 FUNCIÓN AUXILIAR PARA OBTENER CONEXIÓN DB
-async function getDbConnection() {
-  try {
-    // ✅ OPCIÓN 1: Si tienes connectToDatabase funcionando
-    // const { db } = await connectToDatabase();
-    // return db;
-    
-    // ✅ OPCIÓN 2: Si usas mongoose y tienes modelos
-    // return mongoose.connection.db;
-    
-    // ✅ OPCIÓN 3: Usar fetch para endpoints existentes (FALLBACK SEGURO)
-    return null; // Usaremos endpoints existentes
-  } catch (error) {
-    console.error('❌ Error conectando a BD:', error);
-    return null;
-  }
 }
 
 // ==========================================
@@ -50,31 +29,25 @@ async function getDbConnection() {
 export async function getUserBirthData(userId: string): Promise<UserBirthData | null> {
   try {
     console.log(`🔍 Obteniendo datos de nacimiento para usuario: ${userId}`);
-    
-    // 🔄 USAR TU ENDPOINT EXISTENTE DE BIRTH-DATA
-    const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/birth-data?userId=${userId}`);
-    
-    if (!response.ok) {
+
+    // ✅ Usar directamente el modelo de Mongoose (NO fetch HTTP)
+    await connectDB();
+    const birthData = await BirthData.findByUserId(userId);
+
+    if (!birthData) {
       console.log(`❌ No se encontraron datos de nacimiento para usuario: ${userId}`);
       return null;
     }
-    
-    const data = await response.json();
-    
-    if (data.success && data.data) {
-      console.log(`✅ Datos de nacimiento encontrados para usuario: ${userId}`);
-      return {
-        date: data.data.date,
-        time: data.data.time,
-        location: data.data.location,
-        latitude: data.data.latitude,
-        longitude: data.data.longitude,
-        timezone: data.data.timezone
-      };
-    }
 
-    console.log(`❌ No se encontraron datos de nacimiento para usuario: ${userId}`);
-    return null;
+    console.log(`✅ Datos de nacimiento encontrados para usuario: ${userId}`);
+    return {
+      date: birthData.birthDate.toISOString().split('T')[0], // YYYY-MM-DD
+      time: birthData.birthTime,
+      location: birthData.birthPlace,
+      latitude: birthData.latitude,
+      longitude: birthData.longitude,
+      timezone: birthData.timezone
+    };
 
   } catch (error) {
     console.error('❌ Error obteniendo datos de nacimiento:', error);
@@ -89,31 +62,23 @@ export async function getUserBirthData(userId: string): Promise<UserBirthData | 
 export async function getUserProfile(userId: string): Promise<UserProfile | null> {
   try {
     console.log(`👤 Obteniendo perfil completo para usuario: ${userId}`);
-    
-    // Obtener datos de nacimiento
+
+    // Obtener datos de nacimiento directamente del modelo
     const birthData = await getUserBirthData(userId);
-    
-    // Verificar si tiene cartas generadas usando tus endpoints existentes
+
+    // Obtener nombre del modelo si existe
+    await connectDB();
+    const birthDataDoc = await BirthData.findByUserId(userId);
+    const name = birthDataDoc?.fullName || 'Usuario';
+
+    // Para verificar cartas, podríamos consultar la DB directamente también
+    // pero por ahora dejamos esto como está (no crítico)
     let hasNatalChart = false;
     let hasProgressedChart = false;
-    
-    try {
-      const natalResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/charts/natal?userId=${userId}`);
-      hasNatalChart = natalResponse.ok;
-    } catch (error) {
-      console.log('❌ Error verificando carta natal:', error);
-    }
-    
-    try {
-      const progressedResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/charts/progressed?userId=${userId}`);
-      hasProgressedChart = progressedResponse.ok;
-    } catch (error) {
-      console.log('❌ Error verificando carta progresada:', error);
-    }
 
     const profile: UserProfile = {
-      name: 'Usuario', // Puedes obtener esto de Firebase Auth si lo necesitas
-      email: undefined, // Puedes obtener esto de Firebase Auth si lo necesitas
+      name,
+      email: undefined,
       birthData,
       hasNatalChart,
       hasProgressedChart,
@@ -125,7 +90,7 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
       hasNatalChart,
       hasProgressedChart
     });
-    
+
     return profile;
 
   } catch (error) {
@@ -135,31 +100,43 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
 }
 
 // ==========================================
-// 💾 GUARDAR/ACTUALIZAR DATOS DE NACIMIENTO (OPCIONAL)
+// 💾 GUARDAR/ACTUALIZAR DATOS DE NACIMIENTO
 // ==========================================
 
 export async function saveUserBirthData(userId: string, birthData: UserBirthData): Promise<boolean> {
   try {
     console.log(`💾 Guardando datos de nacimiento para usuario: ${userId}`);
-    
-    // Usar tu endpoint existente para guardar datos
-    const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/birth-data`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        userId,
-        ...birthData
-      })
-    });
 
-    if (response.ok) {
-      console.log(`✅ Datos de nacimiento guardados para usuario: ${userId}`);
-      return true;
+    await connectDB();
+
+    // Buscar registro existente
+    const existing = await BirthData.findByUserId(userId);
+
+    if (existing) {
+      // Actualizar existente
+      existing.birthDate = new Date(birthData.date);
+      existing.birthTime = birthData.time;
+      existing.birthPlace = birthData.location;
+      existing.latitude = birthData.latitude;
+      existing.longitude = birthData.longitude;
+      if (birthData.timezone) existing.timezone = birthData.timezone;
+      await existing.save();
+    } else {
+      // Crear nuevo
+      await BirthData.create({
+        userId,
+        fullName: 'Usuario', // Valor por defecto
+        birthDate: new Date(birthData.date),
+        birthTime: birthData.time,
+        birthPlace: birthData.location,
+        latitude: birthData.latitude,
+        longitude: birthData.longitude,
+        timezone: birthData.timezone || 'Europe/Madrid'
+      });
     }
 
-    return false;
+    console.log(`✅ Datos de nacimiento guardados para usuario: ${userId}`);
+    return true;
 
   } catch (error) {
     console.error('❌ Error guardando datos de nacimiento:', error);
@@ -215,17 +192,15 @@ export async function checkUserDataCompleteness(userId: string): Promise<{
 }
 
 // ==========================================
-// 🔄 MIGRAR DATOS LEGACY (FUNCIONAL PERO SIMPLE)
+// 🔄 MIGRAR DATOS LEGACY
 // ==========================================
 
 export async function migrateLegacyUserData(userId: string): Promise<boolean> {
   try {
     console.log(`🔄 Intentando migración de datos legacy para usuario: ${userId}`);
-    
-    // En tu caso, probablemente los datos ya están en los endpoints correctos
-    // Esta función es principalmente por compatibilidad
+
     const birthData = await getUserBirthData(userId);
-    
+
     if (birthData) {
       console.log(`✅ Datos encontrados, no necesita migración para usuario: ${userId}`);
       return true;

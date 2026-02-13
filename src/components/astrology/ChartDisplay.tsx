@@ -715,8 +715,12 @@ const ChartDisplay = ({
               setHoveredPlanet('Ascendente');
               handleMouseMove({ clientX: 0, clientY: 0 } as React.MouseEvent);
             }}
+            onClick={(e) => {
+              setHoveredPlanet('Ascendente');
+              handleMouseMove(e);
+            }}
           />
-          
+
           <text
             x={position.x}
             y={position.y + 1}
@@ -801,8 +805,12 @@ const ChartDisplay = ({
               setHoveredPlanet('Medio Cielo');
               handleMouseMove({ clientX: 0, clientY: 0 } as any);
             }}
+            onClick={(e) => {
+              setHoveredPlanet('Medio Cielo');
+              handleMouseMove(e);
+            }}
           />
-          
+
           <text
             x={position.x}
             y={position.y + 1}

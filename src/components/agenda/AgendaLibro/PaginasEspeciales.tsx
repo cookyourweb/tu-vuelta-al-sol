@@ -101,7 +101,8 @@ export const PrimerDiaCiclo: React.FC<{
 export const UltimoDiaCiclo: React.FC<{
   fecha: Date;
   nombre: string;
-}> = ({ fecha, nombre }) => {
+  eventoDelDia?: any; // Evento astrológico del último día (opcional)
+}> = ({ fecha, nombre, eventoDelDia }) => {
   const { config } = useStyle();
 
   // Normalizar fecha para evitar problemas de timezone
@@ -120,6 +121,31 @@ export const UltimoDiaCiclo: React.FC<{
         <p className={`text-lg ${config.iconSecondary} mb-8`}>Cierre y preparación, {nombre}</p>
 
         <div className={`${config.divider} w-32 my-8`} />
+
+        {/* ✅ NUEVO: Mostrar evento astrológico si existe */}
+        {eventoDelDia && (
+          <div className={`${config.highlightPrimary} rounded-lg p-4 mb-6 max-w-md w-full text-left`}>
+            <h3 className={`text-sm font-bold uppercase ${config.iconPrimary} mb-2`}>
+              Energía del día: {eventoDelDia.titulo || eventoDelDia.title}
+            </h3>
+            {eventoDelDia.interpretacionRaw && (
+              <div className="space-y-2 text-xs text-gray-700">
+                {eventoDelDia.interpretacionRaw.que_se_activa && (
+                  <p><strong>Qué se activa:</strong> {eventoDelDia.interpretacionRaw.que_se_activa}</p>
+                )}
+                {eventoDelDia.interpretacionRaw.como_se_siente && (
+                  <p><strong>Cómo se siente:</strong> {eventoDelDia.interpretacionRaw.como_se_siente}</p>
+                )}
+                {eventoDelDia.interpretacionRaw.consejo && (
+                  <p><strong>Consejo:</strong> {eventoDelDia.interpretacionRaw.consejo}</p>
+                )}
+              </div>
+            )}
+            {!eventoDelDia.interpretacionRaw && eventoDelDia.interpretacion && (
+              <p className="text-xs text-gray-700">{eventoDelDia.interpretacion}</p>
+            )}
+          </div>
+        )}
 
         <div className="max-w-md space-y-6 text-left w-full">
           <div className={`${config.highlightSecondary} p-5`}>
