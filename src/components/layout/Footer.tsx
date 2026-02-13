@@ -116,22 +116,22 @@ const Footer: React.FC = () => {
               <ul className="space-y-3">
                 <li>
                   <a 
-                    href="mailto:wunjocreations@gmail.com" 
+                    href="mailto:agenda@tuvueltaalsol.com" 
                     className="text-gray-300 hover:text-white transition-colors duration-300 flex items-center group"
                   >
                     <Mail className="w-4 h-4 mr-3 text-gray-500 group-hover:text-blue-400 transition-colors" />
-                    wunjocreations@gmail.com
+                    agenda@tuvueltaalsol.com
                   </a>
                 </li>
                 <li>
                   <a 
-                    href="https://instagram.com/wunjocreations" 
+                    href="https://instagram.com/tuvueltaalsolapp" 
                     target="_blank" 
                     rel="noopener noreferrer" 
                     className="text-gray-300 hover:text-white transition-colors duration-300 flex items-center group"
                   >
                     <Instagram className="w-4 h-4 mr-3 text-gray-500 group-hover:text-pink-400 transition-colors" />
-                    @wunjocreations
+                    @tuvueltaalsolapp
                   </a>
                 </li>
               </ul>
@@ -179,7 +179,7 @@ const Footer: React.FC = () => {
             {/* Redes sociales */}
             <div className="flex items-center space-x-6">
               <a 
-                href="https://instagram.com/wunjocreations" 
+                href="https://instagram.com/tuvueltaalsolapp" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="text-gray-400 hover:text-pink-400 transition-colors duration-300 transform hover:scale-110"
@@ -189,7 +189,7 @@ const Footer: React.FC = () => {
               </a>
               
               <a 
-                href="mailto:wunjocreations@gmail.com" 
+                href="mailto:agenda@tuvueltaalsol.com" 
                 className="text-gray-400 hover:text-blue-400 transition-colors duration-300 transform hover:scale-110"
               >
                 <span className="sr-only">Email</span>
