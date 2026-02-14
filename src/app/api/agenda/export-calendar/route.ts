@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import SolarCycle from '@/models/SolarCycle';
+import EventInterpretation from '@/models/EventInterpretation';
 import { generateICSContent, convertEventsForCalendar } from '@/utils/generateICS';
 
 export async function GET(request: NextRequest) {
@@ -31,8 +32,55 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Cargar interpretaciones personalizadas de la colección EventInterpretation
+    // (misma lógica que useInterpretaciones en el libro)
+    const cycleStart = cycle.cycleStart || cycle.start;
+    const cycleEnd = cycle.cycleEnd || cycle.end;
+
+    let personalizedInterpretations: any[] = [];
+    if (cycleStart && cycleEnd) {
+      personalizedInterpretations = await EventInterpretation.find({
+        userId,
+        eventDate: { $gte: new Date(cycleStart), $lte: new Date(cycleEnd) },
+      }).lean();
+    }
+
+    // Crear mapas para merge (igual que useInterpretaciones)
+    const interpById = new Map<string, any>();
+    const interpByDate = new Map<string, any>();
+
+    personalizedInterpretations.forEach((interp: any) => {
+      if (interp.eventId) {
+        interpById.set(interp.eventId, interp);
+      }
+      if (interp.eventDate) {
+        const dateKey = new Date(interp.eventDate).toISOString().split('T')[0];
+        interpByDate.set(dateKey, interp);
+      }
+    });
+
+    // Mergear: preferir EventInterpretation (personalizada) sobre inline (genérica)
+    const mergedEvents = cycle.events.map((event: any) => {
+      let stored = interpById.get(event.id);
+
+      if (!stored && event.date) {
+        const dateKey = new Date(event.date).toISOString().split('T')[0];
+        stored = interpByDate.get(dateKey);
+      }
+
+      if (stored?.interpretation) {
+        return {
+          ...event,
+          interpretation: stored.interpretation,
+          house: stored.eventDetails?.house || event.house,
+        };
+      }
+
+      return event;
+    });
+
     // Convertir eventos al formato de calendario
-    const calendarEvents = convertEventsForCalendar(cycle.events);
+    const calendarEvents = convertEventsForCalendar(mergedEvents);
 
     if (calendarEvents.length === 0) {
       return NextResponse.json(
