@@ -13,6 +13,7 @@ import type { UserProfile, AstrologicalEvent, EventType } from '@/types/astrolog
 import EventsLoadingModal from '@/components/astrology/EventsLoadingModal';
 import EventInterpretationButton from '@/components/agenda/EventInterpretationButton';
 import PlanetarySection from '@/components/agenda/PlanetarySection';
+import ExportCalendarButton from '@/components/agenda/ExportCalendarButton';
 import { AgendaLibro } from '@/components/agenda/AgendaLibro';
 import { StyleProvider } from '@/context/StyleContext';
 import { mapAstrologicalEventToEventData } from '@/utils/eventMapping';
@@ -1833,6 +1834,13 @@ const AgendaPersonalizada = () => {
                   <span className="text-lg">📖</span>
                   <span className="text-white font-bold text-sm">Ver Agenda Libro</span>
                 </button>
+
+                {/* Exportar Calendario (.ics) */}
+                <ExportCalendarButton
+                  userId={user?.uid || ''}
+                  yearLabel={selectedCycleLabel}
+                  disabled={!selectedCycleLabel || loadingCycles || generatingCycle}
+                />
               </div>
             </div>
           </div>
