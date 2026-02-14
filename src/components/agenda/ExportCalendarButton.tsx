@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Calendar, Download, Check, AlertCircle, ChevronDown, X } from 'lucide-react';
+import { Calendar, Download, Check, AlertCircle, ChevronDown, X, Monitor } from 'lucide-react';
 
 interface ExportCalendarButtonProps {
   userId: string;
@@ -32,26 +32,37 @@ const ExportCalendarButton: React.FC<ExportCalendarButtonProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showMenu]);
 
-  const getCalendarUrl = () => {
+  const getFullCalendarUrl = () => {
     const params = new URLSearchParams({ userId, yearLabel });
-    return `/api/agenda/export-calendar?${params}`;
+    return `${window.location.origin}/api/agenda/export-calendar?${params}`;
   };
 
-  // Añadir directamente a Google Calendar (suscripción por URL)
+  // Google Calendar: suscripción directa via URL HTTPS
   const handleGoogleCalendar = () => {
-    const baseUrl = `${window.location.origin}${getCalendarUrl()}`;
-    const webcalUrl = baseUrl.replace('https://', 'webcal://').replace('http://', 'webcal://');
-    const googleUrl = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(webcalUrl)}`;
+    const fullUrl = getFullCalendarUrl();
+    // Google Calendar acepta URLs HTTPS para suscribirse
+    const googleUrl = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(fullUrl)}`;
     window.open(googleUrl, '_blank');
     setShowMenu(false);
     setSuccess(true);
     setTimeout(() => setSuccess(false), 3000);
   };
 
-  // Añadir a Apple Calendar / Outlook (protocolo webcal://)
-  const handleWebcal = () => {
-    const baseUrl = `${window.location.origin}${getCalendarUrl()}`;
-    const webcalUrl = baseUrl.replace('https://', 'webcal://').replace('http://', 'webcal://');
+  // Outlook Web: suscripción desde el navegador (sin app)
+  const handleOutlookWeb = () => {
+    const fullUrl = getFullCalendarUrl();
+    const calName = encodeURIComponent(`Tu Vuelta al Sol ${yearLabel}`);
+    const outlookUrl = `https://outlook.live.com/calendar/0/addfromweb?url=${encodeURIComponent(fullUrl)}&name=${calName}`;
+    window.open(outlookUrl, '_blank');
+    setShowMenu(false);
+    setSuccess(true);
+    setTimeout(() => setSuccess(false), 3000);
+  };
+
+  // Apple Calendar: protocolo webcal:// (abre la app nativa)
+  const handleAppleCalendar = () => {
+    const fullUrl = getFullCalendarUrl();
+    const webcalUrl = fullUrl.replace('https://', 'webcal://').replace('http://', 'webcal://');
     window.location.href = webcalUrl;
     setShowMenu(false);
     setSuccess(true);
@@ -68,7 +79,8 @@ const ExportCalendarButton: React.FC<ExportCalendarButtonProps> = ({
     setShowMenu(false);
 
     try {
-      const response = await fetch(getCalendarUrl());
+      const params = new URLSearchParams({ userId, yearLabel });
+      const response = await fetch(`/api/agenda/export-calendar?${params}`);
 
       if (!response.ok) {
         const data = await response.json();
@@ -154,21 +166,38 @@ const ExportCalendarButton: React.FC<ExportCalendarButtonProps> = ({
             </div>
             <div>
               <p className="text-white font-medium text-sm">Google Calendar</p>
-              <p className="text-white/50 text-xs">Se sincroniza automaticamente</p>
+              <p className="text-white/50 text-xs">Se abre en el navegador y se suscribe</p>
             </div>
           </button>
 
-          {/* Apple Calendar / Outlook */}
+          {/* Outlook Web */}
           <button
-            onClick={handleWebcal}
+            onClick={handleOutlookWeb}
             className="w-full px-4 py-3 flex items-center gap-3 hover:bg-purple-500/20 transition-colors text-left"
           >
-            <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center flex-shrink-0">
-              <Calendar className="w-5 h-5 text-gray-700" />
+            <div className="w-8 h-8 rounded-lg bg-[#0078d4] flex items-center justify-center flex-shrink-0">
+              <svg viewBox="0 0 24 24" className="w-5 h-5" fill="white">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15H7V7h4v10zm6 0h-4V7h4v10z" opacity=".3"/>
+                <path d="M7 7h4v10H7zm6 0h4v10h-4z"/>
+              </svg>
             </div>
             <div>
-              <p className="text-white font-medium text-sm">Apple Calendar / Outlook</p>
-              <p className="text-white/50 text-xs">Abre tu app de calendario directamente</p>
+              <p className="text-white font-medium text-sm">Outlook Web</p>
+              <p className="text-white/50 text-xs">Se abre en outlook.live.com (sin app)</p>
+            </div>
+          </button>
+
+          {/* Apple Calendar */}
+          <button
+            onClick={handleAppleCalendar}
+            className="w-full px-4 py-3 flex items-center gap-3 hover:bg-purple-500/20 transition-colors text-left"
+          >
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-b from-red-500 to-red-600 flex items-center justify-center flex-shrink-0">
+              <Calendar className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="text-white font-medium text-sm">Apple Calendar</p>
+              <p className="text-white/50 text-xs">Abre la app de Calendario en Mac/iPhone</p>
             </div>
           </button>
 
