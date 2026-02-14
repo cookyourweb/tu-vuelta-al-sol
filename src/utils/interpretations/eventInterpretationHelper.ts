@@ -158,7 +158,7 @@ export async function buildUserProfile(userId: string, currentYear: number) {
 
   const profile: any = {
     userId,
-    name: birthData.fullName || birthData.name || 'Sin nombre',
+    name: birthData.fullName || (birthData as any).name || 'Sin nombre',
     currentAge,
     natal: {
       sun: {

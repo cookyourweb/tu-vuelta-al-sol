@@ -275,7 +275,7 @@ export default function NatalChartPage() {
             chartData: dataToUse,
             section,
             userProfile: {
-              name: birthData.fullName || birthData.name || 'Sin nombre',
+              name: birthData.fullName || (birthData as any).name || 'Sin nombre',
               age: new Date().getFullYear() - new Date(birthData.birthDate).getFullYear(),
               birthPlace: birthData.birthPlace,
               birthDate: birthData.birthDate,
@@ -770,7 +770,7 @@ export default function NatalChartPage() {
                 userId={user?.uid || ''}
                 chartData={chartData}
                 userProfile={{
-                  name: birthData.fullName || birthData.name || 'Sin nombre',
+                  name: birthData.fullName || (birthData as any).name || 'Sin nombre',
                   age: new Date().getFullYear() - new Date(birthData.birthDate).getFullYear(),
                   birthPlace: birthData.birthPlace,
                   birthDate: birthData.birthDate,
