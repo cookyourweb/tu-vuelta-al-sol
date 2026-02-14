@@ -34,8 +34,8 @@ export async function GET(request: NextRequest) {
 
     // Cargar interpretaciones personalizadas de la colección EventInterpretation
     // (misma lógica que useInterpretaciones en el libro)
-    const cycleStart = cycle.cycleStart || cycle.start;
-    const cycleEnd = cycle.cycleEnd || cycle.end;
+    const cycleStart = cycle.cycleStart || (cycle as any).start;
+    const cycleEnd = cycle.cycleEnd || (cycle as any).end;
 
     let personalizedInterpretations: any[] = [];
     if (cycleStart && cycleEnd) {
